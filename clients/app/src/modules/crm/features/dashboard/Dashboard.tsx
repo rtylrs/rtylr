@@ -1,811 +1,542 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'motion/react';
-import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
-import {
-  Users,
-  UserPlus,
-  Gift,
-  Megaphone,
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
-  DollarSign,
-  PieChart,
-  Activity,
-  ArrowRight,
-} from 'lucide-react';
-import { EmptyState } from '@voxire/ui';
+import { ArrowRight, Phone, Plus, Upload } from 'lucide-react';
+import { Button } from '../../shared/components/ui';
+import { TierBadge } from '../../shared/components/crm';
+import type { Tier } from '../../shared/lib/tiers';
 import { useCrmDashboard } from '../../shared/hooks/queries/useCrmDashboard';
-import { useListCustomers } from '../../shared/hooks/queries/useCustomers';
-import { useListSegments } from '../../shared/hooks/queries/useSegments';
-import type { DashboardStats } from '../../shared/schemas/dashboard';
-import { CustomerAvatar } from '../../shared/components/crm';
-import { isAtRisk } from '../../shared/lib/customerUtils';
-import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
+import {
+  LoadFailed,
+  RepFilterSelect,
+  RepName,
+  StatTile,
+  useMoney,
+  useRepNames,
+} from '../sales/components/common';
+import { TaskRow } from '../sales/components/Activity';
+import {
+  ACTIVITY_WINDOWS,
+  type ActivityWindow,
+  type LeadListFilters,
+  useDealBoard,
+  useDealStats,
+  useLeadStats,
+  useSalesActivity,
+  useTaskCounts,
+  useTaskList,
+} from '../sales/data/queries';
+import { DEFAULT_LEAD_FILTERS, NO_LEAD_FILTERS, useLeadFilters } from '../sales/data/leadFilters';
+import { type LeadStatus, type RepFilter, WORKING_STATUSES } from '../sales/data/model';
+import { ActivityChart } from './ActivityChart';
+import { BarList } from './BarList';
+import './dashboard.css';
 
-const ACCENT = 'var(--crm-accent)';
-const AT_RISK_DAYS = 60;
+/** Lead statuses in the order a lead moves through them. */
+const FUNNEL: LeadStatus[] = ['new', 'attempting', 'connected', 'nurture', 'qualified'];
+const TIERS: readonly string[] = ['Platinum', 'Gold', 'Silver', 'Bronze'];
 
-function atRiskSegmentId(segments: Array<{ id: string; name: string }>): string | undefined {
-  const segment = segments.find(({ id, name }) => {
-    const normalizedName = name
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, '');
-    return /^\d+$/.test(id) && normalizedName.includes('atrisk');
-  });
-  return segment?.id;
-}
+const percentOf = (part: number, whole: number) =>
+  whole > 0 ? Math.round((part * 100) / whole) : undefined;
 
-interface StatItem {
-  /** Stable id, used as the React key: the label is a translation and changes with the language. */
-  id: string;
-  label: string;
-  value: string;
-  change: string | undefined;
-  up: boolean | undefined;
-  icon: React.ElementType;
-  color: string;
-}
+const Card: React.FC<{
+  title: string;
+  summary?: React.ReactNode;
+  link?: { label: string; onClick: () => void };
+  className?: string;
+  flush?: boolean;
+  refreshing?: boolean;
+  children: React.ReactNode;
+}> = ({ title, summary, link, className, flush, refreshing, children }) => (
+  <section className={`crm-dash-card ${className ?? ''}`} aria-label={title}>
+    <div className="crm-dash-card-head">
+      <div>
+        <h2>{title}</h2>
+        {summary && <p>{summary}</p>}
+      </div>
+      {link && (
+        <button type="button" className="crm-dash-card-link" onClick={link.onClick}>
+          {link.label}
+          <ArrowRight size={13} />
+        </button>
+      )}
+    </div>
+    <div
+      className={`crm-dash-card-body crm-dash-loading${flush ? ' is-flush' : ''}${refreshing ? ' is-refreshing' : ''}`}
+    >
+      {children}
+    </div>
+  </section>
+);
 
-const tierColor: Record<string, string> = {
-  Platinum: '#e879f9',
-  Gold: '#f59e0b',
-  Silver: '#94a3b8',
-  Bronze: '#b45309',
+const Pending: React.FC = () => {
+  const { t } = useTranslation();
+  return (
+    <p className="crm-dash-empty" role="status">
+      {t('crmSales.common.loading')}
+    </p>
+  );
 };
 
-function StatCard({ stat, index }: { stat: StatItem; index: number }): React.JSX.Element {
-  const { t } = useTranslation();
-  const Icon = stat.icon;
+const Dashboard: React.FC = () => {
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const money = useMoney();
+  const names = useRepNames();
+  const setLeadFilters = useLeadFilters((state) => state.setFilters);
+  const [days, setDays] = useState<ActivityWindow>(30);
+  const [rep, setRep] = useState<RepFilter>('all');
+  const number = (value?: number) => new Intl.NumberFormat(i18n.language).format(value ?? 0);
+  const period = t(`crm.dashboard.period.${days}`);
+
+  const leadFilters = useMemo<LeadListFilters>(
+    () => ({
+      ...DEFAULT_LEAD_FILTERS,
+      reps: rep === 'all' ? [] : [rep === 'unassigned' ? '0' : rep],
+    }),
+    [rep]
+  );
+  const leadStats = useLeadStats(leadFilters);
+  const dealStats = useDealStats(undefined, rep);
+  const board = useDealBoard({ rep, search: '' });
+  const activity = useSalesActivity(days, rep);
+  const taskCounts = useTaskCounts(rep);
+  const dueTasks = useTaskList({ scope: 'open', rep, due: 'due' }, 6);
+  const customers = useCrmDashboard();
+
+  /** Opens the leads list on these filters, keeping the dashboard's rep. */
+  const openLeads = (change: Partial<LeadListFilters>) => {
+    setLeadFilters({ ...NO_LEAD_FILTERS, reps: leadFilters.reps, search: '', ...change });
+    void navigate({ to: '/crm/sales/leads' });
+  };
+
+  const byStatus = new Map(
+    (leadStats.data?.byStatus ?? []).map((item) => [item.status ?? '', item.count ?? 0])
+  );
+  const totalLeads = [...byStatus.values()].reduce((sum, value) => sum + value, 0);
+  const overdue = leadStats.data?.followUpsOverdue ?? 0;
+  const due = overdue + (leadStats.data?.followUpsToday ?? 0);
+
+  const totals = activity.data;
+  const calls = totals?.calls ?? 0;
+  const reachedShare = percentOf(totals?.reached ?? 0, calls);
+  const won = totals?.dealsWon ?? 0;
+  const lost = totals?.dealsLost ?? 0;
+  const winRate = percentOf(won, won + lost);
+
+  const openStages = (board.data?.columns ?? []).filter((column) => column.stage?.kind === 'open');
+  const anyValue = openStages.some((column) => Number(column.amount ?? 0) > 0);
+  const repRows = totals?.reps ?? [];
+  const topCustomers = customers.data?.topCustomers ?? [];
+  const tasks = dueTasks.data?.pages.flatMap((page) => page.tasks ?? []) ?? [];
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.06, duration: 0.22, ease: 'easeOut' }}
-      style={{
-        background: 'var(--hub-card)',
-        border: '1px solid var(--hub-border)',
-        borderRadius: '12px',
-        padding: '20px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '12px',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--hub-text-muted)' }}>
-          {stat.label}
-        </span>
-        <div
-          style={{
-            width: '32px',
-            height: '32px',
-            borderRadius: '8px',
-            background: `${stat.color}18`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Icon size={15} style={{ color: stat.color }} />
+    <div className="sales-page crm-dash">
+      <HelmetContainer title={`${t('crm.dashboard.pageTitle')} · rtylr`} />
+      <header className="sales-header">
+        <div>
+          <h1>{t('crm.dashboard.pageTitle')}</h1>
+          <p>{t('crm.dashboard.subtitle')}</p>
         </div>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
-        <span
-          style={{ fontSize: '26px', fontWeight: 700, color: 'var(--hub-text)', lineHeight: 1 }}
-        >
-          {stat.value}
-        </span>
-        {stat.change ? (
-          <span
-            style={{
-              fontSize: '12px',
-              fontWeight: 500,
-              color: stat.up ? '#10b981' : '#ef4444',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '2px',
-              paddingBottom: '2px',
-            }}
+        <div className="crm-dash-controls">
+          <div
+            className="sales-segmented"
+            role="radiogroup"
+            aria-label={t('crm.dashboard.windowLabel')}
           >
-            {stat.up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-            {stat.change}
-          </span>
-        ) : (
-          <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)', paddingBottom: '2px' }}>
-            {t('crm.dashboard.noTrendData')}
-          </span>
-        )}
-      </div>
-      <div
-        style={{
-          height: '3px',
-          borderRadius: '9999px',
-          background: 'var(--hub-border)',
-          overflow: 'hidden',
-        }}
-      >
-        <div
-          style={{
-            height: '100%',
-            width: stat.up ? '62%' : '38%',
-            borderRadius: '9999px',
-            background: stat.color,
-          }}
+            {ACTIVITY_WINDOWS.map((window) => (
+              <button
+                key={window}
+                type="button"
+                role="radio"
+                aria-checked={days === window}
+                onClick={() => setDays(window)}
+              >
+                {t(`crm.dashboard.window.${window}`)}
+              </button>
+            ))}
+          </div>
+          <RepFilterSelect value={rep} onChange={setRep} label={t('crm.dashboard.repLabel')} />
+        </div>
+      </header>
+
+      <div className="sales-stats">
+        <StatTile
+          label={t('crm.dashboard.stats.pipeline')}
+          value={dealStats.data ? money(dealStats.data.openAmount) : '—'}
+          hint={
+            dealStats.data
+              ? t('crm.dashboard.stats.pipelineHint', { count: dealStats.data.openDeals ?? 0 })
+              : undefined
+          }
+          onClick={() => void navigate({ to: '/crm/sales/deals' })}
+        />
+        <StatTile
+          label={t('crm.dashboard.stats.won')}
+          value={totals ? money(totals.wonAmount) : '—'}
+          hint={totals ? t('crm.dashboard.stats.wonHint', { count: won }) : undefined}
+        />
+        <StatTile
+          label={t('crm.dashboard.stats.winRate')}
+          value={winRate === undefined ? '—' : `${number(winRate)}%`}
+          hint={
+            totals
+              ? won + lost > 0
+                ? t('crm.dashboard.stats.winRateHint', { won: number(won), lost: number(lost) })
+                : t('crm.dashboard.stats.noneClosed')
+              : undefined
+          }
+        />
+        <StatTile
+          label={t('crm.dashboard.stats.calls')}
+          value={totals ? number(calls) : '—'}
+          hint={
+            totals
+              ? reachedShare === undefined
+                ? undefined
+                : t('crm.dashboard.stats.callsHint', { percent: number(reachedShare) })
+              : undefined
+          }
+        />
+        <StatTile
+          label={t('crm.dashboard.stats.followUps')}
+          value={leadStats.data ? number(due) : '—'}
+          hint={
+            overdue > 0 ? t('crm.dashboard.stats.followUpsHint', { count: overdue }) : undefined
+          }
+          warning={overdue > 0}
+          onClick={() => openLeads({ statuses: WORKING_STATUSES, followUp: 'due' })}
+        />
+        <StatTile
+          label={t('crm.dashboard.stats.customers')}
+          value={customers.data ? number(customers.data.totalCustomers) : '—'}
+          hint={
+            customers.data
+              ? t('crm.dashboard.stats.customersHint', {
+                  count: customers.data.newThisMonth ?? 0,
+                  value: number(customers.data.newThisMonth),
+                })
+              : undefined
+          }
+          onClick={() => void navigate({ to: '/crm/customers' })}
         />
       </div>
-    </motion.div>
-  );
-}
 
-const Dashboard: React.FC = () => {
-  const navigate = useNavigate();
-  const { t } = useTranslation();
-  const dashboardQuery = useCrmDashboard();
-  const { data: dashboardData, refetch: refetchDashboard } = dashboardQuery;
-  const dashboardError = hasQueryFailed(dashboardQuery);
-  const dashLoading = dashboardQuery.isPending && !dashboardError;
-  // Backend caps page size at 100 — aggregates cover the first page.
-  const customersQuery = useListCustomers({ limit: 100, offset: 0 });
-  const segmentsQuery = useListSegments();
-  const customersError = hasQueryFailed(customersQuery);
-  const segmentsError = hasQueryFailed(segmentsQuery);
-  const customersLoading = customersQuery.isPending && !customersError;
-  const segmentsLoading = segmentsQuery.isPending && !segmentsError;
-  const { data: fetchedCustomers } = customersQuery;
-  const { data: fetchedSegments } = segmentsQuery;
-  const customersPool = fetchedCustomers ?? [];
-  const segmentsPool = fetchedSegments ?? [];
-  const winBackSegmentId = atRiskSegmentId(segmentsPool);
-
-  const ltv =
-    customersError || customersLoading
-      ? null
-      : customersPool.length > 0
-        ? Math.round(customersPool.reduce((s, c) => s + c.totalSpent, 0) / customersPool.length)
-        : 0;
-  const atRiskAll = customersPool.filter((c) => isAtRisk(c, AT_RISK_DAYS));
-  const churnRate =
-    customersError || customersLoading
-      ? null
-      : customersPool.length > 0
-        ? Math.round((atRiskAll.length / customersPool.length) * 100)
-        : 0;
-  // Display list is capped; the rate above uses the full pool.
-  const atRisk = atRiskAll.slice(0, 4);
-  const topSegment =
-    segmentsPool.length > 0
-      ? segmentsPool.reduce((a, b) => (a.customerCount > b.customerCount ? a : b), segmentsPool[0])
-      : null;
-
-  const stats = dashboardData
-    ? [
-        {
-          id: 'totalCustomers',
-          label: t('crm.dashboard.totalCustomers'),
-          value: (dashboardData as DashboardStats).totalCustomers.toLocaleString(),
-          change: dashboardData.totalCustomersChange,
-          up: dashboardData.totalCustomersChange?.startsWith('+'),
-          icon: Users,
-          color: 'var(--crm-accent)',
-        },
-        {
-          id: 'newThisMonth',
-          label: t('crm.dashboard.newThisMonth'),
-          value: dashboardData.newThisMonth.toLocaleString(),
-          change: dashboardData.newThisMonthChange,
-          up: dashboardData.newThisMonthChange?.startsWith('+'),
-          icon: UserPlus,
-          color: '#10b981',
-        },
-        {
-          id: 'activeLoyaltyMembers',
-          label: t('crm.dashboard.activeLoyaltyMembers'),
-          value: dashboardData.activeLoyaltyMembers.toLocaleString(),
-          change: dashboardData.activeLoyaltyMembersChange,
-          up: dashboardData.activeLoyaltyMembersChange?.startsWith('+'),
-          icon: Gift,
-          color: '#f59e0b',
-        },
-        {
-          id: 'campaignReach',
-          label: t('crm.dashboard.campaignReach'),
-          value:
-            dashboardData.campaignReach === undefined
-              ? 'Unavailable'
-              : dashboardData.campaignReach.toLocaleString(),
-          change: dashboardData.campaignReachChange,
-          up: dashboardData.campaignReachChange?.startsWith('+'),
-          icon: Megaphone,
-          color: '#8b5cf6',
-        },
-      ]
-    : [];
-  const topCustomers = dashboardData?.topCustomers ?? [];
-  const campaigns = dashboardData?.recentCampaigns ?? [];
-
-  return (
-    <>
-      <HelmetContainer title={`${t('crm.dashboard.pageTitle')} · rtylr`} />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1280px' }}>
-        {/* Stats grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-          {dashLoading
-            ? [0, 1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  style={{
-                    background: 'var(--hub-card)',
-                    border: '1px solid var(--hub-border)',
-                    borderRadius: '12px',
-                    padding: '16px',
-                  }}
-                >
-                  <Skeleton height={12} width="60%" style={{ marginBottom: 12 }} />
-                  <Skeleton height={28} width="50%" style={{ marginBottom: 6 }} />
-                  <Skeleton height={10} width="40%" />
-                </div>
-              ))
-            : stats.map((stat, i) => <StatCard key={stat.id} stat={stat} index={i} />)}
-        </div>
-
-        {/* Extended KPI widgets */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.18 }}
-            style={{
-              background: 'var(--hub-card)',
-              border: '1px solid var(--hub-border)',
-              borderRadius: '12px',
-              padding: '16px',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '8px',
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '11px',
-                  color: 'var(--hub-text-dim)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  fontWeight: 700,
-                }}
-              >
-                {t('crm.dashboard.avgLtv')}
-              </span>
-              <div
-                style={{
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '8px',
-                  background: 'rgba(16,185,129,0.12)',
-                  color: '#10b981',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <DollarSign size={13} />
-              </div>
-            </div>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--hub-text)' }}>
-              {ltv === null ? '—' : `$${ltv.toLocaleString()}`}
-            </div>
-            <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>
-              per customer
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.22 }}
-            onClick={() => navigate({ to: '/crm/customers/new' })}
-            style={{
-              background: 'var(--hub-card)',
-              border: '1px solid var(--hub-border)',
-              borderRadius: '12px',
-              padding: '16px',
-              cursor: 'pointer',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '8px',
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '11px',
-                  color: 'var(--hub-text-dim)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  fontWeight: 700,
-                }}
-              >
-                {t('crm.dashboard.newThisMonth')}
-              </span>
-              <div
-                style={{
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '8px',
-                  background: 'var(--dash-hover)',
-                  color: 'var(--crm-accent)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <UserPlus size={13} />
-              </div>
-            </div>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--hub-text)' }}>
-              {dashLoading ? <Skeleton width={60} /> : (dashboardData?.newThisMonth ?? 0)}
-            </div>
-            <div style={{ fontSize: '11px', color: '#10b981', marginTop: '2px' }}>
-              {dashboardData?.newThisMonthChange ?? ''}
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.26 }}
-            style={{
-              background: 'var(--hub-card)',
-              border: '1px solid var(--hub-border)',
-              borderRadius: '12px',
-              padding: '16px',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '8px',
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '11px',
-                  color: 'var(--hub-text-dim)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  fontWeight: 700,
-                }}
-              >
-                {t('crm.dashboard.churnRate')}
-              </span>
-              <div
-                style={{
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '8px',
-                  background: 'rgba(239,68,68,0.12)',
-                  color: '#ef4444',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Activity size={13} />
-              </div>
-            </div>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--hub-text)' }}>
-              {churnRate === null ? '—' : `${churnRate}%`}
-            </div>
-            <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>
-              customers at risk
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            onClick={() => topSegment && navigate({ to: `/crm/segments/${topSegment.id}` })}
-            style={{
-              background: 'var(--hub-card)',
-              border: '1px solid var(--hub-border)',
-              borderRadius: '12px',
-              padding: '16px',
-              cursor: topSegment ? 'pointer' : 'default',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '8px',
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '11px',
-                  color: 'var(--hub-text-dim)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  fontWeight: 700,
-                }}
-              >
-                {t('crm.dashboard.topSegment')}
-              </span>
-              <div
-                style={{
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '8px',
-                  background: 'rgba(232,121,249,0.12)',
-                  color: '#e879f9',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <PieChart size={13} />
-              </div>
-            </div>
-            <div
-              style={{
-                fontSize: '16px',
-                fontWeight: 700,
-                color: 'var(--hub-text)',
-                marginTop: '2px',
-              }}
-            >
-              {segmentsError
-                ? t('crmErrors.generic')
-                : segmentsLoading
-                  ? t('crmCommon.loading')
-                  : (topSegment?.name ?? '-')}
-            </div>
-            <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-              {segmentsError ? (
-                <button
-                  type="button"
-                  onClick={() => void segmentsQuery.refetch()}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--crm-accent)',
-                    cursor: 'pointer',
-                  }}
-                >
-                  {t('crm.actions.refresh')}
-                </button>
-              ) : segmentsLoading ? (
-                t('crmCommon.loading')
-              ) : topSegment ? (
-                `${topSegment.customerCount.toLocaleString()} members`
-              ) : (
-                'No segments yet'
-              )}
-            </div>
-          </motion.div>
-        </div>
-
-        {/* At-risk customers widget */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.36 }}
-          style={{
-            background: 'var(--hub-card)',
-            border: '1px solid var(--hub-border)',
-            borderRadius: '12px',
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            style={{
-              padding: '14px 20px',
-              borderBottom: '1px solid var(--hub-border)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <AlertTriangle size={14} style={{ color: '#f59e0b' }} />
-              <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
-                {t('crm.dashboard.atRiskCustomers')}
-              </span>
-              <span style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-                not visited in {AT_RISK_DAYS}+ days
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() =>
-                navigate({
-                  to: '/crm/campaigns/email',
-                  search: winBackSegmentId ? { segment: winBackSegmentId } : {},
+      <div className="crm-dash-grid">
+        <Card
+          className="crm-dash-wide"
+          title={t('crm.dashboard.calls.title')}
+          summary={
+            totals && calls > 0
+              ? t('crm.dashboard.calls.summary', {
+                  count: calls,
+                  calls: number(calls),
+                  percent: number(reachedShare ?? 0),
+                  period,
                 })
-              }
-              style={{
-                fontSize: '12px',
-                color: 'var(--crm-accent)',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-              }}
-            >
-              Send win-back <ArrowRight size={12} />
-            </button>
-          </div>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-              gap: '10px',
-              padding: '14px 20px',
-            }}
-          >
-            {customersLoading ? (
-              <p role="status" style={{ color: 'var(--hub-text-muted)', fontSize: '13px' }}>
-                {t('crmCommon.loading')}
-              </p>
-            ) : customersError ? (
-              <div role="alert">
-                <EmptyState
-                  size="compact"
-                  icon={AlertTriangle}
-                  title={t('crmErrors.generic')}
-                  description={t('crmErrors.refreshAndTryAgain')}
-                  action={{
-                    label: t('crm.actions.refresh'),
-                    onClick: () => void customersQuery.refetch(),
-                  }}
-                />
+              : period
+          }
+          link={{
+            label: t('crm.dashboard.calls.startCalling'),
+            onClick: () => void navigate({ to: '/crm/sales/leads/call' }),
+          }}
+          refreshing={activity.isPlaceholderData}
+        >
+          {activity.isError && !totals ? (
+            <LoadFailed
+              title={t('crm.dashboard.loadFailedTitle')}
+              onRetry={() => void activity.refetch()}
+            />
+          ) : !totals ? (
+            <Pending />
+          ) : calls === 0 ? (
+            <div className="crm-dash-empty">
+              <span>{t('crm.dashboard.calls.empty', { period })}</span>
+              <Button onClick={() => void navigate({ to: '/crm/sales/leads/call' })}>
+                <Phone size={13} />
+                {t('crm.dashboard.calls.startCalling')}
+              </Button>
+            </div>
+          ) : (
+            <ActivityChart days={totals.days ?? []} />
+          )}
+        </Card>
+
+        <Card
+          className="crm-dash-narrow"
+          title={t('crm.dashboard.leads.title')}
+          summary={
+            leadStats.data ? t('crm.dashboard.leads.summary', { count: totalLeads }) : undefined
+          }
+          link={{ label: t('crm.dashboard.leads.all'), onClick: () => openLeads({}) }}
+          refreshing={leadStats.isPlaceholderData}
+        >
+          {leadStats.isError && !leadStats.data ? (
+            <LoadFailed
+              title={t('crm.dashboard.loadFailedTitle')}
+              onRetry={() => void leadStats.refetch()}
+            />
+          ) : !leadStats.data ? (
+            <Pending />
+          ) : totalLeads === 0 ? (
+            <div className="crm-dash-empty">
+              <span>{t('crm.dashboard.leads.empty')}</span>
+              <div className="crm-dash-empty-actions">
+                <Button
+                  variant="outline"
+                  onClick={() => void navigate({ to: '/crm/sales/leads/import' })}
+                >
+                  <Upload size={13} />
+                  {t('crm.dashboard.leads.import')}
+                </Button>
+                <Button onClick={() => openLeads({})}>
+                  <Plus size={13} />
+                  {t('crm.dashboard.leads.add')}
+                </Button>
               </div>
-            ) : (
-              <>
-                {atRisk.slice(0, 4).map((c) => (
-                  <div
-                    key={c.id}
-                    onClick={() => navigate({ to: `/crm/customers/${c.id}` })}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      padding: '8px',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      background: 'var(--hub-hover)',
-                    }}
-                  >
-                    <CustomerAvatar initials={c.initials} points={c.loyaltyPoints} size={30} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)' }}>
-                        {c.name}
-                      </div>
-                      <div style={{ fontSize: '10px', color: 'var(--hub-text-muted)' }}>
-                        Last: {c.lastVisit}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {atRisk.length === 0 && (
-                  <EmptyState
-                    size="compact"
-                    icon={AlertTriangle}
-                    title={t('crm.dashboard.atRiskEmptyTitle')}
-                    action={{
-                      label: t('crm.actions.viewCustomers'),
-                      onClick: () => navigate({ to: '/crm/customers' }),
-                    }}
-                  />
-                )}
-              </>
-            )}
-          </div>
-        </motion.div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-          {/* Top customers */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.28, duration: 0.22, ease: 'easeOut' }}
-            style={{
-              background: 'var(--hub-card)',
-              border: '1px solid var(--hub-border)',
-              borderRadius: '12px',
-              overflow: 'hidden',
-            }}
-          >
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--hub-border)' }}>
-              <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
-                {t('crm.dashboard.topCustomers')}
-              </span>
             </div>
-            <div>
-              {topCustomers.map((c, i) => (
-                <div
-                  key={`${c.name}-${i}`}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    padding: '12px 20px',
-                    borderBottom:
-                      i < topCustomers.length - 1 ? '1px solid var(--hub-border)' : 'none',
-                  }}
-                >
-                  {/* Avatar */}
-                  <div
-                    style={{
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '8px',
-                      background: `rgba(59,130,246,0.12)`,
-                      color: ACCENT,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '12px',
-                      fontWeight: 700,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {c.name
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--hub-text)' }}>
-                      {c.name}
-                    </div>
-                    <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-                      {c.visits === undefined ? 'Visits unavailable' : `${c.visits} visits`}
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
-                      {c.spend}
-                    </div>
-                    <span
-                      style={{
-                        display: 'inline-block',
-                        padding: '1px 7px',
-                        borderRadius: '9999px',
-                        fontSize: '10px',
-                        fontWeight: 600,
-                        background: `${tierColor[c.tier]}18`,
-                        color: tierColor[c.tier],
-                      }}
-                    >
-                      {c.tier}
-                    </span>
-                  </div>
+          ) : (
+            <>
+              <BarList
+                label={t('crm.dashboard.leads.title')}
+                items={FUNNEL.map((status) => ({
+                  id: status,
+                  label: t(`crmSales.leadStatus.${status}`),
+                  value: byStatus.get(status) ?? 0,
+                  display: number(byStatus.get(status) ?? 0),
+                  onClick: () => openLeads({ statuses: [status] }),
+                }))}
+              />
+              {totals && (
+                <div className="crm-dash-foot">
+                  <span>
+                    {t('crm.dashboard.leads.added', { count: totals.leadsAdded ?? 0 })}{' '}
+                    <strong>{number(totals.leadsAdded)}</strong>
+                  </span>
+                  <span>
+                    {t('crm.dashboard.leads.qualified', { count: totals.leadsQualified ?? 0 })}{' '}
+                    <strong>{number(totals.leadsQualified)}</strong>
+                  </span>
                 </div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Recent campaign performance */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.34, duration: 0.22, ease: 'easeOut' }}
-            style={{
-              background: 'var(--hub-card)',
-              border: '1px solid var(--hub-border)',
-              borderRadius: '12px',
-              overflow: 'hidden',
-            }}
-          >
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--hub-border)' }}>
-              <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
-                {t('crm.dashboard.recentCampaignPerformance')}
-              </span>
-            </div>
-            <div>
-              {campaigns.map((c, i) => (
-                <div
-                  key={`${c.name}-${i}`}
-                  style={{
-                    padding: '14px 20px',
-                    borderBottom: i < campaigns.length - 1 ? '1px solid var(--hub-border)' : 'none',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginBottom: '8px',
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--hub-text)' }}>
-                        {c.name}
-                      </div>
-                      <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-                        {c.channel} · {c.sent.toLocaleString()} sent
-                      </div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: '#10b981' }}>
-                        {c.revenue}
-                      </div>
-                      <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-                        {c.openRate} open
-                      </div>
-                    </div>
-                  </div>
-                  {/* Open rate bar */}
-                  <div
-                    style={{
-                      height: '4px',
-                      borderRadius: '9999px',
-                      background: 'var(--hub-border)',
-                    }}
-                  >
-                    <div
-                      style={{
-                        height: '100%',
-                        width: c.openRate,
-                        borderRadius: '9999px',
-                        background: ACCENT,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-              {campaigns.length === 0 && !dashLoading && (
-                <EmptyState
-                  size="compact"
-                  icon={Megaphone}
-                  title={t(
-                    dashboardError && !dashboardData
-                      ? 'crm.dashboard.loadFailedTitle'
-                      : 'crm.dashboard.campaignPerformanceUnavailableTitle'
-                  )}
-                  description={t(
-                    dashboardError && !dashboardData
-                      ? 'crm.dashboard.loadFailedDescription'
-                      : 'crm.dashboard.campaignPerformanceUnavailableDescription'
-                  )}
-                  action={
-                    dashboardError && !dashboardData
-                      ? {
-                          label: t('crm.actions.refresh'),
-                          onClick: () => refetchDashboard(),
-                        }
-                      : undefined
-                  }
-                />
               )}
+            </>
+          )}
+        </Card>
+
+        <Card
+          className="crm-dash-half"
+          title={board.data?.pipeline?.name || t('crm.dashboard.pipeline.title')}
+          summary={
+            dealStats.data
+              ? t('crm.dashboard.pipeline.summary', {
+                  count: dealStats.data.openDeals ?? 0,
+                  weighted: money(dealStats.data.weightedAmount),
+                })
+              : undefined
+          }
+          link={{
+            label: t('crm.dashboard.pipeline.all'),
+            onClick: () => void navigate({ to: '/crm/sales/deals' }),
+          }}
+          refreshing={board.isPlaceholderData}
+        >
+          {board.isError && !board.data ? (
+            <LoadFailed
+              title={t('crm.dashboard.loadFailedTitle')}
+              onRetry={() => void board.refetch()}
+            />
+          ) : !board.data ? (
+            <Pending />
+          ) : openStages.every((column) => (column.deals ?? 0) === 0) ? (
+            <div className="crm-dash-empty">
+              <span>{t('crm.dashboard.pipeline.empty')}</span>
+              <Button variant="outline" onClick={() => openLeads({ statuses: WORKING_STATUSES })}>
+                {t('crm.dashboard.pipeline.workLeads')}
+              </Button>
             </div>
-          </motion.div>
-        </div>
+          ) : (
+            <>
+              <BarList
+                label={t('crm.dashboard.pipeline.title')}
+                items={openStages.map((column) => ({
+                  id: column.stage?.id ?? '',
+                  label: column.stage?.name ?? '',
+                  value: anyValue ? Number(column.amount ?? 0) : (column.deals ?? 0),
+                  display: anyValue ? money(column.amount) : number(column.deals),
+                  hint: anyValue
+                    ? t('crm.dashboard.pipeline.deals', { count: column.deals ?? 0 })
+                    : undefined,
+                  onClick: () => void navigate({ to: '/crm/sales/deals' }),
+                }))}
+              />
+              {dealStats.data && (dealStats.data.averageDaysToWin ?? 0) > 0 && (
+                <div className="crm-dash-foot">
+                  <span>
+                    {t('crm.dashboard.pipeline.averageWon')}{' '}
+                    <strong>{money(dealStats.data.averageWonAmount)}</strong>
+                  </span>
+                  <span>
+                    {t('crm.dashboard.pipeline.daysToWin', {
+                      count: Math.round(dealStats.data.averageDaysToWin ?? 0),
+                    })}
+                  </span>
+                </div>
+              )}
+            </>
+          )}
+        </Card>
+
+        <Card
+          className="crm-dash-half crm-dash-due"
+          title={t('crm.dashboard.tasks.title')}
+          summary={
+            taskCounts.data
+              ? t('crm.dashboard.tasks.summary', {
+                  overdue: number(taskCounts.data.overdue),
+                  today: number(taskCounts.data.dueToday),
+                })
+              : undefined
+          }
+          link={{
+            label: t('crm.dashboard.tasks.all'),
+            onClick: () => void navigate({ to: '/crm/sales/tasks' }),
+          }}
+          flush
+        >
+          {dueTasks.isError && tasks.length === 0 ? (
+            <LoadFailed
+              title={t('crm.dashboard.loadFailedTitle')}
+              onRetry={() => void dueTasks.refetch()}
+            />
+          ) : dueTasks.isPending ? (
+            <Pending />
+          ) : tasks.length === 0 ? (
+            <p className="crm-dash-empty">{t('crm.dashboard.tasks.empty')}</p>
+          ) : (
+            tasks
+              .slice(0, 6)
+              .map((task) => (
+                <TaskRow
+                  key={task.id}
+                  task={task}
+                  showSubject
+                  repName={names.get(task.assignedTo ?? '')}
+                />
+              ))
+          )}
+        </Card>
+
+        <Card
+          className="crm-dash-wide"
+          title={t('crm.dashboard.team.title')}
+          summary={period}
+          flush
+          refreshing={activity.isPlaceholderData}
+        >
+          {!totals ? (
+            activity.isError ? (
+              <LoadFailed
+                title={t('crm.dashboard.loadFailedTitle')}
+                onRetry={() => void activity.refetch()}
+              />
+            ) : (
+              <Pending />
+            )
+          ) : repRows.length === 0 ? (
+            <p className="crm-dash-empty">{t('crm.dashboard.team.empty', { period })}</p>
+          ) : (
+            <div className="sales-table-wrap">
+              <table className="sales-table crm-dash-table">
+                <thead>
+                  <tr>
+                    <th>{t('crm.dashboard.team.rep')}</th>
+                    <th className="is-number">{t('crm.dashboard.team.calls')}</th>
+                    <th className="is-number">{t('crm.dashboard.team.reached')}</th>
+                    <th className="is-number">{t('crm.dashboard.team.qualified')}</th>
+                    <th className="is-number">{t('crm.dashboard.team.won')}</th>
+                    <th className="is-number">{t('crm.dashboard.team.wonValue')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {repRows.map((row) => {
+                    const share = percentOf(row.reached ?? 0, row.calls ?? 0);
+                    return (
+                      <tr key={row.repId}>
+                        <td>
+                          <RepName id={row.repId === '0' ? undefined : row.repId} names={names} />
+                        </td>
+                        <td className="is-number">{number(row.calls)}</td>
+                        <td className="is-number">
+                          {share === undefined ? '—' : `${number(share)}%`}
+                        </td>
+                        <td className="is-number">{number(row.leadsQualified)}</td>
+                        <td className="is-number">{number(row.dealsWon)}</td>
+                        <td className="is-number">{money(row.wonAmount)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
+
+        <Card
+          className="crm-dash-narrow"
+          title={t('crm.dashboard.customers.title')}
+          summary={
+            customers.data
+              ? t('crm.dashboard.customers.summary', {
+                  count: customers.data.activeLoyaltyMembers ?? 0,
+                  value: number(customers.data.activeLoyaltyMembers),
+                })
+              : undefined
+          }
+          link={{
+            label: t('crm.dashboard.customers.all'),
+            onClick: () => void navigate({ to: '/crm/customers' }),
+          }}
+          flush
+        >
+          {customers.isError && !customers.data ? (
+            <LoadFailed
+              title={t('crm.dashboard.loadFailedTitle')}
+              onRetry={() => void customers.refetch()}
+            />
+          ) : !customers.data ? (
+            <Pending />
+          ) : topCustomers.length === 0 ? (
+            <p className="crm-dash-empty">{t('crm.dashboard.customers.empty')}</p>
+          ) : (
+            <ol className="crm-dash-people">
+              {topCustomers.slice(0, 6).map((customer, index) => (
+                <li key={customer.id ?? `${customer.name}-${index}`}>
+                  <button
+                    type="button"
+                    className="crm-dash-person"
+                    disabled={!customer.id}
+                    onClick={() => void navigate({ to: `/crm/customers/${customer.id}` })}
+                  >
+                    <span className="sales-avatar" aria-hidden="true">
+                      {customer.name
+                        .split(' ')
+                        .map((part) => part[0])
+                        .join('')
+                        .slice(0, 2)
+                        .toUpperCase()}
+                    </span>
+                    <span className="crm-dash-person-name">{customer.name}</span>
+                    {TIERS.includes(customer.tier) && <TierBadge tier={customer.tier as Tier} />}
+                    <span className="crm-dash-person-value">{money(customer.spend)}</span>
+                  </button>
+                </li>
+              ))}
+            </ol>
+          )}
+        </Card>
       </div>
-    </>
+    </div>
   );
 };
 

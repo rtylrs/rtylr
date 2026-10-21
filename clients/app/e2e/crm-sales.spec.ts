@@ -3,6 +3,8 @@ import {
   encodeGetDealStatsResponse,
   encodeGetLeadResponse,
   encodeGetLeadStatsResponse,
+  encodeGetSalesActivityResponse,
+  encodeGetSalesTaskCountsResponse,
   encodeImportLeadRowsResponse,
   encodeLeadImportResponse,
   encodeListActivitiesResponse,
@@ -362,6 +364,131 @@ test.describe('CRM sales', () => {
     });
     expect(finished).toBe(true);
     await expect(page.getByText('Duplicates skipped')).toBeVisible();
+  });
+
+  test('shows the dashboard: pipeline, calls, leads and the team', async ({ page }) => {
+    await stubSales(page);
+    const json = (path: string, body: unknown) =>
+      page.route(
+        (url) => url.origin === API_URL && url.pathname === path,
+        (route) => route.fulfill({ json: body })
+      );
+    await json(
+      '/crm/sales/v1/deals/board',
+      encodeGetDealBoardResponse({
+        pipeline: PIPELINE,
+        columns: PIPELINE.stages?.map((stage, index) => ({
+          stage,
+          deals: [4, 2, 9, 3][index],
+          amount: ['18400.00', '9600.00', '52000.00', '7000.00'][index],
+          weightedAmount: ['1840.00', '4800.00', '52000.00', '0.00'][index],
+        })),
+      })
+    );
+    await json(
+      '/crm/sales/v1/deals/stats',
+      encodeGetDealStatsResponse({
+        openDeals: 6,
+        openAmount: '28000.00',
+        weightedAmount: '6640.00',
+        winRate: 60,
+        averageDaysToWin: 18,
+        averageWonAmount: '5200.00',
+      })
+    );
+    await json(
+      '/crm/sales/v1/tasks/counts',
+      encodeGetSalesTaskCountsResponse({ overdue: 1, dueToday: 2, upcoming: 5 })
+    );
+    const days = Array.from({ length: 30 }, (_, i) => {
+      const date = new Date(Date.UTC(2026, 8, 22 + i)).toISOString().slice(0, 10);
+      const weekend = [0, 6].includes(new Date(`${date}T00:00:00Z`).getUTCDay());
+      const calls = weekend ? 0 : 6 + ((i * 7) % 13);
+      return { date, calls, reached: Math.floor(calls * 0.4), leadsAdded: i % 3, dealsWon: 0 };
+    });
+    const calls = days.reduce((sum, day) => sum + day.calls, 0);
+    const reached = days.reduce((sum, day) => sum + day.reached, 0);
+    await json(
+      '/crm/sales/v1/activity',
+      encodeGetSalesActivityResponse({
+        days,
+        calls,
+        reached,
+        leadsAdded: 29,
+        leadsQualified: 5,
+        dealsWon: 3,
+        dealsLost: 1,
+        wonAmount: '15600.00',
+        reps: [
+          {
+            repId: '1',
+            calls,
+            reached,
+            leadsQualified: 4,
+            dealsWon: 3,
+            dealsLost: 1,
+            wonAmount: '15600.00',
+          },
+          {
+            repId: '0',
+            calls: 0,
+            reached: 0,
+            leadsQualified: 1,
+            dealsWon: 0,
+            dealsLost: 0,
+            wonAmount: '0.00',
+          },
+        ],
+      })
+    );
+    await json('/crm/dashboard/v1/dashboard', {
+      total_customers: 1240,
+      new_this_month: 38,
+      active_loyalty_members: 412,
+      top_customers: [
+        {
+          id: '41',
+          first_name: 'Rana',
+          last_name: 'Haddad',
+          total_spent: 4200,
+          loyalty_tier: 'Gold',
+        },
+        {
+          id: '42',
+          first_name: 'Karim',
+          last_name: 'Saad',
+          total_spent: 3100,
+          loyalty_tier: 'Silver',
+        },
+      ],
+    });
+
+    await page.goto(`${PORTAL_URL}/crm`);
+    await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible();
+    const stats = page.locator('.sales-stats');
+    await expect(stats.locator('.sales-stat', { hasText: 'Win rate' })).toContainText('75%');
+    await expect(stats.locator('.sales-stat', { hasText: 'Follow-ups due' })).toContainText(
+      '1 overdue'
+    );
+    await expect(page.getByRole('group', { name: /Calls per day/ })).toBeVisible();
+    await expect(page.getByRole('list', { name: 'Pipeline' }).getByRole('listitem')).toHaveCount(2);
+    await expect(page.getByRole('region', { name: 'Team' })).toContainText('Sam Test');
+    await expect(page.getByRole('region', { name: 'Top customers' })).toContainText('Rana Haddad');
+
+    // Hovering a day shows its numbers.
+    await page.locator('.crm-dash-column').nth(9).hover();
+    await expect(page.locator('.crm-dash-tooltip')).toContainText('Reached');
+    await page.screenshot({ path: 'test-results/crm-dashboard.png', fullPage: true });
+
+    await page
+      .getByRole('list', { name: 'Leads by status' })
+      .getByRole('button', { name: /Attempting/ })
+      .click();
+    await expect(page).toHaveURL(/\/crm\/sales\/leads$/);
+    await expect(page.getByRole('tab', { name: /Attempting/ })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
   });
 
   test('shows the pipeline as a board with stage totals', async ({ page }) => {

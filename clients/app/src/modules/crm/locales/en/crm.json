@@ -295,23 +295,101 @@
     "add": "Add"
   },
   "dashboard": {
-    "atRiskEmptyTitle": "No at-risk customers right now",
-    "campaignPerformanceUnavailableTitle": "Campaign performance isn't available yet",
-    "campaignPerformanceUnavailableDescription": "The CRM dashboard API doesn't currently provide campaign reach or recent campaign results.",
-    "loadFailedTitle": "Dashboard data couldn't be loaded",
-    "loadFailedDescription": "Refresh the dashboard to try again.",
     "pageTitle": "Dashboard",
-    "noTrendData": "No trend data",
-    "totalCustomers": "Total customers",
-    "newThisMonth": "New this month",
-    "activeLoyaltyMembers": "Active loyalty members",
-    "campaignReach": "Campaign reach",
-    "avgLtv": "Avg LTV",
-    "churnRate": "Churn rate",
-    "topSegment": "Top segment",
-    "atRiskCustomers": "At-risk customers",
-    "topCustomers": "Top customers",
-    "recentCampaignPerformance": "Recent campaign performance"
+    "subtitle": "How selling is going, and what needs doing next.",
+    "windowLabel": "Period",
+    "window": {
+      "7": "7 days",
+      "30": "30 days",
+      "90": "90 days"
+    },
+    "period": {
+      "7": "last 7 days",
+      "30": "last 30 days",
+      "90": "last 90 days"
+    },
+    "repLabel": "Rep",
+    "loadFailedTitle": "This couldn't be loaded",
+    "stats": {
+      "pipeline": "Open pipeline",
+      "pipelineHint_one": "{{count}} deal",
+      "pipelineHint_other": "{{count}} deals",
+      "won": "Won",
+      "wonHint_one": "{{count}} deal",
+      "wonHint_other": "{{count}} deals",
+      "winRate": "Win rate",
+      "winRateHint": "{{won}} won · {{lost}} lost",
+      "noneClosed": "Nothing closed",
+      "calls": "Calls",
+      "callsHint": "{{percent}}% reached",
+      "followUps": "Follow-ups due",
+      "followUpsHint_one": "{{count}} overdue",
+      "followUpsHint_other": "{{count}} overdue",
+      "customers": "Customers",
+      "customersHint_one": "+{{value}} this month",
+      "customersHint_other": "+{{value}} this month"
+    },
+    "calls": {
+      "title": "Calls",
+      "summary_one": "{{calls}} call · {{percent}}% reached · {{period}}",
+      "summary_other": "{{calls}} calls · {{percent}}% reached · {{period}}",
+      "startCalling": "Start calling",
+      "empty": "No calls logged in the {{period}}.",
+      "reached": "Reached",
+      "notReached": "Not reached",
+      "chartLabel": "Calls per day. Use the arrow keys to read each day.",
+      "callsLabel_one": "call",
+      "callsLabel_other": "calls",
+      "tableCaption": "Calls per day",
+      "day": "Day"
+    },
+    "leads": {
+      "title": "Leads by status",
+      "summary_one": "{{count}} lead",
+      "summary_other": "{{count}} leads",
+      "all": "Leads",
+      "empty": "No leads yet. Import a list or add your first one.",
+      "import": "Import leads",
+      "add": "Add lead",
+      "added": "Added",
+      "qualified": "Qualified"
+    },
+    "pipeline": {
+      "title": "Pipeline",
+      "summary_one": "{{count}} open deal · {{weighted}} weighted",
+      "summary_other": "{{count}} open deals · {{weighted}} weighted",
+      "all": "Deals",
+      "empty": "No open deals. Qualified leads become deals.",
+      "workLeads": "Work your leads",
+      "deals_one": "{{count}} deal",
+      "deals_other": "{{count}} deals",
+      "averageWon": "Average won deal",
+      "daysToWin_one": "{{count}} day to win",
+      "daysToWin_other": "{{count}} days to win"
+    },
+    "tasks": {
+      "title": "Due",
+      "summary": "{{overdue}} overdue · {{today}} today",
+      "all": "Tasks",
+      "empty": "Nothing due. You're caught up."
+    },
+    "team": {
+      "title": "Team",
+      "empty": "No calls, qualified leads or closed deals in the {{period}}.",
+      "rep": "Rep",
+      "calls": "Calls",
+      "reached": "Reached",
+      "qualified": "Qualified",
+      "won": "Won",
+      "wonValue": "Won value"
+    },
+    "customers": {
+      "title": "Top customers",
+      "summary_one": "{{value}} loyalty member",
+      "summary_other": "{{value}} loyalty members",
+      "all": "Customers",
+      "empty": "Customers show up here once they spend."
+    }
   },
   "actions": {
     "launch": "Launch",

@@ -492,6 +492,25 @@ export function useDealStats(pipelineId: string | undefined, rep: RepFilter) {
   });
 }
 
+/** The dashboard's windows, in days. */
+export const ACTIVITY_WINDOWS = [7, 30, 90] as const;
+export type ActivityWindow = (typeof ACTIVITY_WINDOWS)[number];
+
+/** Calls, new leads and won deals per day over the window, with each rep's share. */
+export function useSalesActivity(days: ActivityWindow, rep: RepFilter) {
+  return useQuery({
+    queryKey: [ROOT, 'activity', days, rep],
+    queryFn: () =>
+      dealClient.getSalesActivity({
+        days,
+        assignedTo: repFilterParam(rep),
+        today: todayISO(),
+        utcOffsetMinutes: utcOffsetMinutes(),
+      }),
+    placeholderData: keepPreviousData,
+  });
+}
+
 export interface DealListFilters {
   pipelineId?: string;
   statuses: DealStatus[];

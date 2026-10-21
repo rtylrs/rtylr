@@ -1071,6 +1071,65 @@ message GetDealStatsRequest {
 }
 
 /// GetDealStatsResponse summarises a pipeline.
+message GetSalesActivityRequest {
+  /// days is the window, ending today: 7, 30 or 90 (30 otherwise).
+  days: int32 @query("days")
+  /// assigned_to limits the activity to one rep; 0 selects unassigned work.
+  /// Calls count for whoever logged them.
+  assigned_to: int64? @query("assigned_to")
+  /// today is the caller's date.
+  today: string @query("today")
+  /// utc_offset_minutes is the caller's offset from UTC.
+  utc_offset_minutes: int32 @query("utc_offset_minutes")
+}
+message SalesActivityDay {
+  /// date is the caller's day (YYYY-MM-DD).
+  date: string
+  /// calls counts calls logged that day.
+  calls: int64 @encode(number)
+  /// reached counts those calls that got through to the person.
+  reached: int64 @encode(number)
+  /// leads_added counts leads created that day.
+  leads_added: int64 @encode(number)
+  /// deals_won counts deals won that day.
+  deals_won: int64 @encode(number)
+}
+message RepActivity {
+  /// rep_id is the user id; 0 is unassigned work.
+  rep_id: int64
+  /// calls counts the calls they logged.
+  calls: int64 @encode(number)
+  /// reached counts those calls that got through.
+  reached: int64 @encode(number)
+  /// leads_qualified counts their leads qualified in the window.
+  leads_qualified: int64 @encode(number)
+  /// deals_won counts their deals won in the window.
+  deals_won: int64 @encode(number)
+  /// deals_lost counts their deals lost in the window.
+  deals_lost: int64 @encode(number)
+  /// won_amount is the first-year value of the deals won (decimal string).
+  won_amount: string
+}
+message GetSalesActivityResponse {
+  /// days covers every day of the window in order, quiet days included.
+  days: SalesActivityDay[]
+  /// calls counts the window's calls.
+  calls: int64 @encode(number)
+  /// reached counts those that got through.
+  reached: int64 @encode(number)
+  /// leads_added counts leads created in the window.
+  leads_added: int64 @encode(number)
+  /// leads_qualified counts leads qualified in the window.
+  leads_qualified: int64 @encode(number)
+  /// deals_won counts deals won in the window.
+  deals_won: int64 @encode(number)
+  /// deals_lost counts deals lost in the window.
+  deals_lost: int64 @encode(number)
+  /// won_amount is the first-year value of the deals won (decimal string).
+  won_amount: string
+  /// reps is each person's share, busiest first.
+  reps: RepActivity[]
+}
 message GetDealStatsResponse {
   /// open_deals counts open deals.
   open_deals: int64 @encode(number)
