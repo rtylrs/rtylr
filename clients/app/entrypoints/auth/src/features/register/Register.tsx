@@ -7,7 +7,7 @@ import { APP_CONFIG, APP_URLS, PORTAL_URL } from '@voxire/config';
 import notify from '../../shared/lib/notify/notify';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useRegisterRestaurant, checkEmailExists } from '../../shared/hooks/useAuth';
-import { startGoogleLogin } from '../../shared/lib/social';
+import { GOOGLE_SIGN_IN_ENABLED, startGoogleLogin } from '../../shared/lib/social';
 import { Button, HelmetContainer } from '@voxire/components';
 import AuthShell from '../../shared/components/AuthShell';
 import {
@@ -262,21 +262,25 @@ const Register: React.FC = (): React.JSX.Element => {
             {t('auth.register.submit')}
           </Button>
 
-          <AuthDivider label={t('auth.common.or')} />
+          {GOOGLE_SIGN_IN_ENABLED && (
+            <>
+              <AuthDivider label={t('auth.common.or')} />
 
-          <Button
-            type="button"
-            variant="outline"
-            className="auth-provider-button"
-            fullWidth
-            height={44}
-            onClick={() => void handleGoogleLogin()}
-          >
-            <span className="inline-flex items-center gap-2">
-              <FaGoogle className="text-[#444]" />
-              {t('auth.common.continueWithGoogle')}
-            </span>
-          </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="auth-provider-button"
+                fullWidth
+                height={44}
+                onClick={() => void handleGoogleLogin()}
+              >
+                <span className="inline-flex items-center gap-2">
+                  <FaGoogle className="text-[#444]" />
+                  {t('auth.common.continueWithGoogle')}
+                </span>
+              </Button>
+            </>
+          )}
         </form>
       </AuthShell>
     </>
