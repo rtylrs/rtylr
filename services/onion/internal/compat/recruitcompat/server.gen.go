@@ -38,11 +38,11 @@ func CompatibilityServiceRoutes() []string {
 		"DELETE /recruit/form-fields",
 		"GET /recruit/public/careers",
 		"GET /recruit/public/career",
-		"POST /recruit/public/resume-upload-url",
 		"GET /recruit/public/branding",
 		"GET /recruit/submissions/export",
 		"GET /recruit/public/og",
 		"POST /recruit/public/apply",
+		"POST /recruit/public/resume-upload-url",
 	}
 }
 
@@ -206,14 +206,6 @@ func (s CompatibilityService) GetPublicCareer(ctx context.Context, req *recruitc
 	return &recruitcompatv1.JsonResponse{Data: data}, nil
 }
 
-func (s CompatibilityService) RequestResumeUploadURL(ctx context.Context, req *recruitcompatv1.BodyRequest) (*recruitcompatv1.JsonResponse, error) {
-	data, err := s.serve(ctx, http.MethodPost, "/recruit/public/resume-upload-url", req.GetBody())
-	if err != nil {
-		return nil, err
-	}
-	return &recruitcompatv1.JsonResponse{Data: data}, nil
-}
-
 func (s CompatibilityService) GetPublicBranding(ctx context.Context, req *recruitcompatv1.EmptyRequest) (*recruitcompatv1.JsonResponse, error) {
 	data, err := s.serve(ctx, http.MethodGet, "/recruit/public/branding", nil)
 	if err != nil {
@@ -237,6 +229,11 @@ func (s CompatibilityService) ListPublicOg(w http.ResponseWriter, r *http.Reques
 
 func (s CompatibilityService) CreatePublicApply(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.EmptyRequest) error {
 	s.Routes.ServeRoute(w, r, http.MethodPost, "/recruit/public/apply")
+	return nil
+}
+
+func (s CompatibilityService) CreatePublicResumeUploadUrl(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPost, "/recruit/public/resume-upload-url")
 	return nil
 }
 
@@ -427,7 +424,7 @@ func Routes() []string {
 // HTTPRoutes lists the routes served by @http methods: the original
 // handler runs, route middlewares included.
 func HTTPRoutes() []string {
-	return []string{"GET /recruit/public/og", "POST /recruit/public/apply", "GET /voxhire/admin/admins", "GET /voxhire/admin/analytics", "GET /voxhire/admin/applications/{id}/cv", "GET /voxhire/admin/applications/{id}/timeline", "GET /voxhire/admin/candidates", "GET /voxhire/admin/cv-jobs", "GET /voxhire/admin/leads", "GET /voxhire/admin/me", "GET /voxhire/admin/openings", "GET /voxhire/admin/openings/{id}/applications", "GET /voxhire/admin/shortlists", "GET /voxhire/admin/tasks", "POST /voxhire/admin/admins", "POST /voxhire/admin/careers", "POST /voxhire/admin/login", "POST /voxhire/admin/shortlists", "POST /voxhire/admin/shortlists/{id}/items", "POST /voxhire/admin/tasks", "POST /voxhire/applications", "POST /voxhire/careers/apply", "POST /voxhire/contact", "PUT /voxhire/admin/applications/{id}/review", "PUT /voxhire/admin/applications/{id}/status", "PUT /voxhire/admin/careers/{id}", "PUT /voxhire/admin/careers/{id}/active", "PUT /voxhire/admin/cv-jobs/{source}/{id}/retry", "PUT /voxhire/admin/tasks/{id}"}
+	return []string{"GET /recruit/public/og", "POST /recruit/public/apply", "POST /recruit/public/resume-upload-url", "GET /voxhire/admin/admins", "GET /voxhire/admin/analytics", "GET /voxhire/admin/applications/{id}/cv", "GET /voxhire/admin/applications/{id}/timeline", "GET /voxhire/admin/candidates", "GET /voxhire/admin/cv-jobs", "GET /voxhire/admin/leads", "GET /voxhire/admin/me", "GET /voxhire/admin/openings", "GET /voxhire/admin/openings/{id}/applications", "GET /voxhire/admin/shortlists", "GET /voxhire/admin/tasks", "POST /voxhire/admin/admins", "POST /voxhire/admin/careers", "POST /voxhire/admin/login", "POST /voxhire/admin/shortlists", "POST /voxhire/admin/shortlists/{id}/items", "POST /voxhire/admin/tasks", "POST /voxhire/applications", "POST /voxhire/careers/apply", "POST /voxhire/contact", "PUT /voxhire/admin/applications/{id}/review", "PUT /voxhire/admin/applications/{id}/status", "PUT /voxhire/admin/careers/{id}", "PUT /voxhire/admin/careers/{id}/active", "PUT /voxhire/admin/cv-jobs/{source}/{id}/retry", "PUT /voxhire/admin/tasks/{id}"}
 }
 
 // Register serves this package's contracts on mux from the route table,

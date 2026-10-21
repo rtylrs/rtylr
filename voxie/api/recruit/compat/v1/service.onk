@@ -28,15 +28,16 @@ service CompatibilityService {
 
   listPublicCareers(QueryRequest) -> JsonResponse @get("/public/careers")
   getPublicCareer(QueryRequest) -> JsonResponse @get("/public/career")
-  // POST /public/apply stays mounted from the route table: it runs inside
-  // a per-route rate limit a contract method cannot apply.
-  requestResumeUploadURL(BodyRequest) -> JsonResponse @post("/public/resume-upload-url") @body("body")
 
   getPublicBranding(EmptyRequest) -> JsonResponse @get("/public/branding")
   exportSubmissions(EmptyRequest) -> JsonResponse @get("/submissions/export")
 
+  // The public apply and resume upload routes run inside per-route rate
+  // limits a contract method cannot apply, so their original handlers serve
+  // them.
   listPublicOg(EmptyRequest) -> EmptyResponse @get("/public/og") @http
   createPublicApply(EmptyRequest) -> EmptyResponse @post("/public/apply") @http
+  createPublicResumeUploadUrl(EmptyRequest) -> EmptyResponse @post("/public/resume-upload-url") @http
 }
 
 /// Voxhire recruiting routes. The admin routes run behind the Voxhire admin

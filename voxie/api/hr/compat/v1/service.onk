@@ -7,6 +7,10 @@ service CompatibilityService {
 
   getMyEmployee(EmptyRequest) -> JsonResponse @get("/employees/me")
 
+  listTimeOff(QueryRequest) -> JsonResponse @get("/time-off")
+
+  submitTimeOff(BodyRequest) -> JsonResponse @post("/time-off") @body("body")
+
   approveTimeOff(BodyRequest) -> JsonResponse @post("/time-off/approve") @body("body")
 
   getShifts(QueryRequest) -> JsonResponse @get("/shifts")
