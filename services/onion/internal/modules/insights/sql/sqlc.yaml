@@ -35,13 +35,6 @@ sql:
       - "../../organization/sql/schema/shared/zz_remove_self_host_and_social_login.sql"
       - "../../organization/sql/schema/shared/zz_subscriptions_paddle_events.sql"
       - "schema/insights/schema.sql"
-      - "../../finance/sql/schema/finance/schema.sql"
-      - "../../pos/sql/schema/pos/schema.sql"
-      - "../../crm/sql/schema/crm/schema.sql"
-      - "../../erp/sql/schema/erp/schema.sql"
-      - "../../hr/sql/schema/hr_core/schema.sql"
-      - "../../hr/sql/schema/hr_shifts/schema.sql"
-      - "../../hr/sql/schema/hr_leave/schema.sql"
     gen:
       go:
         package: "sqlc"

@@ -20,8 +20,9 @@ import (
 )
 
 // Module is the cross-domain aggregation layer that powers the /insights/*
-// namespace. Most endpoints read across Finance, CRM, POS, ERP and HR schemas;
-// settings endpoints also persist insights preferences such as scheduled reports.
+// namespace. Most endpoints combine reads served by Finance, CRM, POS, ERP and
+// HR; settings endpoints also persist insights preferences such as scheduled
+// reports.
 type Module struct {
 	service *application.Service
 	flow    api.FlowReader
@@ -31,21 +32,30 @@ type Module struct {
 // needs without importing an internal package.
 type FlowReader = api.FlowReader
 
-type FlowDelivery = api.FlowDelivery
-type FlowWorkloadMember = api.FlowWorkloadMember
-type FlowRoadmapProject = api.FlowRoadmapProject
+type (
+	FlowDelivery       = api.FlowDelivery
+	FlowWorkloadMember = api.FlowWorkloadMember
+	FlowRoadmapProject = api.FlowRoadmapProject
+)
 
-type FinanceDashboardReader = application.FinanceDashboardReader
-type POSDashboardReader = application.POSDashboardReader
-type CRMDashboardReader = application.CRMDashboardReader
-type DashboardReaders = application.DashboardReaders
+type (
+	FinanceDashboardReader = application.FinanceDashboardReader
+	POSDashboardReader     = application.POSDashboardReader
+	CRMDashboardReader     = application.CRMDashboardReader
+	DashboardReaders       = application.DashboardReaders
+)
+
+// Sources are the owning modules report data is read from. Insights never
+// queries their tables.
+type Sources = infrastructure.Sources
 
 // NewModule takes Flow's insights module because insights.dashboard.v1 declares
 // three projections of Flow's delivery data. Passing the module rather than a
 // database handle keeps the flow_* schema owned by Flow: this module asks Flow
-// for numbers and never queries its tables.
-func NewModule(ctx context.Context, db *sql.DB, flow api.FlowReader, dashboard DashboardReaders) *Module {
-	return &Module{service: application.NewService(infrastructure.NewRepository(db), dashboard), flow: flow}
+// for numbers and never queries its tables. The other owning modules arrive
+// the same way through sources.
+func NewModule(ctx context.Context, db *sql.DB, flow api.FlowReader, dashboard DashboardReaders, sources Sources) *Module {
+	return &Module{service: application.NewService(infrastructure.NewRepository(db, sources), dashboard), flow: flow}
 }
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {

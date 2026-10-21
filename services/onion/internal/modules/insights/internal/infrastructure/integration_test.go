@@ -17,7 +17,7 @@ func dashboardService(t *testing.T) *application.Service {
 	t.Helper()
 	db := testutil.OpenDB(t)
 	ctx := context.Background()
-	return application.NewService(infrastructure.NewRepository(db), application.DashboardReaders{
+	return application.NewService(newRepository(db), application.DashboardReaders{
 		Finance: financereports.NewModule(ctx, db),
 		POS:     posorders.NewModule(ctx, db),
 		CRM:     customers.NewModule(ctx, db),
@@ -104,7 +104,7 @@ func TestGetDashboard_ReturnsStructuredFields(t *testing.T) {
 
 func TestGetTopCustomers_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	from := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
@@ -120,7 +120,7 @@ func TestGetTopCustomers_NoError(t *testing.T) {
 
 func TestGetTopCustomers_UnknownOwner_ReturnsEmpty(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	from := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
@@ -136,7 +136,7 @@ func TestGetTopCustomers_UnknownOwner_ReturnsEmpty(t *testing.T) {
 
 func TestGetInvoiceAging_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	rows, err := repo.GetInvoiceAging(ctx, testutil.OwnerID)
@@ -148,7 +148,7 @@ func TestGetInvoiceAging_NoError(t *testing.T) {
 
 func TestGetHeadcount_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	from := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
@@ -164,7 +164,7 @@ func TestGetHeadcount_NoError(t *testing.T) {
 
 func TestGetLTVDistribution_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	rows, err := repo.GetLTVDistribution(ctx, testutil.OwnerID)
@@ -176,7 +176,7 @@ func TestGetLTVDistribution_NoError(t *testing.T) {
 
 func TestGetSlowMovers_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	rows, err := repo.GetSlowMovers(ctx, testutil.OwnerID, 90)
@@ -188,7 +188,7 @@ func TestGetSlowMovers_NoError(t *testing.T) {
 
 func TestListScheduledReports_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	rows, _, err := repo.ListScheduledReports(ctx, testutil.OwnerID, "created_at", "desc", 10, 0)
@@ -200,7 +200,7 @@ func TestListScheduledReports_NoError(t *testing.T) {
 
 func TestCreateAndDeleteScheduledReport_RoundTrip(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	isActive := true
@@ -227,7 +227,7 @@ func TestCreateAndDeleteScheduledReport_RoundTrip(t *testing.T) {
 
 func TestGetSettings_UnknownOwner_ReturnsNotFound(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	_, err := repo.GetSettings(ctx, 9999999)
@@ -238,7 +238,7 @@ func TestGetSettings_UnknownOwner_ReturnsNotFound(t *testing.T) {
 
 func TestUpsertSettings_RoundTrip(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	row := infrastructure.SettingsRow{
@@ -269,7 +269,7 @@ func TestUpsertSettings_RoundTrip(t *testing.T) {
 
 func TestGetProductKPIs_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	kpis, err := repo.GetProductKPIs(ctx, testutil.OwnerID)
@@ -286,7 +286,7 @@ func TestGetRevenueComparison_NoError(t *testing.T) {
 	from := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 	to := time.Date(2026, 12, 31, 23, 59, 59, 0, time.UTC)
 
-	row, err := application.NewService(infrastructure.NewRepository(db), application.DashboardReaders{
+	row, err := application.NewService(newRepository(db), application.DashboardReaders{
 		Finance: financereports.NewModule(ctx, db),
 	}).GetRevenueComparison(ctx, testutil.OwnerID, from, to)
 	if err != nil {

@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
 
@@ -36,7 +35,7 @@ func TestGetMarginDistribution_ClassifiesBoundariesInDatabase(t *testing.T) {
 		_, _ = db.ExecContext(ctx, "DELETE FROM erp_products WHERE business_id = ?", businessID)
 	})
 
-	rows, err := infrastructure.NewRepository(db).GetMarginDistribution(ctx, businessID)
+	rows, err := newRepository(db).GetMarginDistribution(ctx, businessID)
 	if err != nil {
 		t.Fatalf("GetMarginDistribution: %v", err)
 	}
@@ -94,7 +93,7 @@ func TestGetProductMarginRows_ReturnsUnitsAndMinorUnitRevenue(t *testing.T) {
 		_, _ = db.ExecContext(ctx, "DELETE FROM erp_products WHERE id = ?", productID)
 	})
 
-	rows, err := infrastructure.NewRepository(db).GetProductMarginRows(ctx, businessID)
+	rows, err := newRepository(db).GetProductMarginRows(ctx, businessID)
 	if err != nil {
 		t.Fatalf("GetProductMarginRows: %v", err)
 	}

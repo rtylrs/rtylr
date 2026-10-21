@@ -2,33 +2,63 @@ package infrastructure
 
 import (
 	"context"
-	"database/sql"
-	"github.com/voxire/onion/internal/modules/insights/internal/domain"
+	"sort"
 
-	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type CategorySalesRow = domain.CategorySalesRow
 
+// GetSalesByCategory groups month-to-date paid sales by the product's ERP
+// category. Products without a category are reported as Uncategorised.
 func (r *Repository) GetSalesByCategory(ctx context.Context, businessID int64) ([]CategorySalesRow, error) {
 	thisFrom, thisTo, _, _ := mtdRanges(nowFn())
-	// cross-schema read from erp_categories + erp_products + pos_order_items + pos_orders — MTD category sales
-	rows, err := r.queries.GetSalesByCategory(ctx, sqlc.GetSalesByCategoryParams{
-		BusinessID:  businessID,
-		CreatedAt:   sql.NullTime{Time: thisFrom, Valid: true},
-		CreatedAt_2: sql.NullTime{Time: thisTo, Valid: true},
-	})
+	sales, err := r.sources.POS.InsightsPaidProductSales(ctx, businessID, thisFrom, thisTo)
 	if err != nil {
-		logger.Ctx(ctx).Error("insights: category sales query failed", logger.Error(err))
+		logger.Ctx(ctx).Error("insights: category sales failed", logger.Error(err))
 		return nil, err
 	}
-	out := make([]CategorySalesRow, 0, len(rows))
-	for _, row := range rows {
+	facts, err := r.productFacts(ctx, businessID, sales)
+	if err != nil {
+		logger.Ctx(ctx).Error("insights: category sales products failed", logger.Error(err))
+		return nil, err
+	}
+	type total struct {
+		name    string
+		units   float64
+		revenue int64
+	}
+	byCategory := make(map[int64]*total)
+	for _, sale := range sales {
+		product, ok := facts[sale.ProductID]
+		if !ok {
+			continue
+		}
+		category := byCategory[product.CategoryID]
+		if category == nil {
+			name := product.CategoryName
+			if product.CategoryID == 0 {
+				name = "Uncategorised"
+			}
+			category = &total{name: name}
+			byCategory[product.CategoryID] = category
+		}
+		category.units += sale.Units
+		category.revenue += sale.RevenueMinorUnits
+	}
+	out := make([]CategorySalesRow, 0, len(byCategory))
+	for id, category := range byCategory {
 		out = append(out, CategorySalesRow{
-			CategoryID: row.CategoryID, CategoryName: row.CategoryName,
-			UnitsSold: toFloat(row.Units), RevenueMinorUnits: decimalToMinorUnits(row.Revenue),
+			CategoryID: id, CategoryName: category.name,
+			UnitsSold: roundUnits(category.units), RevenueMinorUnits: category.revenue,
 		})
 	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].RevenueMinorUnits != out[j].RevenueMinorUnits {
+			return out[i].RevenueMinorUnits > out[j].RevenueMinorUnits
+		}
+		return out[i].CategoryID < out[j].CategoryID
+	})
 	return out, nil
 }

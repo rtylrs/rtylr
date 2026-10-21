@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
 
@@ -40,7 +39,7 @@ func TestGetLTVDistribution_CountsPaidSpendOlderThanOneYear(t *testing.T) {
 		_, _ = db.ExecContext(ctx, "DELETE FROM crm_customers WHERE id = ?", customerID)
 	})
 
-	rows, err := infrastructure.NewRepository(db).GetLTVDistribution(ctx, businessID)
+	rows, err := newRepository(db).GetLTVDistribution(ctx, businessID)
 	if err != nil {
 		t.Fatalf("GetLTVDistribution: %v", err)
 	}

@@ -26,6 +26,8 @@ A synchronous owner read returns current data or an error. For example, organiza
 
 A projection belongs to its consumer and is refreshed from published facts or owner APIs. A direct SQL join to an owner's table is not a projection. Published facts describe completed source operations; they cannot instruct another module to invalidate its cache.
 
+Insights reports read through their owners. Finance reports, HR reports, ERP products, POS orders and CRM customers serve `Insights*` reads over their own tables, with result types in `internal/contracts/<owner>`. Insights combines the results itself: product reports join POS sales to ERP product details, and the top-customer list adds CRM contact details to POS purchase totals. Customer purchase figures count the customer recorded on each paid order, so a customer later deleted from CRM still counts for the periods they bought in. Cached reports are versioned by the latest change any owner reports.
+
 POS commits the paid order and its durable fact in one POS transaction. ERP processes that fact in a separate ERP transaction, aggregates repeated products and deduplicates ledger movements. Delivery can be retried. Inventory visibility follows event delivery, so it is not synchronous with POS payment.
 
 Online order confirmation belongs to ERP fulfillment because the status and stock availability form one synchronous invariant. It retains the existing Store routes. Storefront configuration and checkout remain Store capabilities; checkout reads active product quotes through the ERP boundary.
