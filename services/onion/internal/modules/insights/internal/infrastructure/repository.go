@@ -3,39 +3,44 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"sort"
 	"strconv"
 	"time"
 
+	erpcontract "github.com/voxire/onion/internal/contracts/erp"
+	poscontract "github.com/voxire/onion/internal/contracts/pos"
 	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-// Repository aggregates cross-schema insights reads. Static queries use sqlc;
-// churn cohort SQL is tagged dynamic-query: squirrel in customers_churn.go.
+// Repository serves Insights' own tables and builds cross-module reports from
+// the owning modules' reads in sources.
 type Repository struct {
 	queries *sqlc.Queries
-	pool    *sql.DB
+	sources Sources
 }
 
+// GetInsightsGeneration returns the latest change across every source, so a
+// write in any owning module moves cached reports to a new key.
 func (r *Repository) GetInsightsGeneration(ctx context.Context, businessID int64) (time.Time, error) {
-	return r.queries.GetInsightsGeneration(ctx, sqlc.GetInsightsGenerationParams{
-		BusinessID:   businessID,
-		BusinessID_2: businessID,
-		BusinessID_3: businessID,
-		BusinessID_4: businessID,
-		BusinessID_5: businessID,
-		BusinessID_6: businessID,
-		BusinessID_7: businessID,
-		BusinessID_8: businessID,
-		BusinessID_9: businessID,
-	})
+	var latest time.Time
+	for _, source := range []lastChange{r.sources.POS, r.sources.Finance, r.sources.CRM, r.sources.ERP, r.sources.HR} {
+		changed, err := source.InsightsLastChange(ctx, businessID)
+		if err != nil {
+			return time.Time{}, err
+		}
+		if changed.After(latest) {
+			latest = changed
+		}
+	}
+	return latest, nil
 }
 
-func NewRepository(db *sql.DB) *Repository {
+func NewRepository(db *sql.DB, sources Sources) *Repository {
 	return &Repository{
 		queries: sqlc.New(db),
-		pool:    db,
+		sources: sources,
 	}
 }
 
@@ -72,20 +77,6 @@ func decimalToMinorUnits(v interface{}) int64 {
 	return int64(f*100 + 0.5)
 }
 
-func deltaPct(current, prior int64) float64 {
-	if prior == 0 {
-		return 0
-	}
-	return (float64(current-prior) / float64(prior)) * 100
-}
-
-func deltaPctFloat(current, prior float64) float64 {
-	if prior == 0 {
-		return 0
-	}
-	return ((current - prior) / prior) * 100
-}
-
 func mtdRanges(now time.Time) (thisFrom, thisTo, priorFrom, priorTo time.Time) {
 	thisFrom = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
 	thisTo = now
@@ -94,85 +85,51 @@ func mtdRanges(now time.Time) (thisFrom, thisTo, priorFrom, priorTo time.Time) {
 	return thisFrom, thisTo, priorFrom, priorTo
 }
 
-func ifaceToInt64(v interface{}) int64 {
-	if v == nil {
-		return 0
+// GetProductMarginRows returns per-product margin rows joining all-time sales
+// volume with cost price (#853), highest revenue first.
+func (r *Repository) GetProductMarginRows(ctx context.Context, businessID int64) ([]domain.ProductMarginRow, error) {
+	sales, err := r.sources.POS.InsightsLifetimeProductSales(ctx, businessID)
+	if err == nil {
+		var facts map[int64]erpcontract.ProductFacts
+		if facts, err = r.productFacts(ctx, businessID, sales); err == nil {
+			return productMarginRows(sales, facts), nil
+		}
 	}
-	switch val := v.(type) {
-	case int64:
-		return val
-	case int32:
-		return int64(val)
-	case float64:
-		return int64(val + 0.5)
-	case []byte:
-		return decimalToMinorUnits(string(val)) / 100
-	case string:
-		return decimalToMinorUnits(val) / 100
-	default:
-		return 0
-	}
+	logger.Ctx(ctx).Error("failed to get product margin rows", logger.Any("business_id", businessID), logger.Error(err))
+	return nil, err
 }
 
-// GetProductMarginRows returns per-product margin rows joining sales volume
-// with cost price (#853).
-func (r *Repository) GetProductMarginRows(ctx context.Context, businessID int64) ([]domain.ProductMarginRow, error) {
-	rows, err := r.queries.GetProductMarginRows(ctx, businessID)
-	if err != nil {
-		logger.Ctx(ctx).Error("failed to get product margin rows", logger.Any("business_id", businessID), logger.Error(err))
-		return nil, err
-	}
-	out := make([]domain.ProductMarginRow, 0, len(rows))
-	for _, row := range rows {
-		units := decimalToFloat(row.UnitsSold)
-		revenue := row.RevenueMinorUnitsX100
+// productMarginRowLimit caps the per-product margin table.
+const productMarginRowLimit = 200
+
+func productMarginRows(sales []poscontract.ProductSales, facts map[int64]erpcontract.ProductFacts) []domain.ProductMarginRow {
+	out := make([]domain.ProductMarginRow, 0, len(sales))
+	for _, sale := range sales {
+		product, ok := facts[sale.ProductID]
+		if !ok {
+			continue
+		}
 		var cost *int64
-		if row.CostMinorUnitsX100 != 0 {
-			v := row.CostMinorUnitsX100
+		if product.CostMinorUnits != 0 {
+			v := product.CostMinorUnits
 			cost = &v
 		}
 		out = append(out, domain.ProductMarginRow{
-			ID:             row.ID,
-			Name:           row.Name,
-			UnitsSold:      units,
-			RevenueMinor:   revenue,
+			ID:             sale.ProductID,
+			Name:           product.Name,
+			UnitsSold:      sale.Units,
+			RevenueMinor:   sale.RevenueMinorUnits,
 			CostMinorUnits: cost,
 		})
 	}
-	return out, nil
-}
-
-// decimalToFloat converts a DECIMAL column value (which the MySQL driver
-// returns as []byte) or a numeric value into float64. Unlike
-// decimalToMinorUnits it keeps the source scale, so DECIMAL(8,3) quantities
-// do not round to two places.
-func decimalToFloat(v interface{}) float64 {
-	if v == nil {
-		return 0
+	sort.SliceStable(out, func(i, j int) bool {
+		if out[i].RevenueMinor != out[j].RevenueMinor {
+			return out[i].RevenueMinor > out[j].RevenueMinor
+		}
+		return out[i].ID < out[j].ID
+	})
+	if len(out) > productMarginRowLimit {
+		out = out[:productMarginRowLimit]
 	}
-	var s string
-	switch n := v.(type) {
-	case int64:
-		return float64(n)
-	case float64:
-		return n
-	case []byte:
-		s = string(n)
-	case string:
-		s = n
-	default:
-		return 0
-	}
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("insights: failed to parse decimal value",
-			logger.String("value", s),
-			logger.Error(err),
-		)
-		return 0
-	}
-	return f
+	return out
 }

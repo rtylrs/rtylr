@@ -1,0 +1,19 @@
+package pos.compat.v1
+
+/// Legacy POS order and payment routes, served with their existing wire format.
+service CompatibilityService {
+  base_path: "/pos"
+
+  listOrders(EmptyRequest) -> JsonResponse @get("/orders")
+  createCompatOrder(BodyRequest) -> JsonResponse @post("/orders/compat") @body("body")
+  payOrder(PathIdBodyRequest) -> JsonResponse @post("/orders/{id}/pay") @body("body")
+  approveOrderRefund(PathIdBodyRequest) -> JsonResponse @post("/orders/{id}/refund/approve") @body("body")
+  overrideOrderRefund(PathIdBodyRequest) -> JsonResponse @post("/orders/{id}/refund/override") @body("body")
+  approveOrderVoid(PathIdBodyRequest) -> JsonResponse @post("/orders/{id}/void/approve") @body("body")
+  overrideOrderVoid(PathIdBodyRequest) -> JsonResponse @post("/orders/{id}/void/override") @body("body")
+  resumeOrder(PathIdBodyRequest) -> JsonResponse @put("/orders/{id}/resume") @body("body")
+
+  listWs(EmptyRequest) -> EmptyResponse @get("/ws") @http
+  createPaymentsWebhook(EmptyRequest) -> EmptyResponse @post("/payments/webhook") @http
+  createWsTicket(EmptyRequest) -> EmptyResponse @post("/ws-ticket") @http
+}

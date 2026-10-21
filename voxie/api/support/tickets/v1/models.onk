@@ -1,0 +1,76 @@
+package support.tickets.v1
+
+message Ticket {
+  id: int64 @encode(number)
+  business_id: int64 @encode(number)
+  customer_name: string
+  customer_email: string
+  subject: string
+  status: string
+  priority: string
+  assigned_to: int64? @encode(number)
+  channel: string
+  created_at: string
+  updated_at: string
+}
+
+message TicketMessage {
+  id: int64 @encode(number)
+  ticket_id: int64 @encode(number)
+  sender_type: string
+  sender_name: string
+  body: string
+  is_internal: bool
+  created_at: string
+}
+
+message ListTicketsRequest {
+  status: string @query("status")
+  page: int32 @query("page")
+  page_size: int32 @query("page_size")
+}
+
+message ListTicketsResponse {
+  tickets: Ticket[]
+  total: int32
+  page: int32
+  page_size: int32
+}
+
+message GetTicketRequest {
+  id: int64 @query("id") @encode(number)
+}
+
+message GetTicketResponse {
+  ticket: Ticket
+  messages: TicketMessage[]
+}
+
+message CreateTicketRequest {
+  customer_name: string
+  customer_email: string
+  subject: string
+  priority: string
+  channel: string
+  assigned_to: int64? @encode(number)
+  body: string
+  sender_name: string
+}
+
+message CreateTicketResponse {
+  ticket_id: int64 @encode(number)
+  message: string
+}
+
+message UpdateTicketRequest {
+  id: int64 @encode(number)
+  subject: string
+  status: string
+  priority: string
+  assigned_to: int64? @encode(number)
+  channel: string
+}
+
+message UpdateTicketResponse {
+  message: string
+}

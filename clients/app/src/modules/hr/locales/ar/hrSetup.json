@@ -1,0 +1,146 @@
+{
+  "title": "إعداد مساحة عمل الموارد البشرية",
+  "subtitle": "أكمل هذه الخطوات لتهيئة الموارد البشرية لمؤسستك.",
+  "configSaved": "تم حفظ التهيئة",
+  "stepCompleted": "تم إكمال الخطوة",
+  "finishSetup": "إنهاء الإعداد",
+  "statusError": "تعذّر تحميل حالة الإعداد. يرجى المحاولة مجدداً.",
+  "steps": {
+    "companyProfile": "ملف الشركة",
+    "workSchedule": "جدول العمل",
+    "orgStructure": "الهيكل التنظيمي",
+    "locations": "المواقع",
+    "rolesPermissions": "الأدوار والصلاحيات",
+    "payrollConfig": "تهيئة الرواتب",
+    "notifications": "الإشعارات",
+    "employees": "الموظفون"
+  },
+  "companyProfile": {
+    "title": "ملف الشركة",
+    "description": "أخبرنا عن شركتك لنخصص تجربة الموارد البشرية.",
+    "name": "اسم الشركة",
+    "industry": "القطاع",
+    "country": "الدولة",
+    "timezone": "المنطقة الزمنية",
+    "currency": "العملة",
+    "sharedName": "يُدار اسم الشركة في الإعدادات العامة."
+  },
+  "workSchedule": {
+    "title": "جدول العمل الافتراضي",
+    "description": "حدد ساعات العمل القياسية لمؤسستك.",
+    "scheduleName": "اسم الجدول",
+    "workingDays": "أيام العمل",
+    "startTime": "وقت البدء",
+    "endTime": "وقت الانتهاء",
+    "breakMinutes": "مدة الاستراحة (بالدقائق)",
+    "weeklyHours": "الساعات الأسبوعية المتعاقد عليها",
+    "dailyOt": "حد العمل الإضافي اليومي (بالدقائق)",
+    "weeklyOt": "حد العمل الإضافي الأسبوعي (بالدقائق)",
+    "days": {
+      "monday": "الاثنين",
+      "tuesday": "الثلاثاء",
+      "wednesday": "الأربعاء",
+      "thursday": "الخميس",
+      "friday": "الجمعة",
+      "saturday": "السبت",
+      "sunday": "الأحد"
+    }
+  },
+  "orgStructure": {
+    "title": "الهيكل التنظيمي",
+    "description": "أنشئ الأقسام لتنظيم فريقك.",
+    "addDepartment": "إضافة قسم",
+    "departmentName": "اسم القسم",
+    "parentDepartment": "القسم الأم",
+    "noDepartments": "لم تتم إضافة أقسام بعد"
+  },
+  "locations": {
+    "title": "المواقع",
+    "description": "أضف مواقع مكاتبك أو فروعك.",
+    "singleLocation": "لدينا موقع واحد فقط",
+    "addLocation": "إضافة موقع",
+    "locationName": "اسم الموقع",
+    "locationAddress": "العنوان",
+    "locationTimezone": "المنطقة الزمنية",
+    "noLocations": "لم تتم إضافة مواقع بعد",
+    "required": "اسم الموقع والعنوان مطلوبان"
+  },
+  "rolesPermissions": {
+    "title": "الأدوار والصلاحيات",
+    "description": "هذه هي الأدوار الافتراضية التي يبدأ بها عملك.",
+    "previewNotice": "يمكنك تخصيص ما يمكن لكل دور فعله بدقة في أي وقت من الإعدادات ← الأدوار والصلاحيات، بعد اكتمال الإعداد.",
+    "defaultRoles": {
+      "employee": {
+        "name": "موظف",
+        "description": "موظف عادي بصلاحيات أساسية"
+      },
+      "manager": {
+        "name": "مدير",
+        "description": "مدير فريق بصلاحيات الموافقة"
+      },
+      "hrAdmin": {
+        "name": "مسؤول الموارد البشرية",
+        "description": "صلاحية كاملة لإدارة الموارد البشرية"
+      },
+      "payrollManager": {
+        "name": "مسؤول الرواتب/المالية",
+        "description": "عمليات الرواتب والمالية"
+      },
+      "executive": {
+        "name": "تنفيذي",
+        "description": "إشراف على مستوى تنفيذي"
+      }
+    }
+  },
+  "payrollConfig": {
+    "title": "تهيئة الرواتب",
+    "description": "حدد كيفية عمل الرواتب في مؤسستك.",
+    "grossModel": "نموذج الراتب الإجمالي",
+    "hourly": "بالساعة",
+    "salary": "راتب ثابت",
+    "both": "كلاهما",
+    "period": "فترة الدفع",
+    "payDayOfMonth": "يوم دفع الراتب من الشهر",
+    "weekly": "أسبوعي",
+    "biweekly": "نصف شهري",
+    "monthly": "شهري",
+    "enableOvertime": "تفعيل تتبع العمل الإضافي",
+    "enableDeductions": "تفعيل الخصومات",
+    "enableBonuses": "تفعيل المكافآت"
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "description": "يمكن تهيئة بيانات اعتماد قنوات الإشعارات لاحقاً في الإعدادات.",
+    "emailEnabled": "إشعارات البريد الإلكتروني",
+    "smsEnabled": "إشعارات الرسائل القصيرة / واتساب",
+    "channelNote": "يمكن تهيئة بيانات اعتماد القنوات لاحقاً في الإعدادات."
+  },
+  "employees": {
+    "title": "إضافة الموظفين",
+    "description": "أضف موظفيك الأوائل للبدء. يمكنك أيضاً الاستيراد من CSV.",
+    "addEmployee": "إضافة موظف",
+    "importCsv": "استيراد CSV",
+    "csvComingSoon": "استيراد CSV قريباً",
+    "noEmployees": "لم تتم إضافة موظفين بعد. أضف أول موظف للمتابعة.",
+    "noEmployeesHint": "لم يتم إضافة موظفين بعد. يمكنك إضافتهم هنا أو من قسم الموظفين بعد الإعداد."
+  },
+  "hrSettings": {
+    "workWeekStart": "يبدأ أسبوع العمل يوم",
+    "weeklyHours": "الساعات الأسبوعية",
+    "overtimeAfter": "العمل الإضافي بعد (ساعة/أسبوع)",
+    "ptoPolicy": "سياسة الإجازات (يوم/سنة)",
+    "currency": "العملة",
+    "industry": "المجال",
+    "saved": "تم حفظ الإعدادات",
+    "metaTitle": "إعدادات الموارد البشرية · rtylr",
+    "pageTitle": "إعدادات الموارد البشرية",
+    "subtitle": "أسبوع العمل، العمل الإضافي، سياسة الإجازات، والعملة",
+    "monday": "الإثنين",
+    "sunday": "الأحد",
+    "save": "حفظ الإعدادات"
+  },
+  "progress": "تقدم الإعداد",
+  "org": {
+    "departmentNameRequired": "اسم القسم مطلوب"
+  }
+}

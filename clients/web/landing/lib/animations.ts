@@ -21,23 +21,6 @@ export const SPRING_SNAPPY: Transition = {
   mass: 0.7,
 };
 
-// Masked rise - text climbs out of an overflow-hidden clip, the way Apple
-// reveals headlines. Pair with a wrapper that has overflow: hidden.
-export const maskRise: Variants = {
-  hidden: { y: '110%' },
-  visible: {
-    y: '0%',
-    transition: { duration: 0.9, ease: EASE_OUT_EXPO },
-  },
-};
-
-export const maskStagger: Variants = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.07, delayChildren: 0.1 },
-  },
-};
-
 export const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 30 },
   visible: {

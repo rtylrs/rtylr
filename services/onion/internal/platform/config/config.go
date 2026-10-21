@@ -19,11 +19,11 @@ const (
 )
 
 const (
-	// OpenCode Zen is an optional final fallback. The endpoint and model stay
+	// OpenCode Go is an optional final fallback. The endpoint and model stay
 	// product-controlled, like the other OpenAI-compatible providers.
 	OpenCodeAPIKeyEnvVar = "OPENCODE_API_KEY"
-	OpenCodeBaseURL      = "https://opencode.ai/zen/v1"
-	OpenCodeModel        = "minimax-m2.7"
+	OpenCodeBaseURL      = "https://opencode.ai/zen/go/v1"
+	OpenCodeModel        = "deepseek-v4.1-flash"
 )
 
 const (
@@ -33,7 +33,7 @@ const (
 )
 
 const (
-	// DeepSeek is the primary LLM provider. Only the API key is an env secret
+	// Direct DeepSeek is an optional fallback provider. Only the API key is an env secret
 	// (set DEEPSEEK_API_KEY on AWS / in .env); the base URL and model are fixed
 	// here on purpose. The product chooses the model internally, users never do.
 	// #nosec G101 -- This is an environment variable name, not a secret value.
@@ -47,17 +47,11 @@ const (
 )
 
 const (
-	// NVIDIA NIM is an OpenAI-compatible provider (hosted catalog or self-hosted).
-	// Only the API key is an env secret (NVIDIA_NIM_API_KEY); base URL + model are
-	// fixed here. Point NvidiaNIMBaseURL at a self-hosted NIM if/when we run one.
-	// #nosec G101 -- This is an environment variable name, not a secret value.
-	NvidiaNIMAPIKeyEnvVar = "NVIDIA_NIM_API_KEY"
-	NvidiaNIMBaseURL      = "https://integrate.api.nvidia.com/v1"
-	NvidiaNIMModel        = "meta/llama-3.1-8b-instruct"
-
 	// AIPrimaryProviderEnvVar optionally forces which configured provider is
-	// primary ("deepseek" | "nvidia"). Empty = use the default priority order.
+	// primary ("deepseek", "gemini", "openai", "opencode"). Empty uses default order.
 	AIPrimaryProviderEnvVar = "AI_PRIMARY_PROVIDER"
+	SearXNGURLEnvVar        = "SEARXNG_URL"
+	BraveSearchAPIKeyEnvVar = "BRAVE_SEARCH_API_KEY"
 )
 
 const (
@@ -75,32 +69,28 @@ const (
 )
 
 type AppConfig struct {
-	RunMode                string
-	DatabaseURL            string
-	DBHost                 string
-	DBPort                 string
-	DBUser                 string
-	DBPass                 string
-	DBName                 string
-	JWTSecret              string
-	JWTDuration            time.Duration
-	ResendKey              string
-	LeadNotifyEmails       []string
-	NewsletterNotifyEmails []string
-	ResendAudienceID       string
-	ResendAudienceKey      string
-	AppEnv                 string
-	AppRelease             string
-	DeploymentMode         string
-	Port                   string
-	Hostname               string
-	AuthAppURL             string
-	GoogleOAuthClientID    string
-
-	// WorkOS
-	WorkOSAPIKey      string
-	WorkOSClientID    string
-	WorkOSRedirectURI string
+	RunMode                 string
+	DatabaseURL             string
+	DBHost                  string
+	DBPort                  string
+	DBUser                  string
+	DBPass                  string
+	DBName                  string
+	JWTSecret               string
+	JWTDuration             time.Duration
+	ResendKey               string
+	LeadNotifyEmails        []string
+	NewsletterNotifyEmails  []string
+	ResendAudienceID        string
+	ResendAudienceKey       string
+	AppEnv                  string
+	AppRelease              string
+	Port                    string
+	Hostname                string
+	AuthAppURL              string
+	GoogleOAuthClientID     string
+	GoogleOAuthClientSecret string
+	GoogleOAuthRedirectURI  string
 
 	// DB Connection Pool configuration
 	DBMaxOpenConns    int
@@ -108,17 +98,18 @@ type AppConfig struct {
 	DBConnMaxLifetime time.Duration
 	DBConnMaxIdleTime time.Duration
 
-	// OpenAI, Gemini and OpenCode Zen (fallback providers)
+	// OpenAI, Gemini and OpenCode Go (fallback providers)
 	OpenAIAPIKey   string
 	OpenAIOrgID    string
 	OpenAIBaseURL  string
 	GeminiAPIKey   string
 	OpenCodeAPIKey string
 
-	// DeepSeek + NVIDIA NIM (primary providers) — only the keys are configurable.
+	// AI provider secrets and preferred provider.
 	DeepSeekAPIKey    string
-	NvidiaNIMAPIKey   string
 	AIPrimaryProvider string
+	SearXNGURL        string
+	BraveSearchAPIKey string
 
 	// FormMappingCheckpointPath points the Caret document-to-form mapping tool at
 	// a form-mapping classifier checkpoint (directory, .safetensors, or .json).
@@ -187,7 +178,10 @@ type AppConfig struct {
 	FlociBucket      string
 
 	// CDN runmode (cmd/upload) — media/CDN service settings.
-	CDNBaseURL         string // public base for generated file URLs
+	CDNBaseURL string // public base for generated file URLs
+	// PublicAPIURL is this API's public origin, for links that leave the
+	// app, such as the unsubscribe link in a marketing email.
+	PublicAPIURL       string
 	CDNMaxUploadBytes  int64  // hard ceiling on a single upload
 	CDNMediaEnginePath string // path to the C++ media-engine binary
 	CDNAPIKey          string // bearer key for write endpoints; empty disables auth
@@ -199,20 +193,6 @@ type AppConfig struct {
 	CDNModerationEnabled    bool
 	CDNModerationProvider   string // "openai" | "local"
 	CDNModerationFailClosed bool   // reject uploads when the moderation check errors
-
-	// License runmode / self-hosting controls.
-	LicenseKey               string
-	LicenseFile              string
-	LicensePublicKey         string
-	LicenseSigningPrivateKey string
-	LicenseIssuer            string
-	LicenseGracePeriod       time.Duration
-	LicenseClockStateFile    string
-	// LicenseAuthorityURL is the hosted license authority a self-host backend
-	// validates RTYLR_LICENSE_KEY against. Defaults to the Voxire authority and
-	// is intentionally NOT a documented customer knob (override only for our own
-	// testing via LICENSE_AUTHORITY_URL).
-	LicenseAuthorityURL string
 
 	// Internal Auth
 	InternalToken string

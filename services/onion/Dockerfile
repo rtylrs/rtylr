@@ -4,7 +4,7 @@
 #
 # Build from the repository root so the service and the contract module are both
 # in context: docker build -f services/onion/Dockerfile .
-FROM --platform=$BUILDPLATFORM golang:1.26-alpine3.22 AS builder
+FROM --platform=$BUILDPLATFORM golang:1.27-alpine3.24 AS builder
 
 WORKDIR /src
 
@@ -27,7 +27,7 @@ RUN set -eux; \
 # Layer 3: generated contract output is gitignored, so produce it from the
 # pinned onek release before Go compiles against it.
 COPY voxie/ ./voxie/
-RUN GOBIN=/usr/local/bin go install github.com/1homsi/onekit/cmd/onek@v0.19.1 && \
+RUN GOBIN=/usr/local/bin go install github.com/1homsi/onekit/cmd/onek@v0.34.1 && \
     cd /src/voxie && onek build .
 
 # Layer 4: the service, plus the SQL schemas and email templates it embeds.
@@ -35,7 +35,7 @@ COPY services/onion/ ./services/onion/
 WORKDIR /src/services/onion
 RUN set -eux; \
     test -f /src/voxie/go.mod; \
-    test -f ./internal/platform/database/schemas/hr_core/schema.sql; \
+    test -f ./internal/modules/hr/sql/schema/hr_core/schema.sql; \
     test -d ./internal/platform/email/templates
 
 RUN go mod download && go mod verify
@@ -45,8 +45,6 @@ RUN bash scripts/generate_sqlc.sh
 ARG VERSION=dev
 ARG COMMIT=unknown
 ARG BUILD_TIME=unknown
-ARG LICENSE_VENDOR_PUBLIC_KEY
-ARG DEPLOYMENT_MODE=hosted
 # TARGETARCH is provided by buildx; defaults to the build arch for plain builds
 # so the hosted (amd64) path is unchanged while multi-arch publishes work.
 ARG TARGETARCH
@@ -56,23 +54,55 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} \
     -ldflags="-s -w \
       -X 'github.com/voxire/onion/internal/platform/server/http.Version=${VERSION}' \
       -X 'github.com/voxire/onion/internal/platform/server/http.Commit=${COMMIT}' \
-      -X 'github.com/voxire/onion/internal/platform/server/http.BuildTime=${BUILD_TIME}' \
-      -X 'github.com/voxire/onion/internal/platform/license.VendorPublicKey=${LICENSE_VENDOR_PUBLIC_KEY}' \
-      -X 'github.com/voxire/onion/internal/platform/license.BuildDeploymentMode=${DEPLOYMENT_MODE}'" \
+      -X 'github.com/voxire/onion/internal/platform/server/http.BuildTime=${BUILD_TIME}'" \
     -o /app/api ./cmd/api
 
-# Final stage — minimal image
-FROM alpine:3.22
+# Build the image/video transformation executable used by the API's upload
+# routes. Keep it in the same Debian family as the runtime shared libraries.
+FROM debian:bookworm-slim AS media-builder
 
-RUN apk add --no-cache ca-certificates tzdata
-RUN addgroup -S app && adduser -S -G app app
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    cmake \
+    build-essential \
+    pkg-config \
+    libvips-dev \
+    ffmpeg \
+    libavcodec-dev \
+    libavformat-dev \
+    libavutil-dev \
+    libswscale-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+COPY services/onion/media-engine/CMakeLists.txt ./
+COPY services/onion/media-engine/src/ ./src/
+COPY services/onion/media-engine/include/ ./include/
+RUN cmake -B build -DCMAKE_BUILD_TYPE=Release \
+        -DMEDIA_ENGINE_BENCH=OFF \
+        -DMEDIA_ENGINE_TESTS=OFF && \
+    cmake --build build --target media-engine --parallel "$(nproc)"
+
+# Final stage includes the media runtime libraries used by the API.
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    tzdata \
+    wget \
+    libvips42 \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system app \
+    && useradd --system --gid app --no-create-home app
 
 WORKDIR /app
 
 COPY --from=builder /app/api /app/api
+COPY --from=media-builder --chown=app:app /build/build/media-engine /app/media-engine/build/media-engine
 COPY --chown=app:app services/onion/internal/ai/classifier/models/cua-s1-forms /app/models/cua-s1-forms
 
 ENV FORM_MAPPING_CHECKPOINT_PATH=/app/models/cua-s1-forms
+ENV MEDIA_ENGINE_PATH=/app/media-engine/build/media-engine
 
 EXPOSE 9999
 

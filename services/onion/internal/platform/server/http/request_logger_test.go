@@ -2,7 +2,7 @@ package http
 
 import (
 	"context"
-	"encoding/json"
+	"github.com/voxire/onion/internal/platform/observability"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -35,8 +35,8 @@ func TestRequestLoggerPreservesJSONBodyWithCharset(t *testing.T) {
 	}
 }
 
-func TestRequestLoggerPreservesLargeJSONBodyAfterPreviewLimit(t *testing.T) {
-	body := `{"payload":"` + strings.Repeat("x", maxLoggedRequestBodyBytes*2) + `"}`
+func TestRequestLoggerPreservesLargeJSONBody(t *testing.T) {
+	body := `{"payload":"` + strings.Repeat("x", 16<<10) + `"}`
 	var seenBytes int
 
 	handler := RequestLoggerMiddleware(context.Background())(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -59,55 +59,8 @@ func TestRequestLoggerPreservesLargeJSONBodyAfterPreviewLimit(t *testing.T) {
 	}
 }
 
-func TestSanitizeJSONTruncatesLargePayloads(t *testing.T) {
-	large := `{"items":[` + strings.Repeat(`"x",`, 500) + `"end"]}`
-	got := sanitizeJSON(large)
-	if len(got) > maxLoggedBodyPreviewBytes {
-		t.Fatalf("sanitized body length %d exceeds preview cap %d", len(got), maxLoggedBodyPreviewBytes)
-	}
-	if !strings.HasSuffix(got, "...") {
-		t.Fatalf("expected truncated preview suffix, got %q", got)
-	}
-}
-
-func TestSanitizeJSONRedactsSensitiveFieldVariants(t *testing.T) {
-	got := sanitizeJSON(`{
-		"password_hash":"hash",
-		"access_token":"token",
-		"profile":{"api_key":"key","name":"Voxire"}
-	}`)
-
-	var decoded map[string]any
-	if err := json.Unmarshal([]byte(got), &decoded); err != nil {
-		t.Fatalf("sanitized body should still be JSON: %v", err)
-	}
-	if decoded["password_hash"] != "[REDACTED]" {
-		t.Fatalf("password_hash was not redacted: %s", got)
-	}
-	if decoded["access_token"] != "[REDACTED]" {
-		t.Fatalf("access_token was not redacted: %s", got)
-	}
-	profile, ok := decoded["profile"].(map[string]any)
-	if !ok {
-		t.Fatalf("profile is missing or invalid: %s", got)
-	}
-	if profile["api_key"] != "[REDACTED]" {
-		t.Fatalf("nested api_key was not redacted: %s", got)
-	}
-	if profile["name"] != "Voxire" {
-		t.Fatalf("sanitizeJSON removed non-sensitive value: %s", got)
-	}
-}
-
-func TestSanitizeJSONDoesNotEchoMalformedSensitiveBody(t *testing.T) {
-	got := sanitizeJSON(`{"password":"secret"`)
-	if strings.Contains(got, "secret") || strings.Contains(got, "password") {
-		t.Fatalf("malformed body leaked sensitive content: %q", got)
-	}
-}
-
 func TestSanitizeMapRedactsCredentialFieldVariants(t *testing.T) {
-	for _, key := range []string{"pin", "pin_code", "cvv", "cvc", "ssn", "tax_id", "national_id", "otp", "card_number", "expiry", "passwd", "pwd", "x-api-key", "sessionid"} {
+	for _, key := range []string{"pin", "pin_code", "cvv", "cvc", "ssn", "tax_id", "national_id", "otp", "card_number", "expiry", "passwd", "pwd", "x-api-key", "sessionid", "url", "source_uri", "code", "ticket", "sig"} {
 		t.Run(key, func(t *testing.T) {
 			got := sanitizeMap(map[string][]string{key: {"secret"}})
 			if got[key][0] != "[REDACTED]" {
@@ -160,9 +113,14 @@ func TestResponseWriterPreservesFlusher(t *testing.T) {
 	}
 }
 
-func TestRequestURLWithoutQuery(t *testing.T) {
+func TestRequestRouteTemplateDoesNotExposeValuesOrQuery(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /login", func(http.ResponseWriter, *http.Request) {})
+	observability.SetRouteMux(mux)
+	t.Cleanup(func() { observability.SetRouteMux(nil) })
+
 	req := httptest.NewRequest(http.MethodGet, "/login?token=secret", nil)
-	if got := requestURLWithoutQuery(req); got != "/login" {
-		t.Fatalf("requestURLWithoutQuery = %q, want /login", got)
+	if got := requestRouteTemplate(req); got != "/login" {
+		t.Fatalf("requestRouteTemplate = %q, want /login", got)
 	}
 }

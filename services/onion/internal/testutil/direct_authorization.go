@@ -50,6 +50,19 @@ func DirectAuthorizationDB(ctx context.Context) *sql.DB {
 	return db
 }
 
+func WithDirectAuthorizationDB(t *testing.T, run func(context.Context, *sql.DB)) {
+	t.Helper()
+	if os.Getenv("DIRECT_AUTHORIZATION_EVIDENCE") != "1" {
+		t.Skip("direct authorization evidence runs through scripts/run-authorization-evidence.sh")
+	}
+	db := openDirectAuthorizationProbeDB(t)
+	if db == nil {
+		t.Fatal("direct authorization probe database is nil")
+	}
+	ctx := context.WithValue(context.Background(), directAuthorizationProbeContextKey{}, db)
+	run(ctx, db)
+}
+
 // RunDirectAuthorizationCases runs each operation against the disposable
 // database configured by the test environment. Every case must return the
 // operation response so the allowed and denied paths can assert both output
@@ -57,15 +70,18 @@ func DirectAuthorizationDB(ctx context.Context) *sql.DB {
 func RunDirectAuthorizationCases(t *testing.T, cases []DirectAuthorizationCase) {
 	t.Helper()
 	if os.Getenv("DIRECT_AUTHORIZATION_EVIDENCE") != "1" {
-		t.Skip("direct authorization evidence runs through scripts/run-role-access-control-v2-direct-coverage.sh")
+		t.Skip("direct authorization evidence runs through scripts/run-authorization-evidence.sh")
 	}
 	db := openDirectAuthorizationProbeDB(t)
 	if db == nil {
 		t.Fatal("direct authorization probe database is nil")
 	}
 
+	// Complete every denial check before invoking an allowed operation. Some
+	// allowed team operations enqueue billing updates asynchronously; keeping
+	// them out of the denial phase makes the database mutation snapshots stable.
 	for _, tc := range cases {
-		t.Run(tc.Name, func(t *testing.T) {
+		t.Run(tc.Name+"/denied", func(t *testing.T) {
 			caseCtx := context.WithValue(context.Background(), directAuthorizationProbeContextKey{}, db)
 			deniedPermissions := append([]string{}, tc.Extra...)
 			deniedCtx := authpkg.WithAuthUser(caseCtx, directAuthorizationUser(tc.App, tc.Role, deniedPermissions...))
@@ -104,7 +120,10 @@ func RunDirectAuthorizationCases(t *testing.T, cases []DirectAuthorizationCase) 
 				{name: "deactivated user", user: directAuthorizationUserWithProvisioningState(tc.App, tc.Role, authorization.ProvisioningRevoked, allowedPermissions...)},
 				{name: "terminated employee", user: directAuthorizationUserWithProvisioningState(tc.App, tc.Role, authorization.ProvisioningRevoked, allowedPermissions...)},
 			}
-			if tc.App == authorization.AppPOS || tc.App == authorization.AppHR || tc.App == authorization.AppFlow {
+			// Only POS and Flow model resource scopes, so only they get a
+			// "resource scope denial" variant. Every other app is bounded by the
+			// business_id predicate instead, which the wrong-tenant variant proves.
+			if tc.App == authorization.AppPOS || tc.App == authorization.AppFlow {
 				lifecycleVariants = append([]struct {
 					name string
 					user *authpkg.AuthUser
@@ -133,7 +152,14 @@ func RunDirectAuthorizationCases(t *testing.T, cases []DirectAuthorizationCase) 
 					runDeniedDirectAuthorizationVariant(authpkg.WithAuthUser(caseCtx, directAuthorizationUserWithID(tc.App, "member", tc.DelegationUserID, allowedPermissions...)), t, db, tc.Call, "delegation ceiling", tc.Permission)
 				})
 			}
+		})
+	}
 
+	for _, tc := range cases {
+		t.Run(tc.Name+"/allowed", func(t *testing.T) {
+			caseCtx := context.WithValue(context.Background(), directAuthorizationProbeContextKey{}, db)
+			allowedPermissions := append([]string{}, tc.Extra...)
+			allowedPermissions = append(allowedPermissions, tc.Permission)
 			allowedCtx := authpkg.WithAuthUser(caseCtx, directAuthorizationUser(tc.App, tc.Role, allowedPermissions...))
 			allowedResponse, allowedErr := callDirectAuthorizationCase(allowedCtx, tc.Call)
 			if got := directAuthorizationStatus(allowedErr); got == 403 {
@@ -188,36 +214,35 @@ func directAuthorizationUserWithID(app authorization.AppID, role string, userID 
 	if role == "" {
 		role = "member"
 	}
-	user := &authpkg.AuthUser{UserID: userID, BusinessID: directAuthorizationBusinessID, Role: role}
+	user := &authpkg.AuthUser{UserID: userID, BusinessID: directAuthorizationBusinessID}
 	if app == authorization.AppHub {
 		user.EffectiveAccess = &authorization.EffectiveAccess{
 			BusinessID:           directAuthorizationBusinessID,
-			DashRole:             role,
 			IsOwner:              role == "owner",
 			IsAdmin:              role == "admin",
 			AuthorizationVersion: 1,
 			DashPermissions:      permissions,
 			Apps: []authorization.EffectiveAppAccess{{
-				AppID:       authorization.AppHub,
-				Licensed:    true,
-				HasAccess:   true,
-				Permissions: permissions,
+				AppID:            authorization.AppHub,
+				Licensed:         true,
+				HasAccess:        true,
+				Permissions:      permissions,
+				PermissionScopes: permissionScopes(permissions, directAuthorizationScopes(authorization.AppHub)),
 			}},
 		}
 		return user
 	}
 	user.EffectiveAccess = &authorization.EffectiveAccess{
 		BusinessID:           directAuthorizationBusinessID,
-		DashRole:             role,
 		IsOwner:              role == "owner",
 		IsAdmin:              role == "admin",
 		AuthorizationVersion: 1,
 		Apps: []authorization.EffectiveAppAccess{{
-			AppID:       app,
-			Licensed:    true,
-			HasAccess:   true,
-			Permissions: permissions,
-			Scopes:      directAuthorizationScopes(app),
+			AppID:            app,
+			Licensed:         true,
+			HasAccess:        true,
+			Permissions:      permissions,
+			PermissionScopes: permissionScopes(permissions, directAuthorizationScopes(app)),
 		}},
 	}
 	return user
@@ -226,7 +251,7 @@ func directAuthorizationUserWithID(app authorization.AppID, role string, userID 
 func directAuthorizationUserWithNoScope(app authorization.AppID, role string, permissions ...string) *authpkg.AuthUser {
 	user := directAuthorizationUser(app, role, permissions...)
 	if user.EffectiveAccess != nil && len(user.EffectiveAccess.Apps) > 0 {
-		user.EffectiveAccess.Apps[0].Scopes = nil
+		user.EffectiveAccess.Apps[0].PermissionScopes = map[string][]authorization.Scope{}
 	}
 	return user
 }
@@ -237,18 +262,31 @@ func directAuthorizationUserWithNoPermission(app authorization.AppID, role strin
 		user.EffectiveAccess.Apps[0].Licensed = true
 		user.EffectiveAccess.Apps[0].HasAccess = true
 		user.EffectiveAccess.Apps[0].Permissions = nil
+		user.EffectiveAccess.Apps[0].PermissionScopes = map[string][]authorization.Scope{}
 	}
 	return user
 }
 
+func permissionScopes(permissions []string, scopes []authorization.Scope) map[string][]authorization.Scope {
+	result := make(map[string][]authorization.Scope, len(permissions))
+	for _, permission := range permissions {
+		result[permission] = append([]authorization.Scope{}, scopes...)
+	}
+	return result
+}
+
+// directAuthorizationScopes returns scopes the assignment table can actually
+// store. chk_auth_assignment_scope_type permits only pos_location and
+// flow_project; the earlier `location`/`terminal`/`project`/`workspace`/
+// `department` values here could never be persisted, so this suite was
+// exercising states the product cannot produce. Apps that model no scope
+// return none, which is what makes them tenant-wide.
 func directAuthorizationScopes(app authorization.AppID) []authorization.Scope {
 	switch app {
 	case authorization.AppPOS:
-		return []authorization.Scope{{Type: "location", ID: "3001"}, {Type: "terminal", ID: "1"}}
-	case authorization.AppHR:
-		return []authorization.Scope{{Type: "department", ID: "4001"}, {Type: "location", ID: "3001"}}
+		return []authorization.Scope{{Type: "pos_location", ID: "3001"}}
 	case authorization.AppFlow:
-		return []authorization.Scope{{Type: "project", ID: "1"}, {Type: "workspace", ID: "1"}}
+		return []authorization.Scope{{Type: "flow_project", ID: "1"}}
 	default:
 		return []authorization.Scope{}
 	}

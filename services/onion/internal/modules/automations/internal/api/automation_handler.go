@@ -4,11 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
 	"time"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/automations/internal/application"
 	"github.com/voxire/onion/internal/modules/automations/internal/domain"
@@ -165,7 +164,7 @@ func (h *CreateAutomationHandler) Validate(_ context.Context, req *CreateAutomat
 	if req.TriggerType == "" {
 		return onekiterrors.New(http.StatusBadRequest, "Trigger type is required")
 	}
-	if err := domain.ValidateAutomationDefinition(req.TriggerType, req.Actions); err != nil {
+	if err := application.ValidateAutomationDefinition(req.TriggerType, req.Actions); err != nil {
 		return onekiterrors.New(http.StatusBadRequest, err.Error())
 	}
 
@@ -186,7 +185,7 @@ func (h *CreateAutomationHandler) Serve(ctx context.Context, req *CreateAutomati
 		triggerConfig = []byte("{}")
 	}
 
-	actions, actionErr := domain.NormalizeAutomationActions(req.Actions)
+	actions, actionErr := application.NormalizeAutomationActions(req.Actions)
 	if actionErr != nil {
 		return CreateAutomationResponse{}, onekiterrors.New(http.StatusBadRequest, actionErr.Error())
 	}
@@ -238,7 +237,7 @@ func (h *UpdateAutomationHandler) Validate(_ context.Context, req *UpdateAutomat
 	if req.TriggerType == "" {
 		return onekiterrors.New(http.StatusBadRequest, "Trigger type is required")
 	}
-	if err := domain.ValidateAutomationDefinition(req.TriggerType, req.Actions); err != nil {
+	if err := application.ValidateAutomationDefinition(req.TriggerType, req.Actions); err != nil {
 		return onekiterrors.New(http.StatusBadRequest, err.Error())
 	}
 
@@ -254,7 +253,7 @@ func (h *UpdateAutomationHandler) Serve(ctx context.Context, req *UpdateAutomati
 		return UpdateAutomationResponse{}, err
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil || id <= 0 {
 		return UpdateAutomationResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid automation ID")
@@ -265,7 +264,7 @@ func (h *UpdateAutomationHandler) Serve(ctx context.Context, req *UpdateAutomati
 		triggerConfig = []byte("{}")
 	}
 
-	actions, actionErr := domain.NormalizeAutomationActions(req.Actions)
+	actions, actionErr := application.NormalizeAutomationActions(req.Actions)
 	if actionErr != nil {
 		return UpdateAutomationResponse{}, onekiterrors.New(http.StatusBadRequest, actionErr.Error())
 	}
@@ -317,7 +316,7 @@ func (h *DeleteAutomationHandler) Serve(ctx context.Context, _ *DeleteAutomation
 		return DeleteAutomationResponse{}, err
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil || id <= 0 {
 		return DeleteAutomationResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid automation ID")

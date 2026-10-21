@@ -89,8 +89,8 @@ func Default() (*Client, error) {
 }
 
 type storageSettings struct {
-	// endpoint is set for any S3-compatible store (Floci/local dev or a
-	// self-host customer's own). Empty means real AWS S3.
+	// endpoint is set for any S3-compatible store (Floci/local dev or an
+	// operator-provided endpoint). Empty means real AWS S3.
 	endpoint       string
 	region         string
 	bucket         string

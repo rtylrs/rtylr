@@ -1,0 +1,44 @@
+{
+  "dashboard": "Dashboard",
+  "customers": "Customers",
+  "loyalty": "Loyalty",
+  "campaigns": "Campaigns",
+  "segments": "Segments",
+  "automations": "Automations",
+  "templates": "Templates",
+  "feedback": "Feedback",
+  "settings": "Settings",
+  "leads": "Leads",
+  "contracts": "Contracts",
+  "newCustomer": "New customer",
+  "importCustomers": "Import customers",
+  "loyaltyMembers": "Loyalty members",
+  "rewardsCatalog": "Rewards catalog",
+  "loyaltyTiers": "Loyalty tiers",
+  "newEmailCampaign": "New email campaign",
+  "newSmsCampaign": "New SMS campaign",
+  "newSegment": "New segment",
+  "newAutomation": "New automation",
+  "appName": "CRM",
+  "groups": {
+    "navigate": "Navigate",
+    "create": "Create",
+    "customers": "Customers",
+    "loyalty": "Loyalty"
+  },
+  "titles": {
+    "feedback": "Feedback & NPS"
+  },
+  "actions": {
+    "importCustomersCsv": "Import customers from CSV",
+    "loyaltyRewardsCatalog": "Loyalty rewards catalog"
+  },
+  "deals": "Deals",
+  "tasks": "Tasks",
+  "sections": {
+    "sales": "Sales",
+    "customers": "Customers",
+    "marketing": "Marketing",
+    "retention": "Retention"
+  }
+}

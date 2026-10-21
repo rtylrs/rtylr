@@ -19,7 +19,7 @@ func (s *Service) GetUtilization(ctx context.Context, businessID int64, from, to
 	if err != nil {
 		return UtilizationPayload{}, err
 	}
-	out, err := cacher.Of[UtilizationPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (UtilizationPayload, error) {
+	out, err := cacher.Of[UtilizationPayload]().GetOrComputeSingle(ctx, key+"|domain=v2", func(ctx context.Context) (UtilizationPayload, error) {
 		row, rerr := s.repo.GetUtilization(ctx, businessID, from, to)
 		if rerr != nil {
 			return UtilizationPayload{}, rerr

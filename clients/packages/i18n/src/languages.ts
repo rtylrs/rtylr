@@ -49,8 +49,19 @@ export const SUPPORTED_LANGUAGES: LanguageDefinition[] = [
 
 export const RTL_LANGUAGES = new Set(SUPPORTED_LANGUAGES.filter((l) => l.rtl).map((l) => l.code));
 
+/**
+ * Whether a BCP-47 tag is written right-to-left.
+ *
+ * Matching is on the primary subtag, so a regional tag inherits its base
+ * language's direction. An exact match alone answered `false` for `ar-EG` and
+ * `ar-SA`, which lays an Arabic page out left-to-right; the language cookie is
+ * shared across apps on one domain, so a regional tag from any of them reaches
+ * here. Script subtags are not resolved, so `ar-Latn` is reported as RTL.
+ */
 export function isRTL(lang: string): boolean {
-  return RTL_LANGUAGES.has(lang);
+  const tag = lang.trim().toLowerCase().replace(/_/g, '-');
+  if (RTL_LANGUAGES.has(tag)) return true;
+  return RTL_LANGUAGES.has(tag.split('-')[0]!);
 }
 
 export function getLanguage(code: string): LanguageDefinition | undefined {

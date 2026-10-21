@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"strconv"
 	"strings"
@@ -63,34 +64,35 @@ func LoadAndValidate() (*AppConfig, error) {
 			dbConnMaxIdleTime = parsed
 		}
 	}
+	googleRedirectURI := strings.TrimSpace(os.Getenv("GOOGLE_OAUTH_REDIRECT_URI"))
+	if googleRedirectURI == "" {
+		authURL := strings.TrimRight(envOrDefault("AUTH_URL", AuthAppURL), "/")
+		googleRedirectURI = authURL + "/callback"
+	}
 
 	cfg := &AppConfig{
-		RunMode:                envOrDefault("RUN_MODE", "api"),
-		DatabaseURL:            os.Getenv("DATABASE_URL"),
-		DBHost:                 os.Getenv("DB_HOST"),
-		DBPort:                 os.Getenv("DB_PORT"),
-		DBUser:                 os.Getenv("DB_USER"),
-		DBPass:                 os.Getenv("DB_PASSWORD"),
-		DBName:                 os.Getenv("DB_NAME"),
-		JWTSecret:              os.Getenv("JWT_SECRET"),
-		JWTDuration:            jwtDuration,
-		ResendKey:              os.Getenv("RESEND_API_KEY"),
-		LeadNotifyEmails:       ParseEmailList(os.Getenv("LEAD_NOTIFY_EMAILS"), DefaultLeadNotifyEmails),
-		NewsletterNotifyEmails: ParseEmailList(os.Getenv("NEWSLETTER_NOTIFY_EMAILS"), DefaultNewsletterNotifyEmails),
-		ResendAudienceID:       strings.TrimSpace(os.Getenv("RESEND_AUDIENCE_ID")),
-		ResendAudienceKey:      strings.TrimSpace(os.Getenv("RESEND_AUDIENCE_KEY")),
-		AppEnv:                 os.Getenv("APP_ENV"),
-		AppRelease:             os.Getenv("APP_RELEASE"),
-		DeploymentMode:         envOrDefault("DEPLOYMENT_MODE", "hosted"),
-		Port:                   os.Getenv("PORT"),
-		Hostname:               os.Getenv("HOSTNAME"),
-		AuthAppURL:             envFirst("AUTH_URL", "AUTH_APP_URL"),
-		GoogleOAuthClientID:    os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
-
-		// WorkOS
-		WorkOSAPIKey:      os.Getenv("WORKOS_API_KEY"),
-		WorkOSClientID:    os.Getenv("WORKOS_CLIENT_ID"),
-		WorkOSRedirectURI: os.Getenv("WORKOS_REDIRECT_URI"),
+		RunMode:                 envOrDefault("RUN_MODE", "api"),
+		DatabaseURL:             os.Getenv("DATABASE_URL"),
+		DBHost:                  os.Getenv("DB_HOST"),
+		DBPort:                  os.Getenv("DB_PORT"),
+		DBUser:                  os.Getenv("DB_USER"),
+		DBPass:                  os.Getenv("DB_PASSWORD"),
+		DBName:                  os.Getenv("DB_NAME"),
+		JWTSecret:               os.Getenv("JWT_SECRET"),
+		JWTDuration:             jwtDuration,
+		ResendKey:               os.Getenv("RESEND_API_KEY"),
+		LeadNotifyEmails:        ParseEmailList(os.Getenv("LEAD_NOTIFY_EMAILS"), DefaultLeadNotifyEmails),
+		NewsletterNotifyEmails:  ParseEmailList(os.Getenv("NEWSLETTER_NOTIFY_EMAILS"), DefaultNewsletterNotifyEmails),
+		ResendAudienceID:        strings.TrimSpace(os.Getenv("RESEND_AUDIENCE_ID")),
+		ResendAudienceKey:       strings.TrimSpace(os.Getenv("RESEND_AUDIENCE_KEY")),
+		AppEnv:                  os.Getenv("APP_ENV"),
+		AppRelease:              os.Getenv("APP_RELEASE"),
+		Port:                    os.Getenv("PORT"),
+		Hostname:                os.Getenv("HOSTNAME"),
+		AuthAppURL:              envFirst("AUTH_URL", "AUTH_APP_URL"),
+		GoogleOAuthClientID:     os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
+		GoogleOAuthClientSecret: os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
+		GoogleOAuthRedirectURI:  googleRedirectURI,
 
 		DBMaxOpenConns:    dbMaxOpenConns,
 		DBMaxIdleConns:    dbMaxIdleConns,
@@ -104,10 +106,11 @@ func LoadAndValidate() (*AppConfig, error) {
 		GeminiAPIKey:   os.Getenv("GEMINI_API_KEY"),
 		OpenCodeAPIKey: strings.TrimSpace(os.Getenv(OpenCodeAPIKeyEnvVar)),
 
-		// DeepSeek + NVIDIA NIM
+		// AI provider preferences
 		DeepSeekAPIKey:    os.Getenv(DeepSeekAPIKeyEnvVar),
-		NvidiaNIMAPIKey:   os.Getenv(NvidiaNIMAPIKeyEnvVar),
 		AIPrimaryProvider: os.Getenv(AIPrimaryProviderEnvVar),
+		SearXNGURL:        strings.TrimSpace(os.Getenv(SearXNGURLEnvVar)),
+		BraveSearchAPIKey: strings.TrimSpace(os.Getenv(BraveSearchAPIKeyEnvVar)),
 
 		// Caret document-to-form mapping specialist (optional)
 		FormMappingCheckpointPath: strings.TrimSpace(os.Getenv("FORM_MAPPING_CHECKPOINT_PATH")),
@@ -169,10 +172,9 @@ func LoadAndValidate() (*AppConfig, error) {
 		FlociRegion:      os.Getenv("FLOCI_REGION"),
 		FlociBucket:      os.Getenv("FLOCI_BUCKET"),
 
-		// CDN runmode (cmd/upload). In self-host the public media base is the
-		// upload service (UPLOAD_URL); hosted falls back to CDN_BASE_URL / the
-		// cdn.voxire.com default (applied below).
+		// CDN public media base. UPLOAD_URL remains the deployment override.
 		CDNBaseURL:         envFirst("UPLOAD_URL", "CDN_BASE_URL"),
+		PublicAPIURL:       strings.TrimRight(envOrDefault("PUBLIC_API_URL", DefaultAPIURL), "/"),
 		CDNMaxUploadBytes:  int64(positiveEnvIntOrDefault("CDN_MAX_UPLOAD_MB", 100)) * 1024 * 1024,
 		CDNMediaEnginePath: envOrDefault("MEDIA_ENGINE_PATH", "./media-engine/build/media-engine"),
 		CDNAPIKey:          os.Getenv("CDN_API_KEY"),
@@ -180,19 +182,6 @@ func LoadAndValidate() (*AppConfig, error) {
 		CDNModerationEnabled:    !strings.EqualFold(strings.TrimSpace(os.Getenv("CDN_MODERATION_ENABLED")), "false"),
 		CDNModerationProvider:   strings.ToLower(envOrDefault("CDN_MODERATION_PROVIDER", "openai")),
 		CDNModerationFailClosed: strings.EqualFold(strings.TrimSpace(os.Getenv("CDN_MODERATION_FAIL_CLOSED")), "true"),
-
-		// License runmode / self-hosting controls. Self-host customers set the
-		// documented RTYLR_LICENSE_KEY; LICENSE_KEY stays as an internal alias.
-		LicenseKey:  envFirst("RTYLR_LICENSE_KEY", "LICENSE_KEY"),
-		LicenseFile: os.Getenv("LICENSE_FILE"),
-		// LicensePublicKey is retained for console compatibility. Verification
-		// uses the vendor key embedded in the released binary instead.
-		LicensePublicKey:         "",
-		LicenseSigningPrivateKey: os.Getenv("LICENSE_SIGNING_PRIVATE_KEY"),
-		LicenseIssuer:            envOrDefault("LICENSE_ISSUER", "voxire"),
-		LicenseGracePeriod:       envDurationOrDefault("LICENSE_GRACE_PERIOD", 7*24*time.Hour),
-		LicenseClockStateFile:    envOrDefault("LICENSE_CLOCK_STATE_FILE", "/var/lib/rtylr/license-clock.json"),
-		LicenseAuthorityURL:      envTrimmedOrDefault("LICENSE_AUTHORITY_URL", DefaultLicenseAuthorityURL),
 
 		// Internal Auth
 		InternalToken: os.Getenv("INTERNAL_TOKEN"),
@@ -223,20 +212,47 @@ func LoadAndValidate() (*AppConfig, error) {
 
 	var missing []string
 
-	// Validate critical environment variables. The license runmode is the
-	// only DB-less Onion service; every business-data runmode stays strict.
-	if cfg.RunMode != "license" {
-		if cfg.DatabaseURL == "" && (cfg.DBHost == "" || cfg.DBName == "" || cfg.DBUser == "") {
-			missing = append(missing, "DATABASE_URL (or DB_HOST, DB_NAME, DB_USER)")
-		}
-		if cfg.JWTSecret == "" {
-			missing = append(missing, "JWT_SECRET")
-		}
+	// Every Onion service uses the business database and signing identity.
+	if cfg.DatabaseURL == "" && (cfg.DBHost == "" || cfg.DBName == "" || cfg.DBUser == "") {
+		missing = append(missing, "DATABASE_URL (or DB_HOST, DB_NAME, DB_USER)")
+	}
+	if cfg.JWTSecret == "" {
+		missing = append(missing, "JWT_SECRET")
 	}
 	if len(missing) > 0 {
 		return nil, fmt.Errorf("missing critical environment variable(s): %s", strings.Join(missing, ", "))
 	}
 
 	GlobalConfig = cfg
+	assertAppEnvIsUnderstood(cfg.AppEnv)
 	return cfg, nil
+}
+
+// assertAppEnvIsUnderstood reports the resolved environment at boot.
+//
+// It warns rather than returning an error on purpose. APP_ENV now defaults to
+// production, so an unrecognised value is the safe direction and refusing to
+// start would turn a security fix into an outage for any deployment whose
+// label this build has not been taught. A loud, greppable line at boot is what
+// makes the default visible; silence is what let this class of bug survive.
+func assertAppEnvIsUnderstood(raw string) {
+	env := NormalizeAppEnv(raw)
+
+	switch {
+	case env == "":
+		slog.Warn("APP_ENV is not set; defaulting to production. " +
+			"Development-only endpoints, CORS origins and unauthenticated webhook handling are disabled. " +
+			"Set APP_ENV=development for a local machine.")
+	case isUnrecognizedEnv(env):
+		slog.Warn("APP_ENV is not a recognised environment; defaulting to production. "+
+			"Development-only endpoints, CORS origins and unauthenticated webhook handling are disabled. "+
+			"Known development values: dev, development, local, test.",
+			slog.String("app_env", raw))
+	case isNonProductionEnv(env):
+		slog.Info("APP_ENV resolved to a development environment; "+
+			"development-only endpoints and localhost CORS origins are enabled",
+			slog.String("app_env", env))
+	default:
+		slog.Info("APP_ENV resolved to production", slog.String("app_env", env))
+	}
 }

@@ -5,23 +5,23 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/voxire/onion/internal/modules/websitelead/internal/infrastructure"
+	"github.com/voxire/onion/internal/modules/websitelead/internal/domain"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 )
 
 // audienceRepo satisfies both repository and audienceRepository.
 type audienceRepo struct {
 	mockRepo
-	pending []infrastructure.PendingSubscriber
+	pending []domain.PendingSubscriber
 	synced  map[int64]string
 	failed  map[int64]string
 }
 
-func newAudienceRepo(pending ...infrastructure.PendingSubscriber) *audienceRepo {
+func newAudienceRepo(pending ...domain.PendingSubscriber) *audienceRepo {
 	return &audienceRepo{pending: pending, synced: map[int64]string{}, failed: map[int64]string{}}
 }
 
-func (r *audienceRepo) ListUnsyncedSubscribers(_ context.Context, maxAttempts, limit int) ([]infrastructure.PendingSubscriber, error) {
+func (r *audienceRepo) ListUnsyncedSubscribers(_ context.Context, maxAttempts, limit int) ([]domain.PendingSubscriber, error) {
 	if maxAttempts <= 0 || limit <= 0 {
 		return nil, errors.New("bad bounds")
 	}
@@ -48,7 +48,7 @@ func withAudienceSeam(t *testing.T, fn func(ctx context.Context, audienceID, ema
 func TestSyncResendAudience_NoAudienceConfiguredIsNoop(t *testing.T) {
 	calls := 0
 	withAudienceSeam(t, func(context.Context, string, string) (string, error) { calls++; return "c", nil })
-	repo := newAudienceRepo(infrastructure.PendingSubscriber{ID: 1, Email: "a@b.co"})
+	repo := newAudienceRepo(domain.PendingSubscriber{ID: 1, Email: "a@b.co"})
 	svc := &Service{repo: repo}
 	if err := svc.SyncResendAudience(context.Background()); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -69,9 +69,9 @@ func TestSyncResendAudience_MarksSyncedAndFailedPerRow(t *testing.T) {
 		return "contact_" + email, nil
 	})
 	repo := newAudienceRepo(
-		infrastructure.PendingSubscriber{ID: 1, Email: "one@example.com"},
-		infrastructure.PendingSubscriber{ID: 2, Email: "bad@example.com"},
-		infrastructure.PendingSubscriber{ID: 3, Email: "three@example.com"},
+		domain.PendingSubscriber{ID: 1, Email: "one@example.com"},
+		domain.PendingSubscriber{ID: 2, Email: "bad@example.com"},
+		domain.PendingSubscriber{ID: 3, Email: "three@example.com"},
 	)
 	svc := &Service{repo: repo, audienceID: "aud_1"}
 	if err := svc.SyncResendAudience(context.Background()); err != nil {
@@ -90,7 +90,7 @@ func TestSyncResendAudience_MarksSyncedAndFailedPerRow(t *testing.T) {
 
 func TestSyncResendAudience_DisabledProviderStopsWithoutBurningAttempts(t *testing.T) {
 	withAudienceSeam(t, func(context.Context, string, string) (string, error) { return "", emailPkg.ErrAudienceDisabled })
-	repo := newAudienceRepo(infrastructure.PendingSubscriber{ID: 1, Email: "one@example.com"})
+	repo := newAudienceRepo(domain.PendingSubscriber{ID: 1, Email: "one@example.com"})
 	svc := &Service{repo: repo, audienceID: "aud_1"}
 	err := svc.SyncResendAudience(context.Background())
 	if !errors.Is(err, emailPkg.ErrAudienceDisabled) {
@@ -98,6 +98,35 @@ func TestSyncResendAudience_DisabledProviderStopsWithoutBurningAttempts(t *testi
 	}
 	if len(repo.failed) != 0 {
 		t.Fatalf("a missing key must not count as a per-row failure, got %v", repo.failed)
+	}
+}
+
+func TestSyncResendAudience_SendOnlyKey401StopsWithoutBurningAttempts(t *testing.T) {
+	for _, authErr := range []error{
+		emailPkg.ErrAudienceUnauthorized,
+		errors.New("[ERROR]: This API key is restricted to only send emails"),
+		errors.New("[ERROR]: 401 Unauthorized"),
+	} {
+		calls := 0
+		withAudienceSeam(t, func(context.Context, string, string) (string, error) {
+			calls++
+			return "", authErr
+		})
+		repo := newAudienceRepo(
+			domain.PendingSubscriber{ID: 1, Email: "one@example.com"},
+			domain.PendingSubscriber{ID: 2, Email: "two@example.com"},
+		)
+		svc := &Service{repo: repo, audienceID: "aud_1"}
+		err := svc.SyncResendAudience(context.Background())
+		if err == nil {
+			t.Fatalf("expected error for %v, got nil", authErr)
+		}
+		if calls != 1 {
+			t.Fatalf("expected run to abort on first 401, got %d calls for %v", calls, authErr)
+		}
+		if len(repo.failed) != 0 {
+			t.Fatalf("a 401/send-only key must not burn row attempts, got %v for %v", repo.failed, authErr)
+		}
 	}
 }
 

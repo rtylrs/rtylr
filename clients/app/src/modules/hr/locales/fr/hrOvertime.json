@@ -1,0 +1,28 @@
+{
+  "title": "Heures supplémentaires",
+  "subtitle": "Suivre et gérer les demandes d'heures supplémentaires",
+  "employee": "Employé",
+  "newRequest": "Nouvelle pré-approbation",
+  "requestCreated": "Demande d'heures supplémentaires soumise",
+  "requestUpdated": "Demande d'heures supplémentaires mise à jour",
+  "planned": "planifié",
+  "actual": "réel",
+  "emptyTitle": "Aucune demande d'heures supplémentaires",
+  "emptyDescription": "Les demandes d'heures supplémentaires apparaîtront ici.",
+  "statuses": {
+    "all": "Toutes",
+    "pending": "En attente",
+    "approved": "Approuvée",
+    "rejected": "Rejetée",
+    "cancelled": "Annulée"
+  },
+  "form": {
+    "title": "Nouvelle demande d'heures supplémentaires",
+    "date": "Date",
+    "plannedMinutes": "Minutes supplémentaires prévues",
+    "minutesPlaceholder": "ex. 90",
+    "reason": "Motif",
+    "reasonPlaceholder": "Pourquoi les heures supplémentaires sont-elles nécessaires ?",
+    "submit": "Soumettre la demande"
+  }
+}

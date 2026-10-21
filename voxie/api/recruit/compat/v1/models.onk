@@ -2,6 +2,9 @@ package recruit.compat.v1
 
 message EmptyRequest {}
 
+/// Empty response for @http routes whose handler writes its own response.
+message EmptyResponse {}
+
 message JsonResponse {
   data: json @unwrap
 }
@@ -22,4 +25,13 @@ message BodyRequest {
 
 message IdQueryRequest {
   id: string @query("id")
+}
+
+message PathIdRequest {
+  id: string
+}
+
+message PathSourceIdRequest {
+  source: string
+  id: string
 }

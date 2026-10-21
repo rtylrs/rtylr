@@ -50,7 +50,6 @@ func TestAuthUserFromWebSocketRequest_Ticket(t *testing.T) {
 	ticket, err := IssueWebSocketTicket(context.Background(), &AuthUser{
 		UserID:         7,
 		BusinessID:     3,
-		Role:           "staff",
 		Platform:       "rtylr",
 		PlatformUserID: 42,
 		PlanID:         9,
@@ -66,7 +65,7 @@ func TestAuthUserFromWebSocketRequest_Ticket(t *testing.T) {
 	if err != nil {
 		t.Fatalf("AuthUserFromWebSocketRequest: %v", err)
 	}
-	if user.UserID != 7 || user.BusinessID != 3 || user.Role != "staff" {
+	if user.UserID != 7 || user.BusinessID != 3 {
 		t.Fatalf("unexpected auth user: %+v", user)
 	}
 	if user.Platform != "rtylr" || user.PlatformUserID != 42 || user.PlanID != 9 {
@@ -77,7 +76,7 @@ func TestAuthUserFromWebSocketRequest_Ticket(t *testing.T) {
 	}
 }
 
-func TestAuthUserFromWebSocketRequest_LegacyQueryTokenRejected(t *testing.T) {
+func TestAuthUserFromWebSocketRequest_QueryTokenRejected(t *testing.T) {
 	token := signedWebSocketToken(t, &webSocketClaims{UserID: 7})
 	req := wsRequest("/flow/ws?token=" + token)
 
@@ -87,7 +86,7 @@ func TestAuthUserFromWebSocketRequest_LegacyQueryTokenRejected(t *testing.T) {
 	}
 }
 
-func TestAuthUserFromWebSocketRequest_NonFlowLegacyQueryTokenRejected(t *testing.T) {
+func TestAuthUserFromWebSocketRequest_NonFlowQueryTokenRejected(t *testing.T) {
 	for _, path := range []string{"/dash/ws", "/pos/ws"} {
 		t.Run(path, func(t *testing.T) {
 			token := signedWebSocketToken(t, &webSocketClaims{UserID: 17, BusinessID: 4})
@@ -102,7 +101,7 @@ func TestAuthUserFromWebSocketRequest_NonFlowLegacyQueryTokenRejected(t *testing
 }
 
 func TestAuthUserFromWebSocketRequest_BearerFallback(t *testing.T) {
-	token := signedWebSocketToken(t, &webSocketClaims{UserID: 8, BusinessID: 4, Role: "admin"})
+	token := signedWebSocketToken(t, &webSocketClaims{UserID: 8, BusinessID: 4})
 	req := wsRequest("/dash/ws")
 	req.Header.Set("Authorization", "Bearer "+token)
 
@@ -110,7 +109,7 @@ func TestAuthUserFromWebSocketRequest_BearerFallback(t *testing.T) {
 	if err != nil {
 		t.Fatalf("AuthUserFromWebSocketRequest: %v", err)
 	}
-	if user.UserID != 8 || user.BusinessID != 4 || user.Role != "admin" {
+	if user.UserID != 8 || user.BusinessID != 4 {
 		t.Fatalf("unexpected auth user: %+v", user)
 	}
 }

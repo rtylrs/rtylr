@@ -52,9 +52,9 @@ func partialsActor() *authPkg.AuthUser {
 	}
 
 	return &authPkg.AuthUser{
-		UserID: userID,
-		Role:   "console_admin",
-		Token:  "partials-api-key",
+		UserID:         userID,
+		IsConsoleAdmin: true,
+		Token:          "partials-api-key",
 	}
 }
 

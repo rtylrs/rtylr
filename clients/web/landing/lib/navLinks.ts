@@ -11,7 +11,7 @@ import { APP_URLS } from '@voxire/config';
 
 export interface FeatureLink {
   href: string;
-  key: 'pos' | 'erp' | 'hr' | 'crm' | 'finance' | 'flow';
+  key: 'overview' | 'work' | 'finance' | 'customers' | 'team' | 'operations' | 'sales' | 'insights';
 }
 
 export interface LabelledLink {
@@ -20,13 +20,17 @@ export interface LabelledLink {
   external?: boolean;
 }
 
+// Every area lives on one page; each link jumps to its section. The
+// fragments match the section ids in pages/workspace/index.tsx.
 export const FEATURE_LINKS: FeatureLink[] = [
-  { href: '/pos', key: 'pos' },
-  { href: '/erp', key: 'erp' },
-  { href: '/hr', key: 'hr' },
-  { href: '/crm', key: 'crm' },
-  { href: '/finance', key: 'finance' },
-  { href: '/flow', key: 'flow' },
+  { href: '/workspace/', key: 'overview' },
+  { href: '/workspace/#work', key: 'work' },
+  { href: '/workspace/#finance', key: 'finance' },
+  { href: '/workspace/#customers', key: 'customers' },
+  { href: '/workspace/#team', key: 'team' },
+  { href: '/workspace/#operations', key: 'operations' },
+  { href: '/workspace/#sales', key: 'sales' },
+  { href: '/workspace/#insights', key: 'insights' },
 ];
 
 export const RESOURCE_LINKS: LabelledLink[] = [

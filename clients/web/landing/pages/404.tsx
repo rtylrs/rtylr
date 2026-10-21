@@ -15,7 +15,7 @@ import styles from './404.module.scss';
 
 // href only. The label and description resolve from notFound.links,
 // matched by position.
-const SUGGESTED_HREFS = ['/', '/pricing', '/pos', '/demo', '/contact'];
+const SUGGESTED_HREFS = ['/', '/pricing', '/workspace', '/demo', '/contact'];
 
 const NotFoundPage = (): React.JSX.Element => {
   const { t } = useTranslation();

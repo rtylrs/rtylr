@@ -1,200 +1,121 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
+import { cn } from '../../../../lib/cn';
+import { PortalFrame, type PortalView } from './portal/PortalFrame';
+import { useDemoStep } from './portal/usePortalDemo';
+import styles from './portal/PortalDemo.module.scss';
+import local from './ERPDemo.module.scss';
 
-interface StockItem {
-  itemIndex: number;
-  unitKey: 'btl' | 'bag' | 'kg' | 'L' | 'pcs';
-  qty: number;
-  par: number;
-  supplier: string;
+type Status = 'ok' | 'low' | 'out' | 'reorder';
+
+interface Item {
+  name: string;
+  sku: string;
+  stock: number;
+  max: number;
+  unit: string;
 }
 
-// itemIndex points at home.features.demos.erp.items[i] - the display name
-// is translated, everything else here (unit, quantities, supplier) is
-// presentational or a proper noun and stays local.
-const ITEMS: StockItem[] = [
-  { itemIndex: 0, unitKey: 'btl', qty: 5, par: 24, supplier: 'Rossini' },
-  { itemIndex: 1, unitKey: 'bag', qty: 8, par: 10, supplier: 'GrainCo' },
-  { itemIndex: 2, unitKey: 'kg', qty: 3, par: 15, supplier: 'Nomad' },
-  { itemIndex: 3, unitKey: 'kg', qty: 6, par: 8, supplier: 'FreshSea' },
-  { itemIndex: 4, unitKey: 'btl', qty: 0, par: 6, supplier: 'Rossini' },
-  { itemIndex: 5, unitKey: 'L', qty: 14, par: 20, supplier: 'DairyHub' },
-  { itemIndex: 6, unitKey: 'pcs', qty: 21, par: 30, supplier: 'Artisan' },
+const ITEMS: Item[] = [
+  { name: 'Shipping boxes, M', sku: 'PK-204', stock: 420, max: 600, unit: 'pcs' },
+  { name: 'Label rolls', sku: 'PK-118', stock: 64, max: 120, unit: 'rolls' },
+  { name: 'Printer paper', sku: 'OF-031', stock: 38, max: 200, unit: 'reams' },
+  { name: 'Packing tape', sku: 'PK-077', stock: 150, max: 240, unit: 'rolls' },
+  { name: 'Sample kits', sku: 'SL-012', stock: 0, max: 50, unit: 'kits' },
+  { name: 'Branded mugs', sku: 'MR-009', stock: 210, max: 300, unit: 'pcs' },
 ];
 
-const statusOf = (qty: number, par: number): { key: string; color: string; bg: string } => {
-  const r = qty / par;
-  if (r === 0) return { key: 'out', color: '#ef4444', bg: 'rgba(239,68,68,0.12)' };
-  if (r < 0.3) return { key: 'critical', color: '#f97316', bg: 'rgba(249,115,22,0.12)' };
-  if (r < 0.55) return { key: 'low', color: '#eab308', bg: 'rgba(234,179,8,0.12)' };
-  return { key: 'ok', color: '#22c55e', bg: 'rgba(34,197,94,0.1)' };
-};
+// The item the demo follows: stock drains, it turns Low, a reorder goes out.
+const WATCHED = 2;
+const WATCHED_STOCK = [74, 22, 22];
+const WATCHED_STATUS: Status[] = ['ok', 'low', 'reorder'];
+const TONE: Record<Status, string> = { ok: 'green', low: 'amber', out: 'red', reorder: 'accent' };
 
-export const ERPDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element => {
+const statusOf = (item: Item): Status =>
+  item.stock === 0 ? 'out' : item.stock / item.max < 0.25 ? 'low' : 'ok';
+
+export const ERPDemo = ({
+  isActive,
+  onNavigate,
+}: {
+  isActive: boolean;
+  onNavigate?: (view: PortalView) => void;
+}): React.JSX.Element => {
   const { t } = useTranslation();
-  const [items, setItems] = useState<StockItem[]>(ITEMS);
-  const itemNames = t('home.features.demos.erp.items', { returnObjects: true }) as string[];
-  const [pulse, setPulse] = useState(false);
+  const step = useDemoStep(isActive, WATCHED_STATUS.length, 2000);
+  const cols = t('home.features.demos.erp.cols', { returnObjects: true }) as string[];
+  const crumb = t('home.features.demos.erp.crumb', { returnObjects: true }) as string[];
 
-  useEffect(() => {
-    if (!isActive) return;
-    const timer = setInterval(() => {
-      setItems((prev) =>
-        prev.map((item) => {
-          if (item.qty > 0 && Math.random() < 0.25) {
-            return { ...item, qty: Math.max(0, item.qty - 1) };
-          }
-          return item;
-        })
-      );
-      setPulse(true);
-      setTimeout(() => setPulse(false), 600);
-    }, 2500);
-    return () => clearInterval(timer);
-  }, [isActive]);
-
-  const alerts = items.filter((i) => i.qty / i.par < 0.3).length;
+  const rows = ITEMS.map((item, i) =>
+    i === WATCHED
+      ? { ...item, stock: WATCHED_STOCK[step], status: WATCHED_STATUS[step] }
+      : { ...item, status: statusOf(item) },
+  );
+  const alerts = rows.filter((r) => r.status !== 'ok').length;
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        inset: 0,
-        background: 'var(--bg-surface-a)',
-        fontFamily: 'inherit',
-        fontSize: 13,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-      }}
+    <PortalFrame
+      onNavigate={onNavigate}
+      app="erp"
+      crumb={crumb}
     >
-      {/* Header */}
-      <div
-        style={{
-          padding: '16px 20px 14px',
-          borderBottom: '1px solid var(--hairline)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexShrink: 0,
-        }}
-      >
-        <div>
-          <span style={{ color: 'var(--ink)', fontWeight: 600, fontSize: 14 }}>
-            {t('home.features.demos.erp.inventory')}
-          </span>
-          <span style={{ color: 'rgba(19,19,19,0.5)', fontSize: 12, marginInlineStart: 10 }}>
-            {t('home.features.demos.erp.itemCount', { count: items.length })}
-          </span>
-        </div>
-        {alerts > 0 && (
-          <div
-            style={{
-              background: 'rgba(249,115,22,0.12)',
-              border: '1px solid rgba(249,115,22,0.3)',
-              borderRadius: 999,
-              padding: '3px 10px',
-              fontSize: 11,
-              fontWeight: 600,
-              color: '#f97316',
-            }}
-          >
-            {t('home.features.demos.erp.alertCount', { count: alerts })}
-          </div>
-        )}
+      <div className={styles.spread}>
+        <span className={styles.title}>{crumb[1]}</span>
+        <span className={styles.pill} data-tone="amber">
+          {t('home.features.demos.erp.alerts', { count: alerts })}
+        </span>
       </div>
 
-      {/* Table header */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 100px 80px 80px',
-          padding: '8px 20px',
-          fontSize: 10,
-          fontWeight: 600,
-          letterSpacing: '0.1em',
-          color: 'rgba(19,19,19,0.45)',
-          textTransform: 'uppercase',
-          borderBottom: '1px solid var(--hairline)',
-          flexShrink: 0,
-        }}
-      >
-        <span>{t('home.features.demos.erp.table.item')}</span>
-        <span>{t('home.features.demos.erp.table.stock')}</span>
-        <span style={{ textAlign: 'center' }}>{t('home.features.demos.erp.table.onHand')}</span>
-        <span style={{ textAlign: 'center' }}>{t('home.features.demos.erp.table.status')}</span>
-      </div>
-
-      {/* Rows */}
-      <div style={{ flex: 1, overflow: 'hidden' }}>
-        {items.map((item, i) => {
-          const s = statusOf(item.qty, item.par);
-          const pct = Math.min(100, (item.qty / item.par) * 100);
-          return (
-            <div
-              key={item.itemIndex}
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 100px 80px 80px',
-                padding: '10px 20px',
-                borderBottom: '1px solid var(--hairline)',
-                alignItems: 'center',
-                background: pulse && s.key !== 'ok' ? 'rgba(19,19,19,0.02)' : 'transparent',
-                transition: 'background 0.4s ease',
-              }}
-            >
-              <div>
-                <div style={{ color: 'var(--ink)', fontSize: 12, fontWeight: 500 }}>
-                  {itemNames[item.itemIndex]}
-                </div>
-                <div style={{ color: 'rgba(19,19,19,0.45)', fontSize: 11 }}>{item.supplier}</div>
-              </div>
-              <div style={{ paddingInlineEnd: 8 }}>
-                <div
-                  style={{
-                    height: 4,
-                    background: 'var(--hairline)',
-                    borderRadius: 999,
-                    overflow: 'hidden',
-                  }}
-                >
-                  <motion.div
-                    animate={{ width: `${pct}%` }}
-                    transition={{ duration: 0.6, ease: 'easeOut' }}
-                    style={{
-                      height: '100%',
-                      background: s.color,
-                      borderRadius: 999,
-                    }}
-                  />
-                </div>
-              </div>
-              <div style={{ textAlign: 'center', fontSize: 12, color: 'rgba(19,19,19,0.65)' }}>
-                {/* Non-breaking space, not JSX whitespace: a quantity should
-                    never wrap away from its unit, in any language. */}
-                {item.qty}
-                {' '}
-                {t(`home.features.demos.erp.units.${item.unitKey}`)}
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <span
-                  style={{
-                    background: s.bg,
-                    color: s.color,
-                    borderRadius: 999,
-                    padding: '2px 8px',
-                    fontSize: 10,
-                    fontWeight: 600,
-                  }}
-                >
-                  {t(`home.features.demos.erp.status.${s.key}`)}
-                </span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
+      <table className={cn(styles.table, local.table)}>
+        <thead>
+          <tr>
+            <th>{cols[0]}</th>
+            <th>{cols[1]}</th>
+            <th className={styles.num}>{cols[2]}</th>
+            <th>{cols[3]}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => {
+            const ratio = r.stock / r.max;
+            const barColor =
+              r.status === 'out' || ratio < 0.15
+                ? 'var(--p-red)'
+                : ratio < 0.25
+                  ? 'var(--p-amber)'
+                  : 'var(--p-text)';
+            return (
+              <tr key={r.sku} className={i === WATCHED ? local.watched : undefined}>
+                <td>
+                  <div className={local.name}>{r.name}</div>
+                  <div className={styles.muted}>{r.sku}</div>
+                </td>
+                <td className={local.barCell}>
+                  <div className={styles.bar}>
+                    <span style={{ width: `${Math.max(ratio * 100, 0)}%`, background: barColor }} />
+                  </div>
+                </td>
+                <td className={styles.num}>
+                  {r.stock} <span className={styles.muted}>{r.unit}</span>
+                </td>
+                <td>
+                  <motion.span
+                    key={r.status}
+                    className={styles.pill}
+                    data-tone={TONE[r.status]}
+                    initial={{ opacity: 0, y: 3 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {t(`home.features.demos.erp.status.${r.status}`)}
+                  </motion.span>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </PortalFrame>
   );
 };

@@ -4,7 +4,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 // envOrDefault returns the env var value, or fallback when it's unset/empty.
@@ -15,20 +14,7 @@ func envOrDefault(key, fallback string) string {
 	return fallback
 }
 
-// envTrimmedOrDefault is envOrDefault for values where surrounding whitespace is
-// never meaningful, such as a URL. A variable set to spaces by a shell export or
-// a compose file means the same as unset, and passing those spaces through
-// produces an address nothing can reach.
-func envTrimmedOrDefault(key, fallback string) string {
-	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
-		return v
-	}
-	return fallback
-}
-
 // envFirst returns the value of the first set/non-empty env var in keys, or "".
-// Used to accept a customer-facing name and an internal alias (e.g. the
-// documented RTYLR_LICENSE_KEY plus the legacy LICENSE_KEY).
 func envFirst(keys ...string) string {
 	for _, k := range keys {
 		if v := strings.TrimSpace(os.Getenv(k)); v != "" {
@@ -58,18 +44,6 @@ func positiveEnvIntOrDefault(key string, fallback int) int {
 		return fallback
 	}
 	return n
-}
-
-func envDurationOrDefault(key string, fallback time.Duration) time.Duration {
-	v := os.Getenv(key)
-	if v == "" {
-		return fallback
-	}
-	d, err := time.ParseDuration(v)
-	if err != nil {
-		return fallback
-	}
-	return d
 }
 
 func GetOpenAIAPIKey() string {
@@ -146,23 +120,8 @@ func IsDeepSeekConfigured() bool {
 	return GetDeepSeekAPIKey() != ""
 }
 
-func GetNvidiaNIMAPIKey() string {
-	if GlobalConfig != nil {
-		return GlobalConfig.NvidiaNIMAPIKey
-	}
-	return os.Getenv(NvidiaNIMAPIKeyEnvVar)
-}
-
-// GetNvidiaNIMBaseURL / GetNvidiaNIMModel return the hardcoded values.
-func GetNvidiaNIMBaseURL() string { return NvidiaNIMBaseURL }
-func GetNvidiaNIMModel() string   { return NvidiaNIMModel }
-
-func IsNvidiaNIMConfigured() bool {
-	return GetNvidiaNIMAPIKey() != ""
-}
-
 // GetAIPrimaryProvider returns the operator's preferred primary provider
-// ("deepseek" | "nvidia"), or "" for the default priority order.
+// or "" for the default Gemini, OpenCode, DeepSeek, OpenAI order.
 func GetAIPrimaryProvider() string {
 	if GlobalConfig != nil {
 		return GlobalConfig.AIPrimaryProvider
@@ -170,36 +129,22 @@ func GetAIPrimaryProvider() string {
 	return os.Getenv(AIPrimaryProviderEnvVar)
 }
 
+func GetSearXNGURL() string {
+	if GlobalConfig != nil {
+		return strings.TrimSpace(GlobalConfig.SearXNGURL)
+	}
+	return strings.TrimSpace(os.Getenv(SearXNGURLEnvVar))
+}
+
+// GetBraveSearchAPIKey returns the optional Brave Search API key that backs
+// up SearXNG when its free engines return nothing.
+func GetBraveSearchAPIKey() string {
+	if GlobalConfig != nil {
+		return strings.TrimSpace(GlobalConfig.BraveSearchAPIKey)
+	}
+	return strings.TrimSpace(os.Getenv(BraveSearchAPIKeyEnvVar))
+}
+
 func IsAnyAIConfigured() bool {
-	return IsDeepSeekConfigured() || IsNvidiaNIMConfigured() || IsOpenAIConfigured() || IsGeminiConfigured() || IsOpenCodeConfigured()
-}
-
-// GetLicenseSigningPrivateKey returns the private key used to sign self-host
-// license keys (license authority runmode).
-func GetLicenseSigningPrivateKey() string {
-	if GlobalConfig != nil {
-		return GlobalConfig.LicenseSigningPrivateKey
-	}
-	return os.Getenv("LICENSE_SIGNING_PRIVATE_KEY")
-}
-
-// GetLicensePublicKey returns the public key used to verify license keys on
-// self-host deployments.
-func GetLicensePublicKey() string {
-	if GlobalConfig != nil {
-		return GlobalConfig.LicensePublicKey
-	}
-	return os.Getenv("LICENSE_PUBLIC_KEY")
-}
-
-// GetLicenseIssuer returns the issuer name embedded in generated license keys,
-// defaulting to "voxire" when unset.
-func GetLicenseIssuer() string {
-	if GlobalConfig != nil && GlobalConfig.LicenseIssuer != "" {
-		return GlobalConfig.LicenseIssuer
-	}
-	if v := strings.TrimSpace(os.Getenv("LICENSE_ISSUER")); v != "" {
-		return v
-	}
-	return "voxire"
+	return IsDeepSeekConfigured() || IsOpenAIConfigured() || IsGeminiConfigured() || IsOpenCodeConfigured()
 }

@@ -10,9 +10,8 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-// ErrRunNotClaimed means another worker took the run first. Not a failure:
-// several workers reading the same due list is the expected shape.
-var ErrRunNotClaimed = errors.New("automation run already claimed")
+// ErrRunNotClaimed is retained as an adapter alias for existing callers.
+var ErrRunNotClaimed = domain.ErrRunNotClaimed
 
 // ListDueRuns returns runs ready to execute, oldest due first.
 func (r *Repository) ListDueRuns(ctx context.Context, limit int32) ([]domain.Run, error) {
@@ -98,6 +97,9 @@ func (r *Repository) GetAutomationForRun(ctx context.Context, automationID, busi
 		BusinessID: businessID,
 	})
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.Automation{}, domain.ErrAutomationNotFound
+		}
 		return domain.Automation{}, err
 	}
 	return domain.Automation{
@@ -108,24 +110,6 @@ func (r *Repository) GetAutomationForRun(ctx context.Context, automationID, busi
 	}, nil
 }
 
-// GetEventForRun loads the event that produced a run.
-func (r *Repository) GetEventForRun(ctx context.Context, eventID uint64, businessID int64) (domain.Event, error) {
-	row, err := r.queries.GetEventForRun(ctx, sqlc.GetEventForRunParams{
-		ID:         eventID,
-		BusinessID: businessID,
-	})
-	if err != nil {
-		return domain.Event{}, err
-	}
-	return domain.Event{
-		ID:          row.ID,
-		Type:        row.EventType,
-		SubjectType: row.SubjectType,
-		SubjectID:   row.SubjectID,
-		Payload:     row.Payload,
-	}, nil
-}
-
 // RecordExecution writes the run_count and last_run_at that #834 records as
 // never written.
 func (r *Repository) RecordExecution(ctx context.Context, automationID, businessID int64) error {
@@ -133,24 +117,6 @@ func (r *Repository) RecordExecution(ctx context.Context, automationID, business
 		ID:         automationID,
 		BusinessID: businessID,
 	})
-}
-
-// GetCustomerContact resolves a send_email recipient. The customer id arrives
-// in the event payload, so it is looked up against the run's business rather
-// than trusted.
-func (r *Repository) GetCustomerContact(ctx context.Context, customerID, businessID int64) (domain.CustomerContact, error) {
-	row, err := r.queries.GetCustomerContactForRun(ctx, sqlc.GetCustomerContactForRunParams{
-		ID:         customerID,
-		BusinessID: businessID,
-	})
-	if err != nil {
-		return domain.CustomerContact{}, err
-	}
-	return domain.CustomerContact{
-		ID:    row.ID,
-		Email: row.Email,
-		Name:  row.FullName,
-	}, nil
 }
 
 // truncateError keeps a stored cause inside the column and readable. The

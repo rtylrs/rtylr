@@ -1,228 +1,100 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import React from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
+import { Check, Database, Globe, Headphones, Rocket, UserPlus, Video } from 'lucide-react';
+import { cn } from '../../../../lib/cn';
+import { PortalFrame, type PortalView } from './portal/PortalFrame';
+import { money, useDemoStep } from './portal/usePortalDemo';
+import styles from './portal/PortalDemo.module.scss';
+import local from './POSDemo.module.scss';
 
-import { formatMoney } from '../../../../lib/formatMoney';
+// Prices by index into home.features.demos.pos.items.
+const PRICES = [49, 120, 15, 39, 12, 80];
+const ICONS = [Rocket, Video, UserPlus, Headphones, Globe, Database];
+// Products tapped in order, one per step; then charge, then paid.
+const TAPS = [0, 2, 3];
+const STEPS = TAPS.length + 2;
 
-interface MenuItem {
-  id: string;
-  nameIndex: number;
-  price: number;
-  emoji: string;
-}
+export const POSDemo = ({
+  isActive,
+  onNavigate,
+}: {
+  isActive: boolean;
+  onNavigate?: (view: PortalView) => void;
+}): React.JSX.Element => {
+  const { t } = useTranslation();
+  const step = useDemoStep(isActive, STEPS, 1400, STEPS - 1);
+  const items = t('home.features.demos.pos.items', { returnObjects: true }) as string[];
 
-interface CartItem extends MenuItem {
-  qty: number;
-}
-
-// nameIndex points at home.features.demos.pos.items[i], in the same order.
-const MENU: MenuItem[] = [
-  { id: 'esp', nameIndex: 0, price: 3.5, emoji: '☕' },
-  { id: 'lat', nameIndex: 1, price: 5.0, emoji: '🥛' },
-  { id: 'cap', nameIndex: 2, price: 5.0, emoji: '☕' },
-  { id: 'cro', nameIndex: 3, price: 3.5, emoji: '🥐' },
-  { id: 'oj', nameIndex: 4, price: 4.5, emoji: '🍊' },
-  { id: 'avo', nameIndex: 5, price: 12.0, emoji: '🥑' },
-  { id: 'sal', nameIndex: 6, price: 14.0, emoji: '🥗' },
-  { id: 'cake', nameIndex: 7, price: 7.5, emoji: '🍰' },
-];
-
-const SEQ = ['esp', 'cro', 'lat', 'esp', 'avo'];
-
-export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element => {
-  const { t, i18n } = useTranslation();
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [flash, setFlash] = useState<string | null>(null);
-  const seqRef = useRef(0);
-
-  const addItem = (id: string): void => {
-    const item = MENU.find((m) => m.id === id);
-    if (!item) return;
-    setCart((prev) => {
-      const ex = prev.find((c) => c.id === id);
-      if (ex) return prev.map((c) => (c.id === id ? { ...c, qty: c.qty + 1 } : c));
-      return [...prev, { ...item, qty: 1 }];
-    });
-    setFlash(id);
-    setTimeout(() => setFlash(null), 280);
-  };
-
-  useEffect(() => {
-    if (!isActive) return;
-    const timer = setInterval(() => {
-      addItem(SEQ[seqRef.current % SEQ.length]);
-      seqRef.current += 1;
-    }, 2000);
-    return () => clearInterval(timer);
-  }, [isActive]);
-
-  const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
-  const money = (n: number): string => formatMoney(n, i18n.language);
-  const itemNames = t('home.features.demos.pos.items', { returnObjects: true }) as string[];
+  const inOrder = TAPS.slice(0, Math.min(step + 1, TAPS.length));
+  const total = inOrder.reduce((sum, i) => sum + PRICES[i], 0);
+  const charging = step === TAPS.length;
+  const paid = step === TAPS.length + 1;
+  const lastTap = step < TAPS.length ? TAPS[step] : -1;
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        inset: 0,
-        display: 'flex',
-        background: 'var(--bg-surface-a)',
-        fontFamily: 'inherit',
-        fontSize: 13,
-        overflow: 'hidden',
-      }}
+    <PortalFrame
+      onNavigate={onNavigate}
+      app="pos"
+      crumb={t('home.features.demos.pos.crumb', { returnObjects: true }) as string[]}
     >
-      {/* Menu grid */}
-      <div
-        style={{
-          flex: 1,
-          borderInlineEnd: '1px solid var(--hairline)',
-          padding: '20px 16px',
-          overflow: 'hidden',
-        }}
-      >
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 600,
-            letterSpacing: '0.12em',
-            color: 'rgba(19,19,19,0.5)',
-            textTransform: 'uppercase',
-            marginBottom: 14,
-          }}
-        >
-          {t('home.features.demos.pos.menuLabel')}
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
-          {MENU.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => addItem(item.id)}
-              style={{
-                background: flash === item.id ? 'var(--bg-surface-a)' : 'var(--bg-surface-b)',
-                border: `1px solid ${flash === item.id ? 'var(--ink)' : 'var(--hairline)'}`,
-                borderRadius: 8,
-                padding: '10px 12px',
-                cursor: 'pointer',
-                textAlign: 'start',
-                transition: 'background 0.15s ease, border-color 0.15s ease',
-                color: 'var(--ink)',
-              }}
-            >
-              <div style={{ marginBottom: 3, fontSize: 16 }}>{item.emoji}</div>
-              <div style={{ fontWeight: 500, fontSize: 12, marginBottom: 2 }}>
-                {itemNames[item.nameIndex]}
-              </div>
-              <div style={{ fontSize: 11, color: 'rgba(19,19,19,0.55)' }}>
-                {money(item.price)}
-              </div>
-            </button>
+      <div className={local.layout}>
+        <div className={local.products}>
+          {items.map((name, i) => (
+            <div key={name} className={cn(local.product, i === lastTap && local.productTapped)}>
+              {React.createElement(ICONS[i], { size: 16, className: local.productIcon })}
+              <span className={local.productName}>{name}</span>
+              <span className={styles.muted}>{money(PRICES[i])}</span>
+            </div>
           ))}
         </div>
-      </div>
 
-      {/* Cart */}
-      <div
-        style={{
-          width: 185,
-          padding: '20px 14px',
-          display: 'flex',
-          flexDirection: 'column',
-          background: 'var(--bg-surface-b)',
-        }}
-      >
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 600,
-            letterSpacing: '0.12em',
-            color: 'rgba(19,19,19,0.5)',
-            textTransform: 'uppercase',
-            marginBottom: 14,
-          }}
-        >
-          {t('home.features.demos.pos.orderLabel')}
-        </div>
-
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 8,
-            overflowY: 'hidden',
-          }}
-        >
-          {cart.length === 0 ? (
-            <div style={{ color: 'rgba(19,19,19,0.35)', fontSize: 12 }}>{t('home.features.demos.pos.addItems')}</div>
-          ) : (
-            <AnimatePresence>
-              {cart.map((item) => (
+        <div className={cn(styles.card, local.order)}>
+          <span className={local.orderTitle}>{t('home.features.demos.pos.order')}</span>
+          <div className={local.lines}>
+            <AnimatePresence initial={false}>
+              {inOrder.map((i) => (
                 <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    fontSize: 12,
-                  }}
+                  key={i}
+                  className={styles.spread}
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <span style={{ color: 'rgba(19,19,19,0.7)' }}>
-                    <span dir="ltr">{item.qty}×</span> {itemNames[item.nameIndex]}
-                  </span>
-                  <span style={{ color: 'var(--ink)', fontWeight: 600 }}>
-                    {money(item.price * item.qty)}
-                  </span>
+                  <span>1 × {items[i]}</span>
+                  <span className={local.price}>{money(PRICES[i])}</span>
                 </motion.div>
               ))}
             </AnimatePresence>
-          )}
-        </div>
-
-        <div style={{ borderTop: '1px solid var(--hairline)', paddingTop: 14, marginTop: 12 }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 14,
-            }}
-          >
-            <span style={{ color: 'rgba(19,19,19,0.55)', fontSize: 12 }}>{t('home.features.demos.pos.total')}</span>
-            <span style={{ color: 'var(--ink)', fontWeight: 700, fontSize: 16 }}>
-              {money(total)}
-            </span>
           </div>
-          <div
-            style={{
-              background: cart.length ? 'var(--ink)' : 'var(--hairline)',
-              color: cart.length ? '#ffffff' : 'rgba(19,19,19,0.35)',
-              borderRadius: 8,
-              padding: '11px',
-              textAlign: 'center',
-              fontWeight: 700,
-              fontSize: 13,
-              transition: 'all 0.25s ease',
-              cursor: cart.length ? 'pointer' : 'default',
-            }}
-          >
-            {cart.length
-              ? t('home.features.demos.pos.chargeAmount', {
-                  // Plain decimal, not formatMoney(): chargeAmount's own
-                  // translated string already places the $ (before the
-                  // number in English/Arabic, after it in French), so the
-                  // interpolated value must not carry a second one.
-                  amount: total.toLocaleString(i18n.language, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }),
-                })
-              : t('home.features.demos.pos.charge')}
+
+          <div className={cn(styles.spread, local.total)}>
+            <span>{t('home.features.demos.pos.total')}</span>
+            <span className={local.price}>{money(total)}</span>
+          </div>
+
+          <div className={cn(styles.primaryBtn, local.charge, charging && local.charging)}>
+            <AnimatePresence mode="wait" initial={false}>
+              {paid ? (
+                <motion.span
+                  key="paid"
+                  className={styles.row}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                >
+                  <Check size={14} strokeWidth={3} />
+                  {t('home.features.demos.pos.paid')}
+                </motion.span>
+              ) : (
+                <motion.span key="charge" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  {t('home.features.demos.pos.charge')} {money(total)}
+                </motion.span>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
-    </div>
+    </PortalFrame>
   );
 };

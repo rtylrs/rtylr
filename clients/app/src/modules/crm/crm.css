@@ -1,0 +1,80 @@
+:root {
+  --crm-accent: #8b5cf6;
+  /* Solid fills (buttons, badges, checked boxes) take a slightly deeper violet
+     so white text clears AA; PortalShell derives both from the accent. */
+  --crm-action: #8452f5;
+  --crm-on-action: #ffffff;
+  --crm-text: var(--dash-text);
+  --crm-border: var(--dash-border);
+  /* Lucide chevron-down, stroked in --dash-text-dim for each theme. */
+  --crm-select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(240,240,238,0.65)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+:root[data-theme='light'] {
+  --crm-select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(9,9,11,0.65)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+.portal-page.is-crm {
+  padding: clamp(16px, 2.2vw, 28px);
+}
+.portal-crm-settings {
+  max-width: 760px;
+  margin-inline: auto;
+}
+.portal-crm-settings h4 {
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  font-size: 15px !important;
+}
+.portal-crm-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* Filled buttons go neutral when disabled instead of a murky half-opacity fill. */
+.portal-crm-button.is-filled:disabled {
+  opacity: 1;
+}
+/* Native select arrows sit flush against the edge and differ per browser; draw
+   one chevron for every CRM select. Inline background shorthands would reset
+   the image, hence !important. */
+.portal-page.is-crm select:not([multiple]),
+.crm-popover select:not([multiple]) {
+  appearance: none;
+  background-image: var(--crm-select-chevron) !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+  background-size: 16px 16px !important;
+  padding-inline-end: 32px !important;
+  cursor: pointer;
+}
+[dir='rtl'] .portal-page.is-crm select:not([multiple]),
+[dir='rtl'] .crm-popover select:not([multiple]) {
+  background-position: left 10px center !important;
+}
+.portal-crm-button:not(:disabled):hover {
+  filter: brightness(0.94);
+}
+.portal-page.is-crm :is(input, textarea, select):focus-visible {
+  outline: 2px solid var(--app-focus, var(--dash-text-dim)) !important;
+  outline-offset: 2px;
+}
+.portal-page.is-crm table {
+  box-shadow: none;
+}
+@keyframes crm-skeleton {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+@keyframes crm-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.portal-page.is-crm button.bg-accent {
+  background: var(--crm-action);
+  color: var(--crm-on-action);
+  border-radius: 8px;
+}

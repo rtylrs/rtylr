@@ -13,6 +13,11 @@ import (
 // so links live in the templates without hardcoding "https://<app>.rtylr.com".
 // Unknown names fall back to the landing site.
 var templateFuncs = template.FuncMap{
+	// action pairs a link with its label for the base layout's "button"
+	// template: {{template "button" (action .Link "Label")}}.
+	"action": func(url, label string) map[string]string {
+		return map[string]string{"URL": url, "Label": label}
+	},
 	"appURL": func(name string) string {
 		switch name {
 		case "auth":
@@ -29,8 +34,6 @@ var templateFuncs = template.FuncMap{
 			return config.FinanceAppURL
 		case "flow":
 			return config.FlowAppURL
-		case "menu":
-			return config.MenuAppURL
 		case "insights":
 			return config.InsightsAppURL
 		default:

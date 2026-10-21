@@ -73,7 +73,7 @@ func TestConnect_PassesThroughConfig(t *testing.T) {
 	m := &mockRepo{connectID: 9}
 	s := &Service{repo: m}
 	cfg := json.RawMessage(`{"key":"value"}`)
-	id, _ := s.Connect(context.Background(), 7, "slack", cfg)
+	id, _ := s.Connect(context.Background(), 7, "stripe", cfg)
 	if id != 9 {
 		t.Errorf("expected id 9, got %d", id)
 	}
@@ -85,7 +85,7 @@ func TestConnect_PassesThroughConfig(t *testing.T) {
 func TestConnect_PropagatesRepoError(t *testing.T) {
 	want := errors.New("connect failed")
 	s := &Service{repo: &mockRepo{connectErr: want}}
-	if _, err := s.Connect(context.Background(), 1, "x", nil); !errors.Is(err, want) {
+	if _, err := s.Connect(context.Background(), 1, "stripe", nil); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
@@ -163,9 +163,9 @@ func TestConnect_DelegatesOwnerID(t *testing.T) {
 func TestConnect_DelegatesProvider(t *testing.T) {
 	m := &mockRepo{connectID: 1}
 	s := &Service{repo: m}
-	_, _ = s.Connect(context.Background(), 1, "shopify", nil)
-	if m.connectGot.provider != "shopify" {
-		t.Errorf("expected provider shopify, got %q", m.connectGot.provider)
+	_, _ = s.Connect(context.Background(), 1, " Stripe ", nil)
+	if m.connectGot.provider != "stripe" {
+		t.Errorf("expected provider stripe, got %q", m.connectGot.provider)
 	}
 }
 
@@ -180,11 +180,63 @@ func TestDisconnect_ZeroIntegrationIDError(t *testing.T) {
 func TestConnect_ReturnsGeneratedID(t *testing.T) {
 	m := &mockRepo{connectID: 77}
 	s := &Service{repo: m}
-	id, err := s.Connect(context.Background(), 1, "hubspot", json.RawMessage(`{}`))
+	id, err := s.Connect(context.Background(), 1, "stripe", json.RawMessage(`{}`))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if id != 77 {
 		t.Errorf("expected 77, got %d", id)
+	}
+}
+
+func TestConnect_RejectsUnknownProviders(t *testing.T) {
+	m := &mockRepo{}
+	s := &Service{repo: m}
+	for _, provider := range []string{"", "shopify", "stripe/../x", "<script>"} {
+		if _, err := s.Connect(context.Background(), 1, provider, nil); !errors.Is(err, domain.ErrInvalidProvider) {
+			t.Errorf("provider %q: err = %v, want ErrInvalidProvider", provider, err)
+		}
+	}
+	if m.connectGot.provider != "" {
+		t.Fatal("an unsupported provider reached the repository")
+	}
+}
+
+func TestConnect_RejectsNonObjectOrOversizedConfig(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	for name, config := range map[string]json.RawMessage{
+		"array":   json.RawMessage(`[1]`),
+		"string":  json.RawMessage(`"x"`),
+		"null":    json.RawMessage(`null`),
+		"garbage": json.RawMessage(`{`),
+		"too big": json.RawMessage(`{"a":"` + string(make([]byte, maxConfigBytes)) + `"}`),
+	} {
+		if _, err := s.Connect(context.Background(), 1, "stripe", config); !errors.Is(err, domain.ErrInvalidConfig) {
+			t.Errorf("%s: err = %v, want ErrInvalidConfig", name, err)
+		}
+	}
+}
+
+func TestRedactConfigMasksSecretsAtAnyDepth(t *testing.T) {
+	raw := json.RawMessage(`{"account":"acct_1","secret_key":"sk_live_x","nested":{"webhookSecret":"whsec_y","mode":"live"},"list":[{"apiToken":"t"}]}`)
+	var got map[string]any
+	if err := json.Unmarshal(RedactConfig(raw), &got); err != nil {
+		t.Fatal(err)
+	}
+	if got["account"] != "acct_1" || got["secret_key"] != "[redacted]" {
+		t.Fatalf("top level = %v", got)
+	}
+	nested := got["nested"].(map[string]any)
+	if nested["webhookSecret"] != "[redacted]" || nested["mode"] != "live" {
+		t.Fatalf("nested = %v", nested)
+	}
+	if got["list"].([]any)[0].(map[string]any)["apiToken"] != "[redacted]" {
+		t.Fatalf("list = %v", got["list"])
+	}
+}
+
+func TestRedactConfigNeverReturnsUnparseableInput(t *testing.T) {
+	if got := string(RedactConfig(json.RawMessage(`{sk_live_x`))); got != "{}" {
+		t.Fatalf("got %q, want {}", got)
 	}
 }

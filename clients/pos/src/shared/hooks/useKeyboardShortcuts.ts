@@ -24,6 +24,7 @@ export function useKeyboardShortcuts() {
         tag === 'textarea' ||
         (e.target as HTMLElement | null)?.isContentEditable;
 
+      if (e.defaultPrevented) return;
       // cmd/ctrl+k toggles command palette
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();

@@ -24,7 +24,7 @@ func (s *Service) GetSalesByCategory(ctx context.Context, businessID int64) ([]C
 	type result struct {
 		Rows []CategorySalesPayload
 	}
-	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
+	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key+"|domain=v2", func(ctx context.Context) (result, error) {
 		rows, rerr := s.repo.GetSalesByCategory(ctx, businessID)
 		if rerr != nil {
 			return result{}, rerr

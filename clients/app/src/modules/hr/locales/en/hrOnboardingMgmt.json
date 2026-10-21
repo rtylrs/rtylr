@@ -1,0 +1,57 @@
+{
+  "templateCreated": "Template created successfully",
+  "checklist": {
+    "title": "My Onboarding Checklist",
+    "subtitle": "Complete your onboarding tasks",
+    "progress": "Progress",
+    "completedOf": "{{completed}} of {{total}} items completed",
+    "emptyTitle": "No active checklist",
+    "emptyDescription": "Your onboarding checklist will appear here when assigned.",
+    "dueDate": "Due {{date}}",
+    "overdue": "Overdue",
+    "completeItem": "Complete Item",
+    "attachmentRequired": "This item requires an attachment. Upload a file or complete without one.",
+    "completeWithout": "Complete Without Attachment",
+    "statuses": {
+      "incomplete": "To Do",
+      "in_progress": "In Progress",
+      "complete": "Done"
+    }
+  },
+  "management": {
+    "title": "Onboarding",
+    "subtitle": "Active employee onboarding checklists",
+    "manageTemplates": "Manage Templates",
+    "emptyTitle": "No active onboarding",
+    "emptyDescription": "Active onboarding checklists will appear here.",
+    "employeeId": "Employee #{{id}}",
+    "table": {
+      "employee": "Employee",
+      "progress": "Progress",
+      "overdue": "Overdue Items",
+      "triggeredAt": "Started"
+    },
+    "pagination": {
+      "range": "{{from}}–{{to}} of {{total}}"
+    }
+  },
+  "templates": {
+    "title": "Checklist Templates",
+    "subtitle": "Create and manage onboarding/offboarding checklists",
+    "create": "New Template",
+    "emptyTitle": "No templates yet",
+    "emptyDescription": "Create your first checklist template to get started.",
+    "itemCount": "{{count}} items",
+    "triggers": {
+      "onboarding": "Onboarding",
+      "offboarding": "Offboarding"
+    },
+    "form": {
+      "title": "New Checklist Template",
+      "name": "Template Name",
+      "namePlaceholder": "e.g. Engineering Onboarding",
+      "triggerType": "Trigger Type",
+      "submit": "Create Template"
+    }
+  }
+}

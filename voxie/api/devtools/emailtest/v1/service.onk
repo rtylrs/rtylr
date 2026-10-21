@@ -1,0 +1,10 @@
+package devtools.emailtest.v1
+
+/// Non-production endpoints for testing email templates end to end. They
+/// answer 404 unless the run declares a development environment.
+service EmailTestService {
+  base_path: "/"
+
+  listTemplates(ListTemplatesRequest) -> ListTemplatesResponse @get("/test/email/templates")
+  sendTestEmail(SendTestEmailRequest) -> SendTestEmailResponse @post("/test/email")
+}

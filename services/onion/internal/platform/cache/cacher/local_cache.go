@@ -25,19 +25,6 @@ type LocalCache struct {
 	mu    sync.Mutex
 }
 
-func (c *LocalCache) GetMulti(ctx context.Context, keys []string) (results map[string][]byte, notFound []string) {
-	results = make(map[string][]byte, len(keys))
-
-	for _, key := range keys {
-		results[key] = c.Get(ctx, key)
-		if results[key] == nil {
-			notFound = append(notFound, key)
-		}
-	}
-
-	return results, notFound
-}
-
 func (c *LocalCache) PutMulti(ctx context.Context, keyVals map[string][]byte, ttl time.Duration) {
 	for key, val := range keyVals {
 		if val != nil {

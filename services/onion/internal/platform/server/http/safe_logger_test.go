@@ -6,7 +6,7 @@ import (
 )
 
 func TestSanitizeRequestForLoggingRedactsSensitiveQueryValues(t *testing.T) {
-	req := httptest.NewRequest("GET", "/flow/ws?token=jwt&workspace_id=1&code=oauth&signature=sig", nil)
+	req := httptest.NewRequest("GET", "/flow/ws?token=jwt&workspace_id=1&code=oauth&signature=sig&url=https%3A%2F%2Fcdn.example%2Fasset%3Fsig%3Dbearer", nil)
 
 	got := sanitizeRequestForLogging(req)
 
@@ -18,6 +18,9 @@ func TestSanitizeRequestForLoggingRedactsSensitiveQueryValues(t *testing.T) {
 	}
 	if got.URL.Query().Get("signature") != "[REDACTED]" {
 		t.Fatalf("expected signature to be redacted, got %q", got.URL.Query().Get("signature"))
+	}
+	if got.URL.Query().Get("url") != "[REDACTED]" {
+		t.Fatalf("expected nested signed URL to be redacted, got %q", got.URL.Query().Get("url"))
 	}
 	if got.URL.Query().Get("workspace_id") != "1" {
 		t.Fatalf("expected workspace_id to remain visible, got %q", got.URL.Query().Get("workspace_id"))

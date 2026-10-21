@@ -1,14 +1,3 @@
--- cross-schema read from subscriptions + plans (owned by subscriptions module)
--- name: GetSubscriptionEntitlement :one
-SELECT p.slug, p.ai_credits_per_month, s.seat_count, s.status
-FROM subscriptions s
-JOIN plans p ON p.id = s.plan_id
-WHERE s.owner_id = ?;
-
--- cross-schema read from plans — free tier fallback
--- name: GetFreePlanCredits :one
-SELECT ai_credits_per_month FROM plans WHERE slug = 'free' AND is_active = 1 ORDER BY slug ASC LIMIT 1;
-
 -- name: GetQuotaMode :one
 SELECT mode FROM ai_quota_settings WHERE owner_id = ?;
 
@@ -34,14 +23,20 @@ VALUES (?, ?, ?, 0, 0);
 -- name: ReserveMonthlyTokens :execresult
 -- Conditional reservation: the increment only lands when the resulting total
 -- stays within the caller-supplied allowance, making the check-and-add atomic.
+-- When allow_overage is true (paid Pro/Scale plans), the allowance cap is not enforced.
 UPDATE ai_usage_monthly
-SET tokens_used = tokens_used + ?
-WHERE owner_id = ? AND user_id = ? AND billing_month = ?
-  AND tokens_used + ? <= ?;
+SET tokens_used = tokens_used + sqlc.arg('estimate'),
+    requests = requests + 1
+WHERE owner_id = sqlc.arg('owner_id')
+  AND user_id = sqlc.arg('user_id')
+  AND billing_month = sqlc.arg('billing_month')
+  AND (sqlc.arg('allow_overage') = TRUE OR tokens_used + sqlc.arg('estimate') <= sqlc.arg('allowance'));
 
 -- name: AdjustMonthlyTokenUsage :exec
 -- Post-stream reconciliation of a reserved estimate against actual usage.
 -- No request-count bump: the reservation already counted the request.
 UPDATE ai_usage_monthly
-SET tokens_used = tokens_used + ?
-WHERE owner_id = ? AND user_id = ? AND billing_month = ?;
+SET tokens_used = GREATEST(0, CAST(tokens_used AS SIGNED) + sqlc.arg('delta'))
+WHERE owner_id = sqlc.arg('owner_id')
+  AND user_id = sqlc.arg('user_id')
+  AND billing_month = sqlc.arg('billing_month');

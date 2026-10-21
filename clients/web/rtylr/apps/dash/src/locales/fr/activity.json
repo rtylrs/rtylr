@@ -1,7 +1,0 @@
-{
-  "audit": {
-    "emptyTitle": "Aucune entrée d'audit",
-    "emptyDescription": "Les événements liés à la sécurité apparaîtront ici.",
-    "filteredShowing": "Affichage de {{shown}} sur {{total}} sur cette page"
-  }
-}

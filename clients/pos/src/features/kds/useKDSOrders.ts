@@ -23,7 +23,17 @@ function parsePositiveInteger(value: unknown): number | undefined {
 }
 
 function kdsStatus(value: string): KDSOrder['status'] {
-  return kdsStatuses.has(value as KDSOrder['status']) ? (value as KDSOrder['status']) : 'new';
+  const lower = (value ?? '').toLowerCase();
+  if (lower === 'cooking' || lower === 'preparing') return 'cooking';
+  if (lower === 'ready') return 'ready';
+  if (lower === 'served') return 'served';
+  return kdsStatuses.has(lower as KDSOrder['status']) ? (lower as KDSOrder['status']) : 'new';
+}
+
+function toServerItemStatus(status: KDSOrder['status']): string {
+  if (status === 'cooking') return 'preparing';
+  if (status === 'new') return 'pending';
+  return status;
 }
 
 export function useKDSOrders(station?: string) {
@@ -94,7 +104,7 @@ export function useKDSOrders(station?: string) {
             kdsClient.updateKDSItemStatus({
               orderId: item.orderId || order.id,
               itemId: item.id,
-              body: { status },
+              body: { status: toServerItemStatus(status) },
             }),
           ),
         );

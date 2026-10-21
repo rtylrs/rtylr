@@ -4,4 +4,7 @@ package pos.manager.v1
 service ManagerService {
   /// Verifies a manager PIN and returns the associated staff member.
   verifyPIN(VerifyPINRequest) -> VerifyPINResponse @post("/verify")
+
+  /// Sets or rotates the manager override PIN for a staff member.
+  setPIN(SetPINRequest) -> SetPINResponse @post("/set-pin")
 }

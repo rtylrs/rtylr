@@ -2,6 +2,9 @@ package pos.menu_item.v1
 
 /// MenuItemService defines POS menu item endpoints.
 service MenuItemService {
+  /// Returns the shared product catalog for POS operators who can create orders.
+  listPOSCatalog(ListMenuItemsRequest) -> ListMenuItemsResponse @get("/catalog")
+
   /// Returns menu items for the active business.
   listMenuItems(ListMenuItemsRequest) -> ListMenuItemsResponse @get("/menu-items")
 

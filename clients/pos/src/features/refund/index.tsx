@@ -2,7 +2,7 @@ import { createOneKitClient } from '@voxire/api';
 import { OrderRefundServiceClient } from '@voxire/voxie/pos/orders/refunds/v1/client';
 import { OrderServiceClient } from '@voxire/voxie/pos/orders/v1/client';
 import type { Order } from '@voxire/voxie/pos/orders/v1/types';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
@@ -34,6 +34,9 @@ const RefundScreen: React.FC = () => {
   const [fullRefund, setFullRefund] = useState(true);
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
+  // A disabled button alone is not enough: two clicks in one tick both read
+  // `busy === false`, so the guard is a ref that flips before the first await.
+  const refundingRef = useRef(false);
   const receipt = useReceiptsStore((s) => (orderId ? s.byOrder(orderId) : undefined));
   const recordCashRefund = useCashDrawerStore((s) => s.recordCashRefund);
   const { canRefund } = useCapabilities();
@@ -65,6 +68,10 @@ const RefundScreen: React.FC = () => {
   }, [orderId]);
 
   const submit = async () => {
+    // A double refund pays the customer twice, so the second click must be a
+    // no-op rather than a second request.
+    if (refundingRef.current) return;
+    refundingRef.current = true;
     setBusy(true);
     try {
       await processRefund({
@@ -81,12 +88,15 @@ const RefundScreen: React.FC = () => {
         recordCashRefund,
       });
       toast.success('Refund processed');
+      setConfirm(false);
       navigate('/receipts');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Refund failed');
+      // Keep the dialog open so the cashier can retry without re-entering
+      // the amount; the latch is released below either way.
     } finally {
+      refundingRef.current = false;
       setBusy(false);
-      setConfirm(false);
     }
   };
 
@@ -185,8 +195,12 @@ const RefundScreen: React.FC = () => {
         title="Confirm refund"
         message="This action cannot be undone."
         confirmText={busy ? 'Refunding…' : 'Refund'}
+        pending={busy}
         danger
-        onCancel={() => setConfirm(false)}
+        onCancel={() => {
+          if (refundingRef.current) return;
+          setConfirm(false);
+        }}
         onConfirm={submit}
       />
     </ScreenLayout>

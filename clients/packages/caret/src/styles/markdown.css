@@ -1,49 +1,92 @@
 .caret-md {
-  font-size: 13.5px;
-  line-height: 1.55;
+  font-size: 14px;
+  line-height: 1.65;
   color: var(--caret-text, #f2f2ef);
+  overflow-wrap: anywhere;
+}
+/* Zero-specificity reset so the block gap below always applies. */
+.caret-md :where(p, ul, ol, blockquote, pre, h1, h2, h3, h4, h5, h6) {
+  margin: 0;
 }
 .caret-md > * + * {
-  margin-top: 6px;
+  margin-top: 12px;
+}
+.caret-md > :first-child {
+  margin-top: 0;
 }
 .caret-md p.caret-p {
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-word;
+  white-space: pre-line;
+}
+.caret-md strong {
+  font-weight: 600;
 }
 .caret-md .caret-h {
   font-weight: 600;
-  margin: 8px 0 4px;
+  line-height: 1.35;
+  margin: 20px 0 0;
+}
+.caret-md > .caret-h:first-child {
+  margin-top: 0;
+}
+.caret-md .caret-h + * {
+  margin-top: 6px;
 }
 .caret-md h1.caret-h {
-  font-size: 17px;
+  font-size: 19px;
 }
 .caret-md h2.caret-h {
-  font-size: 15px;
+  font-size: 17px;
 }
 .caret-md h3.caret-h {
+  font-size: 15px;
+}
+.caret-md h4.caret-h,
+.caret-md h5.caret-h,
+.caret-md h6.caret-h {
   font-size: 14px;
 }
+/* Host apps reset list markers; restore them for model output. */
 .caret-md ul.caret-list,
 .caret-md ol.caret-list {
-  padding-left: 20px;
-  margin: 0;
+  padding-left: 22px;
+}
+.caret-md ul.caret-list {
+  list-style: disc;
+}
+.caret-md ol.caret-list {
+  list-style: decimal;
+}
+.caret-md .caret-list .caret-list {
+  margin-top: 4px;
+}
+.caret-md ul.caret-list ul.caret-list {
+  list-style: circle;
 }
 .caret-md li {
-  margin: 2px 0;
+  margin: 4px 0;
+  padding-left: 2px;
+}
+.caret-md li::marker {
+  color: var(--caret-text-muted, #b2b2ae);
+}
+.caret-md li > p.caret-p + p.caret-p {
+  margin-top: 6px;
+}
+.caret-md li.task-list-item {
+  list-style: none;
+  margin-left: -20px;
 }
 .caret-md blockquote.caret-quote {
-  border-left: 2px solid var(--caret-border-strong, rgba(255, 255, 255, 0.24));
-  padding-left: 8px;
+  border-left: 3px solid var(--caret-border-strong, rgba(255, 255, 255, 0.24));
+  padding-left: 12px;
   color: var(--caret-text-muted, #b2b2ae);
-  margin: 0;
   font-style: italic;
 }
 .caret-md hr.caret-hr {
   border: none;
   height: 1px;
   background: var(--caret-border, rgba(255, 255, 255, 0.12));
-  margin: 12px 0;
+  margin: 18px 0;
 }
 .caret-md code.caret-inline-code {
   font-family: SFMono-Regular, Menlo, Consolas, monospace;
@@ -67,6 +110,51 @@
   overflow-x: auto;
   border: 1px solid var(--caret-border, rgba(255, 255, 255, 0.12));
 }
+.caret-md .caret-codeblock-frame {
+  position: relative;
+  margin: 8px 0;
+}
+.caret-md .caret-codeblock-frame > pre.caret-codeblock {
+  margin: 0;
+  /* Room for the copy button so it never covers the first line. */
+  padding-top: 10px;
+  padding-right: 10px;
+}
+.caret-md .caret-codeblock-copy {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border: 1px solid var(--caret-border, rgba(255, 255, 255, 0.12));
+  border-radius: 6px;
+  background: var(--caret-surface, #17181b);
+  color: var(--caret-text-muted, #b2b2ae);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.12s, color 0.12s, background 0.12s;
+}
+.caret-md .caret-codeblock-frame:hover .caret-codeblock-copy,
+.caret-md .caret-codeblock-copy:focus-visible,
+.caret-md .caret-codeblock-frame.is-copied .caret-codeblock-copy {
+  opacity: 1;
+}
+.caret-md .caret-codeblock-copy:hover {
+  color: var(--caret-text, #f2f2ef);
+  background: var(--caret-surface-high, #1e2023);
+}
+/* No hover on touch screens, so keep the button visible there. */
+@media (hover: none) {
+  .caret-md .caret-codeblock-copy {
+    opacity: 1;
+  }
+}
 .caret-md .caret-table-wrap {
   width: 100%;
   overflow-x: auto;
@@ -75,7 +163,6 @@
   background: var(--caret-surface, #17181b);
 }
 .caret-md .caret-table-empty {
-  margin: 0;
   padding: 9px 11px;
   border: 1px solid var(--caret-border, rgba(255, 255, 255, 0.12));
   border-radius: 8px;
@@ -106,8 +193,90 @@
 }
 .caret-md a.caret-link {
   color: var(--caret-accent, #63d1c4);
-  text-decoration: none;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  text-underline-offset: 2px;
+  word-break: break-word;
 }
 .caret-md a.caret-link:hover {
-  text-decoration: underline;
+  text-decoration-color: currentColor;
+}
+
+/* Syntax colours for fenced code. Dark by default; light when the app is. */
+.caret-panel-shell {
+  --caret-syn-keyword: #ff7b72;
+  --caret-syn-string: #a5d6ff;
+  --caret-syn-number: #79c0ff;
+  --caret-syn-comment: #8b949e;
+  --caret-syn-title: #d2a8ff;
+  --caret-syn-builtin: #ffa657;
+  --caret-syn-tag: #7ee787;
+  --caret-syn-deleted: #ffa198;
+}
+:root[data-theme='light'] .caret-panel-shell {
+  --caret-syn-keyword: #cf222e;
+  --caret-syn-string: #0a3069;
+  --caret-syn-number: #0550ae;
+  --caret-syn-comment: #6e7781;
+  --caret-syn-title: #8250df;
+  --caret-syn-builtin: #953800;
+  --caret-syn-tag: #116329;
+  --caret-syn-deleted: #82071e;
+}
+.caret-md .hljs-keyword,
+.caret-md .hljs-doctag,
+.caret-md .hljs-selector-tag,
+.caret-md .hljs-template-tag {
+  color: var(--caret-syn-keyword, #ff7b72);
+}
+.caret-md .hljs-string,
+.caret-md .hljs-regexp,
+.caret-md .hljs-meta .hljs-string,
+.caret-md .hljs-template-variable {
+  color: var(--caret-syn-string, #a5d6ff);
+}
+.caret-md .hljs-number,
+.caret-md .hljs-literal,
+.caret-md .hljs-symbol,
+.caret-md .hljs-bullet,
+.caret-md .hljs-attr,
+.caret-md .hljs-attribute,
+.caret-md .hljs-selector-attr,
+.caret-md .hljs-selector-class,
+.caret-md .hljs-selector-id {
+  color: var(--caret-syn-number, #79c0ff);
+}
+.caret-md .hljs-comment,
+.caret-md .hljs-quote,
+.caret-md .hljs-meta {
+  color: var(--caret-syn-comment, #8b949e);
+}
+.caret-md .hljs-comment,
+.caret-md .hljs-quote {
+  font-style: italic;
+}
+.caret-md .hljs-title,
+.caret-md .hljs-section,
+.caret-md .hljs-selector-pseudo {
+  color: var(--caret-syn-title, #d2a8ff);
+}
+.caret-md .hljs-built_in,
+.caret-md .hljs-type,
+.caret-md .hljs-variable.language_,
+.caret-md .hljs-title.class_ {
+  color: var(--caret-syn-builtin, #ffa657);
+}
+.caret-md .hljs-name,
+.caret-md .hljs-tag,
+.caret-md .hljs-addition {
+  color: var(--caret-syn-tag, #7ee787);
+}
+.caret-md .hljs-deletion {
+  color: var(--caret-syn-deleted, #ffa198);
+}
+.caret-md .hljs-strong {
+  font-weight: 700;
+}
+.caret-md .hljs-emphasis {
+  font-style: italic;
 }

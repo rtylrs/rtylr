@@ -1,0 +1,30 @@
+{
+  "configUpdated": "Configuration fiscale mise à jour",
+  "ratesEmptyTitle": "Aucun taux de taxe configuré",
+  "ratesEmptyDescription": "Ajoutez un taux de taxe pour commencer à calculer la taxe sur les factures et devis.",
+  "ratesEmptyCta": "Ajouter un taux de taxe",
+  "exportAria": "Exporter le récapitulatif fiscal pour le comptable",
+  "exportForAccountant": "Exporter pour le comptable",
+  "ratesInvalid": "Les taux doivent être des nombres positifs ou nuls",
+  "report": {
+    "title": "Récapitulatif fiscal",
+    "collected": "TVA collectée",
+    "owed": "TVA due",
+    "subtitle": "Taxe perçue sur les factures payées et montant dû pour la période",
+    "periods": {
+      "month": "Ce mois-ci",
+      "quarter": "Ce trimestre",
+      "year": "Cette année"
+    },
+    "collectedHint": "Sur les factures payées durant la période",
+    "owedHint": "Taxe perçue pas encore reversée",
+    "nothingYet": "Aucune taxe enregistrée pour {{period}}. La taxe apparaît ici dès que des factures avec un taux de taxe sont payées.",
+    "manageRates": "Gérer les taux de taxe"
+  },
+  "ratesTitle": "Taux de taxe",
+  "ratesSubtitle": "Les taux applicables à vos factures et devis",
+  "rateName": "Nom",
+  "rateNamePlaceholder": "TVA",
+  "rateValue": "Taux (%)",
+  "rateAdded": "Taux de taxe ajouté"
+}

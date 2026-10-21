@@ -3,8 +3,12 @@ package infrastructure_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"testing"
+	"time"
 
+	"github.com/voxire/onion/internal/modules/integrations/internal/domain"
 	"github.com/voxire/onion/internal/modules/integrations/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
@@ -151,15 +155,14 @@ func TestConnectIntegration_ProviderFieldPreserved(t *testing.T) {
 	t.Errorf("provider %q not found after connect", provider)
 }
 
-func TestDisconnect_NonExistentID_NoError(t *testing.T) {
+func TestDisconnect_NonExistentID_IsNotFound(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	// Disconnecting a non-existent ID should not error (0 rows affected is fine).
 	err := repo.Disconnect(ctx, testutil.OwnerID, 9999999)
-	if err != nil {
-		t.Fatalf("Disconnect non-existent: %v", err)
+	if !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("Disconnect non-existent = %v, want ErrNotFound", err)
 	}
 }
 
@@ -263,10 +266,12 @@ func TestListIntegrations_AfterConnect_CountIncreases(t *testing.T) {
 		t.Fatalf("List before: %v", err)
 	}
 
-	_, err = repo.Connect(ctx, testutil.OwnerID, "test_count_check", json.RawMessage(`{}`))
+	provider := fmt.Sprintf("test_count_%d", time.Now().UnixNano())
+	id, err := repo.Connect(ctx, testutil.OwnerID, provider, json.RawMessage(`{}`))
 	if err != nil {
 		t.Fatalf("Connect: %v", err)
 	}
+	t.Cleanup(func() { _ = repo.Disconnect(ctx, testutil.OwnerID, id) })
 
 	after, err := repo.List(ctx, testutil.OwnerID)
 	if err != nil {
@@ -274,6 +279,26 @@ func TestListIntegrations_AfterConnect_CountIncreases(t *testing.T) {
 	}
 	if len(after) != len(before)+1 {
 		t.Errorf("expected count +1: before=%d after=%d", len(before), len(after))
+	}
+}
+
+func TestConnect_SameProviderReusesTheRow(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	provider := fmt.Sprintf("test_reuse_%d", time.Now().UnixNano())
+	first, err := repo.Connect(ctx, testutil.OwnerID, provider, json.RawMessage(`{"a":1}`))
+	if err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Disconnect(ctx, testutil.OwnerID, first) })
+	second, err := repo.Connect(ctx, testutil.OwnerID, provider, json.RawMessage(`{"a":2}`))
+	if err != nil {
+		t.Fatalf("Connect again: %v", err)
+	}
+	if second != first {
+		t.Fatalf("connecting %q twice created row %d then %d", provider, first, second)
 	}
 }
 

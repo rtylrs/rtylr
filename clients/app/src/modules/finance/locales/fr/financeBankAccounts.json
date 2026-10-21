@@ -1,0 +1,32 @@
+{
+  "created": "Compte bancaire créé",
+  "title": "Flux bancaires",
+  "addAccount": "Ajouter un compte bancaire",
+  "accountName": "Nom du compte",
+  "bank": "Banque",
+  "typeLabel": "Type",
+  "last4": "4 derniers chiffres",
+  "openingBalance": "Solde initial",
+  "currency": "Devise",
+  "type": {
+    "checking": "Compte courant",
+    "savings": "Compte épargne",
+    "credit": "Crédit"
+  },
+  "payment": {
+    "amountPositive": "Le montant doit être supérieur à zéro",
+    "amountExceedsDue": "Le paiement ne peut pas dépasser le montant restant dû",
+    "dateAndReferenceRequired": "La date et la référence sont obligatoires",
+    "method": "Méthode",
+    "reference": "Référence",
+    "referencePlaceholder": "ID de transaction ou numéro de reçu"
+  },
+  "accountCount_one": "{{count}} compte connecté",
+  "accountCount_other": "{{count}} comptes connectés",
+  "totalBalance": "de solde total",
+  "loadFailedTitle": "Les comptes bancaires ne se sont pas chargés",
+  "loadFailed": "Les comptes bancaires n’ont pas pu être chargés. Vos comptes ne sont pas affectés ; réessayez dans un instant.",
+  "emptyTitle": "Aucun compte bancaire",
+  "emptyDescription": "Ajoutez les comptes depuis lesquels l’entreprise paie et sur lesquels elle est payée. Leurs soldes et transactions apparaissent ensuite ici et dans le rapprochement.",
+  "connect": "Connecter un compte"
+}

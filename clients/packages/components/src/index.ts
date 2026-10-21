@@ -16,15 +16,3 @@ export { Switch } from './Switch';
 export { Spinner } from './Spinner';
 export { Alert } from './Alert';
 export { Chip } from './Chip';
-
-// Self-host license notice (admin-only; no-op for the hosted product)
-export { LicenseBanner, useLicenseState, resolveLicenseNotice, isLicenseAdmin } from './license';
-export type {
-  LicenseBannerProps,
-  LicenseNotice,
-  LicenseNoticeKind,
-  LicenseNoticeSeverity,
-  LicenseState,
-  LicenseStatus,
-  LicenseMode,
-} from './license';

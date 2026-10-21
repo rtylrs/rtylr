@@ -1,0 +1,23 @@
+package devtools.emailtest.v1
+
+message ListTemplatesRequest {}
+
+message ListTemplatesResponse {
+  count: int32
+  templates: string[]
+}
+
+/// data is optional: missing template fields render empty, so a bare
+/// {"template","to"} is enough to test delivery.
+message SendTestEmailRequest {
+  template: string
+  to: string
+  subject: string
+  data: json
+}
+
+message SendTestEmailResponse {
+  queued: bool
+  template: string
+  to: string
+}

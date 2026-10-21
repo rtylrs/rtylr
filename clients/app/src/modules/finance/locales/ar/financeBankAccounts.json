@@ -1,0 +1,36 @@
+{
+  "created": "تم إنشاء الحساب المصرفي",
+  "title": "حركات البنك",
+  "addAccount": "إضافة حساب بنكي",
+  "accountName": "اسم الحساب",
+  "bank": "البنك",
+  "typeLabel": "النوع",
+  "last4": "آخر 4 أرقام",
+  "openingBalance": "الرصيد الافتتاحي",
+  "currency": "العملة",
+  "type": {
+    "checking": "جاري",
+    "savings": "توفير",
+    "credit": "ائتمان"
+  },
+  "payment": {
+    "amountPositive": "يجب أن يكون المبلغ أكبر من صفر",
+    "amountExceedsDue": "لا يمكن أن يتجاوز الدفع المبلغ المتبقي المستحق",
+    "dateAndReferenceRequired": "تاريخ السداد والمرجع مطلوبان",
+    "method": "طريقة السداد",
+    "reference": "المرجع",
+    "referencePlaceholder": "رقم العملية أو الإيصال"
+  },
+  "accountCount_zero": "لا حسابات مرتبطة",
+  "accountCount_one": "حساب واحد مرتبط",
+  "accountCount_two": "حسابان مرتبطان",
+  "accountCount_few": "{{count}} حسابات مرتبطة",
+  "accountCount_many": "{{count}} حسابًا مرتبطًا",
+  "accountCount_other": "{{count}} حساب مرتبط",
+  "totalBalance": "إجمالي الرصيد",
+  "loadFailedTitle": "لم يتم تحميل الحسابات البنكية",
+  "loadFailed": "تعذر تحميل الحسابات البنكية. حساباتك لم تتأثر؛ حاول مرة أخرى بعد قليل.",
+  "emptyTitle": "لا توجد حسابات بنكية بعد",
+  "emptyDescription": "أضف الحسابات التي تدفع منها الشركة وتتلقى عليها المدفوعات. ستظهر أرصدتها ومعاملاتها هنا وفي التسوية.",
+  "connect": "ربط حساب"
+}

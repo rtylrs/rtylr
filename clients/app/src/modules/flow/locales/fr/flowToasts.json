@@ -1,0 +1,167 @@
+{
+  "milestoneCreated": "Jalon créé",
+  "projectCreated": "Projet créé",
+  "task": {
+    "created": "Tâche créée",
+    "createFailed": "Impossible de créer la tâche",
+    "updateFailed": "Impossible de mettre à jour la tâche",
+    "deleteFailed": "Impossible de supprimer la tâche",
+    "statusUpdateFailed": "Impossible de mettre à jour le statut",
+    "archived": "Tâche archivée",
+    "deleted": "Tâche supprimée",
+    "restored": "Tâche restaurée",
+    "restoreFailed": "Impossible de restaurer la tâche",
+    "copied": "{{id}} copié",
+    "niceWork": "Bien joué !",
+    "bulkUpdated_one": "{{count}} tâche mise à jour",
+    "bulkUpdated_many": "{{count}} tâches mises à jour",
+    "bulkUpdated_other": "{{count}} tâches mises à jour",
+    "bulkUpdateFailed": "Impossible d'effectuer la mise à jour groupée",
+    "bulkDeleted_one": "{{count}} tâche supprimée",
+    "bulkDeleted_many": "{{count}} tâches supprimées",
+    "bulkDeleted_other": "{{count}} tâches supprimées",
+    "bulkDeleteFailed": "Impossible d'effectuer la suppression groupée",
+    "selectProjectFirst": "Sélectionnez d'abord un projet",
+    "invalidDuration": "Saisissez une durée valide, par exemple « 90m » ou « 1.5h »",
+    "moveFailed": "Échec du déplacement de la tâche",
+    "titleRequired": "Le titre de la tâche est requis",
+    "linkCopied": "Lien copié",
+    "createdWithId": "Créé {{id}}"
+  },
+  "comment": {
+    "postFailed": "Impossible de publier le commentaire"
+  },
+  "subtask": {
+    "addFailed": "Impossible d'ajouter la sous-tâche",
+    "updateFailed": "Impossible de mettre à jour la sous-tâche"
+  },
+  "time": {
+    "logged": "Temps enregistré",
+    "logFailed": "Impossible d'enregistrer le temps",
+    "deleteFailed": "Impossible de supprimer l'entrée de temps",
+    "deleted": "Entrée de temps supprimée"
+  },
+  "cycle": {
+    "created": "Itération créée",
+    "createFailed": "Échec de la création de l'itération",
+    "updateFailed": "Échec de la mise à jour de l'itération"
+  },
+  "label": {
+    "created": "Étiquette créée",
+    "createFailed": "Impossible de créer l'étiquette",
+    "deleted": "Étiquette supprimée",
+    "deleteFailed": "Impossible de supprimer l'étiquette",
+    "setFailed": "Échec de l'attribution des étiquettes de la tâche"
+  },
+  "notification": {
+    "markReadFailed": "Échec du marquage de la notification comme lue",
+    "markAllReadFailed": "Échec du marquage de toutes les notifications comme lues",
+    "savePreferencesFailed": "Échec de l'enregistrement des préférences de notification"
+  },
+  "column": {
+    "createFailed": "Échec de la création de la colonne",
+    "updateFailed": "Échec de la mise à jour de la colonne",
+    "deleteFailed": "Échec de la suppression de la colonne",
+    "nameRequired": "Le nom de la colonne est requis"
+  },
+  "projectMember": {
+    "removeFailed": "Échec de la suppression du membre",
+    "roleUpdateFailed": "Échec de la mise à jour du rôle",
+    "transferFailed": "Échec du transfert de propriété",
+    "invited": "Invitation envoyée",
+    "notFoundByEmail": "Aucun utilisateur trouvé avec cette adresse e-mail",
+    "roleUpdated": "Rôle mis à jour",
+    "removed": "Membre supprimé",
+    "transferred": "Propriété transférée",
+    "selectNewOwner": "Sélectionnez un membre",
+    "enterEmail": "Saisissez une adresse e-mail",
+    "selectWorkspaceMember": "Choisissez un membre actif de l’espace de travail"
+  },
+  "project": {
+    "createFailed": "Échec de la création du projet",
+    "updated": "Projet mis à jour",
+    "updateFailed": "Impossible de mettre à jour le projet",
+    "deleteFailed": "Échec de la suppression du projet",
+    "deleted": "Projet supprimé",
+    "restoreFailed": "Échec de la restauration du projet",
+    "purgeFailed": "Échec de la suppression définitive du projet",
+    "visibilityFailed": "Échec de la mise à jour de la visibilité",
+    "archived": "Projet archivé.",
+    "archivedUntil": "Projet archivé. Il sera définitivement supprimé le {{date}}.",
+    "archiveFailed": "Échec de l'archivage du projet"
+  },
+  "milestone": {
+    "createFailed": "Échec de la création du jalon",
+    "updateFailed": "Échec de la mise à jour du jalon"
+  },
+  "view": {
+    "renamed": "Vue renommée",
+    "renameFailed": "Échec du renommage de la vue",
+    "deleted": "Vue supprimée",
+    "deleteFailed": "Échec de la suppression de la vue",
+    "created": "Vue créée",
+    "madePrivate": "La vue est maintenant privée",
+    "madeShared": "La vue est maintenant partagée",
+    "visibilityFailed": "Échec du changement de visibilité de la vue"
+  },
+  "weeklyReview": {
+    "logged": "Bilan hebdomadaire enregistré",
+    "streak_one": "{{count}} semaine de suite",
+    "streak_many": "{{count}} semaines de suite",
+    "streak_other": "{{count}} semaines de suite",
+    "alreadyLogged": "Déjà enregistré cette semaine",
+    "alreadyLoggedStreak_one": "Série : {{count}} semaine",
+    "alreadyLoggedStreak_many": "Série : {{count}} semaines",
+    "alreadyLoggedStreak_other": "Série : {{count}} semaines"
+  },
+  "profile": {
+    "updated": "Profil mis à jour",
+    "updateFailed": "Impossible de mettre à jour le profil"
+  },
+  "password": {
+    "changed": "Mot de passe modifié",
+    "changeFailed": "Impossible de modifier le mot de passe"
+  },
+  "workspace": {
+    "noActive": "Aucun espace de travail actif",
+    "createFailed": "Échec de la création de l'espace de travail",
+    "updateFailed": "Échec de la mise à jour de l'espace de travail",
+    "deleteFailed": "Échec de la suppression de l'espace de travail",
+    "nameRequired": "Le nom de l'espace de travail est requis",
+    "created": "Espace de travail créé"
+  },
+  "workspaceMember": {
+    "invalidWorkspaceId": "Identifiant d'espace de travail invalide",
+    "invalidUserId": "Identifiant d'utilisateur invalide",
+    "addWorkspaceMemberFailed": "Échec de l'ajout du membre à l'espace de travail",
+    "removeWorkspaceMemberFailed": "Échec de la suppression du membre de l'espace de travail",
+    "updateRoleFailed": "Échec de la mise à jour du rôle du membre",
+    "roleUpdated": "Rôle mis à jour",
+    "roleUpdateFailed": "Échec de la mise à jour du rôle",
+    "cannotRemoveLastAdmin": "Impossible de supprimer le dernier administrateur",
+    "removed": "Membre supprimé",
+    "removeFailed": "Échec de la suppression du membre",
+    "selectMember": "Sélectionnez un membre de l'équipe",
+    "added": "Membre ajouté à l'espace de travail",
+    "addFailed": "Échec de l'ajout du membre"
+  },
+  "flowTeam": {
+    "accessGranted": "Accès à Work accordé",
+    "grantAccessFailed": "Échec de l'octroi de l'accès à Work",
+    "memberRemoved": "Membre retiré de Work",
+    "removeMemberFailed": "Échec de la suppression du membre"
+  },
+  "status": {
+    "created": "Statut créé",
+    "createFailed": "Impossible de créer le statut",
+    "updateFailed": "Échec de la mise à jour du statut",
+    "deleted": "Statut supprimé",
+    "deletedWithReassignment": "Statut supprimé. {{count}} tâche(s) revenue(s) à leur statut intégré.",
+    "deleteFailed": "Impossible de supprimer le statut",
+    "setFailed": "Échec de la définition du statut de la tâche"
+  },
+  "attachment": {
+    "addFailed": "Impossible d'ajouter la pièce jointe",
+    "removeFailed": "Impossible de supprimer la pièce jointe"
+  }
+}

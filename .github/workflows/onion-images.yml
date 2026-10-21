@@ -2,10 +2,16 @@ name: Onion images
 
 # Builds the ECS images without pushing or touching AWS, so the Dockerfiles,
 # in-tree contract generation and sqlc are exercised without credentials. The
-# real deploy path (ECR push + ECS update) is tryrtylr/deploy -> deploy-release.
+# real deploy path (ECR push + ECS update) is release.yml -> deploy.yml.
 
 on:
+  pull_request:
+    paths:
+      - 'services/onion/**'
+      - 'voxie/**'
+      - '.github/workflows/onion-images.yml'
   push:
+    branches: [main]
     paths:
       - 'services/onion/**'
       - 'voxie/**'
@@ -18,7 +24,7 @@ permissions:
 jobs:
   build:
     name: Build ${{ matrix.name }}
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:

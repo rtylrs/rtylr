@@ -51,9 +51,12 @@ export {
   compositeOver,
   deriveAccentFg,
   deriveAccentFgAcross,
+  deriveActionFill,
   deriveOnAccent,
   hexLuminance,
   isValidHex,
+  NEAR_BLACK,
+  NEAR_WHITE,
   normalizeHex,
   relativeLuminance,
 } from './colorMath';

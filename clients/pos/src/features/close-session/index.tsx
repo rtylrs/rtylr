@@ -1,6 +1,6 @@
 import { createOneKitClient } from '@voxire/api';
 import { SessionServiceClient } from '@voxire/voxie/pos/session/v1/client';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
@@ -25,6 +25,9 @@ const CloseSessionScreen: React.FC = () => {
   const [actualCash, setActualCash] = useState('');
   const [busy, setBusy] = useState(false);
   const [confirmZero, setConfirmZero] = useState(false);
+  // Closing twice would open a second register session; a disabled button does
+  // not cover two clicks inside one tick, so the latch flips before the await.
+  const closingRef = useRef(false);
 
   let variance = 0;
   try {
@@ -37,6 +40,8 @@ const CloseSessionScreen: React.FC = () => {
   }
 
   const close = async () => {
+    if (closingRef.current) return;
+    closingRef.current = true;
     setBusy(true);
     try {
       const result = await closeSessionWithFallback({
@@ -50,6 +55,7 @@ const CloseSessionScreen: React.FC = () => {
         enqueue: enqueueSessionClose,
       });
       closeDrawer();
+      setConfirmZero(false);
       if (result.status === 'queued') {
         toast.warning('Session close saved locally and will sync later');
       } else {
@@ -59,6 +65,9 @@ const CloseSessionScreen: React.FC = () => {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Unable to close session.');
     } finally {
+      // Released on failure too, so the cashier can retry from a still-open
+      // dialog rather than being stuck on a permanently disabled till.
+      closingRef.current = false;
       setBusy(false);
     }
   };
@@ -137,11 +146,16 @@ const CloseSessionScreen: React.FC = () => {
         open={confirmZero}
         title="Close with $0.00 counted cash?"
         message={`No counted cash was entered. This records a closing float of ${formatCurrency(0)} against an expected ${formatCurrency(expectedCash)}.`}
-        confirmText="Close anyway"
+        confirmText={busy ? 'Closing…' : 'Close anyway'}
+        pending={busy}
         danger
-        onCancel={() => setConfirmZero(false)}
-        onConfirm={() => {
+        onCancel={() => {
+          if (closingRef.current) return;
           setConfirmZero(false);
+        }}
+        onConfirm={() => {
+          // The dialog stays open (disabled) until the request settles, so a
+          // failure leaves it in place to retry from.
           void close();
         }}
       />

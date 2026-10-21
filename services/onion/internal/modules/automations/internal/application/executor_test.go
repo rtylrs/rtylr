@@ -91,7 +91,7 @@ func TestProcessDueSendsTheEmailAndRecordsTheRun(t *testing.T) {
 	seedRun(t, db, `[{"type":"send_email","subject":"Thanks!","body":"We got your order."}]`, true,
 		`{"order_id":501,"customer_id":882010}`)
 
-	if err := NewExecutor(db).ProcessDue(ctx); err != nil {
+	if err := newTestExecutor(db).ProcessDue(ctx); err != nil {
 		t.Fatalf("ProcessDue: %v", err)
 	}
 
@@ -131,7 +131,7 @@ func TestProcessDueDoesNotResendACompletedRun(t *testing.T) {
 
 	seedRun(t, db, `[{"type":"send_email"}]`, true, `{"customer_id":882010}`)
 
-	executor := NewExecutor(db)
+	executor := newTestExecutor(db)
 	if err := executor.ProcessDue(ctx); err != nil {
 		t.Fatalf("first ProcessDue: %v", err)
 	}
@@ -153,7 +153,7 @@ func TestProcessDueRefusesAnUnimplementedActionWithoutRunningTheRest(t *testing.
 
 	seedRun(t, db, `[{"type":"send_email"},{"type":"award_points"}]`, true, `{"customer_id":882010}`)
 
-	if err := NewExecutor(db).ProcessDue(ctx); err != nil {
+	if err := newTestExecutor(db).ProcessDue(ctx); err != nil {
 		t.Fatalf("ProcessDue: %v", err)
 	}
 
@@ -176,7 +176,7 @@ func TestProcessDueDeadLettersAnInactiveAutomation(t *testing.T) {
 
 	seedRun(t, db, `[{"type":"send_email"}]`, false, `{"customer_id":882010}`)
 
-	if err := NewExecutor(db).ProcessDue(ctx); err != nil {
+	if err := newTestExecutor(db).ProcessDue(ctx); err != nil {
 		t.Fatalf("ProcessDue: %v", err)
 	}
 
@@ -195,7 +195,7 @@ func TestProcessDueDeadLettersWhenTheEventNamesNoCustomer(t *testing.T) {
 
 	seedRun(t, db, `[{"type":"send_email"}]`, true, `{"order_id":501}`)
 
-	if err := NewExecutor(db).ProcessDue(ctx); err != nil {
+	if err := newTestExecutor(db).ProcessDue(ctx); err != nil {
 		t.Fatalf("ProcessDue: %v", err)
 	}
 

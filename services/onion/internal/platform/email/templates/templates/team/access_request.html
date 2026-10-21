@@ -1,5 +1,5 @@
 {{define "body"}}
-<h1>Access request</h1>
-<p><strong>{{.RequesterName}}</strong> ({{.RequesterEmail}}) is requesting access to <strong>{{.App}}</strong>.</p>
-{{if .TeamLink}}<a href="{{.TeamLink}}" class="btn">Go to Team</a>{{end}}
+<h1>{{.RequesterName}} wants access to {{.App}}</h1>
+<p><strong>{{.RequesterName}}</strong> ({{.RequesterEmail}}) asked for access to <strong>{{.App}}</strong>. You can grant it from Team.</p>
+{{if .TeamLink}}{{template "button" (action .TeamLink "Review in Team")}}{{end}}
 {{end}}

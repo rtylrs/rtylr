@@ -11,11 +11,16 @@ import (
 // permission that protects it. App access remains a separate check in the
 // authentication middleware. A route is left unmapped when the matrix does
 // not define a feature permission for that surface, rather than guessing a
-// broader permission.
+// broader permission. The AI namespaces are the one exception: they claim
+// every sub-path so an unmapped one cannot skip the check, see
+// aiFeaturePermission.
 func featurePermissionForRequest(method, path string) (authorization.AppID, string, bool) {
 	path = strings.ToLower(strings.TrimRight(path, "/"))
 	method = strings.ToUpper(method)
 
+	if permission, ok := aiFeaturePermission(path); ok {
+		return authorization.AppHub, permission, true
+	}
 	if permission, ok := hubFeaturePermission(method, path); ok {
 		return authorization.AppHub, permission, true
 	}
@@ -47,6 +52,38 @@ func featurePermissionForRequest(method, path string) (authorization.AppID, stri
 		return authorization.AppRecruit, permission, true
 	}
 	return "", "", false
+}
+
+// The AI subsystem (the echo module: /caret, /ai, and the hub.caret.v1 and
+// hub.ai.v1 contract routes) is mounted outside every application prefix, so
+// appForPath and the per-app matchers below used to claim none of it and a
+// request reached a handler carrying nothing but a valid token. Caret is a Hub
+// surface, so it takes the same minimum Hub permission that /hub/dashboard
+// already requires.
+//
+// No per-tool permission belongs here. POST /caret/tools/decision fans out to a
+// registry whose tools each own the permission of the app they touch, and a
+// permission outside the catalog could not be granted to anyone, which would
+// deny the whole product.
+func aiFeaturePermission(path string) (string, bool) {
+	if isAISurfacePath(path) {
+		return "hub:dashboard:view", true
+	}
+	return "", false
+}
+
+// isAISurfacePath claims the whole AI namespace rather than only the routes
+// that exist today, so a sub-path with no matrix entry is still gated by the
+// middleware instead of falling through to the unmapped catch-all. Comparing a
+// whole segment keeps a neighbouring route such as /aircraft from being
+// classified as AI.
+func isAISurfacePath(path string) bool {
+	for _, namespace := range []string{"/caret", "/ai", "/hub/caret", "/hub/ai"} {
+		if path == namespace || strings.HasPrefix(path, namespace+"/") {
+			return true
+		}
+	}
+	return false
 }
 
 func hubFeaturePermission(method, path string) (string, bool) {
@@ -83,7 +120,7 @@ func hubFeaturePermission(method, path string) (string, bool) {
 		return "hub:hierarchy:manage", true
 	case strings.HasPrefix(path, "/hub/audit"):
 		return "hub:audit:view", true
-	case strings.HasPrefix(path, "/hub/security"):
+	case path == "/hub/security/v1/organization/mfa":
 		return "hub:security:manage", true
 	case strings.HasPrefix(path, "/hub/api-keys"), strings.HasPrefix(path, "/hub/api_keys"):
 		return "hub:api_keys:manage", true
@@ -93,6 +130,16 @@ func hubFeaturePermission(method, path string) (string, bool) {
 
 func financeFeaturePermission(method, path string) (string, bool) {
 	switch {
+	case strings.HasPrefix(path, "/finance/account"), strings.HasPrefix(path, "/finance/journal"), strings.HasPrefix(path, "/finance/statement"), strings.HasPrefix(path, "/finance/bill"):
+		if method == http.MethodGet {
+			return "finance:accounts:view", true
+		}
+		return "finance:accounts:manage", true
+	case strings.HasPrefix(path, "/finance/expense-categor"):
+		if method == http.MethodGet {
+			return "finance:expenses:view", true
+		}
+		return "finance:expenses:create", true
 	case strings.HasPrefix(path, "/finance/invoices"):
 		if strings.HasSuffix(path, "/send") {
 			return "finance:invoices:send", true
@@ -103,6 +150,7 @@ func financeFeaturePermission(method, path string) (string, bool) {
 		if method == http.MethodPost {
 			return "finance:invoices:create", true
 		}
+		return "finance:invoices:create", true
 	case strings.HasPrefix(path, "/finance/quote"), strings.HasPrefix(path, "/finance/quotes"):
 		if method == http.MethodGet {
 			return "finance:quotes:view", true
@@ -130,6 +178,7 @@ func financeFeaturePermission(method, path string) (string, bool) {
 		if method == http.MethodGet {
 			return "finance:bank_feeds:view", true
 		}
+		return "finance:bank_feeds:manage", true
 	case strings.HasPrefix(path, "/finance/reconciliation"):
 		return "finance:reconciliation:manage", true
 	case strings.HasPrefix(path, "/finance/report"), strings.HasPrefix(path, "/finance/dashboard"):
@@ -147,6 +196,10 @@ func financeFeaturePermission(method, path string) (string, bool) {
 
 func crmFeaturePermission(method, path string) (string, bool) {
 	switch {
+	case strings.Contains(path, "/crm/segment"):
+		return "crm:segments:manage", true
+	case strings.Contains(path, "/crm/template"):
+		return "crm:templates:manage", true
 	case strings.Contains(path, "/crm/campaign"):
 		if strings.HasSuffix(path, "/send") {
 			return "crm:campaigns:send", true
@@ -157,13 +210,20 @@ func crmFeaturePermission(method, path string) (string, bool) {
 		if method == http.MethodPost {
 			return "crm:campaigns:create", true
 		}
+		return "crm:campaigns:manage", true
 	case strings.Contains(path, "/crm/loyalty"):
 		return "crm:loyalty:manage", true
 	case strings.Contains(path, "/crm/automation"):
 		return "crm:automations:manage", true
+	case strings.Contains(path, "/crm/feedback"):
+		return "crm:customers:view", true
+	case strings.Contains(path, "/crm/settings"):
+		return "crm:customers:edit", true
+	case strings.Contains(path, "/crm/dashboard"):
+		return "crm:customers:view", true
 	case strings.HasSuffix(path, "/crm/customers/export"):
 		return "crm:customers:export", true
-	case strings.Contains(path, "/crm/segment"), strings.Contains(path, "/crm/customer"), strings.Contains(path, "/crm/sales"):
+	case strings.Contains(path, "/crm/customer"), strings.Contains(path, "/crm/sales"):
 		if method == http.MethodGet {
 			return "crm:customers:view", true
 		}
@@ -182,7 +242,7 @@ func crmFeaturePermission(method, path string) (string, bool) {
 
 func erpFeaturePermission(method, path string) (string, bool) {
 	switch {
-	case strings.Contains(path, "/erp/product"), strings.Contains(path, "/erp/variant"):
+	case strings.Contains(path, "/erp/product"), strings.Contains(path, "/erp/variant"), strings.Contains(path, "/erp/category"), strings.Contains(path, "/erp/brand"):
 		if method == http.MethodGet {
 			return "erp:products:view", true
 		}
@@ -258,8 +318,24 @@ func isHRPolicyExemptPath(method, path string) bool {
 		path == "/hr/shift/v1/availability" || strings.HasPrefix(path, "/hr/shift/v1/availability/") {
 		return true
 	}
-	return method == http.MethodGet &&
-		(path == "/hr/payroll/my-runs" || strings.HasPrefix(path, "/hr/payroll/my-runs/"))
+	if method == http.MethodGet &&
+		(path == "/hr/payroll/my-runs" || strings.HasPrefix(path, "/hr/payroll/my-runs/")) {
+		return true
+	}
+	// Invite acceptance and verification are self-scoped: both handlers take the
+	// account from the auth context, refuse an anonymous caller, and acceptance
+	// additionally requires the caller's account email to equal the address the
+	// invite was sent to, so nothing in the request selects another tenant or
+	// another employee. Gating them on hr:employees:manage refused the invitee
+	// before those checks could run.
+	//
+	// Exact paths on the registered method only, so issuing an invite
+	// (POST /hr/employees/invite) stays behind hr:employees:manage.
+	if method == http.MethodPost && path == "/hr/employees/invite/accept" {
+		return true
+	}
+
+	return method == http.MethodGet && path == "/hr/employees/invite/verify"
 }
 
 func isPayrollExecutePath(path string) bool {
@@ -289,6 +365,30 @@ func hrFeaturePermission(method, path string) (string, bool) {
 		return "hr:schedules:manage", true
 	case strings.Contains(path, "/hr/role"):
 		return "hr:roles:manage", true
+	case strings.Contains(path, "/hr/review/"):
+		if method == http.MethodGet {
+			return "hr:employees:sensitive_view", true
+		}
+		return "hr:employees:manage", true
+	case strings.Contains(path, "/hr/one_on_one/"), strings.Contains(path, "/hr/one-on-ones"):
+		return "hr:employees:manage", true
+	case strings.Contains(path, "/hr/training/"):
+		if method == http.MethodGet {
+			return "hr:employees:view", true
+		}
+		return "hr:employees:manage", true
+	case strings.Contains(path, "/hr/benefit/"):
+		// Enrolling and listing one's own enrollments resolve the employee from
+		// the auth context, so they stay open to every employee.
+		if strings.Contains(path, "/benefits/enrollments") {
+			return "", false
+		}
+		if method == http.MethodGet {
+			return "hr:employees:view", true
+		}
+		return "hr:employees:manage", true
+	case strings.Contains(path, "/hr/dashboard/") && method != http.MethodGet:
+		return "hr:employees:manage", true
 	case strings.Contains(path, "/hr/employee"), strings.Contains(path, "/hr/staff"), strings.Contains(path, "/hr/attendance"):
 		if strings.Contains(path, "/sensitive") {
 			return "hr:employees:sensitive_view", true
@@ -303,6 +403,11 @@ func hrFeaturePermission(method, path string) (string, bool) {
 
 func insightsFeaturePermission(method, path string) (string, bool) {
 	switch {
+	case strings.Contains(path, "/insights/setting"):
+		if method == http.MethodGet {
+			return "insights:dashboard:view", true
+		}
+		return "insights:settings:edit", true
 	case strings.Contains(path, "/insights/report"):
 		if strings.HasSuffix(path, "/export") {
 			return "insights:reports:export", true
@@ -333,6 +438,8 @@ func posFeaturePermission(method, path string) (string, bool) {
 	}
 
 	switch {
+	case method == http.MethodGet && path == "/pos/menu-item/v1/catalog":
+		return "pos:orders:create", true
 	case strings.Contains(path, "/void"):
 		if strings.Contains(path, "/approve") {
 			return "pos:orders:void:approve", true
@@ -403,11 +510,11 @@ func flowFeaturePermission(method, path string) (string, bool) {
 		}
 		return "flow:tasks:edit", true
 	case strings.Contains(path, "/projects"):
-		if strings.Contains(path, "/assign") || strings.Contains(path, "/members") {
-			return "flow:projects:assign", true
-		}
 		if method == http.MethodGet {
 			return "flow:projects:view", true
+		}
+		if strings.Contains(path, "/assign") || strings.Contains(path, "/members") {
+			return "flow:projects:assign", true
 		}
 		if method == http.MethodPost {
 			return "flow:projects:create", true
@@ -418,6 +525,15 @@ func flowFeaturePermission(method, path string) (string, bool) {
 }
 
 func menuFeaturePermission(method, path string) (string, bool) {
+	if path == "/pos/menu-item/v1/menu-items/public" {
+		return "", false
+	}
+	if path == "/pos/menu-item/v1/menu-items" || strings.HasPrefix(path, "/pos/menu-item/v1/menu-items/") {
+		if method == http.MethodGet {
+			return "menu:menus:view", true
+		}
+		return "menu:menus:edit", true
+	}
 	if !strings.HasPrefix(path, "/menu/") && !strings.HasPrefix(path, "/hub/menu/") {
 		return "", false
 	}

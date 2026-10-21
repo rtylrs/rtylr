@@ -1,0 +1,14 @@
+{
+  "pageTitle": "Menu · rtylr",
+  "allItems": "Menu",
+  "loadFailedTitle": "Couldn't load the menu",
+  "loadFailedDescription": "Something went wrong while loading this menu. Please try again later.",
+  "businessNotFoundTitle": "Business not found",
+  "businessNotFoundDescription": "This business is no longer active or the link is incorrect.",
+  "goBack": "Go back",
+  "locationNotFoundTitle": "Location not found",
+  "locationNotFoundDescription": "This location doesn't exist or is no longer active.",
+  "backToBusiness": "Back to {{businessName}}",
+  "noItemsTitle": "No menu items available",
+  "noItemsDescription": "This menu is currently empty. Please check back later."
+}

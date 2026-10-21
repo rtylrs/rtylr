@@ -1,0 +1,24 @@
+{
+  "title": "Paramètres",
+  "description": "Les préférences de votre compte, entreprise et applications au même endroit.",
+  "groups": {
+    "account": {
+      "title": "Compte",
+      "description": "Votre profil, sécurité et entreprises."
+    },
+    "business": {
+      "title": "Entreprise",
+      "description": "Configuration, facturation et services connectés."
+    },
+    "apps": {
+      "title": "Applications",
+      "description": "Les préférences des applications que vous utilisez."
+    }
+  },
+  "search": "Rechercher des paramètres…",
+  "flowCommand": "Paramètres de Work",
+  "insightsCommand": "Paramètres d’Insights",
+  "noResults": "Aucun paramètre trouvé.",
+  "crmCommand": "Paramètres CRM",
+  "erpCommand": "Paramètres Opérations"
+}

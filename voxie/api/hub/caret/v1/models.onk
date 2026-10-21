@@ -19,3 +19,87 @@ message ListCaretToolsRequest {
 message ListCaretToolsResponse {
   tools: CaretTool[]
 }
+
+/// Image inputs accepted by the authenticated Caret SSE endpoint. At most four
+/// raster images, two MiB combined; SVG and remote URLs are not accepted.
+message CaretImageInput {
+ name: string
+ data_url: string
+}
+
+/// A tool contract as the runtime registry describes it.
+message CaretToolDef {
+  name: string
+  description: string
+  module: string
+  scope: string
+  requires_approval: bool
+  input_hint: string
+  output_hint: string
+  freshness: string
+  side_effect: string
+  approval_reason: string
+}
+
+message ListToolsRequest {
+  mode: string @query("mode")
+}
+
+message ListToolsResponse {
+  tools: CaretToolDef[]
+}
+
+message GetProviderStatusRequest {}
+
+message GetProviderStatusResponse {
+  available: bool
+  primary_provider: string
+  /// Provider name to availability.
+  providers: json
+}
+
+/// Approve or deny a pending tool call. input is the tool's JSON input.
+message ToolDecisionRequest {
+  tool_call_id: string
+  name: string
+  input: json
+  decision: string
+  mode: string
+  /// The chat the proposal came from. The outcome is recorded there so
+  /// Caret knows in later turns what was done or skipped.
+  session_id: string
+}
+
+message ToolDecisionResponse {
+  tool_call_id: string
+  status: string
+  message: string
+  executed: bool
+  tool: CaretToolDef
+  preview: string
+  output: json
+  duration_ms: int64 @encode(number)
+}
+
+message StopReplyRequest {
+  session_id: string
+}
+
+message StopReplyResponse {
+  /// False when no reply was generating in the chat.
+  stopped: bool
+}
+
+message RateReplyRequest {
+  session_id: string
+  /// The stored message id of the reply; empty rates the chat's latest reply.
+  message_id: string
+  /// "up", "down", or "clear" to remove a verdict.
+  rating: string
+  /// What was wrong or right, in the person's words. Optional.
+  reason: string
+}
+
+message RateReplyResponse {
+  saved: bool
+}

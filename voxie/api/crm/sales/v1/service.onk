@@ -1,8 +1,153 @@
 package crm.sales.v1
 
-/// ContractService defines CRM sales contract endpoints: the read surface
-/// other apps need (Finance prefills invoices from signed contracts), plus
-/// create/update so the legacy routes have a contract to migrate onto.
+/// LeadService covers prospecting: the lead list and its stats, editing,
+/// bulk changes and conversion into a deal.
+service LeadService {
+  /// Returns one page of leads.
+  listLeads(ListLeadsRequest) -> ListLeadsResponse @get("/leads")
+
+  /// Summarises prospecting for the leads page header, for the same filters
+  /// as the list (statuses aside).
+  getLeadStats(GetLeadStatsRequest) -> GetLeadStatsResponse @get("/leads/stats")
+
+  /// Lists the distinct sources, industries, sizes and places leads have.
+  listLeadFacets(ListLeadFacetsRequest) -> ListLeadFacetsResponse @get("/leads/facets")
+
+  /// Returns a single lead.
+  getLead(GetLeadRequest) -> GetLeadResponse @get("/leads/{id}")
+
+  /// Adds a lead.
+  createLead(CreateLeadRequest) -> CreateLeadResponse @post("/leads")
+
+  /// Replaces a lead's fields and status.
+  updateLead(UpdateLeadRequest) -> UpdateLeadResponse @put("/leads/{id}") @body("body")
+
+  /// Removes an unconverted lead with its tasks and activities.
+  deleteLead(DeleteLeadRequest) -> DeleteLeadResponse @delete("/leads/{id}")
+
+  /// Assigns or re-statuses many leads.
+  updateLeads(UpdateLeadsRequest) -> UpdateLeadsResponse @put("/leads")
+
+  /// Removes many unconverted leads.
+  deleteLeads(DeleteLeadsRequest) -> DeleteLeadsResponse @post("/leads/delete")
+
+  /// Qualifies a lead into a person, a company and optionally a deal.
+  convertLead(ConvertLeadRequest) -> ConvertLeadResponse @put("/leads/{id}/conversion") @body("body")
+
+  /// Lists the teammates work can be assigned to.
+  listReps(ListRepsRequest) -> ListRepsResponse @get("/reps")
+}
+
+/// ActivityService logs calls, emails, meetings, SMS and notes, and schedules
+/// the follow-ups that drive each rep's worklist.
+service ActivityService {
+  /// Logs a touch, optionally scheduling the next one.
+  logActivity(LogActivityRequest) -> LogActivityResponse @post("/activities")
+
+  /// Pages a lead's timeline.
+  listLeadActivities(ListLeadActivitiesRequest) -> ListActivitiesResponse @get("/leads/{lead_id}/activities")
+
+  /// Pages a deal's timeline.
+  listDealActivities(ListDealActivitiesRequest) -> ListActivitiesResponse @get("/deals/{deal_id}/activities")
+
+  /// Removes a logged activity.
+  deleteActivity(DeleteActivityRequest) -> DeleteActivityResponse @delete("/activities/{id}")
+
+  /// Pages tasks.
+  listTasks(ListSalesTasksRequest) -> ListSalesTasksResponse @get("/tasks")
+
+  /// Counts open tasks by when they are due.
+  getTaskCounts(GetSalesTaskCountsRequest) -> GetSalesTaskCountsResponse @get("/tasks/counts")
+
+  /// Schedules a task.
+  createTask(CreateSalesTaskRequest) -> SalesTaskResponse @post("/tasks")
+
+  /// Edits a task.
+  updateTask(UpdateSalesTaskRequest) -> SalesTaskResponse @put("/tasks/{id}") @body("body")
+
+  /// Marks a task done or open again.
+  completeTask(CompleteSalesTaskRequest) -> SalesTaskResponse @put("/tasks/{id}/completion") @body("body")
+
+  /// Removes a task.
+  deleteTask(DeleteSalesTaskRequest) -> DeleteSalesTaskResponse @delete("/tasks/{id}")
+}
+
+/// DealService covers the pipeline: boards, deal tables, stats and closing.
+service DealService {
+  /// Lists the business's pipelines, creating the default on first use.
+  listPipelines(ListPipelinesRequest) -> ListPipelinesResponse @get("/pipelines")
+
+  /// Adds a pipeline.
+  createPipeline(CreatePipelineRequest) -> PipelineResponse @post("/pipelines")
+
+  /// Renames a pipeline and replaces its stages.
+  updatePipeline(UpdatePipelineRequest) -> PipelineResponse @put("/pipelines/{id}") @body("body")
+
+  /// Removes an empty pipeline.
+  deletePipeline(DeletePipelineRequest) -> DeletePipelineResponse @delete("/pipelines/{id}")
+
+  /// Returns a pipeline's board header: each stage's totals.
+  getDealBoard(GetDealBoardRequest) -> GetDealBoardResponse @get("/deals/board")
+
+  /// Pages one board column.
+  listStageDeals(ListStageDealsRequest) -> ListStageDealsResponse @get("/stages/{stage_id}/deals")
+
+  /// Summarises a pipeline.
+  getDealStats(GetDealStatsRequest) -> GetDealStatsResponse @get("/deals/stats")
+
+  /// Returns calls, new leads and won deals per day over a window, with its
+  /// totals and each rep's share, for the dashboard.
+  getSalesActivity(GetSalesActivityRequest) -> GetSalesActivityResponse @get("/activity")
+
+  /// Returns one page of deals.
+  listDeals(ListDealsRequest) -> ListDealsResponse @get("/deals")
+
+  /// Returns a single deal with its contract.
+  getDeal(GetDealRequest) -> GetDealResponse @get("/deals/{id}")
+
+  /// Opens a deal without a lead.
+  createDeal(CreateDealRequest) -> DealResponse @post("/deals")
+
+  /// Edits a deal's fields.
+  updateDeal(UpdateDealRequest) -> DealResponse @put("/deals/{id}") @body("body")
+
+  /// Moves a deal to another open stage.
+  moveDeal(MoveDealRequest) -> DealResponse @put("/deals/{id}/stage") @body("body")
+
+  /// Closes a deal as won, optionally drafting its contract.
+  winDeal(WinDealRequest) -> WinDealResponse @put("/deals/{id}/win") @body("body")
+
+  /// Closes a deal as lost.
+  loseDeal(LoseDealRequest) -> DealResponse @put("/deals/{id}/lose") @body("body")
+
+  /// Reopens a closed deal.
+  reopenDeal(ReopenDealRequest) -> DealResponse @put("/deals/{id}/reopen") @body("body")
+
+  /// Removes a deal without a contract.
+  deleteDeal(DeleteDealRequest) -> DeleteDealResponse @delete("/deals/{id}")
+}
+
+/// LeadImportService loads spreadsheets of leads in chunks.
+service LeadImportService {
+  /// Opens an import.
+  startLeadImport(StartLeadImportRequest) -> LeadImportResponse @post("/lead-imports")
+
+  /// Imports one chunk of rows.
+  importLeadRows(ImportLeadRowsRequest) -> ImportLeadRowsResponse @post("/lead-imports/{id}/rows") @body("body")
+
+  /// Marks an import complete.
+  finishLeadImport(FinishLeadImportRequest) -> LeadImportResponse @put("/lead-imports/{id}")
+
+  /// Lists recent imports.
+  listLeadImports(ListLeadImportsRequest) -> ListLeadImportsResponse @get("/lead-imports")
+
+  /// Removes an import's untouched leads.
+  undoLeadImport(UndoLeadImportRequest) -> UndoLeadImportResponse @delete("/lead-imports/{id}")
+}
+
+/// ContractService covers contracts: the read surface other apps need
+/// (Finance prefills invoices from signed contracts) plus drafting and
+/// amending.
 service ContractService {
   /// Returns one page of contracts for this business.
   listContracts(ListContractsRequest) -> ListContractsResponse @get("/contracts")
@@ -10,9 +155,9 @@ service ContractService {
   /// Returns a single contract by id.
   getContract(GetContractRequest) -> GetContractResponse @get("/contracts/{id}")
 
-  /// Stages a new contract from a won lead.
+  /// Drafts a contract, usually for a won deal.
   createContract(CreateContractRequest) -> CreateContractResponse @post("/contracts")
 
-  /// Amends an existing contract.
-  updateContract(UpdateContractRequest) -> UpdateContractResponse @put("/contracts/{id}")
+  /// Replaces a contract's terms.
+  updateContract(UpdateContractRequest) -> UpdateContractResponse @put("/contracts/{id}") @body("body")
 }

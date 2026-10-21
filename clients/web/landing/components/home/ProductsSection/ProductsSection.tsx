@@ -1,114 +1,46 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
-import { ShoppingCart, Package, Users, Heart, DollarSign, Workflow, BarChart2 } from 'lucide-react';
 import Link from 'next/link';
+import { ArrowRight, BarChart2, Briefcase, Package, Users, Wallet, Heart } from 'lucide-react';
 import { blurFadeIn, blurFadeInSlow, staggerBlur, viewportOnce } from '../../../lib/animations';
 import { SplitWords } from '../../motion/SplitWords';
 import styles from './ProductsSection.module.scss';
 
-// Structure only. The card title and description live in the locale files
-// under home.products.cardsTop / cardsBottom, matched by position. The
-// label stays here: POS and ERP are product names, not copy, and
-// translating one would break the link to the page it points at.
-interface Product {
-  label: string;
+// Structure only. Each area's label, title and body live in the locale files
+// under home.products.areas, matched by position.
+interface Area {
   href: string;
   Icon: React.ComponentType<{ size?: number; strokeWidth?: number }>;
 }
 
-const PRODUCTS_TOP: Product[] = [
-  {
-    label: 'POS',
-    href: '/pos',
-    Icon: ShoppingCart,
-  },
-  {
-    label: 'ERP',
-    href: '/erp',
-    Icon: Package,
-  },
-  {
-    label: 'HR',
-    href: '/hr',
-    Icon: Users,
-  },
-  {
-    label: 'CRM',
-    href: '/crm',
-    Icon: Heart,
-  },
+const AREAS: Area[] = [
+  { href: '/workspace/#work', Icon: Briefcase },
+  { href: '/workspace/#finance', Icon: Wallet },
+  { href: '/workspace/#customers', Icon: Heart },
+  { href: '/workspace/#team', Icon: Users },
+  { href: '/workspace/#operations', Icon: Package },
+  { href: '/workspace/#insights', Icon: BarChart2 },
 ];
 
-const PRODUCTS_BOTTOM: Product[] = [
-  {
-    label: 'Finance',
-    href: '/finance',
-    Icon: DollarSign,
-  },
-  {
-    label: 'Flow',
-    href: '/flow',
-    Icon: Workflow,
-  },
-  {
-    label: 'Insights',
-    href: 'https://insights.rtylr.com',
-    Icon: BarChart2,
-  },
-];
-
-interface ProductCardProps {
-  product: Product;
-  index: number;
-  /** Resolved copy, passed in so the card does not need to know its index
-      into the locale array. */
+interface AreaCopy {
+  label: string;
   title: string;
-  description: string;
+  body: string;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({
-  product,
-  index,
-  title,
-  description,
-}: ProductCardProps): React.JSX.Element => {
-  const { Icon } = product;
-  const { t } = useTranslation();
-  return (
-    <motion.div className={styles.card} variants={blurFadeIn} custom={index}>
-      <motion.div className={styles.iconWrap} whileHover={{ scale: 1.08, rotate: -3 }}>
-        <Icon size={20} strokeWidth={1.6} />
-      </motion.div>
-      <p className={styles.cardLabel}>{product.label}</p>
-      <h3 className={styles.cardTitle}>{title}</h3>
-      <p className={styles.cardDescription}>{description}</p>
-      <Link
-        href={product.href}
-        className={styles.cardArrow}
-        aria-label={t('home.products.exploreLabel', { capability: product.label })}
-      >
-        {t('home.products.explore')}
-      </Link>
-    </motion.div>
-  );
-};
-
-interface Card {
-  title: string;
-  description: string;
-}
-
+/**
+ * The workspace at a glance: one ruled grid, one cell per area. Each cell
+ * reads as a two-tone sentence (bold claim, muted follow-up), the same
+ * voice as the section heading.
+ */
 const ProductsSection: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const cardsTop = t('home.products.cardsTop', { returnObjects: true }) as unknown as Card[];
-  const cardsBottom = t('home.products.cardsBottom', {
-    returnObjects: true,
-  }) as unknown as Card[];
+  const copy = t('home.products.areas', { returnObjects: true }) as unknown as AreaCopy[];
+
   return (
     <section className={styles.productsSection}>
       <div className={styles.container}>
-        {/* Header */}
         <motion.div
           className={styles.header}
           initial="hidden"
@@ -123,6 +55,7 @@ const ProductsSection: React.FC = (): React.JSX.Element => {
             as="h2"
             className={styles.sectionTitle}
             text={t('home.products.title')}
+            restLinesClassName={styles.sectionTitleMuted}
             trigger="view"
           />
           <motion.p className={styles.sectionSubtitle} variants={blurFadeIn}>
@@ -130,41 +63,32 @@ const ProductsSection: React.FC = (): React.JSX.Element => {
           </motion.p>
         </motion.div>
 
-        {/* Top row: 4 cards */}
         <motion.div
           className={styles.grid}
+          data-mascot-spot="0.12"
           initial="hidden"
           whileInView="visible"
           viewport={viewportOnce}
           variants={staggerBlur}
         >
-          {PRODUCTS_TOP.map((product, i) => (
-            <ProductCard
-              key={product.label}
-              product={product}
-              index={i}
-              title={cardsTop[i].title}
-              description={cardsTop[i].description}
-            />
-          ))}
-        </motion.div>
-
-        {/* Bottom row: 3 cards */}
-        <motion.div
-          className={styles.gridBottom}
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewportOnce}
-          variants={staggerBlur}
-        >
-          {PRODUCTS_BOTTOM.map((product, i) => (
-            <ProductCard
-              key={product.label}
-              product={product}
-              index={i}
-              title={cardsBottom[i].title}
-              description={cardsBottom[i].description}
-            />
+          {AREAS.map(({ href, Icon }, i) => (
+            <motion.div key={href} className={styles.cell} variants={blurFadeIn} custom={i}>
+              <span className={styles.cellLabel}>
+                <Icon size={15} strokeWidth={1.8} />
+                {copy[i].label}
+              </span>
+              <p className={styles.cellText}>
+                <strong>{copy[i].title}</strong> {copy[i].body}
+              </p>
+              <Link
+                href={href}
+                className={styles.cellLink}
+                aria-label={t('home.products.exploreLabel', { capability: copy[i].label })}
+              >
+                {t('home.products.explore')}
+                <ArrowRight size={14} aria-hidden="true" />
+              </Link>
+            </motion.div>
           ))}
         </motion.div>
       </div>

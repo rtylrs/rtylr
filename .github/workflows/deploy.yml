@@ -1,0 +1,88 @@
+name: Deploy release
+
+# Reusable: builds one immutable release tag and ships the selected targets
+# through deploy-pages-release.yml and deploy-ecs-release.yml. Pages apps and ECS services share this entrypoint.
+# Callers (release.yml on a push to main, redeploy.yml by hand) pass the target
+# lists produced by .github/scripts/plan-deploys.sh.
+on:
+  workflow_call:
+    inputs:
+      release_tag:
+        description: GitHub release tag to build, for example rtylr-v6.1.2
+        required: true
+        type: string
+      version:
+        description: Release version without the tag prefix, used as the image tag
+        required: true
+        type: string
+      pages:
+        description: JSON array of Pages targets
+        required: true
+        type: string
+      ecs:
+        description: JSON array of ECS targets
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  pages:
+    name: Deploy ${{ matrix.app }}
+    if: inputs.pages != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(inputs.pages) }}
+    concurrency:
+      group: deploy-${{ matrix.app }}
+      cancel-in-progress: false
+    uses: ./.github/workflows/deploy-pages-release.yml
+    with:
+      source_repository: rtylrs/rtylr
+      source_ref: ${{ inputs.release_tag }}
+      app_filter: ${{ matrix.app_filter }}
+      build_script: ${{ matrix.build_script }}
+      dist_dir: ${{ matrix.dist_dir }}
+      working_directory: ${{ matrix.working_directory }}
+      project_name: ${{ matrix.project_name }}
+      node_version: ${{ matrix.node_version }}
+    secrets: inherit
+
+  # The API and the worker read the columns their release's migrations add, so
+  # the schema goes first. A failed migration stops their deploy: the running
+  # release keeps working against the schema it knows.
+  migrate:
+    name: Migrate the database
+    if: contains(inputs.ecs, '"app":"onion-api"') || contains(inputs.ecs, '"app":"onion-worker"')
+    uses: ./.github/workflows/migrate-onion-database.yml
+    with:
+      release_tag: ${{ inputs.release_tag }}
+      dry_run: false
+    secrets: inherit
+
+  ecs:
+    name: Deploy ${{ matrix.app }}
+    needs: migrate
+    if: ${{ !cancelled() && inputs.ecs != '[]' && needs.migrate.result != 'failure' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(inputs.ecs) }}
+    concurrency:
+      group: deploy-${{ matrix.app }}
+      cancel-in-progress: false
+    uses: ./.github/workflows/deploy-ecs-release.yml
+    with:
+      source_repository: rtylrs/rtylr
+      source_ref: ${{ inputs.release_tag }}
+      version: ${{ inputs.version }}
+      dockerfile: ${{ matrix.dockerfile }}
+      image_repository: ${{ matrix.image_repository }}
+      cluster: ${{ matrix.cluster }}
+      service: ${{ matrix.service }}
+      container: ${{ matrix.container }}
+      desired_count: ${{ matrix.desired_count }}
+      health_url: ${{ matrix.health_url }}
+    secrets: inherit

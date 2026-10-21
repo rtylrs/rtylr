@@ -1,0 +1,10 @@
+version: "2"
+sql:
+ - engine: mysql
+   queries: queries
+   schema: migration_20261009_team_outbox.sql
+   gen:
+    go:
+     package: sqlc
+     out: ../persistence/sqlc
+     sql_package: database/sql

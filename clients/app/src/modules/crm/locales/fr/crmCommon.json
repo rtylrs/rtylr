@@ -1,0 +1,20 @@
+{
+  "loading": "Chargement...",
+  "save": "Enregistrer",
+  "cancel": "Annuler",
+  "delete": "Supprimer",
+  "edit": "Modifier",
+  "close": "Fermer",
+  "back": "Retour",
+  "search": "Rechercher",
+  "create": "Créer",
+  "confirm": "Confirmer",
+  "noData": "Aucune donnée disponible",
+  "actions": "Actions",
+  "status": "Statut",
+  "name": "Nom",
+  "email": "E-mail",
+  "phone": "Téléphone",
+  "date": "Date",
+  "retry": "Réessayer"
+}

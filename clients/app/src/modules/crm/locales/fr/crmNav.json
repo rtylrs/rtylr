@@ -1,0 +1,44 @@
+{
+  "dashboard": "Tableau de bord",
+  "customers": "Clients",
+  "loyalty": "Fidélité",
+  "campaigns": "Campagnes",
+  "segments": "Segments",
+  "automations": "Automatisations",
+  "templates": "Modèles",
+  "feedback": "Avis",
+  "settings": "Paramètres",
+  "leads": "Prospects",
+  "contracts": "Contrats",
+  "newCustomer": "Nouveau client",
+  "importCustomers": "Importer des clients",
+  "loyaltyMembers": "Membres du programme",
+  "rewardsCatalog": "Catalogue de récompenses",
+  "loyaltyTiers": "Niveaux de fidélité",
+  "newEmailCampaign": "Nouvelle campagne e-mail",
+  "newSmsCampaign": "Nouvelle campagne SMS",
+  "newSegment": "Nouveau segment",
+  "newAutomation": "Nouvelle automatisation",
+  "appName": "CRM",
+  "groups": {
+    "navigate": "Naviguer",
+    "create": "Créer",
+    "customers": "Clients",
+    "loyalty": "Fidélité"
+  },
+  "titles": {
+    "feedback": "Avis et NPS"
+  },
+  "actions": {
+    "importCustomersCsv": "Importer des clients depuis un CSV",
+    "loyaltyRewardsCatalog": "Catalogue de récompenses de fidélité"
+  },
+  "deals": "Affaires",
+  "tasks": "Tâches",
+  "sections": {
+    "sales": "Ventes",
+    "customers": "Clients",
+    "marketing": "Marketing",
+    "retention": "Fidélisation"
+  }
+}

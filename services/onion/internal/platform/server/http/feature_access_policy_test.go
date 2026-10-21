@@ -3,12 +3,87 @@ package http
 import (
 	"net/http"
 	"testing"
+
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 )
 
 func TestCustomerExportUsesCanonicalPermission(t *testing.T) {
 	appID, permission, ok := featurePermissionForRequest(http.MethodGet, "/crm/customers/export")
 	if !ok || appID != "crm" || permission != "crm:customers:export" {
 		t.Fatalf("customer export mapping = %s:%s,%t", appID, permission, ok)
+	}
+}
+
+func TestFinanceAndCRMFeatureRoutesUseCanonicalPermissions(t *testing.T) {
+	for _, request := range []struct {
+		method, path string
+		app          authorization.AppID
+		permission   string
+	}{
+		{http.MethodGet, "/finance/account/v1/accounts", authorization.AppFinance, "finance:accounts:view"},
+		{http.MethodPut, "/finance/account/v1/accounts/9", authorization.AppFinance, "finance:accounts:manage"},
+		{http.MethodPost, "/finance/bill/v1/bills", authorization.AppFinance, "finance:accounts:manage"},
+		{http.MethodGet, "/finance/journal/v1/journal-entries", authorization.AppFinance, "finance:accounts:view"},
+		{http.MethodPost, "/finance/journal/v1/journal-entries", authorization.AppFinance, "finance:accounts:manage"},
+		{http.MethodGet, "/finance/statement/v1/balance-sheet", authorization.AppFinance, "finance:accounts:view"},
+		{http.MethodPut, "/finance/bank_account/v1/bank-accounts/9", authorization.AppFinance, "finance:bank_feeds:manage"},
+		{http.MethodGet, "/finance/expense-categories", authorization.AppFinance, "finance:expenses:view"},
+		{http.MethodPut, "/finance/expense-categories", authorization.AppFinance, "finance:expenses:create"},
+		{http.MethodPut, "/finance/invoices/9", authorization.AppFinance, "finance:invoices:create"},
+		{http.MethodGet, "/crm/dashboard", authorization.AppCRM, "crm:customers:view"},
+		{http.MethodDelete, "/crm/campaign/v1/campaigns/9", authorization.AppCRM, "crm:campaigns:manage"},
+		{http.MethodPut, "/crm/campaigns/9/status", authorization.AppCRM, "crm:campaigns:manage"},
+		{http.MethodGet, "/crm/segment/v1/segments", authorization.AppCRM, "crm:segments:manage"},
+		{http.MethodPost, "/crm/template/v1/templates", authorization.AppCRM, "crm:templates:manage"},
+		{http.MethodGet, "/crm/feedback", authorization.AppCRM, "crm:customers:view"},
+		{http.MethodPut, "/crm/settings", authorization.AppCRM, "crm:customers:edit"},
+	} {
+		t.Run(request.method+" "+request.path, func(t *testing.T) {
+			app, permission, ok := featurePermissionForRequest(request.method, request.path)
+			if !ok || app != request.app || permission != request.permission {
+				t.Fatalf("mapping = %s:%s,%t, want %s:%s,true", app, permission, ok, request.app, request.permission)
+			}
+		})
+	}
+}
+
+func TestPOSCatalogAndMenuAdministrationUseSeparatePermissions(t *testing.T) {
+	for _, request := range []struct {
+		method, path string
+		app          authorization.AppID
+		permission   string
+	}{
+		{http.MethodGet, "/pos/menu-item/v1/catalog", authorization.AppPOS, "pos:orders:create"},
+		{http.MethodGet, "/pos/menu-item/v1/menu-items", authorization.AppMenu, "menu:menus:view"},
+		{http.MethodGet, "/pos/menu-item/v1/menu-items/7", authorization.AppMenu, "menu:menus:view"},
+		{http.MethodPost, "/pos/menu-item/v1/menu-items", authorization.AppMenu, "menu:menus:edit"},
+		{http.MethodPut, "/pos/menu-item/v1/menu-items/7", authorization.AppMenu, "menu:menus:edit"},
+		{http.MethodDelete, "/pos/menu-item/v1/menu-items/7", authorization.AppMenu, "menu:menus:edit"},
+	} {
+		t.Run(request.method+" "+request.path, func(t *testing.T) {
+			app, permission, ok := featurePermissionForRequest(request.method, request.path)
+			if !ok || app != request.app || permission != request.permission {
+				t.Fatalf("mapping = %s:%s,%t, want %s:%s,true", app, permission, ok, request.app, request.permission)
+			}
+		})
+	}
+}
+
+func TestInsightsSettingsSeparateReadAndWritePermissions(t *testing.T) {
+	for _, request := range []struct {
+		method     string
+		permission string
+	}{
+		{http.MethodGet, "insights:dashboard:view"},
+		{http.MethodPut, "insights:settings:edit"},
+	} {
+		t.Run(request.method, func(t *testing.T) {
+			appID, permission, ok := featurePermissionForRequest(request.method, "/insights/setting/v1/settings")
+			if !ok || appID != authorization.AppInsights || permission != request.permission {
+				t.Fatalf("settings mapping = %s:%s,%t, want insights:%s,true", appID, permission, ok, request.permission)
+			}
+		})
 	}
 }
 
@@ -27,6 +102,14 @@ func TestERPFeatureRoutesUseCanonicalPermissions(t *testing.T) {
 		{name: "supplier delete", method: http.MethodDelete, path: "/erp/supplier/v1/suppliers/7", permission: "erp:suppliers:edit"},
 		{name: "variant view", method: http.MethodGet, path: "/erp/variant/v1/variants", permission: "erp:products:view"},
 		{name: "variant create", method: http.MethodPost, path: "/erp/variant/v1/variants", permission: "erp:products:create"},
+		{name: "category view", method: http.MethodGet, path: "/erp/category/v1/categories", permission: "erp:products:view"},
+		{name: "category create", method: http.MethodPost, path: "/erp/category/v1/categories", permission: "erp:products:create"},
+		{name: "category edit", method: http.MethodPut, path: "/erp/category/v1/categories/7", permission: "erp:products:edit"},
+		{name: "category delete", method: http.MethodDelete, path: "/erp/category/v1/categories/7", permission: "erp:products:delete"},
+		{name: "brand view", method: http.MethodGet, path: "/erp/brand/v1/brands", permission: "erp:products:view"},
+		{name: "brand create", method: http.MethodPost, path: "/erp/brand/v1/brands", permission: "erp:products:create"},
+		{name: "brand edit", method: http.MethodPut, path: "/erp/brand/v1/brands/7", permission: "erp:products:edit"},
+		{name: "brand delete", method: http.MethodDelete, path: "/erp/brand/v1/brands/7", permission: "erp:products:delete"},
 		{name: "stock take create", method: http.MethodPost, path: "/erp/stock-take/v1/stock-takes", permission: "erp:inventory:adjust"},
 		{name: "stock take complete", method: http.MethodPut, path: "/erp/stock-take/v1/stock-takes/7", permission: "erp:inventory:approve"},
 		{name: "stock transfer receive", method: http.MethodPatch, path: "/erp/stock-transfer/v1/stock-transfers/7/status", permission: "erp:inventory:transfer"},
@@ -63,6 +146,135 @@ func TestAttendanceClockOutRoutesAreSelfServiceExempt(t *testing.T) {
 		t.Run(path, func(t *testing.T) {
 			if appID, permission, ok := featurePermissionForRequest(http.MethodPost, path); ok {
 				t.Fatalf("self-service attendance route %q mapped to %q:%q", path, appID, permission)
+			}
+		})
+	}
+}
+
+func TestAISurfaceRoutesUseTheHubDashboardPermission(t *testing.T) {
+	for _, route := range []struct{ method, path string }{
+		{http.MethodGet, "/caret/tools"},
+		{http.MethodPost, "/caret/tools/decision"},
+		{http.MethodGet, "/ai/status"},
+		{http.MethodPost, "/ai/generate-text-stream"},
+		{http.MethodPost, "/hub/caret/v1/tools"},
+		{http.MethodGet, "/hub/ai/v1/usage"},
+		{http.MethodPut, "/hub/ai/v1/quota-settings"},
+	} {
+		t.Run(route.method+" "+route.path, func(t *testing.T) {
+			appID, permission, ok := featurePermissionForRequest(route.method, route.path)
+			if !ok || appID != authorization.AppHub || permission != "hub:dashboard:view" {
+				t.Fatalf("mapping = %s:%s,%t, want hub:hub:dashboard:view,true", appID, permission, ok)
+			}
+		})
+	}
+}
+
+// An AI sub-path with no matrix row must still reach the middleware's
+// permission check. Falling through to the unmapped catch-all is what let any
+// authenticated tenant member invoke the tool-decision write path.
+func TestUnmappedAISurfaceSubPathsStillRequireAuthorization(t *testing.T) {
+
+	member := &authPkg.AuthUser{
+		UserID:     7,
+		BusinessID: 9,
+		EffectiveAccess: &authorization.EffectiveAccess{
+			BusinessID: 9,
+			Apps: []authorization.EffectiveAppAccess{{
+				AppID:     authorization.AppPOS,
+				Licensed:  true,
+				HasAccess: true,
+			}},
+		},
+	}
+
+	for _, route := range []struct{ method, path string }{
+		{http.MethodGet, "/caret"},
+		{http.MethodPost, "/caret/tools/decision"},
+		{http.MethodPost, "/caret/tools/decision/approve-all"},
+		{http.MethodDelete, "/caret/internal/exec"},
+		{http.MethodGet, "/ai"},
+		{http.MethodPost, "/ai/anything"},
+		{http.MethodPost, "/hub/caret/v1/unknown"},
+		{http.MethodGet, "/hub/ai/v1/unknown"},
+	} {
+		t.Run(route.method+" "+route.path, func(t *testing.T) {
+			appID, permission, ok := featurePermissionForRequest(route.method, route.path)
+			if !ok {
+				t.Fatalf("%q reached the unmapped catch-all, so the middleware skips authorization", route.path)
+			}
+			if hasFeaturePermission(member, appID, permission) {
+				t.Fatalf("%q authorized a tenant member holding no hub permission", route.path)
+			}
+		})
+	}
+}
+
+func TestAISurfaceRoutesAllowAMemberWithTheHubDashboardPermission(t *testing.T) {
+
+	member := &authPkg.AuthUser{
+		UserID:     7,
+		BusinessID: 9,
+		EffectiveAccess: &authorization.EffectiveAccess{
+			BusinessID:      9,
+			DashPermissions: []string{"hub:dashboard:view"},
+		},
+	}
+
+	for _, path := range []string{"/caret/tools/decision", "/ai/generate-text-stream", "/hub/ai/v1/usage"} {
+		t.Run(path, func(t *testing.T) {
+			appID, permission, ok := featurePermissionForRequest(http.MethodPost, path)
+			if !ok || !hasFeaturePermission(member, appID, permission) {
+				t.Fatalf("%q denied a member holding hub:dashboard:view", path)
+			}
+		})
+	}
+}
+
+func TestAISurfaceMatcherDoesNotClaimNeighbouringPrefixes(t *testing.T) {
+	for _, path := range []string{"/aircraft/v1/parts", "/cares/v1/intake", "/hub/air/v1/usage", "/a"} {
+		if appID, permission, ok := featurePermissionForRequest(http.MethodGet, path); ok {
+			t.Fatalf("%q was claimed by the AI namespace as %s:%s", path, appID, permission)
+		}
+	}
+}
+
+func TestHRPeopleRoutesRequireManagementPermissions(t *testing.T) {
+	tests := []struct {
+		name       string
+		method     string
+		path       string
+		permission string
+	}{
+		{name: "reviews list", method: http.MethodGet, path: "/hr/review/v1/reviews", permission: "hr:employees:sensitive_view"},
+		{name: "reviews create", method: http.MethodPost, path: "/hr/review/v1/reviews", permission: "hr:employees:manage"},
+		{name: "one-on-ones list", method: http.MethodGet, path: "/hr/one_on_one/v1/one-on-ones", permission: "hr:employees:manage"},
+		{name: "one-on-ones create", method: http.MethodPost, path: "/hr/one_on_one/v1/one-on-ones", permission: "hr:employees:manage"},
+		{name: "courses list", method: http.MethodGet, path: "/hr/training/v1/courses", permission: "hr:employees:view"},
+		{name: "courses create", method: http.MethodPost, path: "/hr/training/v1/courses", permission: "hr:employees:manage"},
+		{name: "benefit plans list", method: http.MethodGet, path: "/hr/benefit/v1/benefits", permission: "hr:employees:view"},
+		{name: "benefit plan create", method: http.MethodPost, path: "/hr/benefit/v1/benefits", permission: "hr:employees:manage"},
+		{name: "dashboard layout update", method: http.MethodPut, path: "/hr/dashboard/v1/dashboard/widgets", permission: "hr:employees:manage"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			appID, permission, ok := featurePermissionForRequest(tt.method, tt.path)
+			if !ok || appID != "hr" || permission != tt.permission {
+				t.Fatalf("mapping = %s:%s,%t, want hr:%s,true", appID, permission, ok, tt.permission)
+			}
+		})
+	}
+}
+
+func TestHRSelfServiceRoutesStayUnmapped(t *testing.T) {
+	for _, tt := range []struct{ method, path string }{
+		{http.MethodGet, "/hr/benefit/v1/benefits/enrollments/mine"},
+		{http.MethodPost, "/hr/benefit/v1/benefits/enrollments"},
+		{http.MethodGet, "/hr/dashboard/v1/dashboard"},
+	} {
+		t.Run(tt.method+" "+tt.path, func(t *testing.T) {
+			if appID, permission, ok := featurePermissionForRequest(tt.method, tt.path); ok {
+				t.Fatalf("self-service route mapped to %s:%s", appID, permission)
 			}
 		})
 	}

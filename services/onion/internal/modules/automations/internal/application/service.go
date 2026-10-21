@@ -2,11 +2,9 @@ package application
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/automations/internal/domain"
-	"github.com/voxire/onion/internal/modules/automations/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 )
@@ -27,10 +25,8 @@ type Service struct {
 	repo repository
 }
 
-func NewService(_ context.Context, db *sql.DB) *Service {
-	return &Service{
-		repo: infrastructure.NewRepository(db),
-	}
+func NewService(repo repository) *Service {
+	return &Service{repo: repo}
 }
 
 func invalidateAutomationsScope(ctx context.Context, businessID int64) {
@@ -39,7 +35,7 @@ func invalidateAutomationsScope(ctx context.Context, businessID int64) {
 
 func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Automation, error) {
 	return cacher.Of[[]domain.Automation]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(automationsScope, businessID, "list"),
+		cacheKeys.Scoped(automationsScope, businessID, "list")+"|domain=v2",
 		func(ctx context.Context) ([]domain.Automation, error) {
 			return s.repo.List(ctx, businessID)
 		},

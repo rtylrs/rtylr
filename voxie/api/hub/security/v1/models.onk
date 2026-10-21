@@ -4,6 +4,8 @@ message SecurityState {
   two_factor_enabled: bool
   mfa_required: bool
   mfa_enrolled: bool
+  organization_mfa_enforced: bool
+  can_manage_organization_mfa: bool
   active_sessions: ActiveSession[]
 }
 
@@ -66,6 +68,14 @@ message Update2FARequest {
 
 message Update2FAResponse {
   message: string
+}
+
+message UpdateOrganizationMFAEnforcementRequest {
+  enabled: bool
+}
+
+message UpdateOrganizationMFAEnforcementResponse {
+  enforced: bool
 }
 
 message BeginMFAEnrollmentRequest {}

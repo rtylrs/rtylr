@@ -22,7 +22,7 @@ func (s *Service) GetShiftMetrics(ctx context.Context, businessID int64, from, t
 	if err != nil {
 		return ShiftMetricsPayload{}, err
 	}
-	out, err := cacher.Of[ShiftMetricsPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (ShiftMetricsPayload, error) {
+	out, err := cacher.Of[ShiftMetricsPayload]().GetOrComputeSingle(ctx, key+"|domain=v2", func(ctx context.Context) (ShiftMetricsPayload, error) {
 		row, rerr := s.repo.GetShiftMetrics(ctx, businessID, from, to)
 		if rerr != nil {
 			return ShiftMetricsPayload{}, rerr

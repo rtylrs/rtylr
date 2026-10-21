@@ -1,0 +1,38 @@
+{
+  "dashboard": "لوحة التحكم",
+  "inventory": "المخزون",
+  "categories": "الفئات",
+  "brands": "العلامات التجارية",
+  "variants": "المتغيرات",
+  "priceLists": "قوائم الأسعار",
+  "barcodes": "الباركود",
+  "warehouses": "المستودعات",
+  "stockTransfers": "تحويلات المخزون",
+  "stockTakes": "جرد المخزون",
+  "receiving": "الاستلام",
+  "expiry": "انتهاء الصلاحية",
+  "lowStockAlerts": "تنبيهات انخفاض المخزون",
+  "reorder": "إعادة الطلب",
+  "valuation": "التقييم",
+  "purchaseOrders": "أوامر الشراء",
+  "suppliers": "الموردون",
+  "settings": "الإعدادات",
+  "appName": "العمليات",
+  "groups": {
+    "workspace": "مساحة العمل",
+    "catalog": "الكتالوج",
+    "warehouseOps": "عمليات المستودع",
+    "insights": "التحليلات",
+    "purchasing": "المشتريات"
+  },
+  "titles": {
+    "variants": "متغيرات المنتج",
+    "barcodes": "مولد الباركود",
+    "receiving": "استلام البضائع",
+    "expiry": "تتبع انتهاء الصلاحية",
+    "reorder": "اقتراحات إعادة الطلب",
+    "valuation": "تقييم المخزون",
+    "productDetail": "تفاصيل المنتج"
+  },
+  "products": "المنتجات"
+}

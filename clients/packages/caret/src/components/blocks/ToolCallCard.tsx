@@ -1,9 +1,17 @@
-import React, { useState } from 'react';
-import { Search, ChevronDown, ChevronRight, Check, X, AlertCircle } from 'lucide-react';
-import { caretTokens, caretRadius } from '../../ui/tokens';
-import CaretOrb, { orbStateForTool } from '../CaretOrb';
-import FormMappingPlan from './FormMappingPlan';
-import type { ToolCallBlock } from '../../types/message';
+import React, { useState } from "react";
+import {
+  Search,
+  ChevronDown,
+  ChevronRight,
+  Check,
+  X,
+  AlertCircle,
+} from "lucide-react";
+import { searchOutputSources } from "../../lib/searchSources";
+import { caretTokens, caretRadius } from "../../ui/tokens";
+import CaretOrb, { orbStateForTool } from "../CaretOrb";
+import FormMappingPlan from "./FormMappingPlan";
+import type { ToolCallBlock } from "../../types/message";
 
 export interface ToolCallCardProps {
   call: ToolCallBlock;
@@ -18,63 +26,90 @@ const detailLabelStyle: React.CSSProperties = {
 };
 
 const summaryStyle: React.CSSProperties = {
-  padding: '7px 9px',
+  padding: "7px 9px",
   background: caretTokens.surfaceHigh,
   border: `1px solid ${caretTokens.border}`,
   borderRadius: caretRadius.sm,
   color: caretTokens.textMuted,
-  fontFamily: 'inherit',
+  fontFamily: "inherit",
   lineHeight: 1.45,
 };
 
 function actionForTool(name: string): string {
   const normalized = name.trim().toLowerCase();
   const actions: Array<[RegExp, string]> = [
-    [/^erp\.create_product$/, 'add a product'],
-    [/^erp\.update_product$/, 'update a product'],
-    [/^erp\.delete_product$/, 'delete a product'],
-    [/^erp\.set_stock$/, 'adjust product stock'],
-    [/^erp\.list_reorder_suggestions$/, 'review reorder suggestions'],
-    [/^documents\.map_form_fields$/, 'map a document onto the form'],
-    [/^.*\.create_/, 'create a business record'],
-    [/^.*\.delete_/, 'delete a business record'],
-    [/^.*\.update_/, 'update a business record'],
+    [/^web\.search$/, "search the web"],
+    [/^tools\.search$/, "find the right tool"],
+    [/^web\.fetch$/, "read a web page"],
+    [/^agents\.run$/, "work on it in parallel"],
+    [/^weather\./, "check the weather"],
+    [/^places\./, "look up a place"],
+    [/^currency\./, "convert currency"],
+    [/^calendar\.public_holidays$/, "check public holidays"],
+    [/^knowledge\.wikipedia$/, "look it up on Wikipedia"],
+    [/^knowledge\.define$/, "look up the word"],
+    [/^knowledge\.country$/, "look up the country"],
+    [/^utilities\./, "work it out"],
+    [/^chats\./, "search past chats"],
+    [/^business\.find$/, "find it in your records"],
+    [/^memory\.remember$/, "remember this"],
+    [/^memory\.forget$/, "forget a memory"],
+    [/^memory\.list$/, "check what it remembers"],
+    [/^account\.profile$/, "check your profile"],
+    [/^erp\.create_product$/, "add a product"],
+    [/^erp\.update_product$/, "update a product"],
+    [/^erp\.delete_product$/, "delete a product"],
+    [/^erp\.set_stock$/, "adjust product stock"],
+    [/^erp\.list_reorder_suggestions$/, "review reorder suggestions"],
+    [/^documents\.map_form_fields$/, "map a document onto the form"],
+    [/^.*\.create_/, "create a business record"],
+    [/^.*\.delete_/, "delete a business record"],
+    [/^.*\.update_/, "update a business record"],
   ];
-  return actions.find(([pattern]) => pattern.test(normalized))?.[1] ?? 'check business data';
+  return (
+    actions.find(([pattern]) => pattern.test(normalized))?.[1] ??
+    "check business data"
+  );
 }
 
-function statusText(status: ToolCallBlock['status'], action: string): string {
+function statusText(status: ToolCallBlock["status"], action: string): string {
   switch (status) {
-    case 'pending':
+    case "pending":
       return `Needs confirmation to ${action}`;
-    case 'approved':
-    case 'running':
+    case "approved":
+    case "running":
       return `Working to ${action}`;
-    case 'success':
+    case "success":
       return `Completed: ${action}`;
-    case 'denied':
+    case "denied":
       return `Skipped: ${action}`;
-    case 'error':
+    case "error":
       return `Could not ${action}`;
   }
 }
 
-export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onDeny }) => {
-  const [open, setOpen] = useState(call.status === 'pending');
-  const action = actionForTool(call.name);
+export const ToolCallCard: React.FC<ToolCallCardProps> = ({
+  call,
+  onApprove,
+  onDeny,
+}) => {
+  // Only an approval starts open; finished checks stay folded until asked.
+  const [open, setOpen] = useState(call.status === "pending");
+  const action = describeAction(call);
   const label = statusText(call.status, action);
-  const isPending = call.status === 'pending';
-  const isRunning = call.status === 'running' || call.status === 'approved';
-  const quiet = !isPending && call.status !== 'error';
-  const ActivityIcon = call.status === 'error' ? AlertCircle : Search;
+  const isPending = call.status === "pending";
+  const isRunning = call.status === "running" || call.status === "approved";
+  const quiet =
+    !isPending && call.status !== "error" && call.name !== "web.search";
+  const ActivityIcon = call.status === "error" ? AlertCircle : Search;
   const showFormMappingPlan =
-    call.name.trim().toLowerCase() === 'documents.map_form_fields' &&
-    (call.status === 'success' || call.status === 'running');
+    call.name.trim().toLowerCase() === "documents.map_form_fields" &&
+    (call.status === "success" || call.status === "running");
 
   return (
     <div
       style={{
-        margin: isPending ? '8px 0 10px' : '4px 0',
+        margin: isPending ? "8px 0 10px" : "10px 0",
         color: caretTokens.textDim,
       }}
     >
@@ -83,29 +118,37 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         style={{
-          display: 'inline-flex',
-          alignItems: 'center',
+          display: "inline-flex",
+          alignItems: "center",
           gap: quiet ? 7 : 9,
-          maxWidth: '100%',
-          padding: quiet ? '1px 0' : '2px 0',
-          background: 'transparent',
-          border: 'none',
+          maxWidth: "100%",
+          padding: quiet ? "1px 0" : "2px 0",
+          background: "transparent",
+          border: "none",
           color: isPending ? caretTokens.textMuted : caretTokens.textDim,
           fontSize: quiet ? 12 : 13,
           lineHeight: 1.4,
-          cursor: 'pointer',
+          cursor: "pointer",
           opacity: isPending ? 0.95 : quiet ? 0.54 : 0.72,
         }}
       >
-        {open ? <ChevronDown size={quiet ? 12 : 13} /> : <ChevronRight size={quiet ? 12 : 13} />}
+        {open ? (
+          <ChevronDown size={quiet ? 12 : 13} />
+        ) : (
+          <ChevronRight size={quiet ? 12 : 13} />
+        )}
         {isPending ? (
           <CaretOrb state="shaping" />
         ) : isRunning ? (
           <CaretOrb state={orbStateForTool(call.name)} />
         ) : (
-          <ActivityIcon size={quiet ? 12 : 14} style={{ flex: '0 0 auto' }} />
+          <ActivityIcon size={quiet ? 12 : 14} style={{ flex: "0 0 auto" }} />
         )}
-        <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
+        <span
+          style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}
+        >
+          {label}
+        </span>
       </button>
 
       {open && (
@@ -113,9 +156,9 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
           style={{
             marginTop: quiet ? 4 : 6,
             marginLeft: quiet ? 18 : 21,
-            padding: quiet ? '3px 0 1px 10px' : '4px 0 2px 12px',
+            padding: quiet ? "3px 0 1px 10px" : "4px 0 2px 12px",
             borderLeft: `1px solid ${caretTokens.border}`,
-            fontFamily: 'inherit',
+            fontFamily: "inherit",
             fontSize: 11,
             color: caretTokens.textMuted,
             opacity: quiet ? 0.88 : 1,
@@ -128,9 +171,10 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
             </div>
           )}
 
-          {!call.preview && (
+          {!call.preview && isPending && (
             <div style={{ ...summaryStyle, marginBottom: 8 }}>
-              Caret will {action}. Review the request and confirm only if that is what you want.
+              Caret will {action}. Review the request and confirm only if that
+              is what you want.
             </div>
           )}
 
@@ -141,44 +185,62 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
             </div>
           )}
 
+          {call.name === "web.search" && (
+            <SearchResultsDetails output={call.output} />
+          )}
+
+          {call.name === "agents.run" && (
+            <AgentReportsDetails output={call.output} />
+          )}
+
           {showFormMappingPlan && <FormMappingPlan output={call.output} />}
 
           {call.error && (
             <div
               style={{
-                display: 'flex',
-                alignItems: 'flex-start',
+                display: "flex",
+                alignItems: "flex-start",
                 gap: 6,
-                padding: '8px 9px',
+                padding: "8px 9px",
                 background: caretTokens.surfaceHigh,
                 border: `1px solid ${caretTokens.border}`,
                 color: caretTokens.textMuted,
                 borderRadius: caretRadius.sm,
-                fontFamily: 'inherit',
+                fontFamily: "inherit",
               }}
             >
-              <AlertCircle size={12} style={{ marginTop: 1, color: caretTokens.textDim }} />
+              <AlertCircle
+                size={12}
+                style={{ marginTop: 1, color: caretTokens.textDim }}
+              />
               <span>{call.error}</span>
             </div>
           )}
 
-          {call.status === 'pending' && (onApprove || onDeny) && (
-            <div style={{ display: 'flex', gap: 6, marginTop: 9, fontFamily: 'inherit' }}>
+          {call.status === "pending" && (onApprove || onDeny) && (
+            <div
+              style={{
+                display: "flex",
+                gap: 6,
+                marginTop: 9,
+                fontFamily: "inherit",
+              }}
+            >
               {onApprove && (
                 <button
                   type="button"
                   onClick={() => onApprove(call.id)}
                   style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
+                    display: "inline-flex",
+                    alignItems: "center",
                     gap: 4,
-                    padding: '4px 10px',
+                    padding: "4px 10px",
                     borderRadius: caretRadius.sm,
                     background: caretTokens.accentSoft,
                     color: caretTokens.text,
                     border: `1px solid ${caretTokens.accentBorder}`,
                     fontSize: 12,
-                    cursor: 'pointer',
+                    cursor: "pointer",
                   }}
                 >
                   <Check size={12} /> Allow
@@ -189,16 +251,16 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
                   type="button"
                   onClick={() => onDeny(call.id)}
                   style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
+                    display: "inline-flex",
+                    alignItems: "center",
                     gap: 4,
-                    padding: '4px 10px',
+                    padding: "4px 10px",
                     borderRadius: caretRadius.sm,
-                    background: 'transparent',
+                    background: "transparent",
                     color: caretTokens.textMuted,
                     border: `1px solid ${caretTokens.border}`,
                     fontSize: 12,
-                    cursor: 'pointer',
+                    cursor: "pointer",
                   }}
                 >
                   <X size={12} /> Skip
@@ -211,5 +273,98 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
     </div>
   );
 };
+
+/** The card label, naming what was searched so a bad query is visible. */
+function describeAction(call: ToolCallBlock): string {
+  const action = actionForTool(call.name);
+  const query = call.input?.query;
+  if (call.name !== "web.search" || typeof query !== "string" || !query.trim())
+    return action;
+  const trimmed = query.trim();
+  const shown = trimmed.length > 60 ? `${trimmed.slice(0, 57)}...` : trimmed;
+  return `${action} for "${shown}"`;
+}
+
+interface AgentReport {
+  task: string;
+  status: string;
+  report: string;
+}
+
+function agentReports(output: unknown): AgentReport[] {
+  if (!output || typeof output !== "object") return [];
+  const reports = (output as Record<string, unknown>).reports;
+  if (!Array.isArray(reports)) return [];
+  return reports.flatMap((value: unknown) => {
+    if (!value || typeof value !== "object") return [];
+    const item = value as Record<string, unknown>;
+    if (typeof item.task !== "string") return [];
+    return [
+      {
+        task: item.task,
+        status: typeof item.status === "string" ? item.status : "",
+        report: typeof item.report === "string" ? item.report : "",
+      },
+    ];
+  });
+}
+
+/** One entry per sub-agent: its task, whether it finished, and its report. */
+function AgentReportsDetails({ output }: { output: unknown }) {
+  const reports = agentReports(output);
+  if (reports.length === 0) return null;
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <div style={detailLabelStyle}>sub-agents</div>
+      {reports.map((report, index) => (
+        <div
+          key={`${report.task}-${index}`}
+          style={{ ...summaryStyle, marginBottom: 6 }}
+        >
+          <div style={{ color: caretTokens.textDim }}>
+            {report.status === "done" ? "Done" : "Could not finish"}:{" "}
+            {report.task}
+          </div>
+          {report.report && (
+            <div style={{ marginTop: 4, whiteSpace: "pre-wrap" }}>
+              {report.report.length > 600
+                ? `${report.report.slice(0, 597)}...`
+                : report.report}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SearchResultsDetails({ output }: { output: unknown }) {
+  const sources = searchOutputSources(output);
+  if (sources.length === 0) return null;
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <div style={detailLabelStyle}>search results</div>
+      <ul style={{ ...summaryStyle, margin: 0, padding: "7px 9px 7px 26px" }}>
+        {sources.map((source, index) => (
+          <li key={`${source.url}-${index}`} style={{ margin: "2px 0" }}>
+            <a
+              href={source.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: caretTokens.accent }}
+            >
+              {source.title}
+            </a>
+            {source.snippet && (
+              <div style={{ color: caretTokens.textMuted, marginTop: 2 }}>
+                {source.snippet}
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export default ToolCallCard;

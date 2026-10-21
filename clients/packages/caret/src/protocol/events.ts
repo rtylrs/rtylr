@@ -33,7 +33,8 @@ export type CaretStreamEvent =
       summary?: string;
       error?: string;
     }
-  | { type: 'message_end'; messageId: string }
+  | { type: 'message_end'; messageId: string; stored_id?: string }
+  | { type: 'follow_ups'; messageId: string; items: string[] }
   | { type: 'error'; error: string; recoverable?: boolean }
   | { type: 'done' };
 
@@ -52,7 +53,7 @@ export function parseStreamLine(line: string, fallbackMessageId: string): CaretS
   try {
     const obj = JSON.parse(trimmed) as Record<string, unknown>;
     if (typeof obj.type === 'string') {
-      return obj as CaretStreamEvent;
+      return normalizeEventKeys(obj) as CaretStreamEvent;
     }
     // Legacy: { text, done }
     if (obj.done === true) return { type: 'done' };
@@ -63,4 +64,24 @@ export function parseStreamLine(line: string, fallbackMessageId: string): CaretS
   } catch {
     return null;
   }
+}
+
+// The server writes snake_case fields; the event types use camelCase.
+const SNAKE_CASE_FIELDS: Record<string, string> = {
+  session_id: 'sessionId',
+  message_id: 'messageId',
+  block_id: 'blockId',
+  duration_ms: 'durationMs',
+  requires_approval: 'requiresApproval',
+};
+
+function normalizeEventKeys(obj: Record<string, unknown>): Record<string, unknown> {
+  const event: Record<string, unknown> = { ...obj };
+  for (const [snake, camel] of Object.entries(SNAKE_CASE_FIELDS)) {
+    if (snake in event) {
+      if (event[camel] === undefined) event[camel] = event[snake];
+      delete event[snake];
+    }
+  }
+  return event;
 }

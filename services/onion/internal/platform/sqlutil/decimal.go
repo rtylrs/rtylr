@@ -55,3 +55,9 @@ func ParseDecimal(value string) float64 {
 func FloatToDecimal(value float64) string {
 	return fmt.Sprintf("%.2f", value)
 }
+
+// DecimalToMinorUnits converts a DECIMAL(…,2) column value into integer minor
+// units, rounding half up. Empty and malformed values return zero.
+func DecimalToMinorUnits(value any) int64 {
+	return int64(DecimalToFloat(value)*100 + 0.5)
+}

@@ -19,15 +19,19 @@ var renderCases = map[Template]struct {
 	TemplateWelcome: {
 		data: WelcomeData{Subject: "Welcome", Name: "Sam"},
 		// the hub URL verifies the {{appURL "hub"}} func resolved.
-		want: []string{"Hey Sam", "welcome to rtylr", "https://dash.rtylr.com"},
+		want: []string{"Hey Sam", "welcome to rtylr", "https://portal.rtylr.com"},
 	},
 	TemplateInvitation: {
-		data: InvitationData{Subject: "Invite", InviterName: "Alex", BusinessName: "Acme", InviteLink: "https://x.test/i"},
-		want: []string{"invited to rtylr", "Alex", "Acme", "https://x.test/i"},
+		data: InvitationData{Subject: "Invite", InviterName: "Alex", BusinessName: "Acme", InviteLink: "https://x.test/i", ValidDays: 7},
+		want: []string{"Join Acme on rtylr", "<strong>Alex</strong> invited you", "https://x.test/i", "Accept invitation", "expires in 7 days"},
 	},
 	TemplatePasswordReset: {
 		data: PasswordResetData{Subject: "Reset", ResetLink: "https://x.test/r"},
 		want: []string{"https://x.test/r"},
+	},
+	TemplateEmailVerification: {
+		data: VerificationData{Subject: "Verify", VerifyLink: "https://x.test/verify?token=7.0123456789", Code: "7.0123456789"},
+		want: []string{"https://x.test/verify?token=7.0123456789", "7.0123456789", "10 minutes"},
 	},
 	TemplateInvoice: {
 		data: InvoiceData{Subject: "Invoice", CustomerName: "Jordan", InvoiceNumber: "INV-42", Amount: "$10", DueDate: "soon", ViewLink: "https://x.test/v"},
@@ -35,7 +39,7 @@ var renderCases = map[Template]struct {
 	},
 	TemplateAccessRequest: {
 		data: AccessRequestData{Subject: "Access", RequesterName: "Pat", RequesterEmail: "pat@x.test", App: "ERP", TeamLink: "https://x.test/team"},
-		want: []string{"Access request", "Pat", "pat@x.test", "ERP", "https://x.test/team"},
+		want: []string{"Pat wants access to ERP", "pat@x.test", "https://x.test/team"},
 	},
 }
 
@@ -108,5 +112,55 @@ func TestAvailableFromFS(t *testing.T) {
 	}
 	if Exists("does/not_exist") || Exists("../etc/passwd") {
 		t.Error("Exists must reject missing/traversal paths")
+	}
+}
+
+// An invitation without names still reads naturally, and never says
+// "rtylr on rtylr".
+func TestInvitationWithoutNames(t *testing.T) {
+	out, err := Render(TemplateInvitation, InvitationData{Subject: "Invite", InviteLink: "https://x.test/i"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"You're invited to rtylr", "You've been invited", "join a team on rtylr"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("missing %q", want)
+		}
+	}
+	if strings.Contains(out, "expires in") {
+		t.Error("an unknown expiry should be left out")
+	}
+}
+
+func TestInvitationSubject(t *testing.T) {
+	cases := []struct{ inviter, business, want string }{
+		{"Sam", "Acme", "Sam invited you to join Acme on rtylr"},
+		{"", "Acme", "You're invited to join Acme on rtylr"},
+		{"Sam", "", "Sam invited you to rtylr"},
+		{"", "", "You're invited to rtylr"},
+	}
+	for _, c := range cases {
+		if got := InvitationSubject(c.inviter, c.business); got != c.want {
+			t.Errorf("InvitationSubject(%q, %q) = %q, want %q", c.inviter, c.business, got, c.want)
+		}
+	}
+}
+
+// The shared button is a table cell with an inline fill, so clients that strip
+// <style> still show a button; its link is escaped like any other.
+func TestButtonIsBulletproofAndEscaped(t *testing.T) {
+	out, err := Render(TemplatePasswordReset, PasswordResetData{Subject: "Reset", ResetLink: "https://x.test/r?a=1&b=2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out, `bgcolor="#131313"`) || !strings.Contains(out, `href="https://x.test/r?a=1&amp;b=2"`) {
+		t.Errorf("button not rendered as expected:\n%s", out)
+	}
+	unsafe, err := Render(TemplatePasswordReset, PasswordResetData{Subject: "Reset", ResetLink: "javascript:alert(1)"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(unsafe, "javascript:alert") {
+		t.Error("an unsafe link must be filtered")
 	}
 }

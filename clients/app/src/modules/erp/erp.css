@@ -1,0 +1,31 @@
+:root {
+  --erp-accent: #64c5b9;
+  --erp-accent-foreground: #0a0a0a;
+  --erp-warning: #f59e0b;
+  --erp-success: #10b981;
+  --erp-danger: #f87171;
+  --erp-danger-strong: #ef4444;
+  --erp-info: #60a5fa;
+  --erp-purple: #a78bfa;
+  --erp-violet: #8b5cf6;
+  --erp-blue: #3b82f6;
+  --erp-warning-text: var(--dash-text);
+}
+.portal-page.is-erp {
+  padding: clamp(20px, 3vw, 40px);
+}
+.portal-erp-settings {
+  max-width: 760px;
+  margin-inline: auto;
+}
+.portal-page.is-erp table {
+  box-shadow: none;
+}
+.portal-page.is-erp :is(input, textarea, select):focus-visible {
+  outline: 2px solid var(--app-focus, var(--dash-text-dim));
+  outline-offset: 2px;
+}
+
+[dir='rtl'] .erp-directional-icon {
+  transform: rotate(180deg);
+}

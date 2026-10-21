@@ -1,0 +1,170 @@
+package customers
+
+import (
+	"context"
+	"database/sql"
+	"encoding/json"
+	"errors"
+	"fmt"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
+	"net/http"
+	"time"
+
+	moduleinfra "github.com/voxire/onion/internal/modules/crm/customers/internal/infrastructure"
+
+	crmcontract "github.com/voxire/onion/internal/contracts/crm"
+	"github.com/voxire/onion/internal/modules/crm/customers/internal/api"
+	"github.com/voxire/onion/internal/modules/crm/customers/internal/application"
+	"github.com/voxire/onion/internal/modules/crm/customers/internal/domain"
+	"github.com/voxire/onion/internal/platform/emailqueue"
+	"github.com/voxire/onion/internal/platform/eventbus"
+	crmcustomerv1 "github.com/voxire/voxie/gen/go/crm/customer/v1"
+	crmdashboardv1 "github.com/voxire/voxie/gen/go/crm/dashboard/v1"
+	crmloyaltyv1 "github.com/voxire/voxie/gen/go/crm/loyalty/v1"
+	poscustomerv1 "github.com/voxire/voxie/gen/go/pos/customer/v1"
+)
+
+type Module struct {
+	service    *application.Service
+	repository *moduleinfra.Repository
+	db         *sql.DB
+}
+
+type EmailRecipient struct {
+	Email string
+	Name  string
+}
+
+func NewModule(ctx context.Context, db *sql.DB) *Module {
+	repo := moduleinfra.NewRepository(db)
+	return &Module{
+		service:    application.NewService(ctx, repo),
+		repository: repo,
+		db:         db,
+	}
+}
+
+// CampaignSender is who a business's marketing email comes from.
+type CampaignSender struct {
+	Name    string
+	Address string
+	ReplyTo string
+}
+
+// WithCampaignDelivery lets email campaigns send: sender reads the business's
+// display name, postal address and reply-to; secret signs unsubscribe links,
+// which point at publicAPIURL. Emails go through the shared email queue.
+func (m *Module) WithCampaignDelivery(
+	sender func(context.Context, int64) (CampaignSender, error),
+	secret []byte,
+	publicAPIURL string,
+) *Module {
+	m.service.WithCampaignDelivery(application.CampaignDelivery{
+		Sender: func(ctx context.Context, businessID int64) (domain.CampaignSender, error) {
+			value, err := sender(ctx, businessID)
+			return domain.CampaignSender(value), err
+		},
+		Enqueue: func(ctx context.Context, email application.CampaignEmail) error {
+			return emailqueue.Enqueue(ctx, m.db, emailqueue.Job{
+				Priority:  emailqueue.PriorityNormal,
+				To:        email.To,
+				Subject:   email.Subject,
+				HTML:      email.HTML,
+				Text:      email.Text,
+				From:      email.From,
+				ReplyTo:   email.ReplyTo,
+				DedupeKey: email.DedupeKey,
+			})
+		},
+		UnsubscribeSecret: secret,
+		PublicAPIURL:      publicAPIURL,
+	})
+	return m
+}
+
+func (m *Module) WithBusinessOwnerResolver(resolve func(context.Context, int64) (int64, error)) *Module {
+	m.service.WithBusinessOwnerResolver(businessOwnerResolverAdapter{resolve: resolve})
+	return m
+}
+
+type businessOwnerResolverAdapter struct {
+	resolve func(context.Context, int64) (int64, error)
+}
+
+func (a businessOwnerResolverAdapter) GetBusinessOwnerID(ctx context.Context, businessID int64) (int64, error) {
+	return a.resolve(ctx, businessID)
+}
+
+func (m *Module) DispatchEvent(ctx context.Context, event eventbus.Event) error {
+	if event.Type == crmcontract.CustomerLinkedType {
+		return nil
+	}
+	if event.Type != crmcontract.CustomerContactCapturedType {
+		return nil
+	}
+	payload, err := eventbus.PayloadJSON(event.Payload)
+	if err != nil {
+		return fmt.Errorf("encode customer contact event payload: %w", err)
+	}
+	var contact crmcontract.CustomerContactCaptured
+	if err := json.Unmarshal(payload, &contact); err != nil {
+		return fmt.Errorf("decode customer contact event payload: %w", err)
+	}
+	return m.service.CaptureContactFromEvent(ctx, event, contact)
+}
+
+func (m *Module) ResolveEmailRecipient(ctx context.Context, businessID, customerID int64) (EmailRecipient, bool, error) {
+	customer, err := m.service.GetCustomer(ctx, businessID, customerID)
+	if errors.Is(err, domain.ErrCustomerNotFound) {
+		return EmailRecipient{}, false, nil
+	}
+	if err != nil {
+		return EmailRecipient{}, false, err
+	}
+	name := customer.FirstName
+	if customer.LastName != "" {
+		if name != "" {
+			name += " "
+		}
+		name += customer.LastName
+	}
+	return EmailRecipient{Email: customer.Email, Name: name}, true, nil
+}
+
+func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {
+	api.RegisterRoutes(ctx, router, m.service)
+}
+
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := poscustomerv1.RegisterCustomerServiceServer(api.NewPOSCustomerAPI(m.service), poscustomerv1.WithMux(mux)); err != nil {
+		panic(fmt.Errorf("register POS customer service: %w", err))
+	}
+	if err := crmcustomerv1.RegisterCustomerServiceServer(api.NewCustomerAPI(m.service), crmcustomerv1.WithMux(mux)); err != nil {
+		panic(fmt.Errorf("register crm customer service: %w", err))
+	}
+	if err := crmdashboardv1.RegisterDashboardServiceServer(api.NewDashboardAPI(m.service), crmdashboardv1.WithMux(mux)); err != nil {
+		panic(fmt.Errorf("register crm dashboard service: %w", err))
+	}
+
+	if err := crmloyaltyv1.RegisterLoyaltyServiceServer(
+		api.NewLoyaltyAPI(m.service),
+		crmloyaltyv1.WithMux(mux),
+	); err != nil {
+		panic(fmt.Errorf("register crm loyalty service: %w", err))
+	}
+}
+
+func (m *Module) GetAnonymousRoutes() []string {
+	// The unsubscribe link in marketing email is opened by customers, who
+	// have no rtylr session; the signed token in the link authorizes it.
+	return api.UnsubscribeRoutes()
+}
+
+func (m *Module) WithReportingTimezone(read func(context.Context, int64) (string, error)) *Module {
+	m.repository.WithReportingTimezone(read)
+	return m
+}
+
+func (m *Module) CountCustomersCreatedBetween(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
+	return m.repository.CountCustomersCreatedBetween(ctx, businessID, from, to)
+}

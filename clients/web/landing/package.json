@@ -10,7 +10,8 @@
     "typecheck": "tsc --build --force tsconfig.app.json",
     "test:unit": "node --test tests/unit/*.test.mjs",
     "test:lib": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "typecheck:tests": "tsc --noEmit -p tsconfig.test.json"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.99.2",
@@ -19,12 +20,12 @@
     "@voxire/consent": "workspace:*",
     "@voxire/observability": "workspace:*",
     "@voxire/utils": "workspace:*",
-    "axios": "^1.15.2",
+    "axios": "^1.20.0",
     "i18n-iso-countries": "^7.14.0",
     "i18next": "^26.0.6",
     "lucide-react": "^1.8.0",
     "motion": "^12.38.0",
-    "next": "16.3.6",
+    "next": "16.3.8",
     "react": "19.2.5",
     "react-cookie": "^8.1.0",
     "react-dom": "19.2.5",

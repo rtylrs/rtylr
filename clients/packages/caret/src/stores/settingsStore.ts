@@ -1,8 +1,8 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { DEFAULT_MODE, type CaretMode } from '../types/mode';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { DEFAULT_MODE, type CaretMode } from "../types/mode";
 
-// The model is chosen internally by the backend (DeepSeek / NVIDIA NIM) — users
+// The model is chosen internally by the backend (DeepSeek / Gemini / OpenAI / OpenCode) — users
 // don't pick it, so there is no model field here anymore.
 interface CaretSettingsState {
   mode: CaretMode;
@@ -36,10 +36,12 @@ export const useCaretSettingsStore = create<CaretSettingsStore>()(
       ...initial,
       setMode: (mode) => set({ mode }),
       setVoiceEnabled: (voiceEnabled) => set({ voiceEnabled }),
-      setAutoApproveReadOnly: (autoApproveReadOnly) => set({ autoApproveReadOnly }),
+      setAutoApproveReadOnly: (autoApproveReadOnly) =>
+        set({ autoApproveReadOnly }),
       setShowThinking: (showThinking) => set({ showThinking }),
-      setPanelWidth: (panelWidth) => set({ panelWidth: Math.max(320, Math.min(800, panelWidth)) }),
+      setPanelWidth: (panelWidth) =>
+        set({ panelWidth: Math.max(320, Math.min(800, panelWidth)) }),
     }),
-    { name: 'caret-settings' }
-  )
+    { name: "caret-settings" },
+  ),
 );

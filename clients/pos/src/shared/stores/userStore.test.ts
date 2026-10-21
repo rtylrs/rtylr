@@ -35,7 +35,7 @@ const initialState = {
   isAuthenticated: false,
   loading: false,
   error: null,
-  role: null,
+  effectiveAccess: null,
   userId: null,
   addons: {
     feedback: false,
@@ -59,7 +59,7 @@ describe('userStore', () => {
     expect(getState().isAuthenticated).toBe(false);
     expect(getState().loading).toBe(false);
     expect(getState().error).toBeNull();
-    expect(getState().role).toBeNull();
+    expect(getState().effectiveAccess).toBeNull();
     expect(getState().userId).toBeNull();
     expect(getState().addons.feedback).toBe(false);
     expect(getState().visits).toEqual([]);
@@ -81,7 +81,7 @@ describe('userStore', () => {
       user: { name: 'John' },
       token: 'abc',
       isAuthenticated: true,
-      role: 'admin',
+      effectiveAccess: null,
       userId: '123',
     });
 
@@ -90,7 +90,7 @@ describe('userStore', () => {
     expect(getState().user).toBeNull();
     expect(getState().token).toBeNull();
     expect(getState().isAuthenticated).toBe(false);
-    expect(getState().role).toBeNull();
+    expect(getState().effectiveAccess).toBeNull();
     expect(getState().userId).toBeNull();
   });
 
@@ -104,7 +104,16 @@ describe('userStore', () => {
     oauthClient.me.mockResolvedValueOnce({
       userId: 'u1',
       businessId: 'b1',
-      role: 'admin',
+      effectiveAccess: {
+        businessId: 'b1',
+        dashPermissions: [],
+        subscribedApps: ['pos'],
+        licenses: [],
+        apps: [],
+        isOwner: false,
+        isAdmin: true,
+        authorizationVersion: 1,
+      },
     });
     configClient.getConfig.mockResolvedValueOnce({
       maintenance: false,
@@ -131,7 +140,7 @@ describe('userStore', () => {
     expect(oauthClient.me).toHaveBeenCalledWith({});
     expect(configClient.getConfig).toHaveBeenCalledWith({});
     expect(getState().userId).toBe('u1');
-    expect(getState().role).toBe('admin');
+    expect(getState().effectiveAccess?.isAdmin).toBe(true);
     expect(getState().isAuthenticated).toBe(true);
     expect(getState().businessProfile?.name).toBe('Alice Store');
     expect(getState().loading).toBe(false);
@@ -141,7 +150,16 @@ describe('userStore', () => {
     oauthClient.me.mockResolvedValueOnce({
       userId: '42',
       businessId: 'b1',
-      role: 'admin',
+      effectiveAccess: {
+        businessId: 'b1',
+        dashPermissions: [],
+        subscribedApps: ['pos'],
+        licenses: [],
+        apps: [],
+        isOwner: false,
+        isAdmin: true,
+        authorizationVersion: 1,
+      },
     });
     configClient.getConfig.mockRejectedValueOnce(new Error('config unavailable'));
 

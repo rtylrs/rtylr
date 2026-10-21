@@ -1,0 +1,75 @@
+.board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  height: 100%;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px;
+  border-radius: 10px;
+  background: var(--p-bg);
+}
+
+.columnHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 2px 4px;
+  font-weight: 500;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(9, 9, 11, 0.25);
+
+  &[data-col='1'] {
+    background: var(--p-amber);
+  }
+
+  &[data-col='2'] {
+    background: #8b5cf6;
+  }
+
+  &[data-col='3'] {
+    background: var(--p-green);
+  }
+}
+
+.task {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  background: var(--p-surface);
+  box-shadow:
+    0 0 0 1px var(--p-border),
+    0 1px 2px rgba(0, 0, 0, 0.03);
+  font-weight: 500;
+}
+
+// The card that travels gets a hint of lift so the eye follows it.
+.taskMoving {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--p-accent) 35%, transparent),
+    0 6px 16px -6px rgba(0, 0, 0, 0.15);
+}
+
+.taskMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.taskDone {
+  color: var(--p-muted);
+  text-decoration: line-through;
+}

@@ -32,9 +32,18 @@ type Client struct {
 	healthMu        sync.Mutex
 	failures        map[string]int
 	cooldownUntil   map[string]time.Time
+	// firstTokenTimeout overrides defaultFirstTokenTimeout; tests shorten it.
+	firstTokenTimeout time.Duration
 }
 
 const providerFailureCooldown = 10 * time.Second
+
+// defaultFirstTokenTimeout is how long a provider may stay silent before the
+// stream fails over. Without it a provider that accepts the request but never
+// answers holds the reply until its own (much longer) request timeout.
+const defaultFirstTokenTimeout = 8 * time.Second
+
+var errNoFirstToken = errors.New("provider sent no text before the first-token deadline")
 
 type completionOptionsProvider interface {
 	CompleteTextWithOptions(ctx context.Context, prompt string, opts CompletionOptions) (string, error)
@@ -62,9 +71,7 @@ func NewClient(ctx context.Context) (*Client, error) {
 		cooldownUntil: make(map[string]time.Time),
 	}
 
-	// Default priority: DeepSeek, NVIDIA NIM, Gemini, OpenAI, then OpenCode Zen.
-	// AI_PRIMARY_PROVIDER can swap the first two. Unconfigured providers are
-	// skipped; the first registered becomes primary (used for streaming).
+	// Unconfigured providers are skipped; the first registered becomes primary.
 	register := func(p Provider) {
 		client.providers = append(client.providers, p)
 		if client.primaryProvider == nil {
@@ -72,45 +79,34 @@ func NewClient(ctx context.Context) (*Client, error) {
 		}
 	}
 
-	deepseekFirst := config.GetAIPrimaryProvider() != "nvidia"
-	addDeepSeek := func() {
-		if config.IsDeepSeekConfigured() {
-			if p, err := NewDeepSeekProvider(); err == nil {
-				register(p)
-			}
+	// OpenCode answers first; Gemini is the fallback.
+	if config.IsOpenCodeConfigured() {
+		if p, err := NewOpenCodeProvider(); err == nil {
+			register(p)
 		}
 	}
-	addNvidia := func() {
-		if config.IsNvidiaNIMConfigured() {
-			if p, err := NewNvidiaNIMProvider(); err == nil {
-				register(p)
-			}
-		}
-	}
-
-	if deepseekFirst {
-		addDeepSeek()
-		addNvidia()
-	} else {
-		addNvidia()
-		addDeepSeek()
-	}
-
 	if config.IsGeminiConfigured() {
 		if p, err := NewGeminiProvider(ctx); err == nil {
 			register(p)
 		}
 	}
-
+	if config.IsDeepSeekConfigured() {
+		if p, err := NewDeepSeekProvider(); err == nil {
+			register(p)
+		}
+	}
 	if config.IsOpenAIConfigured() {
 		if p, err := NewOpenAIProvider(); err == nil {
 			register(p)
 		}
 	}
 
-	if config.IsOpenCodeConfigured() {
-		if p, err := NewOpenCodeProvider(); err == nil {
-			register(p)
+	for i, provider := range client.providers {
+		if provider.Name() == config.GetAIPrimaryProvider() {
+			copy(client.providers[1:i+1], client.providers[:i])
+			client.providers[0] = provider
+			client.primaryProvider = provider
+			break
 		}
 	}
 
@@ -129,11 +125,12 @@ func (c *Client) CompleteTextWithOptions(ctx context.Context, prompt string, opt
 	if c == nil || len(c.providers) == 0 {
 		return "", ErrNoProvidersConfigured
 	}
+	ctx = ensureConversation(ctx)
 	var lastErr error
 	// Try each healthy provider in order until one succeeds. A short circuit
 	// prevents a broken upstream from adding a full timeout to every request.
 	for _, provider := range c.providers {
-		if !c.providerReady(provider) {
+		if !c.providerReady(provider) || !providerSupportsInput(ctx, provider) {
 			continue
 		}
 
@@ -167,17 +164,20 @@ func (c *Client) CompleteTextStream(ctx context.Context, prompt string) (<-chan 
 	if c == nil || len(c.providers) == 0 {
 		return nil, ErrNoProvidersConfigured
 	}
+	ctx = ensureConversation(ctx)
 	providers := c.streamingProviderOrder()
 	var lastErr error
 	for i, provider := range providers {
-		if !c.providerReady(provider) {
+		if !c.providerReady(provider) || !providerSupportsInput(ctx, provider) {
 			continue
 		}
-		tokenChan, err := provider.CompleteTextStream(ctx, prompt)
+		attemptCtx, cancel := context.WithCancel(ctx)
+		tokenChan, err := provider.CompleteTextStream(attemptCtx, prompt)
 		if err == nil {
 			c.markProviderSuccess(provider)
-			return c.superviseProviderStream(ctx, prompt, provider, tokenChan, providers[i+1:]), nil
+			return c.superviseProviderStream(ctx, prompt, provider, tokenChan, cancel, providers[i+1:]), nil
 		}
+		cancel()
 		lastErr = err
 		c.markProviderFailure(ctx, provider, err)
 	}
@@ -206,48 +206,70 @@ func (c *Client) streamingProviderOrder() []Provider {
 // delivered. Once a user has seen part of an answer, restarting another model
 // would splice two unrelated answers together; the caller receives the
 // provider error and can render a truthful partial-stream failure instead.
-func (c *Client) superviseProviderStream(ctx context.Context, prompt string, provider Provider, source <-chan StreamToken, remaining []Provider) <-chan StreamToken {
+// A provider that sends no text within the first-token deadline is cancelled
+// and replaced by the next one.
+func (c *Client) superviseProviderStream(ctx context.Context, prompt string, provider Provider, source <-chan StreamToken, cancel context.CancelFunc, remaining []Provider) <-chan StreamToken {
 	out := make(chan StreamToken, 100)
 	go func() {
 		defer close(out)
 		visible := false
-		current := provider
-		currentSource := source
+		current, currentSource, cancelCurrent := provider, source, cancel
+		defer func() { cancelCurrent() }()
+
+		firstToken := time.NewTimer(c.firstTokenDeadline())
+		defer firstToken.Stop()
+
+		// failOver swaps in the next provider; it reports false when none is left.
+		failOver := func(cause error) bool {
+			c.markProviderFailure(ctx, current, cause)
+			cancelCurrent()
+			if visible || len(remaining) == 0 {
+				return false
+			}
+			next, nextSource, nextCancel, nextRemaining, err := c.nextProviderStream(ctx, prompt, remaining)
+			if err != nil {
+				return false
+			}
+			current, currentSource, cancelCurrent, remaining = next, nextSource, nextCancel, nextRemaining
+			firstToken.Reset(c.firstTokenDeadline())
+			return true
+		}
+
 		for {
 			select {
 			case <-ctx.Done():
 				return
+			case <-firstToken.C:
+				if visible {
+					continue
+				}
+				logger.Ctx(ctx).Warn("AI provider sent no text in time; failing over",
+					logger.String("provider", current.Name()))
+				if failOver(errNoFirstToken) {
+					continue
+				}
+				sendStreamToken(ctx, out, StreamToken{Done: true, Error: "provider did not respond in time", Provider: current.Name()})
+				return
 			case token, ok := <-currentSource:
 				if !ok {
-					c.markProviderFailure(ctx, current, errors.New("stream closed before completion"))
-					if !visible && len(remaining) > 0 {
-						next, nextSource, err := c.nextProviderStream(ctx, prompt, remaining)
-						if err == nil {
-							current, currentSource, remaining = next, nextSource, remaining[1:]
-							continue
-						}
-						c.markProviderFailure(ctx, remaining[0], err)
+					if failOver(errors.New("stream closed before completion")) {
+						continue
 					}
 					sendStreamToken(ctx, out, StreamToken{Done: true, Error: "provider stream ended before completion"})
 					return
 				}
 				if token.Error != "" {
-					c.markProviderFailure(ctx, current, errors.New(token.Error))
-					if !visible && len(remaining) > 0 {
-						next, nextSource, err := c.nextProviderStream(ctx, prompt, remaining)
-						if err == nil {
-							current, currentSource, remaining = next, nextSource, remaining[1:]
-							continue
-						}
-						c.markProviderFailure(ctx, remaining[0], err)
+					if failOver(errors.New(token.Error)) {
+						continue
 					}
 					token.Provider = current.Name()
 					sendStreamToken(ctx, out, token)
 					return
 				}
 				token.Provider = current.Name()
-				if token.Text != "" {
+				if token.Text != "" && !visible {
 					visible = true
+					firstToken.Stop()
 				}
 				if !sendStreamToken(ctx, out, token) {
 					return
@@ -262,24 +284,33 @@ func (c *Client) superviseProviderStream(ctx context.Context, prompt string, pro
 	return out
 }
 
-func (c *Client) nextProviderStream(ctx context.Context, prompt string, providers []Provider) (Provider, <-chan StreamToken, error) {
+func (c *Client) firstTokenDeadline() time.Duration {
+	if c.firstTokenTimeout > 0 {
+		return c.firstTokenTimeout
+	}
+	return defaultFirstTokenTimeout
+}
+
+func (c *Client) nextProviderStream(ctx context.Context, prompt string, providers []Provider) (Provider, <-chan StreamToken, context.CancelFunc, []Provider, error) {
 	var lastErr error
-	for _, provider := range providers {
-		if !c.providerReady(provider) {
+	for index, provider := range providers {
+		if !c.providerReady(provider) || !providerSupportsInput(ctx, provider) {
 			continue
 		}
-		stream, err := provider.CompleteTextStream(ctx, prompt)
+		attemptCtx, cancel := context.WithCancel(ctx)
+		stream, err := provider.CompleteTextStream(attemptCtx, prompt)
 		if err == nil {
 			c.markProviderSuccess(provider)
-			return provider, stream, nil
+			return provider, stream, cancel, providers[index+1:], nil
 		}
+		cancel()
 		lastErr = err
 		c.markProviderFailure(ctx, provider, err)
 	}
 	if lastErr == nil {
 		lastErr = ErrAllProvidersFailed
 	}
-	return nil, nil, lastErr
+	return nil, nil, nil, nil, lastErr
 }
 
 func sendStreamToken(ctx context.Context, out chan<- StreamToken, token StreamToken) bool {

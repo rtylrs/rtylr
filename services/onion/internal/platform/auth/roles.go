@@ -1,27 +1,6 @@
 package auth
 
-import (
-	"strings"
-
-	"github.com/voxire/onion/internal/platform/authorization"
-)
-
-// HasAnyRole reports whether an authenticated user has one of the supplied
-// tenant roles. Callers should still resolve and validate the tenant scope
-// separately; this helper only answers the role portion of authorization.
-func HasAnyRole(user *AuthUser, roles ...string) bool {
-	if user == nil {
-		return false
-	}
-
-	actual := strings.ToLower(strings.TrimSpace(user.Role))
-	for _, role := range roles {
-		if actual == strings.ToLower(strings.TrimSpace(role)) {
-			return true
-		}
-	}
-	return false
-}
+import "github.com/voxire/onion/internal/platform/authorization"
 
 func IsBusinessAdmin(user *AuthUser) bool {
 	if !hasActiveProvisioning(user) {
@@ -30,21 +9,28 @@ func IsBusinessAdmin(user *AuthUser) bool {
 	if user != nil && user.EffectiveAccess != nil {
 		return user.EffectiveAccess.IsOwner || user.EffectiveAccess.IsAdmin
 	}
-	return HasAnyRole(user, "owner", "admin", "console_admin")
+	return false
+}
+
+func IsConsoleAdmin(user *AuthUser) bool {
+	return user != nil && user.IsConsoleAdmin
 }
 
 // HasAppPermission checks only server-resolved app access. It deliberately
-// does not fall back to the legacy role field.
+// does not fall back to the legacy role field. The resolver requires both an
+// active license and a permission profile assignment for regular members.
 func HasAppPermission(user *AuthUser, appID authorization.AppID, permission string) bool {
 	if !hasActiveProvisioning(user) || user.EffectiveAccess == nil {
 		return false
 	}
 	for _, app := range user.EffectiveAccess.Apps {
+		if app.AppID == appID && app.Licensed && app.HasAccess && (user.EffectiveAccess.IsOwner || user.EffectiveAccess.IsAdmin) {
+			return true
+		}
+	}
+	for _, app := range user.EffectiveAccess.Apps {
 		if app.AppID != appID || !app.Licensed || !app.HasAccess {
 			continue
-		}
-		if LegacyAuthorizationMode() {
-			return true
 		}
 		for _, granted := range app.Permissions {
 			if granted == permission {
@@ -75,6 +61,9 @@ func HasDashboardPermission(user *AuthUser, permission string) bool {
 	if !hasActiveProvisioning(user) || user.EffectiveAccess == nil {
 		return false
 	}
+	if user.EffectiveAccess.IsOwner || user.EffectiveAccess.IsAdmin {
+		return true
+	}
 	for _, granted := range user.EffectiveAccess.DashPermissions {
 		if granted == permission {
 			return true
@@ -83,10 +72,21 @@ func HasDashboardPermission(user *AuthUser, permission string) bool {
 	return false
 }
 
-// HasAnyAppScope reports whether a normalized app assignment has at least one
-// resource scope. A zero authorization version is the legacy compatibility
-// shape used while an installation is being migrated, so it retains the
-// existing business-level behavior until normalized access is available.
+// appRequiresScope reports whether an app's assignments are resource scoped.
+// Only POS (locations) and Flow (projects) model scopes today, and the
+// chk_auth_assignment_scope_type constraint permits no other scope type, so
+// requiring a scope on any other app could never be satisfied and would lock
+// every non-owner member out of it. The allowlist is deliberately explicit:
+// adding an app here without adding a permitted scope type would deny access
+// rather than widen it.
+func appRequiresScope(appID authorization.AppID) bool {
+	return appID == authorization.AppPOS || appID == authorization.AppFlow
+}
+
+// HasAnyAppScope reports whether the resolved app grants any resource access.
+// An empty scope list is a business-wide grant; a non-empty list is restricted
+// to those resources. For apps that do not model scopes, resolved app access
+// is sufficient and the business_id predicate remains the tenant boundary.
 func HasAnyAppScope(user *AuthUser, appID authorization.AppID) bool {
 	if !hasActiveProvisioning(user) || user == nil || user.EffectiveAccess == nil {
 		return false
@@ -95,16 +95,14 @@ func HasAnyAppScope(user *AuthUser, appID authorization.AppID) bool {
 		if app.AppID != appID || !app.Licensed || !app.HasAccess {
 			continue
 		}
-		if user.EffectiveAccess.AuthorizationVersion == 0 {
-			return true
-		}
-		// Owners and admins resolve through the system path, which grants every
-		// permission without creating scoped assignments. HasAccess is only true
-		// for them when their membership is active, so this cannot widen access.
+		// Owners and admins receive business-wide scope through the system path.
 		if user.EffectiveAccess.IsOwner || user.EffectiveAccess.IsAdmin {
 			return true
 		}
-		return len(app.Scopes) > 0
+		if !appRequiresScope(appID) {
+			return true
+		}
+		return len(app.PermissionScopes) > 0
 	}
 	return false
 }

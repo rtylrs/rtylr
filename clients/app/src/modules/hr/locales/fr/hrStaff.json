@@ -1,0 +1,43 @@
+{
+  "directory": "Répertoire du personnel",
+  "memberCount": "{{count}} membres de l'équipe",
+  "inviteStaff": "Inviter du personnel",
+  "searchPlaceholder": "Rechercher le personnel… (appuyez /)",
+  "emptyState": {
+    "title": "Aucun membre du personnel",
+    "description": "Ajustez les filtres ou invitez quelqu'un dans votre équipe."
+  },
+  "profile": {
+    "notFoundTitle": "Employé introuvable",
+    "notFoundDescription": "L'employé que vous recherchez a peut-être été supprimé.",
+    "backToStaff": "Retour au personnel",
+    "hiredOn": "Recruté le {{date}}",
+    "emergencyHeading": "Contact d'urgence",
+    "emergencyNotProvided": "Non renseigné",
+    "aboutHeading": "À propos",
+    "noBio": "Pas encore de biographie.",
+    "noDocuments": "Aucun document enregistré.",
+    "goToDocuments": "Aller aux documents",
+    "noCourses": "Pas encore de cours.",
+    "goToTraining": "Aller à la formation",
+    "noBenefits": "Aucune inscription à un avantage active.",
+    "goToBenefits": "Aller aux avantages",
+    "contact": "Coordonnées",
+    "employment": "Emploi",
+    "documents": "Documents",
+    "training": "Formation",
+    "benefits": "Avantages"
+  },
+  "reportingLines": {
+    "title": "Lignes hiérarchiques",
+    "flowNotice": "Définir un responsable ici lui permet aussi de voir les projets de ses équipes dans Work.",
+    "empty": "Aucun membre pour le moment.",
+    "none": "Aucun responsable",
+    "change": "Modifier",
+    "reportsTo": "Rattaché à {{name}}",
+    "saved": "Ligne hiérarchique mise à jour",
+    "selectLabel": "Choisir un responsable pour {{name}}",
+    "changeLabel": "Modifier le rattachement de {{name}}"
+  },
+  "deptPrefix": "Service :"
+}

@@ -16,15 +16,15 @@ jobs:
       matrix:
         include:
           - label: macOS Apple Silicon
-            os: blacksmith-6vcpu-macos-15
+            os: macos-15
             rust_targets: aarch64-apple-darwin
             args: --target aarch64-apple-darwin
           - label: Windows
-            os: blacksmith-2vcpu-windows-2025
+            os: windows-2025
             rust_targets: ''
             args: ''
           - label: Linux
-            os: blacksmith-2vcpu-ubuntu-2204
+            os: ubuntu-22.04
             rust_targets: ''
             args: ''
 
@@ -47,7 +47,7 @@ jobs:
 
       - name: Install onek
         shell: bash
-        run: go install github.com/1homsi/onekit/cmd/onek@v0.19.1
+        run: go install github.com/1homsi/onekit/cmd/onek@v0.34.1
 
       - name: Generate contracts
         shell: bash
@@ -103,7 +103,7 @@ jobs:
 
   publish-downloads:
     name: Publish Cloudflare downloads
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     needs: build
     steps:
       - name: Checkout

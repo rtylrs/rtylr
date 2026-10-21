@@ -1,0 +1,15 @@
+{
+  "created": "Account created",
+  "nameRequired": "Account name is required",
+  "title": "Chart of Accounts",
+  "count": "{{count}} accounts",
+  "new": "New Account",
+  "search": "Search accounts",
+  "code": "Code",
+  "name": "Name",
+  "type": "Type",
+  "balance": "Balance",
+  "codeOptional": "Account code (optional)",
+  "emptyTitle": "No accounts yet",
+  "emptyDescription": "The chart of accounts lists the ledger accounts that journal entries post to. Add accounts when you start keeping a journal; expenses and invoices do not need them to appear in your reports."
+}

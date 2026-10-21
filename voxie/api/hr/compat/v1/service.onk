@@ -4,12 +4,13 @@ package hr.compat.v1
 service CompatibilityService {
   base_path: "/hr"
 
-  getStaffDetail(GetStaffDetailRequest) -> GetStaffDetailResponse @get("/staff/detail")
 
-  getMyEmployee(GetMyEmployeeRequest) -> GetMyEmployeeResponse @get("/employees/me")
+  getMyEmployee(EmptyRequest) -> JsonResponse @get("/employees/me")
 
-  getTimeOff(EmptyRequest) -> JsonResponse @get("/time-off")
+  listTimeOff(QueryRequest) -> JsonResponse @get("/time-off")
+
   submitTimeOff(BodyRequest) -> JsonResponse @post("/time-off") @body("body")
+
   approveTimeOff(BodyRequest) -> JsonResponse @post("/time-off/approve") @body("body")
 
   getShifts(QueryRequest) -> JsonResponse @get("/shifts")
@@ -28,29 +29,17 @@ service CompatibilityService {
   approveTimesheet(PathBodyRequest) -> JsonResponse @post("/timesheets/{id}/approve") @body("body")
   rejectTimesheet(PathBodyRequest) -> JsonResponse @post("/timesheets/{id}/reject") @body("body")
 
-  getTraining(QueryRequest) -> JsonResponse @get("/training")
-  upsertTraining(BodyRequest) -> JsonResponse @post("/training") @body("body")
 
   getDocuments(QueryRequest) -> JsonResponse @get("/documents")
   getExpiringDocuments(QueryRequest) -> JsonResponse @get("/documents/expiring")
   createDocument(BodyRequest) -> JsonResponse @post("/documents") @body("body")
   deleteDocument(PathRequest) -> JsonResponse @delete("/documents/{id}")
 
-  getBenefits(QueryRequest) -> JsonResponse @get("/benefits")
 
-  getStaff(QueryRequest) -> JsonResponse @get("/staff")
-  upsertStaff(BodyRequest) -> JsonResponse @post("/staff") @body("body")
-  updateStaff(BodyRequest) -> JsonResponse @put("/staff") @body("body")
-  clockIn(BodyRequest) -> JsonResponse @post("/staff/clock-in") @body("body")
-  clockOut(BodyRequest) -> JsonResponse @post("/staff/clock-out") @body("body")
 
   getConfig(EmptyRequest) -> JsonResponse @get("/config")
   updateConfig(BodyRequest) -> JsonResponse @put("/config") @body("body")
 
-  getDashboard(EmptyRequest) -> JsonResponse @get("/dashboard/v1/dashboard")
-  getDashboardWidgets(EmptyRequest) -> JsonResponse @get("/dashboard/v1/dashboard/widgets")
-  updateDashboardWidgets(BodyRequest) -> JsonResponse @put("/dashboard/v1/dashboard/widgets") @body("body")
-  generateReport(BodyRequest) -> JsonResponse @post("/reports/generate") @body("body")
 
   getEmployees(QueryRequest) -> JsonResponse @get("/employees")
   getEmployee(PathRequest) -> JsonResponse @get("/employees/{id}")
@@ -59,8 +48,6 @@ service CompatibilityService {
   inviteEmployee(BodyRequest) -> JsonResponse @post("/employees/invite") @body("body")
 
   getAttendance(QueryRequest) -> JsonResponse @get("/attendance")
-  clockInAttendance(BodyRequest) -> JsonResponse @post("/attendance/clock-in") @body("body")
-  clockOutAttendance(BodyRequest) -> JsonResponse @post("/attendance/clock-out") @body("body")
   updateEmployeePin(BodyRequest) -> JsonResponse @put("/employees/me/pin") @body("body")
 
   getRoles(EmptyRequest) -> JsonResponse @get("/roles")
@@ -68,17 +55,9 @@ service CompatibilityService {
   createRole(BodyRequest) -> JsonResponse @post("/roles") @body("body")
   updateRole(PathBodyRequest) -> JsonResponse @put("/roles/{id}") @body("body")
 
-  getOnboardingTemplates(EmptyRequest) -> JsonResponse @get("/onboarding/templates")
-  createOnboardingTemplate(BodyRequest) -> JsonResponse @post("/onboarding/templates") @body("body")
-  getOnboardingChecklists(QueryRequest) -> JsonResponse @get("/onboarding/checklists")
-  getOnboardingSummary(QueryRequest) -> JsonResponse @get("/onboarding/checklists/summary")
-  completeOnboardingItem(PathBodyRequest) -> JsonResponse @post("/onboarding/checklists/{id}/complete") @body("body")
 
-  getReviewCycles(QueryRequest) -> JsonResponse @get("/performance/cycles")
   getReviewCycle(PathRequest) -> JsonResponse @get("/performance/cycles/{id}")
-  createReviewCycle(BodyRequest) -> JsonResponse @post("/performance/cycles") @body("body")
   openReviewCycle(PathBodyRequest) -> JsonResponse @post("/performance/cycles/{id}/open") @body("body")
-  getGoals(QueryRequest) -> JsonResponse @get("/performance/goals")
   createGoal(BodyRequest) -> JsonResponse @post("/performance/goals") @body("body")
   updateGoal(PathBodyRequest) -> JsonResponse @put("/performance/goals/{id}") @body("body")
   getPerformanceReviews(QueryRequest) -> JsonResponse @get("/performance/reviews")
@@ -109,8 +88,25 @@ service CompatibilityService {
   deleteTimeEntry(PathRequest) -> JsonResponse @delete("/time-entries/{id}")
   markTimeEntriesInvoiced(BodyRequest) -> JsonResponse @patch("/time-entries/mark-invoiced") @body("body")
 
-  getReviews(EmptyRequest) -> JsonResponse @get("/reviews")
-  createReview(BodyRequest) -> JsonResponse @post("/reviews") @body("body")
-  getOneOnOnes(EmptyRequest) -> JsonResponse @get("/one-on-ones")
-  upsertOneOnOne(BodyRequest) -> JsonResponse @post("/one-on-ones") @body("body")
+  deleteEmployee(PathIdRequest) -> JsonResponse @delete("/employees/{id}")
+  deleteShift(EmptyRequest) -> JsonResponse @delete("/shifts")
+  deleteAvailability(EmptyRequest) -> JsonResponse @delete("/shifts/availability")
+  getCompanyConfig(EmptyRequest) -> JsonResponse @get("/company-config")
+  listCoreDepartments(EmptyRequest) -> JsonResponse @get("/core/departments")
+  getDocument(PathIdRequest) -> JsonResponse @get("/documents/{id}")
+  verifyEmployeeInvite(EmptyRequest) -> JsonResponse @get("/employees/invite/verify")
+  listLocations(EmptyRequest) -> JsonResponse @get("/locations")
+  getEmployeeChecklist(PathIdRequest) -> JsonResponse @get("/onboarding/checklists/{id}")
+  getPerformanceConfig(EmptyRequest) -> JsonResponse @get("/performance/config")
+  createCoreDepartment(BodyRequest) -> JsonResponse @post("/core/departments") @body("body")
+  acceptEmployeeInvite(BodyRequest) -> JsonResponse @post("/employees/invite/accept") @body("body")
+  assignEmployeeRole(PathIdBodyRequest) -> JsonResponse @post("/employees/{id}/role") @body("body")
+  completeChecklistItem(PathIdBodyRequest) -> JsonResponse @post("/onboarding/checklists/items/{id}/complete") @body("body")
+  exportPayrollRun(PathIdBodyRequest) -> JsonResponse @post("/payroll/runs/{id}/export") @body("body")
+  updateCompanyConfig(BodyRequest) -> JsonResponse @put("/company-config") @body("body")
+  updateCoreDepartment(PathIdBodyRequest) -> JsonResponse @put("/core/departments/{id}") @body("body")
+  updateLocation(PathIdBodyRequest) -> JsonResponse @put("/locations/{id}") @body("body")
+  updatePerformanceConfig(BodyRequest) -> JsonResponse @put("/performance/config") @body("body")
+
+  createReportsGenerate(EmptyRequest) -> EmptyResponse @post("/reports/generate") @http
 }

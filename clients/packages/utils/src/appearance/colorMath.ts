@@ -240,6 +240,35 @@ export function deriveOnAccent(accent: string): string {
   return contrastRatio(NEAR_BLACK, hex) >= contrastRatio(NEAR_WHITE, hex) ? NEAR_BLACK : NEAR_WHITE;
 }
 
+/**
+ * White text measuring at least this on an accent marks it a mid-tone rather
+ * than a pastel. 3:1 is WCAG's bar for large text and UI components.
+ */
+const MID_TONE_WHITE = 3;
+
+/**
+ * The fill for a solid button in this accent; put deriveOnAccent(fill) on it.
+ *
+ * On a saturated mid-tone deriveOnAccent alone picks near-black by a hair:
+ * violet #8b5cf6 measures 4.7:1 with near-black against 4.2:1 with white. That
+ * passes AA and still looks wrong, because nobody ships black text on a violet
+ * button. So when white already gets 3:1, the fill walks darker, hue and
+ * saturation held, until white clears CONTRAST_TARGET. Light accents (white
+ * under 3:1) and dark ones (white already clear) come back unchanged.
+ */
+export function deriveActionFill(accent: string): string {
+  const hex = safeHex(accent, '#000000');
+  const white = contrastRatio(NEAR_WHITE, hex);
+  if (white < MID_TONE_WHITE || white >= CONTRAST_TARGET) return hex;
+
+  const { h, s, l } = hexToHsl(hex);
+  for (let nextL = l - WALK_STEP; nextL >= 0; nextL -= WALK_STEP) {
+    const candidate = hslToHex({ h, s, l: nextL });
+    if (contrastRatio(NEAR_WHITE, candidate) >= CONTRAST_TARGET) return candidate;
+  }
+  return hex;
+}
+
 /** `rgba(r, g, b, a)` from a hex plus an alpha. Matches the accentTints output. */
 export function rgbaFromHex(hex: string, alpha: number): string {
   const { r, g, b } = hexToRgb(hex);

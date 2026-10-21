@@ -5,21 +5,20 @@ change a contract and every consumer with it.
 
 ## Layout
 
-| Path | What it is |
-|---|---|
-| `clients/` | The pnpm workspace root. Everything JavaScript/TypeScript lives under it. |
-| `clients/web/rtylr/` | The rtylr suite: the ten product apps (`dash`, `auth`, `crm`, `erp`, `finance`, `flow`, `hr`, `insights`, `menu`, `recruit`) plus their tests, docs and scripts. |
-| `clients/web/landing/` | The marketing site (Next.js static export). |
-| `clients/web/docs/` | The documentation site (Next.js static export). |
-| `clients/web/mcp/` | The MCP server. Build-only; nothing deploys it. |
-| `clients/pos/` | The POS terminal: Vite web app plus the Tauri desktop shell in `core/`. |
-| `clients/packages/` | The shared library layer (`@voxire/*`) and the generated contracts package (`contracts/`). |
-| `voxie/` | API contracts (`.onk`) plus the generated Go and OpenAPI output. In-tree and the single source of truth. |
-| `services/onion/` | The Go backend: modules, platform packages, sqlc, worker. |
+| Path                   | What it is                                                                                                                    |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `clients/`             | The pnpm workspace root. Everything JavaScript/TypeScript lives under it.                                                     |
+| `clients/app/`         | Single Portal application: business modules, the public customer menu, and separate SSO and public Recruit build entrypoints. |
+| `clients/web/landing/` | The marketing site (Next.js static export).                                                                                   |
+| `clients/web/docs/`    | The documentation site (Next.js static export).                                                                               |
+| `clients/mcp/`         | The MCP server. Build-only; nothing deploys it.                                                                               |
+| `clients/pos/`         | The POS terminal: Vite web app plus the Tauri desktop shell in `core/`.                                                       |
+| `clients/packages/`    | The shared library layer (`@voxire/*`) and the generated contracts package (`contracts/`).                                    |
+| `voxie/`               | API contracts (`.onk`) plus the generated Go and OpenAPI output. In-tree and the single source of truth.                      |
+| `services/onion/`      | The Go backend: modules, platform packages, sqlc, worker.                                                                     |
 
-`tryrtylr/deploy`, `tryrtylr/infra` and `tryrtylr/pipelines` stay separate:
-they are the release control plane, the infrastructure, and the reusable
-workflows.
+`rtylrs/infra` and `rtylrs/pipelines` stay separate: they are the
+infrastructure and the reusable build-and-deploy workflows.
 
 ## One workspace
 
@@ -34,12 +33,12 @@ same declaration files, not the same versions.
 ```sh
 pnpm -C clients install          # installs every workspace member
 pnpm -C clients -r typecheck     # every member
-pnpm -C clients --filter @rtylr/dash test
-pnpm -C clients --filter dash dev
-pnpm -C clients/web/rtylr build  # the ten rtylr apps, one command
+pnpm -C clients --filter @rtylr/portal test
+pnpm -C clients --filter @rtylr/portal dev
+pnpm -C clients/app build  # Portal, SSO and careers builds
 ```
 
-The rtylr workspace keeps its own scripts (`clients/web/rtylr/package.json`)
+The rtylr workspace keeps its own scripts (`clients/app/package.json`)
 for the things that only concern it: the contracts guard, contracts, the vitest
 suite across packages and apps, and the app build fan-out.
 
@@ -55,28 +54,30 @@ The last line wires the committed hooks; git does not track `core.hooksPath`.
 
 ## Releases and deployment
 
-Nothing in this repository deploys itself:
+A push to `main` releases and deploys:
 
-1. A push to `main` cuts one release — `.github/workflows/release.yml` computes
-   the next `rtylr-v*` version, attaches only the components that changed
-   (per-component source archives plus a `release.json` manifest), and creates
-   the tag and GitHub release.
-2. A maintainer promotes one exact release in `tryrtylr/deploy` by editing the
-   app's manifest.
-3. `deploy` dispatches back here; `.github/workflows/deploy-release.yml` builds
-   the promoted tag through `tryrtylr/pipelines` and ships it — Pages apps and
-   ECS services through the same adapter.
+1. `.github/workflows/release.yml` computes the next `rtylr-v*` version,
+   attaches only the components that changed (per-component source archives
+   plus a `release.json` manifest), and creates the tag and GitHub release.
+2. The same run picks the deploy targets whose own paths changed, using
+   `.github/deploy-targets.json`, and `.github/workflows/deploy.yml` builds the
+   new tag through `rtylrs/pipelines` and ships it — Pages apps and ECS
+   services through the same entrypoint. A change that touches no target's paths
+   (CI only, for example) cuts a release and deploys nothing.
+3. To re-ship or roll back an existing tag, run `redeploy.yml` with the tag and
+   a target name (or `all`).
 
-Manifests carry `working_directory` (for example `clients/web/rtylr`) plus
-`dist_dir`, so one adapter serves every product.
+Each target in `deploy-targets.json` lists the path prefixes that trigger it
+(with optional `ignore` prefixes) and carries `working_directory` (for example
+`clients/app`) plus `dist_dir`, so one entrypoint serves every product. Adding an app is one entry in that file.
+
+Deploys do not run database migrations; use `migrate-onion-database.yml`.
 
 Other workflows:
 
 - `desktop-release.yml` — Tauri desktop builds and the public downloads site;
   installer releases are still tagged `pos-v*` and are separate from source
   releases.
-- `publish-images.yml` / `publish-images-pos.yml` — the public self-host images,
-  dispatched by the Release workflow when app sources change (or run manually).
 
 ## Development notes
 

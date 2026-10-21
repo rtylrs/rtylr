@@ -1,4 +1,4 @@
-.PHONY: onion setup build build-all build-media-engine generate contracts generate-module lint vet test test-db direct-authorization-evidence role-access-control-v2-rollback-check route-contract-check json-tags-check mutation-validation-check run run-api run-upload dev sql-check sql-case-check db-prelaunch-check local-env-up local-env-down local-env-logs local-env-mindsdb-init
+.PHONY: onion setup build build-all build-media-engine generate contracts generate-module lint vet architecture-check test test-db authorization-evidence route-contract-check json-tags-check mutation-validation-check run run-api run-upload dev sql-check sql-case-check db-prelaunch-check local-env-up local-env-down local-env-logs local-env-mindsdb-init
 
 onion: sql-check test build
 	@echo "✅ Onion project is ready!"
@@ -30,7 +30,7 @@ build-all: generate contracts
 	     -X 'github.com/voxire/onion/internal/platform/server/http.Version=$$VERSION' \
 	     -X 'github.com/voxire/onion/internal/platform/server/http.Commit=$$COMMIT' \
 	     -X 'github.com/voxire/onion/internal/platform/server/http.BuildTime=$$BUILD_TIME'" \
-	   -o ./bin/api ./cmd/api/main.go
+	   -o ./bin/api ./cmd/api
 	@echo "All binaries built successfully!"
 
 # Build the C++ media-engine binary the upload runmode shells out to.
@@ -56,21 +56,21 @@ lint: generate contracts
 vet: generate contracts
 	go vet ./...
 
+architecture-check:
+	go test . -run '^TestArchitecture($$|Scanner$$)' -count=1
+
 test: generate contracts
 	./scripts/test.sh
 
 # Run the database-backed integration tests against the local-env MySQL
 # container. Resets a dedicated onion_test DB (drop → migrate → seed) each
 # run so the tests stay repeatable. Requires `make local-env-up` first.
-# Pass a package subset with PKG=, e.g. `make test-db PKG=./internal/modules/pos_users/...`
+# Pass a package subset with PKG=, e.g. `make test-db PKG=./internal/modules/pos/users/...`
 test-db: generate contracts
 	./scripts/test-db.sh $(PKG)
 
-direct-authorization-evidence:
-	./scripts/run-role-access-control-v2-direct-coverage.sh
-
-role-access-control-v2-rollback-check: generate contracts
-	./scripts/test-role-access-control-v2-rollback.sh
+authorization-evidence:
+	./scripts/run-authorization-evidence.sh
 
 route-contract-check:
 	python3 ./scripts/check-route-contract-drift.py
@@ -83,11 +83,11 @@ mutation-validation-check:
 
 # Default run (backwards compatibility)
 run:
-	go run ./cmd/api/main.go
+	go run ./cmd/api
 
 # Run specific services
 run-api:
-	go run ./cmd/api/main.go
+	go run ./cmd/api
 
 # Development with live reloading (air)
 dev:
@@ -107,9 +107,6 @@ local-env-mindsdb-init:
 
 sql-check:
 	./scripts/check_sql_case.sh
-
-load-tables:
-	./scripts/load_tables.sh
 
 db-prelaunch-check:
 	./scripts/db-prelaunch-check.sh

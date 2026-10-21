@@ -1,0 +1,65 @@
+name: Redeploy release
+
+# Manual escape hatch: ships an existing rtylr-v* release again, for a rollback
+# or a failed deploy. A push to main deploys on its own through release.yml.
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Release tag to deploy, for example rtylr-v6.1.1
+        required: true
+        type: string
+      app:
+        description: Target from .github/deploy-targets.json, or all
+        required: true
+        default: all
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    name: Plan ${{ inputs.app }} from ${{ inputs.release_tag }}
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      pages: ${{ steps.plan.outputs.pages }}
+      ecs: ${{ steps.plan.outputs.ecs }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify the release exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: gh api "repos/${{ github.repository }}/releases/tags/$RELEASE_TAG" --silent
+
+      - name: Resolve version
+        id: version
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          case "$RELEASE_TAG" in
+            rtylr-v[0-9]*) echo "version=${RELEASE_TAG#rtylr-v}" >> "$GITHUB_OUTPUT" ;;
+            *) echo 'release_tag must look like rtylr-v1.2.3' >&2; exit 1 ;;
+          esac
+
+      - name: Select targets
+        id: plan
+        env:
+          APP: ${{ inputs.app }}
+        run: .github/scripts/plan-deploys.sh app "$APP"
+
+  deploy:
+    name: Deploy
+    needs: plan
+    uses: ./.github/workflows/deploy.yml
+    with:
+      release_tag: ${{ inputs.release_tag }}
+      version: ${{ needs.plan.outputs.version }}
+      pages: ${{ needs.plan.outputs.pages }}
+      ecs: ${{ needs.plan.outputs.ecs }}
+    secrets: inherit

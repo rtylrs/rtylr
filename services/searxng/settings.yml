@@ -1,0 +1,43 @@
+use_default_settings:
+  engines:
+    # Only engines that answer automated queries. Google, Brave, DuckDuckGo
+    # web, Qwant web, and Mojeek rate-limit, CAPTCHA, or deny a single server
+    # IP, which left Caret with zero results. Caret searches general and news
+    # together so one suspended engine does not empty the results.
+    keep_only:
+      - bing
+      - wikipedia
+      - bing news
+      - duckduckgo news
+      - qwant
+      - qwant news
+      - wikinews
+
+general:
+  debug: false
+  instance_name: Caret Search
+
+search:
+  autocomplete: ""
+  formats:
+    - json
+
+server:
+  secret_key: "replaced-by-SEARXNG_SECRET"
+  limiter: false
+  public_instance: false
+  image_proxy: false
+
+outgoing:
+  request_timeout: 4.0
+  max_request_timeout: 8.0
+
+engines:
+  - name: bing
+    disabled: false
+  # qwant news shares the qwant engine's network, so qwant must stay loaded;
+  # its web results CAPTCHA, so it stays off.
+  - name: qwant
+    disabled: true
+  - name: qwant news
+    disabled: false

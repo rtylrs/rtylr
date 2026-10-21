@@ -1,0 +1,9 @@
+{
+  "audit": {
+    "emptyTitle": "Aucune entrée d'audit",
+    "emptyDescription": "Les événements liés à la sécurité apparaîtront ici.",
+    "filteredShowing": "Affichage de {{shown}} sur {{total}} sur cette page",
+    "loadFailedTitle": "Impossible de charger le journal d’audit",
+    "loadFailedDescription": "Un problème est survenu lors du chargement. Réessayez."
+  }
+}

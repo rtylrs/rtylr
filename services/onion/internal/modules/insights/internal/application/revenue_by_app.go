@@ -25,7 +25,7 @@ func (s *Service) GetRevenueByApp(ctx context.Context, businessID int64) ([]AppR
 	type result struct {
 		Shares []AppRevenueShare
 	}
-	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
+	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key+"|domain=v2", func(ctx context.Context) (result, error) {
 		rows, rerr := s.repo.GetRevenueByApp(ctx, businessID)
 		if rerr != nil {
 			return result{}, rerr

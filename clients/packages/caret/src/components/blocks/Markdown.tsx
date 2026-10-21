@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Check, Copy } from 'lucide-react';
 import ReactMarkdown, { type Components, type UrlTransform } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import '../../styles/markdown.css';
+import ChartBlock, { parseChartSpec, type ChartSpec } from './ChartBlock';
+import type { HighlightNode } from '../../lib/highlightCode';
 
 export interface MarkdownProps {
   source: string;
@@ -23,6 +26,121 @@ function tableHasBodyRows(children: React.ReactNode): boolean {
   });
 }
 
+/** A ```chart block whose JSON describes a usable chart. */
+function chartFromCode(children: React.ReactNode): ChartSpec | null {
+  const code = React.Children.toArray(children)[0];
+  if (!React.isValidElement<{ className?: string; children?: React.ReactNode }>(code)) return null;
+  if (!/\blanguage-chart\b/.test(code.props.className ?? '')) return null;
+  const raw = React.Children.toArray(code.props.children).join('');
+  return parseChartSpec(raw);
+}
+
+type Highlighter = (code: string, language: string) => HighlightNode[] | null;
+
+// The highlighter and its grammars load on first use, so a chat with no code
+// doesn't pay for them. Later blocks reuse the loaded module.
+let loadedHighlighter: Highlighter | null = null;
+let highlighterLoad: Promise<Highlighter> | null = null;
+
+function loadHighlighter(): Promise<Highlighter> {
+  highlighterLoad ??= import('../../lib/highlightCode').then((module) => {
+    loadedHighlighter = module.highlightCode;
+    return module.highlightCode;
+  });
+  return highlighterLoad;
+}
+
+function useHighlighter(enabled: boolean): Highlighter | null {
+  const [highlighter, setHighlighter] = useState<Highlighter | null>(() => loadedHighlighter);
+  useEffect(() => {
+    if (!enabled || highlighter) return;
+    let live = true;
+    loadHighlighter()
+      .then((loaded) => {
+        if (live) setHighlighter(() => loaded);
+      })
+      .catch(() => undefined);
+    return (): void => {
+      live = false;
+    };
+  }, [enabled, highlighter]);
+  return highlighter;
+}
+
+function renderHighlight(nodes: HighlightNode[]): React.ReactNode {
+  return nodes.map((node, index) =>
+    node.type === 'text' ? (
+      node.value
+    ) : (
+      <span key={index} className={node.properties?.className?.join(' ')}>
+        {renderHighlight(node.children)}
+      </span>
+    ),
+  );
+}
+
+/** Inside a fenced block: tokens are coloured once the highlighter has loaded. */
+const CodeContent: React.FC<{
+  language: string;
+  className?: string;
+  children?: React.ReactNode;
+}> = ({ language, className, children }) => {
+  const text = React.Children.toArray(children).join('');
+  const highlighter = useHighlighter(true);
+  const highlighted = useMemo(
+    () => (highlighter ? highlighter(text, language) : null),
+    [highlighter, text, language],
+  );
+  return (
+    <code className={['caret-inline-code', className].filter(Boolean).join(' ')}>
+      {highlighted ? renderHighlight(highlighted) : children}
+    </code>
+  );
+};
+
+/** A fenced block with a copy button that shows on hover or keyboard focus. */
+const CodeBlockFrame: React.FC<{
+  children?: React.ReactNode;
+  preProps: React.HTMLAttributes<HTMLPreElement>;
+}> = ({ children, preProps }) => {
+  const preRef = useRef<HTMLPreElement>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => (): void => clearTimeout(timer.current), []);
+
+  const copy = async (): Promise<void> => {
+    const text = (preRef.current?.textContent ?? '').replace(/\n$/, '');
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // The Clipboard API can be blocked in iframes or when unfocused.
+      return;
+    }
+    setCopied(true);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setCopied(false), 1500);
+  };
+
+  return (
+    <div className={`caret-codeblock-frame${copied ? ' is-copied' : ''}`}>
+      <button
+        type="button"
+        className="caret-codeblock-copy"
+        aria-label={copied ? 'Copied' : 'Copy code'}
+        title={copied ? 'Copied' : 'Copy code'}
+        onClick={() => void copy()}
+      >
+        {copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
+        <span aria-live="polite">{copied ? 'Copied' : 'Copy'}</span>
+      </button>
+      <pre ref={preRef} className="caret-codeblock" {...preProps}>
+        {children}
+      </pre>
+    </div>
+  );
+};
+
 const markdownComponents: Components = {
   h1: ({ node: _node, ...props }) => <h1 className="caret-h" {...props} />,
   h2: ({ node: _node, ...props }) => <h2 className="caret-h" {...props} />,
@@ -35,10 +153,26 @@ const markdownComponents: Components = {
   ol: ({ node: _node, ...props }) => <ol className="caret-list" {...props} />,
   blockquote: ({ node: _node, ...props }) => <blockquote className="caret-quote" {...props} />,
   hr: ({ node: _node, ...props }) => <hr className="caret-hr" {...props} />,
-  code: ({ node: _node, className, ...props }) => (
-    <code className={['caret-inline-code', className].filter(Boolean).join(' ')} {...props} />
-  ),
-  pre: ({ node: _node, ...props }) => <pre className="caret-codeblock" {...props} />,
+  code: ({ node: _node, className, children, ...props }) => {
+    const language = /\blanguage-([\w+#-]+)/.exec(className ?? '')?.[1];
+    if (language && language !== 'chart') {
+      return (
+        <CodeContent language={language} className={className}>
+          {children}
+        </CodeContent>
+      );
+    }
+    return (
+      <code className={['caret-inline-code', className].filter(Boolean).join(' ')} {...props}>
+        {children}
+      </code>
+    );
+  },
+  pre: ({ node: _node, children, ...props }) => {
+    const chart = chartFromCode(children);
+    if (chart) return <ChartBlock spec={chart} />;
+    return <CodeBlockFrame preProps={props}>{children}</CodeBlockFrame>;
+  },
   table: ({ node: _node, children, ...props }) =>
     tableHasBodyRows(children) ? (
       <div className="caret-table-wrap">

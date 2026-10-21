@@ -1,5 +1,5 @@
 import type { CartItem } from "../../shared/stores/cartStore";
-import type { Order } from "../../shared/types/pos";
+import type { Order, OfflineTender } from "../../shared/types/pos";
 import type {
   CreateOrderRequest,
   CreateOrderResponse,
@@ -8,6 +8,30 @@ import type { ProcessPaymentRequest } from "@voxire/voxie/pos/orders/payments/v1
 import { roundCents } from "../../shared/utils/orderCalc";
 
 export type CheckoutPaymentMethod = "card" | "cash" | "qr" | "gift_card";
+
+/**
+ * One charge, identified by the user action that started it.
+ *
+ * `Idempotency-Key` is a required header on the POS payment route (the server
+ * answers 428 without it) and is also what dedups a retry, so it belongs to the
+ * action rather than to the request: every attempt of this checkout sends the
+ * same key, and a later, different sale gets its own. It travels in the same
+ * object as the request so no transport can drop it on the floor.
+ */
+export type ChargeOrderRequest = ProcessPaymentRequest & { idempotencyKey: string };
+
+/**
+ * The money a queued offline sale already took, captured here because
+ * CreateOrderRequest carries no amount - and the drain has nothing else to
+ * charge. Taken from the same figures `recordCashSale` books, so the replay
+ * settles exactly what the drawer was credited with.
+ */
+export function buildOfflineTender(
+  method: CheckoutPaymentMethod,
+  order: Order,
+): OfflineTender {
+  return { paymentMethod: method, amountPaid: order.total, localOrderId: order.id };
+}
 
 interface CashTender {
   received: number;
@@ -46,7 +70,7 @@ interface ProcessCheckoutParams {
   method: CheckoutPaymentMethod;
   existingOrderId?: number | null;
   createOrder: (payload: CreateOrderRequest) => Promise<CreateOrderResponse>;
-  chargeOrder: (payload: ProcessPaymentRequest) => Promise<void>;
+  chargeOrder: (request: ChargeOrderRequest) => Promise<void>;
   persistExistingOrder?: () => Promise<void>;
   enqueueOffline: (payload: CreateOrderRequest) => void;
   recordCashSale: (amount: number, orderId: string) => void;
@@ -183,6 +207,11 @@ export async function processCheckout({
   recordCashSale,
   onOrderCreated,
 }: ProcessCheckoutParams): Promise<ProcessCheckoutResult> {
+  // Minted ONCE, above every retry. Generating it per attempt would give a
+  // double-tap or a retried drain two keys, so both would execute and the
+  // server's fingerprint check could not tell them apart from two real sales.
+  const idempotencyKey = crypto.randomUUID();
+
   const persistedOrderId = positiveInteger(existingOrderId);
   let orderId = persistedOrderId;
 
@@ -192,6 +221,8 @@ export async function processCheckout({
       orderId = positiveInteger(createRes.orderId);
     } catch (error) {
       if (method === "cash" && isRetryableCheckoutFailure(error)) {
+        // The caller stores the tender with the entry, in one write, so the
+        // drain can never find a queued sale it cannot charge.
         enqueueOffline(payload);
         recordCashSale(order.total, order.id);
         return { status: "queued" };
@@ -222,6 +253,7 @@ export async function processCheckout({
       orderId: String(orderId),
       paymentMethod: method,
       amountPaid: order.total,
+      idempotencyKey,
     });
   } catch {
     throw new Error("Payment failed. Please try again.");

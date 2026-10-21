@@ -8,12 +8,6 @@ import (
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
-func GetInvalidationRoutes() []string {
-	return []string{
-		"/invalidate-cache",
-	}
-}
-
 type Request struct {
 	InvalidationType string   `json:"type"`
 	IDs              []string `json:"ids"`

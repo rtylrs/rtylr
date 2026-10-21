@@ -4,11 +4,10 @@
 # must resolve the same files, not merely the same versions.
 packages:
   - 'packages/*'
-  - 'web/rtylr'
-  - 'web/rtylr/apps/*'
+  - 'app'
   - 'web/landing'
   - 'web/docs'
-  - 'web/mcp'
+  - 'mcp'
   - 'pos'
 
 onlyBuiltDependencies:
@@ -32,4 +31,7 @@ overrides:
   'nanoid@>=3.0.0 <4.0.0': '>=3.3.18 <4.0.0'
   ws@>=8.0.0: ">=8.20.1"
   happy-dom: 20.9.0
-  sharp: '>=0.35.4'
+  sharp: '>=0.35.5 <0.36.0'
+  compression: '>=1.8.2 <2.0.0'
+  source-map-js: '>=1.2.2 <2.0.0'
+  dompurify: '>=3.4.16 <4.0.0'

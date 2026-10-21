@@ -4,7 +4,6 @@ import { Sentry } from '@voxire/observability';
 import { getCookie } from '../cookies';
 import { signOut } from '../signOut';
 import { useUserStore } from '../store';
-import { parseUserRole } from '../types';
 import { hasEffectiveAppAccess, parseEffectiveAccess } from '../effectiveAccess';
 import type { AppId, User } from '../types';
 
@@ -89,8 +88,8 @@ function DefaultDenied({ appId }: { appId: AppId }): React.JSX.Element {
 /**
  * AppGuard wraps an app's root and enforces:
  * 1. A valid token cookie (redirects to auth if missing)
- * 2. The authenticated user has the requested app in their `apps` array
- *    (owners and admins are always allowed)
+ * 2. The authenticated user has a licensed app grant in the server-resolved
+ *    authorization document
  *
  * It also hydrates the shared `useUserStore` from the `/user/me` response.
  *
@@ -169,58 +168,26 @@ export function AppGuard({
       .then((data) => {
         // The @voxire/api response interceptor already converts wire
         // snake_case keys to camelCase, so only camelCase fields exist here.
-        const user: User = {
-          id: String(data.id ?? data.userId ?? ''),
-          email: (data.email as string) ?? '',
-          name: (data.fullName as string) ?? '',
-          role: parseUserRole(data.role) ?? undefined,
-          apps: (data.apps as AppId[]) ?? [],
-          effectiveAccess:
-            parseEffectiveAccess(data.effectiveAccess ?? data.effective_access) ?? undefined,
-          planType: (data.planSlug as string) ?? undefined,
-          isConsoleAdmin: data.isConsoleAdmin === true || undefined,
-        };
-        login(user);
-
         const effectiveAccess = parseEffectiveAccess(data.effectiveAccess ?? data.effective_access);
-        if (data.effectiveAccess !== undefined || data.effective_access !== undefined) {
-          setStatus(hasEffectiveAppAccess(effectiveAccess, appId) ? 'allowed' : 'denied');
-          return;
-        }
-
-        const apps: string[] = (data.apps as string[]) ?? [];
-        const role = parseUserRole(data.role);
-
-        // A role the frontend cannot interpret fails closed, and does so even
-        // when the apps array would otherwise admit the user. This used to be an
-        // unchecked cast, so an unrecognised backend role became a valid
-        // UserRole with nothing complaining, and access was decided by a value
-        // no code here understood (#795).
-        //
-        // "Absent" and "unrecognised" are deliberately different. A response
-        // with no role at all is the pre-existing case and still goes through
-        // the apps array; only a present-but-unknown value denies.
-        const roleWasSent = data.role !== undefined && data.role !== null && data.role !== '';
-        if (roleWasSent && role === null) {
-          // Report before denying. A role the frontend cannot interpret means
-          // the backend knows about one this build does not, and without this
-          // the only symptom is a user seeing an access-denied screen they
-          // cannot explain (#795).
-          //
-          // The value is a role name, not user data, so it is safe to send.
-          // captureMessage is a no-op when Sentry has not initialised, which is
-          // why this does not need to know whether boot has run.
-          Sentry.captureMessage('AppGuard: unrecognised user role', {
+        if (!effectiveAccess) {
+          Sentry.captureMessage('AppGuard: missing effective access document', {
             level: 'error',
-            extra: { appId, role: String(data.role) },
+            extra: { appId },
           });
           setStatus('denied');
           return;
         }
 
-        const allowed =
-          role === 'owner' || role === 'admin' || (apps.length > 0 && apps.includes(appId));
-        setStatus(allowed ? 'allowed' : 'denied');
+        const user: User = {
+          id: String(data.id ?? data.userId ?? ''),
+          email: (data.email as string) ?? '',
+          name: (data.fullName as string) ?? '',
+          effectiveAccess,
+          planType: (data.planSlug as string) ?? undefined,
+          isConsoleAdmin: data.isConsoleAdmin === true || undefined,
+        };
+        login(user);
+        setStatus(hasEffectiveAppAccess(effectiveAccess, appId) ? 'allowed' : 'denied');
       })
       .catch((): void => {
         setStatus('error');

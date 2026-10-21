@@ -17,6 +17,3 @@ ON DUPLICATE KEY UPDATE
     owner_id = VALUES(owner_id),
     items = VALUES(items),
     updated_at = CURRENT_TIMESTAMP;
-
--- name: GetHubNavigationMenuBusinessOwnerID :one
-SELECT owner_id FROM businesses WHERE id = ? AND is_active = TRUE;

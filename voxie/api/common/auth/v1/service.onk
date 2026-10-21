@@ -11,6 +11,12 @@ service AuthService {
   /// GoogleAuth completes social authentication with an OAuth code.
   googleAuth(GoogleAuthRequest) -> GoogleAuthResponse @post("/register/google")
 
+  /// Refresh renews a short-lived access token for an active session.
+  refresh(RefreshRequest) -> RefreshResponse @post("/refresh")
+
+  /// Revoke ends the supplied first-party session.
+  revoke(RevokeSessionRequest) -> RevokeSessionResponse @post("/revoke")
+
   /// ResetPassword starts a password reset flow.
   resetPassword(ResetPasswordRequest) -> ResetPasswordResponse @post("/password-reset/request")
 
@@ -29,6 +35,6 @@ service AuthService {
   /// CheckEmailExists probes whether an email is already registered.
   checkEmailExists(CheckEmailExistsRequest) -> CheckEmailExistsResponse @get("/email-exists")
 
-  /// SocialAuthorize returns the WorkOS-hosted consent URL for a provider.
-  socialAuthorize(SocialAuthorizeRequest) -> SocialAuthorizeResponse @get("/social/authorize")
+  /// GoogleAuthorize returns the Google consent URL for sign-in.
+  googleAuthorize(GoogleAuthorizeRequest) -> GoogleAuthorizeResponse @get("/google/authorize")
 }

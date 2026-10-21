@@ -50,12 +50,16 @@ func processTokenAuthentication(ctx context.Context, token, path, remoteAddr str
 	authUser := &authPkg.AuthUser{
 		UserID:         claims.UserID,
 		BusinessID:     claims.BusinessID,
-		Role:           claims.Role,
+		IsConsoleAdmin: claims.IsConsoleAdmin,
 		Platform:       claims.Platform,
 		PlatformUserID: claims.PlatformUserID,
 		PlanID:         claims.PlanID,
+		OAuthClientID:  claims.OAuthClientID,
 		Token:          token,
 		IP:             remoteAddr,
+	}
+	if claims.OAuthClientID != "" {
+		authUser.OAuthScopes = authPkg.ParseOAuthScopes(claims.Scope)
 	}
 
 	if authSuccessLogsEnabled() {
@@ -121,16 +125,25 @@ func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolv
 				tokenValidator = tokenValidatorResolver.ResolveTokenValidator(ctx, authPkg.ProductPlatformCtx(ctx))
 			}
 
-			authUser, err := processTokenAuthentication(ctx, token, path, r.RemoteAddr, tokenValidator)
+			authUser, err := processTokenAuthentication(ctx, token, requestRouteTemplate(r), r.RemoteAddr, tokenValidator)
 			if err != nil {
 				writeUnauthorizedResponse(ctx, w, "Unauthorized")
 
 				return
 			}
+			if authUser.IsOAuthToken() {
+				if required, allowed := requiredOAuthScope(r.Method, path); !allowed {
+					writeInsufficientScope(ctx, w, "")
+					return
+				} else if required != "" && !authUser.HasOAuthScope(required) {
+					writeInsufficientScope(ctx, w, required)
+					return
+				}
+			}
 			if accessResolver != nil {
 				effectiveAccess, accessErr := accessResolver.GetEffectiveAccess(ctx, authUser.BusinessID, authUser.UserID)
 				if accessErr != nil {
-					logger.Ctx(ctx).Warn("Effective authorization resolution failed", logger.Error(accessErr), logger.String("path", path))
+					logger.Ctx(ctx).Warn("Effective authorization resolution failed", logger.Error(accessErr), logger.String("path", requestRouteTemplate(r)))
 					writeUnauthorizedResponse(ctx, w, "Authorization unavailable")
 					return
 				}
@@ -144,9 +157,15 @@ func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolv
 					return
 				}
 				if statusResolver, ok := accessResolver.(authPkg.ProvisioningStatusResolver); ok {
-					status, statusErr := statusResolver.GetProvisioningStatus(ctx, authUser.UserID)
+					var status *authorization.ProvisioningStatus
+					var statusErr error
+					if businessResolver, scoped := accessResolver.(authPkg.BusinessProvisioningStatusResolver); scoped {
+						status, statusErr = businessResolver.GetProvisioningStatusForBusiness(ctx, authUser.BusinessID, authUser.UserID)
+					} else {
+						status, statusErr = statusResolver.GetProvisioningStatus(ctx, authUser.UserID)
+					}
 					if statusErr != nil {
-						logger.Ctx(ctx).Warn("Provisioning status resolution failed", logger.Error(statusErr), logger.String("path", path))
+						logger.Ctx(ctx).Warn("Provisioning status resolution failed", logger.Error(statusErr), logger.String("path", requestRouteTemplate(r)))
 						writeUnauthorizedResponse(ctx, w, "Authorization unavailable")
 						return
 					}
@@ -161,17 +180,23 @@ func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolv
 							return
 						}
 						if status.MFARequired {
-							if !status.MFAEnrolled && !isMFAPath(path) {
+							if !status.MFAEnrolled && !isMFAPath(r, false) {
 								writeUnauthorizedResponse(ctx, w, "MFA enrollment required")
 								return
 							}
-							if status.MFAEnrolled && !isMFAPath(path) {
+							if status.MFAEnrolled && !isMFAPath(r, true) {
 								mfaResolver, ok := accessResolver.(authPkg.MFAVerifiedResolver)
 								if !ok {
 									writeUnauthorizedResponse(ctx, w, "MFA verification unavailable")
 									return
 								}
-								verified, verifyErr := mfaResolver.IsMFAVerified(ctx, authUser.UserID)
+								var verified bool
+								var verifyErr error
+								if businessResolver, scoped := accessResolver.(authPkg.BusinessMFAVerifiedResolver); scoped {
+									verified, verifyErr = businessResolver.IsMFAVerifiedForBusiness(ctx, authUser.BusinessID, authUser.UserID)
+								} else {
+									verified, verifyErr = mfaResolver.IsMFAVerified(ctx, authUser.UserID)
+								}
 								if verifyErr != nil || !verified {
 									writeUnauthorizedResponse(ctx, w, "MFA verification required")
 									return
@@ -190,11 +215,8 @@ func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolv
 
 func hasFeaturePermission(user *authPkg.AuthUser, appID authorization.AppID, permission string) bool {
 	if appID == authorization.AppHub {
-		// Owners and admins are granted every dashboard permission by the
-		// resolver, but a legacy account with no normalized membership row yet
-		// resolves to no effective access. Fall back to the same owner/admin
-		// boundary the concrete handlers enforce so those accounts are not
-		// denied at the edge before their handler can apply that rule.
+		// Owners and admins have full dashboard access, including permissions
+		// added to handlers before the catalog is updated.
 		return authPkg.HasDashboardPermission(user, permission) || authPkg.IsBusinessAdmin(user)
 	}
 	return authPkg.HasAppPermission(user, appID, permission)
@@ -202,6 +224,9 @@ func hasFeaturePermission(user *authPkg.AuthUser, appID authorization.AppID, per
 
 func appForPath(path string) (authorization.AppID, bool) {
 	normalized := strings.ToLower(strings.TrimRight(path, "/"))
+	if normalized == "/pos/menu-item/v1/menu-items" || strings.HasPrefix(normalized, "/pos/menu-item/v1/menu-items/") {
+		return authorization.AppMenu, true
+	}
 	if normalized == "/hub/menu" || strings.HasPrefix(normalized, "/hub/menu/") {
 		return authorization.AppMenu, true
 	}
@@ -224,15 +249,26 @@ func appForPath(path string) (authorization.AppID, bool) {
 	return "", false
 }
 
-func isMFAPath(path string) bool {
-	switch strings.ToLower(strings.TrimRight(path, "/")) {
+// isMFAPath reports whether a request may bypass the MFA gate.
+//
+// Reads and proof endpoints (state, verify, recovery) always bypass: they are
+// how a user satisfies the gate in the first place.
+//
+// Enrollment bypasses only the "enrollment required" branch, because it is the
+// only way out of that state. Once a factor exists the same endpoints are a
+// factor rotation, so they must clear the verification gate like any other
+// mutation. Everything else — PATCH /2fa, POST /invalidate-sessions — is a
+// security-setting mutation and gets no exemption at all: exempting them let a
+// stolen bearer token disable or replace the second factor outright.
+func isMFAPath(r *http.Request, mfaEnrolled bool) bool {
+	switch strings.ToLower(strings.TrimRight(r.URL.Path, "/")) {
 	case "/hub/security/v1/state",
-		"/hub/security/v1/2fa",
-		"/hub/security/v1/mfa/enroll",
-		"/hub/security/v1/mfa/enroll/confirm",
 		"/hub/security/v1/mfa/verify",
 		"/hub/security/v1/mfa/recovery":
 		return true
+	case "/hub/security/v1/mfa/enroll",
+		"/hub/security/v1/mfa/enroll/confirm":
+		return !mfaEnrolled
 	default:
 		return false
 	}

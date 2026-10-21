@@ -20,6 +20,18 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
+func (r *Repository) Create(ctx context.Context, notification domain.Notification) error {
+	return r.queries.CreateNotification(ctx, sqlc.CreateNotificationParams{
+		OwnerID:    notification.OwnerID,
+		BusinessID: notification.BusinessID,
+		UserID:     notification.UserID,
+		Title:      notification.Title,
+		Body:       sql.NullString{String: notification.Body, Valid: notification.Body != ""},
+		Type:       notification.Type,
+		Link:       sql.NullString{String: notification.Link, Valid: notification.Link != ""},
+	})
+}
+
 func (r *Repository) List(ctx context.Context, businessID, userID int64) ([]domain.Notification, error) {
 	return r.ListPage(ctx, businessID, userID, 100, nil, nil)
 }

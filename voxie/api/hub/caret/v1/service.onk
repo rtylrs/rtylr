@@ -3,3 +3,19 @@ package hub.caret.v1
 service CaretService {
   listCaretTools(ListCaretToolsRequest) -> ListCaretToolsResponse @post("/tools")
 }
+
+/// Runtime routes the Caret panel calls directly. Paths match the routes the
+/// legacy handlers served; the SSE stream stays a raw handler.
+service CaretRuntimeService {
+  base_path: "/"
+
+  listTools(ListToolsRequest) -> ListToolsResponse @get("/caret/tools")
+  getProviderStatus(GetProviderStatusRequest) -> GetProviderStatusResponse @get("/ai/status")
+  decideTool(ToolDecisionRequest) -> ToolDecisionResponse @post("/caret/tools/decision")
+  /// Stops the reply generating in a chat. A reply whose client disconnects
+  /// otherwise keeps generating and is saved, so the Stop button calls this.
+  stopReply(StopReplyRequest) -> StopReplyResponse @post("/ai/generate-text-stream/stop")
+  /// Records a thumbs up or down on a reply. Caret learns lessons from these
+  /// verdicts and follows them in later replies.
+  rateReply(RateReplyRequest) -> RateReplyResponse @post("/caret/feedback")
+}

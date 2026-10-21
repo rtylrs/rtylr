@@ -4,37 +4,17 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"time"
 
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-type ScheduledReportRow struct {
-	ID         int64
-	OwnerID    int64
-	BusinessID int64
-	TemplateID string
-	Cadence    string
-	Channel    string
-	Recipient  string
-	IsActive   bool
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
-}
+type ScheduledReportRow = domain.ScheduledReportRow
 
-type ScheduledReportWrite struct {
-	ID         int64
-	OwnerID    int64
-	BusinessID int64
-	TemplateID string
-	Cadence    string
-	Channel    string
-	Recipient  string
-	IsActive   *bool
-}
+type ScheduledReportWrite = domain.ScheduledReportWrite
 
-var ErrScheduledReportNotFound = errors.New("scheduled report not found")
+var ErrScheduledReportNotFound = domain.ErrScheduledReportNotFound
 
 func nullableBool(value *bool) sql.NullBool {
 	if value == nil {

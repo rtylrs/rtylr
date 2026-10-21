@@ -2,6 +2,6 @@
 <h1>Invoice {{.InvoiceNumber}}</h1>
 <p>Hi {{.CustomerName}}, here's your invoice for <strong>{{.Amount}}</strong>.</p>
 <p>Due by <strong>{{.DueDate}}</strong>.</p>
-{{if .ViewLink}}<a href="{{.ViewLink}}" class="btn">View invoice</a>{{end}}
+{{if .ViewLink}}{{template "button" (action .ViewLink "View invoice")}}{{end}}
 <p class="muted">Questions? Reply to this email and we'll help you out.</p>
 {{end}}

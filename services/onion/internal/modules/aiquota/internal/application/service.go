@@ -2,25 +2,26 @@ package application
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/aiquota/internal/domain"
-	"github.com/voxire/onion/internal/modules/aiquota/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type repository interface {
-	ResolveOwnerID(ctx context.Context, businessID, fallbackUserID int64) int64
-	GetEntitlement(ctx context.Context, ownerID int64) (domain.Entitlement, error)
+	ResolveOwnerID(ctx context.Context, businessID, fallbackUserID int64) (int64, error)
 	GetMode(ctx context.Context, ownerID int64) (domain.Mode, error)
 	SetMode(ctx context.Context, ownerID int64, mode domain.Mode) error
 	GetUsedTokens(ctx context.Context, ownerID, bucketUserID int64, month time.Time) (int64, error)
 	AddUsage(ctx context.Context, ownerID, bucketUserID int64, month time.Time, tokens int64) error
-	GetFreePlanCredits(ctx context.Context) (int64, error)
-	Reserve(ctx context.Context, ownerID, bucketUserID int64, month time.Time, estimate, allowance int64) (bool, error)
+	Reserve(ctx context.Context, ownerID, bucketUserID int64, month time.Time, estimate, allowance int64, allowOverage bool) (bool, error)
 	Adjust(ctx context.Context, ownerID, bucketUserID int64, month time.Time, delta int64) error
+}
+
+type entitlementProvider interface {
+	GetAIQuotaEntitlement(ctx context.Context, ownerID int64) (planSlug string, creditsPerMonth, seatCount int, status string, err error)
+	GetFreePlanAICredits(ctx context.Context) (int64, error)
 }
 
 // ReservationEstimateTokens is optimistically debited before the provider call
@@ -38,11 +39,12 @@ var activeEntitlementStatuses = map[string]struct{}{
 }
 
 type Service struct {
-	repo repository
+	repo         repository
+	entitlements entitlementProvider
 }
 
-func NewService(_ context.Context, db *sql.DB) *Service {
-	return &Service{repo: infrastructure.NewRepository(db)}
+func NewService(_ context.Context, repo repository, entitlements entitlementProvider) *Service {
+	return &Service{repo: repo, entitlements: entitlements}
 }
 
 // perSeatBonusCredits mirrors the per-seat AI credit bonus described in the plan
@@ -74,14 +76,14 @@ func monthEnd() time.Time {
 }
 
 func (s *Service) status(ctx context.Context, ownerID, userID int64) (domain.QuotaStatus, error) {
-	ent, err := s.repo.GetEntitlement(ctx, ownerID)
+	ent, err := s.getEntitlement(ctx, ownerID)
 	if err != nil {
 		return domain.QuotaStatus{}, err
 	}
 	if _, active := activeEntitlementStatuses[ent.Status]; !active && ent.Status != "none" {
 		// Cancelled or past-due subscriptions no longer earn plan credits;
 		// the tenant keeps only whatever the free plan grants.
-		credits, ferr := s.repo.GetFreePlanCredits(ctx)
+		credits, ferr := s.entitlements.GetFreePlanAICredits(ctx)
 		if ferr == nil {
 			ent = domain.Entitlement{PlanSlug: "free", AICreditsPerMonth: int(credits), SeatCount: ent.SeatCount, Status: "free"}
 		}
@@ -133,6 +135,14 @@ func (s *Service) status(ctx context.Context, ownerID, userID int64) (domain.Quo
 	}, nil
 }
 
+func (s *Service) getEntitlement(ctx context.Context, ownerID int64) (domain.Entitlement, error) {
+	slug, credits, seats, status, err := s.entitlements.GetAIQuotaEntitlement(ctx, ownerID)
+	if err != nil {
+		return domain.Entitlement{}, err
+	}
+	return domain.Entitlement{PlanSlug: slug, AICreditsPerMonth: credits, SeatCount: seats, Status: status}, nil
+}
+
 // Authorize reserves ReservationEstimateTokens against the tenant's allowance
 // atomically and reports whether the caller may make an AI request. Because
 // the reservation is the gate, N parallel requests can no longer all pass a
@@ -143,8 +153,15 @@ func (s *Service) status(ctx context.Context, ownerID, userID int64) (domain.Quo
 // hard-capped plans. When only the usage bucket cannot be read, plans that
 // bill for overage keep serving; capped plans are blocked.
 func (s *Service) Reserve(ctx context.Context, businessID, userID int64) (bool, domain.QuotaStatus, error) {
-	owner := s.repo.ResolveOwnerID(ctx, businessID, userID)
-	ent, entErr := s.repo.GetEntitlement(ctx, owner)
+	owner, err := s.repo.ResolveOwnerID(ctx, businessID, userID)
+	if err != nil {
+		// Failing closed: the owner id scopes the reservation write below, so an
+		// unresolved tenant must never be replaced by the caller's user id.
+		logger.Ctx(ctx).Error("AI QUOTA BLOCKING: tenant owner could not be resolved",
+			logger.Any("business_id", businessID), logger.Error(err))
+		return false, domain.QuotaStatus{Blocked: true}, err
+	}
+	ent, entErr := s.getEntitlement(ctx, owner)
 	mode, modeErr := s.repo.GetMode(ctx, owner)
 
 	if entErr != nil {
@@ -153,7 +170,7 @@ func (s *Service) Reserve(ctx context.Context, businessID, userID int64) (bool, 
 		return false, domain.QuotaStatus{Blocked: true}, entErr
 	}
 	if _, active := activeEntitlementStatuses[ent.Status]; !active && ent.Status != "none" {
-		if credits, ferr := s.repo.GetFreePlanCredits(ctx); ferr == nil {
+		if credits, ferr := s.entitlements.GetFreePlanAICredits(ctx); ferr == nil {
 			ent = domain.Entitlement{PlanSlug: "free", AICreditsPerMonth: int(credits), SeatCount: ent.SeatCount, Status: "free"}
 		}
 	}
@@ -180,7 +197,7 @@ func (s *Service) Reserve(ctx context.Context, businessID, userID int64) (bool, 
 		return false, buildStatus(ent, mode, allowance, used), nil
 	}
 
-	reserved, err := s.repo.Reserve(ctx, owner, bucketUser, monthStart(), ReservationEstimateTokens, allowance)
+	reserved, err := s.repo.Reserve(ctx, owner, bucketUser, monthStart(), ReservationEstimateTokens, allowance, overageAllowed)
 	if err != nil {
 		if allowsOverage(ent.PlanSlug) {
 			logger.Ctx(ctx).Error("quota reserve failed; failing open for overage plan",
@@ -245,7 +262,18 @@ func (s *Service) Reconcile(ctx context.Context, businessID, userID, actualToken
 	if delta == 0 {
 		return
 	}
-	owner := s.repo.ResolveOwnerID(ctx, businessID, userID)
+	owner, err := s.repo.ResolveOwnerID(ctx, businessID, userID)
+	if err != nil {
+		// Adjust below is a write. Reconciling against a substituted owner would
+		// debit another tenant's usage bucket, so the delta is dropped instead:
+		// an un-reconciled reservation only over-serves this tenant.
+		logger.Ctx(ctx).Error("AI QUOTA UNDER-COUNT: tenant owner could not be resolved; skipping reconcile",
+			logger.Any("business_id", businessID),
+			logger.Any("delta", delta),
+			logger.Error(err),
+		)
+		return
+	}
 	mode, err := s.repo.GetMode(ctx, owner)
 	if err != nil {
 		mode = domain.ModePool
@@ -272,18 +300,27 @@ func (s *Service) Reconcile(ctx context.Context, businessID, userID, actualToken
 
 // Status returns the caller's current quota view.
 func (s *Service) Status(ctx context.Context, businessID, userID int64) (domain.QuotaStatus, error) {
-	owner := s.repo.ResolveOwnerID(ctx, businessID, userID)
+	owner, err := s.repo.ResolveOwnerID(ctx, businessID, userID)
+	if err != nil {
+		return domain.QuotaStatus{}, err
+	}
 	return s.status(ctx, owner, userID)
 }
 
 // GetMode returns the tenant's allocation mode.
 func (s *Service) GetMode(ctx context.Context, businessID, userID int64) (domain.Mode, error) {
-	owner := s.repo.ResolveOwnerID(ctx, businessID, userID)
+	owner, err := s.repo.ResolveOwnerID(ctx, businessID, userID)
+	if err != nil {
+		return "", err
+	}
 	return s.repo.GetMode(ctx, owner)
 }
 
 // SetMode updates the tenant's allocation mode (admin action).
 func (s *Service) SetMode(ctx context.Context, businessID, userID int64, mode domain.Mode) error {
-	owner := s.repo.ResolveOwnerID(ctx, businessID, userID)
+	owner, err := s.repo.ResolveOwnerID(ctx, businessID, userID)
+	if err != nil {
+		return err
+	}
 	return s.repo.SetMode(ctx, owner, mode.Normalize())
 }

@@ -1,0 +1,52 @@
+package application
+
+import (
+	"context"
+	"time"
+
+	"github.com/voxire/onion/internal/modules/crm/crm_settings/internal/domain"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+)
+
+const (
+	crmSettingsScope = "crm_settings"
+	crmSettingsTTL   = 10 * time.Minute
+)
+
+type repository interface {
+	Get(ctx context.Context, ownerID int64) (domain.Settings, error)
+	Upsert(ctx context.Context, input domain.SettingsInput) error
+}
+
+type Service struct {
+	repo repository
+}
+
+func NewService(_ context.Context, repo repository) *Service {
+	return &Service{
+		repo: repo,
+	}
+}
+
+func invalidateCRMSettingsScope(ctx context.Context, businessID int64) {
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(crmSettingsScope, businessID))
+}
+
+func (s *Service) Get(ctx context.Context, businessID int64) (domain.Settings, error) {
+	return cacher.Of[domain.Settings]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(crmSettingsScope, businessID, "settings")+"|domain=v2",
+		func(ctx context.Context) (domain.Settings, error) {
+			return s.repo.Get(ctx, businessID)
+		},
+		cacher.WithExpiry(ctx, crmSettingsTTL),
+	)
+}
+
+func (s *Service) Upsert(ctx context.Context, input domain.SettingsInput) error {
+	if err := s.repo.Upsert(ctx, input); err != nil {
+		return err
+	}
+	invalidateCRMSettingsScope(ctx, input.BusinessID)
+	return nil
+}

@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"context"
 	"time"
 )
 
@@ -34,26 +33,13 @@ type Entitlement struct {
 
 // QuotaStatus is the computed view of a tenant/bucket's current-month AI usage.
 type QuotaStatus struct {
-	PlanSlug        string    `json:"plan_slug"`
-	Mode            Mode      `json:"mode"`
-	AllowanceTokens int64     `json:"allowance_tokens"`
-	UsedTokens      int64     `json:"used_tokens"`
-	RemainingTokens int64     `json:"remaining_tokens"`
-	OverageTokens   int64     `json:"overage_tokens"`
-	AllowOverage    bool      `json:"allow_overage"`
-	Blocked         bool      `json:"blocked"`
-	PeriodEnd       time.Time `json:"period_end"`
-}
-
-// Repository reads plan entitlements (cross-schema), the tenant's allocation
-// mode, and tracks token usage per bucket.
-type Repository interface {
-	// ResolveOwnerID maps a caller's business_id to the canonical tenant id
-	// (businesses.owner_id). Falls back to fallbackUserID when unresolved.
-	ResolveOwnerID(ctx context.Context, businessID, fallbackUserID int64) int64
-	GetEntitlement(ctx context.Context, ownerID int64) (Entitlement, error)
-	GetMode(ctx context.Context, ownerID int64) (Mode, error)
-	SetMode(ctx context.Context, ownerID int64, mode Mode) error
-	GetUsedTokens(ctx context.Context, ownerID, bucketUserID int64, month time.Time) (int64, error)
-	AddUsage(ctx context.Context, ownerID, bucketUserID int64, month time.Time, tokens int64) error
+	PlanSlug        string
+	Mode            Mode
+	AllowanceTokens int64
+	UsedTokens      int64
+	RemainingTokens int64
+	OverageTokens   int64
+	AllowOverage    bool
+	Blocked         bool
+	PeriodEnd       time.Time
 }

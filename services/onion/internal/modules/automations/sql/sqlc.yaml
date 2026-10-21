@@ -3,8 +3,8 @@ sql:
   - engine: "mysql"
     queries: "queries"
     schema:
-      - "../../../../internal/platform/database/schemas/shared"
-      - "../../../../internal/platform/database/schemas/crm"
+      - "schema/shared/automation_runs.sql"
+      - "schema/shared/crm_automations.sql"
     gen:
       go:
         package: "sqlc"

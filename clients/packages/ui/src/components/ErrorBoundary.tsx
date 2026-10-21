@@ -21,22 +21,10 @@ interface ErrorBoundaryState {
 }
 
 const DYNAMIC_IMPORT_RELOAD_KEY = "rtylr:dynamic-import-reload";
+const DYNAMIC_IMPORT_RELOAD_COOLDOWN_MS = 60_000;
 
 function dynamicImportReloadKey(): string {
   return `${window.location.origin}${window.location.pathname}${window.location.search}`;
-}
-
-function clearDynamicImportReloadMarker(): void {
-  if (typeof window === "undefined") return;
-
-  try {
-    const key = dynamicImportReloadKey();
-    if (window.sessionStorage.getItem(DYNAMIC_IMPORT_RELOAD_KEY) === key) {
-      window.sessionStorage.removeItem(DYNAMIC_IMPORT_RELOAD_KEY);
-    }
-  } catch {
-    // Storage can be unavailable in private browsing; the loop guard is optional.
-  }
 }
 
 export function isDynamicImportError(error: unknown): boolean {
@@ -52,11 +40,33 @@ export function recoverFromDynamicImportError(error: unknown): boolean {
     return false;
 
   const reloadKey = dynamicImportReloadKey();
+  const attemptedAt = Date.now();
 
   try {
-    if (window.sessionStorage.getItem(DYNAMIC_IMPORT_RELOAD_KEY) === reloadKey)
-      return false;
-    window.sessionStorage.setItem(DYNAMIC_IMPORT_RELOAD_KEY, reloadKey);
+    const previous = window.sessionStorage.getItem(DYNAMIC_IMPORT_RELOAD_KEY);
+    if (previous) {
+      try {
+        const marker: unknown = JSON.parse(previous);
+        if (
+          marker &&
+          typeof marker === "object" &&
+          "route" in marker &&
+          marker.route === reloadKey &&
+          "attemptedAt" in marker &&
+          typeof marker.attemptedAt === "number" &&
+          attemptedAt >= marker.attemptedAt &&
+          attemptedAt - marker.attemptedAt < DYNAMIC_IMPORT_RELOAD_COOLDOWN_MS
+        ) {
+          return false;
+        }
+      } catch {
+        // Old markers have no timestamp, so they must not disable recovery forever.
+      }
+    }
+    window.sessionStorage.setItem(
+      DYNAMIC_IMPORT_RELOAD_KEY,
+      JSON.stringify({ route: reloadKey, attemptedAt }),
+    );
   } catch {
     return false;
   }
@@ -73,17 +83,6 @@ export class ErrorBoundary extends React.Component<
 
   static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
     return { error: error instanceof Error ? error : new Error(String(error)) };
-  }
-
-  componentDidMount(): void {
-    if (!this.state.error) clearDynamicImportReloadMarker();
-  }
-
-  componentDidUpdate(
-    _prevProps: ErrorBoundaryProps,
-    prevState: ErrorBoundaryState,
-  ): void {
-    if (prevState.error && !this.state.error) clearDynamicImportReloadMarker();
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo): void {

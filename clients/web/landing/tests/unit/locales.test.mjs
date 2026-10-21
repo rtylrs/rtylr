@@ -208,7 +208,7 @@ describe('coverage is per page, not just per locale', () => {
   // would have advertised alternates for all 21 pages while five were
   // translated. Sixteen would 404, and one broken member voids the set.
   it('only routes listed as localised get alternates', () => {
-    for (const p of ['/crm/', '/hr/', '/about/', '/support/', '/blog/']) {
+    for (const p of ['/workspace/', '/hardware/', '/about/', '/support/', '/blog/']) {
       assert.equal(isLocalisedRoute(p), false, `${p} claims to be translated`);
       assert.deepEqual(alternatesFor(p), [], `${p} would advertise dead alternates`);
     }
@@ -351,7 +351,8 @@ describe('the served document declares its locale', () => {
 
   it('every page carries a lang and a dir', () => {
     const pages = globSync('**/index.html', { cwd: OUT });
-    assert.ok(pages.length >= 20, `expected 20+ pages, found ${pages.length}`);
+    // 19 since the six module pages merged into /workspace/.
+    assert.ok(pages.length >= 15, `expected 15+ pages, found ${pages.length}`);
     const offenders = [];
     for (const p of pages) {
       const html = readFileSync(path.join(OUT, p), 'utf8');

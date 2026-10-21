@@ -40,6 +40,18 @@ message CreateWebhookRequest {
 message CreateWebhookResponse {
   id: int64
   message: string
+  /// secret signs every delivery (see the X-Rtylr-Signature header). It is
+  /// returned only here, once, and cannot be read back afterwards.
+  secret: string
+}
+
+message RotateWebhookSecretRequest {
+  id: int64 @gt(0)
+}
+
+message RotateWebhookSecretResponse {
+  /// secret signs every delivery from now on. It is returned only here, once.
+  secret: string
 }
 
 message DeleteWebhookRequest {

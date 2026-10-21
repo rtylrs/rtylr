@@ -8,7 +8,8 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "dev": "tsc --noEmit --watch"
+    "dev": "tsc --noEmit --watch",
+    "typecheck:tests": "tsc --noEmit -p tsconfig.test.json"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
@@ -17,6 +18,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.99.2",
     "@voxire/voxie": "workspace:*",
+    "lowlight": "^3.3.0",
     "lucide-react": "^1.8.0",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",

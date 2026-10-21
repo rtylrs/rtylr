@@ -21,44 +21,12 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{queries: sqlc.New(db), pool: db}
 }
 
-func (r *Repository) ResolveOwnerID(ctx context.Context, businessID, fallbackUserID int64) int64 {
-	ownerID, err := tenant.ResolveOwnerID(ctx, businessID, fallbackUserID)
-	if err != nil {
-		logger.Ctx(ctx).Warn("failed to resolve owner for AI quota",
-			logger.Any("business_id", businessID),
-			logger.Error(err),
-		)
-		return fallbackUserID
-	}
-	return ownerID
-}
-
-func (r *Repository) GetEntitlement(ctx context.Context, ownerID int64) (domain.Entitlement, error) {
-	var ent domain.Entitlement
-	// cross-schema read from subscriptions + plans (owned by the subscriptions module)
-	row, err := r.queries.GetSubscriptionEntitlement(ctx, ownerID)
-	if err == nil {
-		ent.PlanSlug = row.Slug
-		ent.AICreditsPerMonth = int(row.AiCreditsPerMonth)
-		ent.SeatCount = int(row.SeatCount)
-		ent.Status = string(row.Status.SubscriptionsStatus)
-		if ent.SeatCount <= 0 {
-			ent.SeatCount = 1
-		}
-		return ent, nil
-	}
-	if !errors.Is(err, sql.ErrNoRows) {
-		logger.Ctx(ctx).Error("GetEntitlement failed", logger.Error(err))
-		return domain.Entitlement{}, err
-	}
-
-	// cross-schema read from plans — free tier fallback
-	credits, ferr := r.queries.GetFreePlanCredits(ctx)
-	if ferr != nil && !errors.Is(ferr, sql.ErrNoRows) {
-		logger.Ctx(ctx).Error("GetEntitlement free fallback failed", logger.Error(ferr))
-		return domain.Entitlement{}, ferr
-	}
-	return domain.Entitlement{PlanSlug: "free", AICreditsPerMonth: int(credits), SeatCount: 1, Status: "none"}, nil
+// ResolveOwnerID verifies the business owner id used to scope quota reads and
+// token-usage writes. The platform resolver already fails closed; swallowing
+// its error and returning fallbackUserID here would reintroduce that fallback
+// one layer up, so the error is propagated unchanged and the caller must deny.
+func (r *Repository) ResolveOwnerID(ctx context.Context, businessID, fallbackUserID int64) (int64, error) {
+	return tenant.ResolveOwnerID(ctx, businessID, fallbackUserID)
 }
 
 func (r *Repository) GetMode(ctx context.Context, ownerID int64) (domain.Mode, error) {
@@ -76,7 +44,7 @@ func (r *Repository) GetMode(ctx context.Context, ownerID int64) (domain.Mode, e
 func (r *Repository) SetMode(ctx context.Context, ownerID int64, mode domain.Mode) error {
 	err := r.queries.UpsertQuotaMode(ctx, sqlc.UpsertQuotaModeParams{
 		OwnerID: ownerID,
-		Mode:    string(mode.Normalize()),
+		Mode:    sqlc.AiQuotaSettingsMode(mode.Normalize()),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("SetMode failed", logger.Error(err))
@@ -113,19 +81,22 @@ func (r *Repository) AddUsage(ctx context.Context, ownerID, bucketUserID int64, 
 	return err
 }
 
-// Reserve atomically adds the estimate to the usage bucket only when the
-// result stays within allowance, returning false when the bucket is exhausted.
-func (r *Repository) Reserve(ctx context.Context, ownerID, bucketUserID int64, month time.Time, estimate, allowance int64) (bool, error) {
+// Reserve atomically adds the estimate to the usage bucket and increments request count.
+// For capped plans, it succeeds only when the result stays within allowance.
+// For overage plans, allowOverage is true and the reservation succeeds unconditionally.
+func (r *Repository) Reserve(ctx context.Context, ownerID, bucketUserID int64, month time.Time, estimate, allowance int64, allowOverage bool) (bool, error) {
 	if err := r.queries.EnsureUsageRow(ctx, sqlc.EnsureUsageRowParams{
 		OwnerID: ownerID, UserID: bucketUserID, BillingMonth: month,
 	}); err != nil {
 		return false, err
 	}
 	res, err := r.queries.ReserveMonthlyTokens(ctx, sqlc.ReserveMonthlyTokensParams{
-		TokensUsed: estimate,
-		OwnerID:    ownerID, UserID: bucketUserID, BillingMonth: month,
-		TokensUsed_2: estimate,
-		TokensUsed_3: allowance,
+		Estimate:     estimate,
+		OwnerID:      ownerID,
+		UserID:       bucketUserID,
+		BillingMonth: month,
+		AllowOverage: allowOverage,
+		Allowance:    allowance,
 	})
 	if err != nil {
 		return false, err
@@ -139,18 +110,12 @@ func (r *Repository) Reserve(ctx context.Context, ownerID, bucketUserID int64, m
 
 // Adjust reconciles a prior reservation against actual usage. The delta may
 // be negative when the response used fewer tokens than reserved.
+// Tokens used is protected against going negative.
 func (r *Repository) Adjust(ctx context.Context, ownerID, bucketUserID int64, month time.Time, delta int64) error {
 	return r.queries.AdjustMonthlyTokenUsage(ctx, sqlc.AdjustMonthlyTokenUsageParams{
-		TokensUsed: delta,
-		OwnerID:    ownerID, UserID: bucketUserID, BillingMonth: month,
+		Delta:        delta,
+		OwnerID:      ownerID,
+		UserID:       bucketUserID,
+		BillingMonth: month,
 	})
-}
-
-// GetFreePlanCredits reads the free plan's monthly AI credits (plans table).
-func (r *Repository) GetFreePlanCredits(ctx context.Context) (int64, error) {
-	credits, err := r.queries.GetFreePlanCredits(ctx)
-	if err != nil {
-		return 0, err
-	}
-	return int64(credits), nil
 }

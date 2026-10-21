@@ -24,6 +24,8 @@ message RegisterResponse {
   email: string
   /// name is the name value for this contract.
   name: string
+  /// refresh_token is a long-lived opaque session token used to renew the access token.
+  refresh_token: string
 }
 
 message LoginRequest {
@@ -46,6 +48,8 @@ message LoginResponse {
   name: string
   /// is_console_admin indicates the user can access the internal console.
   is_console_admin: bool
+  /// refresh_token is a long-lived opaque session token used to renew the access token.
+  refresh_token: string
 }
 
 message GoogleAuthRequest {
@@ -60,6 +64,28 @@ message GoogleAuthResponse {
   token: string
   /// is_new is the is new value for this contract.
   is_new: bool
+  /// refresh_token is a long-lived opaque session token used to renew the access token.
+  refresh_token: string
+}
+
+message RefreshRequest {
+  /// refresh_token is the opaque session credential issued during sign-in.
+  refresh_token: string @required
+}
+
+message RefreshResponse {
+  /// token is a newly issued short-lived access token.
+  token: string
+}
+
+message RevokeSessionRequest {
+  /// refresh_token is the opaque session credential to revoke.
+  refresh_token: string @required
+}
+
+message RevokeSessionResponse {
+  /// revoked indicates whether the session was revoked.
+  revoked: bool
 }
 
 message ResetPasswordRequest {
@@ -130,12 +156,10 @@ message CheckEmailExistsResponse {
   exists: bool
 }
 
-message SocialAuthorizeRequest {
-  /// provider is the social login provider (google, github, microsoft, apple).
-  provider: string @in("google", "github", "microsoft", "apple", "") @query("provider")
+message GoogleAuthorizeRequest {
 }
 
-message SocialAuthorizeResponse {
-  /// url is the provider-hosted consent URL to redirect the browser to.
+message GoogleAuthorizeResponse {
+  /// url is the Google consent URL to redirect the browser to.
   url: string
 }

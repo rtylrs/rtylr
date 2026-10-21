@@ -10,6 +10,10 @@ WHERE business_id = ? AND user_id = ?
 ORDER BY created_at DESC, id DESC
 LIMIT ?;
 
+-- name: CreateNotification :exec
+INSERT INTO hub_notifications (owner_id, business_id, user_id, title, body, type, link)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
 -- name: MarkNotificationRead :exec
 UPDATE hub_notifications
 SET is_read = TRUE

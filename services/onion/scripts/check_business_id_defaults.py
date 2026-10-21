@@ -9,7 +9,7 @@ Two facts it reports, and the difference between them matters:
 
   1. Tables declaring `business_id BIGINT NOT NULL DEFAULT 0`. That default turns
      a forgotten tenant into a silently shared one rather than an error.
-     `internal/platform/database/schemas/flow/v8_time_tracking.sql:9-12` documents
+     `internal/modules/flow/sql/schema/flow/v8_time_tracking.sql:9-12` documents
      the decision to stop adding to this set.
 
   2. INSERT statements into those tables that omit business_id from their column
@@ -33,7 +33,10 @@ import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SCHEMAS = os.path.join(ROOT, "internal", "platform", "database", "schemas")
+SCHEMA_ROOTS = [
+    os.path.join(ROOT, "internal", "modules"),
+    os.path.join(ROOT, "internal", "platform"),
+]
 
 CREATE_TABLE = re.compile(
     r"CREATE TABLE(?:\s+IF NOT EXISTS)?\s+`?(\w+)`?\s*\((.*?)\n\)\s*", re.S | re.I
@@ -45,24 +48,37 @@ INSERT_INTO = re.compile(r"INSERT\s+INTO\s+`?(\w+)`?\s*\(([^)]*)\)", re.S | re.I
 def sql_files(root, skip_schemas):
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if d not in (".git", "voxie", "node_modules")]
-        if skip_schemas and dirpath.startswith(SCHEMAS):
+        if skip_schemas and is_schema_path(dirpath):
             continue
         for name in filenames:
-            if name.endswith(".sql"):
-                yield os.path.join(dirpath, name)
+            path = os.path.join(dirpath, name)
+            if name.endswith(".sql") and not (skip_schemas and is_schema_path(path)):
+                yield path
+
+
+def is_schema_path(path):
+    """Match context-owned SQL schema inputs, not query or migration files."""
+    parts = os.path.normpath(path).split(os.sep)
+    for index, part in enumerate(parts[:-1]):
+        if part == "sql" and parts[index + 1] == "schema":
+            return True
+    return len(parts) >= 2 and parts[-2] == "sql" and parts[-1] == "schema.sql"
 
 
 def defaulted_tables():
     """Tables whose business_id column carries DEFAULT 0, mapped to their schema file."""
     found = {}
-    for path in sql_files(SCHEMAS, skip_schemas=False):
-        with open(path, encoding="utf-8", errors="replace") as fh:
-            text = fh.read()
-        # Walk CREATE TABLE bodies so a column is attributed to its own table.
-        for match in CREATE_TABLE.finditer(text):
-            table, body = match.group(1), match.group(2)
-            if DEFAULT_ZERO.search(body):
-                found.setdefault(table, os.path.relpath(path, ROOT))
+    for schema_root in SCHEMA_ROOTS:
+        for path in sql_files(schema_root, skip_schemas=False):
+            if not is_schema_path(path):
+                continue
+            with open(path, encoding="utf-8", errors="replace") as fh:
+                text = fh.read()
+            # Walk CREATE TABLE bodies so a column is attributed to its own table.
+            for match in CREATE_TABLE.finditer(text):
+                table, body = match.group(1), match.group(2)
+                if DEFAULT_ZERO.search(body):
+                    found.setdefault(table, os.path.relpath(path, ROOT))
     return found
 
 
@@ -109,8 +125,8 @@ def main():
         # Fixtures and production queries fail differently: a fixture seeds
         # tenant-0 rows into a test database, which is what makes a
         # single-tenant test unable to tell a scoped read from an unscoped one.
-        fixtures = {t: [l for l in v if "scripts/fixtures/" in l] for t, v in omits.items()}
-        queries = {t: [l for l in v if "scripts/fixtures/" not in l] for t, v in omits.items()}
+        fixtures = {t: [l for l in v if "internal/testutil/fixtures/" in l] for t, v in omits.items()}
+        queries = {t: [l for l in v if "internal/testutil/fixtures/" not in l] for t, v in omits.items()}
 
         for label, group in (("production query paths", queries), ("test fixtures", fixtures)):
             rows = {t: v for t, v in group.items() if v}

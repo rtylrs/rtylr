@@ -1,18 +1,21 @@
 import React from 'react';
-import { LucideIcon } from 'lucide-react';
-import { Button } from './Button';
+import type { LucideIcon } from 'lucide-react';
+import { Button, type ButtonProps } from './Button';
 import { cn } from '../lib/cn';
 
 interface EmptyStateAction {
   label: string;
   onClick: () => void;
+  icon?: LucideIcon;
+  variant?: ButtonProps['variant'];
+  size?: ButtonProps['size'];
 }
 
 interface EmptyStateProps {
   icon: LucideIcon;
   title: string;
   description?: string;
-  action: EmptyStateAction;
+  action?: EmptyStateAction;
   className?: string;
   // 'compact' fits dashboard widgets, kanban columns and other tight
   // spaces that still need an illustration and a CTA, just smaller.
@@ -61,8 +64,6 @@ const EmptyStateIllustration = ({
   );
 };
 
-// Every empty state gets an illustration and a next step, never a dead end -
-// see the "no empty states without a call to action" product rule.
 const EmptyState = ({
   icon,
   title,
@@ -95,14 +96,31 @@ const EmptyState = ({
     {/* Button's own xs/sm sizes are 30/32px tall - short of the 44px
        touch-target minimum. Override the height explicitly on mobile and
        let it shrink back down from md: up, where a mouse doesn't need it. */}
-    <Button
-      variant="accent"
-      size={size === 'compact' ? 'xs' : 'sm'}
-      onClick={action.onClick}
-      className={size === 'compact' ? 'h-11 md:h-[30px]' : 'h-11 md:h-8'}
-    >
-      {action.label}
-    </Button>
+    {action && (
+      <Button
+        variant={action.variant ?? 'accent'}
+        size={action.size ?? (size === 'compact' ? 'xs' : 'sm')}
+        onClick={action.onClick}
+        prefix={
+          action.icon ? (
+            <action.icon
+              size={14}
+              aria-hidden="true"
+              className={action.variant === 'outline' ? 'text-accent' : undefined}
+            />
+          ) : undefined
+        }
+        className={
+          action.size === 'md'
+            ? 'h-11 md:h-10'
+            : size === 'compact'
+              ? 'h-11 md:h-[30px]'
+              : 'h-11 md:h-8'
+        }
+      >
+        {action.label}
+      </Button>
+    )}
   </div>
 );
 

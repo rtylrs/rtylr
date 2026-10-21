@@ -19,6 +19,10 @@ const passwordHashCost = 12
 // needs a slower KDF to compensate against offline brute-force attacks.
 const pinHashCost = 12
 
+// MaxPasswordBytes is bcrypt's input limit. Longer passwords make hashing fail,
+// so they are rejected by the policy with a clear error instead.
+const MaxPasswordBytes = 72
+
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), passwordHashCost)
 
@@ -76,7 +80,7 @@ var ErrWeakPassword = errors.New("password does not meet the strength policy")
 // password change/reset and invite acceptance. PINs are validated separately
 // by their owners and intentionally not subject to this rule.
 func ValidateStrength(password string) error {
-	if len(password) < 8 {
+	if len(password) < 8 || len(password) > MaxPasswordBytes {
 		return ErrWeakPassword
 	}
 	hasUpper, hasLower, hasDigit := false, false, false

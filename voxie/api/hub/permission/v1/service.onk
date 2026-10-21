@@ -2,8 +2,8 @@ package hub.permission.v1
 
 /// PermissionService defines hub permission and role endpoints.
 service PermissionService {
-  /// Returns the permission matrix.
-  getPermissions(GetPermissionsRequest) -> GetPermissionsResponse @get("/permissions")
+  /// Returns the permission keys that can be assigned to profiles.
+  listPermissionCatalog(ListPermissionCatalogRequest) -> ListPermissionCatalogResponse @get("/permissions")
 
   /// Returns defined roles.
   listRoles(ListRolesRequest) -> ListRolesResponse @get("/roles")
@@ -41,6 +41,4 @@ service PermissionService {
   /// Lists role lifecycle and assignment audit events.
   listRoleAudit(ListRoleAuditRequest) -> ListRoleAuditResponse @get("/roles/audit")
 
-  /// Toggles a single permission cell.
-  updatePermissionMatrix(UpdatePermissionMatrixRequest) -> UpdatePermissionMatrixResponse @patch("/matrix")
 }

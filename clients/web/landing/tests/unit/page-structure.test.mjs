@@ -45,7 +45,8 @@ before(() => {
   pages = globSync('**/index.html', { cwd: OUT }).sort();
   // A silent zero here would make every test below vacuously pass, which
   // is the exact "check that cannot fail" this project keeps hitting.
-  assert.ok(pages.length >= 20, `expected 20+ exported pages, found ${pages.length}`);
+  // 19 since the six module pages merged into /workspace/.
+  assert.ok(pages.length >= 15, `expected 15+ exported pages, found ${pages.length}`);
 });
 
 const read = (p) => readFileSync(path.join(OUT, p), 'utf8');
@@ -186,21 +187,22 @@ describe('structured data', () => {
     assert.ok(!types.includes('Product'));
   });
 
-  it('each module page declares its own applicationSubCategory', () => {
-    const seen = new Map();
+  // The six module pages merged into /workspace/ (rtylr#1488 follow-up), so
+  // there is one product page left to carry a sub-category.
+  it('the workspace page declares its applicationSubCategory', () => {
+    const sub = jsonLd(read('workspace/index.html'))
+      .flatMap((b) => {
+        const d = JSON.parse(b);
+        return d['@graph'] ?? [d];
+      })
+      .find((n) => n.applicationSubCategory)?.applicationSubCategory;
+    assert.ok(sub, 'workspace has no applicationSubCategory');
+  });
+
+  it('no retired module page is exported', () => {
     for (const mod of ['pos', 'erp', 'crm', 'hr', 'finance', 'flow']) {
-      const sub = jsonLd(read(`${mod}/index.html`))
-        .flatMap((b) => {
-          const d = JSON.parse(b);
-          return d['@graph'] ?? [d];
-        })
-        .find((n) => n.applicationSubCategory)?.applicationSubCategory;
-      assert.ok(sub, `${mod} has no applicationSubCategory`);
-      seen.set(mod, sub);
+      assert.ok(!pages.includes(`${mod}/index.html`), `${mod} is still exported; it should redirect`);
     }
-    // Distinct, or the sub-category conveys nothing: every one of these
-    // pages already shared an identical applicationCategory.
-    assert.equal(new Set(seen.values()).size, seen.size, `sub-categories collide: ${[...seen]}`);
   });
 });
 
@@ -210,13 +212,9 @@ describe('FAQ answers reach a crawler', () => {
   // regression is back in the other direction.
   const CASES = [
     ['pricing/index.html', 'Upgrade and the new features unlock instantly'],
-    ['pos/index.html', 'keeps a full local copy of the menu'],
-    ['erp/index.html', 'stock transfers between locations'],
-    ['crm/index.html', 'loyalty points and campaign touchpoints'],
-    ['hr/index.html', 'tip pooling, minor work-hour limits'],
-    ['finance/index.html', 'balance sheet and cash flow reports'],
-    ['flow/index.html', 'boards, lists, timeline views, cycles'],
-    ['index.html', 'stops stitching a register, a spreadsheet'],
+    ['workspace/index.html', 'keeps a full local copy of the menu'],
+    ['workspace/index.html', 'without copying anything between tools'],
+    ['index.html', 'so an update in one place shows up everywhere else'],
     ['demo/index.html', 'the questions a signup page cannot answer'],
   ];
 
@@ -344,7 +342,7 @@ describe('translated copy reaches the page', () => {
     // The extraction moved hundreds of strings out of the markup. If the
     // provider ever stops resolving, the page does not crash, it just loses
     // its text, which is the kind of thing a build log never shows.
-    const visible = stripScripts(read('pos/index.html'));
+    const visible = stripScripts(read('workspace/index.html'));
     for (const label of ['PRODUCT', 'RESOURCES', 'DEVELOPERS', 'COMPANY', 'TERMS OF USE']) {
       assert.ok(visible.includes(label), `footer lost "${label}"`);
     }
@@ -406,7 +404,7 @@ describe('sitemap lastmod', () => {
     }));
     // Same guard as the page fixture: a zero-length parse would make every
     // assertion below vacuously true.
-    assert.ok(entries.length >= 20, `expected 20+ sitemap URLs, found ${entries.length}`);
+    assert.ok(entries.length >= 15, `expected 15+ sitemap URLs, found ${entries.length}`);
   });
 
   it('every URL carries a lastmod', () => {

@@ -1,0 +1,62 @@
+-- name: ListMenuItemsWithDetails :many
+-- cross-schema read from erp_products + erp_categories + erp_product_images + product_stock_total (products, categories, and stock_core modules) — compose the menu view with category, image, and current stock details.
+SELECT
+    p.id,
+    p.owner_id,
+    p.business_id,
+    p.category_id,
+    COALESCE(c.name, 'Other') AS category_name,
+    p.name,
+    p.sku,
+    p.barcode,
+    p.sale_price,
+    p.cost_price,
+    p.tax_rate,
+    p.description,
+    COALESCE(img.url, '') AS image_url,
+    COALESCE(pst.total_quantity, p.stock_quantity) AS stock_quantity,
+    p.is_active,
+    p.created_at,
+    p.updated_at
+FROM erp_products p
+LEFT JOIN erp_categories c
+  ON c.id = p.category_id
+ AND c.business_id = p.business_id
+LEFT JOIN product_stock_total pst
+  ON pst.business_id = p.business_id
+ AND pst.product_id = p.id
+LEFT JOIN (
+    SELECT business_id, product_id, url
+    FROM (
+        SELECT
+            epi.business_id,
+            epi.product_id,
+            epi.url,
+            ROW_NUMBER() OVER (
+                PARTITION BY epi.business_id, epi.product_id
+                ORDER BY epi.is_primary DESC, epi.position ASC, epi.id ASC
+            ) AS image_rank
+        FROM erp_product_images epi
+        WHERE epi.business_id = ?
+    ) ranked_product_images
+    WHERE image_rank = 1
+) img
+  ON img.business_id = p.business_id
+ AND img.product_id = p.id
+WHERE p.business_id = ?
+  AND p.is_active = TRUE
+ORDER BY c.name, p.name, p.id;
+
+-- name: QuickCreateMenuItem :execresult
+-- cross-schema write to erp_products (products module) — create a product from the POS menu workflow.
+INSERT INTO erp_products (owner_id, business_id, name, sku, sale_price, is_active)
+VALUES (?, ?, ?, ?, ?, TRUE);
+
+-- name: UpdateMenuItem :execresult
+-- cross-schema write to erp_products (products module) — update product details from the POS menu workflow.
+UPDATE erp_products
+SET name = COALESCE(NULLIF(sqlc.arg(name), ''), name),
+    sale_price = ?,
+    is_active = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE business_id = ? AND id = ?;

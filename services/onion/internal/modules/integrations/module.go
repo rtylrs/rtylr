@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
+	moduleinfra "github.com/voxire/onion/internal/modules/integrations/internal/infrastructure"
+
 	"github.com/voxire/onion/internal/modules/integrations/internal/api"
 	"github.com/voxire/onion/internal/modules/integrations/internal/application"
 	hubintegrationv1 "github.com/voxire/voxie/gen/go/hub/integration/v1"
@@ -17,7 +19,7 @@ type Module struct {
 
 func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{
-		service: application.NewService(ctx, db),
+		service: application.NewService(ctx, moduleinfra.NewRepository(db)),
 	}
 }
 

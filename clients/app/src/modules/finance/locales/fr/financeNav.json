@@ -1,0 +1,41 @@
+{
+  "dashboard": "Tableau de bord",
+  "invoices": "Factures",
+  "expenses": "Dépenses",
+  "pl": "Compte de résultat",
+  "tax": "Fiscalité",
+  "reports": "Rapports",
+  "settings": "Paramètres",
+  "recurring": "Récurrentes",
+  "quotes": "Devis",
+  "categories": "Catégories",
+  "bills": "Factures fournisseurs",
+  "bankFeeds": "Flux bancaires",
+  "reconcile": "Rapprochement",
+  "balanceSheet": "Bilan",
+  "cashFlow": "Trésorerie",
+  "taxSummary": "Récapitulatif fiscal",
+  "journal": "Journal",
+  "accounts": "Comptes",
+  "taxConfig": "Taux de taxe",
+  "newInvoice": "Nouvelle facture",
+  "newExpense": "Nouvelle dépense",
+  "recurringInvoices": "Factures récurrentes",
+  "expenseCategories": "Catégories de dépenses",
+  "chartOfAccounts": "Plan comptable",
+  "groups": {
+    "overview": "Vue d'ensemble",
+    "sales": "Ventes",
+    "spend": "Dépenses",
+    "banking": "Banque",
+    "reports": "Rapports",
+    "accounting": "Comptabilité",
+    "pages": "Pages"
+  },
+  "theme": {
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
+  "appName": "Finance"
+}

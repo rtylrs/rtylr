@@ -2,10 +2,13 @@ package api
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 
 	"github.com/voxire/onion/internal/modules/integrations/internal/application"
+	"github.com/voxire/onion/internal/modules/integrations/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
@@ -42,7 +45,7 @@ func (a *IntegrationAPI) ListIntegrations(ctx context.Context, _ *hubintegration
 			Id:        i.ID,
 			Provider:  i.Provider,
 			Status:    string(i.Status),
-			Config:    i.Config,
+			Config:    configFor(device.User, i.Config),
 			CreatedAt: i.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		}
 		if i.ConnectedAt != nil {
@@ -71,6 +74,9 @@ func (a *IntegrationAPI) ConnectIntegration(ctx context.Context, req *hubintegra
 	}
 
 	id, err := a.Service.Connect(ctx, businessID, provider, req.GetConfig())
+	if errors.Is(err, domain.ErrInvalidProvider) || errors.Is(err, domain.ErrInvalidConfig) {
+		return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
+	}
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to connect integration")
 	}
@@ -95,8 +101,20 @@ func (a *IntegrationAPI) DisconnectIntegration(ctx context.Context, req *hubinte
 	}
 
 	if err := a.Service.Disconnect(ctx, businessID, id); err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Integration not found")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to disconnect integration")
 	}
 
 	return &hubintegrationv1.DisconnectIntegrationResponse{Message: "Integration disconnected"}, nil
+}
+
+// configFor hides the stored config from ordinary members and masks secrets for
+// everyone else.
+func configFor(user *authPkg.AuthUser, config json.RawMessage) []byte {
+	if !authPkg.IsBusinessAdmin(user) {
+		return nil
+	}
+	return application.RedactConfig(config)
 }

@@ -1,11 +1,10 @@
-// Sweep the schema/migration corpus: every SQL file under
-// internal/platform/database/schemas, the tables it creates or alters, and
+// Sweep the module-owned schema corpus, the tables it creates or alters, and
 // whether its owning domain has a matching voxie .onk domain.
 // Output: migrations.csv
 import { readFileSync } from 'node:fs';
 import { readdirSync, statSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { walk, paths, writeCsv, voxieApiDir } from './lib.mjs';
+import { schemaFiles, schemaDomain, relRepo, writeCsv, voxieApiDir } from './lib.mjs';
 
 const apiDir = voxieApiDir();
 
@@ -29,9 +28,8 @@ for (const d of apiEntries) {
 }
 
 const rows = [];
-for (const f of walk(paths.schemas, ['.sql'])) {
-  const rel = f.slice(paths.schemas.length + 1);
-  const domain = rel.split('/')[0];
+for (const f of schemaFiles()) {
+  const domain = schemaDomain(f);
   const t = readFileSync(f, 'utf8');
   const created = new Set();
   const altered = new Set();
@@ -42,7 +40,7 @@ for (const f of walk(paths.schemas, ['.sql'])) {
   const views = [...t.matchAll(/create\s+(?:or\s+replace\s+)?(?:algorithm=\w+\s+)?sql\s+security\s+\w+\s+view\s+(\w+)|create\s+view\s+(\w+)/gi)].length;
   const hasContract = contractDomains.has(domain);
   rows.push({
-    file: `internal/platform/database/schemas/${rel}`,
+    file: relRepo(f),
     domain,
     tables_created: [...created].sort().join(' '),
     tables_altered: [...altered].sort().join(' '),

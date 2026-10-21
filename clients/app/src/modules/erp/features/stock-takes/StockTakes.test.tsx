@@ -1,0 +1,176 @@
+import React from 'react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
+import StockTakes from './StockTakes';
+import { initTestI18n } from '../../shared/testing/i18n';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
+
+const mocks = vi.hoisted(() => ({
+  useStockTakes: vi.fn(),
+  updateStockTake: vi.fn(),
+  refetch: vi.fn(),
+  effectiveAccess: undefined as unknown,
+}));
+
+// i18next is deliberately not mocked. An identity `t` makes an assertion and
+// the component agree on a key, so neither notices the key never resolves
+// (rtylr#1269). The real locale files mean the copy below also proves the lookup.
+
+vi.mock('@voxire/components', () => ({
+  HelmetContainer: () => null,
+}));
+
+vi.mock('motion/react', () => ({
+  motion: {
+    div: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  },
+}));
+
+vi.mock('../../../../shared/stores/userStore', () => ({
+  useUserStore: Object.assign(
+    (
+      select: (state: { user: { effectiveAccess: unknown }; effectiveAccess: unknown }) => unknown
+    ) =>
+      select({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    {
+      getState: () => ({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    }
+  ),
+}));
+
+vi.mock('./useStockTakes', () => ({
+  useStockTakes: mocks.useStockTakes,
+  useCreateStockTake: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useUpdateStockTake: () => ({ mutateAsync: mocks.updateStockTake, isPending: false }),
+}));
+
+vi.mock('../warehouses/useWarehouses', () => ({
+  useWarehouses: () => ({ data: [{ id: '1', name: 'Main warehouse' }] }),
+}));
+
+vi.mock('../inventory/useInventory', () => ({
+  useInventoryReport: () => ({
+    data: [{ productId: '5201', productName: 'Widget', stockQuantity: 7 }],
+    isLoading: false,
+    isError: false,
+  }),
+}));
+
+beforeAll(async () => {
+  await initTestI18n('en');
+});
+
+describe('StockTakes physical counts', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.effectiveAccess = createEffectiveAccess('erp', { isOwner: true });
+    mocks.updateStockTake.mockResolvedValue({ message: 'completed' });
+    mocks.useStockTakes.mockReturnValue({
+      data: {
+        stockTakes: [
+          {
+            id: 'st1',
+            warehouseId: '1',
+            status: 'in_progress',
+            notes: '',
+            items: [{ productId: '5201', expectedQty: 7, countedQty: 0 }],
+          },
+        ],
+        hasMore: false,
+      },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: mocks.refetch,
+    });
+  });
+
+  it('requires an explicit count, including an intentional zero, before completion', async () => {
+    render(<StockTakes />);
+
+    const complete = screen.getByRole('button', { name: 'Complete stock take' });
+    expect(complete).toBeDisabled();
+
+    fireEvent.change(screen.getByRole('spinbutton', { name: 'Counted quantity for Widget' }), {
+      target: { value: '0' },
+    });
+    expect(complete).toBeEnabled();
+    fireEvent.click(complete);
+
+    await waitFor(() =>
+      expect(mocks.updateStockTake).toHaveBeenCalledWith({
+        id: 'st1',
+        body: {
+          status: 'completed',
+          notes: '',
+          items: [{ productId: '5201', expectedQty: 7, countedQty: 0 }],
+        },
+      })
+    );
+  });
+});
+
+describe('StockTakes empty state', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.effectiveAccess = createEffectiveAccess('erp', { isOwner: true });
+    mocks.updateStockTake.mockResolvedValue({ message: 'completed' });
+    mocks.useStockTakes.mockReturnValue({
+      data: { stockTakes: [], hasMore: false },
+      isLoading: false,
+      refetch: mocks.refetch,
+    });
+  });
+
+  it('shows the create action and opens the create form with inventory adjustment permission', () => {
+    mocks.effectiveAccess = createEffectiveAccess('erp', { permissions: ['erp:inventory:adjust'] });
+    render(<StockTakes />);
+
+    const title = screen.getByText('No stock takes');
+    expect(title).toBeInTheDocument();
+    expect(screen.getByText('Start a count to find discrepancies')).toBeInTheDocument();
+
+    const emptyState = title.parentElement as HTMLElement;
+    fireEvent.click(within(emptyState).getByRole('button', { name: 'New Stock Take' }));
+
+    expect(screen.getByText('Select warehouse…')).toBeInTheDocument();
+    expect(mocks.refetch).not.toHaveBeenCalled();
+  });
+
+  it('falls back to Refresh without inventory adjustment permission', () => {
+    mocks.effectiveAccess = createEffectiveAccess('erp', { permissions: ['erp:inventory:view'] });
+    render(<StockTakes />);
+
+    const title = screen.getByText('No stock takes');
+    const emptyState = title.parentElement as HTMLElement;
+
+    expect(
+      within(emptyState).queryByRole('button', { name: 'New Stock Take' })
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(within(emptyState).getByRole('button', { name: 'Refresh' }));
+
+    expect(mocks.refetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not show the empty state when stock takes exist', () => {
+    mocks.useStockTakes.mockReturnValue({
+      data: {
+        stockTakes: [{ id: 'st1', warehouseId: '1', status: 'in_progress', items: [] }],
+        hasMore: false,
+      },
+      isLoading: false,
+      refetch: mocks.refetch,
+    });
+
+    render(<StockTakes />);
+
+    expect(screen.queryByText('No stock takes')).not.toBeInTheDocument();
+  });
+});

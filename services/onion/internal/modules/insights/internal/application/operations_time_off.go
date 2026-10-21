@@ -18,7 +18,7 @@ func (s *Service) GetTimeOffSummary(ctx context.Context, businessID int64, from,
 	if err != nil {
 		return TimeOffPayload{}, err
 	}
-	out, err := cacher.Of[TimeOffPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (TimeOffPayload, error) {
+	out, err := cacher.Of[TimeOffPayload]().GetOrComputeSingle(ctx, key+"|domain=v2", func(ctx context.Context) (TimeOffPayload, error) {
 		row, rerr := s.repo.GetTimeOffSummary(ctx, businessID, from, to)
 		if rerr != nil {
 			return TimeOffPayload{}, rerr

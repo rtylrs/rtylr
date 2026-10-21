@@ -1,0 +1,4 @@
+import { createOneKitClient } from '@voxire/api';
+import { FeatureServiceClient } from '@voxire/voxie/hub/feature/v1/client';
+
+export const featureClient = createOneKitClient(FeatureServiceClient, 'auth');

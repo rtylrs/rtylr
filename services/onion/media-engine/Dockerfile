@@ -6,7 +6,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     pkg-config \
     libvips-dev \
-    libvips-cpp-dev \
     ffmpeg \
     libavcodec-dev \
     libavformat-dev \
@@ -27,8 +26,7 @@ RUN cmake -B build -DCMAKE_BUILD_TYPE=Release && \
 FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libvips \
-    libvips-cpp \
+    libvips42 \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 

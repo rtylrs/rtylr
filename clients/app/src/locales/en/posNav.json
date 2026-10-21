@@ -1,0 +1,20 @@
+{
+  "appName": "POS",
+  "terminal": "Terminal",
+  "products": "Products",
+  "orders": "Orders",
+  "tables": "Tables",
+  "kitchen": "Kitchen",
+  "customers": "Customers",
+  "giftCards": "Gift cards",
+  "receipts": "Receipts",
+  "day": "Day summary",
+  "offline": "Offline queue",
+  "modifiers": "Modifiers",
+  "combos": "Combos",
+  "inventory": "Inventory",
+  "staff": "Staff",
+  "heldOrders": "Held orders",
+  "cashDrop": "Cash drop",
+  "closeSession": "Close session"
+}

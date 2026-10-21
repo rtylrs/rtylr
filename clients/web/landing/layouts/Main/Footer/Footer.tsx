@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { Button } from '@voxire/components';
 import { ASSETS, APP_URLS, resolveAuthUrl } from '@voxire/config';
 import { ManageConsentLink } from '@voxire/consent';
 import React from 'react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
+import { cn } from '../../../lib/cn';
 import { fadeInUp, staggerContainer, viewportOnce } from '../../../lib/animations';
 import { navigateExternal } from '../../../lib/navigation';
 import { localeFromPath, localisePath, navPath } from '../../../lib/locales';
@@ -37,12 +37,7 @@ const Footer: React.FC = () => {
       id: 'product',
       title: t('footer.group.product'),
       links: [
-        { to: navPath('/pos', locale), label: t('footer.link.pos') },
-        { to: navPath('/erp', locale), label: t('footer.link.erp') },
-        { to: '/hr', label: t('footer.link.hr') },
-        { to: '/crm', label: t('footer.link.crm') },
-        { to: '/finance', label: t('footer.link.finance') },
-        { to: '/flow', label: t('footer.link.flow') },
+        { to: '/workspace/', label: t('footer.link.workspace') },
         { to: navPath('/pricing', locale), label: t('footer.link.pricing') },
         { to: '/hardware', label: t('footer.link.hardware') },
       ],
@@ -55,11 +50,6 @@ const Footer: React.FC = () => {
         {
           to: 'https://docs.rtylr.com',
           label: t('footer.link.documentation'),
-          external: true,
-        },
-        {
-          to: 'https://docs.rtylr.com/self-hosting',
-          label: t('footer.link.selfHost'),
           external: true,
         },
         { to: '/integrations', label: t('footer.link.integrations') },
@@ -155,17 +145,19 @@ const Footer: React.FC = () => {
           </div>
 
           <motion.div className={styles['footer-cta']} variants={fadeInUp}>
-            <Button
-              onClick={handleSignupClick}
-              variant="dark-outline"
-              className={styles['cta-button']}
-            >
-              {t('common.cta.startFree')}
-            </Button>
+            {/* Fill comes from the global button rule: solid ink, and the
+                outline variant for the class containing "secondary". */}
+            <button type="button" onClick={handleSignupClick} className={styles['cta-button']}>
+              {t('common.cta.getStarted')}
+            </button>
             {!isDemoPage && (
-              <Button onClick={handleBookDemoClick} variant="soft" className={styles['cta-button']}>
+              <button
+                type="button"
+                onClick={handleBookDemoClick}
+                className={cn(styles['cta-button'], styles['cta-secondary'])}
+              >
                 {t('common.cta.bookDemo')}
-              </Button>
+              </button>
             )}
           </motion.div>
         </div>

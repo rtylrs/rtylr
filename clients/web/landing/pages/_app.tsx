@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { injectTheme } from '@voxire/config';
 import { bootObservability } from '@voxire/observability';
-import { CookieBanner, privacyLinkStyle } from '@voxire/consent';
+import { CookieBanner, privacyLinkStyleLight } from '@voxire/consent';
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import { MotionConfig } from 'motion/react';
@@ -164,7 +164,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                     privacyLink: (
                       <a
                         href={localisePath('/legal/privacy-policy/', locale.code)}
-                        style={privacyLinkStyle}
+                        style={privacyLinkStyleLight}
                       />
                     ),
                   }}
@@ -173,6 +173,7 @@ function MyApp({ Component, pageProps }: AppProps) {
               declineLabel={i18n.t('common.cookieBanner.decline')}
               acceptLabel={i18n.t('common.cookieBanner.accept')}
               ariaLabel={i18n.t('common.cookieBanner.ariaLabel')}
+              tone="light"
               // Below the mobile nav's full-screen overlay (z-index 2000) so
               // opening the menu doesn't leave the banner floating on top of
               // it, intercepting taps meant for the menu underneath. Still

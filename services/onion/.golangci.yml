@@ -386,6 +386,8 @@ linters:
             - golang.org/x/crypto
             - golang.org/x/oauth2
             - golang.org/x/sync
+            - golang.org/x/net/html
+            - github.com/ledongthuc/pdf
             - github.com/openai/openai-go/v2
             - github.com/openai/openai-go/v2/option
             - github.com/openai/openai-go/v2/shared

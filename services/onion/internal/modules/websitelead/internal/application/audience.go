@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/voxire/onion/internal/modules/websitelead/internal/infrastructure"
+	"github.com/voxire/onion/internal/modules/websitelead/internal/domain"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/logger"
 )
@@ -22,7 +22,7 @@ const (
 var addAudienceContact = emailPkg.AddAudienceContact
 
 type audienceRepository interface {
-	ListUnsyncedSubscribers(ctx context.Context, maxAttempts, limit int) ([]infrastructure.PendingSubscriber, error)
+	ListUnsyncedSubscribers(ctx context.Context, maxAttempts, limit int) ([]domain.PendingSubscriber, error)
 	MarkSubscriberSynced(ctx context.Context, id int64, contactID string) error
 	MarkSubscriberSyncFailed(ctx context.Context, id int64, reason string) error
 }
@@ -52,7 +52,7 @@ func (s *Service) SyncResendAudience(ctx context.Context) error {
 		}
 		contactID, err := addAudienceContact(ctx, s.audienceID, sub.Email)
 		if err != nil {
-			if errors.Is(err, emailPkg.ErrAudienceDisabled) {
+			if emailPkg.IsAudienceAuthError(err) {
 				return err
 			}
 			failed++

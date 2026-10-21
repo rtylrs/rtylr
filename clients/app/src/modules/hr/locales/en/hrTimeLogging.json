@@ -1,0 +1,36 @@
+{
+  "title": "Time Logging",
+  "subtitle": "Week of {{start}} – {{end}} · {{total}} logged",
+  "addEntry": "Add Entry",
+  "created": "Time entry created",
+  "deleted": "Time entry deleted",
+  "employeeLookupFailed": "Your employee profile could not be loaded",
+  "noDescription": "No description",
+  "billable": "Billable",
+  "emptyTitle": "No time entries this week",
+  "emptyDescription": "Log your first time entry to get started.",
+  "startTimer": "Start",
+  "stopTimer": "Stop",
+  "timerDescription": "What are you working on?",
+  "statuses": {
+    "draft": "Draft",
+    "submitted": "Submitted",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+  "form": {
+    "title": "New Time Entry",
+    "date": "Date",
+    "hours": "Hours",
+    "minutes": "Minutes",
+    "startTime": "Start Time",
+    "endTime": "End Time",
+    "useStartEnd": "Use start/end time instead",
+    "description": "Description",
+    "descriptionPlaceholder": "What did you work on?",
+    "billable": "Billable",
+    "durationRequired": "Duration must be at least 1 minute",
+    "invalidTimeRange": "End time must be after start time",
+    "employeeLookupFailed": "Your employee profile could not be loaded. Please refresh and try again."
+  }
+}

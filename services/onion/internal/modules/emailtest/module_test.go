@@ -2,14 +2,17 @@ package emailtest
 
 import (
 	"context"
+	"encoding/json"
 	stdErrors "errors"
 	"net/http"
+	"os"
 	"testing"
 
 	onekithttp "github.com/voxire/onion/internal/platform/onekiterrors"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/config"
+	emailtestv1 "github.com/voxire/voxie/gen/go/devtools/emailtest/v1"
 )
 
 func oneKitStatus(err error) int {
@@ -23,12 +26,12 @@ func oneKitStatus(err error) int {
 func TestEmailTestHandlersRejectAnonymous(t *testing.T) {
 	withTestEnv(t, "development")
 
-	_, err := (&ListTemplatesHandler{}).Serve(context.Background(), &ListTemplatesRequest{})
+	_, err := (&EmailTestAPI{}).ListTemplates(context.Background(), &emailtestv1.ListTemplatesRequest{})
 	if err == nil || oneKitStatus(err) != http.StatusForbidden {
 		t.Fatalf("expected anonymous list to be forbidden, got %+v", err)
 	}
 
-	_, err = (&TestEmailHandler{}).Serve(context.Background(), &TestEmailRequest{})
+	_, err = (&EmailTestAPI{}).SendTestEmail(context.Background(), &emailtestv1.SendTestEmailRequest{})
 	if err == nil || oneKitStatus(err) != http.StatusForbidden {
 		t.Fatalf("expected anonymous send to be forbidden, got %+v", err)
 	}
@@ -38,14 +41,87 @@ func TestEmailTestHandlersAreUnavailableInProduction(t *testing.T) {
 	withTestEnv(t, "production")
 
 	ctx := authenticatedContext()
-	_, err := (&ListTemplatesHandler{}).Serve(ctx, &ListTemplatesRequest{})
+	_, err := (&EmailTestAPI{}).ListTemplates(ctx, &emailtestv1.ListTemplatesRequest{})
 	if err == nil || oneKitStatus(err) != http.StatusNotFound {
 		t.Fatalf("expected production list to be unavailable, got %+v", err)
 	}
 
-	_, err = (&TestEmailHandler{}).Serve(ctx, &TestEmailRequest{})
+	_, err = (&EmailTestAPI{}).SendTestEmail(ctx, &emailtestv1.SendTestEmailRequest{})
 	if err == nil || oneKitStatus(err) != http.StatusNotFound {
 		t.Fatalf("expected production send to be unavailable, got %+v", err)
+	}
+}
+
+// The regression this guards: the endpoints render real branded templates
+// through the platform's sending domain and post them to a caller-supplied
+// address, so an authenticated user reaching them is a phishing primitive. Only
+// an explicitly declared development environment may.
+func TestEmailTestHandlersRefuseAnythingButDeclaredDevelopment(t *testing.T) {
+	cases := []struct {
+		name string
+		env  string
+	}{
+		{name: "unset", env: ""},
+		{name: "whitespace", env: "   "},
+		{name: "nonsense", env: "banana"},
+		{name: "misspelled development", env: "developement"},
+		{name: "padded production", env: " production "},
+		{name: "padded prod", env: " prod "},
+		{name: "production-eu", env: "production-eu"},
+		{name: "staging", env: "staging"},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			withTestEnv(t, tc.env)
+
+			ctx := authenticatedContext()
+			if _, err := (&EmailTestAPI{}).ListTemplates(ctx, &emailtestv1.ListTemplatesRequest{}); err == nil || oneKitStatus(err) != http.StatusNotFound {
+				t.Errorf("APP_ENV=%q: expected template listing to be unavailable, got %+v", tc.env, err)
+			}
+			if _, err := (&EmailTestAPI{}).SendTestEmail(ctx, &emailtestv1.SendTestEmailRequest{}); err == nil || oneKitStatus(err) != http.StatusNotFound {
+				t.Errorf("APP_ENV=%q: expected send to be unavailable, got %+v", tc.env, err)
+			}
+		})
+	}
+}
+
+// An unset APP_ENV is the state the exploit used: os.Getenv returns "" and the
+// old equality check answered "not production" for it.
+func TestEmailTestHandlersRefuseWhenAppEnvIsUnset(t *testing.T) {
+	previous := config.GlobalConfig
+	config.GlobalConfig = nil
+	t.Cleanup(func() { config.GlobalConfig = previous })
+	t.Setenv("APP_ENV", "placeholder")
+	if err := os.Unsetenv("APP_ENV"); err != nil {
+		t.Fatalf("unset APP_ENV: %v", err)
+	}
+
+	ctx := authenticatedContext()
+	if _, err := (&EmailTestAPI{}).SendTestEmail(ctx, &emailtestv1.SendTestEmailRequest{
+		Template: "auth/password_reset",
+		To:       "ceo@target-bank.example",
+		Subject:  "Action required",
+		Data:     json.RawMessage(`{"ResetLink":"https://attacker.example/reset?t=..."}`),
+	}); err == nil || oneKitStatus(err) != http.StatusNotFound {
+		t.Fatalf("expected send to be unavailable with APP_ENV unset, got %+v", err)
+	}
+}
+
+// The declared development labels are the only ones that open the endpoints;
+// the allowlist must keep covering every value the repo actually ships.
+func TestEmailTestHandlersRemainAvailableInDeclaredDevelopment(t *testing.T) {
+	for _, env := range []string{"dev", "development", "local", "test", "development ", "DEVELOPMENT"} {
+		t.Run(env, func(t *testing.T) {
+			withTestEnv(t, env)
+
+			// Authenticated and not production: the request must get past the
+			// environment gate and reach the ordinary per-request validation.
+			_, err := (&EmailTestAPI{}).ListTemplates(authenticatedContext(), &emailtestv1.ListTemplatesRequest{})
+			if err != nil {
+				t.Fatalf("APP_ENV=%q: expected listing to be served, got %+v", env, err)
+			}
+		})
 	}
 }
 
@@ -56,7 +132,7 @@ func TestEmailTestAnonymousRoutesStayEmpty(t *testing.T) {
 }
 
 func authenticatedContext() context.Context {
-	device := authPkg.Device{IsAnonymous: false, User: &authPkg.AuthUser{UserID: 1, Role: "admin"}}
+	device := authPkg.Device{IsAnonymous: false, User: &authPkg.AuthUser{UserID: 1}}
 	return device.Ctx(context.Background())
 }
 

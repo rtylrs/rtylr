@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure"
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 )
 
 type ScheduledReportPayload struct {
@@ -100,7 +100,7 @@ func (s *Service) CreateScheduledReport(ctx context.Context, businessID int64, i
 	if err := validateScheduledReport(input.validationPayload()); err != nil {
 		return ScheduledReportPayload{}, err
 	}
-	id, err := s.repo.CreateScheduledReport(ctx, infrastructure.ScheduledReportWrite{
+	id, err := s.repo.CreateScheduledReport(ctx, domain.ScheduledReportWrite{
 		OwnerID: businessID, BusinessID: businessID, TemplateID: input.TemplateID,
 		Cadence: input.Cadence, Channel: input.Channel, Recipient: input.Recipient, IsActive: input.IsActive,
 	})
@@ -118,7 +118,7 @@ func (s *Service) UpdateScheduledReport(ctx context.Context, businessID, id int6
 	if err := validateScheduledReport(input.validationPayload()); err != nil {
 		return ScheduledReportPayload{}, err
 	}
-	err := s.repo.UpdateScheduledReport(ctx, infrastructure.ScheduledReportWrite{
+	err := s.repo.UpdateScheduledReport(ctx, domain.ScheduledReportWrite{
 		ID: id, OwnerID: businessID, BusinessID: businessID, TemplateID: input.TemplateID,
 		Cadence: input.Cadence, Channel: input.Channel, Recipient: input.Recipient, IsActive: input.IsActive,
 	})
@@ -161,7 +161,7 @@ func validateScheduledReport(p ScheduledReportPayload) error {
 	return nil
 }
 
-func toScheduledReportPayload(row infrastructure.ScheduledReportRow) ScheduledReportPayload {
+func toScheduledReportPayload(row domain.ScheduledReportRow) ScheduledReportPayload {
 	return ScheduledReportPayload{
 		ID: row.ID, TemplateID: row.TemplateID, Cadence: row.Cadence, Channel: row.Channel,
 		Recipient: row.Recipient, IsActive: row.IsActive,

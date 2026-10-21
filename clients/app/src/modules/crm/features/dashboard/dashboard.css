@@ -1,0 +1,455 @@
+/* CRM dashboard. Builds on the sales page chrome (sales.css): the header, the
+   stats strip and the table come from there. */
+
+:root {
+  /* Calls that didn't reach anyone: a gray that still clears 3:1 against the
+     card, validated against the violet beside it. */
+  --crm-chart-muted: #6e6e78;
+}
+:root[data-theme='light'] {
+  --crm-chart-muted: #8e8e97;
+}
+
+.portal-page > .crm-dash {
+  max-width: 1600px;
+}
+
+/* A stat's detail drops under its value rather than being cut short. */
+.crm-dash .sales-stat-line {
+  flex-wrap: wrap;
+  row-gap: 0;
+}
+.crm-dash .sales-stat-hint {
+  white-space: normal;
+}
+
+.crm-dash-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.crm-dash-controls .sales-segmented {
+  width: auto;
+}
+.crm-dash-controls .sales-segmented button {
+  min-width: 64px;
+}
+
+.crm-dash-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 14px;
+}
+.crm-dash-wide {
+  grid-column: span 8;
+}
+.crm-dash-narrow {
+  grid-column: span 4;
+}
+.crm-dash-half {
+  grid-column: span 6;
+}
+@media (max-width: 1100px) {
+  .crm-dash-wide,
+  .crm-dash-narrow,
+  .crm-dash-half {
+    grid-column: 1 / -1;
+  }
+}
+
+.crm-dash-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--hub-card);
+  border: 1px solid var(--hub-border);
+  border-radius: 12px;
+}
+.crm-dash-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px 0;
+}
+.crm-dash-card-head h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--hub-text);
+}
+.crm-dash-card-head p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--hub-text-muted);
+}
+.crm-dash-card-link {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hub-text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.crm-dash-card-link:hover {
+  color: var(--hub-text);
+}
+[dir='rtl'] .crm-dash-card-link svg {
+  transform: scaleX(-1);
+}
+.crm-dash-card-body {
+  flex: 1;
+  padding: 12px 16px 16px;
+  min-width: 0;
+}
+.crm-dash-card-body.is-flush {
+  padding: 8px 0 4px;
+}
+.crm-dash-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 120px;
+  padding: 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--hub-text-muted);
+}
+.crm-dash-empty-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.crm-dash-loading {
+  transition: opacity 0.15s;
+}
+.crm-dash-loading.is-refreshing {
+  opacity: 0.55;
+}
+
+/* ── Activity chart ───────────────────────────────────────────────────── */
+
+.crm-dash-legend {
+  display: flex;
+  gap: 14px;
+  margin: 0 0 10px;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  color: var(--hub-text-muted);
+}
+.crm-dash-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.crm-dash-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+.crm-dash-chart {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 8px;
+  outline: none;
+}
+.crm-dash-chart:focus-visible {
+  outline: 2px solid var(--app-focus, var(--hub-text-dim));
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+.crm-dash-yaxis {
+  position: relative;
+  height: 180px;
+  font-size: 11px;
+  color: var(--hub-text-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+.crm-dash-yaxis span {
+  display: block;
+  position: absolute;
+  inset-inline-end: 0;
+  transform: translateY(50%);
+  line-height: 1;
+}
+.crm-dash-plot {
+  position: relative;
+  height: 180px;
+}
+.crm-dash-gridline {
+  position: absolute;
+  inset-inline: 0;
+  height: 1px;
+  background: var(--hub-border);
+}
+.crm-dash-columns {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-items: end;
+  /* Keeps the active column's wash (z-index -1) above the card. */
+  isolation: isolate;
+}
+.crm-dash-column {
+  position: relative;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2px;
+  height: 100%;
+}
+.crm-dash-column-bar {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 2px;
+  width: 100%;
+  max-width: 24px;
+  height: 100%;
+  justify-content: flex-start;
+}
+.crm-dash-segment {
+  width: 100%;
+  flex-shrink: 0;
+}
+/* The top of each column is its data end: rounded there, square at the base. */
+.crm-dash-segment.is-top {
+  border-radius: 4px 4px 0 0;
+}
+.crm-dash-segment.is-reached {
+  background: var(--crm-accent);
+}
+.crm-dash-segment.is-missed {
+  background: var(--crm-chart-muted);
+}
+.crm-dash-column.is-active .crm-dash-segment {
+  filter: brightness(1.15);
+}
+.crm-dash-column.is-active::before {
+  content: '';
+  position: absolute;
+  inset: 0 -1px;
+  background: var(--hub-hover);
+  border-radius: 4px;
+  z-index: -1;
+}
+.crm-dash-xaxis {
+  grid-column: 2;
+  position: relative;
+  height: 20px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--hub-text-muted);
+}
+.crm-dash-xaxis span {
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+[dir='rtl'] .crm-dash-xaxis span {
+  transform: translateX(50%);
+}
+.crm-dash-xaxis span.is-first {
+  transform: none;
+}
+.crm-dash-xaxis span.is-last {
+  transform: translateX(-100%);
+}
+[dir='rtl'] .crm-dash-xaxis span.is-last {
+  transform: translateX(100%);
+}
+.crm-dash-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  z-index: 2;
+  min-width: 132px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--hub-border);
+  background: var(--hub-card);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.12);
+  font-size: 12px;
+  color: var(--hub-text-muted);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.crm-dash-tooltip-date {
+  margin-bottom: 4px;
+}
+.crm-dash-tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.crm-dash-tooltip-row strong {
+  min-width: 2ch;
+  color: var(--hub-text);
+  font-variant-numeric: tabular-nums;
+}
+.crm-dash-key {
+  width: 10px;
+  height: 2px;
+  border-radius: 1px;
+}
+
+/* ── Bar lists (funnel, pipeline) ─────────────────────────────────────── */
+
+.crm-dash-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.crm-dash-bar-row {
+  display: grid;
+  grid-template-columns: minmax(84px, 30%) minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  text-align: start;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.crm-dash-bar-row:hover,
+.crm-dash-bar-row:focus-visible {
+  background: var(--hub-hover);
+}
+.crm-dash-bar-label {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--hub-text);
+}
+.crm-dash-bar-label,
+.crm-dash-bar-hint {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.crm-dash-bar-track {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.crm-dash-bar {
+  flex-shrink: 0;
+  height: 10px;
+  min-width: 2px;
+  background: var(--crm-accent);
+  border-start-end-radius: 4px;
+  border-end-end-radius: 4px;
+}
+.crm-dash-bar-value {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--hub-text);
+}
+.crm-dash-bar-hint {
+  font-size: 12px;
+  color: var(--hub-text-muted);
+}
+.crm-dash-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 10px 8px 0;
+  border-top: 1px solid var(--hub-border);
+  font-size: 12px;
+  color: var(--hub-text-muted);
+}
+.crm-dash-foot strong {
+  color: var(--hub-text);
+  font-weight: 600;
+}
+
+/* ── Lists ────────────────────────────────────────────────────────────── */
+
+.crm-dash-table :is(th, td):first-child {
+  padding-inline-start: 16px;
+}
+.crm-dash-table :is(th, td):last-child {
+  padding-inline-end: 16px;
+}
+.crm-dash-table td.is-number,
+.crm-dash-table th.is-number {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.crm-dash-table tbody tr {
+  cursor: default;
+}
+.crm-dash-table tbody tr:hover {
+  background: none;
+}
+.crm-dash-people {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.crm-dash-person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 16px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.crm-dash-person:disabled {
+  cursor: default;
+}
+.crm-dash-person:not(:disabled):hover,
+.crm-dash-person:focus-visible {
+  background: var(--hub-hover);
+}
+.crm-dash-people li + li {
+  border-top: 1px solid var(--hub-border);
+}
+.crm-dash-person-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--hub-text);
+  font-weight: 500;
+}
+.crm-dash-person-value {
+  font-weight: 600;
+  color: var(--hub-text);
+  font-variant-numeric: tabular-nums;
+}
+.crm-dash-due .sales-task {
+  padding-inline: 16px;
+}

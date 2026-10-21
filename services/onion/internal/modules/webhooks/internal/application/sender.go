@@ -3,7 +3,6 @@ package application
 import (
 	"bytes"
 	"context"
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,7 +12,7 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/webhooks/internal/domain"
-	"github.com/voxire/onion/internal/modules/webhooks/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/eventbus"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -46,15 +45,17 @@ const (
 // hub_webhooks, its secret and its last_triggered_at belong here. The queue is
 // a platform table, read as an annotated cross-schema read.
 type Sender struct {
-	repo      *infrastructure.Repository
+	repo      deliveryRepository
+	events    eventReader
 	client    *http.Client
 	batchSize int32
 }
 
 // NewSender builds a sender over the shared pool.
-func NewSender(db *sql.DB) *Sender {
+func NewSender(repo deliveryRepository, events eventReader) *Sender {
 	return &Sender{
-		repo:      infrastructure.NewRepository(db),
+		repo:      repo,
+		events:    events,
 		client:    newDeliveryClient(requestTimeout),
 		batchSize: defaultBatch,
 	}
@@ -82,7 +83,7 @@ func (s *Sender) ProcessDue(ctx context.Context) error {
 		}
 
 		if claimErr := s.repo.ClaimDelivery(ctx, delivery.ID); claimErr != nil {
-			if errors.Is(claimErr, infrastructure.ErrDeliveryNotClaimed) {
+			if errors.Is(claimErr, domain.ErrDeliveryNotClaimed) {
 				continue
 			}
 			logger.Ctx(ctx).Error("webhooks: failed to claim delivery",
@@ -171,7 +172,7 @@ func retryDelaySeconds(attempts int) int64 {
 func (s *Sender) attempt(ctx context.Context, delivery domain.Delivery) (int, error) {
 	registration, err := s.repo.GetRegistrationForDelivery(ctx, delivery.WebhookID, delivery.BusinessID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, domain.ErrDeliveryRegistrationNotFound) {
 			return 0, undeliverable("registration %d is not in business %d", delivery.WebhookID, delivery.BusinessID)
 		}
 		return 0, fmt.Errorf("loading registration: %w", err)
@@ -189,12 +190,20 @@ func (s *Sender) attempt(ctx context.Context, delivery domain.Delivery) (int, er
 		return 0, err
 	}
 
-	event, err := s.repo.GetEventForDelivery(ctx, delivery.EventID, delivery.BusinessID)
+	fact, err := s.events.GetEvent(ctx, delivery.EventID, delivery.BusinessID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, eventbus.ErrEventNotFound) {
 			return 0, undeliverable("event %d is not in business %d", delivery.EventID, delivery.BusinessID)
 		}
 		return 0, fmt.Errorf("loading event: %w", err)
+	}
+	event := domain.Event{
+		ID:          fact.ID,
+		Type:        fact.Type,
+		SubjectType: fact.SubjectType,
+		SubjectID:   fact.SubjectID,
+		Payload:     eventPayloadBytes(fact.Payload),
+		OccurredAt:  fact.OccurredAt,
 	}
 
 	body, err := encodeEnvelope(event)

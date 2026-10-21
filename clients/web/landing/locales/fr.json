@@ -7,32 +7,6 @@
       "company": "Entreprise",
       "signIn": "Se connecter",
       "signUp": "Créer un compte",
-      "featureLinks": {
-        "pos": {
-          "title": "POS",
-          "desc": "Paiements, tables, commandes et tickets dans une seule caisse."
-        },
-        "erp": {
-          "title": "ERP",
-          "desc": "Stocks, fournisseurs et achats qui restent synchronisés."
-        },
-        "hr": {
-          "title": "HR",
-          "desc": "Équipes, plannings, congés et paie au même endroit."
-        },
-        "crm": {
-          "title": "CRM",
-          "desc": "Fiches clients, fidélité, segments et campagnes."
-        },
-        "finance": {
-          "title": "Finance",
-          "desc": "Factures, dépenses, TVA et un vrai compte de résultat en quelques secondes."
-        },
-        "flow": {
-          "title": "Flow",
-          "desc": "Projets, tâches et espaces d’équipe pour chaque département."
-        }
-      },
       "resourceLinks": {
         "hardware": "Matériel",
         "integrations": "Intégrations",
@@ -50,13 +24,45 @@
         "partners": "Partenaires",
         "careers": "Carrières",
         "contact": "Contact"
+      },
+      "featureLinks": {
+        "overview": {
+          "title": "L’espace de travail rtylr",
+          "desc": "Toutes vos activités réunies sur les mêmes registres."
+        },
+        "work": {
+          "title": "Travail",
+          "desc": "Projets, tâches et automatisations pour chaque équipe."
+        },
+        "finance": {
+          "title": "Finance",
+          "desc": "Factures, dépenses, taxes et compte de résultat en temps réel."
+        },
+        "customers": {
+          "title": "Clients",
+          "desc": "Profils, segments, fidélité et campagnes."
+        },
+        "team": {
+          "title": "Équipe",
+          "desc": "Plannings, pointage, paie et congés."
+        },
+        "operations": {
+          "title": "Opérations",
+          "desc": "Stocks, fournisseurs et transferts synchronisés en continu."
+        },
+        "sales": {
+          "title": "Ventes",
+          "desc": "Un encaissement qui actualise instantanément le reste."
+        },
+        "insights": {
+          "title": "Indicateurs",
+          "desc": "Chiffres en direct, expliqués par Caret."
+        }
       }
     },
     "cta": {
-      "startFree": "Commencer gratuitement",
       "bookDemo": "Réserver une démo",
-      "getStarted": "Commencer",
-      "seeItLive": "Voir en action"
+      "getStarted": "Commencer"
     },
     "a11y": {
       "home": "Accueil rtylr",
@@ -81,24 +87,18 @@
       "company": "ENTREPRISE"
     },
     "link": {
-      "pos": "POS",
-      "erp": "ERP",
-      "hr": "HR",
-      "crm": "CRM",
-      "finance": "Finance",
-      "flow": "Flow",
       "pricing": "Tarifs",
       "hardware": "Matériel",
       "blog": "Blog",
       "documentation": "Documentation",
-      "selfHost": "Auto-héberger rtylr",
       "integrations": "Intégrations",
       "helpCenter": "Centre d’aide",
       "status": "État des services",
       "about": "À propos",
       "careers": "Carrières",
       "partners": "Partenaires",
-      "contact": "Contact"
+      "contact": "Contact",
+      "workspace": "Espace de travail"
     },
     "legal": {
       "terms": "CONDITIONS D’UTILISATION",
@@ -110,394 +110,6 @@
     },
     "logoAlt": "rtylr",
     "navLabel": "Navigation {{group}}"
-  },
-  "home": {
-    "pricing": {
-      "badge": "Tarifs",
-      "title": "Une suite rtylr.\nUn espace de travail connecté.",
-      "description": "Une seule suite pour les ventes, les stocks, les équipes, les clients, la finance et les opérations. Ce qui change, c’est l’échelle. Commencez gratuitement, sans carte bancaire."
-    },
-    "meta": {
-      "title": "rtylr · Toute votre entreprise dans une seule suite.",
-      "description": "La suite rtylr pour les ventes, les stocks, les équipes, les clients, la finance et les opérations. Un espace connecté pour les équipes modernes. Propulsé par l’IA.",
-      "ogSiteName": "Rtylr",
-      "keywords": "POS, ERP, HR, CRM, Finance, Flow, logiciel de caisse, système de caisse, gestion des stocks, gestion de la paie, programme de fidélité, facturation, gestion de projet, logiciel pour restaurant, logiciel pour commerce, IA",
-      "schemaDescription": "La suite rtylr réunit les ventes, les stocks, les équipes, les clients, la finance et les opérations sur un modèle de données partagé : une vente met à jour l’entreprise sans passer par un export."
-    },
-    "directAnswer": {
-      "label": "Qu’est-ce que rtylr ?",
-      "body": "rtylr est la suite d’entreprise des petites et moyennes entreprises. Elle relie les ventes, les stocks, les équipes, les clients, la finance et les opérations sur un modèle de données partagé. Elle est conçue pour les restaurants, les commerces et les entreprises de services qui emploient de 2 à 200 personnes, sur un établissement comme sur vingt. Une vente déplace le stock, le chiffre d’affaires et la fidélité sans que personne n’exporte de fichier."
-    },
-    "howItWorks": {
-      "eyebrow": "COMMENT ÇA MARCHE",
-      "title": "Comment passer de l’inscription\nà la mise en service ?",
-      "steps": [
-        {
-          "title": "Créer le compte",
-          "description": "E-mail, mot de passe, terminé. Sans carte bancaire. Votre espace rtylr est prêt dès la première minute."
-        },
-        {
-          "title": "Configurer Hub",
-          "description": "Établissements, équipe, marque, taxes, matériel. Hub est l’endroit unique où vous réglez tout le reste."
-        },
-        {
-          "title": "Définir les rôles et les accès",
-          "description": "Donnez à l’équipe de salle les outils dont elle a besoin, aux responsables la vue sur les équipes et à votre comptable les chiffres. Chacun voit la bonne partie de la suite."
-        },
-        {
-          "title": "Passer en service",
-          "description": "Tous les départements travaillent sur le même modèle de données connecté. Aucun projet d’intégration."
-        }
-      ]
-    },
-    "cta": {
-      "title": "À vous\nde construire.",
-      "subtitle": "Gratuit jusqu’à 10 membres. Sans carte bancaire.\nLancez votre entreprise en un après-midi."
-    },
-    "products": {
-      "badge": "LA SUITE RTYLR",
-      "title": "Une suite.\nUn modèle de données partagé.",
-      "subtitle": "Les ventes, les stocks, les équipes, les clients, la comptabilité et les opérations sont conçus pour fonctionner ensemble : une vente met à jour le reste de l’entreprise sans export.",
-      "cardsTop": [
-        {
-          "title": "Caisse",
-          "description": "Tickets, tables, additions partagées, pourboires et tous les moyens de paiement. La caisse qui suit le rythme du vrai service."
-        },
-        {
-          "title": "Stocks",
-          "description": "Décrémentation liée aux recettes, gestion des fournisseurs, réassort automatique. Vos étagères parlent à la base de données."
-        },
-        {
-          "title": "Équipes et paie",
-          "description": "Planning, pointage, paie, congés, conformité. Le volet humain, sans la paperasse."
-        },
-        {
-          "title": "Clients et fidélité",
-          "description": "Fiches, segments, campagnes et fidélité, alimentés en direct par chaque ticket que votre caisse écrit."
-        }
-      ],
-      "cardsBottom": [
-        {
-          "title": "Une comptabilité qui se boucle seule",
-          "description": "Factures, dépenses, TVA et un compte de résultat en direct. Chaque vente se rapproche en temps réel."
-        },
-        {
-          "title": "Projets et tâches",
-          "description": "Kanban, automatisations et tâches rattachées à la facture, au client ou au service auquel elles appartiennent vraiment."
-        },
-        {
-          "title": "Des analyses sur l’ensemble",
-          "description": "Tendances du chiffre d’affaires, cohortes de clients, marge sur main-d’œuvre. Chaque chiffre reste à jour dans toute la suite rtylr."
-        }
-      ],
-      "explore": "Découvrir →",
-      "exploreLabel": "Découvrir le flux {{capability}}"
-    },
-    "integrations": {
-      "badge": "INTÉGRATIONS",
-      "title": "Se branche sur tout\nce que vous utilisez déjà.",
-      "description": "Stripe pour les paiements. QuickBooks pour votre comptable. Slack pour les alertes. Connexion en quelques minutes. Aucune clé API à aller chercher. Aucun développeur nécessaire.",
-      "footnote": "Consultez le répertoire complet pour tout ce qui est prévu."
-    },
-    "truth": {
-      "badge": "Vérifiable",
-      "title": "Ce que nous pouvons prouver.",
-      "description": "Six affirmations que vous pouvez vérifier depuis un onglet de navigateur ou un terminal. Rien ici ne demande un appel commercial pour être confirmé.",
-      "checkLabel": "À vérifier :",
-      "claims": [
-        {
-          "title": "Un modèle de données, aucune couture de synchronisation",
-          "body": "Les ventes, les stocks, les équipes, les clients, la finance et les opérations lisent et écrivent les mêmes enregistrements. Une vente décrémente le stock et arrive dans les comptes au moment où elle se produit, parce qu’il n’y a pas de second système à synchroniser."
-        },
-        {
-          "title": "Chaque page est lisible par une machine",
-          "body": "Demandez du Markdown plutôt que du HTML à n’importe quelle URL de ce site et vous obtenez du Markdown, avec l’en-tête Vary correct. Sans scraping, sans rendu, sans JavaScript.",
-          "check": "curl -H \"Accept: text/markdown\" https://rtylr.com/pos/"
-        },
-        {
-          "title": "Tout le site est indexé comme une donnée",
-          "body": "Un index lisible par une machine de toutes les pages du site, avec leurs titres et leurs descriptions, généré à la compilation. Il ne peut pas s’écarter du site, puisque c’est le site qui le génère.",
-          "check": "https://rtylr.com/pages.json"
-        },
-        {
-          "title": "Une suite rtylr dans chaque forfait",
-          "body": "Aucune licence ajoutée. Les forfaits diffèrent par le nombre de personnes et d’établissements que vous gérez et par les contrôles dont une équipe plus grande a besoin, pas par l’achat de pièces séparées du produit.",
-          "check": "https://rtylr.com/pricing/"
-        },
-        {
-          "title": "Le forfait Free ne demande aucune carte",
-          "body": "Dix membres d’équipe sur un établissement, la suite rtylr essentielle, aucun moyen de paiement et aucun compte à rebours d’essai. C’est un forfait, pas un décompte.",
-          "check": "https://rtylr.com/pricing/"
-        },
-        {
-          "title": "Un document OpenAPI, publié",
-          "body": "Ce site publie la spécification de ses propres points d’accès au format OpenAPI 3.1. Elle couvre le site vitrine, pas l’API du produit, et elle est indiquée ici pour que personne n’ait à deviner laquelle des deux.",
-          "check": "https://rtylr.com/openapi.json"
-        }
-      ]
-    },
-    "hero": {
-      "announcePill": "BÊTA",
-      "announceText": "Caret AI est en version bêta. Décrivez votre activité, regardez-la se construire",
-      "title": "Gérez toute votre entreprise.\nDepuis un espace rtylr.",
-      "promptPlaceholder": "Décrivez votre activité. Caret AI prépare votre espace rtylr",
-      "caretLabel": "Caret AI",
-      "moreOptions": "Plus d’options",
-      "submit": "Commencer à construire",
-      "demoLinePrefix": "Parlez à un expert et",
-      "demoLineLink": "réservez une démo",
-      "stats": [
-        {
-          "number": "Un identifiant",
-          "label": "POS, ERP, CRM, RH et Finance"
-        },
-        {
-          "number": "Auto-hébergé",
-          "label": "Sur vos propres serveurs"
-        },
-        {
-          "number": "Liban",
-          "label": "Conçu au Liban"
-        },
-        {
-          "number": "3",
-          "label": "Langues disponibles"
-        },
-        {
-          "number": "Hors ligne",
-          "label": "Toujours opérationnel"
-        },
-        {
-          "number": "IA",
-          "label": "Intégrée"
-        },
-        {
-          "number": "Multi",
-          "label": "Langues"
-        },
-        {
-          "number": "Cloud",
-          "label": "Natif"
-        }
-      ],
-      "promptLabel": "Décrivez votre activité"
-    },
-    "features": {
-      "badge": "LA SUITE RTYLR",
-      "title": "Que peut faire la suite rtylr ?",
-      "titleAccent": "Une opération connectée.",
-      "openCta": "Découvrir le flux {{capability}}",
-      "showLabel": "Afficher le flux {{capability}}",
-      "chooseAppLabel": "Choisir une capacité de la suite",
-      "items": [
-        {
-          "title": "Une caisse qui suit le rythme du vrai service.",
-          "description": "Tickets, tables, additions partagées, pourboires et tous les moyens de paiement : carte, Apple Pay, espèces, carte cadeau, offert. Fonctionne hors ligne quand le WiFi lâche. Moins de 200 ms par encaissement."
-        },
-        {
-          "title": "Un stock qui se compte tout seul.",
-          "description": "Décrémentation liée aux recettes au fil des encaissements. Réassort automatique dès le seuil atteint. Transferts entre établissements avec piste d’audit complète. Ce sont vos étagères qui informent la base de données, pas l’inverse."
-        },
-        {
-          "title": "Le volet humain, sans la paperasse.",
-          "description": "Le planning se publie d’un glisser-déposer. Pointage depuis POS. Une paie qui agrège pourboires, heures et retenues automatiquement. Les manquements sont signalés avant de devenir des infractions."
-        },
-        {
-          "title": "Aucun client oublié.",
-          "description": "Chaque vente encaissée dans POS enrichit la fiche client. Segmentation par dépenses, fréquence de visite, anniversaire, étiquettes. La campagne part du même flux connecté : pas de détour par Mailchimp."
-        },
-        {
-          "title": "Un vrai compte de résultat, en temps réel.",
-          "description": "Des factures récurrentes qui s’encaissent toutes seules. Des dépenses saisies à la source. La TVA calculée par juridiction fiscale. Un compte de résultat qui se met à jour à chaque vente, pas à la clôture du mois."
-        },
-        {
-          "title": "Le travail circule dans un seul système.",
-          "description": "Tableaux kanban, automatisations et tâches rattachées à la facture, au client ou au service dont elles parlent vraiment. Des opérations qui ne se perdent pas entre deux outils."
-        },
-        {
-          "title": "Le tableau de bord qui voit tout.",
-          "description": "Tendances du chiffre d’affaires, cohortes de clients, performance par produit, marge sur main-d’œuvre. Chaque chiffre reste à jour dans toute la suite rtylr. Ni SQL, ni ETL nocturne."
-        }
-      ],
-      "demos": {
-        "hr": {
-          "scheduleTitle": "Planning",
-          "today": "Aujourd’hui · lun. 5 mai",
-          "onShift_one": "{{count}} en service",
-          "onShift_other": "{{count}} en service",
-          "roles": {
-            "floorManager": "Chef de salle",
-            "barista": "Barista",
-            "chef": "Chef de cuisine",
-            "server": "Serveur"
-          }
-        },
-        "pos": {
-          "menuLabel": "Carte · Sur place",
-          "orderLabel": "Commande · Table 4",
-          "addItems": "Ajoutez des articles…",
-          "total": "Total",
-          "charge": "Encaisser",
-          "chargeAmount": "Encaisser {{amount}} $",
-          "items": [
-            "Expresso",
-            "Café latte",
-            "Cappuccino",
-            "Croissant",
-            "Jus d’orange",
-            "Tartine à l’avocat",
-            "Salade grecque",
-            "Cheesecake"
-          ]
-        },
-        "erp": {
-          "inventory": "Stocks",
-          "itemCount_one": "{{count}} article",
-          "itemCount_other": "{{count}} articles",
-          "alertCount_one": "{{count}} alerte",
-          "alertCount_other": "{{count}} alertes",
-          "table": {
-            "item": "Article",
-            "stock": "Stock",
-            "onHand": "En stock",
-            "status": "État"
-          },
-          "status": {
-            "out": "Épuisé",
-            "critical": "Critique",
-            "low": "Faible",
-            "ok": "OK"
-          },
-          "items": [
-            "Huile d’olive 5 L",
-            "Farine 25 kg",
-            "Café en grains",
-            "Saumon atlantique",
-            "Huile de truffe",
-            "Crème entière",
-            "Pain au levain"
-          ],
-          "units": {
-            "btl": "bout.",
-            "bag": "sac",
-            "kg": "kg",
-            "L": "L",
-            "pcs": "pces"
-          }
-        },
-        "crm": {
-          "customers": "Clients",
-          "totalCount": "1 204 au total",
-          "segments": {
-            "all": "Tous",
-            "vip": "★ VIP",
-            "regular": "Régulier",
-            "atRisk": "À risque",
-            "new": "Nouveau"
-          },
-          "table": {
-            "customer": "Client",
-            "tier": "Segment",
-            "spend": "Dépensé",
-            "lastVisit": "Dernière visite"
-          },
-          "visitCount_one": "{{count}} visite",
-          "visitCount_other": "{{count}} visites",
-          "relativeTime": {
-            "yesterday": "Hier",
-            "oneDayAgo": "1 j",
-            "twoDaysAgo": "2 j",
-            "threeDaysAgo": "3 j",
-            "fiveDaysAgo": "5 j",
-            "oneWeekAgo": "1 sem.",
-            "threeWeeksAgo": "3 sem.",
-            "oneMonthAgo": "1 mois"
-          }
-        },
-        "finance": {
-          "pnl": "Compte de résultat",
-          "monthLabel": "mai 2026",
-          "profitable": "Rentable",
-          "metrics": {
-            "revenue": "Chiffre d’affaires",
-            "expenses": "Dépenses",
-            "netProfit": "Bénéfice net"
-          },
-          "momSuffix": "sur un mois",
-          "months": {
-            "nov": "nov.",
-            "dec": "déc.",
-            "jan": "janv.",
-            "feb": "févr.",
-            "mar": "mars",
-            "apr": "avr.",
-            "may": "mai"
-          }
-        },
-        "flow": {
-          "breadcrumb": {
-            "workspaces": "Espaces de travail",
-            "operations": "Opérations",
-            "sprint": "Sprint hebdo"
-          },
-          "views": {
-            "board": "Tableau",
-            "list": "Liste",
-            "timeline": "Chronologie"
-          },
-          "columns": {
-            "backlog": "À faire",
-            "progress": "En cours",
-            "review": "À valider",
-            "done": "Terminé"
-          },
-          "priorityHigh": "Haute",
-          "tasks": {
-            "t1": "Lancement de la carte de saison, T3",
-            "t2": "Nouveau fournisseur : Rossini",
-            "t3": "Couverts du vendredi, planning des équipes",
-            "t4": "Refaire la checklist de mise en place du brunch",
-            "t5": "Campagne e-mail : fête des Mères",
-            "t6": "Contrat de maintenance, machine à expresso",
-            "t7": "Déclaration de TVA, T1",
-            "t8": "Firmware POS v4.2"
-          },
-          "tags": {
-            "ops": "Opérations",
-            "erp": "ERP",
-            "hr": "HR",
-            "kitchen": "Cuisine",
-            "crm": "CRM",
-            "vendor": "Fournisseur",
-            "finance": "Finance"
-          }
-        },
-        "insights": {
-          "revenue": "Chiffre d’affaires",
-          "last7Days": "7 derniers jours",
-          "kpis": {
-            "covers": "Couverts",
-            "avgOrder": "Panier moyen",
-            "peakDay": "Jour de pointe"
-          },
-          "vsPrefix": "vs {{day}}",
-          "days": {
-            "mon": "lun.",
-            "tue": "mar.",
-            "wed": "mer.",
-            "thu": "jeu.",
-            "fri": "ven.",
-            "sat": "sam.",
-            "sun": "dim."
-          },
-          "ranges": {
-            "7d": "7 j",
-            "30d": "30 j",
-            "90d": "90 j"
-          }
-        }
-      }
-    }
   },
   "pricing": {
     "meta": {
@@ -572,183 +184,6 @@
       "subtitle": "10 utilisateurs et la suite rtylr sont à vous dès le premier jour, sans carte. Réservez une démo si vous préférez d’abord le voir tourner sur vos propres chiffres."
     }
   },
-  "pos": {
-    "meta": {
-      "title": "POS · La caisse qui suit le rythme. | rtylr",
-      "description": "Logiciel de caisse complet pour la restauration et le commerce. Tickets, additions partagées, pourboires et un vrai mode hors ligne, dans rtylr.",
-      "schemaDescription": "Logiciel de caisse complet pour la restauration et le commerce. Tickets, additions partagées, pourboires et un vrai mode hors ligne."
-    },
-    "hero": {
-      "eyebrow": "rtylr POS",
-      "title": "La caisse\nqui suit le rythme.",
-      "subtitle": "Envoyez les plats à la bonne station. Partagez une addition en sept. Acceptez Apple Pay, les cartes cadeaux, les comptes clients. Continuez à encaisser quand le WiFi tombe. Conçue pour le rythme du vrai service, pas pour une vidéo de démonstration.",
-      "receipt": {
-        "items": [
-          "Pizza margherita",
-          "Salade maison",
-          "Eau pétillante",
-          "Expresso"
-        ],
-        "order": "Commande n° {{orderId}} · Table {{table}}",
-        "live": "DIRECT",
-        "venue": "rtylr · Terrasse",
-        "date": "18 avr.",
-        "server": "Servi par {{name}}",
-        "subtotal": "Sous-total",
-        "tax": "TVA ({{pct}})",
-        "tip": "Pourboire ({{pct}})",
-        "total": "Total",
-        "paid": "Payé · Visa ••4891"
-      }
-    },
-    "directAnswer": {
-      "label": "Qu’est-ce que rtylr POS ?",
-      "body": "rtylr POS est l’application de caisse de rtylr, conçue pour les restaurants et les commerces qui exploitent aussi bien un seul établissement que vingt. Elle gère les tickets, l’envoi des plats, le partage des additions, les pourboires, les options et les paiements par carte, et elle continue de prendre les commandes quand la connexion tombe. Comme elle écrit dans la même base de données que les stocks, les équipes et la comptabilité, une vente déplace le stock et le chiffre d’affaires sans export."
-    },
-    "features": {
-      "eyebrow": "CE QU’ELLE FAIT",
-      "title": "Que doit réussir\nune caisse ?",
-      "items": [
-        {
-          "title": "Des tickets qui suivent",
-          "copy": "Partager, fusionner, regrouper. Envoyer chaque plat à la bonne station. Lancer quand vous dites de lancer."
-        },
-        {
-          "title": "Tous les moyens de paiement",
-          "copy": "Carte, Apple Pay, Google Pay, espèces, carte cadeau, offert, compte client. Une seule caisse pour tout."
-        },
-        {
-          "title": "Pourboires, additions ouvertes et partages",
-          "copy": "Partage par couvert. Pourboire automatique. Additions pré-autorisées. Les pourboires arrivent dans la paie le lendemain matin."
-        },
-        {
-          "title": "Fonctionne quand internet ne fonctionne pas",
-          "copy": "Mode hors ligne complet. Les transactions sont mises en file en local et se synchronisent dès que vous êtes de nouveau en ligne."
-        }
-      ]
-    },
-    "compare": {
-      "eyebrow": "FACE AUX AUTRES",
-      "title": "Que font payer en plus\nles autres caisses ?",
-      "rows": [
-        "Mode hors ligne (service complet, sans internet)",
-        "Prestataire de paiement imposé",
-        "Matériel que vous pouvez acheter ailleurs",
-        "HR et paie inclus",
-        "Le stock se décrémente par recette",
-        "CRM en temps réel lié aux tickets",
-        "API REST publique v1"
-      ],
-      "cell": {
-        "included": "Inclus",
-        "excluded": "-",
-        "partial": "Partiel",
-        "paidAddon": "Option payante"
-      },
-      "footnote": "Comparatif établi d’après les tarifs et la documentation produit accessibles publiquement, avril 2026. Une information n’est plus à jour ?",
-      "footnoteLink": "Signalez-le-nous"
-    },
-    "cta": {
-      "title": "Votre caisse devrait\nsuivre le rythme. Celle-ci le fait."
-    }
-  },
-  "erp": {
-    "meta": {
-      "title": "ERP · Des stocks qui se comptent tout seuls. | rtylr",
-      "description": "Stocks en temps réel, fournisseurs et achats. Décrémentation liée aux recettes. Transferts entre établissements avec piste d’audit complète.",
-      "schemaDescription": "Stocks en temps réel, fournisseurs, bons de commande et gestion d’entrepôt."
-    },
-    "hero": {
-      "eyebrow": "rtylr ERP · Stocks",
-      "title": "Des stocks qui\nse comptent tout seuls.",
-      "subtitle": "Chaque margherita vendue retire de la farine, de la mozzarella et de l’huile d’olive. Chaque bon de commande approuvé met à jour le stock de l’entrepôt. Chaque alerte de stock bas part avant la rupture, pas après que le coup de feu du samedi s’en est aperçu.",
-      "inventory": {
-        "items": [
-          "Margherita (225 g de pâte)",
-          "Rouge maison (750 ml)",
-          "Huile d’olive (5 L)",
-          "Café en grains (1 kg)",
-          "Farine 00 (3 kg)"
-        ]
-      }
-    },
-    "directAnswer": {
-      "label": "Qu’est-ce que rtylr ERP ?",
-      "body": "rtylr ERP est l’application de gestion des stocks et des approvisionnements de rtylr, pour les entreprises qui détiennent du stock sur un ou plusieurs établissements. Elle couvre les quantités en stock, les fournisseurs, les bons de commande, les transferts entre sites, les alertes de stock bas et le suivi des coûts. Elle lit les ventes de POS au fil de l’eau : le stock reste juste sans synchronisation nocturne et un réassort peut être préparé avant que quiconque remarque une étagère vide."
-    },
-    "capabilities": {
-      "eyebrow": "CAPACITÉS",
-      "title": "Que couvre rtylr ERP,\ndu quai de réception\nau compte de résultat ?",
-      "items": [
-        {
-          "title": "Chaque référence, chaque variante",
-          "copy": "Suivez les ingrédients au gramme près. Décrémentation liée aux recettes. Quantités en temps réel au fil des ventes."
-        },
-        {
-          "title": "Fournisseurs et bons de commande",
-          "copy": "Réassort automatique au seuil. Comparaison des prix entre fournisseurs. Suivi de la date d’arrivée prévue, ligne par ligne."
-        },
-        {
-          "title": "Transferts entre établissements",
-          "copy": "Déplacez du stock entre les sites avec une piste d’audit complète. Reporting par établissement. Aucun rapprochement sur tableur."
-        },
-        {
-          "title": "Le stock bas avant qu’il fasse mal",
-          "copy": "Seuils intelligents fondés sur la vitesse d’écoulement passée. Les alertes partent à la bonne personne. Plus de rupture en plein service."
-        }
-      ]
-    },
-    "depletion": {
-      "eyebrow": "DÉCRÉMENTATION EN DIRECT PAR RECETTE",
-      "title": "Qu’arrive-t-il au stock quand une vente passe ?",
-      "copy": "Chaque vente encaissée dans POS descend l’arbre de la recette. Farine, levure, mozzarella, basilic, huile d’olive : chacun se décrémente au gramme exact. Dès qu’un article franchit son seuil de réassort, un bon de commande est préparé avec votre fournisseur habituel et envoyé pour approbation."
-    },
-    "cta": {
-      "title": "Bouclez vos stocks\npendant que vous dormez."
-    },
-    "mock": {
-      "reset": "Réinitialiser",
-      "resetLabel": "Réinitialiser les stocks",
-      "tabs": {
-        "allSkus": "Toutes les références",
-        "lowStock": "Stock bas · {{count}}",
-        "suppliers": "Fournisseurs",
-        "purchaseOrders": "Bons de commande"
-      },
-      "simulate": "Simuler le service du vendredi",
-      "simulateRunning": "Service en cours…",
-      "table": {
-        "sku": "Référence",
-        "item": "Article",
-        "onHand": "En stock",
-        "min": "Seuil",
-        "status": "État"
-      },
-      "status": {
-        "critical": "Critique",
-        "reorder": "À réassortir",
-        "healthy": "Suffisant"
-      },
-      "footer_one": "Réassort automatique déclenché pour {{count}} article · bon de commande n° {{po}} préparé",
-      "footer_other": "Réassort automatique déclenché pour {{count}} articles · bon de commande n° {{po}} préparé"
-    },
-    "flow": {
-      "steps": [
-        {
-          "title": "1 margherita vendue",
-          "desc": "POS interroge la fiche recette"
-        },
-        {
-          "title": "7 ingrédients décrémentés",
-          "desc": "Farine, mozza, basilic, huile, sel, levure, pâte"
-        },
-        {
-          "title": "Bon de commande préparé automatiquement",
-          "desc": "Envoyé au responsable pour approbation"
-        }
-      ]
-    }
-  },
   "contact": {
     "meta": {
       "title": "Contacter rtylr : ventes et support au Liban | rtylr",
@@ -794,15 +229,18 @@
       "title": "Canaux de contact",
       "whatsapp": {
         "label": "Discuter avec nous",
-        "description": "Écrivez-nous directement sur WhatsApp."
+        "description": "Écrivez-nous directement sur WhatsApp.",
+        "value": "WhatsApp +961 3 940 708"
       },
       "phone": {
         "label": "Nous appeler",
-        "description": "Du lundi au vendredi, de 9 h à 17 h, heure locale."
+        "description": "Du lundi au vendredi, de 9 h à 17 h, heure locale.",
+        "value": "+961 3 940 708"
       },
       "email": {
         "label": "Nous écrire",
-        "description": "Nous répondons sous 24 heures."
+        "description": "Nous répondons sous 24 heures.",
+        "value": "info@voxire.com"
       }
     },
     "hours": {
@@ -848,36 +286,6 @@
     }
   },
   "faq": {
-    "home": {
-      "title": "Questions sur rtylr",
-      "intro": "Les six questions que les acheteurs posent en premier. Les réponses sont sur la page, pas cachées dans du balisage.",
-      "items": [
-        {
-          "question": "Qu’est-ce que rtylr ?",
-          "answer": "rtylr est la suite d’entreprise des petites et moyennes entreprises. Elle réunit les ventes, les stocks, les équipes, les clients, la finance et les opérations sur un modèle de données partagé : une équipe cesse d’assembler une caisse, un tableur, un outil comptable et un gestionnaire de tâches. Conçu pour les restaurants, les commerces et les entreprises de services qui emploient de 2 à 200 personnes."
-        },
-        {
-          "question": "Combien coûte rtylr ?",
-          "answer": "rtylr n’a pas encore publié ses prix. Le forfait Free est réellement gratuit, ne demande aucune carte et couvre 10 membres d’équipe sur un établissement avec la suite rtylr essentielle : vous pouvez faire tourner un établissement dessus dès aujourd’hui. Pro et Scale sont sur devis : dites-nous la taille de votre équipe et le nombre de vos établissements. Voir rtylr.com/pricing pour le détail de chaque forfait."
-        },
-        {
-          "question": "Puis-je commencer avec un seul flux de travail ?",
-          "answer": "Oui. Vous pouvez commencer avec le flux de travail qui compte le plus pour votre entreprise, tout en gardant vos données dans un seul espace rtylr et sur un modèle partagé. La suite grandit avec vous, sans connexions distinctes ni exports."
-        },
-        {
-          "question": "rtylr remplace-t-il mon logiciel de caisse ?",
-          "answer": "Oui. rtylr POS est une caisse complète pour la restauration et le commerce. Elle gère les tickets, les partages d’addition, les pourboires, les options, les comptages de stock, le mode hors ligne et l’impression des tickets sur du matériel certifié. Elle tourne sur iPad, tablette Android et ordinateur, et se synchronise en temps réel avec le reste de la plateforme : une vente déplace le stock sans export."
-        },
-        {
-          "question": "Mes données sont-elles à moi ?",
-          "answer": "Oui. Chaque compte rtylr exporte à tout moment des CSV propres de ses clients, commandes, employés, factures et stocks depuis la page des réglages, sans passer par le support. Les données sont hébergées dans la région UE ou US, à votre choix. Voir rtylr.com/trust pour le détail de la conformité et rtylr.com/legal/security pour l’architecture de sécurité."
-        },
-        {
-          "question": "Qu’est-ce que rtylr remplace ?",
-          "answer": "Chez la plupart des entreprises qui l’adoptent : une caisse, une feuille de stock, un outil de planning, un export de paie, une liste de clients et un logiciel de comptabilité. rtylr n’affirme pas que chacun de ces outils est mauvais pris séparément. Il affirme que les faire tourner séparément oblige à saisir le même chiffre plusieurs fois, et que les versions finissent par se contredire."
-        }
-      ]
-    },
     "pricing": {
       "title": "Questions sur les tarifs rtylr",
       "items": [
@@ -907,44 +315,6 @@
         }
       ]
     },
-    "pos": {
-      "title": "Questions sur rtylr POS",
-      "items": [
-        {
-          "question": "rtylr POS fonctionne-t-il hors ligne ?",
-          "answer": "Oui. rtylr POS garde une copie locale complète de la carte, des options et des commandes en cours. Quand internet tombe, la caisse continue de prendre les commandes, d’imprimer les tickets et d’encaisser les espèces. Les paiements par carte sont mis en file et se règlent automatiquement au retour de la connexion : une coupure un samedi soir n’arrête pas la salle."
-        },
-        {
-          "question": "Quel matériel fonctionne avec rtylr POS ?",
-          "answer": "rtylr POS tourne sur iPad, tablette Android et ordinateur Windows ou macOS. Il s’associe aux imprimantes de tickets Epson et Star, aux lecteurs de codes-barres standards, aux scanners Zebra et Symbol pour le commerce, et aux terminaux de paiement Stripe Terminal, Clover et Square. Voir rtylr.com/hardware pour la liste du matériel testé."
-        },
-        {
-          "question": "rtylr POS gère-t-il les restaurants à plusieurs établissements ?",
-          "answer": "Oui, à partir du forfait Pro. Chaque établissement a sa propre carte, ses prix, ses équipes et son reporting, et le propriétaire dispose d’un tableau de bord consolidé sur l’ensemble des sites. Une modification de carte peut être poussée partout d’un coup ou ajustée établissement par établissement."
-        },
-        {
-          "question": "Qu’est-ce que rtylr POS remplace ?",
-          "answer": "La caisse, et le travail qui se cache derrière : le comptage de stock que quelqu’un refait à la main, le tableur des pourboires qui alimente la paie, et l’export de fin de journée vers la comptabilité. Comme POS écrit dans la même base de données que ERP, HR et Finance, une vente met à jour le stock et le chiffre d’affaires au moment où elle se produit, pas dans la nuit."
-        }
-      ]
-    },
-    "erp": {
-      "title": "Questions sur rtylr ERP",
-      "items": [
-        {
-          "question": "Que gère rtylr ERP ?",
-          "answer": "rtylr ERP couvre les stocks, les fournisseurs, les bons de commande, les transferts de stock entre établissements, les alertes de stock bas et le suivi des coûts. Il lit les ventes d’articles de POS au fil de l’eau : les quantités en stock restent justes sans synchronisation nocturne."
-        },
-        {
-          "question": "rtylr ERP gère-t-il les stocks sur plusieurs entrepôts ?",
-          "answer": "Oui. Chaque article peut être stocké sur plusieurs sites, avec des quantités, des seuils de réassort et un suivi des transferts propres à chaque site. Un bon de commande peut être réparti entre plusieurs entrepôts, et par défaut chaque employé ne voit que le site auquel il est affecté."
-        },
-        {
-          "question": "Qu’est-ce que rtylr ERP remplace ?",
-          "answer": "Le tableur de stock, et le CSV censé le tenir à jour avec les ventes. Une vente dans POS décrémente les composants de la recette dans ERP au moment où elle se produit : « combien d’unités d’un composant reste-t-il sur trois établissements ? » devient une question à laquelle vous répondez sans ouvrir un second outil."
-        }
-      ]
-    },
     "demo": {
       "title": "Questions sur la démo rtylr",
       "items": [
@@ -955,10 +325,54 @@
         {
           "question": "La démo est-elle un rendez-vous commercial ?",
           "answer": "C’est une présentation produit de 30 minutes, menée par quelqu’un qui a construit rtylr. Vous n’en avez pas besoin pour commencer : l’offre gratuite couvre 10 membres sur un établissement et ne demande aucune carte, vous pouvez donc vous inscrire et explorer seul d’abord. La présentation sert aux questions qu’une page d’inscription ne traite pas."
+        }
+      ]
+    },
+    "home": {
+      "title": "Questions sur rtylr",
+      "intro": "Des réponses claires aux questions les plus fréquentes.",
+      "items": [
+        {
+          "question": "Qu’est-ce que rtylr ?",
+          "answer": "rtylr est un espace de travail unique pour diriger votre entreprise. Travail, finance, clients, équipe, opérations et ventes partagent les mêmes enregistrements : une mise à jour à un endroit se répercute partout. Caret, l’IA intégrée, répond à vos questions et exécute vos tâches sur l’ensemble du système."
         },
         {
-          "question": "La démo peut-elle couvrir l’auto-hébergement ?",
-          "answer": "Oui. rtylr peut être auto-hébergé, et l’installation est documentée publiquement sur docs.rtylr.com/self-hosting. Signalez-le à la réservation, sous Explore a Rtylr Use Case, et la présentation prendra cette direction. La documentation est ouverte, vous pouvez donc la lire d’abord et venir avec des questions précises sur votre infrastructure."
+          "question": "Combien coûte rtylr ?",
+          "answer": "rtylr n’a pas encore publié sa grille tarifaire. Le forfait Gratuit est entièrement offert, ne requiert aucune carte et prend en charge 10 membres sur un point de vente avec la suite essentielle. Pro et Scale sont établis sur devis selon votre effectif et vos implantations. Rendez-vous sur rtylr.com/pricing pour le détail."
+        },
+        {
+          "question": "Qu’est-ce que Caret ?",
+          "answer": "Caret est l’assistant IA natif de rtylr. Interrogez-le sur votre activité (factures en retard, chiffre d’affaires de la semaine) et laissez-le agir (relancer un client, préparer une facture). C’est aussi un assistant du quotidien pour la rédaction, la recherche et l’analyse."
+        },
+        {
+          "question": "Mes données m’appartiennent-elles ?",
+          "answer": "Oui. Tout compte rtylr peut exporter des fichiers CSV propres de ses clients, commandes, équipes, factures et stocks à tout moment depuis les paramètres, sans ticket d’assistance. Vos données sont hébergées en UE ou aux États-Unis, selon votre préférence."
+        }
+      ]
+    },
+    "workspace": {
+      "title": "Questions sur l’espace de travail",
+      "intro": "Comment les modules s’articulent et ce qu’ils prennent en charge.",
+      "items": [
+        {
+          "question": "Puis-je n’utiliser qu’une partie de l’espace de travail ?",
+          "answer": "Oui. Démarrez avec les fonctions prioritaires pour votre activité et activez le reste à votre rythme. Tout demeure dans le même espace sur les mêmes enregistrements, sans comptes séparés ni exports manuels."
+        },
+        {
+          "question": "Que permet cet espace de travail que des outils séparés ne peuvent pas faire ?",
+          "answer": "Assigner une tâche à un collaborateur existant dans l’équipe, la rattacher à un client du CRM et transférer les heures facturables sur une facture, sans aucune ressaisie. Vous disposez de tableaux, tâches et automatisations complets, directement branchés sur les données réelles de l’entreprise."
+        },
+        {
+          "question": "La caisse fonctionne-t-elle hors ligne ?",
+          "answer": "Oui. rtylr POS conserve une copie locale complète du catalogue, des déclinaisons et des commandes en cours. En cas de coupure internet, la caisse continue d’enregistrer les ventes, d’imprimer les reçus et d’encaisser les espèces. Les paiements par carte se synchronisent automatiquement dès le rétablissement du réseau."
+        },
+        {
+          "question": "Gérez-vous le multi-devises ?",
+          "answer": "Oui. Facturez dans la devise de votre choix ; rtylr effectue la conversion selon le taux au moment de la facturation. Vos états financiers peuvent être consultés dans n’importe quelle devise de référence, avec les gains ou pertes de change détaillés."
+        },
+        {
+          "question": "Prenez-vous en charge plusieurs établissements ?",
+          "answer": "Oui. Chaque article peut être stocké sur plusieurs sites avec des quantités dédiées, des seuils de réapprovisionnement et un suivi des transferts. Un bon de commande peut être réparti entre plusieurs dépôts, et le personnel n’accède par défaut qu’à son site."
         }
       ]
     }
@@ -1358,47 +772,1049 @@
   "demo": {
     "meta": {
       "title": "Réserver une démo rtylr sur vos données | rtylr",
-      "description": "Voyez rtylr tourner sur des données réelles pendant une démo de 30 minutes avec ceux qui l’ont construit. Posez vos questions sur la caisse, les stocks et la paie."
+      "description": "Voyez rtylr tourner sur des données réelles pendant une démo de 30 minutes avec ceux qui l’ont construit. Posez vos questions sur la caisse, les stocks et la paie.",
+      "schemaName": "Réserver une démo"
     },
     "directAnswer": {
       "label": "Ce qu’est une démo rtylr",
       "body": "Une démo rtylr est une présentation de 30 minutes du produit en fonctionnement sur des données réelles, menée par quelqu’un qui l’a construit. Elle couvre la caisse, les stocks, la paie et la comptabilité, et montre comment tout repose sur un seul modèle de données plutôt que sur quatre outils à rapprocher. Apportez votre menu, votre liste d’articles ou un PDF de factures : la présentation s’appuiera dessus. Et si vous préférez ne rien réserver, l’offre gratuite ne demande aucune carte bancaire."
+    },
+    "hero": {
+      "title": "Découvrez rtylr sur vos données.",
+      "subtitle": "Une présentation de 30 minutes avec un concepteur de la solution. Apportez votre carte, votre catalogue d’articles ou vos factures : nous vous montrerons à quoi ressemblera votre transition."
+    },
+    "success": {
+      "title": "Encore une étape.",
+      "body": "Nous avons préparé un message dans votre messagerie e-mail. Envoyez-le et un membre de l’équipe rtylr vous recontactera sous 24 heures pour convenir du créneau. Si rien ne s’est ouvert, écrivez-nous à"
+    },
+    "form": {
+      "emailLabel": "E-MAIL PROFESSIONNEL",
+      "emailPlaceholder": "Votre adresse e-mail professionnelle",
+      "countryLabel": "OÙ ÊTES-VOUS SITUÉ ?",
+      "countryPlaceholder": "Sélectionnez votre pays",
+      "reasonLabel": "MOTIF DE LA DÉMO",
+      "reasonPlaceholder": "Sélectionnez un motif",
+      "sizeLabel": "COMBIEN DE SALARIÉS COMPTE VOTRE ENTREPRISE ?",
+      "sizePlaceholder": "Sélectionnez la taille de l’entreprise"
+    },
+    "reasons": [
+      "Découvrir Rtylr Enterprise",
+      "Explorer un cas d’usage rtylr",
+      "Partenariats",
+      "Services professionnels"
+    ],
+    "errors": {
+      "emailRequired": "L’adresse e-mail professionnelle est requise",
+      "emailInvalid": "Veuillez saisir une adresse e-mail valide",
+      "country": "Veuillez sélectionner votre pays",
+      "reason": "Veuillez choisir un motif pour la démo",
+      "size": "Veuillez indiquer la taille de l’entreprise"
     }
   },
   "integrations": {
     "meta": {
       "title": "Intégrations : paiements, comptabilité, livraison | rtylr",
       "description": "Tous les services auxquels rtylr se connecte : paiements, comptabilité, livraison, communication, matériel et productivité, avec le statut de chacun."
-    }
-  },
-  "crm": {
-    "meta": {
-      "title": "CRM : chaque client, gardé en mémoire | rtylr",
-      "description": "Fiches clients, fidélité, segments et campagnes. Chaque vente en caisse enrichit la fiche automatiquement. Pensé pour la restauration, le commerce et les services."
+    },
+    "hero": {
+      "searchPlaceholder": "Rechercher des intégrations…",
+      "eyebrow": "INTÉGRATIONS",
+      "title": "Connectez ce que vous\nutilisez déjà.",
+      "subtitle": "rtylr s’intègre d’emblée aux solutions de paiement, à la comptabilité, aux plateformes de livraison, aux communications et au matériel. Tout ce dont une vraie entreprise a besoin, dès le premier jour."
+    },
+    "categories": {
+      "all": "Toutes",
+      "payments": "Paiements",
+      "accounting": "Comptabilité",
+      "delivery": "Livraison",
+      "comms": "Communications",
+      "hardware": "Matériel",
+      "productivity": "Productivité"
+    },
+    "status": {
+      "live": "Disponible",
+      "beta": "Bêta",
+      "soon": "Bientôt disponible"
+    },
+    "api": {
+      "eyebrow": "CRÉEZ LA VÔTRE",
+      "title": "Rien ne correspond ? Développez sur notre API.",
+      "copy": "API REST intégrale couvrant tous les objets rtylr : articles de menu, commandes, factures, clients, plannings, tâches. Webhooks pour chaque événement. OAuth 2.0 pour les applications tierces. Limites de requêtes généreuses. Documentation publique.",
+      "docs": "Consulter la documentation de l’API",
+      "contact": "Échanger avec un ingénieur"
     }
   },
   "hardware": {
     "meta": {
-      "title": "Matériel de caisse : terminaux, imprimantes, scanners | rtylr",
-      "description": "Un écosystème de matériel testé et certifié pour la caisse rtylr. Chaque appareil fonctionne dès le branchement : imprimantes, lecteurs, scanners et bornes."
+      "title": "Matériel de caisse · Terminaux, imprimantes et scanners | rtylr",
+      "description": "Écosystème matériel testé et certifié pour rtylr POS. Chaque appareil est optimisé dès l’installation : imprimantes, lecteurs, scanners et bornes."
+    },
+    "items": [
+      {
+        "name": "Balance numérique",
+        "description": "Pesage de précision pour ingrédients et produits. Capteur haute précision avec écran LCD rétroéclairé."
+      },
+      {
+        "name": "Tiroir-caisse",
+        "description": "Tiroir-caisse sécurisé double compartiment billets et pièces, structure en acier renforcé et ouverture automatique."
+      },
+      {
+        "name": "Imprimante thermique de tickets",
+        "description": "Impression thermique ultra-rapide 80 mm à 250 mm/s. Connexions USB, Ethernet et Bluetooth."
+      },
+      {
+        "name": "Lecteur code-barres",
+        "description": "Scanner USB omnidirectionnel 1D/2D à 360°. Lit les codes-barres endommagés et à faible contraste."
+      },
+      {
+        "name": "Terminal de paiement",
+        "description": "Paiements sans contact, puce et piste certifiés EMV. Compatible NFC, Apple Pay, Google Pay et CB/Visa/Mastercard."
+      },
+      {
+        "name": "Écran cuisine (KDS)",
+        "description": "Écran mural 15\" pour commandes en cuisine avec gestion des tickets en temps réel et routage multi-postes."
+      },
+      {
+        "name": "Support pour tablette",
+        "description": "Support orientable et rotatif à 360°. Compatible tablettes de 7\" à 13\". Base lestée antidérapante."
+      },
+      {
+        "name": "Afficheur client",
+        "description": "Double écran orienté client. L’affichage arrière indique le montant, les promotions et les points fidélité."
+      },
+      {
+        "name": "Imprimante d’étiquettes",
+        "description": "Imprimante thermique 4\" pour étiquettes de rayon, codes-barres produits et dates limites. Résolution 203 dpi."
+      }
+    ],
+    "hero": {
+      "eyebrow": "MATÉRIEL RTYLR",
+      "title": "Branchez. Encaissez.",
+      "subtitle": "Imprimantes, lecteurs de carte, scanners et bornes certifiés, prêts à l’emploi avec rtylr POS. Aucun pilote à installer, aucun micrologiciel complexe, aucune configuration fastidieuse."
+    },
+    "gridTitle": "Ce que vous pouvez brancher",
+    "strip": {
+      "badge": "Prêt à l’emploi",
+      "text": "Tout le matériel s’intègre nativement à rtylr POS. Zéro pilote, zéro configuration."
+    },
+    "cta": {
+      "title": "Équipez votre établissement.",
+      "contactSales": "Contacter l’équipe commerciale",
+      "subtitle": "Notre équipe vous conseille sur les appareils adaptés à votre configuration et expédie l’ensemble préconfiguré pour votre site."
     }
   },
   "support": {
     "meta": {
-      "title": "Centre d’aide : guides, facturation et support | rtylr",
-      "description": "Démarrage, facturation, équipe, configuration, intégrations et sécurité, au même endroit. Des guides et des réponses pour ceux qui font tourner rtylr."
+      "title": "Centre d’aide · Guides, facturation et assistance | rtylr",
+      "description": "Prise en main, facturation, équipe, configuration, intégrations, sécurité, tout au même endroit. Guides et réponses pour les gestionnaires au quotidien."
+    },
+    "hero": {
+      "eyebrow": "CENTRE D’AIDE",
+      "title": "Comment pouvons-nous vous aider ?",
+      "searchPlaceholder": "Rechercher des articles, sujets ou réglages…"
+    },
+    "topicsTitle": "Parcourir par thème",
+    "topics": [
+      {
+        "articles": [
+          "Créer votre espace rtylr",
+          "Ajouter votre premier établissement",
+          "Inviter des collaborateurs et définir les accès",
+          "Connecter votre matériel de caisse"
+        ],
+        "title": "Premiers pas",
+        "description": "Créez votre espace, configurez votre premier site, invitez votre équipe."
+      },
+      {
+        "articles": [
+          "Calcul du prorata par utilisateur",
+          "Passer de la formule Gratuite à Pro ou Scale",
+          "Télécharger vos factures et l’historique",
+          "Mettre à jour votre moyen de paiement",
+          "Résilier votre abonnement"
+        ],
+        "title": "Facturation et abonnements",
+        "description": "Forfaits, factures, prorata d’utilisateurs, évolutions et résiliation."
+      },
+      {
+        "articles": [
+          "Attribuer des rôles aux collaborateurs",
+          "Donner accès à une fonctionnalité précise",
+          "Retirer un membre et conséquences sur la facturation",
+          "Configurer le SSO (forfait Scale)"
+        ],
+        "title": "Équipe et autorisations",
+        "description": "Rôles, droits d’accès, gestion des postes et invitations."
+      },
+      {
+        "articles": [
+          "Configurer la caisse pour un restaurant",
+          "Configurer la caisse pour le commerce de détail",
+          "Définir les règles de paie dans les RH",
+          "Personnaliser les modèles de facture en Finance",
+          "Créer votre premier segment CRM"
+        ],
+        "title": "Configuration",
+        "description": "Paramétrez chaque module selon votre activité et vos habitudes."
+      },
+      {
+        "articles": [
+          "Connecter Stripe pour l’encaissement par carte",
+          "Connecter un lecteur de carte Square",
+          "Exporter les données vers QuickBooks ou Xero",
+          "Générer une clé d’API",
+          "Documentation des webhooks"
+        ],
+        "title": "Intégrations",
+        "description": "Paiements, matériel, e-mail, comptabilité et accès API."
+      },
+      {
+        "articles": [
+          "Activer l’authentification à deux facteurs",
+          "Réinitialiser votre mot de passe",
+          "Consulter les sessions actives",
+          "Télécharger les journaux d’audit"
+        ],
+        "title": "Sécurité et compte",
+        "description": "Mots de passe, 2FA, sessions d’appareils, journaux d’audit."
+      }
+    ],
+    "channelsSection": {
+      "eyebrow": "VOUS NE TROUVEZ PAS ?",
+      "title": "Trois façons de nous joindre."
+    },
+    "channels": [
+      {
+        "title": "Chat en direct",
+        "detail": "Dans l’application, de 9 h à 21 h EST, du lun. au ven.",
+        "cta": "Démarrer une conversation depuis l’espace"
+      },
+      {
+        "title": "Support par e-mail",
+        "detail": "Réponse sous 24 h ouvrées",
+        "href": "mailto:support@voxire.com",
+        "cta": "support@voxire.com"
+      },
+      {
+        "title": "État du service",
+        "detail": "Incidents en direct et maintenances planifiées",
+        "href": "https://status.rtylr.com",
+        "cta": "status.rtylr.com"
+      }
+    ],
+    "docs": {
+      "title": "Vous cherchez la documentation pour développeurs ?",
+      "link": "Besoin d’un échange humain ? Contactez-nous →"
     }
   },
   "partners": {
     "meta": {
-      "title": "Programme partenaires rtylr | rtylr",
-      "description": "Construisez avec rtylr. Partenaires d’intégration, technologiques, de solutions et matériels : les conditions, les niveaux et comment se porter candidat."
+      "title": "Programme Partenaires : Développez et vendez avec rtylr | rtylr",
+      "description": "Développez votre activité avec rtylr. Partenaires d’intégration, technologiques, de solutions et matériels : conditions, niveaux et candidature."
+    },
+    "tracks": [
+      {
+        "benefits": [
+          "Commissions d’apport d’affaires sur la première année",
+          "Vente conjointe avec notre équipe commerciale",
+          "Portail partenaire dédié avec ressources d’avant-vente",
+          "Accréditation d’intégrateur certifié rtylr"
+        ],
+        "name": "Partenaires d’intégration",
+        "summary": "Cabinets de conseil et agences qui déploient rtylr chez les clients finaux, configuration de la caisse, migration de menus, intégration RH.",
+        "who": "Pour les spécialistes de l’efficacité opérationnelle, experts en foodtech et agences digitales."
+      },
+      {
+        "benefits": [
+          "Référencement dans l’annuaire des intégrations",
+          "Co-marketing lors du lancement",
+          "Webinaires conjoints avec nos clients",
+          "Canal de support partenaire prioritaire"
+        ],
+        "name": "Partenaires technologiques",
+        "summary": "Logiciels connectés à rtylr : plateformes de livraison, processeurs de paiement, moteurs de fidélité, outils de BI.",
+        "who": "Pour les éditeurs SaaS complémentaires au commerce, à la caisse, aux RH ou à la finance."
+      },
+      {
+        "benefits": [
+          "Partage de revenus sur les déploiements multi-sites",
+          "Programme de formation certifiée rtylr",
+          "Accès anticipé aux nouvelles applications et API",
+          "Mise en avant dans les lettres d’information clients"
+        ],
+        "name": "Partenaires de solutions",
+        "summary": "Formation, accompagnement et services managés autour de rtylr, déploiements en franchise, formation du personnel, audits de conformité.",
+        "who": "Pour les organismes de formation, équipes d’animation de réseaux et spécialistes sectoriels."
+      },
+      {
+        "benefits": [
+          "Intégration directe au catalogue de matériel rtylr",
+          "Programme de certification pour association instantanée",
+          "Opérations logistiques conjointes de livraison client",
+          "Accès SDK pour le développement de pilotes natifs"
+        ],
+        "name": "Partenaires matériels",
+        "summary": "Imprimantes, terminaux de paiement, scanners, bornes : le matériel que rtylr expédie au client final.",
+        "who": "Pour les fabricants OEM et distributeurs agréés de matériel."
+      }
+    ],
+    "tiers": [
+      {
+        "name": "Inscrit",
+        "desc": "Vous faites partie du programme. Présence dans l’annuaire, suivi des recommandations, ressources marketing de base.",
+        "commitment": "0 vente conclue"
+      },
+      {
+        "name": "Certifié",
+        "desc": "Vous avez validé la formation produit et conclu vos premières ventes. Taux de commission bonifié.",
+        "commitment": "3+ ventes conclues"
+      },
+      {
+        "name": "Premier",
+        "desc": "Gestionnaire de compte dédié, accès aux versions préliminaires, vente conjointe, mise en avant sur la page d’accueil.",
+        "commitment": "15+ ventes conclues"
+      }
+    ],
+    "hero": {
+      "eyebrow": "PROGRAMME PARTENAIRES",
+      "title": "Développez avec rtylr.\nGrandissez à nos côtés.",
+      "apply": "Postuler au programme",
+      "email": "Écrire à partners@voxire.com"
+    },
+    "tracksSection": {
+      "eyebrow": "QUATRE PARCOURS",
+      "title": "Choisissez le parcours qui vous correspond."
+    },
+    "tiersSection": {
+      "eyebrow": "VOTRE PROGRESSION",
+      "title": "Trois niveaux. Au mérite, pas à l’achat."
+    },
+    "cta": {
+      "title": "Prêt à nous rejoindre ?",
+      "apply": "Déposer une candidature"
     }
   },
   "blog": {
     "hero": {
       "subtitle": "Des écrits concrets, éprouvés sur le terrain : caisse, stocks, paie, et ce qui change quand tout partage une seule plateforme. Sans remplissage, seulement ce qui tient un samedi soir.",
-      "intro": "Les articles couvrent quatre sujets : faire tourner une PME libanaise sur un seul système plutôt que six, le quotidien de la caisse et de la restauration, ce qui change vraiment quand on quitte les tableurs et les outils dispersés, et des explications claires pour chaque module rtylr. Écrit à partir du fonctionnement du produit, pas d’une liste de mots-clés."
+      "intro": "Les articles couvrent quatre sujets : faire tourner une PME libanaise sur un seul système plutôt que six, le quotidien de la caisse et de la restauration, ce qui change vraiment quand on quitte les tableurs et les outils dispersés, et des explications claires pour chaque module rtylr. Écrit à partir du fonctionnement du produit, pas d’une liste de mots-clés.",
+      "eyebrow": "BLOG",
+      "title": "Des guides concrets pour piloter toute l’entreprise."
+    },
+    "meta": {
+      "title": "Blog · Guides pratiques caisse, stocks et opérations | rtylr",
+      "description": "Guides opérationnels sur la caisse, les stocks, la paie et la gestion d’entreprise unifiée : tactiques concrètes pour restaurants, commerces et épiceries.",
+      "schemaDescription": "Guides opérationnels sur la caisse, les stocks, la paie et les logiciels d’entreprise tout-en-un."
+    },
+    "readingTime": "Lecture : {{minutes}} min",
+    "readingTimeShort": "{{minutes}} min",
+    "post": {
+      "allPosts": "Tous les articles",
+      "ctaTitle": "Découvrez rtylr sur vos propres chiffres",
+      "ctaBody": "Caisse, stocks, RH, CRM et finance sur une seule plateforme. Démarrez gratuitement."
+    }
+  },
+  "notFound": {
+    "meta": {
+      "title": "Page introuvable · rtylr",
+      "description": "La page recherchée n’existe pas. Voici où vous pouvez vous rendre."
+    },
+    "links": [
+      {
+        "label": "Accueil",
+        "description": "Retour au point de départ."
+      },
+      {
+        "label": "Tarifs",
+        "description": "Consulter les forfaits et le tarif par utilisateur."
+      },
+      {
+        "label": "Espace de travail",
+        "description": "Toutes les facettes de rtylr en un seul endroit."
+      },
+      {
+        "label": "Réserver une démo",
+        "description": "Découvrir rtylr avec vos propres données."
+      },
+      {
+        "label": "Contact",
+        "description": "Échanger avec un membre de notre équipe."
+      }
+    ],
+    "eyebrow": "ERREUR · 404",
+    "title": "Cette page\nn’existe pas.",
+    "backHome": "Retour à l’accueil",
+    "startFree": "Commencer gratuitement"
+  },
+  "about": {
+    "meta": {
+      "title": "À propos de rtylr · La suite d’entreprise pour les équipes modernes",
+      "description": "Nous concevons le système d’exploitation du commerce. Une suite unifiée pour les ventes, les stocks, les équipes, les clients, la finance et les opérations."
+    },
+    "clusters": [
+      {
+        "label": "Salle et Vente",
+        "description": "Gérez chaque point de contact client, la caisse, la fidélité, les campagnes et bien plus."
+      },
+      {
+        "label": "Opérations",
+        "description": "Suivez les stocks, les achats, les factures et le résultat net sur tous vos sites."
+      },
+      {
+        "label": "Équipes",
+        "description": "Plannings du personnel, gestion de projet et indicateurs rassemblés en un seul endroit."
+      }
+    ],
+    "values": [
+      {
+        "title": "Tout réuni en un seul endroit",
+        "body": "Fini de jongler entre des outils déconnectés. Une seule connexion, un seul espace de travail, une source unique de vérité."
+      },
+      {
+        "title": "Conçu pour les équipes",
+        "body": "De la boutique de deux personnes à l’entreprise de 500 postes, rtylr s’adapte à la façon réelle de travailler de vos équipes."
+      },
+      {
+        "title": "L’IA au cœur de la conception",
+        "body": "L’intelligence artificielle est intégrée nativement dans l’expérience rtylr, pas comme un ajout superficiel mais au cœur des processus."
+      },
+      {
+        "title": "Toujours disponible hors ligne",
+        "body": "La caisse et les flux opérationnels critiques fonctionnent sans internet. La synchronisation s’opère dès la reconnexion."
+      }
+    ],
+    "hero": {
+      "eyebrow": "À PROPOS DE VOXIRE & RTYLR",
+      "title": "Un système d’exploitation\npour les vraies entreprises."
+    },
+    "mission": {
+      "eyebrow": "NOTRE MISSION",
+      "title": "En finir avec les fichiers CSV."
+    },
+    "story": {
+      "eyebrow": "NOTRE HISTOIRE",
+      "title": "Nous en avions assez du bricolage."
+    },
+    "platform": {
+      "eyebrow": "La suite rtylr",
+      "title": "Une seule suite rtylr. Une entreprise connectée."
+    },
+    "valuesTitle": "Ce qui nous guide.",
+    "cta": {
+      "title": "Rejoignez les entreprises qui utilisent déjà rtylr.",
+      "subtitle": "Gratuit pour toujours jusqu’à 10 membres. Sans carte bancaire requise."
+    }
+  },
+  "workspace": {
+    "meta": {
+      "title": "L’espace de travail rtylr · Travail, finance, clients, équipe et plus",
+      "description": "Un espace unique pour piloter une entreprise : projets, finance, clients, équipe, stocks, ventes et indicateurs sur les mêmes données, avec Caret l’IA intégrée.",
+      "schemaDescription": "L’espace de travail rtylr rassemble projets, finance, clients, équipe, stocks, ventes et analyses sur des registres partagés, pour qu’une mise à jour se répercute instantanément."
+    },
+    "hero": {
+      "eyebrow": "L’espace de travail rtylr",
+      "title": "Toutes vos activités.\nUn seul espace.",
+      "subtitle": "Travail, finance, clients, équipe, opérations, ventes et indicateurs partagent les mêmes données : aucune double saisie, aucune déconnexion entre vos outils.",
+      "navLabel": "Domaines de l’espace de travail"
+    },
+    "areas": {
+      "work": {
+        "label": "Travail",
+        "title": "Projets et tâches.\nConnectés au réel.",
+        "body": "Tableaux, listes, chronologies et calendriers pour chaque équipe, tous fondés sur la même base de données sous-jacente.",
+        "features": [
+          {
+            "title": "Des vues pour chaque métier.",
+            "body": "Tableau Kanban, liste, calendrier ou chronologie. Chaque équipe choisit son affichage ; la donnée reste la même."
+          },
+          {
+            "title": "Des tâches ancrées dans la réalité.",
+            "body": "Associez une tâche à un client, un fournisseur, une facture ou une prise de poste. Quand elle avance, tout s’actualise."
+          },
+          {
+            "title": "Des automatisations intégrées.",
+            "body": "Lorsqu’un bon de commande est validé, une tâche est créée pour les achats. À la clôture de la paie, les RH reçoivent un rappel."
+          }
+        ]
+      },
+      "finance": {
+        "label": "Finance",
+        "title": "Les finances, sous contrôle.\nLa comptabilité suit d’elle-même.",
+        "body": "Factures, dépenses, TVA et compte de résultat en temps réel, alimentés en continu par le reste de l’espace.",
+        "features": [
+          {
+            "title": "Des factures qui s’encaissent d’elles-mêmes.",
+            "body": "Échéanciers récurrents, relances automatiques et paiement en un clic. Les factures réglées sont rapprochées sans intervention."
+          },
+          {
+            "title": "Dépenses saisies à la source.",
+            "body": "Prenez le reçu en photo, imputez-le selon vos règles et faites-le passer de validé à payé au même endroit."
+          },
+          {
+            "title": "Un résultat net en temps réel.",
+            "body": "Chaque encaissement, dépense et paie alimente le compte de résultat instantanément, pas à la fin du mois."
+          },
+          {
+            "title": "La fiscalité sans stress.",
+            "body": "TVA par pays, instantanés de clôture trimestrielle et export complet en un clic pour votre expert-comptable."
+          }
+        ]
+      },
+      "customers": {
+        "label": "Clients",
+        "title": "Chaque client.\nMémorisé.",
+        "body": "Profils, segments, fidélité et campagnes, mis à jour à chaque encaissement et à chaque échange.",
+        "features": [
+          {
+            "title": "Des segments pertinents.",
+            "body": "Filtrez par fréquence de visite, panier moyen ou date de dernière commande, sauvegardez et lancez une campagne ciblée."
+          },
+          {
+            "title": "Fidélité native.",
+            "body": "Points, paliers et récompenses appliqués automatiquement lors de l’encaissement."
+          },
+          {
+            "title": "Des messages personnalisés.",
+            "body": "Modèles d’e-mails et de SMS personnalisés, déclenchés automatiquement lors d’un anniversaire, d’une inactivité ou d’une première visite."
+          }
+        ]
+      },
+      "team": {
+        "label": "Équipe",
+        "title": "Vos collaborateurs.\nAccompagnés.",
+        "body": "Plannings, relevé d’heures, paie et congés au même endroit, avec gestion fine des accès selon les fonctions.",
+        "features": [
+          {
+            "title": "Des plannings qui se diffusent instantanément.",
+            "body": "Glissez, déposez, publiez. Les collaborateurs sont prévenus dès la parution des créneaux, et les conflits sont signalés en amont."
+          },
+          {
+            "title": "Suivi du temps et présence.",
+            "body": "Pointage par code PIN ou géolocalisation, avec gestion native des arrondis et des temps de pause."
+          },
+          {
+            "title": "La paie d’après les heures réelles.",
+            "body": "Heures travaillées, pourboires, retenues et charges s’agrègent automatiquement, avec bulletins générés pour tous."
+          },
+          {
+            "title": "Gestion claire des congés.",
+            "body": "Demandes, validations et soldes de congés centralisés en un coup d’œil."
+          }
+        ]
+      },
+      "operations": {
+        "label": "Opérations",
+        "title": "Des stocks qui se comptent seuls.\nDes fournisseurs alignés.",
+        "body": "Gestion des stocks, approvisionnements et transferts actualisés au fil de vos ventes.",
+        "features": [
+          {
+            "title": "Chaque article, chaque variante.",
+            "body": "Niveaux de stocks en temps réel au fil des encaissements, jusqu’au niveau des ingrédients."
+          },
+          {
+            "title": "Fournisseurs et commandes d’achat.",
+            "body": "Réapprovisionnez dès le seuil d’alerte, comparez les tarifs fournisseurs et suivez les réceptions ligne par ligne."
+          },
+          {
+            "title": "Transferts multi-sites.",
+            "body": "Déplacez des articles d’un dépôt à un autre avec une traçabilité intégrale."
+          },
+          {
+            "title": "Alertes de stock faible.",
+            "body": "Seuils calculés sur la vitesse réelle d’écoulement, notifiés automatiquement au bon responsable."
+          }
+        ]
+      },
+      "sales": {
+        "label": "Ventes",
+        "title": "Un encaissement fluide.\nQui alimente tout le reste.",
+        "body": "Un point de vente qui actualise les stocks, le chiffre d’affaires et la fiche client au moment précis où la vente est conclue.",
+        "features": [
+          {
+            "title": "Tous les moyens de paiement.",
+            "body": "Cartes bancaires, Apple Pay, Google Pay, espèces, cartes-cadeaux et comptes clients sur la même caisse."
+          },
+          {
+            "title": "Partages, additions et pourboires.",
+            "body": "Partagez par article ou par couvert, gérez les notes en cours et intégrez directement les pourboires à la paie."
+          },
+          {
+            "title": "Fonctionne hors ligne.",
+            "body": "Les encaissements sont mis en attente localement si le réseau tombe et se synchronisent dès son rétablissement."
+          }
+        ]
+      },
+      "insights": {
+        "label": "Indicateurs",
+        "title": "Les chiffres.\nToujours à jour.",
+        "body": "Chiffre d’affaires, fidélité clients et marges sur tout l’espace, avec Caret à disposition pour analyser chaque évolution.",
+        "features": [
+          {
+            "title": "Une vision d’ensemble de l’entreprise.",
+            "body": "Ventes, charges, équipes et clients réunis sur le même tableau de bord, sans aucun export manuel."
+          },
+          {
+            "title": "Interrogez au lieu de chercher.",
+            "body": "Demandez à Caret d’où provient une variation et obtenez une réponse rédigée à partir de vos données."
+          },
+          {
+            "title": "En direct, pas le lendemain.",
+            "body": "Les indicateurs évoluent à la seconde au fil de l’activité, sans attendre de traitement nocturne."
+          }
+        ]
+      }
+    }
+  },
+  "home": {
+    "meta": {
+      "title": "rtylr · Pilotez toute votre entreprise depuis un seul espace",
+      "description": "rtylr est l’espace de travail unique pour diriger votre entreprise : projets, finance, clients, équipe, opérations et ventes, avec l’IA Caret intégrée. Gratuit pendant la bêta.",
+      "ogSiteName": "Rtylr",
+      "keywords": "espace de travail entreprise, logiciel tout-en-un, assistant IA, Caret, gestion de projet, facturation, CRM, RH, gestion des stocks, caisse enregistreuse, analyse commerciale",
+      "schemaDescription": "rtylr réunit gestion de projet, finance, clients, équipe, opérations et ventes dans un seul espace, propulsé par l’assistant IA Caret."
+    },
+    "howItWorks": {
+      "eyebrow": "Fonctionnement",
+      "title": "De l’inscription au lancement.\nEn trois étapes.",
+      "steps": [
+        {
+          "title": "Créez votre espace",
+          "description": "Inscrivez-vous avec votre e-mail. C’est gratuit pendant la bêta et sans carte bancaire."
+        },
+        {
+          "title": "Laissez Caret le configurer",
+          "description": "Décrivez votre activité : Caret prépare vos domaines, listes et réglages, prêts à être ajustés."
+        },
+        {
+          "title": "Invitez votre équipe",
+          "description": "Ajoutez vos collaborateurs et choisissez ce que chacun voit, de la vision globale à son seul périmètre."
+        }
+      ],
+      "visuals": {
+        "email": "E-mail professionnel",
+        "create": "Créer l’espace",
+        "created": "Espace de travail prêt",
+        "brief": "Nous sommes un studio de design de 12 personnes. Nous facturons nos clients au mois et suivons des projets.",
+        "areas": [
+          "Tableau de projets",
+          "Facturation mensuelle",
+          "Liste des clients",
+          "Équipe et rôles"
+        ],
+        "people": [
+          {
+            "name": "Marc Khoury",
+            "access": "Admin"
+          },
+          {
+            "name": "Lina Rahme",
+            "access": "Finance uniquement"
+          },
+          {
+            "name": "Jad Daou",
+            "access": "Son propre travail"
+          }
+        ]
+      }
+    },
+    "cta": {
+      "title": "Pilotez tout depuis un seul endroit.\nCommencez gratuitement.",
+      "subtitle": "Gratuit pendant la période bêta. Aucune carte bancaire requise."
+    },
+    "products": {
+      "badge": "L’espace de travail rtylr",
+      "title": "Tout ce qui fait tourner votre entreprise.\nEn un seul endroit.",
+      "subtitle": "Projets, finance, clients, équipes et opérations partagent les mêmes enregistrements : toute mise à jour se diffuse partout. Zéro export, zéro copier-coller.",
+      "areas": [
+        {
+          "label": "Travail",
+          "title": "Projets et tâches.",
+          "body": "Tableaux, listes et tâches récurrentes, rattachés au client, à la facture ou au collaborateur concerné."
+        },
+        {
+          "label": "Finance",
+          "title": "Les finances, sous contrôle.",
+          "body": "Factures, dépenses, budgets et compte de résultat en temps réel actualisé à chaque vente."
+        },
+        {
+          "label": "Clients",
+          "title": "Chaque client, fidélisé.",
+          "body": "Profils, historique d’achat, segments et campagnes alimentés par chaque passage en caisse."
+        },
+        {
+          "label": "Équipe",
+          "title": "Vos collaborateurs, accompagnés.",
+          "body": "Plannings, pointage, paie et congés réunis au même endroit, avec droits d’accès sur mesure."
+        },
+        {
+          "label": "Opérations",
+          "title": "Stocks et approvisionnements.",
+          "body": "Niveaux de stock en temps réel, commandes d’achat et transferts qui suivent le rythme des ventes."
+        },
+        {
+          "label": "Indicateurs",
+          "title": "Les chiffres en clair.",
+          "body": "Chiffre d’affaires, marges et tendances en temps réel, avec Caret pour expliquer chaque variation."
+        }
+      ],
+      "explore": "Explorer",
+      "exploreLabel": "Explorer {{capability}}"
+    },
+    "hero": {
+      "announcePill": "Bêta",
+      "announceText": "rtylr est en version bêta. Gratuit pendant que nous le construisons avec vous",
+      "title": "Pilotez tout.\nDepuis un seul espace rtylr.",
+      "promptPlaceholder": "Interrogez Caret sur votre activité ou confiez-lui une action à accomplir",
+      "caretLabel": "Caret",
+      "moreOptions": "Essayer un exemple",
+      "submit": "Démarrer",
+      "demoLinePrefix": "Gratuit pendant la bêta. Aucune carte requise.",
+      "demoLineLink": "Créer votre compte",
+      "promptLabel": "Demander à Caret",
+      "promptExamples": [
+        "Prépare une facture pour Voxire et envoie-la vendredi",
+        "Quel a été le montant des achats fournisseurs le mois dernier ?",
+        "Transforme le compte-rendu de réunion en tâches pour l’équipe",
+        "Qui dans l’équipe est en congé la semaine prochaine ?",
+        "Résume les ventes de cette semaine en trois lignes"
+      ],
+      "productAlt": "Aperçu interactif de l’espace de travail rtylr avec l’assistant Caret",
+      "portal": {
+        "apps": {
+          "home": "Accueil",
+          "insights": "Indicateurs",
+          "flow": "Travail",
+          "crm": "Clients",
+          "erp": "Opérations",
+          "finance": "Finance",
+          "hr": "Équipe",
+          "pos": "Ventes"
+        },
+        "home": {
+          "greeting": "Bonjour Sara",
+          "date": "Jeudi 10 octobre",
+          "kpis": {
+            "revenue": "Chiffre d’affaires ce mois-ci",
+            "tasks": "Tâches en cours",
+            "tasksNote": "2 à échéance aujourd’hui",
+            "overdue": "Factures en retard"
+          },
+          "today": "Aujourd’hui",
+          "tasks": [
+            "Envoyer le rapport T3",
+            "Relancer Voxire",
+            "Valider la paie d’octobre",
+            "Examiner le devis du nouveau fournisseur"
+          ],
+          "recent": "Activité récente",
+          "activity": [
+            "Voxire a réglé FAC-1042",
+            "Lina a commencé son service",
+            "Le papier d’impression arrive à terme",
+            "Nouveau client : Kite Labs"
+          ]
+        },
+        "caret": {
+          "label": "Assistant Caret",
+          "greeting": "Bonjour Sara. 3 factures sont en retard et le stock de papier d’impression faiblit. Par quoi souhaitez-vous commencer ?",
+          "thinking": "Caret réfléchit",
+          "placeholder": "Posez une question à Caret…",
+          "suggestions": [
+            {
+              "q": "Quelles factures sont en retard ?",
+              "a": "Trois factures, pour un montant de 6 450 $. Celle de Lumen Studio est la plus ancienne (21 jours). Je peux envoyer des relances à ces trois clients."
+            },
+            {
+              "q": "Qui travaille aujourd’hui ?",
+              "a": "Quatre personnes sont en service en ce moment. Lina commence à 10 h 30 et Jad arrive à midi."
+            },
+            {
+              "q": "Quels articles manquent de stock ?",
+              "a": "Il ne reste que 22 ramettes de papier d’impression. J’ai préparé un bon de commande de 150 ramettes auprès de votre fournisseur habituel."
+            },
+            {
+              "q": "Quel est le bilan de cette semaine ?",
+              "a": "Le chiffre d’affaires s’élève à 98 400 $, en hausse de 12 %. Le creux de mardi s’explique par le décalage de deux factures importantes à mercredi."
+            }
+          ]
+        }
+      },
+      "floating": {
+        "caretName": "Caret",
+        "caretTime": "à l’instant",
+        "caretBody": "3 factures sont en retard cette semaine. Voulez-vous que j’envoie les relances ?",
+        "taskDone": "Envoyer le rapport T3",
+        "taskOpen": "Relancer Voxire",
+        "taskDue": "Ven",
+        "moneyLabel": "Dépenses",
+        "moneyLeft": "72 % du budget",
+        "moneyAmount": "4 286,40 $",
+        "eventDay": "Vendredi",
+        "eventTitle": "Appel client",
+        "eventTime": "10:00 – 10:45"
+      }
+    },
+    "features": {
+      "badge": "Au cœur de rtylr",
+      "title": "Voyez-le en action.",
+      "titleAccent": "Chaque module, un seul espace.",
+      "openCta": "Explorer {{capability}}",
+      "items": [
+        {
+          "label": "Travail",
+          "title": "Des projets qui avancent sur un système unique.",
+          "description": "Tableaux, listes et automatisations, avec chaque tâche rattachée au client, à la facture ou au coéquipier concerné. Rien ne s’égare entre plusieurs logiciels."
+        },
+        {
+          "label": "Finance",
+          "title": "Un résultat net en direct, pas un casse-tête de fin de mois.",
+          "description": "Factures récurrentes, notes de frais enregistrées sur le vif et résultat net qui s’actualise à chaque transaction."
+        },
+        {
+          "label": "Clients",
+          "title": "Une mémoire fidèle de chaque client.",
+          "description": "Profils, segmentation fine et campagnes de réengagement déclenchées automatiquement selon l’historique d’achat."
+        },
+        {
+          "label": "Équipe",
+          "title": "Plannings, relevé d’heures et paie alignés.",
+          "description": "Créez les plannings en quelques clics, enregistrez les pointages et calculez la paie exacte d’après les heures réelles."
+        },
+        {
+          "label": "Opérations",
+          "title": "Des stocks qui suivent le rythme de l’activité.",
+          "description": "Décompte automatique des articles et ingrédients au fil des ventes, alertes de réapprovisionnement et suivi multi-dépôts."
+        },
+        {
+          "label": "Ventes",
+          "title": "La caisse qui connecte toute l’entreprise.",
+          "description": "Encaissement ultra-rapide sur tablette ou terminal, fonctionnant même sans connexion internet, synchronisé dès le retour du réseau."
+        },
+        {
+          "label": "Indicateurs",
+          "title": "Des décisions éclairées par vos données réelles.",
+          "description": "Tous vos chiffres réunis sans export, avec Caret pour analyser les écarts et proposer des actions immédiates."
+        }
+      ],
+      "demos": {
+        "frame": {
+          "caret": "Demander à Caret"
+        },
+        "flow": {
+          "crumb": [
+            "Travail",
+            "Refonte du site web"
+          ],
+          "views": [
+            "Tableau",
+            "Liste",
+            "Calendrier"
+          ],
+          "columns": [
+            "À faire",
+            "En cours",
+            "À valider",
+            "Terminé"
+          ],
+          "tasks": [
+            "Rédiger le contenu de l’accueil",
+            "Fixer la date de lancement",
+            "Concevoir la page tarifs",
+            "Configurer les statistiques",
+            "Recette sur mobile",
+            "Briefer l’équipe commerciale",
+            "Migrer les articles de blog"
+          ],
+          "tags": {
+            "design": "Design",
+            "web": "Web",
+            "ops": "Opérations",
+            "sales": "Ventes"
+          },
+          "days": [
+            "Lun",
+            "Mar",
+            "Mer",
+            "Jeu",
+            "Ven"
+          ]
+        },
+        "finance": {
+          "crumb": [
+            "Finance",
+            "Vue d’ensemble"
+          ],
+          "kpis": [
+            "Chiffre d’affaires",
+            "Dépenses",
+            "Bénéfice net"
+          ],
+          "vsLast": "par rapport au mois dernier",
+          "chart": "Flux de trésorerie",
+          "months": [
+            "Mai",
+            "Juin",
+            "Juil",
+            "Août",
+            "Sep",
+            "Oct"
+          ],
+          "in": "Entrées",
+          "out": "Sorties",
+          "invoices": "Factures",
+          "status": {
+            "paid": "Payée",
+            "due": "À payer",
+            "overdue": "En retard",
+            "sent": "Relance envoyée"
+          }
+        },
+        "crm": {
+          "crumb": [
+            "Clients",
+            "Tous les clients"
+          ],
+          "segments": [
+            "Tous",
+            "Actifs",
+            "À risque",
+            "Nouveaux"
+          ],
+          "cols": [
+            "Client",
+            "Statut",
+            "Valeur vie",
+            "Dernière activité"
+          ],
+          "status": {
+            "active": "Actif",
+            "atRisk": "À risque",
+            "new": "Nouveau"
+          },
+          "total": "{{count}} clients",
+          "activity": [
+            "Facture réglée",
+            "Appel consigné",
+            "E-mail ouvert",
+            "Devis envoyé",
+            "Rendez-vous fixé",
+            "Inscrit"
+          ]
+        },
+        "hr": {
+          "crumb": [
+            "Équipe",
+            "Planning"
+          ],
+          "today": "Aujourd’hui",
+          "onShift_one": "{{count}} en service",
+          "onShift_other": "{{count}} en service",
+          "roles": {
+            "ops": "Responsable des opérations",
+            "sales": "Chargé de clientèle",
+            "support": "Assistance",
+            "finance": "Finance",
+            "design": "Designer"
+          }
+        },
+        "erp": {
+          "crumb": [
+            "Opérations",
+            "Stocks"
+          ],
+          "cols": [
+            "Article",
+            "Stock",
+            "Disponible",
+            "Statut"
+          ],
+          "status": {
+            "ok": "En stock",
+            "low": "Faible",
+            "out": "Rupture",
+            "reorder": "Réappro commandé"
+          },
+          "alerts_one": "{{count}} alerte",
+          "alerts_other": "{{count}} alertes"
+        },
+        "pos": {
+          "crumb": [
+            "Ventes",
+            "Caisse"
+          ],
+          "order": "Commande en cours",
+          "total": "Total",
+          "charge": "Encaisser",
+          "paid": "Paiement reçu",
+          "items": [
+            "Formule Découverte",
+            "Session d’intégration",
+            "Utilisateur supplémentaire",
+            "Support prioritaire",
+            "Domaine personnalisé",
+            "Import de données"
+          ]
+        },
+        "insights": {
+          "crumb": [
+            "Indicateurs",
+            "Vue d’ensemble"
+          ],
+          "ranges": [
+            "7 j",
+            "30 j",
+            "90 j"
+          ],
+          "kpis": [
+            "Chiffre d’affaires",
+            "Nouveaux clients",
+            "Panier moyen"
+          ],
+          "days": [
+            "Lun",
+            "Mar",
+            "Mer",
+            "Jeu",
+            "Ven",
+            "Sam",
+            "Dim"
+          ],
+          "question": "Pourquoi le mardi a-t-il été plus calme ?",
+          "answer": "La pluie continue a réduit les visites en salle de 34 %, mais les commandes à emporter ont progressé de 18 %."
+        }
+      }
+    },
+    "connected": {
+      "eyebrow": "Connecté",
+      "title": "Une mise à jour.\nPartout au même instant.",
+      "subtitle": "Chaque composant de rtylr lit et écrit sur les mêmes registres : une modification à un endroit atteint immédiatement le reste. Zéro export, zéro copier-coller.",
+      "events": [
+        {
+          "title": "Une vente est enregistrée.",
+          "effect": "Le stock, le chiffre d’affaires et la fiche client s’actualisent."
+        },
+        {
+          "title": "Lina prend son service.",
+          "effect": "Ses heures de travail s’inscrivent dans la paie et les données en direct."
+        },
+        {
+          "title": "Voxire règle une facture.",
+          "effect": "Le compte client, la tâche de relance et le compte de résultat sont synchronisés."
+        },
+        {
+          "title": "Le papier d’impression arrive à terme.",
+          "effect": "Une tâche de réapprovisionnement apparaît dans les suggestions de Caret."
+        }
+      ]
+    },
+    "mascot": {
+      "hint": "Psst… attrape-moi",
+      "caught": "Trouvé ! {{count}} sur {{goal}}",
+      "hiAgain": "Encore toi 👋",
+      "foundTitle": "Vous avez trouvé Caret !",
+      "foundBody": "Caret est l’assistant IA natif de rtylr. Il est nettement plus doué pour gérer votre entreprise que pour jouer à cache-cache.",
+      "foundCta": "Rencontrer Caret",
+      "close": "Fermer"
     }
   }
 }

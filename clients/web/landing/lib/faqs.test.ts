@@ -13,12 +13,7 @@ import type { FaqSection } from './faqs';
 const SECTIONS: FaqSection[] = [
   'home',
   'pricing',
-  'pos',
-  'erp',
-  'crm',
-  'hr',
-  'finance',
-  'flow',
+  'workspace',
   'demo',
 ];
 

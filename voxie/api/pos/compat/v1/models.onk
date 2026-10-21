@@ -1,0 +1,21 @@
+package pos.compat.v1
+
+message EmptyRequest {}
+
+/// Empty response for @http routes whose handler writes its own response.
+message EmptyResponse {}
+
+/// The route's JSON body, passed through unchanged.
+message BodyRequest {
+  body: json
+}
+
+/// The handler's JSON response, sent unchanged.
+message JsonResponse {
+  data: json @unwrap
+}
+
+message PathIdBodyRequest {
+  id: string
+  body: json
+}

@@ -1,20 +1,24 @@
 // Package emailtest exposes authenticated non-production endpoints for manually
 // testing email template enqueueing end-to-end.
+//
+// The endpoints only exist for a run that has explicitly declared a
+// development environment; anything else, including an unset or unrecognised
+// APP_ENV, resolves to production and the routes 404.
 package emailtest
 
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
+	"fmt"
 	"net/http"
-
-	"github.com/go-chi/chi/v5"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
-	serverHttp "github.com/voxire/onion/internal/platform/server/http"
+	emailtestv1 "github.com/voxire/voxie/gen/go/devtools/emailtest/v1"
 )
 
 type Module struct {
@@ -25,102 +29,86 @@ func NewModule(_ context.Context, db *sql.DB) *Module {
 	return &Module{db: db}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	serverHttp.RegisterPOSTWithValidation[TestEmailRequest, TestEmailResponse](
-		ctx, router, sendRoutes(), &TestEmailHandler{DB: m.db},
-	)
-	serverHttp.RegisterGET[ListTemplatesRequest, ListTemplatesResponse](
-		ctx, router, listRoutes(), &ListTemplatesHandler{},
-	)
+// RegisterAPI serves devtools.emailtest.v1.
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := emailtestv1.RegisterEmailTestServiceServer(&EmailTestAPI{DB: m.db}, emailtestv1.WithMux(mux)); err != nil {
+		panic(fmt.Errorf("register email test service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {
 	return []string{}
 }
 
-func sendRoutes() []string { return []string{"/test/email"} }
-func listRoutes() []string { return []string{"/test/email/templates"} }
+// EmailTestAPI implements devtools.emailtest.v1.
+type EmailTestAPI struct{ DB *sql.DB }
 
-// ── GET /test/email/templates ── lists every sendable template ──────────────
-
-type ListTemplatesRequest struct{}
-
-type ListTemplatesResponse struct {
-	Count     int      `json:"count"`
-	Templates []string `json:"templates"`
-}
-
-type ListTemplatesHandler struct{}
-
-func (h *ListTemplatesHandler) Serve(ctx context.Context, _ *ListTemplatesRequest) (ListTemplatesResponse, error) {
+// ListTemplates lists every sendable template.
+func (a *EmailTestAPI) ListTemplates(ctx context.Context, _ *emailtestv1.ListTemplatesRequest) (*emailtestv1.ListTemplatesResponse, error) {
 	if err := requireAuthenticatedNonProduction(ctx); err != nil {
-		return ListTemplatesResponse{}, err
+		return nil, err
 	}
 	names := templateNames()
-	return ListTemplatesResponse{Count: len(names), Templates: names}, nil
+	return &emailtestv1.ListTemplatesResponse{Count: int32(len(names)), Templates: names}, nil // #nosec G115 -- the template catalog is a small fixed list.
 }
 
-// TestEmailRequest is the JSON body. `data` is optional — missing template fields
-// just render empty, so a bare {"template","to"} is enough to test delivery.
-type TestEmailRequest struct {
-	Template string         `json:"template"`
-	To       string         `json:"to"`
-	Subject  string         `json:"subject"`
-	Data     map[string]any `json:"data"`
-}
-
-type TestEmailResponse struct {
-	Queued   bool   `json:"queued"`
-	Template string `json:"template"`
-	To       string `json:"to"`
-}
-
-type TestEmailHandler struct{ DB *sql.DB }
-
-func (h *TestEmailHandler) Serve(ctx context.Context, req *TestEmailRequest) (TestEmailResponse, error) {
+// SendTestEmail enqueues one rendered template to the given address.
+func (a *EmailTestAPI) SendTestEmail(ctx context.Context, req *emailtestv1.SendTestEmailRequest) (*emailtestv1.SendTestEmailResponse, error) {
 	if err := requireAuthenticatedNonProduction(ctx); err != nil {
-		return TestEmailResponse{}, err
+		return nil, err
 	}
-	if req.To == "" || req.Template == "" {
-		return TestEmailResponse{}, badRequest("'to' and 'template' are required; GET /test/email/templates lists valid templates")
+	if req.GetTo() == "" || req.GetTemplate() == "" {
+		return nil, badRequest("'to' and 'template' are required; GET /test/email/templates lists valid templates")
 	}
 
-	tmpl := email.Template(req.Template)
+	tmpl := email.Template(req.GetTemplate())
 	if !email.Exists(tmpl) {
-		return TestEmailResponse{}, badRequest("unknown template " + req.Template + "; GET /test/email/templates lists valid templates")
+		return nil, badRequest("unknown template " + req.GetTemplate() + "; GET /test/email/templates lists valid templates")
 	}
 
-	if h.DB == nil {
-		return TestEmailResponse{}, onekiterrors.New(http.StatusServiceUnavailable, "email queue unavailable (no database)")
+	if a.DB == nil {
+		return nil, onekiterrors.New(http.StatusServiceUnavailable, "email queue unavailable (no database)")
 	}
 
-	subject := req.Subject
+	subject := req.GetSubject()
 	if subject == "" {
 		subject = "rtylr test email"
 	}
-	data := req.Data
-	if data == nil {
-		data = map[string]any{}
+	data := map[string]any{}
+	if raw := req.GetData(); len(raw) > 0 && string(raw) != "null" {
+		if err := json.Unmarshal(raw, &data); err != nil {
+			return nil, badRequest("'data' must be a JSON object")
+		}
 	}
 	if _, ok := data["Subject"]; !ok {
 		data["Subject"] = subject
 	}
 
-	if err := email.EnqueueTemplate(ctx, h.DB, email.PriorityNormal, req.To, subject, tmpl, data); err != nil {
+	if err := email.EnqueueTemplate(ctx, a.DB, email.PriorityNormal, req.GetTo(), subject, tmpl, data); err != nil {
 		logger.Ctx(ctx).Error("test email enqueue failed",
-			logger.String("template", req.Template), logger.Error(err))
-		return TestEmailResponse{}, onekiterrors.New(http.StatusInternalServerError, "failed to enqueue test email")
+			logger.String("template", req.GetTemplate()), logger.Error(err))
+		return nil, onekiterrors.New(http.StatusInternalServerError, "failed to enqueue test email")
 	}
 
-	return TestEmailResponse{Queued: true, Template: req.Template, To: req.To}, nil
+	return &emailtestv1.SendTestEmailResponse{Queued: true, Template: req.GetTemplate(), To: req.GetTo()}, nil
 }
 
 func badRequest(msg string) error {
 	return onekiterrors.New(http.StatusBadRequest, msg)
 }
 
+// requireAuthenticatedNonProduction refuses the request unless the run has
+// explicitly declared itself a development environment. It asks the allowlist
+// question directly (config.IsNonProduction) rather than negating
+// config.IsProduction so that the safety of this endpoint does not depend on
+// the polarity of the production check staying correct elsewhere.
+//
+// This matters more than the usual dev-only endpoint: /test/email renders the
+// real branded templates through the platform's sending domain and posts them
+// to a caller-supplied address, so treating an unset or misspelled APP_ENV as
+// development is a phishing primitive rather than a small convenience leak.
 func requireAuthenticatedNonProduction(ctx context.Context) error {
-	if config.IsProduction() {
+	if !config.IsNonProduction() {
 		return onekiterrors.New(http.StatusNotFound, "Not found")
 	}
 	device := authPkg.DeviceCtx(ctx)

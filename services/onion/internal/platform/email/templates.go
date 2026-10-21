@@ -22,6 +22,8 @@ const (
 	TemplateInvitation Template = "team/invitation"
 	// TemplatePasswordReset is sent on a password-reset request.
 	TemplatePasswordReset Template = "auth/password_reset"
+	// TemplateEmailVerification asks a new account to confirm its email.
+	TemplateEmailVerification Template = "auth/email_verification"
 	// TemplateInvoice is sent with an invoice.
 	TemplateInvoice Template = "billing/invoice"
 	// TemplateAccessRequest notifies a business owner that a user requested app access.
@@ -35,6 +37,7 @@ var wiredTemplates = []Template{
 	TemplateWelcome,
 	TemplateInvitation,
 	TemplatePasswordReset,
+	TemplateEmailVerification,
 	TemplateInvoice,
 	TemplateAccessRequest,
 }
@@ -77,18 +80,42 @@ type WelcomeData struct {
 	Name    string
 }
 
-// InvitationData is the data for TemplateInvitation.
+// InvitationData is the data for TemplateInvitation. InviterName and
+// BusinessName may be empty; the email words around a missing one.
 type InvitationData struct {
 	Subject      string
 	InviterName  string
 	BusinessName string
 	InviteLink   string
+	// ValidDays is how long the link works; 0 leaves the expiry out.
+	ValidDays int
+}
+
+// InvitationSubject words an invitation's subject around the names it has.
+func InvitationSubject(inviterName, businessName string) string {
+	switch {
+	case inviterName != "" && businessName != "":
+		return inviterName + " invited you to join " + businessName + " on rtylr"
+	case businessName != "":
+		return "You're invited to join " + businessName + " on rtylr"
+	case inviterName != "":
+		return inviterName + " invited you to rtylr"
+	}
+	return "You're invited to rtylr"
 }
 
 // PasswordResetData is the data for TemplatePasswordReset.
 type PasswordResetData struct {
 	Subject   string
 	ResetLink string
+}
+
+// VerificationData is the data for TemplateEmailVerification. Code is
+// the whole token the verification page accepts, user id included.
+type VerificationData struct {
+	Subject    string
+	VerifyLink string
+	Code       string
 }
 
 // InvoiceData is the data for TemplateInvoice.

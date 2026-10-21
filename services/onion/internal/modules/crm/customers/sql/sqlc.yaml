@@ -1,0 +1,21 @@
+version: "2"
+sql:
+  - engine: "mysql"
+    queries: "queries"
+    schema:
+      - "../../sql/schema/crm/crm_customer_timeline.sql"
+      - "schema/customer_capture_events.sql"
+      - "../../sql/schema/crm/crm_feedback.sql"
+      - "../../sql/schema/crm/crm_loyalty_rewards.sql"
+      - "../../sql/schema/crm/crm_loyalty_tiers.sql"
+      - "../../sql/schema/crm/crm_settings.sql"
+      - "../../sql/schema/crm/crm_templates.sql"
+      - "../../sql/schema/crm/schema.sql"
+      - "../../sql/schema/crm/v2_sales_pipeline.sql"
+    gen:
+      go:
+        package: "sqlc"
+        out: "../internal/infrastructure/persistence/sqlc"
+        sql_package: "database/sql"
+        emit_json_tags: true
+        emit_db_tags: true

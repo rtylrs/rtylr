@@ -2,6 +2,9 @@ package crm.compat.v1
 
 message EmptyRequest {}
 
+/// EmptyResponse marks a method whose handler writes its own response.
+message EmptyResponse {}
+
 message JsonResponse {
   data: json @unwrap
 }
@@ -40,6 +43,12 @@ message CampaignStatsRequest {
   campaign_id: int32? @query("campaign_id")
 }
 
+/// CampaignAudienceRequest counts an email campaign's reach; without a
+/// segment the audience is every customer.
+message CampaignAudienceRequest {
+  segment_id: int64? @query("segment_id")
+}
+
 message LoyaltyTransactionsRequest {
   customer_id: int32? @query("customer_id")
   limit: int32? @query("limit")
@@ -49,13 +58,6 @@ message LoyaltyTransactionsRequest {
 message ExportCustomerRequest {
   id: int32? @query("id")
   customer_id: int32? @query("customer_id")
-}
-
-message ContactsRequest {
-  lead_id: int32? @query("lead_id")
-  customer_id: int32? @query("customer_id")
-  limit: int32? @query("limit")
-  offset: int32? @query("offset")
 }
 
 message BodyRequest {
@@ -70,3 +72,4 @@ message PathBodyRequest {
   id: string
   body: json
 }
+

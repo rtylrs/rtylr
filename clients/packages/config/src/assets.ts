@@ -1,4 +1,4 @@
-import { resolveCdnBaseUrl } from './runtimeConfig';
+import { resolveCdnBaseUrl } from './serviceUrls';
 
 export const ASSETS = {
   // Served from each app's own origin (public/logo.png) rather than an external
@@ -38,20 +38,16 @@ const CDN_FILE_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}
 const VOXIRE_CDN_HOSTS = new Set(['cdn.voxire.com', 'cdn.voxire.dev', 'api.voxire.com', 'api.voxire.dev']);
 
 export function getCdnBaseUrl(override?: string): string {
-  // In self-host, `resolveCdnBaseUrl()` returns the runtime upload base; hosted
-  // (and a blank runtime config) returns the same `DEFAULT_CDN_BASE_URL`, so the
-  // hosted resolution is byte-for-byte identical to before.
   return (override || resolveCdnBaseUrl() || DEFAULT_CDN_BASE_URL).replace(/\/+$/, '');
 }
 
-/** Recognised CDN hosts: the static voxire hosts plus the runtime upload host. */
+/** Recognised CDN hosts: the static voxire hosts plus the configured upload host. */
 function recognisedCdnHosts(): Set<string> {
   const hosts = new Set(VOXIRE_CDN_HOSTS);
   try {
-    const runtime = resolveCdnBaseUrl();
-    if (runtime) hosts.add(new URL(runtime).hostname.toLowerCase());
+    hosts.add(new URL(resolveCdnBaseUrl()).hostname.toLowerCase());
   } catch {
-    // ignore malformed runtime base
+    // Ignore a malformed build-time CDN base.
   }
   return hosts;
 }

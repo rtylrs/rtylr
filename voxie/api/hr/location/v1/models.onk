@@ -19,7 +19,7 @@ message LocationPayload {
   /// Unix timestamp when this location was last updated.
   updated_at: int64
   /// URL-safe slug, scoped per business. Powers public URLs like
-  /// menu.rtylr.com/<business-slug>/<location-slug>.
+  /// portal.rtylr.com/<business-slug>/menu/<location-slug>.
   slug: string
 }
 

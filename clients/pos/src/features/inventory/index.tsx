@@ -4,7 +4,6 @@ import { Package, Store } from 'lucide-react';
 import { toast } from 'sonner';
 import { AccessServiceClient } from '@voxire/voxie/pos/access/v1/client';
 import { LocationServiceClient } from '@voxire/voxie/pos/location/v1/client';
-import { StockServiceClient } from '@voxire/voxie/pos/stock/v1/client';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import EmptyState from '../../shared/components/EmptyState';
 import Skeleton from '../../shared/components/Skeleton';
@@ -16,11 +15,11 @@ import {
   mapInventoryLocations,
   summarizeLowStockItems,
 } from './inventoryWorkflow';
+import { listBranchInventory, listLowStock, recordStockAction } from './stockActionClient';
 import type { InventoryItem, InventoryLocation, StockAction } from './inventoryWorkflow';
 
 const accessClient = createOneKitClient(AccessServiceClient, 'pos');
 const locationClient = createOneKitClient(LocationServiceClient, 'pos');
-const stockClient = createOneKitClient(StockServiceClient, 'pos');
 
 const ACTION_LABELS: Record<StockAction, string> = {
   receive: 'Receive',
@@ -163,8 +162,8 @@ const InventoryScreen: React.FC = () => {
     setLoading(true);
     try {
       const [inv, low] = await Promise.all([
-        stockClient.listInventory({ branchId: String(branchId) }),
-        stockClient.lowStock({ branchId: String(branchId) }),
+        listBranchInventory(String(branchId)),
+        listLowStock(String(branchId)),
       ]);
       setItems(mapInventoryItems(inv.inventory ?? []));
       setLowStock(mapInventoryItems(low.items ?? []));
@@ -211,19 +210,7 @@ const InventoryScreen: React.FC = () => {
         toBranchId,
         employeeId: Number(employee?.id) || null,
       });
-      const call = (() => {
-        switch (built.action) {
-          case 'receive':
-            return stockClient.receiveStock(built.payload);
-          case 'adjust':
-            return stockClient.adjustStock(built.payload);
-          case 'waste':
-            return stockClient.wasteStock(built.payload);
-          case 'transfer':
-            return stockClient.transferStock(built.payload);
-        }
-      })();
-      await call;
+      await recordStockAction(built);
       toast.success(`${ACTION_LABELS[action]} recorded`);
       void load();
     } catch (err) {

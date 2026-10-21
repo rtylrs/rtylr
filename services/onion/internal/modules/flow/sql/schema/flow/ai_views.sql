@@ -1,0 +1,3 @@
+-- Read-only projection of this module's tables for the AI analyst (aiquery).
+
+CREATE OR REPLACE VIEW `ai_tasks` AS select `flow_tasks`.`id` AS `id`,`flow_tasks`.`owner_id` AS `owner_id`,`flow_tasks`.`project_id` AS `project_id`,`flow_tasks`.`workspace_id` AS `workspace_id`,`flow_tasks`.`title` AS `title`,`flow_tasks`.`status` AS `status`,`flow_tasks`.`priority` AS `priority`,`flow_tasks`.`assignee_id` AS `assignee_id`,`flow_tasks`.`due_date` AS `due_date`,`flow_tasks`.`start_date` AS `start_date`,`flow_tasks`.`completed_at` AS `completed_at`,`flow_tasks`.`estimated_hours` AS `estimated_hours`,`flow_tasks`.`actual_hours` AS `actual_hours`,`flow_tasks`.`created_at` AS `created_at`,`flow_tasks`.`updated_at` AS `updated_at` from `flow_tasks`;

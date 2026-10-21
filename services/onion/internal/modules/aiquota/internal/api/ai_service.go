@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"net/http"
-	"strings"
 
 	"github.com/voxire/onion/internal/modules/aiquota/internal/application"
 	"github.com/voxire/onion/internal/modules/aiquota/internal/domain"
@@ -70,7 +69,7 @@ func (a *AiAPI) UpdateAiQuotaSettings(ctx context.Context, req *hubaiv1.UpdateAi
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	if !canUpdateAiQuotaSettings(device.User.Role) {
+	if !canUpdateAiQuotaSettings(device.User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -89,11 +88,6 @@ func (a *AiAPI) UpdateAiQuotaSettings(ctx context.Context, req *hubaiv1.UpdateAi
 	}, nil
 }
 
-func canUpdateAiQuotaSettings(role string) bool {
-	switch strings.ToLower(strings.TrimSpace(role)) {
-	case "owner", "admin", "console_admin":
-		return true
-	default:
-		return false
-	}
+func canUpdateAiQuotaSettings(user *authPkg.AuthUser) bool {
+	return authPkg.IsBusinessAdmin(user) || authPkg.HasDashboardPermission(user, "hub:ai:quota:manage")
 }

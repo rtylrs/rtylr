@@ -1,0 +1,15 @@
+{
+  "created": "Compte créé",
+  "nameRequired": "Le nom du compte est obligatoire",
+  "title": "Plan comptable",
+  "count": "{{count}} comptes",
+  "new": "Nouveau compte",
+  "search": "Rechercher des comptes",
+  "code": "Code",
+  "name": "Nom",
+  "type": "Type",
+  "balance": "Solde",
+  "codeOptional": "Code du compte (facultatif)",
+  "emptyTitle": "Aucun compte",
+  "emptyDescription": "Le plan comptable liste les comptes du grand livre utilisés par les écritures de journal. Ajoutez des comptes lorsque vous commencez à tenir un journal ; les dépenses et factures n’en ont pas besoin pour apparaître dans vos rapports."
+}

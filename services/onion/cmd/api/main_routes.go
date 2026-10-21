@@ -4,19 +4,18 @@ import (
 	"context"
 	stdhttp "net/http"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/voxire/onion/internal/modules/organization/scopes"
 
-	"github.com/voxire/onion/internal/cdn"
-	"github.com/voxire/onion/internal/modules/addons"
-	hrdashboardstats "github.com/voxire/onion/internal/modules/hr_dashboard/stats"
-	"github.com/voxire/onion/internal/modules/team"
-	"github.com/voxire/onion/internal/modules/user"
+	hrdashboardstats "github.com/voxire/onion/internal/modules/hr/hr_dashboard/stats"
+	"github.com/voxire/onion/internal/modules/organization/addons"
+	"github.com/voxire/onion/internal/modules/organization/team"
+	"github.com/voxire/onion/internal/modules/organization/user"
 	"github.com/voxire/onion/internal/modules/webhooks"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/cache"
+	"github.com/voxire/onion/internal/platform/cdn"
 	platformConfig "github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
-	"github.com/voxire/onion/internal/platform/license"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/server/http"
 	"github.com/voxire/onion/internal/platform/storage"
@@ -27,7 +26,7 @@ import (
 // setupRoutes registers every API route on r and returns the middlewares the
 // server should wrap it with. It does not apply them itself: the HTTP server
 // builds one chain so the Partials X-API-KEY bypass can sit outside it.
-func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
+func setupRoutes(ctx context.Context, mux *stdhttp.ServeMux) []http.MiddlewareFunc {
 	modules := initializeModules(ctx)
 
 	// Start the websocket bus with topic-level authorization backed by
@@ -87,9 +86,6 @@ func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 	accessPolicy := http.NewRouteAccessPolicy()
 	accessPolicy.RegisterAnonymousRoutes("/health")
 	accessPolicy.RegisterAnonymousRoutes("/version")
-	accessPolicy.RegisterAnonymousRoutes("/license/state")
-	accessPolicy.RegisterAnonymousRoutes("/runtime-config")
-	accessPolicy.RegisterAnonymousRoutes("/.well-known/rtylr.json")
 	accessPolicy.RegisterAnonymousRoutes("/flow/ws")
 	accessPolicy.RegisterAnonymousRoutes("/invalidate-cache")
 
@@ -110,14 +106,6 @@ func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 		"/videos/info",
 		"/purge",
 		"/sign",
-	)
-
-	// Self-host license authority routes
-	accessPolicy.RegisterAnonymousRoutes(
-		"/license/status",
-		"/license/verify",
-		"/license/activate",
-		"/license/refresh",
 	)
 
 	provisionerResolver := authPkg.NewStaticPlatformProvisionerResolver(
@@ -149,7 +137,7 @@ func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 			PayrollDraft:   payrollDraft,
 		}, nil
 	})
-	modules.Business.WithUserService(modules.User.UserService)
+	modules.Business.WithUserService(modules.User.Onboarding())
 	modules.Apps.SetAddonProvider(addons.NewHubAddonProvider(modules.Addons.GetService()))
 	modules.APIKeys.SetWebhooksProvider(webhooks.NewHubWebhooksProvider(modules.Webhooks.GetService()))
 
@@ -160,8 +148,7 @@ func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 	user.OnUserCreated = ensurePersonalWorkspace
 	user.OnUserLogin = ensurePersonalWorkspace
 
-	http.AutoRegisterAnonymousRoutes(ctx, modules, accessPolicy)
-	http.AutoConfigureAccessPolicy(ctx, modules, accessPolicy)
+	http.AutoRegisterAnonymousRoutes(ctx, accessPolicy, modules.anonymousRouteProviders()...)
 
 	tokenResolver := authPkg.NewStaticTokenValidatorResolver(
 		modules.User.GetTokenValidator(),
@@ -171,48 +158,23 @@ func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 		},
 	)
 
-	// Self-host license validator. A no-op in hosted mode (always valid, no
-	// network); in self-host mode it validates the key against the license
-	// authority with a grace window. Built once and shared by /license/state,
-	// /runtime-config, and the enforcement middleware below.
-	licenseValidator := license.NewCachedValidator(platformConfig.GlobalConfig)
-
+	// Request screening (scanner paths, spoofed forwarding headers, injection
+	// params) happens at the Cloudflare WAF in front of the API, not here.
 	middlewares := []http.MiddlewareFunc{
-		http.SecurityMiddleware(),
 		jwtutils.JWTMiddleware(),
 		http.RequestLoggerMiddleware(ctx),
 		http.GetAuthMiddlewareFunc(accessPolicy, tokenResolver, teamSvc),
 		authPkg.DeviceMiddleware(),
 		// Keep subscription state authoritative for every authenticated tenant
 		// request. The middleware leaves billing recovery and console routes open.
-		http.SubscriptionEnforcementMiddleware(dbclient.Pool(), accessPolicy),
+		http.SubscriptionEnforcementMiddleware(scopes.NewReader(dbclient.Pool()).SubscriptionAccess, accessPolicy),
 		// After auth so idempotency keys are scoped per authenticated user.
 		http.IdempotencyMiddleware,
-		// AFTER auth: gate protected API routes when a self-host license is
-		// invalid. Strict no-op in hosted mode (never consults the validator).
-		http.LicenseEnforcementMiddleware(licenseValidator, accessPolicy),
 	}
 
-	http.RegisterCacheRoutes(ctx, r)
-	http.RegisterStatusRoutes(ctx, r)
-	http.RegisterVersionRoutes(r)
-
-	// /license/state lets frontends render an admin-only notice. Prime the
-	// cache in the background so the first protected request isn't blocked on
-	// the authority round-trip.
-	http.RegisterLicenseStateRoutes(r, licenseValidator)
-	http.RegisterRuntimeConfigRoutes(r, licenseValidator)
-	if license.IsSelfHosted(platformConfig.GlobalConfig) {
-		go licenseValidator.Refresh(ctx)
-	}
-
-	// License authority routes (/license/status, /license/verify, /license/activate, /license/refresh)
-	if pool := dbclient.Pool(); pool != nil {
-		if err := license.EnsureActivationTable(ctx, pool); err != nil {
-			logger.Ctx(ctx).Warn("license activation ledger unavailable", logger.Error(err))
-		}
-	}
-	http.RegisterLicenseAuthorityRoutes(r, platformConfig.GlobalConfig, dbclient.Pool())
+	http.RegisterCacheRoutes(ctx, mux)
+	http.RegisterStatusRoutes(ctx, mux)
+	http.RegisterVersionRoutes(mux)
 
 	// Consolidated CDN / Upload routes
 	cfg := platformConfig.GlobalConfig
@@ -227,7 +189,7 @@ func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 		cfg.CDNMaxUploadBytes,
 		cfg.CDNMediaEnginePath,
 		cfg.CDNAPIKey,
-	)
+	).WithUploadKeyReader(scopes.NewReader(dbclient.Pool()).UploadKeyScope)
 	if err := cdnService.CheckMediaEngine(); err != nil {
 		logger.Ctx(ctx).Warn("media-engine unavailable; image transformations will fail", logger.Error(err))
 	}
@@ -238,17 +200,19 @@ func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 			logger.Bool("fail_closed", failClosed),
 		)
 	}
-	cdnService.RegisterRoutes(r)
+	cdnService.RegisterRoutes(mux)
 
 	// oneKit contract services: every module's generated service servers
-	// register on one shared mux; the generated code owns every contract path.
-	// Runs before RegisterRoutes so module escape hatches (rate-limited or
-	// special routes) can reference the mux captured in RegisterAPI.
-	oneKitMux := stdhttp.NewServeMux()
-	http.AutoRegisterAPIs(ctx, modules, oneKitMux)
-	http.MountOneKit(r, oneKitMux)
+	// register on the root mux; the generated code owns every contract path.
+	http.AutoRegisterAPIs(ctx, mux, modules.apiRegistrars()...)
 
-	http.AutoRegisterRoutes(ctx, modules, r)
+	// Modules that still use the Register* helpers fill a route table. Compat
+	// contracts serve its routes; the few they cannot (route middlewares, raw
+	// handlers) are mounted from the table on the same mux.
+	legacyRoutes := http.NewLegacyRoutes()
+	http.AutoRegisterRoutes(ctx, legacyRoutes, modules.routeRegistrars()...)
+	registerCompatContracts(mux, legacyRoutes)
+	legacyRoutes.Mount(mux, compatRoutes().Contains)
 
 	return middlewares
 }
@@ -257,8 +221,8 @@ type apiServer struct {
 	middlewares []http.MiddlewareFunc
 }
 
-func (a *apiServer) Setup(ctx context.Context, r *chi.Mux) {
-	a.middlewares = setupRoutes(ctx, r)
+func (a *apiServer) Setup(ctx context.Context, mux *stdhttp.ServeMux) {
+	a.middlewares = setupRoutes(ctx, mux)
 }
 
 func (a *apiServer) Middlewares() []http.MiddlewareFunc {

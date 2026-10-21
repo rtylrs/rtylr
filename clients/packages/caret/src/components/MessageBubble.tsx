@@ -1,11 +1,12 @@
-import React from 'react';
-import { caretTokens } from '../ui/tokens';
-import MessageBlocks from './MessageBlocks';
-import MessageActions from './MessageActions';
-import FollowUpChips from './FollowUpChips';
-import { StreamingOrb } from './CaretOrb';
-import type { CaretStarter } from '../lib/suggestions';
-import type { CaretMessage, ContentBlock } from '../types/message';
+import React from "react";
+import { caretTokens } from "../ui/tokens";
+import MessageBlocks from "./MessageBlocks";
+import MessageActions, { type ReplyRating } from "./MessageActions";
+import SourceChips from "./SourceChips";
+import FileChip from "./composer/FileChip";
+import { replySources } from "../lib/searchSources";
+import { StreamingOrb } from "./CaretOrb";
+import type { CaretMessage, ContentBlock } from "../types/message";
 
 export interface MessageBubbleProps {
   message: CaretMessage;
@@ -14,20 +15,28 @@ export interface MessageBubbleProps {
   onApproveTool?: (id: string) => void;
   onDenyTool?: (id: string) => void;
   onRetry?: () => void;
-  followUps?: CaretStarter[];
-  onFollowUp?: (item: CaretStarter) => void;
+  /** Rates this reply; see MessageActions. */
+  onRate?: (messageId: string, rating: ReplyRating, reason?: string) => void;
 }
 
 /** Flatten content blocks to plain text for copy. */
 function blocksToText(blocks: ContentBlock[]): string {
   return blocks
     .map((b) => {
-      if (b.type === 'text') return b.content;
-      if (b.type === 'thinking') return '';
-      return '[business check]';
+      if (b.type === "text") return b.content;
+      if (
+        b.type === "tool_call" &&
+        b.name === "web.search" &&
+        b.output &&
+        typeof b.output === "object"
+      ) {
+        const answer = (b.output as Record<string, unknown>).answer;
+        return typeof answer === "string" ? answer : "";
+      }
+      return "";
     })
     .filter(Boolean)
-    .join('\n');
+    .join("\n");
 }
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({
@@ -37,51 +46,85 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   onApproveTool,
   onDenyTool,
   onRetry,
-  followUps = [],
-  onFollowUp,
+  onRate,
 }) => {
-  const isUser = message.role === 'user';
+  const isUser = message.role === "user";
   const blocks: ContentBlock[] =
     message.blocks.length > 0
       ? message.blocks
       : message.content
-        ? [{ id: `${message.id}-text`, type: 'text', content: message.content }]
+        ? [{ id: `${message.id}-text`, type: "text", content: message.content }]
         : [];
 
-  const text = isUser ? (message.content ?? blocksToText(blocks)) : blocksToText(blocks);
+  const text = isUser
+    ? (message.content ?? blocksToText(blocks))
+    : blocksToText(blocks);
+  const hasAssistantText =
+    blocks.some((block) => block.type === "text") ||
+    blocks.some(
+      (block) =>
+        block.type === "tool_call" &&
+        block.name === "web.search" &&
+        Boolean(blocksToText([block])),
+    );
 
   // User message - quiet, right-aligned bubble.
   if (isUser) {
     return (
       <div
         style={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          margin: '12px 0',
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-end",
+          gap: 8,
+          minWidth: 0,
+          margin: "12px 0",
         }}
       >
-        <div
-          style={{
-            maxWidth: '82%',
-            padding: '10px 14px',
-            borderRadius: '16px 16px 4px 16px',
-            background: caretTokens.accentSoft,
-            color: caretTokens.text,
-            fontSize: 13.5,
-            lineHeight: 1.55,
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
-          }}
-        >
-          {text}
-        </div>
+        {message.attachments?.map((attachment, index) =>
+          attachment.dataUrl.startsWith("data:image/") ? (
+            <img
+              key={`${attachment.name}-${index}`}
+              src={attachment.dataUrl}
+              alt={attachment.name || `Attached image ${index + 1}`}
+              style={{
+                display: "block",
+                width: "auto",
+                height: "auto",
+                maxWidth: "min(320px, 82%)",
+                maxHeight: 280,
+                objectFit: "contain",
+                borderRadius: 10,
+              }}
+            />
+          ) : attachment.kind === "file" ? (
+            <FileChip key={`${attachment.name}-${index}`} name={attachment.name} />
+          ) : null,
+        )}
+        {text && (
+          <div
+            style={{
+              maxWidth: "82%",
+              padding: "10px 14px",
+              borderRadius: "16px 16px 4px 16px",
+              background: caretTokens.accentSoft,
+              color: caretTokens.text,
+              fontSize: 13.5,
+              lineHeight: 1.55,
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+            }}
+          >
+            {text}
+          </div>
+        )}
       </div>
     );
   }
 
   // Assistant message - full-width plain text, no avatar, no bubble (ChatGPT-style).
   return (
-    <div className="caret-assistant-message" style={{ margin: '12px 0' }}>
+    <div className="caret-assistant-message" style={{ margin: "12px 0" }}>
       <div
         style={{
           color: caretTokens.text,
@@ -97,10 +140,20 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         />
         {isStreaming && <StreamingOrb hasText={text.trim().length > 0} />}
       </div>
-      {!isStreaming && blocks.some((b) => b.type === 'text') && (
-        <MessageActions text={text} onRetry={onRetry} />
+      {!isStreaming && <SourceChips sources={replySources(blocks)} />}
+      {!isStreaming && hasAssistantText && (
+        <MessageActions
+          text={text}
+          onRetry={onRetry}
+          responseMs={message.responseMs}
+          onRate={
+            onRate
+              ? (rating, reason) =>
+                  onRate(message.storedId ?? message.id, rating, reason)
+              : undefined
+          }
+        />
       )}
-      {!isStreaming && <FollowUpChips items={followUps} onSelect={onFollowUp} />}
     </div>
   );
 };

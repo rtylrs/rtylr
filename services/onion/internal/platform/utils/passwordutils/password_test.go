@@ -1,6 +1,10 @@
 package passwordutils
 
-import "testing"
+import (
+	"errors"
+	"strings"
+	"testing"
+)
 
 func TestHashPassword_RoundTrip(t *testing.T) {
 	hash, err := HashPassword("hunter2")
@@ -60,5 +64,19 @@ func TestCheckDummyHash_NeverMatches(t *testing.T) {
 		if CheckDummyHash(password) {
 			t.Errorf("dummy hash matched %q", password)
 		}
+	}
+}
+
+func TestValidateStrengthRejectsPasswordsBcryptCannotHash(t *testing.T) {
+	long := "Aa1" + strings.Repeat("x", MaxPasswordBytes)
+	if err := ValidateStrength(long); !errors.Is(err, ErrWeakPassword) {
+		t.Fatalf("err = %v, want ErrWeakPassword", err)
+	}
+	atLimit := "Aa1" + strings.Repeat("x", MaxPasswordBytes-3)
+	if err := ValidateStrength(atLimit); err != nil {
+		t.Fatalf("a %d-byte password was refused: %v", len(atLimit), err)
+	}
+	if _, err := HashPassword(atLimit); err != nil {
+		t.Fatalf("a password the policy accepts must hash: %v", err)
 	}
 }

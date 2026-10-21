@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
+	"time"
 
-	"github.com/google/generative-ai-go/genai"
-	"google.golang.org/api/iterator"
-	"google.golang.org/api/option"
+	"google.golang.org/genai"
 
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -19,9 +19,16 @@ var (
 	ErrGeminiAllModelsFailed = errors.New("all gemini models failed")
 )
 
+const (
+	geminiRequestTimeout = 35 * time.Second
+	geminiModelTimeout   = 12 * time.Second
+)
+
 type GeminiProvider struct {
-	client *genai.Client
-	models []string
+	client       *genai.Client
+	httpClient   *http.Client
+	models       []string
+	modelTimeout time.Duration
 }
 
 func NewGeminiProvider(ctx context.Context) (*GeminiProvider, error) {
@@ -29,14 +36,21 @@ func NewGeminiProvider(ctx context.Context) (*GeminiProvider, error) {
 		return nil, ErrGeminiNotConfigured
 	}
 
-	client, err := genai.NewClient(ctx, option.WithAPIKey(config.GetGeminiAPIKey()))
+	httpClient := &http.Client{Timeout: geminiRequestTimeout}
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{
+		APIKey:     config.GetGeminiAPIKey(),
+		Backend:    genai.BackendGeminiAPI,
+		HTTPClient: httpClient,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Gemini client: %w", err)
 	}
 
 	return &GeminiProvider{
-		client: client,
-		models: []string{"gemini-3.5-flash-lite", "gemini-3.5-flash"},
+		client:       client,
+		httpClient:   httpClient,
+		models:       []string{"gemini-3.8-flash", "gemini-3.7-flash"},
+		modelTimeout: geminiModelTimeout,
 	}, nil
 }
 
@@ -56,211 +70,226 @@ func (c *GeminiProvider) CompleteText(ctx context.Context, prompt string) (strin
 }
 
 func (c *GeminiProvider) CompleteTextWithOptions(ctx context.Context, prompt string, opts CompletionOptions) (string, error) {
+	requestCtx, cancel := context.WithTimeout(ctx, geminiRequestTimeout)
+	defer cancel()
+	contents := geminiContents(ctx, prompt)
 	var lastErr error
 
 	for _, modelName := range c.models {
-		logger.Ctx(ctx).Info("Trying Gemini model", logger.String("model", modelName))
-		model := c.client.GenerativeModel(modelName)
-		applyGeminiCompletionOptions(model, opts)
-
-		resp, err := model.GenerateContent(ctx, genai.Text(prompt))
+		if requestCtx.Err() != nil {
+			lastErr = requestCtx.Err()
+			break
+		}
+		modelCtx, cancelModel := context.WithTimeout(requestCtx, c.timeoutPerModel())
+		logger.Ctx(modelCtx).Info("Trying Gemini model", logger.String("model", modelName))
+		resp, err := c.client.Models.GenerateContent(modelCtx, modelName, contents, geminiGenerationConfig(opts))
+		cancelModel()
 		if err != nil {
-			logger.Ctx(ctx).Error("Gemini model failed",
+			logger.Ctx(requestCtx).Error("Gemini model failed",
 				logger.String("model", modelName),
 				logger.Error(err))
 			lastErr = err
-
 			continue
 		}
 
-		if len(resp.Candidates) == 0 {
-			logger.Ctx(ctx).Warn("Gemini model returned no candidates", logger.String("model", modelName))
-
-			continue
+		if text := geminiResponseText(resp); text != "" {
+			logger.Ctx(requestCtx).Info("Gemini model succeeded", logger.String("model", modelName))
+			return text, nil
 		}
-
-		candidate := resp.Candidates[0]
-		if candidate.Content == nil || len(candidate.Content.Parts) == 0 {
-			logger.Ctx(ctx).Warn("Gemini model returned empty content", logger.String("model", modelName))
-
-			continue
-		}
-
-		part := candidate.Content.Parts[0]
-		if textPart, ok := part.(genai.Text); ok {
-			logger.Ctx(ctx).Info("Gemini model succeeded", logger.String("model", modelName))
-
-			return string(textPart), nil
-		}
-
-		logger.Ctx(ctx).Warn("Gemini model returned non-text content", logger.String("model", modelName))
+		logger.Ctx(requestCtx).Warn("Gemini model returned no text", logger.String("model", modelName))
 	}
 
 	if lastErr != nil {
 		return "", fmt.Errorf("all Gemini models failed: %w", lastErr)
 	}
-
 	return "", ErrGeminiAllModelsFailed
 }
 
-func applyGeminiCompletionOptions(model *genai.GenerativeModel, opts CompletionOptions) {
-	if opts.Temperature == nil && !opts.JSONResponse {
-		return
+func geminiGenerationConfig(opts CompletionOptions) *genai.GenerateContentConfig {
+	result := &genai.GenerateContentConfig{
+		ThinkingConfig: &genai.ThinkingConfig{
+			ThinkingLevel: genai.ThinkingLevelLow,
+		},
 	}
-
-	maxTokens := int32(config.AIMaxOutputTokens)
-	cfg := genai.GenerationConfig{
-		MaxOutputTokens: &maxTokens,
+	if opts.Temperature != nil || opts.JSONResponse {
+		result.MaxOutputTokens = int32(config.AIMaxOutputTokens)
+	}
+	if opts.JSONResponse {
+		result.ResponseMIMEType = "application/json"
 	}
 	if opts.Temperature != nil {
 		temperature := float32(*opts.Temperature)
-		cfg.Temperature = &temperature
+		result.Temperature = &temperature
 	}
-	if opts.JSONResponse {
-		cfg.ResponseMIMEType = "application/json"
+	return result
+}
+
+func geminiStreamGenerationConfig() *genai.GenerateContentConfig {
+	result := geminiGenerationConfig(CompletionOptions{})
+	result.MaxOutputTokens = int32(config.AIMaxOutputTokens)
+	return result
+}
+
+func geminiContents(ctx context.Context, prompt string) []*genai.Content {
+	parts := []*genai.Part{genai.NewPartFromText(prompt)}
+	for _, input := range imagesFromContext(ctx) {
+		mime, data, err := DecodeImage(input)
+		if err == nil {
+			parts = append(parts, genai.NewPartFromBytes(data, mime))
+		}
 	}
-	model.GenerationConfig = cfg
+	return []*genai.Content{genai.NewContentFromParts(parts, genai.RoleUser)}
+}
+
+func geminiResponseText(response *genai.GenerateContentResponse) string {
+	if response == nil || len(response.Candidates) == 0 || response.Candidates[0].Content == nil {
+		return ""
+	}
+	var text strings.Builder
+	for _, part := range response.Candidates[0].Content.Parts {
+		if part != nil && part.Text != "" && !part.Thought {
+			text.WriteString(part.Text)
+		}
+	}
+	return strings.TrimSpace(text.String())
 }
 
 // CompleteTextStream implements the Provider interface.
 func (c *GeminiProvider) CompleteTextStream(ctx context.Context, prompt string) (<-chan StreamToken, error) {
 	tokenChan := make(chan StreamToken, 100)
+	streamCtx, cancel := context.WithTimeout(ctx, geminiRequestTimeout)
 
 	go func() {
 		defer close(tokenChan)
+		defer cancel()
 		defer func() {
-			if r := recover(); r != nil {
-				logger.Global().Error("panic in Gemini stream goroutine", logger.Any("panic", r))
-				select {
-				case tokenChan <- StreamToken{Error: "internal streaming error", Done: true}:
-				case <-ctx.Done():
-				}
+			if recovered := recover(); recovered != nil {
+				logger.Global().Error("panic in Gemini stream goroutine", logger.Any("panic", recovered))
+				_ = sendGeminiToken(streamCtx, tokenChan, StreamToken{Error: "internal streaming error", Done: true})
 			}
 		}()
 
-		c.processGeminiStream(ctx, prompt, tokenChan)
+		c.processGeminiStream(streamCtx, prompt, tokenChan)
 	}()
 
 	return tokenChan, nil
 }
 
 func (c *GeminiProvider) processGeminiStream(ctx context.Context, prompt string, tokenChan chan<- StreamToken) {
+	contents := geminiContents(ctx, prompt)
 	for _, modelName := range c.models {
-		logger.Ctx(ctx).Info("Trying Gemini stream model", logger.String("model", modelName))
-
-		if c.tryModelStream(ctx, prompt, modelName, tokenChan) {
-			logger.Ctx(ctx).Info("Gemini stream model succeeded", logger.String("model", modelName))
-
-			return // Success.
+		if ctx.Err() != nil {
+			break
 		}
-
+		modelCtx, cancelModel := context.WithTimeout(ctx, c.timeoutPerModel())
+		logger.Ctx(modelCtx).Info("Trying Gemini stream model", logger.String("model", modelName))
+		completed := c.tryModelStream(modelCtx, contents, modelName, tokenChan)
+		modelErr := modelCtx.Err()
+		cancelModel()
+		if completed {
+			logger.Ctx(ctx).Info("Gemini stream model succeeded", logger.String("model", modelName))
+			return
+		}
+		if ctx.Err() != nil {
+			break
+		}
+		if modelErr != nil {
+			logger.Ctx(ctx).Warn("Gemini stream model timed out; trying fallback",
+				logger.String("model", modelName), logger.Error(modelErr))
+		}
 		logger.Ctx(ctx).Error("Gemini stream model failed", logger.String("model", modelName))
 	}
 
 	logger.Ctx(ctx).Error("All Gemini stream models failed")
-
-	select {
-	case tokenChan <- StreamToken{Error: "all models failed", Done: true}:
-	case <-ctx.Done():
+	if ctx.Err() != nil {
+		_ = sendGeminiToken(ctx, tokenChan, StreamToken{Error: "Gemini request timed out", Done: true})
+		return
 	}
+	_ = sendGeminiToken(ctx, tokenChan, StreamToken{Error: "all models failed", Done: true})
 }
 
-func (c *GeminiProvider) tryModelStream(ctx context.Context, prompt, modelName string, tokenChan chan<- StreamToken) bool {
-	model := c.client.GenerativeModel(modelName)
-
-	maxTokens := int32(config.AIMaxOutputTokens)
-	temperature := float32(0.7)
-	topP := float32(0.8)
-	topK := int32(40)
-
-	model.GenerationConfig = genai.GenerationConfig{
-		MaxOutputTokens: &maxTokens,
-		Temperature:     &temperature,
-		TopP:            &topP,
-		TopK:            &topK,
+func (c *GeminiProvider) timeoutPerModel() time.Duration {
+	if c.modelTimeout > 0 {
+		return c.modelTimeout
 	}
-
-	iter := model.GenerateContentStream(ctx, genai.Text(prompt))
-	if iter == nil {
-		logger.Ctx(ctx).Error("Gemini stream model returned nil iterator", logger.String("model", modelName))
-
-		return false
-	}
-
-	return c.processModelIteration(ctx, iter, tokenChan)
+	return geminiModelTimeout
 }
 
-func (c *GeminiProvider) processModelIteration(ctx context.Context, iter *genai.GenerateContentResponseIterator, tokenChan chan<- StreamToken) bool {
+func (c *GeminiProvider) tryModelStream(ctx context.Context, contents []*genai.Content, modelName string, tokenChan chan<- StreamToken) bool {
+	return c.processModelIteration(ctx, modelName, contents, tokenChan)
+}
+
+func (c *GeminiProvider) processModelIteration(ctx context.Context, modelName string, contents []*genai.Content, tokenChan chan<- StreamToken) bool {
 	emittedText := false
-	for {
-		resp, err := iter.Next()
+	for response, err := range c.client.Models.GenerateContentStream(ctx, modelName, contents, geminiStreamGenerationConfig()) {
 		if err != nil {
-			if errors.Is(err, iterator.Done) {
-				select {
-				case tokenChan <- StreamToken{Done: true}:
-					return true
-				case <-ctx.Done():
-					return false
-				}
-			}
-
 			logger.Ctx(ctx).Error("Gemini stream iterator failed", logger.Error(err))
 			if emittedText {
-				select {
-				case tokenChan <- StreamToken{Error: "Gemini stopped while generating a response", Done: true}:
-				case <-ctx.Done():
-				}
+				_ = sendGeminiToken(ctx, tokenChan, StreamToken{Error: "Gemini stopped while generating a response", Done: true})
 				return true
 			}
 			return false
 		}
-
-		if resp == nil {
+		if response == nil {
 			logger.Ctx(ctx).Error("Gemini stream model returned an empty response")
 			return false
 		}
-
-		if !c.processResponse(ctx, resp, tokenChan) {
+		if geminiResponseHasText(response) {
+			emittedText = true
+		}
+		if !c.processResponse(ctx, response, tokenChan) {
 			return false
 		}
-		emittedText = true
 	}
+
+	if ctx.Err() != nil {
+		return false
+	}
+	return sendGeminiToken(ctx, tokenChan, StreamToken{Done: true})
 }
 
-// processResponse emits every text part in the chunk. Gemini streams
-// interleave non-text parts (thought summaries, usage metadata) and can
-// deliver several parts per chunk; treating one of them as a failure
-// abandoned the model mid-answer and restarted the next one.
-func (c *GeminiProvider) processResponse(ctx context.Context, resp *genai.GenerateContentResponse, tokenChan chan<- StreamToken) bool {
-	if len(resp.Candidates) == 0 || resp.Candidates[0].Content == nil {
+func geminiResponseHasText(response *genai.GenerateContentResponse) bool {
+	if response == nil || len(response.Candidates) == 0 || response.Candidates[0].Content == nil {
+		return false
+	}
+	for _, part := range response.Candidates[0].Content.Parts {
+		if part != nil && !part.Thought && strings.TrimSpace(part.Text) != "" {
+			return true
+		}
+	}
+	return false
+}
+
+// processResponse emits every non-thought text part in the chunk.
+func (c *GeminiProvider) processResponse(ctx context.Context, response *genai.GenerateContentResponse, tokenChan chan<- StreamToken) bool {
+	if response == nil || len(response.Candidates) == 0 || response.Candidates[0].Content == nil {
 		return true
 	}
-
-	for _, part := range resp.Candidates[0].Content.Parts {
-		textPart, ok := part.(genai.Text)
-		if !ok {
+	for _, part := range response.Candidates[0].Content.Parts {
+		if part == nil || part.Thought || strings.TrimSpace(part.Text) == "" {
 			continue
 		}
-		text := string(textPart)
-		if strings.TrimSpace(text) == "" {
-			continue
-		}
-
-		logger.Global().Debug("Gemini returned text chunk",
-			logger.String("text_preview", text[:min(len(text), 50)]),
-			logger.Int("length", len(text)))
-
-		select {
-		case tokenChan <- StreamToken{Text: text, Done: false}:
-		case <-ctx.Done():
+		logger.Global().Debug("Gemini returned text chunk", logger.Int("length", len(part.Text)))
+		if !sendGeminiToken(ctx, tokenChan, StreamToken{Text: part.Text}) {
 			return false
 		}
 	}
-
 	return true
+}
+
+func sendGeminiToken(ctx context.Context, tokenChan chan<- StreamToken, token StreamToken) bool {
+	select {
+	case tokenChan <- token:
+		return true
+	case <-ctx.Done():
+		return false
+	}
 }
 
 // Close implements the Provider interface.
 func (c *GeminiProvider) Close() error {
-	return c.client.Close()
+	if c.httpClient != nil {
+		c.httpClient.CloseIdleConnections()
+	}
+	return nil
 }

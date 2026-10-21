@@ -24,7 +24,7 @@ describe('useKDSOrders', () => {
     vi.clearAllMocks();
   });
 
-  it('loads KDS orders on mount', async () => {
+  it('loads KDS orders on mount and maps preparing to cooking', async () => {
     kdsClient.listKDSOrders.mockResolvedValue({
       orders: [
         {
@@ -32,7 +32,7 @@ describe('useKDSOrders', () => {
           orderNumber: '101',
           type: 'Kitchen',
           items: [{ id: '11', orderId: '1', name: 'Burger', quantity: 2 }],
-          status: 'new',
+          status: 'preparing',
           createdAt: '2026-01-01T10:00:00Z',
         },
       ],
@@ -44,6 +44,7 @@ describe('useKDSOrders', () => {
 
     expect(result.current.orders).toHaveLength(1);
     expect(result.current.orders[0].number).toBe('101');
+    expect(result.current.orders[0].status).toBe('cooking');
     expect(result.current.orders[0].items[0].name).toBe('Burger');
   });
 
@@ -66,7 +67,35 @@ describe('useKDSOrders', () => {
     expect(result.current.orders).toEqual([]);
   });
 
-  it('setStatus updates order locally and calls API', async () => {
+  it('setStatus updates order locally and maps cooking to preparing for server API', async () => {
+    kdsClient.listKDSOrders.mockResolvedValue({
+      orders: [{
+        id: '1',
+        orderNumber: '101',
+        type: 'Kitchen',
+        items: [{ id: '9', orderId: '1', name: 'Burger', quantity: 1 }],
+        status: 'new',
+      }],
+    });
+    kdsClient.updateKDSItemStatus.mockResolvedValue({ success: true });
+
+    const { result } = renderHook(() => useKDSOrders());
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await act(async () => {
+      await result.current.setStatus('1', 'cooking');
+    });
+
+    expect(result.current.orders[0].status).toBe('cooking');
+    expect(kdsClient.updateKDSItemStatus).toHaveBeenCalledWith({
+      orderId: '1',
+      itemId: '9',
+      body: { status: 'preparing' },
+    });
+  });
+
+  it('setStatus updates order locally and calls API for ready', async () => {
     kdsClient.listKDSOrders.mockResolvedValue({
       orders: [{
         id: '1',

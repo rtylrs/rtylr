@@ -2,7 +2,18 @@ package hubdeveloper
 
 import (
 	"context"
+	"errors"
 	"time"
+)
+
+var (
+	// ErrInvalidWebhook marks a registration the caller can correct: a bad
+	// URL or an unsupported event.
+	ErrInvalidWebhook  = errors.New("invalid webhook")
+	ErrWebhookNotFound = errors.New("webhook not found")
+	// ErrInvalidAPIKey marks a key request the caller can correct.
+	ErrInvalidAPIKey  = errors.New("invalid api key")
+	ErrAPIKeyNotFound = errors.New("api key not found")
 )
 
 type APIKey struct {
@@ -69,9 +80,14 @@ type APIKeysProvider interface {
 
 type WebhooksProvider interface {
 	List(ctx context.Context, businessID int64) ([]Webhook, error)
-	Create(ctx context.Context, ownerID, businessID int64, url string, events []string) (int64, error)
+	// Create registers a webhook and returns its signing secret, which is
+	// never readable again.
+	Create(ctx context.Context, ownerID, businessID int64, url string, events []string) (id int64, secret string, err error)
 	Update(ctx context.Context, businessID, webhookID int64, url string, events []string, isActive bool) (Webhook, error)
 	Delete(ctx context.Context, businessID, webhookID int64) error
+	// RotateSecret replaces the signing secret and returns the new one, which
+	// is never readable again.
+	RotateSecret(ctx context.Context, businessID, webhookID int64) (string, error)
 	// ListDeliveries returns a page of delivery attempts for the business,
 	// most recent first, with the total matching the filter.
 	ListDeliveries(ctx context.Context, businessID int64, filter DeliveryFilter) ([]Delivery, int64, error)

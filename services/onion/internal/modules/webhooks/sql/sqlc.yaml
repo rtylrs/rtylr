@@ -3,8 +3,9 @@ sql:
   - engine: "mysql"
     queries: "queries"
     schema:
-      - "../../../../internal/platform/database/schemas/shared"
-      - "../../../../internal/platform/database/schemas/hub"
+      - "schema/shared/dead_delivery_notices.sql"
+      - "schema/shared/webhook_deliveries.sql"
+      - "schema/hub/hub_webhooks.sql"
     gen:
       go:
         package: "sqlc"

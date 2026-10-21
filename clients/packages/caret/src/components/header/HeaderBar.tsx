@@ -1,11 +1,19 @@
-import React from 'react';
-import { ArrowLeft, ChevronDown, Maximize2, Minimize2, Settings, SquarePen, X } from 'lucide-react';
-import { caretTokens } from '../../ui/tokens';
-import IconButton from '../../ui/IconButton';
-import Tooltip from '../../ui/Tooltip';
-import { useCaretStore } from '../../stores/caretStore';
-import { useCaretUIStore } from '../../stores/uiStore';
-import HistoryHover from './HistoryHover';
+import React from "react";
+import {
+  ArrowLeft,
+  ChevronDown,
+  Maximize2,
+  Minimize2,
+  Settings,
+  SquarePen,
+  X,
+} from "lucide-react";
+import { caretTokens } from "../../ui/tokens";
+import IconButton from "../../ui/IconButton";
+import Tooltip from "../../ui/Tooltip";
+import { useCaretStore } from "../../stores/caretStore";
+import { useCaretUIStore } from "../../stores/uiStore";
+import HistoryHover from "./HistoryHover";
 
 export interface HeaderBarProps {
   onNewChat?: () => void;
@@ -34,33 +42,33 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
     <div
       className="caret-header-bar"
       style={{
-        height: 44,
-        display: 'flex',
-        alignItems: 'center',
+        height: "var(--caret-header-height, 44px)",
+        display: "flex",
+        alignItems: "center",
         gap: 4,
-        padding: '0 10px',
+        padding: "0 10px",
         background: caretTokens.bg,
         flexShrink: 0,
       }}
     >
-      {view === 'chat' ? (
+      {view === "chat" ? (
         <>
           {title && (
             <button
               type="button"
-              onClick={() => setView('history')}
+              onClick={() => setView("history")}
               className="caret-chrome-button"
               style={{
-                display: 'flex',
-                alignItems: 'center',
+                display: "flex",
+                alignItems: "center",
                 gap: 4,
-                border: 'none',
-                background: 'transparent',
+                border: "none",
+                background: "transparent",
                 color: caretTokens.textMuted,
                 fontSize: 13,
                 fontWeight: 600,
-                cursor: 'pointer',
-                padding: '4px 6px',
+                cursor: "pointer",
+                padding: "4px 6px",
                 borderRadius: 6,
               }}
             >
@@ -87,7 +95,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             className="caret-chrome-button"
             size="md"
             label="Back to chat"
-            onClick={() => setView('chat')}
+            onClick={() => setView("chat")}
           >
             <ArrowLeft size={15} />
           </IconButton>
@@ -99,11 +107,11 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
       <HistoryHover />
 
       {onToggleExpand && (
-        <Tooltip label={expanded ? 'Restore' : 'Maximize'}>
+        <Tooltip label={expanded ? "Restore" : "Maximize"}>
           <IconButton
             className="caret-chrome-button"
             size="md"
-            label={expanded ? 'Restore' : 'Maximize'}
+            label={expanded ? "Restore" : "Maximize"}
             onClick={onToggleExpand}
           >
             {expanded ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
@@ -116,8 +124,8 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
           className="caret-chrome-button"
           size="md"
           label="Settings"
-          active={view === 'settings'}
-          onClick={() => setView('settings')}
+          active={view === "settings"}
+          onClick={() => setView("settings")}
         >
           <Settings size={13} />
         </IconButton>
@@ -125,7 +133,12 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
 
       {!hideClose && (
         <Tooltip label="Close">
-          <IconButton className="caret-chrome-button" size="md" label="Close Caret" onClick={close}>
+          <IconButton
+            className="caret-chrome-button"
+            size="md"
+            label="Close Caret"
+            onClick={close}
+          >
             <X size={15} />
           </IconButton>
         </Tooltip>

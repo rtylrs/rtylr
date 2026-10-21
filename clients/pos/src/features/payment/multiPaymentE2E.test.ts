@@ -7,6 +7,7 @@
  */
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { finalizeMultiPayment } from './multiPaymentWorkflow';
+import type { ChargeOrderRequest } from './checkoutWorkflow';
 import { printReceiptAndOpenDrawer } from './paymentHardware';
 
 vi.mock('../../shared/services/hardware/receiptPrinter', () => ({
@@ -76,7 +77,19 @@ describe('split-tender checkout: $33 cash + $22 card', () => {
       orderId: '99',
       paymentMethod: 'cash',
       amountPaid: 55,
+      idempotencyKey: expect.any(String),
     });
+  });
+
+  it('gives a separate Finalize press its own idempotency key', async () => {
+    const chargeOrder = vi.fn(async (_request: ChargeOrderRequest) => undefined);
+
+    await finalizeMultiPayment({ orderId: '99', payments, chargeOrder });
+    await finalizeMultiPayment({ orderId: '99', payments, chargeOrder });
+
+    const keys = chargeOrder.mock.calls.map((call) => call[0].idempotencyKey);
+    expect(keys).toHaveLength(2);
+    expect(keys[0]).not.toBe(keys[1]);
   });
 
   it('rejects an invalid order id before calling chargeOrder', async () => {

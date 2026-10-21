@@ -1,0 +1,331 @@
+name: Migrate Onion database
+
+# Applies the schema set from a released tag to a deployed database.
+#
+# deploy.yml calls this before it ships the API and the worker, so a release's
+# migrations land before the code that reads them. Until it did, this ran only
+# by hand: the last manual run was 6.0.7, and for ten days every release that
+# added a column answered with a 500 wherever it read it (contracts, bank
+# accounts) while its migration sat unapplied. Run it by hand to migrate a
+# release again or to rehearse one with dry_run.
+#
+# A GitHub runner cannot reach the database directly: it lives on a private VPC
+# address with 3306 closed to the world. This works the same way the ECS deploy
+# does, by calling the public AWS API to run something *inside* the VPC. The
+# migration task borrows its network and its database credentials from the live
+# API service's own task definition, so nothing here needs to know a secret and
+# no credential is ever passed through the runner.
+#
+# Run by hand, dry_run defaults to true, so a manual run cannot migrate
+# anything by accident: it renders the plan and stops.
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Release tag whose schemas should be applied, for example 0.8.4
+        required: true
+        type: string
+      cluster:
+        description: ECS cluster
+        required: false
+        default: voxire-prod
+        type: string
+      service:
+        description: Service to copy database credentials and networking from
+        required: false
+        default: api
+        type: string
+      container:
+        description: Container in that service holding the database configuration
+        required: false
+        default: api
+        type: string
+      dry_run:
+        description: Render the task definition and stop without migrating
+        required: false
+        default: true
+        type: boolean
+  workflow_call:
+    inputs:
+      release_tag:
+        description: Release tag whose schemas should be applied
+        required: true
+        type: string
+      cluster:
+        required: false
+        default: voxire-prod
+        type: string
+      service:
+        required: false
+        default: api
+        type: string
+      container:
+        required: false
+        default: api
+        type: string
+      dry_run:
+        required: false
+        default: false
+        type: boolean
+    secrets:
+      PAT_TOKEN:
+        required: false
+      AWS_ACCESS_KEY_ID:
+        required: false
+      AWS_SECRET_ACCESS_KEY:
+        required: false
+
+concurrency:
+  group: migrate-${{ inputs.cluster }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: eu-west-1
+  ECR_REGISTRY: 101533649486.dkr.ecr.eu-west-1.amazonaws.com
+  IMAGE_REPOSITORY: voxire/onion
+
+jobs:
+  migrate:
+    name: Migrate ${{ inputs.cluster }} from ${{ inputs.release_tag }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Verify the release exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: gh api "repos/${{ github.repository }}/releases/tags/$RELEASE_TAG" --silent
+
+      # voxie is still a private submodule. The default GITHUB_TOKEN cannot read
+      # another private repository, so a checkout without PAT_TOKEN fails with
+      # "Repository not found" before anything else runs.
+      # deploy-ecs-release.yml passes the same token for the same reason.
+      - name: Checkout the release, with schemas
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag }}
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN || github.token }}
+
+      # The release tag supplies the schema set, which is the thing being
+      # applied. The migration tooling has to come from this workflow's own
+      # commit instead: a tag cut before the tooling existed carries a
+      # Dockerfile.migrate that does not ship dsn.sh and a migrate.sh that
+      # cannot read DATABASE_URL, so an image built from it would abort with
+      # "DB_USER is required" against a production task that sets only a DSN.
+      # Separating the two means an old release can still be migrated.
+      - name: Take the migration tooling from this workflow's commit
+        env:
+          TOOLING_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          git fetch --depth 1 origin "$TOOLING_SHA"
+          git checkout "$TOOLING_SHA" -- services/onion/scripts services/onion/Dockerfile.migrate
+          echo "Migration tooling taken from $TOOLING_SHA"
+          echo "Schema set remains at ${{ inputs.release_tag }}"
+
+      - name: Confirm the schema set is present
+        run: |
+          set -euo pipefail
+          registry=services/onion/internal/platform/database/schema_registry.tsv
+          if [ ! -f "$registry" ]; then
+            echo "The schema set is missing from the checkout; there is nothing to apply." >&2
+            exit 1
+          fi
+          echo "Module-owned schema migrations to be applied, in order:"
+          cut -f1 "$registry" | sed '/^#/d; /^$/d'
+
+      - name: Check the DSN parser still holds
+        run: bash services/onion/scripts/dsn_test.sh
+
+      - name: Require AWS credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+            echo 'AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be set on this repository' >&2
+            exit 1
+          fi
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region "$AWS_REGION" \
+            | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+
+      - name: Build and push the migrate image
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          IMAGE_URI="$ECR_REGISTRY/$IMAGE_REPOSITORY:${RELEASE_TAG}-migrate"
+          docker build -f services/onion/Dockerfile.migrate -t "$IMAGE_URI" services/onion
+          docker push "$IMAGE_URI"
+          echo "IMAGE_URI=$IMAGE_URI" >> "$GITHUB_ENV"
+
+      # The live service is the source of truth for both halves of the problem:
+      # which subnets and security groups can reach the database, and where the
+      # database credentials come from. Copying them means this workflow holds
+      # no secret of its own and cannot drift from the API.
+      - name: Derive networking and credentials from the live service
+        id: derive
+        env:
+          CLUSTER: ${{ inputs.cluster }}
+          SERVICE: ${{ inputs.service }}
+          CONTAINER: ${{ inputs.container }}
+        run: |
+          set -euo pipefail
+          aws ecs describe-services --cluster "$CLUSTER" --services "$SERVICE" \
+            --region "$AWS_REGION" --query 'services[0]' > service.json
+
+          TASK_DEFINITION_ARN="$(jq -r '.taskDefinition' service.json)"
+          if [ -z "$TASK_DEFINITION_ARN" ] || [ "$TASK_DEFINITION_ARN" = "null" ]; then
+            echo "Service $SERVICE was not found in cluster $CLUSTER" >&2
+            exit 1
+          fi
+
+          NETWORK="$(jq -c '.networkConfiguration' service.json)"
+          if [ "$NETWORK" = "null" ]; then
+            echo "Service $SERVICE has no awsvpc network configuration to borrow" >&2
+            exit 1
+          fi
+          echo "$NETWORK" > network.json
+
+          aws ecs describe-task-definition --task-definition "$TASK_DEFINITION_ARN" \
+            --region "$AWS_REGION" --query taskDefinition > source-task.json
+
+          # Fail loudly rather than migrating with no database configured.
+          jq --exit-status --arg c "$CONTAINER" \
+            'any(.containerDefinitions[]; .name == $c)' source-task.json >/dev/null \
+            || { echo "Container $CONTAINER is not in the active task definition" >&2; exit 1; }
+
+          HAS_DB="$(jq -r --arg c "$CONTAINER" '
+            .containerDefinitions[] | select(.name == $c)
+            | [((.secrets // [])[].name), ((.environment // [])[].name)]
+            | map(select(. == "DATABASE_URL" or startswith("DB_")))
+            | length' source-task.json)"
+          if [ "$HAS_DB" -eq 0 ]; then
+            echo "Container $CONTAINER exposes neither DATABASE_URL nor any DB_* variable" >&2
+            exit 1
+          fi
+          echo "Borrowing $HAS_DB database variable(s) from $CONTAINER"
+
+      - name: Render the migration task definition
+        run: |
+          set -euo pipefail
+          # Keep migration execution within its narrowly authorized task family.
+          jq --arg image "$IMAGE_URI" \
+             --arg container "${{ inputs.container }}" \
+             --arg family "onion-migrate" '
+            (.containerDefinitions[] | select(.name == $container)) as $src
+            | {
+                family: $family,
+                executionRoleArn: .executionRoleArn,
+                networkMode: .networkMode,
+                requiresCompatibilities: .requiresCompatibilities,
+                cpu: .cpu,
+                memory: .memory,
+                containerDefinitions: [{
+                  name: "migrate",
+                  image: $image,
+                  essential: true,
+                  environment: ($src.environment // []),
+                  secrets: ($src.secrets // []),
+                  logConfiguration: $src.logConfiguration
+                }]
+              }
+            | with_entries(select(.value != null))' source-task.json > migration-task.json
+
+          echo "Rendered task definition (secret VALUES are never present here, only their ARNs):"
+          jq '.containerDefinitions[0].secrets |= map({name, valueFrom})' migration-task.json
+
+      - name: Stop here when this is a dry run
+        if: ${{ inputs.dry_run }}
+        run: |
+          echo "dry_run was true, so nothing was migrated."
+          echo "Re-run with dry_run unchecked to apply the schema set."
+
+      - name: Register the migration task definition
+        if: ${{ !inputs.dry_run }}
+        id: register
+        run: |
+          set -euo pipefail
+          ARN="$(aws ecs register-task-definition \
+            --cli-input-json "file://migration-task.json" \
+            --region "$AWS_REGION" \
+            --query 'taskDefinition.taskDefinitionArn' --output text)"
+          echo "arn=$ARN" >> "$GITHUB_OUTPUT"
+          echo "Registered $ARN"
+
+      - name: Run the migration inside the VPC
+        if: ${{ !inputs.dry_run }}
+        id: run
+        env:
+          CLUSTER: ${{ inputs.cluster }}
+          TASK_DEFINITION_ARN: ${{ steps.register.outputs.arn }}
+        run: |
+          set -euo pipefail
+          TASK_ARN="$(aws ecs run-task \
+            --cluster "$CLUSTER" \
+            --task-definition "$TASK_DEFINITION_ARN" \
+            --launch-type FARGATE \
+            --network-configuration "file://network.json" \
+            --started-by "migrate-${{ github.run_id }}" \
+            --region "$AWS_REGION" \
+            --query 'tasks[0].taskArn' --output text)"
+          if [ -z "$TASK_ARN" ] || [ "$TASK_ARN" = "None" ]; then
+            echo "The migration task was not accepted by ECS" >&2
+            exit 1
+          fi
+          echo "Started $TASK_ARN"
+          echo "task_arn=$TASK_ARN" >> "$GITHUB_OUTPUT"
+
+          aws ecs wait tasks-stopped --cluster "$CLUSTER" --tasks "$TASK_ARN" --region "$AWS_REGION"
+
+      - name: Report the migration output
+        if: ${{ !inputs.dry_run && always() && steps.run.outputs.task_arn != '' }}
+        env:
+          CLUSTER: ${{ inputs.cluster }}
+          TASK_ARN: ${{ steps.run.outputs.task_arn }}
+        run: |
+          set -euo pipefail
+          aws ecs describe-tasks --cluster "$CLUSTER" --tasks "$TASK_ARN" \
+            --region "$AWS_REGION" --query 'tasks[0]' > finished.json
+
+          GROUP="$(jq -r '.containerDefinitions[0].logConfiguration.options."awslogs-group" // empty' migration-task.json)"
+          PREFIX="$(jq -r '.containerDefinitions[0].logConfiguration.options."awslogs-stream-prefix" // empty' migration-task.json)"
+          if [ -n "$GROUP" ] && [ -n "$PREFIX" ]; then
+            TASK_ID="${TASK_ARN##*/}"
+            echo "--- migration log ---"
+            # Say why the log could not be read; "not readable" alone left every
+            # run without its output and nothing to fix.
+            if ! aws logs get-log-events \
+              --log-group-name "$GROUP" \
+              --log-stream-name "$PREFIX/migrate/$TASK_ID" \
+              --region "$AWS_REGION" \
+              --query 'events[].[message]' --output text 2>logs-error.txt; then
+              echo "(log stream $GROUP:$PREFIX/migrate/$TASK_ID not readable: $(head -c 400 logs-error.txt))"
+            fi
+            echo "--- end ---"
+          fi
+
+          EXIT_CODE="$(jq -r '.containers[0].exitCode // empty' finished.json)"
+          REASON="$(jq -r '.stoppedReason // empty' finished.json)"
+          echo "exit code: ${EXIT_CODE:-none}   stopped reason: ${REASON:-none}"
+          if [ "${EXIT_CODE:-1}" != "0" ]; then
+            echo "The migration did not succeed. Nothing that failed was recorded as applied." >&2
+            exit 1
+          fi
+          echo "Migrations applied."

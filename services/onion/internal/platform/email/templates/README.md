@@ -52,12 +52,29 @@ struct. The fields each template expects:
 | Template               | Data fields                                 |
 | ---------------------- | ------------------------------------------- |
 | `welcome/welcome`      | `Name`                                      |
-| `team/invitation`      | `InviterName`, `BusinessName`, `InviteLink` |
+| `team/invitation`      | `InviterName`, `BusinessName` (either may be empty), `InviteLink`, `ValidDays` |
 | `team/access_request`  | `RequesterName`, `RequesterEmail`, `App`, `TeamLink` |
 | `auth/password_reset`  | (see `email.go` call site)                  |
 | `billing/invoice`      | (see `email.go` call site)                  |
 
 `.Subject` is available to every template (used by the base layout).
+
+## Look and buttons
+
+The layout follows rtylr.com: a flat white card with a hairline border on a
+soft grey page, ink (`#131313`) type and a black button, in DM Sans with system
+fallbacks. Clients that support `prefers-color-scheme` get a dark variant with
+the light logo.
+
+Buttons go through the base layout's `button` template so they render as a
+table cell with an inline fill, which survives clients that strip `<style>`:
+
+```html
+{{template "button" (action .InviteLink "Accept invitation")}}
+```
+
+`action` pairs the link with its label; the link is escaped and unsafe schemes
+are filtered like any other `href`.
 
 ## Adding a template
 

@@ -1,0 +1,1212 @@
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
+import { useClickOutside } from '@voxire/utils';
+import { createPortal } from 'react-dom';
+import { motion } from 'motion/react';
+import { toast } from 'sonner';
+import { useParams } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
+import { ChevronDown, GripVertical, ListChecks, Plus, Settings2, Trash2 } from 'lucide-react';
+import { useFlowStore } from '../../shared/stores/flowStore';
+import { useTasks } from '../tasks/useTasks';
+import {
+  useProjectColumns,
+  useCreateColumn,
+  useUpdateColumn,
+  useDeleteColumn,
+  useMoveTaskToColumn,
+} from './useColumns';
+import { apiTaskToTask } from '../../shared/lib/taskMapper';
+import { addDays, todayIso } from '../../shared/lib/dateUtils';
+import type { BoardGroupKey } from '../../shared/lib/boardUtils';
+import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
+import TaskCard from '../../shared/components/TaskCard';
+import ConfirmDialog from '../../shared/components/ConfirmDialog';
+import ProjectViewTabs from './ProjectViewTabs';
+import MoveToColumnMenu, { type MoveTarget } from './components/MoveToColumnMenu';
+import {
+  columnIdAtPoint,
+  exceedsDragThreshold,
+  resolveDropTarget,
+  type ColumnRect,
+} from './boardDrag';
+import {
+  insertionIndex,
+  isSamePlace,
+  orderBoardTasks,
+  orderedIdsAfterDrop,
+  type CardSlot,
+  type DropSlot,
+} from './boardOrder';
+import { useCurrentProject } from './useCurrentProject';
+import {
+  useCanEditTask,
+  useCanCreateTask,
+  useCanDeleteResource,
+} from '../../shared/lib/currentUser';
+import BoardSettingsPanel from './components/BoardSettingsPanel';
+import StatusSettingsPanel from './components/StatusSettingsPanel';
+import type { ApiProjectColumn } from '../../shared/services/flowApi';
+import type { Task } from '../../shared/stores/flowStore';
+import { withAlpha, onTint } from '../../shared/lib/colorUtils';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
+
+/** What the board renders while a card is being dragged. */
+interface DragView {
+  taskId: string;
+  /** Where the card started: its column and its place among that column's cards. */
+  source: DropSlot;
+  /** Where it would land now, or null while the pointer is outside every column. */
+  slot: DropSlot | null;
+  /** The card's height, so the placeholder holds exactly the space it will fill. */
+  height: number;
+}
+
+/** The floating copy of the card that follows the pointer. */
+interface GhostInfo {
+  task: Task;
+  width: number;
+}
+
+/** Everything one drag gesture needs, captured when the pointer goes down. */
+interface DragSession {
+  pointerId: number;
+  taskId: string;
+  task: Task;
+  source: DropSlot;
+  /** Cards can only be reordered when the board is not split into swimlanes. */
+  reorder: boolean;
+  startX: number;
+  startY: number;
+  x: number;
+  y: number;
+  /** Where inside the card the pointer grabbed it, so the copy does not jump. */
+  offsetX: number;
+  offsetY: number;
+  width: number;
+  height: number;
+  /** Each column's card ids in display order, as they were when the drag began. */
+  columnIds: Map<string, string[]>;
+  /** Each column's card centres, measured against the list's own top edge. */
+  slots: Map<string, CardSlot[]>;
+  slot: DropSlot | null;
+  active: boolean;
+  cleanup: () => void;
+}
+
+/**
+ * The card being dragged stays mounted but leaves the layout. A touch pointer
+ * keeps targeting the node it went down on, so that node must not be unmounted
+ * or re-parented while the drag is in progress.
+ */
+const HIDDEN_CARD_STYLE: React.CSSProperties = {
+  position: 'absolute',
+  visibility: 'hidden',
+  pointerEvents: 'none',
+  width: '100%',
+};
+
+const sameSlot = (a: DropSlot | null, b: DropSlot | null): boolean =>
+  a === b || (a !== null && b !== null && a.columnId === b.columnId && a.index === b.index);
+
+/** Card centres of one column list, relative to the top of its scrollable content. */
+const measureSlots = (list: HTMLElement | null | undefined): CardSlot[] => {
+  if (!list) return [];
+  const origin = list.getBoundingClientRect().top - list.scrollTop;
+  return [...list.querySelectorAll<HTMLElement>('[data-board-card]')].map((el) => {
+    const r = el.getBoundingClientRect();
+    return { id: el.dataset.boardCard ?? '', mid: r.top - origin + r.height / 2 };
+  });
+};
+
+// ── Group-by (swimlanes) ────────────────────────────────────────────────
+// "None" = plain kanban columns. Any other value partitions each column's
+// tasks into horizontal lanes keyed by that attribute (assignee, priority,
+// etc.). The choice persists per-project in localStorage so switching
+// projects doesn't reset it.
+
+/** Re-exported name kept local for readability; the type lives in boardUtils. */
+type GroupKey = BoardGroupKey;
+
+// labelKey, not label: module scope, so it cannot call `t` itself.
+const GROUP_OPTIONS: { key: GroupKey; labelKey: string }[] = [
+  { key: 'none', labelKey: 'flow.board.groupBy.none' },
+  { key: 'assignee', labelKey: 'flow.board.groupBy.assignee' },
+  { key: 'priority', labelKey: 'flow.board.groupBy.priority' },
+  { key: 'due', labelKey: 'flow.board.groupBy.due' },
+];
+
+const PRIORITY_ORDER: Task['priority'][] = ['urgent', 'high', 'medium', 'low', 'no_priority'];
+
+const PRIORITY_LABEL_KEY: Record<Task['priority'], string> = {
+  urgent: 'flowPriority.urgent',
+  high: 'flowPriority.high',
+  medium: 'flowPriority.medium',
+  low: 'flowPriority.low',
+  no_priority: 'flowPriority.noPriority',
+};
+
+interface Lane {
+  key: string;
+  /** A person's name, for assignee lanes. Never translated. */
+  label?: string;
+  /** A translation key, for priority and due-window lanes. */
+  labelKey?: string;
+  tasks: Task[];
+}
+
+/**
+ * Partition a column's tasks into lanes. Every column renders the same
+ * set of lane keys in the same order so rows line up horizontally across
+ * columns - this is the "swimlane" effect.
+ */
+function buildLanes(
+  allLaneKeys: { key: string; label?: string; labelKey?: string }[],
+  columnTasks: Task[],
+  groupBy: GroupKey
+): Lane[] {
+  if (groupBy === 'none') {
+    return [{ key: '_all', label: '', tasks: columnTasks }];
+  }
+  const byKey = new Map<string, Task[]>();
+  for (const t of columnTasks) {
+    const k = laneKeyFor(t, groupBy);
+    const bucket = byKey.get(k) ?? [];
+    bucket.push(t);
+    byKey.set(k, bucket);
+  }
+  return allLaneKeys.map(({ key, label, labelKey }) => ({
+    key,
+    label,
+    labelKey,
+    tasks: byKey.get(key) ?? [],
+  }));
+}
+
+// Exported for the lane-key regression test: the due-date lanes are the only
+// place a board swimlane can silently mislabel a task, and the comparison is
+// not visible from the rendered output alone.
+export function laneKeyFor(t: Task, groupBy: GroupKey): string {
+  if (groupBy === 'assignee') return t.assignee || 'Unassigned';
+  if (groupBy === 'priority') return t.priority;
+  if (groupBy === 'due') {
+    if (!t.dueDate) return 'No due date';
+    // A due date is a calendar day, not an instant. The previous
+    // `Math.round((new Date(due) - new Date()) / msPerDay)` parsed the bare
+    // date as UTC midnight and rounded against a local `now`, so a task due
+    // today slid into "Overdue" for the last third of the working day
+    // (rtylr#1077). Compare the day strings instead, as bucketForMyTask does.
+    const due = t.dueDate.split('T')[0] ?? '';
+    if (due === '') return 'No due date';
+    const today = todayIso();
+    if (due < today) return 'Overdue';
+    if (due === today) return 'Today';
+    if (due <= addDays(today, 7)) return 'This week';
+    if (due <= addDays(today, 30)) return 'This month';
+    return 'Later';
+  }
+  return '_all';
+}
+
+/**
+ * Derive the deterministic ordered lane list across ALL tasks so every
+ * column shows the same swimlanes in the same order. Without this, empty
+ * columns would skip lanes and rows would misalign.
+ */
+function buildLaneIndex(
+  tasks: Task[],
+  groupBy: GroupKey
+): { key: string; label?: string; labelKey?: string }[] {
+  if (groupBy === 'none') return [{ key: '_all', label: '' }];
+
+  if (groupBy === 'priority') {
+    return PRIORITY_ORDER.map((p) => ({ key: p, labelKey: PRIORITY_LABEL_KEY[p] }));
+  }
+
+  if (groupBy === 'due') {
+    // The keys stay as they are: they are lane identities used for bucketing,
+    // not text, and translating them would break the grouping.
+    return [
+      { key: 'Overdue', labelKey: 'flow.board.dueLane.overdue' },
+      { key: 'Today', labelKey: 'flow.board.dueLane.today' },
+      { key: 'This week', labelKey: 'flow.board.dueLane.thisWeek' },
+      { key: 'This month', labelKey: 'flow.board.dueLane.thisMonth' },
+      { key: 'Later', labelKey: 'flow.board.dueLane.later' },
+      { key: 'No due date', labelKey: 'flow.board.dueLane.noDueDate' },
+    ];
+  }
+
+  // assignee - build from data, keep stable order by first-seen. These labels
+  // are people's names, so they carry `label` and are never translated.
+  const seen = new Map<string, string>();
+  for (const t of tasks) {
+    const k = laneKeyFor(t, groupBy);
+    if (!seen.has(k)) seen.set(k, k);
+  }
+  return Array.from(seen.values()).map((k) => ({ key: k, label: k }));
+}
+
+function loadGroupBy(projectId: string): GroupKey {
+  try {
+    const raw = localStorage.getItem(`flow:board:groupBy:${projectId}`);
+    if (raw === 'none' || raw === 'assignee' || raw === 'priority' || raw === 'due') {
+      return raw;
+    }
+  } catch {
+    // localStorage unavailable (SSR / private mode) - fall through.
+  }
+  return 'none';
+}
+
+function saveGroupBy(projectId: string, key: GroupKey): void {
+  try {
+    localStorage.setItem(`flow:board:groupBy:${projectId}`, key);
+  } catch {
+    // ignore
+  }
+}
+
+const ProjectBoard: React.FC = () => {
+  const { t } = useTranslation();
+  const { projectId = '' } = useParams({ strict: false });
+
+  const selectedTaskIds = useFlowStore((state) => state.selectedTaskIds);
+
+  const toggleSelectTask = useFlowStore((state) => state.toggleSelectTask);
+  const {
+    project,
+    isLoading: projectLoading,
+    loadFailed: projectMetadataFailed,
+    refetch: refetchProjectMetadata,
+  } = useCurrentProject(projectId);
+  const moveTask = useMoveTaskToColumn();
+  const canEdit = useCanEditTask(projectId);
+  const canCreate = useCanCreateTask(projectId);
+  // "Manage project" for board setup. A viewer still opens the panel and sees
+  // why it is read-only, rather than the board's behaviour being unexplainable.
+  const canManageBoard = useCanDeleteResource(projectId);
+
+  useProjectRealtime(projectId);
+
+  const tasksQuery = useTasks({ projectId, activeOnly: true, compact: true });
+  const { data: apiTasks = [] } = tasksQuery;
+  const projectLoadFailed = projectMetadataFailed || hasQueryFailed(tasksQuery);
+  const refetchProjects = () => {
+    void refetchProjectMetadata();
+    void tasksQuery.refetch();
+  };
+  const columnsQuery = useProjectColumns(projectId);
+  const { data: columns = [] } = columnsQuery;
+  const createColumn = useCreateColumn(projectId);
+  const updateColumn = useUpdateColumn(projectId);
+  const deleteColumn = useDeleteColumn(projectId);
+
+  // The live drag preview. `source` is where the card started; `slot` is where
+  // the pointer says it would land now, or null while it is outside every
+  // column (the placeholder then sits back at the source).
+  const [dragView, setDragView] = useState<DragView | null>(null);
+  const [ghost, setGhost] = useState<GhostInfo | null>(null);
+  const draggingTaskId = dragView?.taskId ?? null;
+  const dragOver = dragView?.slot?.columnId ?? null; // column id
+  const [addingColumn, setAddingColumn] = useState(false);
+  const [newColumnName, setNewColumnName] = useState('');
+  const [groupBy, setGroupByState] = useState<GroupKey>('none');
+  const [pendingDeleteColumn, setPendingDeleteColumn] = useState<ApiProjectColumn | null>(null);
+  const [boardSettingsOpen, setBoardSettingsOpen] = useState(false);
+  const [statusSettingsOpen, setStatusSettingsOpen] = useState(false);
+
+  // Hydrate group-by from localStorage once the project id is known.
+  useEffect(() => {
+    if (projectId) setGroupByState(loadGroupBy(projectId));
+  }, [projectId]);
+
+  const setGroupBy = (k: GroupKey): void => {
+    setGroupByState(k);
+    if (projectId) saveGroupBy(projectId, k);
+  };
+
+  // Tasks mapped to Task shape for TaskCard. Computed BEFORE any early
+  // return so the useMemo below always runs in the same hook slot on
+  // every render (React #310 otherwise - conditional hook order).
+  // `activeOnly` is a query param the backend doesn't currently act on,
+  // so archived tasks still come back over the wire - filter client-side
+  // to match Triage/FocusToday/FlowLayout.
+  const tasks: Task[] = useMemo(
+    () => apiTasks.map(apiTaskToTask).filter((t) => !t.archived),
+    [apiTasks]
+  );
+
+  // Precompute the ordered lane index across all tasks so every column
+  // renders the same rows in the same order - otherwise empty columns
+  // would silently skip lanes and the swimlane grid misaligns.
+  const laneIndex = useMemo(() => buildLaneIndex(tasks, groupBy), [tasks, groupBy]);
+
+  // Every column is a move destination for the non-drag path (B2).
+  const moveTargets: MoveTarget[] = useMemo(
+    () => columns.map((c) => ({ id: String(c.id), name: c.name })),
+    [columns]
+  );
+
+  const columnRefs = useRef(new Map<string, HTMLDivElement | null>());
+  const listRefs = useRef(new Map<string, HTMLDivElement | null>());
+  const ghostRef = useRef<HTMLDivElement | null>(null);
+  const justDraggedRef = useRef(false);
+  const dragRef = useRef<DragSession | null>(null);
+
+  if (projectLoading && !project) {
+    return (
+      <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
+        {t('flow.project.loading')}
+      </div>
+    );
+  }
+
+  // A failed project list leaves `project` undefined exactly as a missing one
+  // does, so a 500 used to tell the user their project had gone.
+  if (projectLoadFailed || hasQueryFailed(columnsQuery)) {
+    return (
+      <ListLoadFailed
+        onRetry={() => {
+          refetchProjects();
+          void columnsQuery.refetch();
+        }}
+      />
+    );
+  }
+
+  if (!project) {
+    return (
+      <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
+        {t('flow.project.notFound')}
+      </div>
+    );
+  }
+
+  // Bucket tasks by column. Tasks with no sectionId go into first column.
+  function tasksForColumn(col: ApiProjectColumn, colIndex: number): Task[] {
+    // `Task.sectionId` is a stringified column id (see apiTaskToTask), so the
+    // board keys buckets on `String(col.id)`. Comparing against the raw number
+    // matched `"5"` against `5` - always false - and made moved tasks vanish.
+    const colKey = String(col.id);
+    return orderBoardTasks(
+      tasks.filter((t) => {
+        if (t.sectionId && String(t.sectionId) === colKey) return true;
+        // Unsectioned tasks go into first column.
+        if (colIndex === 0 && !t.sectionId) return true;
+        return false;
+      })
+    );
+  }
+
+  // Pointer-based card drag (B1). HTML5 drag-and-drop never fired on touch, so
+  // the board was mouse-only; pointer events cover mouse, touch and pen in one
+  // path.
+  //
+  // Mouse and pen can start a drag anywhere on a card; the card suppresses its
+  // open click only after the movement threshold is crossed. Touch starts on
+  // the grip so the board remains scrollable elsewhere.
+  const measureColumns = (): ColumnRect[] => {
+    const out: ColumnRect[] = [];
+    for (const [id, el] of columnRefs.current) {
+      if (!el) continue;
+      const r = el.getBoundingClientRect();
+      out.push({ id, left: r.left, right: r.right, top: r.top, bottom: r.bottom });
+    }
+    return out;
+  };
+
+  const positionGhost = (): void => {
+    const drag = dragRef.current;
+    const el = ghostRef.current;
+    if (!drag || !el) return;
+    el.style.transform = `translate3d(${drag.x - drag.offsetX}px, ${drag.y - drag.offsetY}px, 0) rotate(1.5deg) scale(1.02)`;
+  };
+
+  /** Which column, and which place in it, the pointer is over right now. */
+  const slotAt = (drag: DragSession, x: number, y: number): DropSlot | null => {
+    const columnId = columnIdAtPoint(measureColumns(), x, y);
+    if (columnId === null) return null;
+    const list = listRefs.current.get(columnId);
+    const slots = drag.slots.get(columnId) ?? [];
+    if (!list) return { columnId, index: slots.length };
+    const y0 = list.getBoundingClientRect().top - list.scrollTop;
+    return { columnId, index: insertionIndex(slots, drag.taskId, y - y0) };
+  };
+
+  const endSession = (): void => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    drag.cleanup();
+    dragRef.current = null;
+    setDragView(null);
+    setGhost(null);
+  };
+
+  const commitDrop = (drag: DragSession, slot: DropSlot | null): void => {
+    // Released outside every column: the drag is cancelled.
+    if (slot === null) return;
+    if (!drag.reorder) {
+      // Swimlanes: a card changes column but has no single place to take.
+      const target = resolveDropTarget(slot.columnId, drag.source.columnId);
+      if (target !== null) moveTask.mutate({ taskId: drag.taskId, columnId: target });
+      return;
+    }
+    if (isSamePlace(drag.source, slot)) return;
+    moveTask.mutate({
+      taskId: drag.taskId,
+      columnId: slot.columnId,
+      orderedTaskIds: orderedIdsAfterDrop(
+        drag.columnIds.get(slot.columnId) ?? [],
+        drag.taskId,
+        slot.index
+      ),
+    });
+  };
+
+  // Live card drag. Pointer events cover mouse, touch and pen in one path.
+  //
+  // The card under the pointer never moves in the DOM: a touch pointer keeps
+  // targeting the node it went down on, so re-parenting it mid-drag would end the
+  // gesture. It stays where it is, hidden; a placeholder shows where it would land and the
+  // cards around it slide aside; a floating copy follows the pointer. The
+  // listeners sit on `window` for the same reason, because the pointer is off
+  // the card almost at once.
+  const handleDragPointerDown = (
+    e: React.PointerEvent,
+    taskId: string,
+    sourceColumnId: string
+  ): void => {
+    if (!canEdit || dragRef.current) return;
+    const task = tasks.find((candidate) => candidate.id === taskId);
+    if (!task) return;
+    e.stopPropagation();
+
+    const card = e.currentTarget as HTMLElement;
+    const cardRect = card.getBoundingClientRect();
+    const columnIds = new Map<string, string[]>();
+    const slots = new Map<string, CardSlot[]>();
+    columns.forEach((col, i) => {
+      const key = String(col.id);
+      columnIds.set(
+        key,
+        tasksForColumn(col, i).map((candidate) => candidate.id)
+      );
+      slots.set(key, measureSlots(listRefs.current.get(key)));
+    });
+    const sourceIndex = (columnIds.get(sourceColumnId) ?? []).indexOf(taskId);
+
+    const drag: DragSession = {
+      pointerId: e.pointerId,
+      taskId,
+      task,
+      source: { columnId: sourceColumnId, index: Math.max(0, sourceIndex) },
+      reorder: groupBy === 'none',
+      startX: e.clientX,
+      startY: e.clientY,
+      x: e.clientX,
+      y: e.clientY,
+      offsetX: e.clientX - cardRect.left,
+      offsetY: e.clientY - cardRect.top,
+      width: cardRect.width,
+      height: cardRect.height,
+      columnIds,
+      slots,
+      slot: null,
+      active: false,
+      cleanup: () => undefined,
+    };
+    drag.slot = drag.source;
+
+    const previousCursor = document.body.style.cursor;
+    const previousSelect = document.body.style.userSelect;
+
+    const onMove = (ev: PointerEvent): void => {
+      if (ev.pointerId !== drag.pointerId) return;
+      drag.x = ev.clientX;
+      drag.y = ev.clientY;
+      if (!drag.active) {
+        if (!exceedsDragThreshold(ev.clientX - drag.startX, ev.clientY - drag.startY)) return;
+        drag.active = true;
+        document.body.style.cursor = 'grabbing';
+        document.body.style.userSelect = 'none';
+        setGhost({ task: drag.task, width: drag.width });
+        setDragView({
+          taskId: drag.taskId,
+          source: drag.source,
+          slot: drag.source,
+          height: drag.height,
+        });
+      }
+      if (ev.cancelable) ev.preventDefault();
+      positionGhost();
+      const slot = slotAt(drag, ev.clientX, ev.clientY);
+      if (!sameSlot(slot, drag.slot)) {
+        drag.slot = slot;
+        setDragView((view) => (view ? { ...view, slot } : view));
+      }
+    };
+    const onUp = (ev: PointerEvent): void => {
+      if (ev.pointerId !== drag.pointerId) return;
+      const { active, slot } = drag;
+      endSession();
+      if (!active) return;
+      // The click that follows a drag must not open the task.
+      justDraggedRef.current = true;
+      window.setTimeout(() => {
+        justDraggedRef.current = false;
+      }, 0);
+      commitDrop(drag, slot);
+    };
+    const onCancel = (ev: PointerEvent): void => {
+      if (ev.pointerId === drag.pointerId) endSession();
+    };
+    const onKey = (ev: KeyboardEvent): void => {
+      if (ev.key === 'Escape') endSession();
+    };
+
+    window.addEventListener('pointermove', onMove, { passive: false });
+    window.addEventListener('pointerup', onUp, true);
+    window.addEventListener('pointercancel', onCancel, true);
+    window.addEventListener('keydown', onKey);
+    drag.cleanup = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp, true);
+      window.removeEventListener('pointercancel', onCancel, true);
+      window.removeEventListener('keydown', onKey);
+      document.body.style.cursor = previousCursor;
+      document.body.style.userSelect = previousSelect;
+    };
+    dragRef.current = drag;
+  };
+
+  // The card's own pointer-up runs after the capture-phase listener above, so by
+  // then this already says whether the gesture was a drag.
+  const endCardPointer = (): boolean => justDraggedRef.current;
+
+  /** The placeholder this column should show, if the dragged card would land in it. */
+  const placeholderFor = (columnId: string): { index: number; height: number } | null => {
+    if (!dragView) return null;
+    const at = dragView.slot ?? dragView.source;
+    return at.columnId === columnId ? { index: at.index, height: dragView.height } : null;
+  };
+
+  const handleAddColumn = () => {
+    const name = newColumnName.trim();
+    if (!name) {
+      toast.error(t('flowToasts.column.nameRequired'));
+      return;
+    }
+    createColumn.mutate({
+      name,
+      color: 'var(--flow-neutral-fg)',
+      sortOrder: columns.length,
+    });
+    setNewColumnName('');
+    setAddingColumn(false);
+  };
+
+  if (
+    (columnsQuery.isPending && !hasQueryFailed(columnsQuery)) ||
+    (tasksQuery.isPending && !hasQueryFailed(tasksQuery))
+  ) {
+    return (
+      <div className="flex flex-col h-full">
+        <ProjectViewTabs
+          project={project}
+          projectId={projectId}
+          taskCount={tasks.length}
+          onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
+        />
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-flow-meta" style={{ color: 'var(--flow-text-dim)' }}>
+            {t('flow.project.loading')}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-full">
+      <HelmetContainer title={t('flow.board.pageTitle')} />
+      <ProjectViewTabs
+        project={project}
+        projectId={projectId}
+        taskCount={tasks.length}
+        onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
+        rightSlot={
+          <div className="flex items-center gap-1.5">
+            <GroupByPicker groupBy={groupBy} onChange={setGroupBy} />
+            {canManageBoard && (
+              <button
+                type="button"
+                onClick={() => setStatusSettingsOpen(true)}
+                aria-label={t('flow.status.openSettings')}
+                className="flow-focus flex h-[44px] w-[44px] items-center justify-center rounded-md md:h-8 md:w-8"
+                style={{ color: 'var(--flow-text-muted)' }}
+              >
+                <ListChecks size={14} aria-hidden="true" />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setBoardSettingsOpen(true)}
+              aria-label={t('flow.board.openSettings')}
+              className="flow-focus flex h-[44px] w-[44px] items-center justify-center rounded-md md:h-8 md:w-8"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              <Settings2 size={14} aria-hidden="true" />
+            </button>
+          </div>
+        }
+      />
+
+      <BoardSettingsPanel
+        open={boardSettingsOpen}
+        onClose={() => setBoardSettingsOpen(false)}
+        projectId={projectId}
+        columns={columns}
+        canManage={canManageBoard}
+        groupBy={groupBy}
+        onGroupByChange={setGroupBy}
+      />
+
+      <StatusSettingsPanel
+        open={statusSettingsOpen}
+        onClose={() => setStatusSettingsOpen(false)}
+        projectId={projectId}
+        canManage={canManageBoard}
+      />
+
+      {/* Tightened kanban canvas - the previous p-6 / gap-4 combo wasted
+          too much room on laptop screens. These values stay reasonable
+          down to narrow viewports because the column snaps to 248px. */}
+      <div className="min-h-0 flex-1 overflow-auto">
+        <div className="flex h-full min-w-max gap-2 px-3 py-3">
+          {columns.map((col, i) => (
+            <KanbanColumn
+              key={String(col.id)}
+              col={col}
+              lanes={buildLanes(laneIndex, tasksForColumn(col, i), groupBy)}
+              groupBy={groupBy}
+              isOver={dragOver === String(col.id)}
+              selectedTaskIds={selectedTaskIds}
+              canEdit={canEdit}
+              canCreate={canCreate}
+              canManage={canManageBoard}
+              draggingTaskId={draggingTaskId}
+              moveTargets={moveTargets}
+              registerRef={(el) => columnRefs.current.set(String(col.id), el)}
+              registerList={(el) => listRefs.current.set(String(col.id), el)}
+              reorder={groupBy === 'none'}
+              placeholder={placeholderFor(String(col.id))}
+              onMoveTask={(taskId, columnId) => moveTask.mutate({ taskId, columnId })}
+              onDragPointerDown={handleDragPointerDown}
+              onDragPointerEnd={endCardPointer}
+              onSelect={toggleSelectTask}
+              onAddTask={() => useFlowStore.getState().setQuickCreateOpen(true, String(col.id))}
+              onRename={(name) =>
+                updateColumn.mutate({
+                  id: String(col.id),
+                  name,
+                  color: col.color,
+                  sortOrder: col.sortOrder,
+                })
+              }
+              onDelete={() => setPendingDeleteColumn(col)}
+            />
+          ))}
+
+          {/* Add column */}
+          {canManageBoard && (
+            <div className="w-[248px] shrink-0">
+              {addingColumn ? (
+                <div
+                  className="rounded-md p-2"
+                  style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
+                >
+                  <input
+                    autoFocus
+                    value={newColumnName}
+                    onChange={(e) => setNewColumnName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleAddColumn();
+                      if (e.key === 'Escape') setAddingColumn(false);
+                    }}
+                    placeholder={t('flow.board.columnName')}
+                    className="w-full bg-transparent text-flow-meta font-medium mb-1.5"
+                    style={{ color: 'var(--flow-text)' }}
+                  />
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={handleAddColumn}
+                      disabled={!newColumnName.trim() || createColumn.isPending}
+                      className="h-6 px-2.5 rounded-sm text-flow-meta font-semibold disabled:opacity-40"
+                      style={{
+                        background: 'var(--flow-action-bg)',
+                        color: 'var(--flow-on-accent)',
+                      }}
+                    >
+                      {t('flow.taskDetail.add')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAddingColumn(false)}
+                      className="h-6 px-2 rounded-sm text-flow-meta hover:bg-[var(--flow-hover)]"
+                      style={{ color: 'var(--flow-text-muted)' }}
+                    >
+                      {t('flowCommon.cancel')}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAddingColumn(true)}
+                  className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-flow-meta transition-colors hover:bg-[var(--flow-hover)]"
+                  style={{
+                    color: 'var(--flow-text-dim)',
+                    border: '1px dashed var(--flow-border)',
+                  }}
+                >
+                  <Plus size={12} />
+                  {t('flow.board.addColumn')}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+      <ConfirmDialog
+        open={pendingDeleteColumn !== null}
+        onOpenChange={(o) => {
+          if (!o) setPendingDeleteColumn(null);
+        }}
+        title={t('flow.board.deleteColumnLabel')}
+        description={
+          <>
+            Delete the <strong>{pendingDeleteColumn?.name}</strong> column? Tasks in this column
+            will need to be moved manually first or they will become orphaned.
+          </>
+        }
+        confirmLabel={t('flow.board.deleteColumn')}
+        pending={deleteColumn.isPending}
+        onConfirm={() => {
+          if (!pendingDeleteColumn) return;
+          deleteColumn.mutate(String(pendingDeleteColumn.id), {
+            onSettled: () => setPendingDeleteColumn(null),
+          });
+        }}
+      />
+      {ghost &&
+        createPortal(
+          // The copy that follows the pointer. It is positioned straight on the
+          // element by the move handler, so a drag costs no React render per move.
+          <div
+            ref={(el) => {
+              ghostRef.current = el;
+              if (el) positionGhost();
+            }}
+            aria-hidden="true"
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: ghost.width,
+              zIndex: 1000,
+              pointerEvents: 'none',
+              willChange: 'transform',
+              filter: 'drop-shadow(0 12px 24px rgba(0, 0, 0, 0.28))',
+            }}
+          >
+            <TaskCard task={ghost.task} />
+          </div>,
+          document.body
+        )}
+    </div>
+  );
+};
+
+// ── Column component ────────────────────────────────────────────────────────
+
+const KanbanColumn: React.FC<{
+  col: ApiProjectColumn;
+  lanes: Lane[];
+  groupBy: GroupKey;
+  isOver: boolean;
+  selectedTaskIds: string[];
+  canEdit: boolean;
+  canCreate: boolean;
+  canManage: boolean;
+  draggingTaskId: string | null;
+  moveTargets: readonly MoveTarget[];
+  registerRef: (el: HTMLDivElement | null) => void;
+  registerList: (el: HTMLDivElement | null) => void;
+  /** Whether cards can be placed (false in swimlane view, where a drag only changes column). */
+  reorder: boolean;
+  /** Where the dragged card would land in this column, when it would. */
+  placeholder: { index: number; height: number } | null;
+  onMoveTask: (taskId: string, columnId: string) => void;
+  onDragPointerDown: (e: React.PointerEvent, taskId: string, sourceColumnId: string) => void;
+  onDragPointerEnd: (e: React.PointerEvent) => boolean;
+  onSelect: (id: string) => void;
+  onAddTask: () => void;
+  onRename: (name: string) => void;
+  onDelete: () => void;
+}> = ({
+  col,
+  lanes,
+  groupBy,
+  isOver,
+  selectedTaskIds,
+  canEdit,
+  canCreate,
+  canManage,
+  draggingTaskId,
+  moveTargets,
+  registerRef,
+  registerList,
+  reorder,
+  placeholder,
+  onMoveTask,
+  onDragPointerDown,
+  onDragPointerEnd,
+  onSelect,
+  onAddTask,
+  onRename,
+  onDelete,
+}) => {
+  const { t } = useTranslation();
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState(col.name);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editing) inputRef.current?.focus();
+  }, [editing]);
+
+  const commitRename = () => {
+    const name = editName.trim();
+    if (name && name !== col.name) onRename(name);
+    setEditing(false);
+  };
+
+  // Both card branches below render the same affordances; keeping them in one
+  // place stops the swimlane view from quietly losing the move menu.
+  const renderCardControls = (taskId: string, title: string): React.ReactNode => (
+    <>
+      {canEdit && (
+        <button
+          type="button"
+          aria-hidden
+          tabIndex={-1}
+          data-flow-drag-handle
+          onClick={(e) => e.stopPropagation()}
+          className="flex h-8 w-8 cursor-grab items-center justify-center rounded-sm hover:bg-[var(--flow-hover)] active:cursor-grabbing"
+          style={{ color: 'var(--flow-text-dim)', touchAction: 'none' }}
+        >
+          <GripVertical size={12} />
+        </button>
+      )}
+      <MoveToColumnMenu
+        taskTitle={title}
+        targets={moveTargets}
+        currentColumnId={String(col.id)}
+        onMove={(columnId) => onMoveTask(taskId, columnId)}
+        disabled={!canEdit}
+      />
+    </>
+  );
+
+  // The cards of one lane. While a card is being dragged it stays mounted but
+  // leaves the layout, and a placeholder holds the place it would take; the
+  // cards around the placeholder slide aside through TaskCard's layout animation.
+  const renderCards = (laneTasks: Task[]): React.ReactNode[] => {
+    const out: React.ReactNode[] = [];
+    let visible = 0;
+    const slotAt = (): React.ReactNode =>
+      placeholder && (
+        <DropPlaceholder key="drag-placeholder" height={placeholder.height} color={col.color} />
+      );
+    for (const task of laneTasks) {
+      const lifted = reorder && draggingTaskId === task.id;
+      if (!lifted) {
+        if (reorder && placeholder && placeholder.index === visible) out.push(slotAt());
+        visible += 1;
+      }
+      out.push(
+        <div key={task.id} data-board-card={task.id} style={lifted ? HIDDEN_CARD_STYLE : undefined}>
+          <TaskCard
+            task={task}
+            controls={renderCardControls(task.id, task.title)}
+            dimmed={!reorder && draggingTaskId === task.id}
+            selected={selectedTaskIds.includes(task.id)}
+            onSelect={() => onSelect(task.id)}
+            onDragPointerDown={
+              canEdit ? (e, id) => onDragPointerDown(e, id, String(col.id)) : undefined
+            }
+            onDragPointerEnd={onDragPointerEnd}
+          />
+        </div>
+      );
+    }
+    if (reorder && placeholder && placeholder.index >= visible) out.push(slotAt());
+    return out;
+  };
+
+  // Total count for the column header pill (stays accurate regardless
+  // of group-by - it's the sum of tasks across all lanes).
+  const colTaskCount = lanes.reduce((n, l) => n + l.tasks.length, 0);
+
+  return (
+    <div
+      ref={registerRef}
+      data-board-column={String(col.id)}
+      // 296px, inside the 280-320 the board rule asks for. It was 248, which
+      // squeezed a two-line title to the point that the card carried less than
+      // the row beside it (rtylr#1078, S-08). The viewport clamp stays, so a
+      // 390px phone still gets one full-width column rather than a horizontal
+      // scrollbar on the page itself.
+      className="flex w-[min(296px,calc(100vw-1.5rem))] min-w-[min(296px,calc(100vw-1.5rem))] flex-col rounded-md p-1.5 sm:w-[296px] sm:min-w-[296px]"
+      style={{
+        background: isOver ? withAlpha(col.color, 5) : 'transparent',
+        border: isOver ? `1px dashed ${col.color}` : '1px solid transparent',
+        transition: 'background 0.15s, border 0.15s',
+      }}
+    >
+      {/* Column header - tighter. 24px tall, no wasteful vertical padding. */}
+      <div className="flex items-center gap-1.5 px-1.5 h-7 mb-1.5 group/header">
+        <span className="h-2 w-2 rounded-full shrink-0" style={{ background: col.color }} />
+
+        {editing ? (
+          <input
+            ref={inputRef}
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            onBlur={commitRename}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') commitRename();
+              if (e.key === 'Escape') {
+                setEditName(col.name);
+                setEditing(false);
+              }
+            }}
+            className="flex-1 bg-transparent text-flow-meta font-semibold min-w-0"
+            style={{ color: 'var(--flow-text)' }}
+          />
+        ) : (
+          <button
+            type="button"
+            disabled={!canManage}
+            onClick={() => setEditing(true)}
+            className="flex-1 text-start text-flow-meta font-semibold truncate hover:opacity-70 transition-opacity"
+            style={{ color: 'var(--flow-text)' }}
+          >
+            {col.name}
+          </button>
+        )}
+
+        <span
+          className="text-flow-meta px-1.5 py-0.5 rounded-full font-medium shrink-0"
+          style={{ background: withAlpha(col.color, 13), color: onTint(col.color) }}
+        >
+          {colTaskCount}
+        </span>
+
+        {/* Actions (visible on header hover). Add is not among them any more: it
+            lives in the persistent row below, because a hover-only control is
+            unreachable on a touch screen and this one was 20px besides. */}
+        {canManage && (
+          <div className="flex items-center gap-0.5 opacity-0 group-hover/header:opacity-100 transition-opacity shrink-0">
+            <button
+              type="button"
+              onClick={onDelete}
+              // hover:text-red-400 was a Tailwind palette colour on a screen whose
+              // every other colour is a token, and it does not follow the theme.
+              className="flow-focus flex h-11 w-11 items-center justify-center rounded-sm text-[var(--flow-text-dim)] hover:bg-[var(--flow-hover)] hover:text-[var(--flow-danger-fg)] md:h-6 md:w-6"
+              title={t('flow.board.deleteColumnLabel')}
+              aria-label={t('flow.board.deleteColumnLabel')}
+            >
+              <Trash2 size={11} />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Add task, directly under the header and on every column.
+          It used to appear only in empty columns, centred vertically, so the
+          two columns that had cards offered no way to add one; and the
+          alternative in the header was hover-only at 20px, which a touch screen
+          cannot reach at all (rtylr#1078, Asana rule 1.2). 32px on a pointer,
+          44px where a finger has to hit it. */}
+      {canCreate && (
+        <button
+          type="button"
+          onClick={onAddTask}
+          aria-label={t('flow.board.addTaskLabel')}
+          className="flow-focus mb-1.5 flex min-h-11 w-full items-center gap-1.5 rounded-md px-1.5 text-flow-meta font-medium transition-colors hover:bg-[var(--flow-hover)] md:min-h-8"
+          style={{ color: 'var(--flow-text-muted)' }}
+        >
+          <Plus size={12} />
+          {t('flow.board.addTask')}
+        </button>
+      )}
+
+      {/* Cards */}
+      <div
+        ref={registerList}
+        data-board-list
+        className="relative flex flex-col gap-1.5 flex-1 min-h-[80px] overflow-y-auto"
+      >
+        {groupBy === 'none' ? (
+          <>
+            {renderCards(lanes[0]?.tasks ?? [])}
+            {colTaskCount === 0 && !placeholder && (
+              // A sentence, not a second add control: the row above the cards is
+              // already the way in, and this said "Add task" in hardcoded
+              // English on a screen that ships in Arabic and French.
+              <p
+                className="flex flex-1 items-center justify-center rounded-md px-3 py-4 text-center text-flow-meta"
+                style={{
+                  color: 'var(--flow-text-muted)',
+                  border: '1px dashed var(--flow-border)',
+                }}
+              >
+                {t('flow.board.emptyColumn')}
+              </p>
+            )}
+          </>
+        ) : (
+          // Swimlanes: render each lane with a mini-header + its tasks.
+          // Lanes are rendered in the same order across every column so
+          // rows line up horizontally.
+          lanes.map((lane) => (
+            <div key={lane.key} className="flex flex-col gap-1">
+              <div
+                className="flex items-center gap-1.5 px-1 pt-1.5 pb-0.5 text-flow-meta font-semibold uppercase tracking-wider"
+                style={{ color: 'var(--flow-text-dim)' }}
+              >
+                <span className="truncate">{lane.labelKey ? t(lane.labelKey) : lane.label}</span>
+                <span style={{ color: 'var(--flow-border)' }}>·</span>
+                <span className="tabular-nums">{lane.tasks.length}</span>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                {lane.tasks.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    controls={renderCardControls(task.id, task.title)}
+                    dimmed={draggingTaskId === task.id}
+                    selected={selectedTaskIds.includes(task.id)}
+                    onSelect={() => onSelect(task.id)}
+                    onDragPointerDown={
+                      canEdit ? (e, id) => onDragPointerDown(e, id, String(col.id)) : undefined
+                    }
+                    onDragPointerEnd={onDragPointerEnd}
+                  />
+                ))}
+                {lane.tasks.length === 0 && (
+                  <p
+                    className="flex min-h-[28px] items-center justify-center rounded-md text-flow-meta"
+                    style={{
+                      color: 'var(--flow-text-muted)',
+                      border: '1px dashed var(--flow-border)',
+                    }}
+                  >
+                    {t('flow.board.emptyLane')}
+                  </p>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ── Drag placeholder ────────────────────────────────────────────────────────
+
+/** The empty slot a dragged card would drop into, sized to the card. */
+const DropPlaceholder: React.FC<{ height: number; color: string }> = ({ height, color }) => (
+  <motion.div
+    layout
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 0.12 }}
+    aria-hidden="true"
+    data-board-placeholder
+    className="shrink-0 rounded-lg"
+    style={{
+      height,
+      border: `1.5px dashed ${color}`,
+      background: withAlpha(color, 8),
+    }}
+  />
+);
+
+// ── Group-by picker ─────────────────────────────────────────────────────────
+
+const GroupByPicker: React.FC<{
+  groupBy: GroupKey;
+  onChange: (k: GroupKey) => void;
+}> = ({ groupBy, onChange }) => {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const close = useCallback((): void => setOpen(false), []);
+  useClickOutside(ref, close);
+
+  const current = GROUP_OPTIONS.find((o) => o.key === groupBy)!;
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1.5 h-7 px-2 rounded-md text-flow-meta font-medium transition-colors hover:bg-[var(--flow-hover)]"
+        style={{
+          background: 'var(--flow-surface)',
+          border: '1px solid var(--flow-border)',
+          color: 'var(--flow-text-muted)',
+        }}
+      >
+        <span style={{ color: 'var(--flow-text-dim)' }}>{t('flow.board.groupByLabel')}</span>
+        <span style={{ color: 'var(--flow-text)' }}>{t(current.labelKey)}</span>
+        <ChevronDown size={11} />
+      </button>
+      {open && (
+        <div
+          className="absolute end-0 top-full mt-1 z-20 min-w-[140px] rounded-md py-1 shadow-md"
+          style={{
+            background: 'var(--flow-card)',
+            border: '1px solid var(--flow-border)',
+          }}
+        >
+          {GROUP_OPTIONS.map((o) => (
+            <button
+              type="button"
+              key={o.key}
+              onClick={() => {
+                onChange(o.key);
+                setOpen(false);
+              }}
+              className="w-full text-start px-2.5 py-1.5 text-flow-meta transition-colors hover:bg-[var(--flow-hover)]"
+              style={{
+                color: o.key === groupBy ? 'var(--flow-text)' : 'var(--flow-text-muted)',
+                fontWeight: o.key === groupBy ? 600 : 400,
+              }}
+            >
+              {t(o.labelKey)}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ProjectBoard;

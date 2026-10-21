@@ -8,8 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	commonauthv1 "github.com/voxire/voxie/gen/go/common/auth/v1"
 )
@@ -64,7 +62,7 @@ func (h *validatedGETHandler) Serve(_ context.Context, req *validatedGETRequest)
 }
 
 func TestRegisterGETWithValidationRejectsInvalidQuery(t *testing.T) {
-	router := chi.NewRouter()
+	router := NewLegacyRoutes()
 	handler := &validatedGETHandler{}
 	RegisterGETWithValidation[validatedGETRequest, validatedGETResponse](
 		context.Background(),
@@ -75,7 +73,7 @@ func TestRegisterGETWithValidationRejectsInvalidQuery(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodGet, "/validated", http.NoBody)
 	rec := httptest.NewRecorder()
-	router.ServeHTTP(rec, req)
+	router.Handler().ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("expected 400, got %d: %s", rec.Code, rec.Body.String())
@@ -86,7 +84,7 @@ func TestRegisterGETWithValidationRejectsInvalidQuery(t *testing.T) {
 }
 
 func TestRegisterGETWithValidationParsesQuery(t *testing.T) {
-	router := chi.NewRouter()
+	router := NewLegacyRoutes()
 	handler := &validatedGETHandler{}
 	RegisterGETWithValidation[validatedGETRequest, validatedGETResponse](
 		context.Background(),
@@ -97,7 +95,7 @@ func TestRegisterGETWithValidationParsesQuery(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodGet, "/validated?id=7", http.NoBody)
 	rec := httptest.NewRecorder()
-	router.ServeHTTP(rec, req)
+	router.Handler().ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d: %s", rec.Code, rec.Body.String())
@@ -157,7 +155,7 @@ func TestParseQueryParamsAssignsTypedFieldsWithoutJSONRoundTrip(t *testing.T) {
 }
 
 func TestRegisterGETRejectsMalformedTypedQuery(t *testing.T) {
-	router := chi.NewRouter()
+	router := NewLegacyRoutes()
 	handler := &validatedGETHandler{}
 	RegisterGET[validatedGETRequest, validatedGETResponse](
 		context.Background(),
@@ -168,7 +166,7 @@ func TestRegisterGETRejectsMalformedTypedQuery(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodGet, "/validated?id=not-a-number", http.NoBody)
 	rec := httptest.NewRecorder()
-	router.ServeHTTP(rec, req)
+	router.Handler().ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("expected 400 for malformed query, got %d: %s", rec.Code, rec.Body.String())
@@ -190,7 +188,7 @@ func TestRegisterGETSkipsResponseProtoValidationByDefault(t *testing.T) {
 	t.Setenv("VALIDATE_RESPONSE_PROTOS", "")
 	t.Setenv("RESPONSE_PROTO_VALIDATION", "")
 
-	router := chi.NewRouter()
+	router := NewLegacyRoutes()
 	RegisterGET[emptyRequest, *commonauthv1.LoginRequest](
 		context.Background(),
 		router,
@@ -200,7 +198,7 @@ func TestRegisterGETSkipsResponseProtoValidationByDefault(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodGet, "/proto", http.NoBody)
 	rec := httptest.NewRecorder()
-	router.ServeHTTP(rec, req)
+	router.Handler().ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d: %s", rec.Code, rec.Body.String())
@@ -211,7 +209,7 @@ func TestRegisterGETCanValidateResponseProtosWhenEnabled(t *testing.T) {
 	t.Setenv("VALIDATE_RESPONSE_PROTOS", "true")
 	t.Setenv("RESPONSE_PROTO_VALIDATION", "")
 
-	router := chi.NewRouter()
+	router := NewLegacyRoutes()
 	RegisterGET[emptyRequest, *commonauthv1.LoginRequest](
 		context.Background(),
 		router,
@@ -221,7 +219,7 @@ func TestRegisterGETCanValidateResponseProtosWhenEnabled(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodGet, "/proto", http.NoBody)
 	rec := httptest.NewRecorder()
-	router.ServeHTTP(rec, req)
+	router.Handler().ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusInternalServerError {
 		t.Fatalf("expected 500, got %d: %s", rec.Code, rec.Body.String())
@@ -264,7 +262,7 @@ func (h *jsonBodyHandler) Serve(_ context.Context, req *jsonBodyRequest) (jsonBo
 }
 
 func TestRegisterPOSTRejectsTrailingJSON(t *testing.T) {
-	router := chi.NewRouter()
+	router := NewLegacyRoutes()
 	handler := &jsonBodyHandler{}
 	RegisterPOST[jsonBodyRequest, jsonBodyResponse](
 		context.Background(),
@@ -275,7 +273,7 @@ func TestRegisterPOSTRejectsTrailingJSON(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodPost, "/json", strings.NewReader(`{"name":"one"}{"name":"two"}`))
 	rec := httptest.NewRecorder()
-	router.ServeHTTP(rec, req)
+	router.Handler().ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("expected 400, got %d: %s", rec.Code, rec.Body.String())
@@ -286,7 +284,7 @@ func TestRegisterPOSTRejectsTrailingJSON(t *testing.T) {
 }
 
 func TestRegisterPOSTAcceptsWhitespaceAfterJSON(t *testing.T) {
-	router := chi.NewRouter()
+	router := NewLegacyRoutes()
 	handler := &jsonBodyHandler{}
 	RegisterPOST[jsonBodyRequest, jsonBodyResponse](
 		context.Background(),
@@ -297,7 +295,7 @@ func TestRegisterPOSTAcceptsWhitespaceAfterJSON(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodPost, "/json", strings.NewReader("{\"name\":\"one\"}\n\t "))
 	rec := httptest.NewRecorder()
-	router.ServeHTTP(rec, req)
+	router.Handler().ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d: %s", rec.Code, rec.Body.String())
@@ -308,7 +306,7 @@ func TestRegisterPOSTAcceptsWhitespaceAfterJSON(t *testing.T) {
 }
 
 func TestRegisterDELETERejectsTrailingJSONBody(t *testing.T) {
-	router := chi.NewRouter()
+	router := NewLegacyRoutes()
 	handler := &jsonBodyHandler{}
 	RegisterDELETE[jsonBodyRequest, jsonBodyResponse](
 		context.Background(),
@@ -319,7 +317,7 @@ func TestRegisterDELETERejectsTrailingJSONBody(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodDelete, "/json", strings.NewReader(`{"name":"one"}{"name":"two"}`))
 	rec := httptest.NewRecorder()
-	router.ServeHTTP(rec, req)
+	router.Handler().ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("expected 400, got %d: %s", rec.Code, rec.Body.String())

@@ -1,5 +1,11 @@
 #!/usr/bin/env sh
 
+# Load-bearing: without it only the exit status of the *last* command reaches
+# git, so a failed `pnpm exec lint-staged` was discarded and this hook exited 0
+# for every commit, blocking nothing. It also makes a failed `cd` stop instead
+# of running the checks in the wrong directory.
+set -e
+
 # Formats only the files being committed.
 #
 # This used to run `pnpm format:check` across the whole tree, which made the gate
@@ -11,7 +17,10 @@
 #
 # Scoped to staged files, nobody inherits anyone else's debt and a direct push
 # cannot poison the gate.
-cd clients/web/rtylr
+# Hooks can supply a relative work tree; preserve it before changing directories.
+GIT_WORK_TREE="$(git rev-parse --show-toplevel)"
+export GIT_WORK_TREE
+cd "$GIT_WORK_TREE/clients/app"
 pnpm exec lint-staged
 
 echo "Checking OneKit boundary..."

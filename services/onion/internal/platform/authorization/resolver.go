@@ -23,10 +23,9 @@ const (
 type AssignmentSource string
 
 const (
-	SourceExplicit    AssignmentSource = "explicit"
-	SourceDashDefault AssignmentSource = "dash_default"
-	SourceGroup       AssignmentSource = "group"
-	SourceSystem      AssignmentSource = "system"
+	SourceExplicit AssignmentSource = "explicit"
+	SourceGroup    AssignmentSource = "group"
+	SourceSystem   AssignmentSource = "system"
 )
 
 type Scope struct {
@@ -69,8 +68,8 @@ type RoleAssignment struct {
 
 type Snapshot struct {
 	BusinessID           int64
-	DashRole             string
-	DashRoleID           *int64
+	IsOwner              bool
+	IsAdmin              bool
 	MembershipActive     bool
 	SubscribedApps       []AppID
 	DashPermissions      []string
@@ -82,22 +81,16 @@ type Snapshot struct {
 }
 
 type EffectiveAppAccess struct {
-	AppID             AppID
-	Licensed          bool
-	HasAccess         bool
-	RoleIDs           []int64
-	PrimaryRoleID     *int64
-	DisplayRole       string
-	Permissions       []string
-	Scopes            []Scope
-	Sources           []AssignmentSource
-	PermissionSources map[string][]string
+	AppID            AppID
+	Licensed         bool
+	HasAccess        bool
+	Permissions      []string
+	PermissionScopes map[string][]Scope
+	Sources          []AssignmentSource
 }
 
 type EffectiveAccess struct {
 	BusinessID           int64
-	DashRole             string
-	DashRoleID           *int64
 	DashPermissions      []string
 	SubscribedApps       []AppID
 	Licenses             []License
@@ -136,16 +129,11 @@ type ProvisioningStatus struct {
 	RecoveryAvailable      bool
 }
 
-// Resolve computes effective access using union semantics for compatible
-// assignments. It deliberately returns no app permission when membership is
-// inactive, a license is absent, a role is archived, or a role cannot be found.
+// Resolve computes effective access from active membership, app entitlements,
+// permission-profile assignments, and their resource scopes.
 func Resolve(snapshot Snapshot) EffectiveAccess {
-	// A revoked business membership must not retain dashboard privileges merely
-	// because the stale dash role/permission rows are still present. App access
-	// already fails closed on MembershipActive; apply the same boundary to the
-	// dashboard surface and its owner/admin shortcuts.
-	isOwner := snapshot.MembershipActive && snapshot.DashRole == "owner"
-	isAdmin := snapshot.MembershipActive && snapshot.DashRole == "admin"
+	isOwner := snapshot.MembershipActive && snapshot.IsOwner
+	isAdmin := snapshot.MembershipActive && snapshot.IsAdmin
 	rolesByID := make(map[int64]Role, len(snapshot.Roles))
 	for _, role := range snapshot.Roles {
 		rolesByID[role.ID] = role
@@ -153,19 +141,12 @@ func Resolve(snapshot Snapshot) EffectiveAccess {
 
 	dashPermissions := []string{}
 	if snapshot.MembershipActive {
-		dashPermissions = uniqueSorted(snapshot.DashPermissions)
+		// Every active business member can enter the Dash app launcher. Page
+		// management remains permission-gated below this baseline.
+		dashPermissions = uniqueSorted(append(snapshot.DashPermissions, "hub:dashboard:view"))
 		if isOwner || isAdmin {
-			dashPermissions = uniqueSorted(snapshot.AllPermissions)
+			dashPermissions = permissionsForApp(snapshot.AllPermissions, AppHub)
 		}
-	}
-
-	dashRole := snapshot.DashRole
-	dashRoleID := snapshot.DashRoleID
-	if !snapshot.MembershipActive {
-		// CanAssignDashboardRole and other consumers use the role string as a
-		// fallback ceiling, so clear the identity as well as the flags.
-		dashRole = ""
-		dashRoleID = nil
 	}
 
 	apps := make([]AppID, 0, len(snapshot.SubscribedApps))
@@ -181,8 +162,6 @@ func Resolve(snapshot Snapshot) EffectiveAccess {
 
 	resolved := EffectiveAccess{
 		BusinessID:           snapshot.BusinessID,
-		DashRole:             dashRole,
-		DashRoleID:           dashRoleID,
 		DashPermissions:      dashPermissions,
 		SubscribedApps:       apps,
 		Licenses:             append([]License{}, snapshot.Licenses...),
@@ -193,61 +172,14 @@ func Resolve(snapshot Snapshot) EffectiveAccess {
 	}
 
 	for _, appID := range apps {
-		resolved.Apps = append(resolved.Apps, resolveApp(snapshot, rolesByID, appID, isOwner, isAdmin))
+		resolved.Apps = append(resolved.Apps, resolveApp(snapshot, rolesByID, appID, isOwner || isAdmin))
 	}
 	return resolved
 }
 
-// LegacyAccess reconstructs the pre-v2 app-level boundary for rollback. The
-// old model had no feature-level permission set, so an active legacy app grant
-// authorizes the app's existing surface. This is intentionally kept separate
-// from Resolve so the migration can be reversed without deleting normalized
-// assignments, licenses, or audit history.
-func LegacyAccess(businessID int64, apps []string, role string) EffectiveAccess {
-	knownApps := map[AppID]struct{}{
-		AppPOS: {}, AppERP: {}, AppHR: {}, AppCRM: {}, AppFinance: {},
-		AppFlow: {}, AppInsights: {}, AppMenu: {}, AppRecruit: {},
-	}
-	resolvedApps := make([]AppID, 0, len(apps))
-	licenses := make([]License, 0, len(apps))
-	seen := make(map[AppID]struct{}, len(apps))
-	for _, rawApp := range apps {
-		appID := AppID(rawApp)
-		if _, ok := knownApps[appID]; !ok {
-			continue
-		}
-		if _, ok := seen[appID]; ok {
-			continue
-		}
-		seen[appID] = struct{}{}
-		resolvedApps = append(resolvedApps, appID)
-		licenses = append(licenses, License{AppID: appID, Source: SourceExplicit, Active: true})
-	}
-	sort.Slice(resolvedApps, func(i, j int) bool { return resolvedApps[i] < resolvedApps[j] })
-	access := EffectiveAccess{
-		BusinessID:     businessID,
-		DashRole:       role,
-		SubscribedApps: append([]AppID{}, resolvedApps...),
-		Licenses:       licenses,
-		Apps:           make([]EffectiveAppAccess, 0, len(resolvedApps)),
-		IsOwner:        role == "owner",
-		IsAdmin:        role == "admin",
-	}
-	for _, appID := range resolvedApps {
-		access.Apps = append(access.Apps, EffectiveAppAccess{
-			AppID:             appID,
-			Licensed:          true,
-			HasAccess:         true,
-			Sources:           []AssignmentSource{SourceExplicit},
-			Permissions:       []string{},
-			Scopes:            []Scope{},
-			PermissionSources: map[string][]string{},
-		})
-	}
-	return access
-}
-
-func resolveApp(snapshot Snapshot, rolesByID map[int64]Role, appID AppID, isOwner, isAdmin bool) EffectiveAppAccess {
+// resolveApp combines the member's license and permission profile grants.
+// Owners and admins inherit every permission for apps in the business plan.
+func resolveApp(snapshot Snapshot, rolesByID map[int64]Role, appID AppID, isPrivileged bool) EffectiveAppAccess {
 	licensed := false
 	sources := make([]AssignmentSource, 0, 2)
 	for _, license := range snapshot.Licenses {
@@ -257,29 +189,42 @@ func resolveApp(snapshot Snapshot, rolesByID map[int64]Role, appID AppID, isOwne
 		licensed = true
 		sources = appendUniqueSource(sources, license.Source)
 	}
-	if snapshot.MembershipActive && (isOwner || isAdmin) {
+	// An owner or admin is entitled to the whole business plan, and their app
+	// set is drawn from that plan, so every app they resolve is covered by it.
+	// Without this the reported metadata contradicts the entitlement: the app
+	// carries HasAccess but Licensed=false, and consumers that require both
+	// (the Dash sidebar) then hide it.
+	//
+	// This is reporting only and cannot widen access: the caller's app set is
+	// already bounded to the plan, and an inactive membership returns below
+	// before either flag is set.
+	if snapshot.MembershipActive && isPrivileged {
 		licensed = true
 		sources = appendUniqueSource(sources, SourceSystem)
 	}
 
 	access := EffectiveAppAccess{
-		AppID:             appID,
-		Licensed:          licensed,
-		HasAccess:         false,
-		RoleIDs:           []int64{},
-		Scopes:            []Scope{},
-		Sources:           sources,
-		Permissions:       []string{},
-		PermissionSources: map[string][]string{},
+		AppID:            appID,
+		Licensed:         licensed,
+		HasAccess:        false,
+		Sources:          sources,
+		Permissions:      []string{},
+		PermissionScopes: map[string][]Scope{},
 	}
-	if !licensed || !snapshot.MembershipActive {
+	if !snapshot.MembershipActive {
 		return access
 	}
 
-	if isOwner || isAdmin {
+	if isPrivileged {
 		access.HasAccess = true
-		access.Permissions = uniqueSorted(snapshot.AllPermissions)
+		access.Permissions = permissionsForApp(snapshot.AllPermissions, appID)
+		for _, permission := range access.Permissions {
+			access.PermissionScopes[permission] = []Scope{}
+		}
 		access.Sources = appendUniqueSource(access.Sources, SourceSystem)
+		return access
+	}
+	if !licensed {
 		return access
 	}
 
@@ -295,16 +240,8 @@ func resolveApp(snapshot Snapshot, rolesByID map[int64]Role, appID AppID, isOwne
 				continue
 			}
 			validAssignment = true
-			access.RoleIDs = appendUniqueInt64(access.RoleIDs, roleID)
-			if assignment.PrimaryRoleID != nil && *assignment.PrimaryRoleID == roleID {
-				access.PrimaryRoleID = assignment.PrimaryRoleID
-				access.DisplayRole = role.DisplayName
-			}
 			for _, permission := range inheritedPermissions(role, rolesByID, map[int64]struct{}{}) {
 				assignmentPermissions = appendUniqueString(assignmentPermissions, permission)
-				access.PermissionSources[permission] = appendUniqueString(
-					access.PermissionSources[permission], role.Key,
-				)
 			}
 		}
 		if !validAssignment {
@@ -312,27 +249,49 @@ func resolveApp(snapshot Snapshot, rolesByID map[int64]Role, appID AppID, isOwne
 		}
 		access.HasAccess = true
 		access.Sources = appendUniqueSource(access.Sources, assignment.Source)
-		for _, scope := range assignment.Scopes {
-			access.Scopes = appendUniqueScope(access.Scopes, scope)
-		}
 		for _, permission := range assignmentPermissions {
 			access.Permissions = appendUniqueString(access.Permissions, permission)
+			if _, exists := access.PermissionScopes[permission]; !exists {
+				access.PermissionScopes[permission] = append([]Scope{}, assignment.Scopes...)
+				continue
+			}
+			current := access.PermissionScopes[permission]
+			if len(current) == 0 || len(assignment.Scopes) == 0 {
+				access.PermissionScopes[permission] = []Scope{}
+				continue
+			}
+			for _, scope := range assignment.Scopes {
+				access.PermissionScopes[permission] = appendUniqueScope(access.PermissionScopes[permission], scope)
+			}
 		}
 	}
-	access.RoleIDs = sortedInt64(access.RoleIDs)
 	access.Permissions = uniqueSorted(access.Permissions)
 	return access
 }
 
 func validSourceTarget(source AssignmentSource, groupID *int64) bool {
 	switch source {
-	case SourceExplicit, SourceDashDefault, SourceSystem:
+	case SourceExplicit, SourceSystem:
 		return groupID == nil
 	case SourceGroup:
 		return groupID != nil && *groupID > 0
 	default:
 		return false
 	}
+}
+
+func permissionsForApp(permissions []string, appID AppID) []string {
+	prefix := string(appID) + ":"
+	if appID == AppHub {
+		prefix = "hub:"
+	}
+	filtered := make([]string, 0)
+	for _, permission := range permissions {
+		if len(permission) >= len(prefix) && permission[:len(prefix)] == prefix {
+			filtered = append(filtered, permission)
+		}
+	}
+	return uniqueSorted(filtered)
 }
 
 // PermissionsForRole returns the inherited permission set for a role. It is
@@ -375,15 +334,6 @@ func appendUniqueSource(values []AssignmentSource, value AssignmentSource) []Ass
 	return append(values, value)
 }
 
-func appendUniqueInt64(values []int64, value int64) []int64 {
-	for _, existing := range values {
-		if existing == value {
-			return values
-		}
-	}
-	return append(values, value)
-}
-
 func appendUniqueString(values []string, value string) []string {
 	for _, existing := range values {
 		if existing == value {
@@ -408,11 +358,5 @@ func uniqueSorted(values []string) []string {
 		result = appendUniqueString(result, value)
 	}
 	sort.Strings(result)
-	return result
-}
-
-func sortedInt64(values []int64) []int64 {
-	result := append([]int64{}, values...)
-	sort.Slice(result, func(i, j int) bool { return result[i] < result[j] })
 	return result
 }

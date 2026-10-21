@@ -1,0 +1,45 @@
+package organization.compat.v1
+
+message EmptyRequest {}
+
+/// Empty response for @http routes whose handler writes its own response.
+message EmptyResponse {}
+
+/// The route's JSON body, passed through unchanged.
+message BodyRequest {
+  body: json
+}
+
+/// The handler's JSON response, sent unchanged.
+message JsonResponse {
+  data: json @unwrap
+}
+
+message PathIdRequest {
+  id: string
+}
+
+message PathTableIdRequest {
+  table: string
+  id: string
+}
+
+message PathIdBodyRequest {
+  id: string
+  body: json
+}
+
+message PathTableBodyRequest {
+  table: string
+  body: json
+}
+
+message PathTableIdBodyRequest {
+  table: string
+  id: string
+  body: json
+}
+
+message PathTableRequest {
+  table: string
+}

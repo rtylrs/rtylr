@@ -47,7 +47,7 @@ on:
       runs_on:
         description: Runner label
         required: false
-        default: blacksmith-2vcpu-ubuntu-2404
+        default: ubuntu-24.04
         type: string
 
 permissions:
@@ -56,7 +56,7 @@ permissions:
 jobs:
   resolve:
     name: Resolve promoted manifest
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.values.outputs.version }}
       release_tag: ${{ steps.values.outputs.release_tag }}

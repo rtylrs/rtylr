@@ -1,0 +1,9 @@
+{
+  "audit": {
+    "emptyTitle": "لا توجد سجلات تدقيق",
+    "emptyDescription": "ستظهر الأحداث الأمنية المهمة هنا.",
+    "filteredShowing": "عرض {{shown}} من {{total}} في هذه الصفحة",
+    "loadFailedTitle": "تعذّر تحميل سجل التدقيق",
+    "loadFailedDescription": "حدث خطأ أثناء تحميل السجلات. حاول مجددًا."
+  }
+}

@@ -1,10 +1,12 @@
 import type { OfflineQueuedOrder } from '../../shared/types/pos';
-import type { CreateOrderRequest } from '@voxire/voxie/pos/orders/v1/types';
 import { getOneKitErrorMessage } from '@voxire/api';
+
+/** Replays one entry. Rejecting leaves the entry queued, never marks it synced. */
+export type SyncOrder = (entry: OfflineQueuedOrder) => Promise<void>;
 
 interface SyncQueuedOrdersParams {
   entries: OfflineQueuedOrder[];
-  syncOrder: (order: CreateOrderRequest) => Promise<void>;
+  syncOrder: SyncOrder;
   retry: (id: string) => void;
   markSynced: (id: string) => void;
   markFailed: (id: string, err: string) => void;
@@ -37,7 +39,7 @@ export async function syncQueuedOrders({
     retry(current.id);
 
     try {
-      await syncOrder(current.order);
+      await syncOrder(current);
       markSynced(current.id);
       result.synced += 1;
     } catch (error) {

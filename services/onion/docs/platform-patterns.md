@@ -3,11 +3,13 @@
 These primitives adapt the strongest backend patterns we found in Koussa without
 forcing a rewrite of the current modules.
 
-## Runmodes
+## Command lifecycle
 
-New runmodes should describe themselves with `internal/platform/runmode.Spec`:
-name, database tags, web-server requirement, optional gRPC config, setup,
-startup, and route registration. Existing commands can adopt it gradually.
+Commands own process startup and shutdown. Keep command-specific wiring in
+`cmd/<command>` and implement the narrow server interfaces from
+`internal/platform/server/http` where needed. Shared server behavior belongs
+in the platform package; module construction and dependencies belong in the
+command composition root.
 
 ## Jobs
 
@@ -55,22 +57,9 @@ business, product, config, subscription, and related scopes.
 Workers subscribe to both pattern invalidations and group invalidations so a
 cache wipe on one replica reaches local in-memory cache on the others.
 
-## Database Tags
-
-New SQL-backed code can use:
-
-```go
-dbclient.TaggedPool(dbclient.TagMain)
-dbclient.TaggedPool(dbclient.TagReplica)
-dbclient.TaggedPool(dbclient.TagLogging)
-```
-
-The wrapper satisfies sqlc's DBTX shape and stamps query contexts with the
-logical database tag.
-
 ## Probes And Profiling
 
-`cmd/api`, `cmd/upload`, `cmd/license`, and `cmd/worker` start a probe server
+`cmd/api`, `cmd/upload`, and `cmd/worker` start a probe server
 when `PROBE_PORT` is set or when running in Kubernetes. pprof starts only when
 `PPROF_ENABLED=true` or `PPROF_PORT` is set. The destructive probe `POST
 /stop` requires the `PROBE_STOP_TOKEN` value in the `X-Probe-Token` header;

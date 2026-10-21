@@ -1,0 +1,20 @@
+{
+  "appName": "نقطة البيع",
+  "terminal": "المحطة",
+  "products": "المنتجات",
+  "orders": "الطلبات",
+  "tables": "الطاولات",
+  "kitchen": "المطبخ",
+  "customers": "العملاء",
+  "giftCards": "بطاقات الهدايا",
+  "receipts": "الإيصالات",
+  "day": "ملخص اليوم",
+  "offline": "قائمة غير المتصل",
+  "modifiers": "الإضافات",
+  "combos": "الوجبات المجمعة",
+  "inventory": "المخزون",
+  "staff": "الموظفون",
+  "heldOrders": "الطلبات المعلقة",
+  "cashDrop": "إيداع نقدي",
+  "closeSession": "إغلاق الجلسة"
+}

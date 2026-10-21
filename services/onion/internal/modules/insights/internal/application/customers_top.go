@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure"
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 )
 
@@ -81,8 +81,8 @@ func (s *Service) GetTopCustomers(ctx context.Context, businessID int64, query T
 		Rows  []TopCustomerPayload
 		Total int64
 	}
-	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
-		page, rerr := s.repo.GetTopCustomers(ctx, businessID, infrastructure.TopCustomerQuery{
+	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key+"|domain=v2", func(ctx context.Context) (result, error) {
+		page, rerr := s.repo.GetTopCustomers(ctx, businessID, domain.TopCustomerQuery{
 			From:         query.From,
 			To:           query.To,
 			Limit:        query.Limit,

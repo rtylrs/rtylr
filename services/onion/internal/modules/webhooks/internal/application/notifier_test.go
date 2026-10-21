@@ -11,6 +11,7 @@ import (
 const (
 	notifyTenant  int64 = 885001
 	notifyCreator int64 = 885010
+	notifyOwner   int64 = 885011
 	notifyHook    int64 = 885020
 )
 
@@ -37,12 +38,14 @@ func seedFailing(t *testing.T, db *sql.DB, membershipStatus string, deadAgeHours
 	      VALUES (?, ?, 'fixture-auth-disabled', 'Hook Owner', ?)`, notifyCreator, notifyEmail, notifyTenant)
 	// authorization_business_members has a foreign key to businesses, so the
 	// tenant has to exist as a row rather than just as an id.
+	exec(`INSERT INTO users (id, email, password_hash, full_name, business_id)
+	      VALUES (?, 'tenant-owner@test.local', 'fixture-auth-disabled', 'Tenant Owner', ?)`, notifyOwner, notifyTenant)
 	exec(`INSERT INTO businesses (id, name, owner_id) VALUES (?, 'Notify Test Co', ?)`,
-		notifyTenant, notifyCreator)
+		notifyTenant, notifyOwner)
 	if membershipStatus != "" {
 		exec(`INSERT INTO authorization_business_members
-		        (business_id, user_id, dash_role_key, status, authorization_version)
-		      VALUES (?, ?, 'owner', ?, 1)`, notifyTenant, notifyCreator, membershipStatus)
+		        (business_id, user_id, member_type, status, authorization_version)
+		      VALUES (?, ?, 'member', ?, 1)`, notifyTenant, notifyCreator, membershipStatus)
 	}
 	exec(`INSERT INTO hub_webhooks (id, owner_id, business_id, url, events, secret, is_active)
 	      VALUES (?, ?, ?, 'https://example.test/hook', JSON_ARRAY('order_created'), 's', TRUE)`,
@@ -63,6 +66,7 @@ func clearFailing(t *testing.T, db *sql.DB) {
 	t.Helper()
 	ctx := context.Background()
 	for _, stmt := range []string{
+		"DELETE FROM webhook_dead_delivery_notices WHERE business_id = ?",
 		"DELETE FROM webhook_deliveries WHERE business_id = ?",
 		"DELETE FROM platform_events WHERE business_id = ?",
 		"DELETE FROM hub_webhooks WHERE business_id = ?",
@@ -72,6 +76,7 @@ func clearFailing(t *testing.T, db *sql.DB) {
 	}
 	_, _ = db.ExecContext(ctx, "DELETE FROM businesses WHERE id = ?", notifyTenant)
 	_, _ = db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", notifyCreator)
+	_, _ = db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", notifyOwner)
 	_, _ = db.ExecContext(ctx, "DELETE FROM email_jobs WHERE to_email = ?", notifyEmail)
 }
 
@@ -94,7 +99,7 @@ func TestNotifyFailingSendsOneMessagePerRegistration(t *testing.T) {
 
 	seedFailing(t, db, "active", 1, 3)
 
-	if err := NewNotifier(db).NotifyFailing(ctx); err != nil {
+	if err := newTestNotifier(db).NotifyFailing(ctx); err != nil {
 		t.Fatalf("NotifyFailing: %v", err)
 	}
 
@@ -128,7 +133,7 @@ func TestNotifyFailingTellsTheOwnerOncePerDay(t *testing.T) {
 
 	seedFailing(t, db, "active", 1, 1)
 
-	notifier := NewNotifier(db)
+	notifier := newTestNotifier(db)
 	for pass := 1; pass <= 3; pass++ {
 		if err := notifier.NotifyFailing(ctx); err != nil {
 			t.Fatalf("pass %d: %v", pass, err)
@@ -170,7 +175,7 @@ func TestNotifyFailingAdvancesPastAlreadyNotifiedRegistrations(t *testing.T) {
 	      VALUES (?, ?, ?, ?, 'dead', 5, DATE_SUB(NOW(), INTERVAL 1 HOUR))`,
 		secondDead, notifyTenant, secondHook, secondEvent)
 
-	notifier := NewNotifier(db)
+	notifier := newTestNotifier(db)
 	notifier.batchSize = 1
 
 	for pass := 1; pass <= 2; pass++ {
@@ -192,7 +197,7 @@ func TestNotifyFailingIgnoresFailuresOutsideTheWindow(t *testing.T) {
 
 	seedFailing(t, db, "active", 72, 2)
 
-	if err := NewNotifier(db).NotifyFailing(ctx); err != nil {
+	if err := newTestNotifier(db).NotifyFailing(ctx); err != nil {
 		t.Fatalf("NotifyFailing: %v", err)
 	}
 
@@ -211,7 +216,7 @@ func TestNotifyFailingTellsNobodyWhenTheCreatorHasLeft(t *testing.T) {
 
 	seedFailing(t, db, "", 1, 1)
 
-	if err := NewNotifier(db).NotifyFailing(ctx); err != nil {
+	if err := newTestNotifier(db).NotifyFailing(ctx); err != nil {
 		t.Fatalf("NotifyFailing: %v", err)
 	}
 
@@ -227,7 +232,7 @@ func TestNotifyFailingSkipsARevokedMembership(t *testing.T) {
 
 	seedFailing(t, db, "revoked", 1, 1)
 
-	if err := NewNotifier(db).NotifyFailing(ctx); err != nil {
+	if err := newTestNotifier(db).NotifyFailing(ctx); err != nil {
 		t.Fatalf("NotifyFailing: %v", err)
 	}
 

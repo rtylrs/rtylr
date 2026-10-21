@@ -3,7 +3,7 @@
 // Output: backend_handlers.csv
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { walk, moduleDirs, paths, writeCsv, relRepo, lineOf, voxieApiDir } from './lib.mjs';
+import { walk, moduleDirs, modulePackages, paths, writeCsv, relRepo, lineOf, voxieApiDir } from './lib.mjs';
 
 const rows = [];
 
@@ -58,7 +58,7 @@ for (const f of goFiles) {
 
 // Anonymous (unauthenticated) route literals per module.
 const anonByModule = new Map();
-for (const m of moduleDirs()) {
+for (const m of modulePackages()) {
   const modFile = join(m.path, 'module.go');
   try {
     const t = readFileSync(modFile, 'utf8');
@@ -66,7 +66,7 @@ for (const m of moduleDirs()) {
     const mm = re.exec(t);
     if (mm) {
       const p = [...mm[1].matchAll(/"([^"]+)"/g)].map((x) => x[1]);
-      if (p.length) anonByModule.set(m.name, p);
+      if (p.length) anonByModule.set(m.name, [...(anonByModule.get(m.name) || []), ...p]);
     }
   } catch {}
 }
@@ -273,7 +273,7 @@ for (const f of listOnk(onkRoot)) {
 
 // Which module registers which generated service.
 const genImportRe = /(\w+)\s+"github\.com\/voxire\/onion\/internal\/modules\/([\w/]+)"/g;
-for (const m of moduleDirs()) {
+for (const m of modulePackages()) {
   const modFile = join(m.path, 'module.go');
   let t;
   try {
@@ -336,7 +336,7 @@ for (const f of walk(paths.platform, ['.go'])) {
         rpc_or_route: `${mm[1].replace('Register', '').toUpperCase()} /${pm[1]}`,
         request_type: '',
         response_type: '',
-        auth_required: t.includes('license_routes') ? 'mixed' : 'yes',
+        auth_required: 'yes',
         tenant_predicate: tenantPredicate(t),
         file: relRepo(f),
         line: t.slice(0, mm.index).split('\n').length,

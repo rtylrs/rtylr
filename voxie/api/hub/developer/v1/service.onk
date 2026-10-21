@@ -23,6 +23,10 @@ service DeveloperService {
   /// Removes a webhook by ID.
   deleteWebhook(DeleteWebhookRequest) -> DeleteWebhookResponse @delete("/webhooks/{id}")
 
+  /// Replaces a webhook's signing secret. The old secret stops signing
+  /// immediately and the new one is returned once.
+  rotateWebhookSecret(RotateWebhookSecretRequest) -> RotateWebhookSecretResponse @post("/webhooks/{id}/rotate-secret")
+
   /// Returns delivery attempts for the business's webhooks, most recent first.
   ///
   /// A registration whose endpoint has started failing is otherwise invisible

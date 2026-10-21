@@ -1,0 +1,20 @@
+{
+  "appName": "Caisse",
+  "terminal": "Terminal",
+  "products": "Produits",
+  "orders": "Commandes",
+  "tables": "Tables",
+  "kitchen": "Cuisine",
+  "customers": "Clients",
+  "giftCards": "Cartes cadeaux",
+  "receipts": "Reçus",
+  "day": "Bilan du jour",
+  "offline": "File hors ligne",
+  "modifiers": "Modificateurs",
+  "combos": "Combos",
+  "inventory": "Stock",
+  "staff": "Personnel",
+  "heldOrders": "Commandes en attente",
+  "cashDrop": "Dépôt de caisse",
+  "closeSession": "Clôturer la session"
+}

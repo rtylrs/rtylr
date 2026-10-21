@@ -1,10 +1,13 @@
 import axios, { type AxiosInstance } from 'axios';
-import { resolveApiBase, resolveAuthUrl, resolveCookieDomain } from '@voxire/config';
+import {
+  resolveApiBase,
+  resolveAppUrl,
+  resolveAuthUrl,
+} from '@voxire/config';
 import { safeFetch } from './result';
+import { markCredential, sentCredential, shouldEndSharedSession, setSessionRefresh } from './session';
 
 const getBaseUrl = (): string => {
-  // Runtime config (self-host) overrides the build-time/hosted default; hosted
-  // returns the same VITE_API_URL/rtylr default it always did.
   return resolveApiBase();
 };
 
@@ -23,6 +26,14 @@ const getToken = (): string | null => {
   return token;
 };
 
+const safelyGetToken = (): string | null => {
+  try {
+    return getToken();
+  } catch {
+    return null;
+  }
+};
+
 const isLocalDevHost = (hostname: string): boolean => {
   const host = hostname.toLowerCase();
   return host === 'localhost' || host === '127.0.0.1' || /^\d+\.\d+\.\d+\.\d+$/.test(host);
@@ -31,9 +42,6 @@ const isLocalDevHost = (hostname: string): boolean => {
 const getCookieDomain = (): string | undefined => {
   const hostname = window.location.hostname.toLowerCase();
   if (isLocalDevHost(hostname)) return undefined;
-  // Self-host: scope to the deployment's own shared parent domain (if any).
-  const runtimeDomain = resolveCookieDomain();
-  if (runtimeDomain) return runtimeDomain;
   if (hostname === 'rtylr.com' || hostname.endsWith('.rtylr.com')) return '.rtylr.com';
   return undefined;
 };
@@ -42,16 +50,81 @@ const clearTokenCookie = (): void => {
   const domain = getCookieDomain();
   if (domain) {
     document.cookie = `token=; Max-Age=0; path=/; Domain=${domain};`;
+    document.cookie = `refresh_token=; Max-Age=0; path=/; Domain=${domain};`;
   }
   document.cookie = 'token=; Max-Age=0; path=/;';
+  document.cookie = 'refresh_token=; Max-Age=0; path=/;';
 };
 
+const getRefreshToken = (): string | null => {
+  const match = document.cookie.match(/(?:^|;\s*)refresh_token=([^;]+)/);
+  if (!match) return null;
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return match[1];
+  }
+};
+
+const setAccessToken = (token: string): void => {
+  const domain = getCookieDomain();
+  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+  const domainPart = domain ? `; Domain=${domain}` : '';
+  document.cookie = `token=${encodeURIComponent(token)}; Max-Age=2592000; path=/${domainPart}; SameSite=Lax${secure}`;
+};
+
+setSessionRefresh(async (signal) => {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return 'unavailable';
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) return 'rejected';
+  const response = await fetch(`${getBaseUrl().replace(/\/+$/, '')}/common/auth/v1/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh_token: refreshToken }),
+    signal,
+  });
+  if (response.status === 401) return 'rejected';
+  if (!response.ok) return 'unavailable';
+  const data: unknown = await response.json();
+  if (
+    !data ||
+    typeof data !== 'object' ||
+    !('token' in data) ||
+    typeof data.token !== 'string' ||
+    !data.token
+  ) return 'unavailable';
+  setAccessToken(data.token);
+  return 'refreshed';
+});
+
 const getAuthBaseUrl = (): string => {
-  // Self-host uses the runtime auth URL; hosted uses sso.rtylr.com.
   return isLocalDevHost(window.location.hostname) ? 'http://localhost:5176' : resolveAuthUrl();
 };
 
 const getAuthUrl = (appId: string): string => `${getAuthBaseUrl()}?redirect=${appId}`;
+
+const isMFARequiredResponse = (data: unknown): boolean => {
+  if (!data || typeof data !== 'object' || !('message' in data)) return false;
+  const message = (data as { message?: unknown }).message;
+  return message === 'MFA enrollment required' || message === 'MFA verification required';
+};
+
+const redirectToSecuritySettings = (): void => {
+  const dashboardUrl = new URL(resolveAppUrl('dash'), window.location.href);
+  const dashboardPath = dashboardUrl.pathname.replace(/\/+$/, '');
+  const securityPath = `${dashboardPath}/security`;
+  if (
+    window.location.origin === dashboardUrl.origin &&
+    (window.location.pathname === securityPath ||
+      window.location.pathname.startsWith(`${securityPath}/`))
+  ) {
+    return;
+  }
+  dashboardUrl.pathname = securityPath;
+  dashboardUrl.search = '';
+  dashboardUrl.hash = '';
+  window.location.href = dashboardUrl.toString();
+};
 
 // True when the current page IS the auth app. A 401 there (e.g. a wrong
 // password on the login screen, or an expired cookie during the login page's
@@ -66,6 +139,73 @@ const isOnAuthApp = (): boolean => {
     return false;
   }
 };
+
+// ── 401 classification ────────────────────────────────────────────
+
+/**
+ * 401 bodies that do not mean "your token is no longer valid".
+ *
+ * The bearer gate answers a bad token with a bare "Unauthorized"
+ * (auth_middleware.go). These are 401s the backend raises for other reasons
+ * while the token is still good: unverified email, an account awaiting
+ * activation, outstanding MFA, a failed authorization lookup, or a credential
+ * the caller itself submitted and got wrong (a wrong password on the login
+ * form, a wrong current password, an expired Google code). Signing the user
+ * out of all ten apps for any of them is the bug this list exists to prevent.
+ */
+const NON_SESSION_401_MESSAGES = new Set([
+  'authorization unavailable',
+  'email verification required',
+  'account activation required',
+  'mfa enrollment required',
+  'mfa verification required',
+  'mfa verification unavailable',
+  'invalid email or password',
+  'google code is invalid or expired',
+  'current password is incorrect',
+  'internal authority token required',
+]);
+
+/** Pull a message out of a JSON or plain-text error body. */
+function unauthorizedMessage(data: unknown): string | null {
+  if (typeof data === 'string') {
+    const trimmed = data.trim();
+    return trimmed || null;
+  }
+  if (!data || typeof data !== 'object') return null;
+  const record = data as Record<string, unknown>;
+  for (const key of ['message', 'error', 'detail']) {
+    const value = record[key];
+    if (typeof value === 'string' && value.trim()) return value.trim();
+  }
+  return null;
+}
+
+/**
+ * True only for a 401 that actually rejects the bearer token.
+ *
+ * An unrecognised body is treated as a session rejection on purpose: the only
+ * safe default for a status the client does not understand is the behaviour it
+ * had before, and a genuinely dead session has to keep signing the user out.
+ */
+function isSessionRejection(data: unknown): boolean {
+  const message = unauthorizedMessage(data);
+  if (message === null) return true;
+  return !NON_SESSION_401_MESSAGES.has(message.toLowerCase());
+}
+
+/** Run the shared sign-out without ever throwing into a response interceptor. */
+function endSharedSession(appId: string): void {
+  try {
+    clearTokenCookie();
+    if (!isOnAuthApp()) {
+      window.location.href = getAuthUrl(appId);
+    }
+  } catch {
+    // Sign-out is best effort. A cookie or navigation failure here must not
+    // replace the real 401 the caller is about to handle.
+  }
+}
 
 // ── snake_case → camelCase converter ──────────────────────────────
 
@@ -171,10 +311,13 @@ export function createApiClient(appId: string): AxiosInstance {
   client.interceptors.request.use(
     (config) => {
       // Resolve the base per-request: the singleton `api` is created at module
-      // load, which can be before runtime config (self-host) has fetched. Hosted
-      // resolves to the same value `getBaseUrl()` returned at creation time.
       config.baseURL = getBaseUrl();
       const token = getToken();
+      // Recorded so the response interceptor can tell a 401 against a real
+      // credential from one against a request that never sent one. Set even
+      // when there is no token, so "absent" and "not credentialed" are the
+      // same answer rather than a stale leftover.
+      markCredential(config, token);
       if (token) {
         config.headers['Authorization'] = `Bearer ${token}`;
       }
@@ -198,14 +341,45 @@ export function createApiClient(appId: string): AxiosInstance {
       }
       return response;
     },
-    (error) => {
+    async (error) => {
       if (error.response?.data && typeof error.response.data === 'object') {
         error.response.data = convertKeys(error.response.data);
       }
       if (error.response?.status === 401) {
-        clearTokenCookie();
-        if (!isOnAuthApp()) {
-          window.location.href = getAuthUrl(appId);
+        // An MFA-required 401 is a step-up prompt, not a dead session: signing
+        // out would discard a valid token and strand the user mid-sign-in.
+        if (isMFARequiredResponse(error.response.data)) {
+          redirectToSecuritySettings();
+        } else {
+          const config = error.config as (
+            typeof error.config & {
+              headers?: Record<string, unknown>;
+              __voxireSessionRetried?: boolean;
+            }
+          ) | undefined;
+          const sentToken = sentCredential(config);
+          const canRetry =
+            config &&
+            sentToken &&
+            isSessionRejection(error.response.data) &&
+            !config.__voxireSessionRetried &&
+            safelyGetToken() === sentToken;
+          const ended = await shouldEndSharedSession(
+            sentToken,
+            isSessionRejection(error.response.data),
+            getToken,
+            () => endSharedSession(appId)
+          );
+          const refreshedToken = safelyGetToken();
+          if (canRetry && !ended && refreshedToken && refreshedToken !== sentToken) {
+            // Axios creates a new config when replaying; carry the guard on
+            // the config so mergeConfig preserves it across that copy.
+            config.__voxireSessionRetried = true;
+            config.headers = config.headers ?? {};
+            config.headers.Authorization = `Bearer ${refreshedToken}`;
+            markCredential(config, refreshedToken);
+            return client.request(config);
+          }
         }
       }
       return Promise.reject(error);
@@ -237,8 +411,21 @@ export type OneKitClientConstructor<TClient, TOptions extends OneKitClientOption
 
 export const getOneKitApiBaseUrl = (): string => getBaseUrl();
 
+/**
+ * Read a 401 body without disturbing the response the caller still has to
+ * parse. A clone that fails yields null, which classifies as a session
+ * rejection - the same answer a bodiless 401 gets.
+ */
+async function readUnauthorizedBody(response: Response): Promise<unknown> {
+  try {
+    return await response.clone().json();
+  } catch {
+    return null;
+  }
+}
+
 export function createOneKitFetch(appId: string): typeof fetch {
-  return async (input, init) => {
+  const send = async (input: RequestInfo | URL, init: RequestInit | undefined, retry = false): Promise<Response> => {
     const headers = new Headers(init?.headers);
     const token = getToken();
     if (token) {
@@ -251,14 +438,28 @@ export function createOneKitFetch(appId: string): typeof fetch {
     });
 
     if (response.status === 401) {
-      clearTokenCookie();
-      if (!isOnAuthApp()) {
-        window.location.href = getAuthUrl(appId);
+      // An MFA-required 401 is a step-up prompt, not a dead session: sending the
+      // user to the sign-in page would discard a perfectly valid token.
+      const unauthorizedBody = await readUnauthorizedBody(response);
+      if (isMFARequiredResponse(unauthorizedBody)) {
+        redirectToSecuritySettings();
+      } else {
+        const ended = await shouldEndSharedSession(
+          token,
+          isSessionRejection(unauthorizedBody),
+          getToken,
+          () => endSharedSession(appId)
+        );
+        const refreshedToken = getToken();
+        if (!retry && !ended && token && refreshedToken && refreshedToken !== token) {
+          return send(input, init, true);
+        }
       }
     }
 
     return response;
   };
+  return (input, init) => send(input, init);
 }
 
 export function createOneKitClientOptions<TOptions extends OneKitClientOptions>(

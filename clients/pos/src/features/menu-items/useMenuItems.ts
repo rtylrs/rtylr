@@ -20,7 +20,7 @@ export function useMenuItems(): UseMenuItemsResult {
   const query = useQuery({
     queryKey: ['pos-menu-items'],
     queryFn: async (): Promise<MenuItem[]> => {
-      const res = await menuItemClient.listMenuItems({});
+      const res = await menuItemClient.listPOSCatalog({});
       return res.items ?? [];
     },
     staleTime: 2 * 60 * 1000,

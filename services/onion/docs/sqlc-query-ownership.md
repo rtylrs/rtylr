@@ -1,44 +1,43 @@
-# SQLC Query Ownership
+# Persistence ownership
 
-SQLC packages are deliberately module-local. A byte-identical statement in two
-packages is not automatically dead code: each package owns its repository API,
-error mapping, cache invalidation, and (for write paths) transaction boundary.
-Moving one module's generated method into another module would make a domain
-service depend on another module's infrastructure package and can split an
-otherwise atomic write into two connections.
+The first directory under `internal/modules` is a bounded context. Child packages are capabilities of that context, not additional owners of its tables. SQL sources, sqlc configuration, generated queries, repositories and transactions live with that owner.
 
-This register records the disposition of the duplicate active query groups
-audited in issue #203. A future change may share a query only through an
-explicit application-facing provider interface; do not import another module's
-`internal/infrastructure` package merely to reuse generated SQL.
+| Context | Mutable state |
+| --- | --- |
+| Organization | Accounts, businesses, membership, authorization assignments, subscriptions, entitlements and settings |
+| ERP | Products, categories, procurement, stock locations, stock levels, stock ledger, online product listings and order fulfillment |
+| POS | Registers, floors, tables, orders, payments, refunds, terminals, register users and kitchen workflow |
+| CRM | Customers, contacts, leads, loyalty, campaigns and segmentation |
+| Finance | Accounts, journals, invoices, payments, expenses, bills and reconciliation |
+| HR | Employees, organization structure, rosters, attendance, leave and payroll |
+| Flow | Projects, tasks, workspaces, comments and planning |
+| Booking | Services, resources, appointments, reminders and calendar concurrency |
+| Store | Storefronts, checkout sessions, shipping, payment configuration and themes |
+| Insights | Report settings and consumer projections |
+| Caret | Chats, projects and conversation memory |
 
-Issue #203 describes 21 groups, but its enumerated duplicate-group list
-contains the 20 groups below; this register covers every explicitly listed
-group. Any newly discovered group must be added here with the same disposition
-before its SQLC definition is moved or removed.
+Other contexts and platform state retain their named schema owners. The complete table inventory is computed from the checked-in SQL sources by `scripts/cross-app/sweep-tables.mjs`.
 
-| Group | Canonical domain owner | Disposition |
-| --- | --- | --- |
-| Addon enable/disable (`addons`, `console`) | Addons | Intentional console administrative projection. Console keeps grant administration and its own audit/error boundary; the addon module owns product-facing enablement. |
-| Bank balance sum (`bank_accounts`, `finance_reports`) | Bank accounts | Intentional finance-report projection. Reports compose this sum with accounts, receivables, and payables without depending on the bank-account repository. |
-| Active seat/member count (`console`, `subscriptions`, `team`) | Subscriptions | Intentional read projections. Console renders administration state and team performs seat mutations in its transaction; neither may import subscription infrastructure. |
-| Delete user (`console`, `user`) | User | Intentional console administrative capability. Console must preserve its administrator authorization and audit boundary; user owns self-service lifecycle. |
-| Business owner lookup (`crm_sales`, `pos_stock_movements`, `user`) | Business | Intentional tenant-resolution reads. Each call participates in a different domain operation and maps missing/inactive businesses differently. |
-| Customer count (`customers`, `kpis`) | Customers | Intentional KPI projection. The KPI aggregate reads several domains in one repository without coupling to customer infrastructure. |
-| Active customer count (`customers`, `segments`) | Customers | Intentional segmentation projection. Segment recalculation owns its query/transaction boundary while customer owns CRUD. |
-| Loyalty transaction count (`customers`, `loyalty`) | Loyalty | Intentional customer-detail projection. The customer module uses the count while merging customer records; loyalty owns the ledger API. |
-| Active staff count (`kpis`, `staff`) | Staff | Intentional KPI projection. KPI composition must remain independent of staff infrastructure. |
-| Low-stock product count (`kpis`, `products`) | Products | Intentional KPI projection. KPI composition keeps the exact inventory predicate local and does not expose product repository internals. |
-| User ID by email (`oauth`, `workspaces`) | User | Intentional authentication/workspace projections. OAuth deliberately returns only an ID for credential flow; workspace needs its own user lookup shape. |
-| Order-item status update (`pos_kds`, `pos_orders`) | POS orders | Intentional KDS command boundary. POS orders performs owner verification; KDS applies kitchen workflow changes in its own repository API. |
-| Inventory transaction with reference (`purchase_orders`, `stock_takes`) | Inventory ledger | Intentional transactional writes. Receiving and stock-take completion insert the same ledger shape inside different multi-step transactions. |
-| Login-history insert (`security`, `user`) | Security | Intentional auth-path write. Security owns login-history caching and session behavior; user records authentication events during its own flows. |
-| Owner apps (`subscriptions`, `team`) | Subscriptions | Intentional team invite projection. Team resolves plan apps while provisioning a member and must retain its local failure/fallback behavior. |
-| Subscription seat-count update (`subscriptions`, `team`) | Subscriptions | Intentional team transaction participant. Team updates the count together with membership and seat-period rows; subscriptions owns standalone billing changes. |
-| Close active seat period (`subscriptions`, `team`) | Subscriptions | Intentional team transaction participant. Team closes and opens periods atomically with membership changes. |
-| Open seat period (`subscriptions`, `team`) | Subscriptions | Intentional team transaction participant. Team creates the replacement period in the same transaction as the seat-count mutation. |
-| User business ID (`team`, `user`) | User | Intentional tenant-resolution projection. Team maps missing users to team-domain errors; user owns profile/token behavior and caching. |
-| Ensure employee for user (`team`, `user`) | User | Intentional onboarding transaction participant. Team provisioning and self-registration each retain their own error handling and transaction ownership. |
+## Integration boundaries
 
-Campaign and segment SQLC duplication is deliberately excluded from this
-register because it is tracked separately by issue #189.
+A consumer defines the small interface or callback it needs. Wiring belongs in the composition root; field mapping belongs in an adapter owned by the consumer. A producer exposes application operations, values and explicit errors. Consumers cannot import its repositories, generated SQL types or internal packages.
+
+A synchronous owner read returns current data or an error. For example, organization reporting preferences return `sql.ErrNoRows` for an unknown or inactive business. ERP sales quotes expose only active products within the specified business and exclude costs and supplier information. Consumers persist the price they observed; a quote does not lock another context's product transaction.
+
+A projection belongs to its consumer and is refreshed from published facts or owner APIs. A direct SQL join to an owner's table is not a projection. Published facts describe completed source operations; they cannot instruct another module to invalidate its cache.
+
+Insights reports read through their owners. Finance reports, HR reports, ERP products, POS orders and CRM customers serve `Insights*` reads over their own tables, with result types in `internal/contracts/<owner>`. Insights combines the results itself: product reports join POS sales to ERP product details, and the top-customer list adds CRM contact details to POS purchase totals. Customer purchase figures count the customer recorded on each paid order, so a customer later deleted from CRM still counts for the periods they bought in. Cached reports are versioned by the latest change any owner reports.
+
+POS commits the paid order and its durable fact in one POS transaction. ERP processes that fact in a separate ERP transaction, aggregates repeated products and deduplicates ledger movements. Delivery can be retried. Inventory visibility follows event delivery, so it is not synchronous with POS payment.
+
+Online order confirmation belongs to ERP fulfillment because the status and stock availability form one synchronous invariant. It retains the existing Store routes. Storefront configuration and checkout remain Store capabilities; checkout reads active product quotes through the ERP boundary.
+
+CRM owns the POS contact lookup route because it reads the same customer records and exposes only contact fields. There is no separate POS customer repository or domain copy. CRM mutations invalidate that lookup alongside its other customer caches.
+
+## Transactions and migrations
+
+Transactions may cover multiple capabilities of one owner. Never pass a SQL transaction to another bounded context. Booking schedule locks and POS order sequences belong to their respective contexts rather than using organization rows as lock targets.
+
+`internal/platform/database/schema_registry.tsv` maps stable migration identities to their owned SQL sources. Moving a source does not change its applied identity. A historical migration may concatenate sources from different owners when splitting ownership of an existing schema; subsequent changes belong to the relevant owner. Fresh database replay must produce the intended schema, and production migrations must be applied separately from the service rollout.
+
+`make architecture-check` inspects source boundaries, contracts, transaction calls, context cycles, table access and the migration registry. The only accepted deviations are exact, dated entries in `docs/architecture-exceptions.json` with an owner, reason, containment and exit plan. No blanket legacy exception applies.

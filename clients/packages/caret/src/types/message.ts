@@ -1,27 +1,27 @@
-import type { CaretMode } from './mode';
+import type { CaretMode } from "./mode";
 
-export type MessageRole = 'user' | 'assistant' | 'system' | 'tool';
+export type MessageRole = "user" | "assistant" | "system" | "tool";
 
 export interface ThinkingBlock {
   id: string;
-  type: 'thinking';
+  type: "thinking";
   content: string;
   durationMs?: number;
 }
 
 export interface TextBlock {
   id: string;
-  type: 'text';
+  type: "text";
   content: string;
 }
 
 export interface ToolCallBlock {
   id: string;
-  type: 'tool_call';
+  type: "tool_call";
   name: string;
   mode?: CaretMode;
   input: Record<string, unknown>;
-  status: 'pending' | 'approved' | 'denied' | 'running' | 'success' | 'error';
+  status: "pending" | "approved" | "denied" | "running" | "success" | "error";
   output?: unknown;
   preview?: string;
   summary?: string;
@@ -31,6 +31,13 @@ export interface ToolCallBlock {
 
 export type ContentBlock = TextBlock | ThinkingBlock | ToolCallBlock;
 
+export interface CaretImageAttachment {
+  name: string;
+  /** Empty for a text file, which is shown by name. */
+  dataUrl: string;
+  kind?: "image" | "file";
+}
+
 export interface CaretMessage {
   id: string;
   role: MessageRole;
@@ -38,4 +45,11 @@ export interface CaretMessage {
   createdAt: string;
   /** Legacy/flattened content used when blocks aren't populated yet. */
   content?: string;
+  attachments?: CaretImageAttachment[];
+  /** How long the reply took, from sending the prompt to the last token. */
+  responseMs?: number;
+  /** The saved message's id, once the server has stored the reply. */
+  storedId?: string;
+  /** Next questions the reply suggests, shown as buttons under it. */
+  followUps?: string[];
 }

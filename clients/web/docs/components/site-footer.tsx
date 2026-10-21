@@ -7,7 +7,6 @@ const footerGroups = [
       ['Apps', '/apps/hub'],
       ['API', '/api/overview'],
       ['Addon system', '/platform/addons'],
-      ['Self Host rtylr', '/self-hosting'],
     ],
   },
   {
@@ -20,20 +19,9 @@ const footerGroups = [
     ],
   },
   {
-    title: 'Self-hosting',
-    links: [
-      ['Architecture', '/self-hosting/architecture'],
-      ['Docker Compose', '/self-hosting/compose'],
-      ['Helm install', '/self-hosting/helm'],
-      ['DNS setup', '/self-hosting/dns'],
-    ],
-  },
-  {
     title: 'Resources',
     links: [
       ['Documentation', '/'],
-      ['Upgrade flow', '/self-hosting/upgrade'],
-      ['Backend environment', '/self-hosting/backend-env'],
       ['rtylr.com', 'https://rtylr.com'],
     ],
   },
@@ -67,7 +55,6 @@ export function SiteFooter() {
       <div className="site-footer__bottom">
         <div>
           <Link href="/faq">Help</Link>
-          <Link href="/self-hosting">Self Host rtylr</Link>
           <a href="https://github.com/tryrtylr" target="_blank" rel="noreferrer">GitHub</a>
         </div>
         <span>© {new Date().getFullYear()} rtylr</span>

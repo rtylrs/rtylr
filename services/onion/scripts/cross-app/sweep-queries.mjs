@@ -1,25 +1,25 @@
-// Sweep every sqlc query definition across all modules plus the platform
-// packages that carry their own SQL (customer_sync, stock_core, tenant).
+// Inventory named queries across business modules and platform packages.
 // Output: backend_queries.csv
 // Columns: module, query_name, tables_read, tables_written,
 //          has_business_id_filter, has_owner_id_filter, file, line
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { walk, paths, writeCsv, relRepo } from './lib.mjs';
+import { walk, paths, writeCsv, relRepo, cteNames } from './lib.mjs';
 
 const rows = [];
 
 function tablesIn(sql) {
   // Strip comments so commented examples do not count.
-  let t = sql.replace(/--[^\n]*/g, ' ').replace(/\/\*[\s\S]*?\*\//g, ' ');
+  let t = sql.replace(/--[^\n]*/g, ' ').replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/`/g, '');
   // ON DUPLICATE KEY UPDATE names columns, not tables.
   t = t.replace(/on\s+duplicate\s+key\s+update/gi, ' ');
   const reads = new Set();
   const writes = new Set();
+  const ctes = cteNames(t);
   const push = (set, name) => {
-    name = name.trim().replace(/[;,)]/g, '');
+    name = name.trim().replace(/[;,)]/g, '').split('.').at(-1).toLowerCase();
     if (!name || /\s/.test(name)) return;
     if (/^(select|from|where|group|order|left|inner|outer|join|on|and|or|set|values|as)$/.test(name)) return;
+    if (set === reads && ctes.has(name.split('.').at(-1).replace(/`/g, '').toLowerCase())) return;
     set.add(name);
   };
   // FROM / JOIN clauses (reads), including subqueries. Strip write keywords
@@ -35,9 +35,6 @@ function tablesIn(sql) {
   // a CTE-referencing write still shows its read targets via from/join above.
   return { reads: [...reads], writes: [...writes] };
 }
-
-const queryDirs = [];
-for (const mod of walk(paths.modules, [], []).length ? [] : []) void mod; // no-op guard
 
 // Module query files.
 const seen = new Set();
@@ -75,7 +72,7 @@ function addQueryFile(file, module) {
 }
 
 for (const dir of walk(paths.modules, ['.sql'])) {
-  if (!dir.includes(`${join('sql', 'queries')}`) && !dir.includes('sqlc')) continue;
+  if (!dir.includes('/sql/queries/') && !dir.includes('sqlc')) continue;
   const module = dir.slice(paths.modules.length + 1).split('/')[0];
   addQueryFile(dir, module);
 }
@@ -88,10 +85,9 @@ for (const f of walk(paths.modules, ['.sql'])) {
 }
 
 // Platform packages with their own SQL.
-for (const p of ['customer_sync', 'stock_core', 'tenant']) {
-  for (const f of walk(join(paths.platform, p), ['.sql'])) {
-    addQueryFile(f, `platform/${p}`);
-  }
+for (const f of walk(paths.platform, ['.sql'])) {
+  const owner = f.slice(paths.platform.length + 1).split('/')[0];
+  addQueryFile(f, `platform/${owner}`);
 }
 
 rows.sort((a, b) => a.module.localeCompare(b.module) || a.query_name.localeCompare(b.query_name));

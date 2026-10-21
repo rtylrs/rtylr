@@ -6,9 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/observability"
@@ -17,24 +14,26 @@ import (
 
 const serverShutdownTimeoutSeconds = 20
 
-func Start(ctx context.Context, runMode ChiRunMode, port string) error {
+func Start(ctx context.Context, runMode RunMode, port string) error {
 	// Rate limiters created during package initialization (notably the auth
 	// route limiters) are process-lifetime objects. Snapshot them before setup
 	// so a server restart only tears down limiters owned by this Start call.
 	preexistingRateLimiters := snapshotSecurityRateLimiters()
 	defer stopSecurityRateLimitersNotIn(preexistingRateLimiters)
 
-	r := chi.NewRouter()
+	// One ServeMux serves every route: the run mode's (contracts, the legacy
+	// route table, platform routes) and the server's own below. A pattern a
+	// run mode registers twice, or one that conflicts with these, panics here
+	// at start rather than shadowing a route silently.
+	mux := http.NewServeMux()
 
-	runMode.Setup(ctx, r)
+	runMode.Setup(ctx, mux)
 
-	// /metrics is mounted before runMode.Setup's module routes run so
-	// there's no way a module accidentally shadows it. Basic-auth is
-	// enforced inside the handler; the endpoint 404s when
+	// Basic-auth is enforced inside the handler; the endpoint 404s when
 	// METRICS_USER/METRICS_PASS aren't set, so it stays opt-in.
-	r.Get("/metrics", httpmetrics.Handler())
+	mux.Handle("GET /metrics", httpmetrics.Handler())
 
-	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		if usesDatabaseHealthCheck(runMode) {
 			pingCtx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
@@ -53,7 +52,7 @@ func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 		}
 	})
 
-	r.Get("/", func(w http.ResponseWriter, _ *http.Request) {
+	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
@@ -62,7 +61,7 @@ func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 		}
 	})
 
-	r.Get("/favicon.ico", func(w http.ResponseWriter, _ *http.Request) {
+	mux.HandleFunc("GET /favicon.ico", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
@@ -71,7 +70,8 @@ func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 		middlewares = append(middlewares, provider.Middlewares()...)
 	}
 
-	handler := composeHandler(r, middlewares)
+	observability.SetRouteMux(mux)
+	handler := composeHandler(mux, middlewares)
 
 	srv := &http.Server{
 		Addr:              ":" + port,
@@ -152,7 +152,7 @@ func stopSecurityRateLimitersNotIn(keep map[*SecurityRateLimiter]struct{}) {
 	}
 }
 
-func usesDatabaseHealthCheck(runMode ChiRunMode) bool {
+func usesDatabaseHealthCheck(runMode RunMode) bool {
 	mode, ok := runMode.(DatabaseHealthMode)
 	if !ok {
 		return true
@@ -164,8 +164,8 @@ func usesDatabaseHealthCheck(runMode ChiRunMode) bool {
 // first) instead of registering them with r.Use. Keeping the chain outside the
 // router is what lets the Partials X-API-KEY bypass send a request straight to
 // the router with no middleware in front of it.
-func composeHandler(r *chi.Mux, middlewares []MiddlewareFunc) http.Handler {
-	var protected http.Handler = r
+func composeHandler(mux *http.ServeMux, middlewares []MiddlewareFunc) http.Handler {
+	var protected http.Handler = mux
 	for i := len(middlewares) - 1; i >= 0; i-- {
 		protected = middlewares[i](protected)
 	}
@@ -174,7 +174,7 @@ func composeHandler(r *chi.Mux, middlewares []MiddlewareFunc) http.Handler {
 		return protected
 	}
 
-	return PartialsBypassHandler(r, protected)
+	return PartialsBypassHandler(mux, protected)
 }
 
 // platformMiddlewares returns the middlewares every runmode gets, outermost
@@ -189,8 +189,8 @@ func platformMiddlewares() []MiddlewareFunc {
 	}
 
 	middlewares = append(middlewares,
-		middleware.Recoverer,
-		// Sentry recover runs after chi's Recoverer so we still respond
+		recoverMiddleware,
+		// Sentry recover runs after recoverMiddleware so we still respond
 		// with a 500, but anything that escapes the handler layer ends
 		// up in Sentry with a proper stack trace and request scope.
 		observability.RecoverMiddleware,

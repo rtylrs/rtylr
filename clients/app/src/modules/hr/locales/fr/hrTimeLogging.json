@@ -1,0 +1,36 @@
+{
+  "title": "Saisie du temps",
+  "subtitle": "Semaine du {{start}} – {{end}} · {{total}} enregistré",
+  "addEntry": "Ajouter une entrée",
+  "created": "Entrée de temps créée",
+  "deleted": "Entrée de temps supprimée",
+  "employeeLookupFailed": "Votre profil employé n'a pas pu être chargé",
+  "noDescription": "Pas de description",
+  "billable": "Facturable",
+  "emptyTitle": "Aucune entrée de temps cette semaine",
+  "emptyDescription": "Enregistrez votre première entrée pour commencer.",
+  "startTimer": "Démarrer",
+  "stopTimer": "Arrêter",
+  "timerDescription": "Sur quoi travaillez-vous ?",
+  "statuses": {
+    "draft": "Brouillon",
+    "submitted": "Soumis",
+    "approved": "Approuvé",
+    "rejected": "Rejeté"
+  },
+  "form": {
+    "title": "Nouvelle entrée de temps",
+    "date": "Date",
+    "hours": "Heures",
+    "minutes": "Minutes",
+    "startTime": "Heure de début",
+    "endTime": "Heure de fin",
+    "useStartEnd": "Utiliser l'heure de début/fin",
+    "description": "Description",
+    "descriptionPlaceholder": "Sur quoi avez-vous travaillé ?",
+    "billable": "Facturable",
+    "durationRequired": "La durée doit être d'au moins 1 minute",
+    "invalidTimeRange": "L'heure de fin doit être après l'heure de début",
+    "employeeLookupFailed": "Votre profil employé n'a pas pu être chargé. Veuillez actualiser la page."
+  }
+}

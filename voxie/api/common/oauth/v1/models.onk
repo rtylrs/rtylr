@@ -36,6 +36,8 @@ message TokenResponse {
   refresh_token: string
   token_type: string
   expires_in: int32
+  /// scope is the space-delimited set of scopes the access token carries.
+  scope: string
 }
 
 message RevokeRequest {
@@ -52,7 +54,6 @@ message MeRequest {}
 message MeResponse {
   user_id: int64
   business_id: int64
-  role: string
   /// Server-resolved authorization for the active business.
   effective_access: hub.user.v1.EffectiveAccess?
 }

@@ -1,26 +1,13 @@
 package hr.compat.v1
 
-message GetStaffDetailRequest {
-  id: string @query("id")
-}
-
-message GetStaffDetailResponse {
-  id: string
-  photo_url: string?
-  bio: string?
-}
-
 message MyEmployee {
   id: string
 }
 
-message GetMyEmployeeRequest {}
-
-message GetMyEmployeeResponse {
-  employee: MyEmployee
-}
-
 message EmptyRequest {}
+
+/// Empty response for @http routes whose handler writes its own response.
+message EmptyResponse {}
 
 message JsonResponse {
   data: json @unwrap
@@ -68,4 +55,13 @@ message PathBodyRequest {
 message QueryPathRequest {
   id: string
   status: string? @query("status")
+}
+
+message PathIdRequest {
+  id: string
+}
+
+message PathIdBodyRequest {
+  id: string
+  body: json
 }

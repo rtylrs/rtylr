@@ -10,6 +10,12 @@ type SubscriberInput struct {
 	Language     string
 }
 
+// PendingSubscriber is a row still missing from the Resend audience.
+type PendingSubscriber struct {
+	ID    int64
+	Email string
+}
+
 // AllowedNewsletterSources are the form placements on voxire.com that can
 // produce a signup. Anything else is rejected at validation.
 var AllowedNewsletterSources = []string{

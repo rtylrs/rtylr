@@ -14,6 +14,10 @@ import (
 	"github.com/voxire/onion/internal/platform/config"
 )
 
+// Content-Encoding used to be preserved, which asserted the buggy behaviour:
+// the recorder buffers the uncompressed body but the outer response compressor
+// has already set Content-Encoding: gzip on the shared header map, so keeping
+// it replayed a plain body labelled gzip.
 func TestIdempotencyHeadersForReplayKeepsContentTypeOnly(t *testing.T) {
 	headers := http.Header{
 		"Content-Type":     []string{"application/json"},
@@ -24,8 +28,8 @@ func TestIdempotencyHeadersForReplayKeepsContentTypeOnly(t *testing.T) {
 	if got.Get("Content-Type") != "application/json" {
 		t.Fatalf("Content-Type = %q", got.Get("Content-Type"))
 	}
-	if got.Get("Content-Encoding") != "gzip" {
-		t.Fatalf("Content-Encoding = %q", got.Get("Content-Encoding"))
+	if got.Get("Content-Encoding") != "" {
+		t.Fatalf("Content-Encoding must not describe the stored body, got %q", got.Get("Content-Encoding"))
 	}
 	if got.Get("X-Request-Id") != "" {
 		t.Fatalf("unexpected X-Request-Id header: %q", got.Get("X-Request-Id"))
@@ -165,7 +169,7 @@ func TestStoreIdempotencyRecordUsesTombstoneForOversizedBody(t *testing.T) {
 	}
 
 	var payload []byte
-	storeIdempotencyRecord(context.Background(), "key", rec, func(_ context.Context, _ string, got []byte) {
+	storeIdempotencyRecord(context.Background(), "key", rec, "fp", func(_ context.Context, _ string, got []byte) {
 		payload = got
 	})
 	if len(payload) == 0 {
@@ -178,6 +182,9 @@ func TestStoreIdempotencyRecordUsesTombstoneForOversizedBody(t *testing.T) {
 	}
 	if entry.Status != http.StatusCreated || len(entry.Body) != 0 {
 		t.Fatalf("tombstone = status %d, body %d bytes; want 201 and empty body", entry.Status, len(entry.Body))
+	}
+	if entry.Fingerprint != "fp" {
+		t.Fatalf("tombstone fingerprint = %q, want %q", entry.Fingerprint, "fp")
 	}
 }
 

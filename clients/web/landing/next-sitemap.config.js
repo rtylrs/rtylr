@@ -152,7 +152,7 @@ module.exports = {
     // trailing slash regardless of the global trailingSlash option.
     const norm = path === '/' ? '/' : path.replace(/\/$/, '') + '/';
 
-    const high = ['/pos/', '/erp/', '/hr/', '/crm/', '/finance/', '/flow/', '/pricing/'];
+    const high = ['/workspace/', '/pricing/'];
     const medium = ['/demo/', '/contact/', '/hardware/', '/integrations/', '/support/'];
     const low = ['/legal/terms/', '/legal/privacy-policy/', '/legal/security/'];
 

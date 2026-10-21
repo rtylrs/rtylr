@@ -5,19 +5,17 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
-
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/status"
 	"github.com/voxire/onion/internal/platform/status/providers"
 )
 
-func RegisterStatusRoutes(ctx context.Context, r *chi.Mux) {
+func RegisterStatusRoutes(ctx context.Context, mux *http.ServeMux) {
 	// Initialize status providers
 	initializeStatusProviders()
 
-	r.Get("/status", func(w http.ResponseWriter, req *http.Request) {
+	mux.HandleFunc("GET /status", func(w http.ResponseWriter, req *http.Request) {
 		authUser, ok := authPkg.GetAuthUser(req.Context())
 		if !ok {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -26,7 +24,7 @@ func RegisterStatusRoutes(ctx context.Context, r *chi.Mux) {
 		w.Header().Set("Content-Type", "application/json")
 
 		systemStatus := status.GetSystemStatus(req.Context())
-		if !authPkg.HasAnyRole(authUser, "console_admin") {
+		if !authPkg.IsConsoleAdmin(authUser) {
 			redactStatusDetails(&systemStatus)
 		}
 		statusCode := http.StatusOK

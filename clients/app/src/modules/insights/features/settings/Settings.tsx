@@ -1,0 +1,240 @@
+import React, { useState, useEffect } from 'react';
+import { HelmetContainer } from '@voxire/components';
+import { Clock, Loader2, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { EmptyState } from '../../../../shared/components/dash/EmptyState';
+import { refreshEmptyStateAction } from '../../shared/lib/refreshAction';
+import {
+  useInsightsSettings,
+  useUpdateInsightsSettings,
+  useScheduledReports,
+  useDeleteScheduledReport,
+} from '../../shared/hooks/queries/useInsightsSettings';
+import { CardSkeleton, SkeletonRow } from '../../shared/components/Skeleton';
+import ErrorState from '../../shared/components/ErrorState';
+import { canInsightsPermission } from '../../shared/lib/insightsPermissions';
+import { useUserStore } from '../../../../shared/stores/userStore';
+import { Button } from '../../../../shared/components/ui';
+
+const Settings: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const access = useUserStore((state) => state.user?.effectiveAccess);
+  const canEditSettings = canInsightsPermission('insights:settings:edit', access);
+  const canManageReports = canInsightsPermission('insights:reports:create', access);
+  const { data: settings, isLoading: settingsLoading, isError, refetch } = useInsightsSettings();
+  const updateSettings = useUpdateInsightsSettings();
+  const {
+    data: scheduledRes,
+    isLoading: schedLoading,
+    refetch: refetchScheduled,
+  } = useScheduledReports({ enabled: canManageReports });
+  const deleteScheduled = useDeleteScheduledReport();
+
+  const [defaultCurrency, setDefaultCurrency] = useState<string>('');
+  const [fiscalYearStart, setFiscalYearStart] = useState<string>('');
+  const [timezone, setTimezone] = useState<string>('');
+  const [dirty, setDirty] = useState(false);
+
+  useEffect(() => {
+    if (settings && !dirty) {
+      setDefaultCurrency(settings.defaultCurrency);
+      setFiscalYearStart(settings.fiscalYearStart);
+      setTimezone(settings.timezone);
+    }
+  }, [settings, dirty]);
+
+  const handleEdit =
+    (setter: (value: string) => void) =>
+    (e: React.ChangeEvent<HTMLInputElement>): void => {
+      setDirty(true);
+      setter(e.target.value);
+    };
+
+  if (isError) {
+    return <ErrorState message={t('insights.errors.generic')} onRetry={refetch} />;
+  }
+
+  const scheduledList = scheduledRes?.scheduledReports ?? [];
+
+  const handleSave = (): void => {
+    if (!canEditSettings) return;
+    updateSettings.mutate(
+      { defaultCurrency, fiscalYearStart, timezone },
+      { onSuccess: () => setDirty(false) }
+    );
+  };
+
+  const handleDeleteScheduled = (id: string): void => {
+    if (!canManageReports) return;
+    deleteScheduled.mutate(id);
+  };
+
+  return (
+    <div className="space-y-6 max-w-3xl">
+      <HelmetContainer title={t('insights.settings.metaTitle')} />
+
+      <div
+        className="rounded-xl p-5 space-y-4"
+        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+      >
+        {settingsLoading ? (
+          <CardSkeleton />
+        ) : (
+          <>
+            <div>
+              <label
+                htmlFor="insights-default-currency"
+                className="text-xs font-medium"
+                style={{ color: 'var(--hub-text-muted)' }}
+              >
+                {t('insights.settings.defaultCurrency')}
+              </label>
+              <input
+                id="insights-default-currency"
+                type="text"
+                value={defaultCurrency}
+                readOnly={!canEditSettings}
+                onChange={handleEdit(setDefaultCurrency)}
+                className="mt-1 w-full px-3 py-2 rounded-lg text-base outline-none"
+                style={{
+                  background: 'var(--hub-input-bg)',
+                  border: '1px solid var(--hub-border)',
+                  color: 'var(--hub-text)',
+                  fontSize: '16px',
+                }}
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="insights-fiscal-year"
+                className="text-xs font-medium"
+                style={{ color: 'var(--hub-text-muted)' }}
+              >
+                {t('insights.settings.fiscalYearStart')}
+              </label>
+              <input
+                id="insights-fiscal-year"
+                type="text"
+                value={fiscalYearStart}
+                readOnly={!canEditSettings}
+                onChange={handleEdit(setFiscalYearStart)}
+                placeholder="MM-DD"
+                className="mt-1 w-full px-3 py-2 rounded-lg outline-none"
+                style={{
+                  background: 'var(--hub-input-bg)',
+                  border: '1px solid var(--hub-border)',
+                  color: 'var(--hub-text)',
+                  fontSize: '16px',
+                }}
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="insights-timezone"
+                className="text-xs font-medium"
+                style={{ color: 'var(--hub-text-muted)' }}
+              >
+                {t('insights.settings.timezone')}
+              </label>
+              <input
+                id="insights-timezone"
+                type="text"
+                value={timezone}
+                readOnly={!canEditSettings}
+                onChange={handleEdit(setTimezone)}
+                className="mt-1 w-full px-3 py-2 rounded-lg outline-none"
+                style={{
+                  background: 'var(--hub-input-bg)',
+                  border: '1px solid var(--hub-border)',
+                  color: 'var(--hub-text)',
+                  fontSize: '16px',
+                }}
+              />
+            </div>
+          </>
+        )}
+      </div>
+
+      {canEditSettings ? (
+        <div>
+          <Button
+            type="button"
+            onClick={handleSave}
+            disabled={updateSettings.isPending || settingsLoading}
+            aria-label={t('insights.settings.save')}
+          >
+            {updateSettings.isPending && <Loader2 size={14} className="animate-spin" />}
+            {updateSettings.isPending ? t('insights.settings.saving') : t('insights.settings.save')}
+          </Button>
+        </div>
+      ) : (
+        <p className="text-sm" style={{ color: 'var(--hub-text-dim)' }}>
+          {t('insights.settings.readOnly')}
+        </p>
+      )}
+
+      {canManageReports && (
+        <div
+          className="rounded-xl p-5"
+          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Clock size={14} style={{ color: 'var(--accent)' }} />
+              <h2 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+                {t('insights.settings.scheduledReports.title')}
+              </h2>
+            </div>
+          </div>
+          {schedLoading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <SkeletonRow key={i} cols={3} />
+              ))}
+            </div>
+          ) : scheduledList.length === 0 ? (
+            <EmptyState
+              icon={Clock}
+              title={t('insights.settings.scheduledReports.empty.title')}
+              description={t('insights.settings.scheduledReports.empty.description')}
+              action={refreshEmptyStateAction(t('common.refresh'), () => refetchScheduled())}
+            />
+          ) : (
+            <div className="space-y-1">
+              {scheduledList.map((s) => (
+                <div
+                  key={s.id}
+                  className="flex items-center justify-between px-3 py-2.5 rounded-lg"
+                  style={{ background: 'var(--hub-hover)' }}
+                >
+                  <div>
+                    <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                      {s.templateId}
+                    </p>
+                    <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
+                      {s.cadence} · {s.channel} · {s.recipient}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteScheduled(s.id)}
+                    className="min-h-[44px] min-w-[44px] rounded flex items-center justify-center"
+                    style={{ color: 'var(--hub-text-dim)' }}
+                    aria-label={t(
+                      'insights.settings.scheduledReports.delete',
+                      'Delete scheduled report'
+                    )}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Settings;

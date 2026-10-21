@@ -3,15 +3,14 @@ package application
 import (
 	"context"
 	"crypto/rand"
-	"database/sql"
 	"encoding/hex"
 	"errors"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/webhooks/internal/domain"
-	"github.com/voxire/onion/internal/modules/webhooks/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+	"github.com/voxire/onion/internal/platform/eventbus"
 )
 
 const (
@@ -25,17 +24,17 @@ type repository interface {
 	Get(ctx context.Context, businessID, webhookID int64) (domain.Webhook, error)
 	Update(ctx context.Context, businessID, webhookID int64, url string, events []string, isActive bool) error
 	Delete(ctx context.Context, businessID, webhookID int64) error
+	RotateSecret(ctx context.Context, businessID, webhookID int64, secret string) error
 	ListDeliveriesForBusiness(ctx context.Context, businessID int64, filter domain.DeliveryFilter) ([]domain.DeliveryRecord, int64, error)
 }
 
 type Service struct {
-	repo repository
+	repo   repository
+	events eventReader
 }
 
-func NewService(_ context.Context, db *sql.DB) *Service {
-	return &Service{
-		repo: infrastructure.NewRepository(db),
-	}
+func NewService(repo repository, events eventReader) *Service {
+	return &Service{repo: repo, events: events}
 }
 
 func invalidateWebhooksScope(ctx context.Context, businessID int64) {
@@ -44,7 +43,7 @@ func invalidateWebhooksScope(ctx context.Context, businessID int64) {
 
 func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Webhook, error) {
 	return cacher.Of[[]domain.Webhook]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(webhooksScope, businessID, "list"),
+		cacheKeys.Scoped(webhooksScope, businessID, "list")+"|domain=v2",
 		func(ctx context.Context) ([]domain.Webhook, error) {
 			return s.repo.List(ctx, businessID)
 		},
@@ -52,23 +51,24 @@ func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Webhook,
 	)
 }
 
-func (s *Service) Create(ctx context.Context, ownerID, businessID int64, url string, events []string) (int64, error) {
-	if url == "" {
-		return 0, errors.New("url is required")
+// Create registers a webhook and returns its signing secret. The secret is
+// not stored anywhere the tenant can read it back, so this is the only time
+// they can see it.
+func (s *Service) Create(ctx context.Context, ownerID, businessID int64, url string, events []string) (int64, string, error) {
+	url, events, err := validateRegistration(url, events)
+	if err != nil {
+		return 0, "", err
 	}
 	secret, err := generateSecret()
 	if err != nil {
-		return 0, err
-	}
-	if events == nil {
-		events = []string{}
+		return 0, "", err
 	}
 	id, err := s.repo.Create(ctx, ownerID, businessID, url, secret, events)
 	if err != nil {
-		return 0, err
+		return 0, "", err
 	}
 	invalidateWebhooksScope(ctx, businessID)
-	return id, nil
+	return id, secret, nil
 }
 
 func (s *Service) Delete(ctx context.Context, businessID, webhookID int64) error {
@@ -82,26 +82,37 @@ func (s *Service) Delete(ctx context.Context, businessID, webhookID int64) error
 	return nil
 }
 
+// RotateSecret replaces the signing secret. Deliveries already queued are
+// signed with the new secret, since the secret is read at send time.
+func (s *Service) RotateSecret(ctx context.Context, businessID, webhookID int64) (string, error) {
+	if webhookID <= 0 {
+		return "", errors.New("webhook id is required")
+	}
+	secret, err := generateSecret()
+	if err != nil {
+		return "", err
+	}
+	if err := s.repo.RotateSecret(ctx, businessID, webhookID, secret); err != nil {
+		return "", err
+	}
+	invalidateWebhooksScope(ctx, businessID)
+	return secret, nil
+}
+
 func (s *Service) Update(ctx context.Context, businessID, webhookID int64, url string, events []string, isActive bool) (domain.Webhook, error) {
 	if webhookID == 0 {
 		return domain.Webhook{}, errors.New("webhook id is required")
 	}
-	if url == "" {
-		return domain.Webhook{}, errors.New("url is required")
-	}
-	if events == nil {
-		events = []string{}
+	url, events, err := validateRegistration(url, events)
+	if err != nil {
+		return domain.Webhook{}, err
 	}
 	if err := s.repo.Update(ctx, businessID, webhookID, url, events, isActive); err != nil {
 		return domain.Webhook{}, err
 	}
 	invalidateWebhooksScope(ctx, businessID)
 
-	webhook, err := s.repo.Get(ctx, businessID, webhookID)
-	if err != nil {
-		return domain.Webhook{}, err
-	}
-	return webhook, nil
+	return s.repo.Get(ctx, businessID, webhookID)
 }
 
 func generateSecret() (string, error) {
@@ -119,5 +130,19 @@ func generateSecret() (string, error) {
 // mutation with real effects on somebody's endpoint and is deliberately not
 // offered here.
 func (s *Service) ListDeliveries(ctx context.Context, businessID int64, filter domain.DeliveryFilter) ([]domain.DeliveryRecord, int64, error) {
-	return s.repo.ListDeliveriesForBusiness(ctx, businessID, filter)
+	records, total, err := s.repo.ListDeliveriesForBusiness(ctx, businessID, filter)
+	if err != nil {
+		return nil, 0, err
+	}
+	for i := range records {
+		event, err := s.events.GetEvent(ctx, records[i].EventID, businessID)
+		if err != nil {
+			if errors.Is(err, eventbus.ErrEventNotFound) {
+				continue
+			}
+			return nil, 0, err
+		}
+		records[i].EventType = event.Type
+	}
+	return records, total, nil
 }

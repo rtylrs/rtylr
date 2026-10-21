@@ -18,8 +18,6 @@ import type { PrinterInfo, SerialPortInfo } from '../../shared/services/hardware
 import { isTauri } from '../../shared/utils/platform';
 import appConfig from '../../app.json';
 import { HardwareHealthCheck } from './HardwareHealthCheck';
-import { useTranslation } from 'react-i18next';
-import ServerSetup from '../server-setup';
 
 const INPUT_CLS =
   'w-full h-11 px-3 rounded-lg bg-white/8 border border-pos-border text-pos-text outline-none focus:border-white/25';
@@ -47,7 +45,6 @@ const FEATURE_OPTIONS: { key: POSFeatureKey; label: string }[] = [
 ];
 
 const SettingsScreen: React.FC = () => {
-  const { t } = useTranslation('server');
   const autoLogoutMinutes = useSettingsStore((st) => st.autoLogoutMinutes);
   const barMode = useSettingsStore((st) => st.barMode);
   const business = useSettingsStore((st) => st.business);
@@ -149,10 +146,6 @@ const SettingsScreen: React.FC = () => {
   return (
     <ScreenLayout title="Settings">
       <div className="p-5 max-w-3xl space-y-5">
-        <Section title={t('sectionTitle')}>
-          <ServerSetup variant="settings" />
-        </Section>
-
         <Section title="Business">
           <div className="grid grid-cols-1 gap-3">
             <div>

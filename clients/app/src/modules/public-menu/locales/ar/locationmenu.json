@@ -1,0 +1,14 @@
+{
+  "pageTitle": "القائمة · rtylr",
+  "allItems": "القائمة",
+  "loadFailedTitle": "تعذّر تحميل القائمة",
+  "loadFailedDescription": "حدث خطأ أثناء تحميل هذه القائمة. يرجى المحاولة مرة أخرى لاحقًا.",
+  "businessNotFoundTitle": "المتجر غير موجود",
+  "businessNotFoundDescription": "هذا المتجر غير نشط أو الرابط غير صحيح.",
+  "goBack": "رجوع",
+  "locationNotFoundTitle": "الموقع غير موجود",
+  "locationNotFoundDescription": "هذا الموقع غير موجود أو لم يعد نشطًا.",
+  "backToBusiness": "الرجوع إلى {{businessName}}",
+  "noItemsTitle": "لا توجد عناصر في القائمة",
+  "noItemsDescription": "هذه القائمة فارغة حاليًا. يرجى المحاولة مرة أخرى لاحقًا."
+}

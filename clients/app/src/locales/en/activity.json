@@ -1,0 +1,9 @@
+{
+  "audit": {
+    "emptyTitle": "No audit entries",
+    "emptyDescription": "Security-relevant events will appear here.",
+    "filteredShowing": "Showing {{shown}} of {{total}} on this page",
+    "loadFailedTitle": "Couldn't load the audit log",
+    "loadFailedDescription": "Something went wrong loading entries. Try again."
+  }
+}

@@ -1,0 +1,18 @@
+[
+  {
+    "ID": "published-fact-json",
+    "Rule": "transport-tag",
+    "Details": ["json"],
+    "Axiom": "Explicit complete contracts; protected domain and contract representations",
+    "Owner": "POS and CRM capability maintainers",
+    "Files": [
+      "internal/contracts/pos/order_paid.go",
+      "internal/contracts/crm/contact_captured.go"
+    ],
+    "Reason": "These published facts are durable JSON wire contracts. Their field names must survive Go identifier changes and replay of persisted events.",
+    "Alternatives": "Keep a second set of private serialization structs in every producer and consumer. This duplicates the compatibility contract and permits their representations to drift.",
+    "Containment": "Only JSON tags are permitted by this exception. Database tags, SQLC types, database dependencies and transport handlers remain prohibited. Facts contain values and identifiers, never consumer cache instructions.",
+    "ExitPlan": "Review these wire contracts before introducing the next event version; migrate persisted event payloads or keep an explicit version decoder before removing JSON field names.",
+    "ReviewBy": "2026-12-31"
+  }
+]

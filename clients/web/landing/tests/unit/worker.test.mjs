@@ -311,6 +311,37 @@ describe('routing', () => {
     assert.ok((await followed.text()).includes('<main>'));
   });
 
+  // The module pages merged into /workspace/. Every old URL must land on its
+  // section in a single 301, with or without the slash.
+  it('retired module pages 301 to their workspace section', async () => {
+    const expected = {
+      '/pos/': '/workspace/#sales',
+      '/erp/': '/workspace/#operations',
+      '/hr/': '/workspace/#team',
+      '/crm/': '/workspace/#customers',
+      '/finance/': '/workspace/#finance',
+      '/flow/': '/workspace/#work',
+    };
+    for (const [from, to] of Object.entries(expected)) {
+      for (const variant of [from, from.slice(0, -1), `${from}index.html`]) {
+        const res = await worker.fetch(req(variant), env);
+        assert.equal(res.status, 301, variant);
+        assert.equal(res.headers.get('location'), `${SITE}${to}`, variant);
+      }
+    }
+  });
+
+  it('a retired page redirect keeps the query string before the fragment', async () => {
+    const res = await worker.fetch(req('/pos?utm_source=ad'), env);
+    assert.equal(res.status, 301);
+    assert.equal(res.headers.get('location'), `${SITE}/workspace/?utm_source=ad#sales`);
+  });
+
+  it('a path that merely starts with a retired slug is not redirected', async () => {
+    const res = await worker.fetch(req('/posters/'), env);
+    assert.notEqual(res.status, 301);
+  });
+
   it('the trailing-slash redirect keeps the query string', async () => {
     const res = await worker.fetch(req('/trust?utm_source=newsletter&a=b'), env);
     assert.equal(res.status, 301);

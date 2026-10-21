@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
-
 	cacheInvalidate "github.com/voxire/onion/internal/platform/cache/invalidate"
 	"github.com/voxire/onion/internal/platform/cache/invalidation"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -17,10 +15,10 @@ type cacheOKResponse struct {
 	Status string `json:"status"`
 }
 
-func RegisterCacheRoutes(ctx context.Context, r *chi.Mux) {
+func RegisterCacheRoutes(ctx context.Context, mux *http.ServeMux) {
 	cacheInvalidate.RegisterDefaultGroups()
 
-	r.Post("/invalidate-cache", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("POST /invalidate-cache", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		if !hasValidInternalToken(r) {
 			WriteOneKitError(ctx, w, onekiterrors.New(http.StatusForbidden, "Forbidden"))

@@ -1,0 +1,489 @@
+:root,
+:root[data-theme='dark'] {
+  --flow-warn-fg: #d9a066;
+  --flow-danger-fg: #e5776a;
+  --flow-danger-fill: var(--flow-danger-fg);
+  --flow-warn-fill: var(--flow-warn-fg);
+  --flow-danger-on-fill: #0a0a0a;
+  --flow-warn-on-fill: #0a0a0a;
+  --flow-locked-fg: #a8a4c8;
+  --flow-info-fg: #6aa5ff;
+  --flow-neutral-fg: #9ba0a8;
+  --flow-priority-high-fg: #e8945c;
+  --flow-status-draft: var(--flow-text-muted);
+  --flow-status-draft-bg: rgba(255, 255, 255, 0.06);
+  --flow-status-draft-border: rgba(255, 255, 255, 0.12);
+  --flow-status-pending: var(--flow-warn-fg);
+  --flow-status-pending-bg: rgba(217, 160, 102, 0.12);
+  --flow-status-pending-border: rgba(217, 160, 102, 0.3);
+  --flow-status-approved: var(--flow-text);
+  --flow-status-approved-bg: var(--accent-muted);
+  --flow-status-approved-border: var(--accent-border);
+  --flow-status-rejected: var(--flow-danger-fg);
+  --flow-status-rejected-bg: rgba(229, 119, 106, 0.12);
+  --flow-status-rejected-border: rgba(229, 119, 106, 0.3);
+  --flow-status-locked: var(--flow-locked-fg);
+  --flow-status-locked-bg: rgba(168, 164, 200, 0.12);
+  --flow-status-locked-border: rgba(168, 164, 200, 0.3);
+  --flow-capacity-under: var(--flow-text-muted);
+  --flow-capacity-at: var(--flow-text);
+  --flow-capacity-over: var(--flow-warn-fg);
+  --flow-capacity-critical: var(--flow-danger-fg);
+}
+
+:root[data-theme='light'] {
+  --flow-warn-fg: #8f5f14;
+  --flow-danger-fg: #b4382a;
+  --flow-danger-on-fill: #ffffff;
+  --flow-warn-on-fill: #ffffff;
+  --flow-locked-fg: #5b5591;
+  --flow-info-fg: #2a63bb;
+  --flow-neutral-fg: #5f6570;
+  --flow-priority-high-fg: #9d4d16;
+  --flow-status-draft: var(--flow-text-muted);
+  --flow-status-draft-bg: rgba(0, 0, 0, 0.05);
+  --flow-status-draft-border: rgba(0, 0, 0, 0.12);
+  --flow-status-pending: var(--flow-warn-fg);
+  --flow-status-pending-bg: rgba(217, 160, 102, 0.18);
+  --flow-status-pending-border: rgba(217, 160, 102, 0.45);
+  --flow-status-approved: var(--flow-text);
+  --flow-status-approved-bg: var(--accent-muted);
+  --flow-status-approved-border: var(--accent-border);
+  --flow-status-rejected: var(--flow-danger-fg);
+  --flow-status-rejected-bg: rgba(229, 119, 106, 0.18);
+  --flow-status-rejected-border: rgba(229, 119, 106, 0.45);
+  --flow-status-locked: var(--flow-locked-fg);
+  --flow-status-locked-bg: rgba(168, 164, 200, 0.2);
+  --flow-status-locked-border: rgba(168, 164, 200, 0.48);
+  --flow-capacity-under: var(--flow-text-muted);
+  --flow-capacity-at: var(--flow-text);
+  --flow-capacity-over: var(--flow-warn-fg);
+  --flow-capacity-critical: var(--flow-danger-fg);
+}
+
+:root,
+:root[data-theme] {
+  --flow-bg: var(--dash-bg);
+  --flow-surface: var(--dash-surface);
+  --flow-card: var(--dash-card);
+  --flow-border: var(--dash-border);
+  --flow-text: var(--dash-text);
+  --flow-text-muted: var(--dash-text-dim);
+  --flow-text-dim: var(--dash-text-dim);
+  --flow-hover: var(--dash-hover);
+  --flow-active: var(--dash-active);
+  --flow-input-bg: var(--dash-input-bg);
+  --flow-scrollbar: var(--dash-scrollbar);
+  --flow-shadow: var(--dash-shadow);
+  --flow-on-accent: var(--dash-text);
+  --flow-action-bg: var(--dash-hover);
+  --flow-border-control: color-mix(in srgb, var(--dash-text) 16%, transparent);
+  --flow-border-focus: var(--dash-border-focus);
+  --flow-focus-ring: var(--dash-border-focus);
+  --flow-shadow-card: 0 1px 3px color-mix(in srgb, var(--dash-text) 10%, transparent);
+  --flow-r: 8px;
+  --flow-u: 1;
+}
+
+@theme {
+  --text-flow-screen: 24px;
+  --text-flow-screen--line-height: 32px;
+  --text-flow-title: 18px;
+  --text-flow-title--line-height: 26px;
+  --text-flow-section: 14px;
+  --text-flow-section--line-height: 20px;
+  --text-flow-body: 14px;
+  --text-flow-body--line-height: 21px;
+  --text-flow-meta: 13px;
+  --text-flow-meta--line-height: 19px;
+}
+
+@keyframes flow-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+.flow-shimmer {
+  animation: flow-shimmer 1.4s infinite;
+}
+
+[dir='rtl'] .flow-directional-icon {
+  transform: scaleX(-1);
+}
+
+:is(.portal-flow, .portal-flow-dialog, .portal-flow-settings)
+  :is(button, a, input, select, textarea, summary, [tabindex]:not([tabindex='-1'])):focus-visible {
+  outline: 2px solid var(--flow-focus-ring);
+  outline-offset: 2px;
+}
+
+.flow-reveal-on-hover {
+  transition: opacity 150ms ease-out;
+}
+
+/* A sidebar row's actions button (28px, 4px in) sits over the link's end edge, so the
+   link must leave that room or its count lands underneath the button.
+   .portal-nav-link sets its own padding in unlayered CSS, which beats a Tailwind
+   padding utility on the same element, hence the doubled selector instead of pe-9. */
+.portal-nav-link.flow-nav-row-link {
+  padding-inline-end: 2.25rem;
+}
+
+@media (hover: hover) {
+  .flow-reveal-on-hover {
+    opacity: 0;
+  }
+
+  .group:hover .flow-reveal-on-hover,
+  .group:focus-within .flow-reveal-on-hover,
+  .flow-reveal-on-hover:focus-visible {
+    opacity: 1;
+  }
+}
+
+.flow-focus:focus-visible {
+  outline: 2px solid var(--flow-focus-ring);
+  outline-offset: 2px;
+}
+
+.flow-focus-inset:focus-visible {
+  outline: 2px solid var(--flow-focus-ring);
+  outline-offset: -2px;
+}
+
+.flow-focus-none:focus-visible {
+  outline: none;
+}
+
+@keyframes flow-add-hours-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.flow-add-hours-spinner {
+  animation: flow-add-hours-spin 0.7s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion='full']) *,
+  :root:not([data-motion='full']) *::before,
+  :root:not([data-motion='full']) *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.portal-flow[data-motion='reduce'] *,
+.portal-flow[data-motion='reduce'] *::before,
+.portal-flow[data-motion='reduce'] *::after {
+  transition-duration: 0.01ms !important;
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+}
+
+@media (pointer: coarse) {
+  .portal-flow :where(button, [role='button'], a[href], summary, select, textarea),
+  .portal-flow :where(input):not([type='hidden'], [type='checkbox'], [type='radio']) {
+    min-height: 44px;
+  }
+}
+.portal-page.is-flow {
+  padding: 0;
+  overflow: hidden;
+}
+.portal-page.is-flow > .portal-flow {
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+}
+.portal-flow {
+  display: flex;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  color: var(--flow-text);
+}
+.portal-flow-sidebar {
+  width: 256px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-inline-end: 1px solid var(--dash-border);
+  background: var(--dash-surface);
+}
+.portal-flow-sidebar-header {
+  height: 58px;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px 0 18px;
+}
+.portal-flow-content {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.portal-flow-page {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+.portal-flow-mobile-trigger {
+  display: none;
+}
+.portal-flow-header {
+  border-bottom: 1px solid var(--dash-border);
+}
+.portal-flow-show-sidebar {
+  flex-shrink: 0;
+}
+.portal-flow-sidebar .portal-app-navigation {
+  padding: 12px;
+}
+.portal-flow-settings {
+  max-width: 1040px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+}
+.portal-flow-page h1 {
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: -0.035em;
+  font-weight: 600;
+}
+.portal-flow-sidebar a {
+  font-size: 14px;
+}
+.portal-flow-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.portal-flow-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 16px;
+  border-radius: 14px;
+  background: var(--dash-hover);
+  color: var(--dash-text-dim);
+}
+.portal-flow-dialog .flow-task-name {
+  display: block;
+  width: 100%;
+  min-height: 72px;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  resize: none;
+  border: 1px solid var(--flow-border-control);
+  border-radius: 10px;
+  background: var(--flow-hover);
+  color: var(--flow-text);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+.portal-flow-dialog .flow-task-name::placeholder {
+  color: var(--flow-text-muted);
+  font-weight: 400;
+}
+.portal-flow-dialog .flow-task-name:focus {
+  border-color: var(--flow-border-focus);
+  background: var(--flow-input-bg);
+  outline: none !important;
+}
+@media (max-width: 900px) {
+  .portal-flow-show-sidebar {
+    display: none;
+  }
+  .portal-flow-sidebar {
+    display: none;
+  }
+  .portal-flow-mobile-trigger {
+    display: inline-flex;
+  }
+  .portal-flow-mobile-nav {
+    border: 1px solid var(--dash-border);
+    border-radius: 16px;
+    width: min(300px, calc(100vw - 64px));
+    max-height: calc(100dvh - 32px);
+    height: calc(100dvh - 32px);
+    margin-block: 16px;
+    margin-inline: 56px auto;
+    padding: 0;
+    background: var(--dash-surface);
+    color: var(--dash-text);
+  }
+  .portal-flow-mobile-nav::backdrop {
+    background: rgb(0 0 0 / 30%);
+  }
+}
+
+.portal-flow-task-drawer {
+  display: flex;
+  flex-direction: column;
+  inset-block: 8px;
+  inset-inline: auto 8px;
+  transform: none;
+  width: min(960px, calc(100vw - 16px));
+  height: calc(100dvh - 16px);
+  max-width: 960px;
+  padding: 0;
+  border: 1px solid var(--dash-border);
+  border-radius: 14px;
+  background: var(--dash-surface);
+  color: var(--dash-text);
+  overflow: hidden;
+}
+.portal-flow-dialog {
+  background: var(--dash-surface);
+  color: var(--dash-text);
+  border: 1px solid var(--dash-border);
+}
+.portal-flow :where(button.bg-accent) {
+  background: var(--flow-action-bg);
+  color: var(--flow-on-accent);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.portal-flow-page > div > :where(header, div.shrink-0:first-child) {
+  padding-block: 22px;
+  padding-inline: 24px;
+}
+
+.portal-flow-footer {
+  flex-shrink: 0;
+  margin-top: auto;
+  padding: 10px 12px 14px;
+}
+.portal-flow-footer .portal-nav-link {
+  min-height: 34px;
+  padding: 7px 12px;
+  font-size: 13px;
+  gap: 10px;
+}
+
+.flow-task-drawer-title {
+  border-bottom: 1px solid var(--flow-border);
+  padding: 16px 24px;
+  font-size: 14px;
+}
+.flow-task-detail-body {
+  width: 100%;
+  padding: 24px;
+}
+.flow-task-detail-body > section {
+  margin-bottom: 24px;
+}
+.flow-task-detail-body h3,
+.flow-task-detail-properties h3 {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
+}
+.flow-task-detail-properties {
+  padding: 20px;
+}
+.flow-task-detail-field {
+  margin-bottom: 18px;
+  min-width: 0;
+}
+.flow-task-detail-label {
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.flow-task-detail-field > div:first-child {
+  color: var(--flow-text-muted);
+  margin-bottom: 6px;
+}
+.flow-task-detail-field :is(select, input, textarea) {
+  min-width: 0;
+  min-height: 34px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+.flow-task-detail-field :is(select, input, textarea):hover:not(:disabled) {
+  background: var(--flow-hover);
+}
+.flow-task-detail-field :is(select, input, textarea):focus-visible {
+  background: var(--flow-input-bg);
+}
+.flow-due-date-trigger {
+  min-height: 34px;
+  border-radius: 6px;
+}
+.flow-due-date-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 6px;
+}
+.flow-due-date-popover {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  z-index: 100;
+  width: min(280px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  padding: 8px;
+  overflow-y: auto;
+  border: 1px solid var(--flow-border-control);
+  border-radius: 10px;
+  background: var(--flow-card);
+  color: var(--flow-text);
+  box-shadow: var(--flow-shadow);
+  --color-muted: var(--flow-text-muted);
+}
+.flow-due-date-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px;
+}
+.flow-due-date-shortcuts button {
+  min-height: 34px;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+.flow-due-date-calendar {
+  width: 100%;
+  padding: 4px;
+}
+.flow-due-date-calendar [role='gridcell'] {
+  border-radius: 6px;
+}
+.flow-due-date-popover :focus-visible {
+  outline: 2px solid var(--flow-focus-ring);
+  outline-offset: 1px;
+}
+@media (min-width: 1024px) {
+  .flow-task-detail-properties {
+    width: 280px;
+  }
+}
+@media (max-width: 600px) {
+  .flow-task-detail-body,
+  .flow-task-detail-properties {
+    padding: 20px 16px;
+  }
+}

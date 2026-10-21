@@ -15,4 +15,10 @@ service ExpensesService {
   updateExpenseStatus(UpdateExpenseStatusRequest) -> UpdateExpenseStatusResponse @patch("/expenses/{id}/status") @body("body")
 
   listExpenseCategories(ListExpenseCategoriesRequest) -> ListExpenseCategoriesResponse @get("/categories")
+
+  createExpenseCategory(CreateExpenseCategoryRequest) -> CreateExpenseCategoryResponse @post("/categories")
+
+  updateExpenseCategory(UpdateExpenseCategoryRequest) -> UpdateExpenseCategoryResponse @put("/categories/{id}") @body("body")
+
+  deleteExpenseCategory(DeleteExpenseCategoryRequest) -> DeleteExpenseCategoryResponse @delete("/categories/{id}")
 }

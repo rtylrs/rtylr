@@ -9,11 +9,15 @@
   },
   "dependencies": {
     "@voxire/config": "workspace:*",
-    "axios": "^1.19.0",
+    "axios": "^1.20.0",
     "neverthrow": "8.2.0"
   },
   "devDependencies": {
     "typescript": "~6.0.3",
     "vitest": "^4.1.11"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "typecheck:tests": "tsc --noEmit -p tsconfig.test.json"
   }
 }

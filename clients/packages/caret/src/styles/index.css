@@ -206,10 +206,34 @@
   background: var(--caret-bg);
 }
 
-.caret-message-list,
 .caret-chat-list-scroll {
   scrollbar-width: thin;
   scrollbar-color: var(--caret-scrollbar) transparent;
+}
+
+/* The conversation still scrolls; it just has no visible bar. */
+.caret-message-list {
+  scrollbar-width: none;
+}
+
+.caret-message-list::-webkit-scrollbar {
+  display: none;
+}
+
+.caret-memory-row .caret-memory-actions {
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+.caret-memory-row:hover .caret-memory-actions,
+.caret-memory-row:focus-within .caret-memory-actions {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .caret-memory-row .caret-memory-actions {
+    opacity: 1;
+  }
 }
 
 .caret-chat-row .caret-chat-actions {
@@ -217,6 +241,7 @@
   transition: opacity 0.12s;
 }
 
+.caret-chat-row.is-menu-open .caret-chat-actions,
 .caret-chat-row:hover .caret-chat-actions,
 .caret-chat-row:focus-within .caret-chat-actions {
   opacity: 1;
@@ -252,6 +277,13 @@
   box-shadow: none !important;
 }
 
+.caret-composer.is-large:focus-within {
+  /* Focus must not thicken or darken the edge, or add shadow. */
+  border-color: var(--caret-border) !important;
+  background: var(--caret-surface) !important;
+  box-shadow: 0 1px 2px rgba(15, 15, 20, 0.05) !important;
+}
+
 .caret-composer textarea::placeholder {
   color: var(--caret-text-muted);
   opacity: 1;
@@ -276,6 +308,7 @@
 
 .caret-follow-up:hover,
 .caret-new-chat-button:hover,
+.caret-source-chip:hover,
 .caret-chat-row:hover {
   background: var(--caret-hover) !important;
   color: var(--caret-text) !important;
@@ -339,4 +372,13 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
+}
+
+.caret-panel-shell .caret-chat-menu button:focus-visible {
+  outline: none;
+}
+
+.caret-chat-menu button:hover,
+.caret-chat-menu button:focus {
+  background: var(--caret-hover) !important;
 }

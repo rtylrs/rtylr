@@ -1,0 +1,47 @@
+:root {
+  --hr-status-draft: #6b7280;
+  --hr-status-submitted: #f59e0b;
+  --hr-status-approved: #10b981;
+  --hr-status-rejected: #ef4444;
+  --hr-status-locked: #6366f1;
+  --hr-status-active: #10b981;
+  --hr-status-inactive: #6b7280;
+  --hr-error: #ef4444;
+  --hr-shift-purple: #8b5cf6;
+  --hr-shift-green: #10b981;
+  --hr-shift-amber: #f59e0b;
+  --hr-shift-red: #ef4444;
+  --hr-shift-blue: #3b82f6;
+  --hr-shift-pink: #ec4899;
+  --hr-shift-teal: #14b8a6;
+  --hr-status-paid: #10b981;
+  --hr-status-pending: #f59e0b;
+  --hr-status-overdue: #ef4444;
+  --hr-onboarding-complete: #10b981;
+  --hr-onboarding-in-progress: #8b5cf6;
+  --hr-onboarding-not-started: #6b7280;
+  --hr-accent: #10b981;
+  --hr-payroll-accent: #10b981;
+  --hr-on-accent: #0a0a0a;
+  --hr-bg: var(--dash-bg);
+  --hr-surface: var(--dash-surface);
+  --hr-card: var(--dash-surface);
+  --hr-border: var(--dash-border);
+  --hr-text: var(--dash-text);
+  --hr-text-muted: var(--dash-text-muted);
+  --hr-text-dim: var(--dash-text-dim);
+  --hr-hover: var(--dash-hover);
+  --hr-active: var(--dash-active);
+  --hr-input-bg: var(--dash-input-bg);
+  --hr-border-focus: var(--dash-text-dim);
+}
+.portal-page.is-hr {
+  padding: clamp(20px, 3vw, 40px);
+}
+.portal-page.is-hr table {
+  box-shadow: none;
+}
+.portal-page.is-hr :is(input, textarea, select):focus-visible {
+  outline: 2px solid var(--app-focus, var(--dash-text-dim));
+  outline-offset: 2px;
+}

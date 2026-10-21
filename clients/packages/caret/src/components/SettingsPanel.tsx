@@ -1,22 +1,15 @@
-import React, { useId } from 'react';
-import { ChevronDown } from 'lucide-react';
-import { caretTokens, caretRadius } from '../ui/tokens';
-import { useCaretSettingsStore } from '../stores/settingsStore';
-import { CARET_MODES, type CaretMode } from '../types/mode';
+import React, { useId } from "react";
+import { caretTokens, caretRadius } from "../ui/tokens";
+import { useCaretSettingsStore } from "../stores/settingsStore";
+import MemorySettings from "./MemorySettings";
 
 const sectionTitle: React.CSSProperties = {
   fontSize: 10.5,
   fontWeight: 700,
   color: caretTokens.textDim,
-  textTransform: 'uppercase',
+  textTransform: "uppercase",
   letterSpacing: 0.7,
-  margin: '0 0 7px 2px',
-};
-
-const label: React.CSSProperties = {
-  color: caretTokens.text,
-  fontSize: 13,
-  fontWeight: 550,
+  margin: "0 0 7px 2px",
 };
 
 const description: React.CSSProperties = {
@@ -24,6 +17,12 @@ const description: React.CSSProperties = {
   fontSize: 11.5,
   lineHeight: 1.45,
   marginTop: 2,
+};
+
+const label: React.CSSProperties = {
+  color: caretTokens.text,
+  fontSize: 13,
+  fontWeight: 550,
 };
 
 interface SettingsToggleProps {
@@ -48,24 +47,24 @@ const SettingsToggle: React.FC<SettingsToggleProps> = ({
     className="caret-settings-row caret-switch"
     onClick={() => onChange(!checked)}
     style={{
-      width: '100%',
+      width: "100%",
       minHeight: 58,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
       gap: 14,
-      padding: '10px 12px',
-      background: 'transparent',
-      border: 'none',
-      borderTop: divided ? `1px solid ${caretTokens.border}` : 'none',
+      padding: "10px 12px",
+      background: "transparent",
+      border: "none",
+      borderTop: divided ? `1px solid ${caretTokens.border}` : "none",
       color: caretTokens.text,
-      textAlign: 'left',
-      cursor: 'pointer',
+      textAlign: "left",
+      cursor: "pointer",
     }}
   >
     <span style={{ minWidth: 0 }}>
-      <span style={{ ...label, display: 'block' }}>{title}</span>
-      <span style={{ ...description, display: 'block' }}>{detail}</span>
+      <span style={{ ...label, display: "block" }}>{title}</span>
+      <span style={{ ...description, display: "block" }}>{detail}</span>
     </span>
     <span
       aria-hidden="true"
@@ -75,35 +74,42 @@ const SettingsToggle: React.FC<SettingsToggleProps> = ({
         padding: 2,
         borderRadius: 3,
         background: checked ? caretTokens.accent : caretTokens.active,
-        boxSizing: 'border-box',
+        boxSizing: "border-box",
         flexShrink: 0,
-        transition: 'background 0.16s ease',
+        transition: "background 0.16s ease",
       }}
     >
       <span
         className="caret-switch-thumb"
         style={{
-          display: 'block',
+          display: "block",
           width: 16,
           height: 16,
           borderRadius: 2,
           background: checked ? caretTokens.accentInk : caretTokens.surface,
-          boxShadow: 'none',
+          boxShadow: "none",
         }}
       />
     </span>
   </button>
 );
 
-export const SettingsPanel: React.FC = () => {
+export interface SettingsPanelProps {
+  /** Enables the Memory section, which reads and edits saved memories. */
+  userId?: number;
+  apiBaseUrl?: string;
+}
+
+export const SettingsPanel: React.FC<SettingsPanelProps> = ({
+  userId = 0,
+  apiBaseUrl,
+}) => {
   const s = useCaretSettingsStore();
-  const modeSelectId = useId();
-  const selectedMode = CARET_MODES[s.mode];
 
   return (
     <div
       className="caret-settings-panel"
-      style={{ padding: '18px 14px 20px', overflowY: 'auto', flex: 1 }}
+      style={{ padding: "18px 14px 20px", overflowY: "auto", flex: 1 }}
     >
       <div style={{ marginBottom: 20 }}>
         <h2
@@ -117,75 +123,16 @@ export const SettingsPanel: React.FC = () => {
         >
           Settings
         </h2>
-        <p style={{ ...description, margin: '3px 0 0' }}>Tune how Caret responds and works.</p>
+        <p style={{ ...description, margin: "3px 0 0" }}>
+          Tune how Caret responds and works.
+        </p>
       </div>
-
-      <section style={{ marginBottom: 18 }}>
-        <h3 style={sectionTitle}>Default mode</h3>
-        <div
-          style={{
-            padding: '2px 0 0',
-          }}
-        >
-          <label htmlFor={modeSelectId} style={{ ...label, display: 'block', marginBottom: 7 }}>
-            Response style
-          </label>
-          <div
-            className="caret-settings-select-wrap"
-            style={{
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'center',
-              background: caretTokens.inputBg,
-              border: `1px solid ${caretTokens.border}`,
-              borderRadius: caretRadius.md,
-              transition: 'border-color 0.14s ease, box-shadow 0.14s ease',
-            }}
-          >
-            <select
-              id={modeSelectId}
-              value={s.mode}
-              onChange={(event) => s.setMode(event.target.value as CaretMode)}
-              style={{
-                width: '100%',
-                appearance: 'none',
-                WebkitAppearance: 'none',
-                background: 'transparent',
-                border: 'none',
-                outline: 'none',
-                color: caretTokens.text,
-                fontSize: 12.5,
-                fontWeight: 550,
-                padding: '8px 34px 8px 10px',
-                cursor: 'pointer',
-              }}
-            >
-              {Object.values(CARET_MODES).map((mode) => (
-                <option key={mode.id} value={mode.id}>
-                  {mode.label}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              size={13}
-              aria-hidden="true"
-              style={{
-                position: 'absolute',
-                right: 10,
-                color: caretTokens.textMuted,
-                pointerEvents: 'none',
-              }}
-            />
-          </div>
-          <p style={{ ...description, margin: '7px 1px 0' }}>{selectedMode.description}</p>
-        </div>
-      </section>
 
       <section>
         <h3 style={sectionTitle}>Behavior</h3>
         <div
           style={{
-            overflow: 'hidden',
+            overflow: "hidden",
             background: caretTokens.surface,
             border: `1px solid ${caretTokens.border}`,
             borderRadius: caretRadius.lg,
@@ -213,6 +160,17 @@ export const SettingsPanel: React.FC = () => {
           />
         </div>
       </section>
+
+      {userId > 0 && apiBaseUrl !== undefined && (
+        <section style={{ marginTop: 22 }}>
+          <h3 style={sectionTitle}>Memory</h3>
+          <p style={{ ...description, margin: "0 2px 8px" }}>
+            Caret uses these in every chat. Correct or remove anything that is
+            wrong.
+          </p>
+          <MemorySettings userId={userId} apiBaseUrl={apiBaseUrl} />
+        </section>
+      )}
     </div>
   );
 };

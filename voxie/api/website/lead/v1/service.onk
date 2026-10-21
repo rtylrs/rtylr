@@ -1,0 +1,12 @@
+package website.lead.v1
+
+/// Public lead capture for the marketing website. The routes keep the paths
+/// the website already posts to.
+service WebsiteLeadService {
+  base_path: "/"
+
+  submitQuote(SubmitQuoteRequest) -> SubmitQuoteResponse @post("/quote") @meta("rate_limit", "10/m")
+  contact(ContactRequest) -> ContactResponse @post("/contact") @meta("rate_limit", "10/m")
+  subscribeNewsletter(NewsletterRequest) -> NewsletterResponse @post("/newsletter") @meta("rate_limit", "10/m")
+  recordAnalyticsEvent(AnalyticsEventRequest) -> AnalyticsEventResponse @post("/analytics/event") @meta("rate_limit", "60/m")
+}

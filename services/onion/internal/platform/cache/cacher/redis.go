@@ -86,7 +86,7 @@ func getNewRedisClient() redis.UniversalClient {
 
 	// Prefer REDIS_URL (Upstash / Heroku style). Falls back to the
 	// REDIS_HOSTS / REDIS_USERNAME / REDIS_PASSWORD env trio used by
-	// our older self-hosted setup.
+	// the earlier Redis setup.
 	if url := config.GetRedisURL(); url != "" {
 		opt, err := redis.ParseURL(url)
 		if err == nil {

@@ -1,0 +1,19 @@
+{
+  "emptyTitle": "No categories yet",
+  "emptyDescription": "Create categories to organize expenses and set budgets.",
+  "emptyCta": "New Category",
+  "created": "Category created",
+  "alreadyExists": "“{{name}}” already exists",
+  "updated": "Category updated",
+  "deleted": "Category deleted",
+  "title": "Expense Categories",
+  "edit": "Edit Category",
+  "delete": "Delete Category",
+  "newTitle": "New Expense Category",
+  "editTitle": "Edit Expense Category",
+  "deleteTitle": "Delete Expense Category",
+  "name": "Name",
+  "color": "Color",
+  "monthlyBudget": "Monthly Budget",
+  "deleteConfirm": "Are you sure you want to delete this category? A category that still has expenses cannot be deleted."
+}
