@@ -9,6 +9,8 @@ import (
 	"github.com/voxire/onion/internal/modules/websitelead/internal/api"
 	"github.com/voxire/onion/internal/modules/websitelead/internal/application"
 	moduleinfra "github.com/voxire/onion/internal/modules/websitelead/internal/infrastructure"
+	internaljobs "github.com/voxire/onion/internal/modules/websitelead/internal/jobs"
+	platformjobs "github.com/voxire/onion/internal/platform/jobs"
 	serverhttp "github.com/voxire/onion/internal/platform/server/http"
 	websiteleadv1 "github.com/voxire/voxie/gen/go/website/lead/v1"
 )
@@ -41,6 +43,11 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	); err != nil {
 		panic(fmt.Errorf("register website lead service: %w", err))
 	}
+}
+
+// RegisterJobs adds the Resend audience mirror to the worker scheduler.
+func (m *Module) RegisterJobs(ctx context.Context, registry *platformjobs.Registry) {
+	internaljobs.Register(ctx, registry, m.service)
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

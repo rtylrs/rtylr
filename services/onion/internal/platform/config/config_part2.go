@@ -83,6 +83,8 @@ func LoadAndValidate() (*AppConfig, error) {
 		ResendKey:               os.Getenv("RESEND_API_KEY"),
 		LeadNotifyEmails:        ParseEmailList(os.Getenv("LEAD_NOTIFY_EMAILS"), DefaultLeadNotifyEmails),
 		NewsletterNotifyEmails:  ParseEmailList(os.Getenv("NEWSLETTER_NOTIFY_EMAILS"), DefaultNewsletterNotifyEmails),
+		ResendAudienceID:        strings.TrimSpace(os.Getenv("RESEND_AUDIENCE_ID")),
+		ResendAudienceKey:       strings.TrimSpace(os.Getenv("RESEND_AUDIENCE_KEY")),
 		AppEnv:                  os.Getenv("APP_ENV"),
 		AppRelease:              os.Getenv("APP_RELEASE"),
 		Port:                    os.Getenv("PORT"),

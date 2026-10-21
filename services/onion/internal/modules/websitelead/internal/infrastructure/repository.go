@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"unicode/utf8"
 
 	"github.com/voxire/onion/internal/modules/websitelead/internal/domain"
 	"github.com/voxire/onion/internal/modules/websitelead/internal/infrastructure/persistence/sqlc"
@@ -50,4 +51,48 @@ func (r *Repository) CreateSubscriber(ctx context.Context, input domain.Subscrib
 		return 0, err
 	}
 	return result.LastInsertId()
+}
+
+// PendingSubscriber aliases domain.PendingSubscriber for callers referencing
+// the repository package directly.
+type PendingSubscriber = domain.PendingSubscriber
+
+// ListUnsyncedSubscribers returns rows never mirrored into the Resend
+// audience that have failed fewer than maxAttempts times, oldest first.
+func (r *Repository) ListUnsyncedSubscribers(ctx context.Context, maxAttempts, limit int) ([]domain.PendingSubscriber, error) {
+	rows, err := r.queries.ListUnsyncedNewsletterSubscribers(ctx, sqlc.ListUnsyncedNewsletterSubscribersParams{
+		ResendSyncAttempts: int32(maxAttempts),
+		Limit:              int32(limit),
+	})
+	if err != nil {
+		return nil, err
+	}
+	out := make([]domain.PendingSubscriber, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, domain.PendingSubscriber{ID: row.ID, Email: row.Email})
+	}
+	return out, nil
+}
+
+func (r *Repository) MarkSubscriberSynced(ctx context.Context, id int64, contactID string) error {
+	return r.queries.MarkNewsletterSubscriberSynced(ctx, sqlc.MarkNewsletterSubscriberSyncedParams{
+		ResendContactID: sql.NullString{String: contactID, Valid: contactID != ""},
+		ID:              id,
+	})
+}
+
+func truncateReason(reason string, maxRunes int) string {
+	if utf8.RuneCountInString(reason) <= maxRunes {
+		return reason
+	}
+	runes := []rune(reason)
+	return string(runes[:maxRunes])
+}
+
+func (r *Repository) MarkSubscriberSyncFailed(ctx context.Context, id int64, reason string) error {
+	reason = truncateReason(reason, 255)
+	return r.queries.MarkNewsletterSubscriberSyncFailed(ctx, sqlc.MarkNewsletterSubscriberSyncFailedParams{
+		ResendSyncError: sql.NullString{String: reason, Valid: reason != ""},
+		ID:              id,
+	})
 }
