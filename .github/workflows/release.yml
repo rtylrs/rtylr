@@ -36,10 +36,13 @@ jobs:
       # 'false' only when this exact set of migrations already applied cleanly.
       migrate: ${{ steps.applied.outputs.cache-hit == 'true' && 'false' || 'true' }}
     steps:
+      # Tags, commits and trees for the version and the changed paths; file
+      # contents only for HEAD, which the release archives come from.
       - name: Checkout history
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          filter: blob:none
 
       - name: Calculate next version
         id: version

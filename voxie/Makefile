@@ -4,7 +4,7 @@
 ONK_VERSION := v0.34.1
 
 # `go install` writes to GOPATH/bin, which is not guaranteed to be on PATH here.
-GOBIN_DIR := $(shell go env GOPATH)/bin
+GOBIN_DIR := $(shell go env GOPATH 2>/dev/null)/bin
 export PATH := $(GOBIN_DIR):$(PATH)
 
 # Go/OpenAPI stay next to the contracts; the TypeScript half belongs to the
@@ -15,9 +15,15 @@ CONTRACTS_DIR := ../clients/packages/contracts
 clean:
 	rm -rf gen $(CONTRACTS_DIR)/src
 
-# Install the onek CLI used to generate Go/TypeScript from api/*.onk contracts.
+# Install the onek CLI used to generate Go/TypeScript from api/*.onk contracts,
+# unless that version is already on PATH (Pages deploys use the release binary,
+# which prints its version without the "v").
 install-onek:
-	go install github.com/1homsi/onekit/cmd/onek@$(ONK_VERSION)
+	@if [ "$$(onek --version 2>/dev/null | sed 's/^v//')" = "$(ONK_VERSION:v%=%)" ]; then \
+		echo "onek $(ONK_VERSION) is already installed"; \
+	else \
+		go install github.com/1homsi/onekit/cmd/onek@$(ONK_VERSION); \
+	fi
 
 # Regenerate gen/go, gen/openapi and the contracts package's TypeScript from
 # api/*.onk. Output is gitignored. onekit.toml sets api/ as the schema root, so
