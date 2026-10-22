@@ -85,29 +85,27 @@ jobs:
           echo 'AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be passed to the ECS image build' >&2
           exit 1
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Login to Amazon ECR
-        env:
-          ECR_REGISTRY: ${{ inputs.ecr_registry }}
-        run: |
-          aws ecr get-login-password --region "$AWS_REGION" \
-            | docker login --username AWS --password-stdin "$ECR_REGISTRY"
-
+      # The code generators and the compiler run on this runner, so the AWS keys
+      # live only in the two steps that talk to ECR, each ECR login is dropped
+      # as soon as its step is done with it, and the checkout keeps no token.
+      #
       # A release tag always names the same commit, so a redeploy or a re-run
       # can ship the image an earlier run already pushed.
       - name: Check for an existing image
         id: existing
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          ECR_REGISTRY: ${{ inputs.ecr_registry }}
         run: |
+          set -euo pipefail
+          aws ecr get-login-password --region "$AWS_REGION" \
+            | docker login --username AWS --password-stdin "$ECR_REGISTRY"
           if docker buildx imagetools inspect "$IMAGE_URI" >/dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
             echo "$IMAGE_URI is already pushed; not rebuilding it"
           fi
+          docker logout "$ECR_REGISTRY"
 
       - name: Checkout promoted source release
         if: steps.existing.outputs.exists != 'true'
@@ -117,6 +115,7 @@ jobs:
           ref: ${{ inputs.source_ref }}
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN || github.token }}
+          persist-credentials: false
 
       - name: Verify generated contract reference
         if: steps.existing.outputs.exists != 'true'
@@ -161,7 +160,8 @@ jobs:
 
       # Both caches are saved by go-build-cache.yml after each push to main, so
       # the build cache holds the previous release's compiled packages. Keep
-      # these keys in step with that workflow.
+      # these keys in step with that workflow. A run on main restores only
+      # entries saved on main; pull request runs write to their own scope.
       - name: Restore the Go module cache
         if: steps.go.outputs.version != ''
         uses: actions/cache/restore@v4
@@ -193,6 +193,16 @@ jobs:
         with:
           # The runner is discarded anyway; removing the builder took ~10s.
           cleanup: false
+
+      - name: Login to Amazon ECR
+        if: steps.existing.outputs.exists != 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          ECR_REGISTRY: ${{ inputs.ecr_registry }}
+        run: |
+          aws ecr get-login-password --region "$AWS_REGION" \
+            | docker login --username AWS --password-stdin "$ECR_REGISTRY"
 
       # build-push-action hands buildx the Actions runtime token the gha cache
       # needs. A plain `docker buildx build` step never had it, so every build
