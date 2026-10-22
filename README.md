@@ -63,8 +63,10 @@ A push to `main` releases and deploys:
    `.github/deploy-targets.json`, and `.github/workflows/deploy.yml` builds the
    new tag and ships it — Pages apps and ECS services through the same
    entrypoint. ECS images build while the database migrates, and the services
-   roll out once both are done. A change that touches no target's paths (CI
-   only, for example) cuts a release and deploys nothing.
+   roll out once both are done. Images build on Blacksmith, whose builder keeps
+   Docker layers and the Go build cache between releases, so a release only
+   recompiles what changed. A change that touches no target's paths (CI only,
+   for example) cuts a release and deploys nothing.
 3. To re-ship or roll back an existing tag, run `redeploy.yml` with the tag and
    a target name (or `all`).
 

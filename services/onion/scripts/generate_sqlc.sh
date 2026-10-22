@@ -1,8 +1,10 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 # SQLC Generation Script
-# This script generates sqlc code for all modules (SQL case checking moved to separate script)
+# Generates sqlc code for every module and platform package with a sqlc.yaml
+# (SQL case checking lives in a separate script). The configs are independent,
+# so they generate in parallel.
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -11,28 +13,21 @@ NC='\033[0m' # No Color
 
 echo -e "${BLUE}🔧 Generating sqlc files for all modules...${NC}"
 
-# Find all sqlc.yaml files in modules and platform packages and generate code
-module_count=0
-for config_file in $(find internal/modules internal/platform -name "sqlc.yaml" -type f); do
-    config_dir=$(dirname "$config_file")
-    module_name="${config_dir%/sql}"
-    module_name="${module_name#internal/modules/}"
-    module_name="${module_name#internal/platform/}"
-    
-    echo "  [$((++module_count))] Generating sqlc for module: $module_name ($config_dir)"
-    
-    # Change to the config directory and run sqlc generate
-    if (cd "$config_dir" && sqlc generate); then
-        echo "      ✓ Successfully generated sqlc for $module_name"
-    else
-        echo "      ✗ Failed to generate sqlc for $module_name"
-        exit 1
-    fi
-done
-
-if [ $module_count -eq 0 ]; then
+configs="$(find internal/modules internal/platform -name "sqlc.yaml" -type f)"
+if [ -z "$configs" ]; then
     echo "  No modules with sqlc.yaml found!"
     exit 1
 fi
+module_count="$(printf '%s\n' "$configs" | wc -l | tr -d ' ')"
+jobs="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 4)"
+
+# xargs exits non-zero when any generation fails.
+printf '%s\n' "$configs" | xargs -n 1 -P "$jobs" sh -c '
+    dir="$(dirname "$1")"
+    if ! (cd "$dir" && sqlc generate); then
+        echo "      ✗ Failed to generate sqlc for $dir" >&2
+        exit 1
+    fi
+' sh
 
 echo -e "${GREEN}Successfully generated sqlc code for $module_count modules!${NC}"

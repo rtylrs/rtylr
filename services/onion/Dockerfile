@@ -24,21 +24,29 @@ RUN set -eux; \
     rm -f /tmp/sqlc.tar.gz; \
     sqlc version
 
-# Layer 3: generated contract output is gitignored, so produce it from the
-# pinned onek release before Go compiles against it.
-COPY voxie/ ./voxie/
-RUN GOBIN=/usr/local/bin go install github.com/1homsi/onekit/cmd/onek@v0.34.1 && \
-    cd /src/voxie && onek build .
+# Layer 3: the onek CLI, kept apart from the contracts so editing them doesn't
+# recompile it.
+RUN GOBIN=/usr/local/bin go install github.com/1homsi/onekit/cmd/onek@v0.34.1
 
-# Layer 4: the service, plus the SQL schemas and email templates it embeds.
-COPY services/onion/ ./services/onion/
+# Layer 4: module downloads depend only on the module files, so source edits
+# reuse them.
+COPY voxie/go.mod voxie/go.sum ./voxie/
+COPY services/onion/go.mod services/onion/go.sum ./services/onion/
 WORKDIR /src/services/onion
+RUN go mod download && go mod verify
+
+# Layer 5: generated contract output is gitignored, so produce it from the
+# pinned onek release before Go compiles against it.
+COPY voxie/ /src/voxie/
+RUN cd /src/voxie && onek build .
+
+# Layer 6: the service, plus the SQL schemas and email templates it embeds.
+COPY services/onion/ ./
 RUN set -eux; \
     test -f /src/voxie/go.mod; \
     test -f ./internal/modules/hr/sql/schema/hr_core/schema.sql; \
     test -d ./internal/platform/email/templates
 
-RUN go mod download && go mod verify
 RUN chmod +x scripts/*.sh
 RUN bash scripts/generate_sqlc.sh
 
@@ -49,7 +57,9 @@ ARG BUILD_TIME=unknown
 # so the hosted (amd64) path is unchanged while multi-arch publishes work.
 ARG TARGETARCH
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} \
+# The build cache mount lets a release recompile only the packages it changed.
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} \
     go build \
     -ldflags="-s -w \
       -X 'github.com/voxire/onion/internal/platform/server/http.Version=${VERSION}' \
@@ -97,7 +107,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-COPY --from=builder /app/api /app/api
 COPY --from=media-builder --chown=app:app /build/build/media-engine /app/media-engine/build/media-engine
 COPY --chown=app:app services/onion/internal/ai/classifier/models/cua-s1-forms /app/models/cua-s1-forms
 
@@ -105,6 +114,9 @@ ENV FORM_MAPPING_CHECKPOINT_PATH=/app/models/cua-s1-forms
 ENV MEDIA_ENGINE_PATH=/app/media-engine/build/media-engine
 
 EXPOSE 9999
+
+# Last, so a release only adds this layer on top of the cached ones.
+COPY --from=builder /app/api /app/api
 
 USER app
 

@@ -34,7 +34,7 @@ on:
       runs_on:
         description: Runner label
         required: false
-        default: ubuntu-24.04
+        default: blacksmith-8vcpu-ubuntu-2404
         type: string
     secrets:
       PAT_TOKEN:
@@ -122,22 +122,24 @@ jobs:
         id: source
         run: echo "sha=$(git rev-parse --short=7 HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Set up Docker Buildx
+      # Keeps BuildKit's state on a Blacksmith sticky disk, so unchanged layers
+      # and the Dockerfiles' Go build cache mount carry over to the next release.
+      # Off Blacksmith it falls back to a plain, uncached builder.
+      - name: Set up Docker builder with a persistent cache
         if: steps.existing.outputs.exists != 'true'
-        uses: docker/setup-buildx-action@v3
+        uses: useblacksmith/setup-docker-builder@19215110ab936351210feebdfa5b440b4493e184 # v2.2.0
+        with:
+          cache-key: ${{ inputs.image_repository }}
 
       - name: Build and push immutable image
         if: steps.existing.outputs.exists != 'true'
         env:
-          IMAGE_REPOSITORY: ${{ inputs.image_repository }}
           VERSION: ${{ inputs.version }}
           DOCKERFILE: ${{ inputs.dockerfile }}
           SOURCE_SHA: ${{ steps.source.outputs.sha }}
         run: |
           set -euo pipefail
           docker buildx build \
-            --cache-from type=gha,scope="$IMAGE_REPOSITORY" \
-            --cache-to type=gha,scope="$IMAGE_REPOSITORY",mode=max \
             -f "$DOCKERFILE" \
             --build-arg VERSION="$VERSION" \
             --build-arg COMMIT="$SOURCE_SHA" \

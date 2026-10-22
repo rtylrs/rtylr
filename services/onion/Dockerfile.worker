@@ -22,25 +22,32 @@ RUN set -eux; \
     fi; \
     rm -f /tmp/sqlc.tar.gz; \
     sqlc version
+# The onek CLI, kept apart from the contracts so editing them doesn't
+# recompile it.
+RUN GOBIN=/usr/local/bin go install github.com/1homsi/onekit/cmd/onek@v0.34.1
+# Module downloads depend only on the module files, so source edits reuse them.
+COPY voxie/go.mod voxie/go.sum ./voxie/
+COPY services/onion/go.mod services/onion/go.sum ./services/onion/
+WORKDIR /src/services/onion
+RUN go mod download && go mod verify
 # Generated contract output is gitignored, so produce it from the pinned onek
 # release before Go compiles against it.
-COPY voxie/ ./voxie/
-RUN GOBIN=/usr/local/bin go install github.com/1homsi/onekit/cmd/onek@v0.34.1 && \
-    cd /src/voxie && onek build .
-COPY services/onion/ ./services/onion/
-WORKDIR /src/services/onion
+COPY voxie/ /src/voxie/
+RUN cd /src/voxie && onek build .
+COPY services/onion/ ./
 RUN set -eux; \
     test -f /src/voxie/go.mod; \
     test -f ./internal/modules/hr/sql/schema/hr_core/schema.sql; \
     test -d ./internal/platform/email/templates
-RUN go mod download && go mod verify
 RUN chmod +x scripts/*.sh && \
     bash scripts/generate_sqlc.sh
 ARG VERSION=dev
 ARG COMMIT=unknown
 ARG BUILD_TIME=unknown
 ARG TARGETARCH
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} go build \
+# The build cache mount lets a release recompile only the packages it changed.
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} go build \
     -ldflags="-s -w \
       -X 'github.com/voxire/onion/internal/platform/server/http.Version=${VERSION}' \
       -X 'github.com/voxire/onion/internal/platform/server/http.Commit=${COMMIT}' \
