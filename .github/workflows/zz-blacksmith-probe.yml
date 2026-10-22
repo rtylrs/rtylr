@@ -1,0 +1,51 @@
+name: Blacksmith builder probe (temporary)
+
+# Measures cold and warm api image builds on the Blacksmith builder without
+# pushing anywhere. Removed before this PR merges.
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/zz-blacksmith-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: blacksmith-8vcpu-ubuntu-2404
+    timeout-minutes: 30
+    steps:
+      - name: Tools on the runner
+        run: |
+          gh --version | head -1
+          aws --version
+          docker version --format '{{.Server.Version}}'
+          nproc
+
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker builder with a persistent cache
+        uses: useblacksmith/setup-docker-builder@19215110ab936351210feebdfa5b440b4493e184 # v2.2.0
+        with:
+          cache-key: probe/voxire/onion
+
+      - name: Build as a release would
+        run: |
+          set -euo pipefail
+          start=$SECONDS
+          docker buildx build -f services/onion/Dockerfile \
+            --build-arg VERSION=probe --build-arg COMMIT="$(git rev-parse --short=7 HEAD)" \
+            --build-arg BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --progress=plain -t probe/onion:first . 2>&1 | grep -E '^#[0-9]+ (\[|DONE|CACHED)' | grep -E 'DONE [0-9.]+s|CACHED' | tail -40
+          echo "FIRST BUILD: $((SECONDS - start))s"
+
+      - name: Build again after a one-file change
+        run: |
+          set -euo pipefail
+          printf '\n// probe\n' >> services/onion/internal/platform/email/templates.go
+          start=$SECONDS
+          docker buildx build -f services/onion/Dockerfile \
+            --build-arg VERSION=probe2 --build-arg COMMIT="$(git rev-parse --short=7 HEAD)" \
+            --build-arg BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --progress=plain -t probe/onion:second . 2>&1 | grep -E '^#[0-9]+ (\[|DONE|CACHED)' | grep -E 'DONE [0-9.]+s|CACHED' | tail -40
+          echo "SECOND BUILD: $((SECONDS - start))s"
