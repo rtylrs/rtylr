@@ -43,6 +43,8 @@ on:
         required: false
       AWS_SECRET_ACCESS_KEY:
         required: false
+      IMAGE_CACHE_SALT:
+        required: false
 
 permissions:
   contents: read
@@ -65,17 +67,21 @@ jobs:
           SOURCE_REF: ${{ inputs.source_ref }}
         run: gh api "repos/$SOURCE_REPOSITORY/releases/tags/$SOURCE_REF" --silent
 
-      - name: Require AWS credentials
+      - name: Require AWS credentials and the build cache salt
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          IMAGE_CACHE_SALT: ${{ secrets.IMAGE_CACHE_SALT }}
         run: |
           set -euo pipefail
-          if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
-            exit 0
+          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+            echo 'AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be passed to the ECS image build' >&2
+            exit 1
           fi
-          echo 'AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be passed to the ECS image build' >&2
-          exit 1
+          if [ -z "$IMAGE_CACHE_SALT" ]; then
+            echo 'IMAGE_CACHE_SALT must be passed to the ECS image build' >&2
+            exit 1
+          fi
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -123,13 +129,16 @@ jobs:
         run: echo "sha=$(git rev-parse --short=7 HEAD)" >> "$GITHUB_OUTPUT"
 
       # Keeps BuildKit's state on a Blacksmith sticky disk, so unchanged layers
-      # and the Dockerfiles' Go build cache mount carry over to the next release.
-      # Off Blacksmith it falls back to a plain, uncached builder.
+      # and the Go build cache mount carry over to the next release. Any job in
+      # this repository that knows a disk's key can commit to it, and what it
+      # commits ships in the next image, so the key carries a secret that pull
+      # request workflows never receive. Keep the secret raw so the public log
+      # masks it. Off Blacksmith this falls back to a plain, uncached builder.
       - name: Set up Docker builder with a persistent cache
         if: steps.existing.outputs.exists != 'true'
         uses: useblacksmith/setup-docker-builder@19215110ab936351210feebdfa5b440b4493e184 # v2.2.0
         with:
-          cache-key: ${{ inputs.image_repository }}
+          cache-key: ${{ inputs.image_repository }}/${{ secrets.IMAGE_CACHE_SALT }}
 
       - name: Build and push immutable image
         if: steps.existing.outputs.exists != 'true'
