@@ -2,6 +2,10 @@
 
 # Onekit CLI version. Generated output is gitignored; see `make generate`.
 ONK_VERSION := v0.34.1
+# SHA-256 of that release's onekit_<version>_Linux_x86_64.tar.gz. Pages deploys
+# install the release binary instead of compiling onek, and check it against
+# this; update it together with ONK_VERSION.
+ONK_LINUX_X86_64_SHA256 := c8497f164e4de436f31e7c8192293cfc0c735a03c3512df8c472afd5f67d4ccb
 
 # `go install` writes to GOPATH/bin, which is not guaranteed to be on PATH here.
 GOBIN_DIR := $(shell go env GOPATH 2>/dev/null)/bin

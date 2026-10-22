@@ -61,6 +61,7 @@ permissions:
   contents: read
 
 env:
+  # Pinned rather than whatever npx resolves as latest on the day.
   WRANGLER_VERSION: 4.151.3
 
 jobs:
@@ -92,26 +93,40 @@ jobs:
           filter: blob:none
 
       # Generated contracts are gitignored, so they must be produced from the
-      # release tag before the app builds. The prebuilt onek release generates
+      # release tag before the app builds. The onek release binary generates
       # the same output as `go install`, which compiled onek on every deploy;
+      # it is checked against the checksum voxie/Makefile pins, and
       # `make generate` skips its install when this version is on PATH.
       - name: Install onek
+        id: onek
         if: hashFiles('voxie/onekit.toml') != ''
         run: |
           set -euo pipefail
           version="$(sed -n 's/^ONK_VERSION := v//p' voxie/Makefile)"
-          if [ -z "$version" ]; then
-            echo "voxie/Makefile does not pin ONK_VERSION" >&2
-            exit 1
+          sha256="$(sed -n 's/^ONK_LINUX_X86_64_SHA256 := //p' voxie/Makefile)"
+          if [ -z "$version" ] || [ -z "$sha256" ]; then
+            echo "This release pins no onek checksum, so Go will build onek"
+            exit 0
           fi
           archive="onekit_${version}_Linux_x86_64.tar.gz"
-          release="https://github.com/1homsi/onekit/releases/download/v$version"
           mkdir -p "$RUNNER_TEMP/onek"
           cd "$RUNNER_TEMP/onek"
-          curl --fail --silent --show-error --location --retry 5 --retry-all-errors -O "$release/$archive" -O "$release/checksums.txt"
-          grep " $archive\$" checksums.txt | sha256sum --check --status
+          curl --fail --silent --show-error --location --retry 5 --retry-all-errors \
+            -o "$archive" "https://github.com/1homsi/onekit/releases/download/v$version/$archive"
+          if ! echo "$sha256  $archive" | sha256sum --check --status; then
+            echo "$archive does not match ONK_LINUX_X86_64_SHA256 in voxie/Makefile" >&2
+            exit 1
+          fi
           tar -xzf "$archive" onek
           echo "$RUNNER_TEMP/onek" >> "$GITHUB_PATH"
+          echo "installed=true" >> "$GITHUB_OUTPUT"
+
+      # Releases cut before the checksum was pinned still build onek from source.
+      - name: Set up Go
+        if: hashFiles('voxie/onekit.toml') != '' && steps.onek.outputs.installed != 'true'
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: voxie/go.mod
 
       - name: Generate contracts
         if: hashFiles('voxie/onekit.toml') != ''
@@ -148,19 +163,6 @@ jobs:
             pnpm run "$BUILD_SCRIPT"
           fi
 
-      # A pinned wrangler, cached, instead of `npx wrangler` fetching the
-      # latest release (and its ~200 MB of dependencies) on every deploy.
-      - name: Restore wrangler
-        id: wrangler-cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ runner.temp }}/wrangler
-          key: wrangler-${{ env.WRANGLER_VERSION }}-${{ runner.os }}-${{ runner.arch }}-node${{ inputs.node_version }}
-
-      - name: Install wrangler
-        if: steps.wrangler-cache.outputs.cache-hit != 'true'
-        run: npm install --prefix "$RUNNER_TEMP/wrangler" --no-audit --no-fund "wrangler@$WRANGLER_VERSION"
-
       - name: Deploy promoted app to Cloudflare Pages
         working-directory: ${{ inputs.working_directory }}
         env:
@@ -175,9 +177,9 @@ jobs:
         # a failed deploy creates it and tries once more.
         run: |
           set -euo pipefail
-          wrangler="$RUNNER_TEMP/wrangler/node_modules/.bin/wrangler"
-          deploy() { "$wrangler" pages deploy "$DIST_DIR" --project-name="$PROJECT_NAME" --branch=main; }
+          wrangler() { npx --yes "wrangler@$WRANGLER_VERSION" "$@"; }
+          deploy() { wrangler pages deploy "$DIST_DIR" --project-name="$PROJECT_NAME" --branch=main; }
           if ! deploy; then
-            "$wrangler" pages project create "$PROJECT_NAME" --production-branch=main || true
+            wrangler pages project create "$PROJECT_NAME" --production-branch=main || true
             deploy
           fi
