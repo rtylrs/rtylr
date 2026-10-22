@@ -32,14 +32,10 @@ tools="$(mktemp -d)"
 trap 'rm -rf "$tools"' EXIT
 fetch() { curl --fail --silent --show-error --location --retry 5 --retry-all-errors --retry-delay 2 "$@"; }
 
-# Prebuilt releases rather than `go install`, which compiles them. onek
-# publishes checksums; sqlc doesn't, and the Dockerfile trusts its download too.
-onek_archive="onekit_${onek_version}_Linux_x86_64.tar.gz"
-onek_release="https://github.com/1homsi/onekit/releases/download/v$onek_version"
-fetch -o "$tools/$onek_archive" "$onek_release/$onek_archive"
-fetch -o "$tools/onek-checksums.txt" "$onek_release/checksums.txt"
-(cd "$tools" && grep " $onek_archive\$" onek-checksums.txt | sha256sum --check --status)
-tar -xzf "$tools/$onek_archive" -C "$tools" onek
+# `go install` checks onek against the Go checksum database, as the Dockerfile
+# does; the restored caches make it quick. sqlc is cgo, so it comes from its
+# release like the Dockerfile's, which has no checksum to verify either.
+GOBIN="$tools" go install "github.com/1homsi/onekit/cmd/onek@v$onek_version"
 
 sqlc_archive="sqlc_${sqlc_version}_linux_amd64.tar.gz"
 fetch -o "$tools/$sqlc_archive" "https://github.com/sqlc-dev/sqlc/releases/download/v$sqlc_version/$sqlc_archive"
