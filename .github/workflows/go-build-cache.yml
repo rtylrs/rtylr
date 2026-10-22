@@ -1,0 +1,77 @@
+name: Go build cache
+
+# Release image builds (build-ecs-image.yml) only restore the Go caches:
+# saving ~300 MB would hold up the deploy. This compiles the same binaries
+# after each push to main and saves the caches for the next release. Keep the
+# cache keys in step with build-ecs-image.yml.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/onion/**'
+      - 'voxie/**'
+      - '.github/deploy-targets.json'
+      - '.github/scripts/build-onion-binaries.sh'
+      - '.github/workflows/go-build-cache.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: go-build-cache
+  cancel-in-progress: true
+
+jobs:
+  save:
+    name: Compile and save the Go caches
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read the Go version from the Dockerfile
+        id: go
+        run: |
+          set -euo pipefail
+          version="$(sed -n 's/^FROM .*golang:\([0-9][0-9.]*\)-.*/\1/p' services/onion/Dockerfile | head -n 1)"
+          if [ -z "$version" ]; then
+            echo "services/onion/Dockerfile has no golang builder stage" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Go
+        id: setup-go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ steps.go.outputs.version }}
+          cache: false
+
+      - name: Restore or save the Go module cache
+        uses: actions/cache@v4
+        with:
+          path: ~/go/pkg/mod
+          key: go-mod-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+
+      - name: Restore the Go build cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/go-build
+          key: go-build-${{ runner.os }}-${{ steps.setup-go.outputs.go-version }}-${{ github.sha }}
+          restore-keys: go-build-${{ runner.os }}-${{ steps.setup-go.outputs.go-version }}-
+
+      # Same script, paths and flags as the release build, so its compiled
+      # packages are the ones the next release looks up.
+      - name: Compile every release binary
+        run: |
+          set -euo pipefail
+          packages="$(jq -r '.[] | select(.go_package) | .go_package' .github/deploy-targets.json)"
+          .github/scripts/build-onion-binaries.sh services/onion/Dockerfile "$RUNNER_TEMP/builder" $packages
+
+      - name: Save the Go build cache
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/go-build
+          key: go-build-${{ runner.os }}-${{ steps.setup-go.outputs.go-version }}-${{ github.sha }}

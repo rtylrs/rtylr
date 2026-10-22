@@ -57,15 +57,9 @@ ARG BUILD_TIME=unknown
 # so the hosted (amd64) path is unchanged while multi-arch publishes work.
 ARG TARGETARCH
 
-# The build cache mount lets a release recompile only the packages it changed.
+# The build cache mount lets a rebuild recompile only the packages it changed.
 RUN --mount=type=cache,target=/root/.cache/go-build \
-    CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} \
-    go build \
-    -ldflags="-s -w \
-      -X 'github.com/voxire/onion/internal/platform/server/http.Version=${VERSION}' \
-      -X 'github.com/voxire/onion/internal/platform/server/http.Commit=${COMMIT}' \
-      -X 'github.com/voxire/onion/internal/platform/server/http.BuildTime=${BUILD_TIME}'" \
-    -o /app/api ./cmd/api
+    bash scripts/build-binary.sh ./cmd/api /app/api
 
 # Build the image/video transformation executable used by the API's upload
 # routes. Keep it in the same Debian family as the runtime shared libraries.
@@ -116,7 +110,7 @@ ENV MEDIA_ENGINE_PATH=/app/media-engine/build/media-engine
 EXPOSE 9999
 
 # Last, so a release only adds this layer on top of the cached ones.
-COPY --from=builder /app/api /app/api
+COPY --link --from=builder /app/api /app/api
 
 USER app
 

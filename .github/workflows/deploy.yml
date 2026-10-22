@@ -80,6 +80,7 @@ jobs:
       version: ${{ inputs.version }}
       dockerfile: ${{ matrix.dockerfile }}
       image_repository: ${{ matrix.image_repository }}
+      go_package: ${{ matrix.go_package }}
     secrets: inherit
 
   # The API and the worker read the columns their release's migrations add, so
