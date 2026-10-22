@@ -26,6 +26,14 @@ on:
         description: ECR repository path without the registry hostname
         required: true
         type: string
+      go_package:
+        description: >-
+          Package (relative to the Dockerfile) that its builder stage compiles.
+          When set, the runner compiles it with the cached Go state and the
+          result replaces that stage.
+        required: false
+        default: ""
+        type: string
       ecr_registry:
         description: ECR registry hostname
         required: false
@@ -77,29 +85,27 @@ jobs:
           echo 'AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be passed to the ECS image build' >&2
           exit 1
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Login to Amazon ECR
-        env:
-          ECR_REGISTRY: ${{ inputs.ecr_registry }}
-        run: |
-          aws ecr get-login-password --region "$AWS_REGION" \
-            | docker login --username AWS --password-stdin "$ECR_REGISTRY"
-
+      # The code generators and the compiler run on this runner, so the AWS keys
+      # live only in the two steps that talk to ECR, each ECR login is dropped
+      # as soon as its step is done with it, and the checkout keeps no token.
+      #
       # A release tag always names the same commit, so a redeploy or a re-run
       # can ship the image an earlier run already pushed.
       - name: Check for an existing image
         id: existing
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          ECR_REGISTRY: ${{ inputs.ecr_registry }}
         run: |
+          set -euo pipefail
+          aws ecr get-login-password --region "$AWS_REGION" \
+            | docker login --username AWS --password-stdin "$ECR_REGISTRY"
           if docker buildx imagetools inspect "$IMAGE_URI" >/dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
             echo "$IMAGE_URI is already pushed; not rebuilding it"
           fi
+          docker logout "$ECR_REGISTRY"
 
       - name: Checkout promoted source release
         if: steps.existing.outputs.exists != 'true'
@@ -109,6 +115,7 @@ jobs:
           ref: ${{ inputs.source_ref }}
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN || github.token }}
+          persist-credentials: false
 
       - name: Verify generated contract reference
         if: steps.existing.outputs.exists != 'true'
@@ -120,29 +127,101 @@ jobs:
       - name: Resolve source commit
         if: steps.existing.outputs.exists != 'true'
         id: source
-        run: echo "sha=$(git rev-parse --short=7 HEAD)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "sha=$(git rev-parse --short=7 HEAD)" >> "$GITHUB_OUTPUT"
+          echo "build_time=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      # A builder stage starts cold on every fresh runner, so the binary is
+      # compiled here, where the Go caches apply. A tag cut before this script
+      # existed builds entirely in Docker.
+      - name: Read the Go version from the Dockerfile
+        id: go
+        if: >-
+          steps.existing.outputs.exists != 'true' && inputs.go_package != '' &&
+          hashFiles('.github/scripts/build-onion-binaries.sh') != ''
+        env:
+          DOCKERFILE: ${{ inputs.dockerfile }}
+        run: |
+          set -euo pipefail
+          version="$(sed -n 's/^FROM .*golang:\([0-9][0-9.]*\)-.*/\1/p' "$DOCKERFILE" | head -n 1)"
+          if [ -z "$version" ]; then
+            echo "$DOCKERFILE has no golang builder stage" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Go
+        id: setup-go
+        if: steps.go.outputs.version != ''
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ steps.go.outputs.version }}
+          cache: false
+
+      # Both caches are saved by go-build-cache.yml after each push to main, so
+      # the build cache holds the previous release's compiled packages. Keep
+      # these keys in step with that workflow. A run on main restores only
+      # entries saved on main; pull request runs write to their own scope.
+      - name: Restore the Go module cache
+        if: steps.go.outputs.version != ''
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/go/pkg/mod
+          key: go-mod-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+
+      - name: Restore the Go build cache
+        if: steps.go.outputs.version != ''
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/go-build
+          key: go-build-${{ runner.os }}-${{ steps.setup-go.outputs.go-version }}-${{ github.sha }}
+          restore-keys: go-build-${{ runner.os }}-${{ steps.setup-go.outputs.go-version }}-
+
+      - name: Compile the binary
+        if: steps.go.outputs.version != ''
+        env:
+          DOCKERFILE: ${{ inputs.dockerfile }}
+          GO_PACKAGE: ${{ inputs.go_package }}
+          VERSION: ${{ inputs.version }}
+          COMMIT: ${{ steps.source.outputs.sha }}
+          BUILD_TIME: ${{ steps.source.outputs.build_time }}
+        run: .github/scripts/build-onion-binaries.sh "$DOCKERFILE" "$RUNNER_TEMP/builder" "$GO_PACKAGE"
 
       - name: Set up Docker Buildx
         if: steps.existing.outputs.exists != 'true'
         uses: docker/setup-buildx-action@v3
+        with:
+          # The runner is discarded anyway; removing the builder took ~10s.
+          cleanup: false
 
-      - name: Build and push immutable image
+      - name: Login to Amazon ECR
         if: steps.existing.outputs.exists != 'true'
         env:
-          IMAGE_REPOSITORY: ${{ inputs.image_repository }}
-          VERSION: ${{ inputs.version }}
-          DOCKERFILE: ${{ inputs.dockerfile }}
-          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          ECR_REGISTRY: ${{ inputs.ecr_registry }}
         run: |
-          set -euo pipefail
-          docker buildx build \
-            --cache-from type=gha,scope="$IMAGE_REPOSITORY" \
-            --cache-to type=gha,scope="$IMAGE_REPOSITORY",mode=max \
-            -f "$DOCKERFILE" \
-            --build-arg VERSION="$VERSION" \
-            --build-arg COMMIT="$SOURCE_SHA" \
-            --build-arg BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-            -t "$IMAGE_URI" \
-            --push \
-            .
-          echo "Pushed $IMAGE_URI"
+          aws ecr get-login-password --region "$AWS_REGION" \
+            | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+
+      # build-push-action hands buildx the Actions runtime token the gha cache
+      # needs. A plain `docker buildx build` step never had it, so every build
+      # started cold.
+      - name: Build and push immutable image
+        if: steps.existing.outputs.exists != 'true'
+        uses: docker/build-push-action@v6
+        env:
+          DOCKER_BUILD_SUMMARY: false
+          DOCKER_BUILD_RECORD_UPLOAD: false
+        with:
+          context: .
+          file: ${{ inputs.dockerfile }}
+          build-contexts: ${{ steps.go.outputs.version != '' && format('builder={0}/builder', runner.temp) || '' }}
+          build-args: |
+            VERSION=${{ inputs.version }}
+            COMMIT=${{ steps.source.outputs.sha }}
+            BUILD_TIME=${{ steps.source.outputs.build_time }}
+          tags: ${{ env.IMAGE_URI }}
+          push: true
+          cache-from: type=gha,scope=${{ inputs.image_repository }}
+          cache-to: type=gha,scope=${{ inputs.image_repository }},mode=max
