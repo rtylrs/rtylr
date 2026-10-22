@@ -293,7 +293,31 @@ jobs:
           echo "Started $TASK_ARN"
           echo "task_arn=$TASK_ARN" >> "$GITHUB_OUTPUT"
 
-          aws ecs wait tasks-stopped --cluster "$CLUSTER" --tasks "$TASK_ARN" --region "$AWS_REGION"
+          # The exit code is final once the container stops. The task reaches
+          # STOPPED only after Fargate also releases its network interface,
+          # which `aws ecs wait tasks-stopped` sat through.
+          deadline=$((SECONDS + 1800))
+          last=""
+          while [ "$SECONDS" -lt "$deadline" ]; do
+            sleep 3
+            # A new task can be missing from describe-tasks for a moment, and a
+            # throttled call should not end the wait; both just poll again.
+            state="$(aws ecs describe-tasks --cluster "$CLUSTER" --tasks "$TASK_ARN" \
+              --region "$AWS_REGION" --output json \
+              | jq -r '.tasks[0] // empty
+                  | "\(.lastStatus) \(.containers[0].lastStatus) \(.containers[0].exitCode // "-")"')" || continue
+            [ -n "$state" ] || continue
+            read -r task_status container_status exit_code <<< "$state"
+            if [ "$state" != "$last" ]; then
+              echo "$(date -u +%H:%M:%S) task $task_status, container $container_status"
+              last="$state"
+            fi
+            if [ "$exit_code" != - ] || [ "$task_status" = STOPPED ]; then
+              exit 0
+            fi
+          done
+          echo "Timed out waiting for $TASK_ARN" >&2
+          exit 1
 
       - name: Report the migration output
         if: ${{ !inputs.dry_run && always() && steps.run.outputs.task_arn != '' }}
