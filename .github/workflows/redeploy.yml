@@ -26,6 +26,8 @@ jobs:
       version: ${{ steps.version.outputs.version }}
       pages: ${{ steps.plan.outputs.pages }}
       ecs: ${{ steps.plan.outputs.ecs }}
+      # 'false' only when this release's migrations already applied cleanly.
+      migrate: ${{ steps.applied.outputs.cache-hit == 'true' && 'false' || 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,6 +55,30 @@ jobs:
           APP: ${{ inputs.app }}
         run: .github/scripts/plan-deploys.sh app "$APP"
 
+      # As in release.yml: a rollback or a re-ship skips migrations its release
+      # already applied cleanly, and any failure here means migrating.
+      - name: Compute the migration key
+        id: migrations
+        if: steps.plan.outputs.ecs != '[]'
+        continue-on-error: true
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          git fetch --quiet --depth 1 origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
+          key="$(.github/scripts/migration-key.sh "$RELEASE_TAG")"
+          echo "key=$key" >> "$GITHUB_OUTPUT"
+
+      - name: Look up whether these migrations are applied
+        id: applied
+        if: steps.migrations.outputs.key != ''
+        continue-on-error: true
+        uses: actions/cache/restore@v4
+        with:
+          path: .migrations-applied
+          key: onion-migrations-applied-${{ steps.migrations.outputs.key }}
+          lookup-only: true
+
   deploy:
     name: Deploy
     needs: plan
@@ -62,4 +88,5 @@ jobs:
       version: ${{ needs.plan.outputs.version }}
       pages: ${{ needs.plan.outputs.pages }}
       ecs: ${{ needs.plan.outputs.ecs }}
+      migrate: ${{ needs.plan.outputs.migrate }}
     secrets: inherit

@@ -72,8 +72,8 @@ Each target in `deploy-targets.json` lists the path prefixes that trigger it
 (with optional `ignore` prefixes) and carries `working_directory` (for example
 `clients/app`) plus `dist_dir`, so one entrypoint serves every product. Adding an app is one entry in that file.
 
-A release that ships the API or the worker first applies its database
-migrations with `migrate-onion-database.yml`, unless that exact set
+A release or redeploy that ships the API or the worker first applies its
+database migrations with `migrate-onion-database.yml`, unless that exact set
 (`.github/scripts/migration-key.sh`) already applied cleanly. Run that workflow
 by hand to rehearse a migration (`dry_run`) or to apply one again.
 
