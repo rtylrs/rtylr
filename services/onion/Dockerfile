@@ -4,7 +4,7 @@
 #
 # Build from the repository root so the service and the contract module are both
 # in context: docker build -f services/onion/Dockerfile .
-FROM --platform=$BUILDPLATFORM golang:1.27-alpine3.24 AS builder
+FROM --platform=$BUILDPLATFORM golang:1.27.3-alpine3.24 AS builder
 
 WORKDIR /src
 
@@ -26,7 +26,7 @@ RUN set -eux; \
 
 # Layer 3: the onek CLI, kept apart from the contracts so editing them doesn't
 # recompile it.
-RUN GOBIN=/usr/local/bin go install github.com/1homsi/onekit/cmd/onek@v0.34.1
+RUN GOBIN=/usr/local/bin go install github.com/1homsi/onekit/cmd/onek@v0.36.3
 
 # Layer 4: module downloads depend only on the module files, so source edits
 # reuse them.

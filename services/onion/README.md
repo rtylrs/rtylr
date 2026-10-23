@@ -13,7 +13,7 @@ Onion is a full-featured backend framework that provides everything you need to 
 
 ## 📋 Prerequisites
 
-- **Go 1.26+**
+- **Go 1.27.3+**
 - **MySQL-compatible database**. Local dev uses Percona Server 5.7.23 to match the current HostGator database.
 - **Docker** for the optional local development environment.
 - `mysql` and `mysqladmin` available locally if you run database scripts from your machine.
