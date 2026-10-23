@@ -1,8 +1,8 @@
 {
   "name": "@rtylr/mcp",
   "version": "0.1.0",
-  "private": true,
-  "description": "MCP server for rtylr — gives AI agents access to Flow, CRM, Finance, ERP, POS",
+  "private": false,
+  "description": "MCP server for rtylr \u2014 gives AI agents access to Flow, CRM, Finance, ERP and POS",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -39,5 +39,22 @@
   "engines": {
     "node": ">=18"
   },
-  "license": "UNLICENSED"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rtylrs/rtylr.git",
+    "directory": "clients/mcp"
+  },
+  "homepage": "https://docs.rtylr.com",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "rtylr",
+    "ai",
+    "claude",
+    "business",
+    "crm",
+    "erp",
+    "finance"
+  ]
 }
