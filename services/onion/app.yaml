@@ -19,4 +19,4 @@ services:
       - key: PORT
         value: "8080"
       - key: GO_VERSION
-        value: "1.25.0"
+        value: "1.27.3"

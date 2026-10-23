@@ -7,7 +7,7 @@
 # ── Build stage ──────────────────────────────────────────────────────────────
 # Build on the native runner arch and cross-compile to TARGETARCH (the builder
 # downloads an amd64 sqlc, which can't run under arm64 emulation).
-FROM --platform=$BUILDPLATFORM golang:1.27-alpine3.24 AS builder
+FROM --platform=$BUILDPLATFORM golang:1.27.3-alpine3.24 AS builder
 WORKDIR /src
 RUN apk add --no-cache ca-certificates curl bash
 # sqlc: the worker imports the email package, whose generated query code is
@@ -24,7 +24,7 @@ RUN set -eux; \
     sqlc version
 # The onek CLI, kept apart from the contracts so editing them doesn't
 # recompile it.
-RUN GOBIN=/usr/local/bin go install github.com/1homsi/onekit/cmd/onek@v0.34.1
+RUN GOBIN=/usr/local/bin go install github.com/1homsi/onekit/cmd/onek@v0.36.3
 # Module downloads depend only on the module files, so source edits reuse them.
 COPY voxie/go.mod voxie/go.sum ./voxie/
 COPY services/onion/go.mod services/onion/go.sum ./services/onion/
