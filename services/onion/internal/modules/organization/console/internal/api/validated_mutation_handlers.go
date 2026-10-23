@@ -61,7 +61,19 @@ func (h *deleteResourceRowHandler) Serve(ctx context.Context, _ *deleteResourceR
 	if err := requireConsoleResourceAdmin(ctx); err != nil {
 		return resourceMutationResponse{}, err
 	}
-	if err := h.Service.DeleteResourceRow(ctx, serverHttp.PathParam(ctx, "table"), serverHttp.PathParam(ctx, "id")); err != nil {
+	table := serverHttp.PathParam(ctx, "table")
+	if table == "users" {
+		id, err := parseIDPath(ctx, "id")
+		if err != nil {
+			return resourceMutationResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid id")
+		}
+		message, err := deleteUser(ctx, h.Service, id)
+		if err != nil {
+			return resourceMutationResponse{}, err
+		}
+		return resourceMutationResponse{Message: message}, nil
+	}
+	if err := h.Service.DeleteResourceRow(ctx, table, serverHttp.PathParam(ctx, "id")); err != nil {
 		return resourceMutationResponse{}, onekiterrors.New(http.StatusBadRequest, err.Error())
 	}
 	return resourceMutationResponse{Message: "Resource row deleted"}, nil

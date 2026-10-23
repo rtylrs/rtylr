@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -292,4 +293,38 @@ type ResourceRowsResult struct {
 	PrimaryKey string
 	Rows       []map[string]any
 	Total      int64
+}
+
+// BusinessRef names a business in an error an admin acts on.
+type BusinessRef struct {
+	ID   int64
+	Name string
+}
+
+// OwnedBusinessesInUseError blocks deleting a user while other members still
+// use businesses they own; ownership has to move to someone else first.
+type OwnedBusinessesInUseError struct {
+	Businesses []BusinessRef
+}
+
+func (e *OwnedBusinessesInUseError) Error() string {
+	return "user owns businesses other members still use: " + e.BusinessList()
+}
+
+// BusinessList renders the businesses as "Name (#id), ...".
+func (e *OwnedBusinessesInUseError) BusinessList() string {
+	names := make([]string, 0, len(e.Businesses))
+	for _, business := range e.Businesses {
+		names = append(names, fmt.Sprintf("%s (#%d)", business.Name, business.ID))
+	}
+	return strings.Join(names, ", ")
+}
+
+// DeletedUser reports what a user deletion changed beyond the user itself.
+type DeletedUser struct {
+	DeactivatedBusinessIDs []int64
+	// MemberBusinessIDs are businesses the user belonged to without owning.
+	MemberBusinessIDs []int64
+	// SeatOwnerIDs own businesses where the user held an active seat.
+	SeatOwnerIDs []int64
 }

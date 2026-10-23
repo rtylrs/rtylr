@@ -188,7 +188,3 @@ func (r *Repository) UpdateUser(ctx context.Context, id int64, fullName, email s
 	_, err = r.pool.ExecContext(ctx, query, args...)
 	return err
 }
-
-func (r *Repository) DeleteUser(ctx context.Context, id int64) error {
-	return r.queries.DeleteUser(ctx, id)
-}

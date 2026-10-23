@@ -4,12 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/organization/console/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	consoleadminv1 "github.com/voxire/voxie/gen/go/console/admin/v1"
 )
@@ -127,10 +129,49 @@ func (a *ConsoleAdminAPI) DeleteUser(ctx context.Context, req *consoleadminv1.De
 	if err := requireConsoleAdmin(ctx); err != nil {
 		return nil, err
 	}
-	if err := a.service.DeleteUser(ctx, req.GetId()); err != nil {
-		return nil, internalError("Failed to delete user")
+	message, err := deleteUser(ctx, a.service, req.GetId())
+	if err != nil {
+		return nil, err
 	}
-	return &consoleadminv1.DeleteUserResponse{Message: "User deleted"}, nil
+	return &consoleadminv1.DeleteUserResponse{Message: message}, nil
+}
+
+// deleteUser backs both this endpoint and the generic users row delete, so
+// neither path removes a user without the guards and cleanup.
+func deleteUser(ctx context.Context, service *application.Service, id int64) (string, error) {
+	var actorID int64
+	if admin, ok := authPkg.GetAuthUser(ctx); ok && admin != nil {
+		actorID = admin.UserID
+	}
+	deleted, err := service.DeleteUser(ctx, actorID, id)
+	var inUse *application.OwnedBusinessesInUseError
+	switch {
+	case err == nil:
+	case errors.Is(err, sql.ErrNoRows):
+		return "", onekiterrors.New(http.StatusNotFound, "User not found")
+	case errors.As(err, &inUse):
+		return "", onekiterrors.New(http.StatusConflict,
+			"This user owns businesses other members still use: "+inUse.BusinessList()+
+				". Transfer their ownership or remove the other members first.")
+	case errors.Is(err, application.ErrDeleteSelf):
+		return "", onekiterrors.New(http.StatusConflict, "You can't delete your own account")
+	case errors.Is(err, application.ErrDeleteConsoleAdmin):
+		return "", onekiterrors.New(http.StatusConflict, "Remove console admin access before deleting this user")
+	case errors.Is(err, application.ErrUserHasBilledPlan):
+		return "", onekiterrors.New(http.StatusConflict,
+			"This user's Paddle subscription can still bill. Cancel it in Paddle first.")
+	default:
+		logger.Ctx(ctx).Error("Failed to delete user", logger.Any("user_id", id), logger.Error(err))
+		return "", internalError("Failed to delete user")
+	}
+	switch n := len(deleted.DeactivatedBusinessIDs); n {
+	case 0:
+		return "User deleted", nil
+	case 1:
+		return "User deleted. Deactivated the 1 business only they used.", nil
+	default:
+		return fmt.Sprintf("User deleted. Deactivated the %d businesses only they used.", n), nil
+	}
 }
 
 func (a *ConsoleAdminAPI) BanUser(ctx context.Context, req *consoleadminv1.BanUserRequest) (*consoleadminv1.BanUserResponse, error) {

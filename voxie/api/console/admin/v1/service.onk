@@ -11,6 +11,10 @@ service ConsoleAdminService {
 
   updateUser(UpdateUserRequest) -> UpdateUserResponse @put("/console/users/{id}")
 
+  /// Deletes a user's account, access and personal data, and deactivates the
+  /// businesses only they use. Returns 409 while another member uses a business
+  /// they own, while their Paddle subscription can still bill, for a console
+  /// admin, or for the caller's own account.
   deleteUser(DeleteUserRequest) -> DeleteUserResponse @delete("/console/users/{id}")
 
   banUser(BanUserRequest) -> BanUserResponse @post("/console/users/{id}/ban")

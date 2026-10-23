@@ -97,7 +97,7 @@ func TestDeleteUser_RemovesFromList(t *testing.T) {
 		t.Fatalf("CreateUser: %v", err)
 	}
 
-	if err := repo.DeleteUser(ctx, id); err != nil {
+	if _, err := repo.DeleteUser(ctx, id); err != nil {
 		t.Fatalf("DeleteUser: %v", err)
 	}
 

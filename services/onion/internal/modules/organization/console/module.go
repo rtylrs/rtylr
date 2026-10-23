@@ -37,6 +37,12 @@ func (m *Module) SetEmployeeProvisioner(provisioner application.EmployeeProvisio
 	}
 }
 
+func (m *Module) SetSeatChangeRecorder(recorder application.SeatChangeRecorder) {
+	if recorder != nil {
+		m.service.WithSeatChangeRecorder(recorder)
+	}
+}
+
 func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {
 	api.RegisterRoutes(ctx, router, m.service)
 }

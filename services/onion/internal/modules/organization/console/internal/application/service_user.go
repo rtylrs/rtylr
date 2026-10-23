@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
 
@@ -265,7 +267,39 @@ func (s *Service) UpdateUser(ctx context.Context, id int64, fullName, email stri
 	return s.repo.UpdateUser(ctx, id, fullName, email)
 }
 
-func (s *Service) DeleteUser(ctx context.Context, id int64) error {
-	defer invalidateConsoleScope(ctx)
-	return s.repo.DeleteUser(ctx, id)
+// DeleteUser erases a user for a console admin. actorID is the admin, or 0 for
+// the Partials key without an actor.
+func (s *Service) DeleteUser(ctx context.Context, actorID, id int64) (*DeletedUser, error) {
+	if actorID > 0 && actorID == id {
+		return nil, ErrDeleteSelf
+	}
+	user, err := s.repo.GetUserByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if user.IsConsoleAdmin {
+		return nil, ErrDeleteConsoleAdmin
+	}
+
+	deleted, err := s.repo.DeleteUser(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	invalidateConsoleScope(ctx)
+	invalidateOwnerSubscriptionScope(ctx, id)
+	for _, businessIDs := range [][]int64{deleted.DeactivatedBusinessIDs, deleted.MemberBusinessIDs} {
+		for _, businessID := range businessIDs {
+			cacher.InvalidateScope(ctx, cacheKeys.BusinessPrefix(businessID))
+		}
+	}
+	if s.seatChangeRecorder != nil {
+		for _, ownerID := range deleted.SeatOwnerIDs {
+			if err := s.seatChangeRecorder.RecordSeatChange(ctx, ownerID); err != nil {
+				logger.Ctx(ctx).Error("Failed to record seat change after deleting a user",
+					logger.Any("owner_id", ownerID), logger.Error(err))
+			}
+		}
+	}
+	return deleted, nil
 }
