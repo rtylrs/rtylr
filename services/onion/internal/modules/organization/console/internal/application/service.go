@@ -21,6 +21,9 @@ var (
 	ErrAddonNotFound          = errors.New("addon not found")
 	ErrInvalidSubscription    = errors.New("invalid subscription input")
 	ErrRecordNotFound         = errors.New("record not found")
+	ErrDeleteSelf             = errors.New("console admins cannot delete their own account")
+	ErrDeleteConsoleAdmin     = errors.New("remove console admin access before deleting this user")
+	ErrUserHasBilledPlan      = errors.New("user has a Paddle subscription that can still bill")
 )
 
 // Console is a global admin surface — caches are keyed on the admin namespace
@@ -48,11 +51,18 @@ func invalidateBusinessAddonScope(ctx context.Context, businessID int64) {
 type Service struct {
 	repo                repository
 	employeeProvisioner EmployeeProvisioner
+	seatChangeRecorder  SeatChangeRecorder
 }
 
 type EmployeeProvisioner interface {
 	EnsureEmployeeForUser(ctx context.Context, ownerID, businessID, userID int64, firstName, lastName, email string) error
 	DeleteEmployeeForUser(ctx context.Context, ownerID, businessID, userID int64) error
+}
+
+// SeatChangeRecorder reprices an owner's seat period after their member count
+// changes. The team module owns seat billing.
+type SeatChangeRecorder interface {
+	RecordSeatChange(ctx context.Context, ownerID int64) error
 }
 
 func NewService(_ context.Context, repo repository) *Service {
@@ -61,6 +71,11 @@ func NewService(_ context.Context, repo repository) *Service {
 
 func (s *Service) WithEmployeeProvisioner(provisioner EmployeeProvisioner) *Service {
 	s.employeeProvisioner = provisioner
+	return s
+}
+
+func (s *Service) WithSeatChangeRecorder(recorder SeatChangeRecorder) *Service {
+	s.seatChangeRecorder = recorder
 	return s
 }
 

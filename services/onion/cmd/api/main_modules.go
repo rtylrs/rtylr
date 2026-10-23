@@ -294,6 +294,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	taxModule := tax.NewModule(ctx, dbclient.Pool())
 	consoleModule := console.NewModule(ctx, dbclient.Pool())
 	consoleModule.SetEmployeeProvisioner(hrCoreModule)
+	consoleModule.SetSeatChangeRecorder(teamModule.Service())
 
 	s1FormsExecutor, s1FormsErr := echo.NewFormMappingToolExecutor(platformConfig.GlobalConfig.FormMappingCheckpointPath)
 	if s1FormsErr != nil {

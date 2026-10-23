@@ -14,7 +14,7 @@ type repository interface {
 	CreateBusinessOwner(ctx context.Context, params CreateBusinessOwnerParams) (*CreateBusinessOwnerRow, error)
 	DeleteCreatedBusinessOwner(ctx context.Context, ownerID, businessID int64) error
 	UpdateUser(ctx context.Context, id int64, fullName, email string) error
-	DeleteUser(ctx context.Context, id int64) error
+	DeleteUser(ctx context.Context, id int64) (*DeletedUser, error)
 	CreateResourceRow(ctx context.Context, table string, values map[string]any) (int64, error)
 	UpdateResourceRow(ctx context.Context, table, id string, values map[string]any) error
 	DeleteResourceRow(ctx context.Context, table, id string) error

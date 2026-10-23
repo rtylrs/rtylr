@@ -23,9 +23,6 @@ UPDATE users
 SET full_name = ?, email = ?, updated_at = NOW()
 WHERE id = ?;
 
--- name: DeleteUser :exec
-DELETE FROM users WHERE id = ?;
-
 -- name: BanUser :exec
 UPDATE users
 SET is_banned = TRUE, ban_reason = ?, banned_at = NOW()
