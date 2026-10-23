@@ -92,7 +92,7 @@ export function jsonSchemaToZodShape(inputSchema: {
     } else if (prop.type === 'array') {
       schema = z.array(z.any());
     } else if (prop.type === 'object') {
-      schema = z.record(z.any());
+      schema = z.record(z.string(), z.any());
     } else {
       schema = z.string();
     }
