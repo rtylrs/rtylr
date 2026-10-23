@@ -152,7 +152,6 @@ func LoadAndValidate() (*AppConfig, error) {
 		SlackBotToken:           os.Getenv("SLACK_BOT_TOKEN"),
 		SlackAlertsChannel:      os.Getenv("SLACK_ALERTS_CHANNEL_ID"),
 		SlackRequestLogsChannel: os.Getenv("SLACK_REQUEST_LOGS_CHANNEL"),
-		SlackSuspiciousChannel:  os.Getenv("SLACK_SUSPICIOUS_REQUESTS_CHANNEL"),
 		SlackDashboardChannel:   os.Getenv("SLACK_DASHBOARD_CHANNEL_ID"),
 
 		// Sentry

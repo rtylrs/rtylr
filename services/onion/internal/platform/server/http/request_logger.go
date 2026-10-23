@@ -54,11 +54,12 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 			duration := time.Since(start)
 
 			// Failed requests (4xx/5xx) → the Slack request-logs channel (batched).
-			// 2xx/3xx are left to Better Stack to keep the channel signal-dense. Malicious
-			// requests are blocked upstream by SecurityMiddleware and never reach here.
-			// Anonymous 401s (no token) are expected bot/scanner noise — skip them.
+			// 2xx/3xx are left to Better Stack to keep the channel signal-dense.
+			// Scanner probes and anonymous 401s (no token) are expected bot noise —
+			// skip them.
 			// Request bodies are never logged because they may contain customer content.
 			if slack.Enabled() && responseWriter.statusCode >= 400 &&
+				!isMaliciousPath(r.URL.Path) &&
 				(responseWriter.statusCode != http.StatusUnauthorized || r.Header.Get("Authorization") != "") &&
 				rateLimiter.CanSend("request-logs") {
 				slack.Post(slack.Requests, fmt.Sprintf("`%d` %s %s · %s · %s",
@@ -70,7 +71,7 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 					return
 				}
 
-				// SecurityMiddleware already batched these.
+				// Scanner probes are bot noise, not actionable errors.
 				if isMaliciousPath(r.URL.Path) {
 					return
 				}
