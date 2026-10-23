@@ -1,24 +1,76 @@
 # rtylr
 
-The rtylr product in one repository. One checkout, one install, one place to
-change a contract and every consumer with it.
+**Run everything. From one workspace.**
+
+One workspace to run a small business — work, finance, customers, team,
+operations and sales, with **Caret**, the AI built in.
+
+> **Beta · Free while we build it with you.**
+
+[**Start free →**](https://portal.rtylr.com/register) · [Website](https://rtylr.com) · [Docs](https://docs.rtylr.com) · [Self-host](#self-hosting)
+
+![rtylr — run everything from one workspace](docs/assets/beta-banner.png)
+
+## What's inside
+
+| Module | What it does |
+| --- | --- |
+| **Flow** | Projects, tasks, roadmaps, cycles, team workload |
+| **CRM** | Customers, loyalty tiers, campaigns, segments |
+| **Finance** | Invoices, expenses, P&L, tax, reconciliation |
+| **ERP** | Inventory, suppliers, purchasing, stock |
+| **HR** | Staff, shifts, payroll, time off, reviews |
+| **POS** | Point-of-sale terminal, Vite web app + Tauri desktop shell |
+| **Menu** | Public customer menu with QR codes, served from the Portal origin |
+| **Insights** | Cross-app analytics, revenue, operations, reports |
+| **Recruit** | Careers sites and an HR submissions inbox |
+| **Caret** | The built-in AI: asks about overdue invoices, drafts, and answers across modules |
+
+Each app is standalone. A business can buy one module and use it without ever
+touching the others — there is no all-or-nothing switch.
+
+## Quick start
+
+Requires pnpm 10.33 (pinned in `clients/package.json`), Node 20.19+ or 22.12+
+(Vite 7's floor), and Go 1.27+ if you want the backend.
+
+```sh
+git clone https://github.com/rtylrs/rtylr.git
+cd rtylr
+
+pnpm -C clients install --frozen-lockfile
+make -C voxie generate              # contracts are generated, not committed
+git config core.hooksPath .githooks # committed hooks; git does not track this
+
+pnpm -C clients --filter @rtylr/portal dev
+```
+
+The Portal comes up on `http://localhost:5175`. The landing site runs with
+`pnpm -C clients/web/landing dev` on port 4200.
+
+Typecheck everything, or one member:
+
+```sh
+pnpm -C clients -r typecheck
+pnpm -C clients --filter @rtylr/portal typecheck
+```
 
 ## Layout
 
-| Path                   | What it is                                                                                                                    |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `clients/`             | The pnpm workspace root. Everything JavaScript/TypeScript lives under it.                                                     |
-| `clients/app/`         | Single Portal application: business modules, the public customer menu, and separate SSO and public Recruit build entrypoints. |
-| `clients/web/landing/` | The marketing site (Next.js static export).                                                                                   |
-| `clients/web/docs/`    | The documentation site (Next.js static export).                                                                               |
-| `clients/mcp/`         | The MCP server. Build-only; nothing deploys it.                                                                               |
-| `clients/pos/`         | The POS terminal: Vite web app plus the Tauri desktop shell in `core/`.                                                       |
-| `clients/packages/`    | The shared library layer (`@voxire/*`) and the generated contracts package (`contracts/`).                                    |
-| `voxie/`               | API contracts (`.onk`) plus the generated Go and OpenAPI output. In-tree and the single source of truth.                      |
-| `services/onion/`      | The Go backend: modules, platform packages, sqlc, worker.                                                                     |
+| Path | What it is |
+| --- | --- |
+| `clients/` | The pnpm workspace root. Everything JavaScript/TypeScript. |
+| `clients/app/` | The Portal application: business modules, the public customer menu, plus separate SSO and public Recruit entrypoints. |
+| `clients/web/landing/` | Marketing site, Next.js static export. |
+| `clients/web/docs/` | Documentation site, Next.js static export. |
+| `clients/mcp/` | The MCP server — gives AI agents access to Flow, CRM, Finance, ERP. |
+| `clients/pos/` | POS terminal: Vite web app plus the Tauri desktop shell in `core/`. |
+| `clients/packages/` | Shared `@voxire/*` library layer and the generated contracts package. |
+| `voxie/` | API contracts (`.onk`) plus generated Go and OpenAPI output. In-tree, single source of truth. |
+| `services/onion/` | The Go backend: modules, platform packages, sqlc, worker. |
 
-`rtylrs/infra` and `rtylrs/pipelines` stay separate: they are the
-infrastructure and the reusable build-and-deploy workflows.
+`rtylrs/infra` and `rtylrs/pipelines` stay separate — infrastructure and the
+reusable build-and-deploy workflows.
 
 ## One workspace
 
@@ -30,83 +82,105 @@ This is deliberate. Separate installs for the same packages gave a linked
 package one copy of its dependencies per consumer, and type identity needs the
 same declaration files, not the same versions.
 
-```sh
-pnpm -C clients install          # installs every workspace member
-pnpm -C clients -r typecheck     # every member
-pnpm -C clients --filter @rtylr/portal test
-pnpm -C clients --filter @rtylr/portal dev
-pnpm -C clients/app build  # Portal, SSO and careers builds
+## Architecture
+
+**Stack:** React 19, Vite 7, Next.js 15 (landing and docs), TypeScript 5.9 in
+strict mode, Tailwind CSS, TanStack Query v5, Zustand, neverthrow, motion.
+Backend is Go with MySQL, sqlc, and Protocol Buffer contracts.
+
+### Contract-first
+
+API request and response types are Protocol Buffers in `voxie/proto`, shared
+between frontend and backend as the single source of truth.
+
+```
+voxie/proto/
+  common/v1/   # pagination, errors, timestamps
+  auth/v1/     # login, register, password reset
+  hub/v1/      # team, business, apps, dashboard, billing, developer
 ```
 
-The rtylr workspace keeps its own scripts (`clients/app/package.json`)
-for the things that only concern it: the contracts guard, contracts, the vitest
-suite across packages and apps, and the app build fan-out.
+Change a `.onk` file, regenerate, and every consumer moves with it in one
+commit. Generated TypeScript is committed.
 
-## Setup
+### Errors as values
 
-```sh
-pnpm -C clients install --frozen-lockfile
-make -C voxie generate   # contracts are generated, not committed
-git config core.hooksPath .githooks
+Every API call returns a `Result` instead of throwing:
+
+```ts
+import { createApiClient, safeFetch, unwrap } from '@voxire/api';
+
+const api = createApiClient('crm');
+const safe = safeFetch(api);
+
+export function useProducts() {
+  return useQuery({
+    queryKey: ['products'],
+    queryFn: () => unwrap(storeApi.listProducts()),
+  });
+}
 ```
 
-The last line wires the committed hooks; git does not track `core.hooksPath`.
+`safeFetch` returns `ResultAsync<T, ApiError>`; `unwrap()` bridges into React
+Query. Network failures, validation errors and auth errors are values you match
+on, not exceptions that escape a component.
 
-## Releases and deployment
+### Per-app structure
 
-A push to `main` releases and deploys:
+```
+apps/{name}/src/
+  features/{feature}/    # screen component + co-located hook
+  shared/                # components, lib, services, hooks, stores
+  layouts/DefaultLayout.tsx
+  routes/AppRoutes.tsx
+```
 
-1. `.github/workflows/release.yml` computes the next `rtylr-v*` version,
-   attaches only the components that changed (per-component source archives
-   plus a `release.json` manifest), and creates the tag and GitHub release.
-2. The same run picks the deploy targets whose own paths changed, using
-   `.github/deploy-targets.json`, and `.github/workflows/deploy.yml` builds the
-   new tag and ships it — Pages apps and ECS services through the same
-   entrypoint. ECS images build while the database migrates, and the services
-   roll out once both are done. The onion binaries compile on the runner
-   against Go caches that `go-build-cache.yml` saves after each push, so a
-   release only recompiles what changed, and Docker layers come from the
-   Actions cache. A change that touches no target's paths (CI only, for
-   example) cuts a release and deploys nothing.
-3. To re-ship or roll back an existing tag, run `redeploy.yml` with the tag and
-   a target name (or `all`).
+## GitHub Copilot / AI agents
 
-Each target in `deploy-targets.json` lists the path prefixes that trigger it
-(with optional `ignore` prefixes) and carries `working_directory` (for example
-`clients/app`) plus `dist_dir`, so one entrypoint serves every product. Adding an app is one entry in that file.
+`clients/mcp` ships an MCP server so an assistant can read and write your
+workspace — tasks, invoices, customers, inventory:
 
-A release or redeploy that ships the API or the worker first applies its
-database migrations with `migrate-onion-database.yml`, unless that exact set
-(`.github/scripts/migration-key.sh`) already applied cleanly. Run that workflow
-by hand to rehearse a migration (`dry_run`) or to apply one again.
+```sh
+npx @rtylr/mcp
+```
 
-Other workflows:
+See [`clients/mcp/README.md`](clients/mcp/README.md) for Claude Desktop and
+other client configuration.
 
-- `desktop-release.yml` — Tauri desktop builds and the public downloads site;
-  installer releases are still tagged `pos-v*` and are separate from source
-  releases.
+## Self-hosting
 
-## Development notes
+Run rtylr on your own infrastructure with Helm or Docker Compose. Self-hosting
+is free — you pay only if you want support or managed hosting.
 
-- `clients/web/landing` and `clients/web/docs` export statically; their build
-  output stays inside the app (`dist/landing`, `out`).
-- `clients/pos` builds the web app into `clients/pos/dist`; the desktop shell
-  builds through Tauri from `clients/pos/core`.
-- Contract output is generated, not committed. Run `make -C voxie generate`
-  after changing anything under `voxie/api/`; CI regenerates before every build.
-  `voxie/` is the Go module `github.com/voxire/voxie`, consumed by `onion`
-  through a `replace` directive; its TypeScript half is copied into
-  `clients/packages/contracts`, which the apps consume as `@voxire/voxie`.
+```sh
+git clone https://github.com/rtylrs/rtylr-self-host.git
+cd rtylr-self-host
+
+helm upgrade --install rtylr ./helm/rtylr \
+  --set-string secrets.jwtSecret=$(openssl rand -hex 32) \
+  --set ingress.domain=example.com
+```
+
+Or Docker Compose: `docker compose --env-file .env up -d`.
+
+Installers live in [`rtylrs/rtylr-self-host`](https://github.com/rtylrs/rtylr-self-host).
+That repository contains no product source; it pulls public images and wires
+the API, worker, upload service and frontends together.
+
+## Contributing
+
+Issues and pull requests are welcome. For anything larger than a bug fix, open
+an issue first so we can agree on the shape before you write the code.
+
+```sh
+pnpm -C clients lint
+pnpm -C clients -r typecheck
+pnpm -C clients -r test
+```
 
 ## License
 
-Everything in this repository is source-available under the
-[PolyForm Strict License 1.0.0](./LICENSE). It permits noncommercial use only
-and does not grant the right to distribute the software or make changes or new
-works based on it. Commercial use, self-hosting, redistribution and
-modification require a separate written license from Voxire.
+MIT. See [LICENSE](LICENSE).
 
-This single LICENSE at the repository root covers every path. PolyForm Strict
-has no SPDX license identifier, so do not invent one in package manifests, and
-any artifact distributed outside this repository — an npm tarball, a Go module
-zip, a container image — must include a copy of this LICENSE.
+You can use, modify, self-host and redistribute rtylr commercially. Support
+and managed hosting are available separately.
