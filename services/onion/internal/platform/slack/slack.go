@@ -1,6 +1,6 @@
 // Package slack posts batched log messages to Slack channels. It is wired into
 // the global logger (error-level records -> alerts channel) and called directly
-// by the HTTP middlewares (request logs, blocked/suspicious requests).
+// by the HTTP request logger (failed requests).
 //
 // Messages are buffered per channel and flushed on an interval, combined into as
 // few chat.postMessage calls as possible, so high log volume never trips Slack's
@@ -42,7 +42,6 @@ type Channel int
 const (
 	Alerts Channel = iota
 	Requests
-	Suspicious
 	DashboardCh
 )
 
@@ -83,7 +82,6 @@ func Init() {
 		channels: map[Channel]string{
 			Alerts:      cfg.SlackAlertsChannel,
 			Requests:    cfg.SlackRequestLogsChannel,
-			Suspicious:  cfg.SlackSuspiciousChannel,
 			DashboardCh: cfg.SlackDashboardChannel,
 		},
 		client: &http.Client{Timeout: 10 * time.Second},

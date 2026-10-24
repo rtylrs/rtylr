@@ -149,12 +149,11 @@ type AppConfig struct {
 	BetterStackSourceToken   string
 	BetterStackIngestingHost string
 
-	// Slack logging — routes error/request/suspicious logs to Slack channels.
+	// Slack logging — routes error and request logs to Slack channels.
 	SlackLoggingEnabled     bool
 	SlackBotToken           string
 	SlackAlertsChannel      string
 	SlackRequestLogsChannel string
-	SlackSuspiciousChannel  string
 	SlackDashboardChannel   string
 
 	// Sentry
