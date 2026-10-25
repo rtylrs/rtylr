@@ -131,8 +131,20 @@ jobs:
             --region "$AWS_REGION" \
             --query taskDefinition > "$RUNNER_TEMP/task-definition.json"
 
+          # Sibling images come from the revision the tasks serve. While a
+          # rollout is in progress the service's taskDefinition already names
+          # the incoming revision, so prefer the deployment that completed.
+          SERVING_TASK_DEFINITION="$(aws ecs describe-services \
+            --cluster "$CLUSTER" \
+            --services "$SERVICE" \
+            --region "$AWS_REGION" \
+            --output json \
+            | jq -r --arg fallback "$CURRENT_TASK_DEFINITION" \
+                '[.services[0].deployments[] | select(.rolloutState == "COMPLETED")][0].taskDefinition // $fallback')"
+          echo "Serving revision: $SERVING_TASK_DEFINITION"
+
           aws ecs describe-task-definition \
-            --task-definition "$CURRENT_TASK_DEFINITION" \
+            --task-definition "$SERVING_TASK_DEFINITION" \
             --region "$AWS_REGION" \
             --query taskDefinition > "$RUNNER_TEMP/running-task-definition.json"
 
