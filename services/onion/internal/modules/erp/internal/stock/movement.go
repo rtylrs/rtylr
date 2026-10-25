@@ -52,6 +52,7 @@ func applyMovementLevelTx(ctx context.Context, tx DBTX, m Movement) (before, aft
 
 	onHandStr, err := q.LockStockLevelOnHand(ctx, stocksqlc.LockStockLevelOnHandParams{
 		OwnerID:    m.BusinessID,
+		BusinessID: m.BusinessID,
 		LocationID: m.LocationID,
 		ProductID:  m.ProductID,
 	})
@@ -68,10 +69,10 @@ func applyMovementLevelTx(ctx context.Context, tx DBTX, m Movement) (before, aft
 		err = tx.QueryRowContext(ctx, `
 			SELECT id
 			FROM stock_ledger
-			WHERE owner_id = ? AND reference_type = ? AND reference_id = ?
+			WHERE owner_id = ? AND business_id = ? AND reference_type = ? AND reference_id = ?
 			  AND entry_type = ? AND product_id = ? AND location_id = ?
 			FOR UPDATE`,
-			m.BusinessID, m.ReferenceType, *m.ReferenceID, string(m.EntryType), m.ProductID, m.LocationID,
+			m.BusinessID, m.BusinessID, m.ReferenceType, *m.ReferenceID, string(m.EntryType), m.ProductID, m.LocationID,
 		).Scan(&existingID)
 		if err == nil {
 			return before, before, existingID, false, nil
@@ -124,6 +125,7 @@ func TransferTx(ctx context.Context, tx DBTX, out, in Movement) (outLedgerID, in
 		}
 		if _, err := q.LockStockLevelOnHand(ctx, stocksqlc.LockStockLevelOnHandParams{
 			OwnerID:    leg.BusinessID,
+			BusinessID: leg.BusinessID,
 			LocationID: leg.LocationID,
 			ProductID:  leg.ProductID,
 		}); err != nil {
@@ -339,6 +341,7 @@ func applyKnown(ctx context.Context, q *stocksqlc.Queries, m Movement, before, a
 	if err := q.UpdateStockLevelOnHand(ctx, stocksqlc.UpdateStockLevelOnHandParams{
 		OnHand:     fmtQty(after),
 		OwnerID:    m.BusinessID,
+		BusinessID: m.BusinessID,
 		LocationID: m.LocationID,
 		ProductID:  m.ProductID,
 	}); err != nil {

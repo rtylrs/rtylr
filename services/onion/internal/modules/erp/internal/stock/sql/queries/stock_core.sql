@@ -1,9 +1,11 @@
 -- ERP rows carry the business ID in owner_id as well as business_id, so every
--- owner_id parameter here is a business ID.
+-- owner_id parameter here is a business ID. Lookups match both columns, so a
+-- row written under an owner's user ID can never match a business that shares
+-- that number.
 
 -- name: GetDefaultWarehouseLocationID :one
 SELECT id FROM stock_locations
- WHERE owner_id = ? AND kind = 'warehouse' AND source_table = 'native' AND source_id = 0
+ WHERE owner_id = ? AND business_id = ? AND kind = 'warehouse' AND source_table = 'native' AND source_id = 0
  LIMIT 1;
 
 -- name: InsertDefaultWarehouseLocation :exec
@@ -25,7 +27,7 @@ SELECT business_id FROM erp_warehouses WHERE id = ?;
 
 -- name: GetWarehouseLocationID :one
 SELECT id FROM stock_locations
- WHERE owner_id = ? AND source_table = 'erp_warehouses' AND source_id = ? LIMIT 1;
+ WHERE owner_id = ? AND business_id = ? AND source_table = 'erp_warehouses' AND source_id = ? LIMIT 1;
 
 -- name: InsertWarehouseLocation :exec
 INSERT INTO stock_locations (owner_id, business_id, kind, source_table, source_id, name, is_default, is_active)
@@ -38,11 +40,11 @@ INSERT INTO stock_levels (owner_id, business_id, location_id, product_id, on_han
 
 -- name: LockStockLevelOnHand :one
 SELECT on_hand FROM stock_levels
- WHERE owner_id = ? AND location_id = ? AND product_id = ? FOR UPDATE;
+ WHERE owner_id = ? AND business_id = ? AND location_id = ? AND product_id = ? FOR UPDATE;
 
 -- name: UpdateStockLevelOnHand :exec
 UPDATE stock_levels SET on_hand = ?
- WHERE owner_id = ? AND location_id = ? AND product_id = ?;
+ WHERE owner_id = ? AND business_id = ? AND location_id = ? AND product_id = ?;
 
 -- name: InsertStockLedgerEntry :execresult
 INSERT INTO stock_ledger

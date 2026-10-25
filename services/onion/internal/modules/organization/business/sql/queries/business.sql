@@ -1,10 +1,3 @@
--- name: GetBusinessProfile :one
-SELECT COALESCE(site_name,'') AS site_name, COALESCE(logo_url,'') AS logo_url, COALESCE(contact_email,'') AS contact_email, COALESCE(contact_number,'') AS contact_number
-FROM config
-WHERE owner_id = ?
-ORDER BY owner_id ASC
-LIMIT 1;
-
 -- name: GetBusinessProfileByBusiness :one
 SELECT
     b.id,
@@ -17,8 +10,7 @@ SELECT
     COALESCE(b.timezone, 'UTC') AS timezone
 FROM businesses b
 LEFT JOIN config c ON c.business_id = b.id
-WHERE (b.id = sqlc.arg(owner_id) OR b.owner_id = sqlc.arg(owner_id)) AND b.is_active = TRUE
-ORDER BY (b.id = sqlc.arg(owner_id)) DESC, b.id ASC
+WHERE b.id = ? AND b.is_active = TRUE
 LIMIT 1;
 
 -- name: GetPublicBusiness :one

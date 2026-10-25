@@ -29,6 +29,7 @@ func SetLevelTx(ctx context.Context, tx DBTX, m Movement, target float64) (befor
 
 	onHandStr, err := q.LockStockLevelOnHand(ctx, stocksqlc.LockStockLevelOnHandParams{
 		OwnerID:    m.BusinessID,
+		BusinessID: m.BusinessID,
 		LocationID: m.LocationID,
 		ProductID:  m.ProductID,
 	})
@@ -76,9 +77,9 @@ func SetTotalTx(ctx context.Context, tx DBTX, m Movement, target float64) (befor
 	rows, err := tx.QueryContext(ctx, `
 		SELECT location_id, on_hand
 		FROM stock_levels
-		WHERE owner_id = ? AND product_id = ?
+		WHERE owner_id = ? AND business_id = ? AND product_id = ?
 		ORDER BY location_id
-		FOR UPDATE`, m.BusinessID, m.ProductID)
+		FOR UPDATE`, m.BusinessID, m.BusinessID, m.ProductID)
 	if err != nil {
 		return 0, 0, fmt.Errorf("stock_core: lock total levels: %w", err)
 	}
@@ -155,9 +156,9 @@ func LockProductLevelsTx(ctx context.Context, tx DBTX, businessID, productID int
 	rows, err := tx.QueryContext(ctx, `
 		SELECT location_id
 		FROM stock_levels
-		WHERE owner_id = ? AND product_id = ?
+		WHERE owner_id = ? AND business_id = ? AND product_id = ?
 		ORDER BY location_id
-		FOR UPDATE`, businessID, productID)
+		FOR UPDATE`, businessID, businessID, productID)
 	if err != nil {
 		return fmt.Errorf("stock_core: lock product levels: %w", err)
 	}

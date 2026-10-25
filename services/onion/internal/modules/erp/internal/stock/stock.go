@@ -88,7 +88,7 @@ func queries(tx DBTX) *stocksqlc.Queries {
 func DefaultLocationID(ctx context.Context, tx DBTX, businessID int64) (int64, error) {
 	q := queries(tx)
 
-	id, err := q.GetDefaultWarehouseLocationID(ctx, businessID)
+	id, err := q.GetDefaultWarehouseLocationID(ctx, stocksqlc.GetDefaultWarehouseLocationIDParams{OwnerID: businessID, BusinessID: businessID})
 	if err == nil {
 		return id, nil
 	}
@@ -103,7 +103,7 @@ func DefaultLocationID(ctx context.Context, tx DBTX, businessID int64) (int64, e
 	}); err != nil {
 		return 0, fmt.Errorf("stock_core: create default location: %w", err)
 	}
-	id, err = q.GetDefaultWarehouseLocationID(ctx, businessID)
+	id, err = q.GetDefaultWarehouseLocationID(ctx, stocksqlc.GetDefaultWarehouseLocationIDParams{OwnerID: businessID, BusinessID: businessID})
 	if err != nil {
 		return 0, fmt.Errorf("stock_core: re-read default location: %w", err)
 	}
@@ -170,8 +170,9 @@ func WarehouseLocationID(ctx context.Context, tx DBTX, businessID, warehouseID i
 	}
 
 	id, err := q.GetWarehouseLocationID(ctx, stocksqlc.GetWarehouseLocationIDParams{
-		OwnerID:  businessID,
-		SourceID: warehouseID,
+		OwnerID:    businessID,
+		BusinessID: businessID,
+		SourceID:   warehouseID,
 	})
 	if err == nil {
 		return id, nil
@@ -188,8 +189,9 @@ func WarehouseLocationID(ctx context.Context, tx DBTX, businessID, warehouseID i
 		return 0, fmt.Errorf("stock_core: create warehouse location: %w", err)
 	}
 	id, err = q.GetWarehouseLocationID(ctx, stocksqlc.GetWarehouseLocationIDParams{
-		OwnerID:  businessID,
-		SourceID: warehouseID,
+		OwnerID:    businessID,
+		BusinessID: businessID,
+		SourceID:   warehouseID,
 	})
 	if err != nil {
 		return 0, fmt.Errorf("stock_core: re-read warehouse location: %w", err)

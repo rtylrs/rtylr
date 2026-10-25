@@ -18,7 +18,7 @@ const (
 
 type repository interface {
 	GetBusinessOwnerID(ctx context.Context, businessID int64) (int64, error)
-	GetProfile(ctx context.Context, ownerID int64) (domain.BusinessProfile, error)
+	GetProfile(ctx context.Context, businessID int64) (domain.BusinessProfile, error)
 	GetPublicBusiness(ctx context.Context, businessID int64) (domain.PublicBusiness, error)
 	LookupBySlug(ctx context.Context, slug string) (domain.SlugLookupResult, error)
 	UpdateSlug(ctx context.Context, businessID, ownerUserID int64, slug string) (bool, error)
@@ -51,12 +51,12 @@ func (s *Service) WithPublicLocationReader(reader PublicLocationReader) *Service
 	return s
 }
 
-func (s *Service) GetProfile(ctx context.Context, ownerID int64) (domain.BusinessProfile, error) {
+func (s *Service) GetProfile(ctx context.Context, businessID int64) (domain.BusinessProfile, error) {
 	return cacher.Of[domain.BusinessProfile]().GetOrComputeSingle(
 		ctx,
-		cacheKeys.BusinessProfile(ownerID),
+		cacheKeys.BusinessProfile(businessID),
 		func(ctx context.Context) (domain.BusinessProfile, error) {
-			return s.repo.GetProfile(ctx, ownerID)
+			return s.repo.GetProfile(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, businessProfileCacheTTL),
 	)

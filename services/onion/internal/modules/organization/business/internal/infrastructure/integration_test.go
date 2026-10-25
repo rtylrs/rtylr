@@ -3,6 +3,7 @@ package infrastructure_test
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 	"testing"
@@ -57,17 +58,39 @@ func TestGetPublicBusiness_NotFound(t *testing.T) {
 	}
 }
 
-func TestGetProfile_ReturnsProfileForOwner(t *testing.T) {
+func TestGetProfile_ReturnsProfileForBusiness(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	profile, err := repo.GetProfile(ctx, testutil.OwnerID)
+	profile, err := repo.GetProfile(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("GetProfile: %v", err)
 	}
-	if profile.ID != testutil.OwnerID {
-		t.Errorf("expected ID=%d, got %d", testutil.OwnerID, profile.ID)
+	if profile.ID != testutil.BusinessID {
+		t.Errorf("expected ID=%d, got %d", testutil.BusinessID, profile.ID)
+	}
+}
+
+// A profile is read by business ID only. Before, a lookup also matched the
+// owner's user ID, so a user ID that happened to equal a business ID read
+// that business, and an owner's ID read their first business.
+func TestGetProfile_DoesNotMatchAnOwnerUserID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const ownerID, businessID = int64(9967601), int64(9967701)
+	if _, err := db.ExecContext(ctx, `INSERT INTO businesses (id, owner_id, name, is_active) VALUES (?, ?, 'Owned elsewhere', TRUE)`, businessID, ownerID); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _, _ = db.ExecContext(context.Background(), "DELETE FROM businesses WHERE id = ?", businessID) })
+
+	if _, err := repo.GetProfile(ctx, ownerID); !errors.Is(err, sql.ErrNoRows) {
+		t.Fatalf("GetProfile(owner user id) error = %v, want sql.ErrNoRows", err)
+	}
+	if profile, err := repo.GetProfile(ctx, businessID); err != nil || profile.ID != businessID {
+		t.Fatalf("GetProfile(business id) = %+v, %v", profile, err)
 	}
 }
 
@@ -76,7 +99,7 @@ func TestGetProfile_SiteNameIsTestSite(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	profile, err := repo.GetProfile(ctx, testutil.OwnerID)
+	profile, err := repo.GetProfile(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("GetProfile: %v", err)
 	}
@@ -90,7 +113,7 @@ func TestGetProfile_HasDefaultCurrencyAndTimezone(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	profile, err := repo.GetProfile(ctx, testutil.OwnerID)
+	profile, err := repo.GetProfile(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("GetProfile: %v", err)
 	}
@@ -273,7 +296,7 @@ func TestGetProfile_ContactEmailPresent(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	profile, err := repo.GetProfile(ctx, testutil.OwnerID)
+	profile, err := repo.GetProfile(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("GetProfile: %v", err)
 	}
@@ -299,7 +322,7 @@ func TestGetProfile_OwnerID1001_ReturnsProfile(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	profile, err := repo.GetProfile(ctx, testutil.OwnerID)
+	profile, err := repo.GetProfile(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("GetProfile(1001): %v", err)
 	}
@@ -324,7 +347,7 @@ func TestGetProfile_NameIsTestBusiness(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	profile, err := repo.GetProfile(ctx, testutil.OwnerID)
+	profile, err := repo.GetProfile(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("GetProfile: %v", err)
 	}
@@ -339,7 +362,7 @@ func TestGetProfile_CurrencyIsUSD(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	profile, err := repo.GetProfile(ctx, testutil.OwnerID)
+	profile, err := repo.GetProfile(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("GetProfile: %v", err)
 	}
@@ -423,7 +446,7 @@ func TestGetProfile_ContactEmailPresent2(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	profile, err := repo.GetProfile(ctx, testutil.OwnerID)
+	profile, err := repo.GetProfile(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("GetProfile: %v", err)
 	}
@@ -437,7 +460,7 @@ func TestGetProfile_TimezoneIsUTC(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	profile, err := repo.GetProfile(ctx, testutil.OwnerID)
+	profile, err := repo.GetProfile(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("GetProfile: %v", err)
 	}
@@ -451,7 +474,7 @@ func TestGetProfile_PlanIsSet(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	profile, err := repo.GetProfile(ctx, testutil.OwnerID)
+	profile, err := repo.GetProfile(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("GetProfile: %v", err)
 	}
