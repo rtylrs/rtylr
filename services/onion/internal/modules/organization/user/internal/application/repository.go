@@ -7,7 +7,7 @@ import (
 )
 
 type repository interface {
-	AssignSubscription(ctx context.Context, ownerID int64, planSlug string) error
+	AssignSubscription(ctx context.Context, userID int64, planSlug string) error
 	BusinessNameExists(ctx context.Context, name string) (bool, error)
 	CheckBusinessAccess(ctx context.Context, userID, businessID int64) (bool, error)
 	ConsumeEmailVerificationCode(ctx context.Context, token string) (int64, error)

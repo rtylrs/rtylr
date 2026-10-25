@@ -12,9 +12,12 @@ import (
 	"github.com/voxire/onion/internal/platform/authorization"
 )
 
-// GetOwnerApps returns the set of apps included in the business subscription.
-func (r *Repository) GetOwnerApps(ctx context.Context, ownerID int64) ([]string, error) {
-	appsJSON, err := r.queries.GetOwnerApps(ctx, ownerID)
+// GetBusinessApps returns the set of apps included in the business subscription.
+func (r *Repository) GetBusinessApps(ctx context.Context, businessID int64) ([]string, error) {
+	appsJSON, err := r.queries.GetBusinessApps(ctx, businessID)
+	if errors.Is(err, sql.ErrNoRows) {
+		appsJSON, err = r.queries.GetDefaultPlanApps(ctx)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -306,10 +309,13 @@ func (r *Repository) ActivateNormalizedAuthorization(ctx context.Context, busine
 	return tx.Commit()
 }
 
-// GetOwnerSubscriptionInfo returns the plan slug and status for the owner's subscription.
-func (r *Repository) GetOwnerSubscriptionInfo(ctx context.Context, ownerID int64) (string, string, error) {
-	// cross-schema read from subscriptions + plans — approved for owner subscription info
-	row, err := r.queries.GetOwnerSubscriptionInfo(ctx, ownerID)
+// GetBusinessSubscriptionInfo returns the plan slug and status for the business's subscription.
+func (r *Repository) GetBusinessSubscriptionInfo(ctx context.Context, businessID int64) (string, string, error) {
+	// cross-schema read from subscriptions + plans — approved for business subscription info
+	row, err := r.queries.GetBusinessSubscriptionInfo(ctx, businessID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return "free", "active", nil
+	}
 	if err != nil {
 		return "", "", err
 	}
@@ -323,7 +329,7 @@ func (r *Repository) GetOwnerSubscriptionInfo(ctx context.Context, ownerID int64
 // RecordSeatChange updates the billing seat_periods table after a team member is added or removed.
 // All three writes (close the active period, open a new one, update the subscription seat count)
 // run inside a single transaction so billing state can never end up partially applied.
-func (r *Repository) RecordSeatChange(ctx context.Context, ownerID int64, newCount int) error {
+func (r *Repository) RecordSeatChange(ctx context.Context, businessID int64, newCount int) error {
 	now := time.Now().UTC()
 	yesterday := now.AddDate(0, 0, -1)
 	billingMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
@@ -342,7 +348,7 @@ func (r *Repository) RecordSeatChange(ctx context.Context, ownerID int64, newCou
 	qtx := r.queries.WithTx(tx)
 
 	// cross-schema read from subscriptions — approved for seat period management
-	sub, err := qtx.LockSubscriptionForSeatChange(ctx, ownerID)
+	sub, err := qtx.LockSubscriptionForSeatChange(ctx, businessID)
 	if err != nil {
 		_ = tx.Rollback()
 		return err
@@ -360,7 +366,7 @@ func (r *Repository) RecordSeatChange(ctx context.Context, ownerID int64, newCou
 	// cross-schema write to seat_periods — approved for seat billing accuracy
 	if err := qtx.OpenSeatPeriod(ctx, sqlc.OpenSeatPeriodParams{
 		SubscriptionID:    sub.ID,
-		OwnerID:           ownerID,
+		BusinessID:        businessID,
 		SeatCount:         int32(newCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		PricePerSeatCents: sub.PricePerSeatCents,
 		PeriodStart:       now,
@@ -372,8 +378,8 @@ func (r *Repository) RecordSeatChange(ctx context.Context, ownerID int64, newCou
 
 	// cross-schema write to subscriptions — approved for seat billing accuracy
 	if err := qtx.UpdateSubscriptionSeatCount(ctx, sqlc.UpdateSubscriptionSeatCountParams{
-		SeatCount: int32(newCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-		OwnerID:   ownerID,
+		SeatCount:  int32(newCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		BusinessID: businessID,
 	}); err != nil {
 		_ = tx.Rollback()
 		return err

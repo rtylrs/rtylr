@@ -27,26 +27,28 @@ type groupRepo struct {
 	deleteErr error
 }
 
-func (g *groupRepo) GetGroup(context.Context, int64, int64, int64) (*domain.Group, error) {
+func (g *groupRepo) GetGroup(context.Context, int64, int64) (*domain.Group, error) {
 	return g.group, nil
 }
 
-func (g *groupRepo) GetGroupDetail(context.Context, int64, int64, int64) (*domain.GroupDetail, error) {
+func (g *groupRepo) GetGroupDetail(context.Context, int64, int64) (*domain.GroupDetail, error) {
 	return nil, errors.New("not needed")
 }
 
-// Zero skips the business-wide cache invalidation, which needs Redis.
-func (g *groupRepo) GetBusinessIDByOwnerID(context.Context, int64) (int64, error) { return 0, nil }
+// The actor below is the owner, so delegation is unrestricted.
+func (g *groupRepo) GetBusinessByID(context.Context, int64) (string, int64, error) {
+	return "Biz", 1, nil
+}
 
-func (g *groupRepo) DeleteGroup(context.Context, int64, int64, int64) error { return g.deleteErr }
+func (g *groupRepo) DeleteGroup(context.Context, int64, int64) error { return g.deleteErr }
 
-func (g *groupRepo) RemoveGroupMember(context.Context, int64, int64, int64, int64) error { return nil }
+func (g *groupRepo) RemoveGroupMember(context.Context, int64, int64, int64) error { return nil }
 
 func TestDeleteGroup_RecordsAuditEntryWithGroupName(t *testing.T) {
 	recorder := &recordingAudit{}
 	s := NewService(context.Background(), &groupRepo{group: &domain.Group{ID: 7, Name: "Kitchen"}}).WithAuditRecorder(recorder)
 
-	if err := s.DeleteGroup(context.Background(), 1, 1, 42, 7); err != nil {
+	if err := s.DeleteGroup(context.Background(), 1, 42, 7); err != nil {
 		t.Fatalf("DeleteGroup: %v", err)
 	}
 	if len(recorder.events) != 1 {
@@ -63,7 +65,7 @@ func TestDeleteGroup_FailedChangeRecordsNothing(t *testing.T) {
 	recorder := &recordingAudit{}
 	s := NewService(context.Background(), &groupRepo{group: &domain.Group{ID: 7, Name: "Kitchen"}, deleteErr: errors.New("boom")}).WithAuditRecorder(recorder)
 
-	if err := s.DeleteGroup(context.Background(), 1, 1, 42, 7); err == nil {
+	if err := s.DeleteGroup(context.Background(), 1, 42, 7); err == nil {
 		t.Fatal("DeleteGroup succeeded, want the repository error")
 	}
 	if len(recorder.events) != 0 {
@@ -77,7 +79,7 @@ func TestRemoveGroupMember_AuditFailureDoesNotFailTheChange(t *testing.T) {
 	recorder := &recordingAudit{err: errors.New("outbox down")}
 	s := NewService(context.Background(), &groupRepo{group: &domain.Group{ID: 7, Name: "Kitchen"}}).WithAuditRecorder(recorder)
 
-	if err := s.RemoveGroupMember(context.Background(), 1, 1, 42, 7, 99); err != nil {
+	if err := s.RemoveGroupMember(context.Background(), 1, 42, 7, 99); err != nil {
 		t.Fatalf("RemoveGroupMember: %v", err)
 	}
 	if len(recorder.events) != 1 || recorder.events[0].Action != "group.member_removed" {

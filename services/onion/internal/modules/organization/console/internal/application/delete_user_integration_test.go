@@ -22,12 +22,13 @@ const (
 	deleteTestSoloBizID    int64 = 9_999_944
 	deleteTestAdminID      int64 = 9_999_945
 	deleteTestBilledUserID int64 = 9_999_946
+	deleteTestBilledBizID  int64 = 9_999_948
 )
 
-type seatRecorder struct{ owners []int64 }
+type seatRecorder struct{ businesses []int64 }
 
-func (r *seatRecorder) RecordSeatChange(_ context.Context, ownerID int64) error {
-	r.owners = append(r.owners, ownerID)
+func (r *seatRecorder) RecordSeatChange(_ context.Context, businessID int64) error {
+	r.businesses = append(r.businesses, businessID)
 	return nil
 }
 
@@ -66,8 +67,8 @@ func TestDeleteUser_ErasesMemberAccessAndPersonalData(t *testing.T) {
 	if want := []int64{deleteTestBusinessID}; !reflect.DeepEqual(deleted.MemberBusinessIDs, want) {
 		t.Errorf("member businesses = %v, want %v", deleted.MemberBusinessIDs, want)
 	}
-	if want := []int64{deleteTestOwnerID}; !reflect.DeepEqual(recorder.owners, want) {
-		t.Errorf("seat changes recorded for %v, want %v", recorder.owners, want)
+	if want := []int64{deleteTestBusinessID}; !reflect.DeepEqual(recorder.businesses, want) {
+		t.Errorf("seat changes recorded for %v, want %v", recorder.businesses, want)
 	}
 	for _, check := range []struct{ table, where string }{
 		{"users", "id = ?"},
@@ -134,7 +135,8 @@ func TestDeleteUser_DeactivatesSoloBusinessAndCancelsUnbilledPlan(t *testing.T) 
 	seedDeleteTestUser(t, db, deleteTestSoloOwnerID, false)
 	mustExec(t, db, `INSERT INTO businesses (id, name, owner_id) VALUES (?, 'Delete Test Solo', ?)`, deleteTestSoloBizID, deleteTestSoloOwnerID)
 	mustExec(t, db, `INSERT INTO authorization_business_members (business_id, user_id, member_type, status) VALUES (?, ?, 'admin', 'active')`, deleteTestSoloBizID, deleteTestSoloOwnerID)
-	mustExec(t, db, `INSERT INTO subscriptions (owner_id, plan_id, status) VALUES (?, 1, 'trial')`, deleteTestSoloOwnerID)
+	mustExec(t, db, `INSERT INTO subscriptions (business_id, plan_id, status) VALUES (?, 1, 'trial')`, deleteTestSoloBizID)
+	mustExec(t, db, `INSERT INTO manual_access_grants (business_id, plan_id, granted_by) VALUES (?, 1, 1)`, deleteTestSoloBizID)
 
 	svc := application.NewService(ctx, infrastructure.NewRepository(db))
 	deleted, err := svc.DeleteUser(ctx, 0, deleteTestSoloOwnerID)
@@ -147,8 +149,11 @@ func TestDeleteUser_DeactivatesSoloBusinessAndCancelsUnbilledPlan(t *testing.T) 
 	if n := countRows(t, db, "businesses", "id = ? AND is_active = FALSE", deleteTestSoloBizID); n != 1 {
 		t.Error("the solo business should be deactivated")
 	}
-	if n := countRows(t, db, "subscriptions", "owner_id = ? AND status = 'cancelled'", deleteTestSoloOwnerID); n != 1 {
+	if n := countRows(t, db, "subscriptions", "business_id = ? AND status = 'cancelled'", deleteTestSoloBizID); n != 1 {
 		t.Error("the unbilled trial should be cancelled")
+	}
+	if n := countRows(t, db, "manual_access_grants", "business_id = ? AND revoked_at IS NULL", deleteTestSoloBizID); n != 0 {
+		t.Error("the business's plan grant should be revoked")
 	}
 	if n := countRows(t, db, "users", "id = ?", deleteTestSoloOwnerID); n != 0 {
 		t.Error("the owner should be deleted")
@@ -161,7 +166,8 @@ func TestDeleteUser_RefusesWhilePaddleCanStillBill(t *testing.T) {
 	purgeDeleteUserFixtures(t, db)
 
 	seedDeleteTestUser(t, db, deleteTestBilledUserID, false)
-	mustExec(t, db, `INSERT INTO subscriptions (owner_id, plan_id, status, paddle_subscription_id) VALUES (?, 1, 'active', 'sub_delete_test')`, deleteTestBilledUserID)
+	mustExec(t, db, `INSERT INTO businesses (id, name, owner_id) VALUES (?, 'Delete Test Billed', ?)`, deleteTestBilledBizID, deleteTestBilledUserID)
+	mustExec(t, db, `INSERT INTO subscriptions (business_id, plan_id, status, paddle_subscription_id) VALUES (?, 1, 'active', 'sub_delete_test')`, deleteTestBilledBizID)
 
 	svc := application.NewService(ctx, infrastructure.NewRepository(db))
 	if _, err := svc.DeleteUser(ctx, 0, deleteTestBilledUserID); !errors.Is(err, application.ErrUserHasBilledPlan) {
@@ -202,23 +208,24 @@ func seedDeleteTestUser(t *testing.T, db *sql.DB, id int64, consoleAdmin bool) {
 func purgeDeleteUserFixtures(t *testing.T, db *sql.DB) {
 	t.Helper()
 	users := []any{deleteTestOwnerID, deleteTestMemberID, deleteTestSoloOwnerID, deleteTestAdminID, deleteTestBilledUserID}
-	businesses := []any{deleteTestBusinessID, deleteTestSoloBizID}
+	businesses := []any{deleteTestBusinessID, deleteTestSoloBizID, deleteTestBilledBizID}
 	purge := func() {
 		ctx := context.Background()
 		for _, statement := range []string{
-			`DELETE scope FROM authorization_role_assignment_scopes scope JOIN authorization_role_assignments assignment ON assignment.id = scope.assignment_id WHERE assignment.business_id IN (?, ?)`,
-			`DELETE FROM authorization_role_assignments WHERE business_id IN (?, ?)`,
-			`DELETE FROM authorization_roles WHERE business_id IN (?, ?)`,
-			`DELETE FROM authorization_license_assignments WHERE business_id IN (?, ?)`,
-			`DELETE FROM authorization_business_members WHERE business_id IN (?, ?)`,
-			`DELETE FROM hr_employees WHERE business_id IN (?, ?)`,
-			`DELETE FROM pos_users WHERE business_id IN (?, ?)`,
-			`DELETE FROM businesses WHERE id IN (?, ?)`,
+			`DELETE scope FROM authorization_role_assignment_scopes scope JOIN authorization_role_assignments assignment ON assignment.id = scope.assignment_id WHERE assignment.business_id IN (?, ?, ?)`,
+			`DELETE FROM authorization_role_assignments WHERE business_id IN (?, ?, ?)`,
+			`DELETE FROM authorization_roles WHERE business_id IN (?, ?, ?)`,
+			`DELETE FROM authorization_license_assignments WHERE business_id IN (?, ?, ?)`,
+			`DELETE FROM authorization_business_members WHERE business_id IN (?, ?, ?)`,
+			`DELETE FROM hr_employees WHERE business_id IN (?, ?, ?)`,
+			`DELETE FROM pos_users WHERE business_id IN (?, ?, ?)`,
+			`DELETE FROM subscriptions WHERE business_id IN (?, ?, ?)`,
+			`DELETE FROM manual_access_grants WHERE business_id IN (?, ?, ?)`,
+			`DELETE FROM businesses WHERE id IN (?, ?, ?)`,
 		} {
 			_, _ = db.ExecContext(ctx, statement, businesses...)
 		}
 		for _, statement := range []string{
-			`DELETE FROM subscriptions WHERE owner_id IN (?, ?, ?, ?, ?)`,
 			`DELETE FROM user_sessions WHERE user_id IN (?, ?, ?, ?, ?)`,
 			`DELETE FROM login_history WHERE user_id IN (?, ?, ?, ?, ?)`,
 			`DELETE FROM conversation_messages WHERE user_id IN (?, ?, ?, ?, ?)`,

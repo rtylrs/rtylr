@@ -52,9 +52,9 @@ func TestPatternsForBusinessScopedGroupsRejectMalformedID(t *testing.T) {
 	}
 }
 
-func TestPatternsForSubscriptionDelimitsOwnerID(t *testing.T) {
+func TestPatternsForSubscriptionDelimitsBusinessID(t *testing.T) {
 	got := patternsFor(keys.InvalidateSubscription, "4")
-	want := []string{"cache:subscription:4", "cache:subscription:4:*"}
+	want := []string{"cache:subscription:business:4", "cache:subscription:business:4:*"}
 	if len(got) != len(want) {
 		t.Fatalf("patternsFor(subscription,4) = %v, want %v", got, want)
 	}

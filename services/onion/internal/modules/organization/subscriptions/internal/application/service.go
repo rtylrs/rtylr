@@ -19,10 +19,11 @@ const (
 	reconcileBatchSize   = 200
 )
 
-// invalidateSubscriptionScope clears every subscription + user-scoped cache
-// entry for the owner. Called by every mutation that changes plan/seat/state.
-func invalidateSubscriptionScope(ctx context.Context, ownerID int64) {
-	patterns := append(cacheKeys.SubscriptionPatterns(ownerID), cacheKeys.UserPrefix(ownerID))
+// invalidateSubscriptionScope clears the business's cached subscription and
+// every member's /me payload, which embeds the plan's apps. Called by every
+// mutation that changes plan/seat/state.
+func invalidateSubscriptionScope(ctx context.Context, businessID int64) {
+	patterns := append(cacheKeys.SubscriptionPatterns(businessID), cacheKeys.BusinessUserMePrefix(businessID))
 	cacher.InvalidateScope(ctx, patterns...)
 }
 
@@ -39,15 +40,15 @@ func (s *Service) ListPlans(ctx context.Context) ([]domain.Plan, error) {
 }
 
 // GetMySubscription is a pure read. Everything that changes subscription or
-// seat state lives behind ReconcileOwnerBilling, which the background job calls;
+// seat state lives behind ReconcileBusinessBilling, which the background job calls;
 // a GET used to do it inline, so every cached read (and every prefetch or
 // crawler hit that missed the cache) mutated rows without a lock.
-func (s *Service) GetMySubscription(ctx context.Context, ownerID int64) (*domain.Subscription, error) {
+func (s *Service) GetMySubscription(ctx context.Context, businessID int64) (*domain.Subscription, error) {
 	return cacher.Of[*domain.Subscription]().GetOrComputeSingle(
 		ctx,
-		cacheKeys.Subscription(ownerID),
+		cacheKeys.Subscription(businessID),
 		func(ctx context.Context) (*domain.Subscription, error) {
-			return s.readSubscription(ctx, ownerID)
+			return s.readSubscription(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, subscriptionCacheTTL),
 	)
@@ -55,8 +56,8 @@ func (s *Service) GetMySubscription(ctx context.Context, ownerID int64) (*domain
 
 // GetAIQuotaEntitlement exposes the subscription facts needed by the AI quota
 // capability without sharing subscription persistence with that module.
-func (s *Service) GetAIQuotaEntitlement(ctx context.Context, ownerID int64) (string, int, int, string, error) {
-	sub, err := s.readSubscription(ctx, ownerID)
+func (s *Service) GetAIQuotaEntitlement(ctx context.Context, businessID int64) (string, int, int, string, error) {
+	sub, err := s.readSubscription(ctx, businessID)
 	if err != nil {
 		return "", 0, 0, "", err
 	}
@@ -71,10 +72,10 @@ func (s *Service) GetFreePlanAICredits(ctx context.Context) (int64, error) {
 	return int64(plan.AICreditsPerMonth), nil
 }
 
-func (s *Service) readSubscription(ctx context.Context, ownerID int64) (*domain.Subscription, error) {
-	sub, err := s.repo.GetSubscription(ctx, ownerID)
+func (s *Service) readSubscription(ctx context.Context, businessID int64) (*domain.Subscription, error) {
+	sub, err := s.repo.GetSubscription(ctx, businessID)
 	if errors.Is(err, domain.ErrSubscriptionNotFound) {
-		return s.defaultSubscription(ctx, ownerID)
+		return s.defaultSubscription(ctx, businessID)
 	}
 	if err != nil {
 		return nil, err
@@ -82,21 +83,21 @@ func (s *Service) readSubscription(ctx context.Context, ownerID int64) (*domain.
 	return s.withSeatAllowance(sub), nil
 }
 
-// defaultSubscription projects the default plan for an owner that has no
+// defaultSubscription projects the default plan for a business that has no
 // subscription row yet. The background job persists the row; a read only
 // reports what it would have contained, so the response is unchanged without
 // the write.
-func (s *Service) defaultSubscription(ctx context.Context, ownerID int64) (*domain.Subscription, error) {
+func (s *Service) defaultSubscription(ctx context.Context, businessID int64) (*domain.Subscription, error) {
 	plan, err := s.repo.GetPlanBySlug(ctx, defaultPlanSlug)
 	if err != nil {
 		return nil, err
 	}
-	seatCount, err := s.currentActiveSeatCount(ctx, ownerID)
+	seatCount, err := s.currentActiveSeatCount(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
 	return s.withSeatAllowance(&domain.Subscription{
-		OwnerID:           ownerID,
+		BusinessID:        businessID,
 		PlanName:          plan.Name,
 		PlanSlug:          plan.Slug,
 		AICreditsPerMonth: plan.AICreditsPerMonth,
@@ -107,28 +108,28 @@ func (s *Service) defaultSubscription(ctx context.Context, ownerID int64) (*doma
 	}), nil
 }
 
-func (s *Service) UpsertSubscription(ctx context.Context, ownerID int64, planSlug string) error {
+func (s *Service) UpsertSubscription(ctx context.Context, businessID int64, planSlug string) error {
 	plan, err := s.repo.GetPlanBySlug(ctx, planSlug)
 	if err != nil {
 		return err
 	}
 
-	seatCount, err := s.currentActiveSeatCount(ctx, ownerID)
+	seatCount, err := s.currentActiveSeatCount(ctx, businessID)
 	if err != nil {
 		return err
 	}
 
-	if upsertErr := s.repo.UpsertSubscription(ctx, ownerID, plan.ID, plan.TrialDays, seatCount); upsertErr != nil {
+	if upsertErr := s.repo.UpsertSubscription(ctx, businessID, plan.ID, plan.TrialDays, seatCount); upsertErr != nil {
 		return upsertErr
 	}
-	defer invalidateSubscriptionScope(ctx, ownerID)
+	defer invalidateSubscriptionScope(ctx, businessID)
 	// A plan change moves the per-seat price, so the running seat period has to
 	// be split rather than left at the old price for the rest of the month.
-	return s.ReconcileOwnerBilling(ctx, ownerID)
+	return s.ReconcileBusinessBilling(ctx, businessID)
 }
 
-func (s *Service) GetOwnerApps(ctx context.Context, ownerID int64) ([]string, error) {
-	apps, err := s.repo.GetOwnerApps(ctx, ownerID)
+func (s *Service) GetBusinessApps(ctx context.Context, businessID int64) ([]string, error) {
+	apps, err := s.repo.GetBusinessApps(ctx, businessID)
 	if err == nil {
 		return apps, nil
 	}
@@ -150,14 +151,14 @@ func (s *Service) ExpireTrialSubscriptions(ctx context.Context) error {
 }
 
 // GetBillingDetail returns the current month's usage line items and totals.
-func (s *Service) GetBillingDetail(ctx context.Context, ownerID, businessID int64) (*domain.BillingDetail, error) {
-	sub, err := s.readSubscription(ctx, ownerID)
+func (s *Service) GetBillingDetail(ctx context.Context, businessID int64) (*domain.BillingDetail, error) {
+	sub, err := s.readSubscription(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
 
 	currentMonth := domain.FirstOfUTCMonth(time.Now().UTC())
-	periods, err := s.repo.GetPeriodsForMonth(ctx, ownerID, currentMonth)
+	periods, err := s.repo.GetPeriodsForMonth(ctx, businessID, currentMonth)
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +175,7 @@ func (s *Service) GetBillingDetail(ctx context.Context, ownerID, businessID int6
 		totalCents += item.AmountCents
 		seatDiscountCents += item.IncludedCents
 	}
-	addonPeriods, err := s.repo.GetAddonPeriodsForMonth(ctx, ownerID, businessID, currentMonth)
+	addonPeriods, err := s.repo.GetAddonPeriodsForMonth(ctx, businessID, currentMonth)
 	if err != nil {
 		return nil, err
 	}
@@ -207,13 +208,13 @@ func (s *Service) GetBillingDetail(ctx context.Context, ownerID, businessID int6
 }
 
 // GetBillingHistory returns the last N billing months.
-func (s *Service) GetBillingHistory(ctx context.Context, ownerID, businessID int64, limit int) ([]domain.BillingHistoryMonth, error) {
-	months, err := s.repo.GetBillingHistory(ctx, ownerID, limit)
+func (s *Service) GetBillingHistory(ctx context.Context, businessID int64, limit int) ([]domain.BillingHistoryMonth, error) {
+	months, err := s.repo.GetBillingHistory(ctx, businessID, limit)
 	if err != nil {
 		return nil, err
 	}
 	for i := range months {
-		addonPeriods, err := s.repo.GetAddonPeriodsForMonth(ctx, ownerID, businessID, months[i].Month)
+		addonPeriods, err := s.repo.GetAddonPeriodsForMonth(ctx, businessID, months[i].Month)
 		if err != nil {
 			return nil, err
 		}
@@ -226,62 +227,62 @@ func (s *Service) GetBillingHistory(ctx context.Context, ownerID, businessID int
 	return months, nil
 }
 
-// ReconcileOwnerBilling re-derives one owner's seat ledger from current state:
-// the subscription row (created on the default plan if absent) and the seat
-// period for the current billing month, plus subscriptions.seat_count.
+// ReconcileBusinessBilling re-derives one business's seat ledger from current
+// state: the subscription row (created on the default plan if absent) and the
+// seat period for the current billing month, plus subscriptions.seat_count.
 //
 // This is the only path that writes billing state. It is driven by the
 // subscriptions.reconcile job and by plan changes, never by a GET. The
 // repository call is transactional and takes a row lock, so calling it
-// concurrently for the same owner converges on a single open period instead of
-// two that are both billed.
-func (s *Service) ReconcileOwnerBilling(ctx context.Context, ownerID int64) error {
-	// The default plan is only materialised when the owner has no row; passing
+// concurrently for the same business converges on a single open period instead
+// of two that are both billed.
+func (s *Service) ReconcileBusinessBilling(ctx context.Context, businessID int64) error {
+	// The default plan is only materialised when the business has no row; passing
 	// it unconditionally lets the repository keep the existing plan on the
 	// create-if-absent insert.
 	plan, err := s.repo.GetPlanBySlug(ctx, defaultPlanSlug)
 	if err != nil {
 		return err
 	}
-	seatCount, err := s.currentActiveSeatCount(ctx, ownerID)
+	seatCount, err := s.currentActiveSeatCount(ctx, businessID)
 	if err != nil {
 		return err
 	}
-	if err := s.repo.ReconcileSeatBilling(ctx, ownerID, plan.ID, plan.TrialDays, seatCount, time.Now().UTC()); err != nil {
+	if err := s.repo.ReconcileSeatBilling(ctx, businessID, plan.ID, plan.TrialDays, seatCount, time.Now().UTC()); err != nil {
 		return err
 	}
-	invalidateSubscriptionScope(ctx, ownerID)
+	invalidateSubscriptionScope(ctx, businessID)
 	return nil
 }
 
 // ReconcileAllSubscriptions is the subscriptions.reconcile job: it walks every
-// owner that could owe for the current billing month and rolls their ledger
+// business that could owe for the current billing month and rolls its ledger
 // forward. Without it nothing advances a seat period past the month it was
 // opened in, so every later month bills zero.
 func (s *Service) ReconcileAllSubscriptions(ctx context.Context) error {
 	after := int64(0)
 	reconciled, failed := 0, 0
 	for {
-		owners, err := s.repo.ListOwnerIDsForReconciliation(ctx, after, reconcileBatchSize)
+		businesses, err := s.repo.ListBusinessIDsForReconciliation(ctx, after, reconcileBatchSize)
 		if err != nil {
 			return err
 		}
-		if len(owners) == 0 {
+		if len(businesses) == 0 {
 			break
 		}
-		for _, ownerID := range owners {
-			after = ownerID
-			if err := s.ReconcileOwnerBilling(ctx, ownerID); err != nil {
+		for _, businessID := range businesses {
+			after = businessID
+			if err := s.ReconcileBusinessBilling(ctx, businessID); err != nil {
 				failed++
 				logger.Ctx(ctx).Error("seat billing reconciliation failed",
-					logger.Any("owner_id", ownerID),
+					logger.Any("business_id", businessID),
 					logger.Error(err),
 				)
 				continue
 			}
 			reconciled++
 		}
-		if len(owners) < reconcileBatchSize {
+		if len(businesses) < reconcileBatchSize {
 			break
 		}
 	}
@@ -292,8 +293,8 @@ func (s *Service) ReconcileAllSubscriptions(ctx context.Context) error {
 	return nil
 }
 
-func (s *Service) currentActiveSeatCount(ctx context.Context, ownerID int64) (int, error) {
-	seatCount, err := s.repo.CountActiveSeats(ctx, ownerID)
+func (s *Service) currentActiveSeatCount(ctx context.Context, businessID int64) (int, error) {
+	seatCount, err := s.repo.CountActiveSeats(ctx, businessID)
 	if err != nil {
 		return 0, err
 	}
@@ -412,7 +413,7 @@ func splitSeats(seatCount, includedLimit int) (int, int) {
 // ── Paddle ─────────────────────────────────────────────────────────────────────
 
 // CreateCheckout creates a Paddle transaction for the given plan and returns the checkout URL.
-func (s *Service) CreateCheckout(ctx context.Context, ownerID int64, planSlug, ownerEmail string) (string, error) {
+func (s *Service) CreateCheckout(ctx context.Context, businessID int64, planSlug, customerEmail string) (string, error) {
 	plan, err := s.repo.GetPlanBySlug(ctx, planSlug)
 	if err != nil {
 		return "", err
@@ -422,7 +423,7 @@ func (s *Service) CreateCheckout(ctx context.Context, ownerID int64, planSlug, o
 		return "", fmt.Errorf("plan %s has no Paddle price configured", planSlug)
 	}
 
-	return paddlePkg.CreateTransaction(ctx, ownerID, plan.PaddlePriceID, ownerEmail)
+	return paddlePkg.CreateTransaction(ctx, businessID, plan.PaddlePriceID, customerEmail)
 }
 
 // HandlePaddleWebhook processes a verified Paddle webhook event.
@@ -448,14 +449,14 @@ func (s *Service) HandlePaddleWebhook(ctx context.Context, event paddlePkg.Webho
 		return nil
 	}
 
-	var fallbackOwnerID int64
-	if ownerIDRaw := data.CustomData["owner_id"]; ownerIDRaw != "" {
-		if _, err := fmt.Sscanf(ownerIDRaw, "%d", &fallbackOwnerID); err != nil || fallbackOwnerID == 0 {
-			return fmt.Errorf("invalid owner_id in custom_data: %s", ownerIDRaw)
+	var fallbackBusinessID int64
+	if businessIDRaw := data.CustomData["business_id"]; businessIDRaw != "" {
+		if _, err := fmt.Sscanf(businessIDRaw, "%d", &fallbackBusinessID); err != nil || fallbackBusinessID == 0 {
+			return fmt.Errorf("invalid business_id in custom_data: %s", businessIDRaw)
 		}
 	}
 
-	applied, ownerID, err := s.repo.ApplyPaddleSubscriptionEvent(ctx, event.EventID, data.ID, event.OccurredAt, fallbackOwnerID, data.CustomerID, status)
+	applied, businessID, err := s.repo.ApplyPaddleSubscriptionEvent(ctx, event.EventID, data.ID, event.OccurredAt, fallbackBusinessID, data.CustomerID, status)
 	if err != nil {
 		return err
 	}
@@ -465,7 +466,7 @@ func (s *Service) HandlePaddleWebhook(ctx context.Context, event paddlePkg.Webho
 			logger.String("event_type", event.EventType))
 		return nil
 	}
-	invalidateSubscriptionScope(ctx, ownerID)
+	invalidateSubscriptionScope(ctx, businessID)
 	return nil
 }
 

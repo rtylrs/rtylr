@@ -32,23 +32,23 @@ SELECT id, name, slug, apps, price_per_seat_cents,
 FROM plans WHERE id = ?;
 
 -- name: GetSubscription :one
-SELECT s.id, s.owner_id, s.plan_id, p.name AS plan_name, p.slug AS plan_slug,
+SELECT s.id, s.business_id, s.plan_id, p.name AS plan_name, p.slug AS plan_slug,
        COALESCE(p.ai_credits_per_month, 0) AS ai_credits_per_month, p.apps,
        p.price_per_seat_cents, s.status, s.seat_count, s.trial_ends_at, s.next_billing_date,
        s.current_period_ends_at, s.paddle_subscription_id, s.paddle_customer_id, s.created_at
 FROM subscriptions s
 JOIN plans p ON p.id = s.plan_id
-WHERE s.owner_id = ?;
+WHERE s.business_id = ?;
 
 -- name: GetActiveManualGrantExpiresAt :one
 SELECT expires_at FROM manual_access_grants
-WHERE user_id = ? AND plan_id = ? AND revoked_at IS NULL
+WHERE business_id = ? AND plan_id = ? AND revoked_at IS NULL
   AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)
 ORDER BY created_at DESC
 LIMIT 1;
 
 -- name: UpsertSubscription :exec
-INSERT INTO subscriptions (owner_id, plan_id, status, seat_count, trial_ends_at, next_billing_date)
+INSERT INTO subscriptions (business_id, plan_id, status, seat_count, trial_ends_at, next_billing_date)
 VALUES (?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
     plan_id = VALUES(plan_id), status = VALUES(status), seat_count = VALUES(seat_count),
@@ -60,21 +60,21 @@ FROM (
     SELECT b.owner_id AS user_id
     FROM businesses b
     JOIN users u ON u.id = b.owner_id
-    WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
+    WHERE b.id = sqlc.arg(business_id) AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
     UNION
     SELECT member.user_id AS user_id
     FROM authorization_business_members member
     JOIN businesses b ON b.id = member.business_id
     JOIN users u ON u.id = member.user_id
-    WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE
+    WHERE member.business_id = sqlc.arg(business_id) AND COALESCE(b.is_active, TRUE) = TRUE
       AND member.status = 'active' AND COALESCE(u.is_banned, FALSE) = FALSE
 ) active_users;
 
--- name: GetOwnerApps :one
+-- name: GetBusinessApps :one
 SELECT p.apps
 FROM subscriptions s
 JOIN plans p ON p.id = s.plan_id
-WHERE s.owner_id = ?;
+WHERE s.business_id = ?;
 
 -- name: ExpireTrialSubscriptions :exec
 UPDATE subscriptions
@@ -88,30 +88,30 @@ UPDATE seat_periods SET period_end = ?
 WHERE subscription_id = ? AND period_end IS NULL;
 
 -- name: OpenSeatPeriod :exec
-INSERT INTO seat_periods (subscription_id, owner_id, seat_count, price_per_seat_cents, period_start, billing_month)
+INSERT INTO seat_periods (subscription_id, business_id, seat_count, price_per_seat_cents, period_start, billing_month)
 VALUES (?, ?, ?, ?, ?, ?);
 
 -- name: GetSeatPeriodsForMonth :many
-SELECT id, subscription_id, owner_id, seat_count, price_per_seat_cents,
+SELECT id, subscription_id, business_id, seat_count, price_per_seat_cents,
        period_start, period_end, billing_month
 FROM seat_periods
-WHERE owner_id = ? AND billing_month = ?
+WHERE business_id = ? AND billing_month = ?
 ORDER BY period_start ASC;
 
 -- name: GetBillingHistoryPeriods :many
 SELECT billing_month, seat_count, price_per_seat_cents, period_start, period_end
 FROM seat_periods
-WHERE owner_id = ? AND billing_month < ?
+WHERE business_id = ? AND billing_month < ?
 ORDER BY billing_month DESC, period_start ASC
 LIMIT ?;
 
 -- name: UpdatePaddleSubscription :execresult
 UPDATE subscriptions
 SET paddle_subscription_id = ?, paddle_customer_id = ?, status = ?, updated_at = CURRENT_TIMESTAMP
-WHERE owner_id = ?;
+WHERE business_id = ?;
 
--- name: GetOwnerIDByPaddleSubscription :one
-SELECT owner_id FROM subscriptions WHERE paddle_subscription_id = ? ORDER BY id ASC LIMIT 1;
+-- name: GetBusinessIDByPaddleSubscription :one
+SELECT business_id FROM subscriptions WHERE paddle_subscription_id = ? ORDER BY id ASC LIMIT 1;
 
 -- name: InsertPaddleEventIfNew :execresult
 INSERT IGNORE INTO paddle_webhook_events (event_id, paddle_subscription_id, occurred_at)

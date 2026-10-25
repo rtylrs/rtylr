@@ -68,3 +68,27 @@ func TestResolveBusinessIDFailsClosed(t *testing.T) {
 		t.Fatalf("verified business=%d err=%v", id, err)
 	}
 }
+
+func TestActiveBusinessIDFailsClosed(t *testing.T) {
+	for _, test := range []struct {
+		name       string
+		reader     ScopeResolver
+		businessID int64
+	}{
+		{"missing scope", scopeStub{ownerID: 7}, 0},
+		{"missing resolver", nil, 42},
+		{"inactive business", scopeStub{err: errors.New("no rows")}, 42},
+		{"no owner", scopeStub{}, 42},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			id, err := activeBusinessID(context.Background(), test.reader, test.businessID)
+			if id != 0 || !errors.Is(err, ErrNoBusinessScope) {
+				t.Fatalf("business=%d err=%v", id, err)
+			}
+		})
+	}
+	id, err := activeBusinessID(context.Background(), scopeStub{ownerID: 7}, 42)
+	if err != nil || id != 42 {
+		t.Fatalf("active business=%d err=%v", id, err)
+	}
+}

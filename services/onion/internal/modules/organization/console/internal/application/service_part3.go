@@ -91,6 +91,7 @@ func (s *Service) DeleteBusiness(ctx context.Context, id int64) error {
 
 // ── Subscriptions ─────────────────────────────────────────────────────────────
 
+// SubscriptionDTO's owner fields describe the business's current owner.
 type SubscriptionDTO struct {
 	ID                   int64   `json:"id"`
 	OwnerID              int64   `json:"owner_id"`
@@ -122,8 +123,9 @@ type ListSubscriptionsResult struct {
 }
 
 func toSubDTO(s SubscriptionRow) SubscriptionDTO {
+	businessID := s.BusinessID
 	dto := SubscriptionDTO{
-		ID: s.ID, OwnerID: s.OwnerID, PlanID: s.PlanID,
+		ID: s.ID, OwnerID: s.OwnerID, BusinessID: &businessID, PlanID: s.PlanID,
 		PlanName: s.PlanName, Status: s.Status, SeatCount: s.SeatCount,
 		ActiveSeatCount: s.ActiveSeatCount, IncludedSeatLimit: freeIncludedSeatLimit,
 		IncludedSeatCount: s.IncludedSeatCount, BillableSeatCount: s.BillableSeatCount,
@@ -133,10 +135,6 @@ func toSubDTO(s SubscriptionRow) SubscriptionDTO {
 	}
 	if s.OwnerEmail.Valid {
 		dto.OwnerEmail = s.OwnerEmail.String
-	}
-	if s.BusinessID.Valid {
-		id := s.BusinessID.Int64
-		dto.BusinessID = &id
 	}
 	if s.BusinessName.Valid {
 		dto.BusinessName = s.BusinessName.String

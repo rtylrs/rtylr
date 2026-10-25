@@ -73,8 +73,11 @@ func subscriptionStatusString(status sqlc.NullSubscriptionsStatus) string {
 func subscriptionFromIDRow(row sqlc.GetSubscriptionByIDRow) *SubscriptionRow {
 	return &SubscriptionRow{
 		ID:                   row.ID,
-		OwnerID:              row.OwnerID,
+		BusinessID:           row.BusinessID,
+		BusinessName:         mapNullableString(row.BusinessName),
+		OwnerID:              row.OwnerID.Int64,
 		OwnerName:            application.NullString{String: row.OwnerName, Valid: true},
+		OwnerEmail:           mapNullableString(row.OwnerEmail),
 		PlanID:               row.PlanID,
 		PlanName:             row.PlanName,
 		Status:               subscriptionStatusString(row.Status),
@@ -86,17 +89,17 @@ func subscriptionFromIDRow(row sqlc.GetSubscriptionByIDRow) *SubscriptionRow {
 		PaddleCustomerID:     mapNullableString(row.PaddleCustomerID),
 		CreatedAt:            nullableTime(row.CreatedAt),
 		UpdatedAt:            nullableTime(row.UpdatedAt),
-		OwnerEmail:           mapNullableString(row.OwnerEmail),
-		BusinessID:           nullableInt64(row.BusinessID),
-		BusinessName:         mapNullableString(row.BusinessName),
 	}
 }
 
-func subscriptionFromOwnerRow(row sqlc.GetSubscriptionByOwnerRow) *SubscriptionRow {
+func subscriptionFromBusinessRow(row sqlc.GetSubscriptionByBusinessRow) *SubscriptionRow {
 	return &SubscriptionRow{
 		ID:                   row.ID,
+		BusinessID:           row.BusinessID,
+		BusinessName:         application.NullString{String: row.BusinessName, Valid: true},
 		OwnerID:              row.OwnerID,
 		OwnerName:            application.NullString{String: row.OwnerName, Valid: true},
+		OwnerEmail:           mapNullableString(row.OwnerEmail),
 		PlanID:               row.PlanID,
 		PlanName:             row.PlanName,
 		Status:               subscriptionStatusString(row.Status),
@@ -108,15 +111,12 @@ func subscriptionFromOwnerRow(row sqlc.GetSubscriptionByOwnerRow) *SubscriptionR
 		PaddleCustomerID:     mapNullableString(row.PaddleCustomerID),
 		CreatedAt:            nullableTime(row.CreatedAt),
 		UpdatedAt:            nullableTime(row.UpdatedAt),
-		OwnerEmail:           mapNullableString(row.OwnerEmail),
-		BusinessID:           nullableInt64(row.BusinessID),
-		BusinessName:         mapNullableString(row.BusinessName),
 	}
 }
 
 func upsertSubscriptionParams(params SubscriptionWriteParams) sqlc.UpsertSubscriptionParams {
 	return sqlc.UpsertSubscriptionParams{
-		OwnerID:              params.OwnerID,
+		BusinessID:           params.BusinessID,
 		PlanID:               params.PlanID,
 		Status:               sqlc.NullSubscriptionsStatus{SubscriptionsStatus: sqlc.SubscriptionsStatus(params.Status), Valid: true},
 		SeatCount:            int32(params.SeatCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.

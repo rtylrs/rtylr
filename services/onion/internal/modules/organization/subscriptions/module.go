@@ -24,8 +24,8 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(ctx, moduleinfra.NewRepository(db))}
 }
 
-func (m *Module) GetAIQuotaEntitlement(ctx context.Context, ownerID int64) (string, int, int, string, error) {
-	return m.service.GetAIQuotaEntitlement(ctx, ownerID)
+func (m *Module) GetAIQuotaEntitlement(ctx context.Context, businessID int64) (string, int, int, string, error) {
+	return m.service.GetAIQuotaEntitlement(ctx, businessID)
 }
 
 func (m *Module) GetFreePlanAICredits(ctx context.Context) (int64, error) {

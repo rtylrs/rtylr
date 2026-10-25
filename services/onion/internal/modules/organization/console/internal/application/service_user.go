@@ -247,7 +247,7 @@ func (s *Service) CreateBusinessOwner(ctx context.Context, input CreateBusinessO
 
 	var subscription *SubscriptionDTO
 	if created.SubscriptionID.Valid {
-		sub, subErr := s.GetSubscriptionByOwner(ctx, created.OwnerID)
+		sub, subErr := s.GetSubscriptionByBusiness(ctx, created.BusinessID)
 		if subErr != nil {
 			return nil, subErr
 		}
@@ -287,17 +287,20 @@ func (s *Service) DeleteUser(ctx context.Context, actorID, id int64) (*DeletedUs
 	}
 
 	invalidateConsoleScope(ctx)
-	invalidateOwnerSubscriptionScope(ctx, id)
+	invalidateUserScope(ctx, id)
+	for _, businessID := range deleted.DeactivatedBusinessIDs {
+		invalidateBusinessSubscriptionScope(ctx, businessID)
+	}
 	for _, businessIDs := range [][]int64{deleted.DeactivatedBusinessIDs, deleted.MemberBusinessIDs} {
 		for _, businessID := range businessIDs {
 			cacher.InvalidateScope(ctx, cacheKeys.BusinessPrefix(businessID))
 		}
 	}
 	if s.seatChangeRecorder != nil {
-		for _, ownerID := range deleted.SeatOwnerIDs {
-			if err := s.seatChangeRecorder.RecordSeatChange(ctx, ownerID); err != nil {
+		for _, businessID := range deleted.SeatBusinessIDs {
+			if err := s.seatChangeRecorder.RecordSeatChange(ctx, businessID); err != nil {
 				logger.Ctx(ctx).Error("Failed to record seat change after deleting a user",
-					logger.Any("owner_id", ownerID), logger.Error(err))
+					logger.Any("business_id", businessID), logger.Error(err))
 			}
 		}
 	}

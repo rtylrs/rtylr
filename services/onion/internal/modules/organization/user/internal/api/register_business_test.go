@@ -44,7 +44,7 @@ func TestRegisterCreatesRequestedBusinessBeforeIssuingToken(t *testing.T) {
 					"DELETE FROM user_provisioning_states WHERE user_id = ?",
 					"DELETE FROM user_email_verification_tokens WHERE user_id = ?",
 					"DELETE FROM hr_employees WHERE user_id = ?",
-					"DELETE FROM subscriptions WHERE owner_id = ?",
+					"DELETE FROM subscriptions WHERE business_id IN (SELECT id FROM businesses WHERE owner_id = ?)",
 					"DELETE FROM businesses WHERE owner_id = ?",
 					"DELETE FROM users WHERE id = ?",
 				} {

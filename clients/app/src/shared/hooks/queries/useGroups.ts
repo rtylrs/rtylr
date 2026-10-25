@@ -25,7 +25,7 @@ export type GroupSummary = {
 
 export type Group = {
   id: number;
-  ownerId: number;
+  businessId: number;
   name: string;
   description: string;
   color: string;
@@ -64,7 +64,7 @@ function toIdNumber(value: string | undefined): number {
 function fromApiGroup(g: ApiGroup): Group {
   return {
     id: toIdNumber(g.id),
-    ownerId: toIdNumber(g.ownerId),
+    businessId: toIdNumber(g.businessId),
     name: g.name ?? '',
     description: g.description ?? '',
     color: g.color ?? '',

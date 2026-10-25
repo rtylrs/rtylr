@@ -25,9 +25,9 @@ func NewRepository(db *sql.DB) *Repository {
 // product. A tenant without a row is still on the seeded free plan until the
 // subscription service creates its row; paid state must never be replaced by
 // a hard-coded response.
-func (r *Repository) GetSummary(ctx context.Context, ownerID int64) (domain.BillingSummary, error) {
-	if ownerID <= 0 {
-		return domain.BillingSummary{}, fmt.Errorf("invalid billing owner id %d", ownerID)
+func (r *Repository) GetSummary(ctx context.Context, businessID int64) (domain.BillingSummary, error) {
+	if businessID <= 0 {
+		return domain.BillingSummary{}, fmt.Errorf("invalid billing business id %d", businessID)
 	}
 
 	var (
@@ -41,7 +41,7 @@ func (r *Repository) GetSummary(ctx context.Context, ownerID int64) (domain.Bill
 		SELECT p.slug, s.status, s.seat_count, p.max_seats, s.next_billing_date
 		FROM subscriptions s
 		JOIN plans p ON p.id = s.plan_id
-		WHERE s.owner_id = ?`, ownerID).Scan(&planSlug, &status, &seats, &maxSeats, &nextDate)
+		WHERE s.business_id = ?`, businessID).Scan(&planSlug, &status, &seats, &maxSeats, &nextDate)
 	if errors.Is(err, sql.ErrNoRows) {
 		return r.freeSummary(ctx)
 	}
@@ -90,9 +90,9 @@ func nullableLimit(value sql.NullInt64) float64 {
 // Returning an empty slice would turn a missing provider integration into a
 // successful statement for every tenant, so fail explicitly until an invoice
 // source is wired in.
-func (r *Repository) ListInvoices(_ context.Context, ownerID int64) ([]domain.Invoice, error) {
-	if ownerID <= 0 {
-		return nil, fmt.Errorf("invalid billing owner id %d", ownerID)
+func (r *Repository) ListInvoices(_ context.Context, businessID int64) ([]domain.Invoice, error) {
+	if businessID <= 0 {
+		return nil, fmt.Errorf("invalid billing business id %d", businessID)
 	}
 	return nil, ErrBillingInvoicesUnavailable
 }

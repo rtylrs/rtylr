@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 
 CREATE TABLE IF NOT EXISTS `manual_access_grants` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `user_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL,
   `plan_id` bigint NOT NULL,
   `granted_by` bigint NOT NULL COMMENT 'console admin user_id who created the grant',
   `note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'deal notes, e.g. "cash payment $500/yr agreed 2026-05-14"',
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS `manual_access_grants` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `idx_mag_user` (`user_id`),
+  KEY `idx_mag_business_plan` (`business_id`,`plan_id`),
   KEY `idx_mag_plan` (`plan_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

@@ -2,14 +2,13 @@ package application
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"time"
 )
 
-func (s *Service) GetSubscriptionByOwner(ctx context.Context, ownerID int64) (*SubscriptionDTO, error) {
-	sub, err := s.repo.GetSubscriptionByOwner(ctx, ownerID)
+func (s *Service) GetSubscriptionByBusiness(ctx context.Context, businessID int64) (*SubscriptionDTO, error) {
+	sub, err := s.repo.GetSubscriptionByBusiness(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -17,7 +16,54 @@ func (s *Service) GetSubscriptionByOwner(ctx context.Context, ownerID int64) (*S
 	return &dto, nil
 }
 
+// GetSubscriptionForUser returns the subscription of the business the user
+// owns, preferring the one their session opens in. A user who owns no active
+// business has none: ErrRecordNotFound.
+func (s *Service) GetSubscriptionForUser(ctx context.Context, userID int64) (*SubscriptionDTO, error) {
+	businesses, err := s.repo.ListActiveBusinessesByOwner(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	if len(businesses) == 0 {
+		return nil, ErrRecordNotFound
+	}
+	return s.GetSubscriptionByBusiness(ctx, businesses[0].ID)
+}
+
+// resolveBillingBusiness picks the business a console billing write applies
+// to. Partials may still name only the owner; that is accepted while the owner
+// has exactly one active business, so an owner with several must say which.
+func (s *Service) resolveBillingBusiness(ctx context.Context, ownerID, businessID int64) (*BusinessRow, error) {
+	if businessID > 0 {
+		business, err := s.repo.GetBusinessByID(ctx, businessID)
+		if err != nil {
+			return nil, err
+		}
+		if ownerID > 0 && business.OwnerID != ownerID {
+			return nil, ErrBusinessNotOwnedByUser
+		}
+		return business, nil
+	}
+	if ownerID <= 0 {
+		return nil, ErrBusinessRequired
+	}
+	businesses, err := s.repo.ListActiveBusinessesByOwner(ctx, ownerID)
+	if err != nil {
+		return nil, err
+	}
+	switch len(businesses) {
+	case 0:
+		return nil, ErrNotOrganizationOwner
+	case 1:
+		return &businesses[0], nil
+	default:
+		return nil, ErrOwnerHasSeveralBusinesses
+	}
+}
+
 type SubscriptionWriteInput struct {
+	BusinessID int64
+	// OwnerID names the business through its owner when BusinessID is unset.
 	OwnerID              int64
 	PlanID               int64
 	Status               string
@@ -58,15 +104,10 @@ func normalizeSubscriptionStatus(status string) (string, error) {
 	}
 }
 
+// subscriptionWriteParams expects input.BusinessID to be resolved already.
 func (s *Service) subscriptionWriteParams(ctx context.Context, input SubscriptionWriteInput) (SubscriptionWriteParams, error) {
-	if input.OwnerID <= 0 || input.PlanID <= 0 {
-		return SubscriptionWriteParams{}, fmt.Errorf("%w: owner_id and plan_id are required", ErrInvalidSubscription)
-	}
-	if _, err := s.repo.GetActiveBusinessByOwner(ctx, input.OwnerID); err != nil {
-		if errors.Is(err, ErrRecordNotFound) {
-			return SubscriptionWriteParams{}, ErrNotOrganizationOwner
-		}
-		return SubscriptionWriteParams{}, err
+	if input.BusinessID <= 0 || input.PlanID <= 0 {
+		return SubscriptionWriteParams{}, fmt.Errorf("%w: business_id and plan_id are required", ErrInvalidSubscription)
 	}
 
 	status, err := normalizeSubscriptionStatus(input.Status)
@@ -76,12 +117,9 @@ func (s *Service) subscriptionWriteParams(ctx context.Context, input Subscriptio
 
 	seatCount := input.SeatCount
 	if seatCount <= 0 {
-		seatCount, err = s.repo.CountActiveSeatsForOwner(ctx, input.OwnerID)
+		seatCount, err = s.activeSeatCountForBusiness(ctx, input.BusinessID)
 		if err != nil {
 			return SubscriptionWriteParams{}, err
-		}
-		if seatCount < 1 {
-			seatCount = 1
 		}
 	}
 
@@ -99,7 +137,7 @@ func (s *Service) subscriptionWriteParams(ctx context.Context, input Subscriptio
 	}
 
 	return SubscriptionWriteParams{
-		OwnerID:              input.OwnerID,
+		BusinessID:           input.BusinessID,
 		PlanID:               input.PlanID,
 		Status:               status,
 		SeatCount:            seatCount,
@@ -112,12 +150,17 @@ func (s *Service) subscriptionWriteParams(ctx context.Context, input Subscriptio
 }
 
 func (s *Service) UpsertSubscription(ctx context.Context, input SubscriptionWriteInput) error {
+	business, err := s.resolveBillingBusiness(ctx, input.OwnerID, input.BusinessID)
+	if err != nil {
+		return err
+	}
+	input.BusinessID = business.ID
 	params, err := s.subscriptionWriteParams(ctx, input)
 	if err != nil {
 		return err
 	}
 	defer invalidateConsoleScope(ctx)
-	defer invalidateOwnerSubscriptionScope(ctx, input.OwnerID)
+	defer invalidateBusinessSubscriptionScope(ctx, business.ID)
 	return s.repo.UpsertSubscription(ctx, params)
 }
 
@@ -127,8 +170,8 @@ func (s *Service) UpdateSubscription(ctx context.Context, id int64, input Subscr
 	if err != nil {
 		return err
 	}
-	input.OwnerID = sub.OwnerID
-	defer invalidateOwnerSubscriptionScope(ctx, sub.OwnerID)
+	input.BusinessID = sub.BusinessID
+	defer invalidateBusinessSubscriptionScope(ctx, sub.BusinessID)
 	params, err := s.subscriptionWriteParams(ctx, input)
 	if err != nil {
 		return err
@@ -141,14 +184,8 @@ func (s *Service) DeleteSubscription(ctx context.Context, id int64) error {
 	return s.repo.DeleteSubscription(ctx, id)
 }
 
-func (s *Service) activeSeatCountForOwner(ctx context.Context, ownerID int64) (int, error) {
-	if _, err := s.repo.GetActiveBusinessByOwner(ctx, ownerID); err != nil {
-		if errors.Is(err, ErrRecordNotFound) {
-			return 0, ErrNotOrganizationOwner
-		}
-		return 0, err
-	}
-	seatCount, err := s.repo.CountActiveSeatsForOwner(ctx, ownerID)
+func (s *Service) activeSeatCountForBusiness(ctx context.Context, businessID int64) (int, error) {
+	seatCount, err := s.repo.CountActiveSeatsForBusiness(ctx, businessID)
 	if err != nil {
 		return 0, err
 	}

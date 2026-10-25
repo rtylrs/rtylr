@@ -48,7 +48,7 @@ func TestTeam_AddGroupMembers_WritesBusinessIDResolvableBySnapshot(t *testing.T)
 		_, _ = db.ExecContext(ctx, "DELETE FROM user_group_members WHERE group_id = ?", groupID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM authorization_business_members WHERE business_id = ? AND user_id = ?", businessID, userID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", userID)
-		_ = repo.DeleteGroup(ctx, ownerID, businessID, groupID)
+		_ = repo.DeleteGroup(ctx, businessID, groupID)
 	})
 
 	if _, err := db.ExecContext(ctx,
@@ -74,7 +74,7 @@ func TestTeam_AddGroupMembers_WritesBusinessIDResolvableBySnapshot(t *testing.T)
 		t.Fatalf("insert active membership: %v", err)
 	}
 
-	if err := repo.AddGroupMembers(ctx, ownerID, groupID, businessID, ownerID, []int64{userID}); err != nil {
+	if err := repo.AddGroupMembers(ctx, groupID, businessID, ownerID, []int64{userID}); err != nil {
 		t.Fatalf("AddGroupMembers: %v", err)
 	}
 

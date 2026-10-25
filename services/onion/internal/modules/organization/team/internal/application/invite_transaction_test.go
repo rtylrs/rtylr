@@ -28,7 +28,7 @@ func TestInviteUserRemovesNewUserWhenAuthorizationFails(t *testing.T) {
 			t.Errorf("find failed invite user during cleanup: %v", err)
 			return
 		}
-		if err := service.repo.DeleteInvitedUser(ctx, testutil.BusinessID, testutil.OwnerID, userID); err != nil {
+		if err := service.repo.DeleteInvitedUser(ctx, testutil.BusinessID, userID); err != nil {
 			t.Errorf("clean up failed invite user: %v", err)
 		}
 	})

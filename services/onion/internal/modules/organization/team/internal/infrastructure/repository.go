@@ -64,7 +64,7 @@ func (r *Repository) GetAuthorizationRoleGrant(ctx context.Context, businessID, 
 
 // UpsertNormalizedAuthorization atomically replaces a member's direct licenses,
 // permission-profile assignments, group memberships, and authorization record.
-func (r *Repository) UpsertNormalizedAuthorization(ctx context.Context, businessID, ownerID, actorID, userID int64, apps []string, memberType, memberStatus string, assignments []domain.AppRoleAssignmentInput, groupIDs []int64) error {
+func (r *Repository) UpsertNormalizedAuthorization(ctx context.Context, businessID, actorID, userID int64, apps []string, memberType, memberStatus string, assignments []domain.AppRoleAssignmentInput, groupIDs []int64) error {
 	if businessID <= 0 || actorID <= 0 || userID <= 0 {
 		return errors.New("business, actor, and user are required")
 	}
@@ -110,7 +110,7 @@ func (r *Repository) UpsertNormalizedAuthorization(ctx context.Context, business
 		businessID, userID, memberType, memberStatus); err != nil {
 		return rollback(err)
 	}
-	if err = r.replaceUserGroupMemberships(ctx, tx, businessID, ownerID, actorID, userID, groupIDs); err != nil {
+	if err = r.replaceUserGroupMemberships(ctx, tx, businessID, actorID, userID, groupIDs); err != nil {
 		return rollback(err)
 	}
 	if _, err = tx.ExecContext(ctx, `

@@ -39,7 +39,7 @@ func TestLinkGoogleUser_RecordsSignupContext(t *testing.T) {
 			t.Fatalf("linkGoogleUser: %v", err)
 		}
 		t.Cleanup(func() {
-			_, _ = db.ExecContext(context.Background(), "DELETE FROM subscriptions WHERE owner_id = ?", result.UserID)
+			_, _ = db.ExecContext(context.Background(), "DELETE FROM subscriptions WHERE business_id IN (SELECT id FROM businesses WHERE owner_id = ?)", result.UserID)
 			_ = service.repo.DeleteUser(context.Background(), result.UserID)
 		})
 

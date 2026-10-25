@@ -30,12 +30,7 @@ func (a *GroupsAPI) ListGroups(ctx context.Context, _ *hubteamgroupsv1.ListGroup
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	ownerID, ok := teamOwnerIDFromCtx(ctx, a.Service)
-	if !ok {
-		return nil, onekiterrors.PermissionDenied()
-	}
-
-	groups, err := a.Service.ListGroups(ctx, ownerID, businessID)
+	groups, err := a.Service.ListGroups(ctx, businessID)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list groups")
 	}
@@ -57,7 +52,7 @@ func (a *GroupsAPI) CreateGroup(ctx context.Context, req *hubteamgroupsv1.Create
 	if !businessOK {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	actorID, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
+	actorID, ok := teamManagerFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
@@ -76,7 +71,7 @@ func (a *GroupsAPI) CreateGroup(ctx context.Context, req *hubteamgroupsv1.Create
 		color = "#6366f1"
 	}
 
-	id, err := a.Service.CreateGroup(ctx, actorID, ownerID, businessID, domain.CreateGroupInput{
+	id, err := a.Service.CreateGroup(ctx, actorID, businessID, domain.CreateGroupInput{
 		BusinessID:                   businessID,
 		Name:                         name,
 		Description:                  req.GetDescription(),
@@ -91,7 +86,7 @@ func (a *GroupsAPI) CreateGroup(ctx context.Context, req *hubteamgroupsv1.Create
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create group")
 	}
 
-	g, err := a.Service.GetGroup(ctx, ownerID, businessID, id)
+	g, err := a.Service.GetGroup(ctx, businessID, id)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to fetch group")
 	}
@@ -107,17 +102,12 @@ func (a *GroupsAPI) GetGroupDetail(ctx context.Context, req *hubteamgroupsv1.Get
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	ownerID, ok := teamOwnerIDFromCtx(ctx, a.Service)
-	if !ok {
-		return nil, onekiterrors.PermissionDenied()
-	}
-
 	groupID := req.GetId()
 	if groupID <= 0 {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid group id")
 	}
 
-	detail, err := a.Service.GetGroupDetail(ctx, ownerID, businessID, groupID)
+	detail, err := a.Service.GetGroupDetail(ctx, businessID, groupID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) ||
 			errors.Is(err, domain.ErrGroupNotFound) ||
@@ -138,7 +128,7 @@ func (a *GroupsAPI) UpdateGroup(ctx context.Context, req *hubteamgroupsv1.Update
 	if !businessOK {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	actorID, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
+	actorID, ok := teamManagerFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
@@ -157,7 +147,7 @@ func (a *GroupsAPI) UpdateGroup(ctx context.Context, req *hubteamgroupsv1.Update
 	if assignmentErr != nil {
 		return nil, onekiterrors.New(http.StatusBadRequest, assignmentErr.Error())
 	}
-	if err := a.Service.UpdateGroup(ctx, actorID, ownerID, businessID, groupID, domain.UpdateGroupInput{
+	if err := a.Service.UpdateGroup(ctx, actorID, businessID, groupID, domain.UpdateGroupInput{
 		BusinessID:                   businessID,
 		Name:                         name,
 		Description:                  req.GetDescription(),
@@ -174,7 +164,7 @@ func (a *GroupsAPI) UpdateGroup(ctx context.Context, req *hubteamgroupsv1.Update
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update group")
 	}
 
-	g, err := a.Service.GetGroup(ctx, ownerID, businessID, groupID)
+	g, err := a.Service.GetGroup(ctx, businessID, groupID)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to fetch group")
 	}
@@ -190,7 +180,7 @@ func (a *GroupsAPI) DeleteGroup(ctx context.Context, req *hubteamgroupsv1.Delete
 	if !businessOK {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	actorID, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
+	actorID, ok := teamManagerFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
@@ -200,7 +190,7 @@ func (a *GroupsAPI) DeleteGroup(ctx context.Context, req *hubteamgroupsv1.Delete
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid group id")
 	}
 
-	if err := a.Service.DeleteGroup(ctx, actorID, ownerID, businessID, groupID); err != nil {
+	if err := a.Service.DeleteGroup(ctx, actorID, businessID, groupID); err != nil {
 		if errors.Is(err, domain.ErrDelegationCeiling) {
 			return nil, onekiterrors.PermissionDenied()
 		}
@@ -218,7 +208,7 @@ func (a *GroupsAPI) AddGroupMembers(ctx context.Context, req *hubteamgroupsv1.Ad
 	if permissionErr != nil {
 		return nil, permissionErr
 	}
-	actorID, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
+	actorID, ok := teamManagerFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
@@ -240,7 +230,7 @@ func (a *GroupsAPI) AddGroupMembers(ctx context.Context, req *hubteamgroupsv1.Ad
 		if userID <= 0 {
 			return nil, onekiterrors.New(http.StatusBadRequest, "user_ids must contain positive ids")
 		}
-		if _, err := a.Service.GetStaffUserByID(ctx, ownerID, businessID, userID); err != nil {
+		if _, err := a.Service.GetStaffUserByID(ctx, businessID, userID); err != nil {
 			if errors.Is(err, domain.ErrUserNotFound) {
 				return nil, onekiterrors.New(http.StatusBadRequest, "user_ids must belong to the current business")
 			}
@@ -248,7 +238,7 @@ func (a *GroupsAPI) AddGroupMembers(ctx context.Context, req *hubteamgroupsv1.Ad
 		}
 	}
 
-	if err := a.Service.AddGroupMembers(ctx, ownerID, groupID, businessID, actorID, userIDs); err != nil {
+	if err := a.Service.AddGroupMembers(ctx, groupID, businessID, actorID, userIDs); err != nil {
 		if errors.Is(err, domain.ErrDelegationCeiling) {
 			return nil, onekiterrors.PermissionDenied()
 		}
@@ -269,7 +259,7 @@ func (a *GroupsAPI) RemoveGroupMember(ctx context.Context, req *hubteamgroupsv1.
 	if !businessOK {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	actorID, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
+	actorID, ok := teamManagerFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
@@ -280,7 +270,7 @@ func (a *GroupsAPI) RemoveGroupMember(ctx context.Context, req *hubteamgroupsv1.
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid group or user id")
 	}
 
-	if err := a.Service.RemoveGroupMember(ctx, actorID, ownerID, businessID, groupID, userID); err != nil {
+	if err := a.Service.RemoveGroupMember(ctx, actorID, businessID, groupID, userID); err != nil {
 		if errors.Is(err, domain.ErrDelegationCeiling) {
 			return nil, onekiterrors.PermissionDenied()
 		}
@@ -301,17 +291,12 @@ func (a *GroupsAPI) GetUserGroups(ctx context.Context, req *hubteamgroupsv1.GetU
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	ownerID, ok := teamOwnerIDFromCtx(ctx, a.Service)
-	if !ok {
-		return nil, onekiterrors.PermissionDenied()
-	}
-
 	userID := req.GetUserId()
 	if userID <= 0 {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid user id")
 	}
 
-	groups, err := a.Service.GetUserGroups(ctx, ownerID, businessID, userID)
+	groups, err := a.Service.GetUserGroups(ctx, businessID, userID)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get user groups")
 	}
@@ -327,7 +312,7 @@ func (a *GroupsAPI) GetUserGroups(ctx context.Context, req *hubteamgroupsv1.GetU
 func toProtoGroup(g domain.Group) *hubteamgroupsv1.Group {
 	return &hubteamgroupsv1.Group{
 		Id:                           g.ID,
-		OwnerId:                      g.OwnerID,
+		BusinessId:                   g.BusinessID,
 		Name:                         g.Name,
 		Description:                  g.Description,
 		Color:                        g.Color,
@@ -352,7 +337,7 @@ func toProtoGroupDetail(detail domain.GroupDetail) *hubteamgroupsv1.GroupDetail 
 	g := toProtoGroup(detail.Group)
 	return &hubteamgroupsv1.GroupDetail{
 		Id:                           g.GetId(),
-		OwnerId:                      g.GetOwnerId(),
+		BusinessId:                   g.GetBusinessId(),
 		Name:                         g.GetName(),
 		Description:                  g.GetDescription(),
 		Color:                        g.GetColor(),

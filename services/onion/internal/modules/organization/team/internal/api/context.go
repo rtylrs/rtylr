@@ -20,7 +20,7 @@ func requireHubPermission(ctx context.Context, permission string) (*authPkg.Auth
 	return device.User, nil
 }
 
-func teamOwnerIDFromCtx(ctx context.Context, service *application.Service) (int64, bool) {
+func teamManagerFromCtx(ctx context.Context, service *application.Service) (actorID int64, ok bool) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return 0, false
@@ -28,20 +28,10 @@ func teamOwnerIDFromCtx(ctx context.Context, service *application.Service) (int6
 	if _, err := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID); err != nil {
 		return 0, false
 	}
-	ownerID, err := service.BusinessOwnerID(ctx, device.User.UserID, device.User.BusinessID)
-	return ownerID, err == nil && ownerID != 0
-}
-
-func teamManagerFromCtx(ctx context.Context, service *application.Service) (actorID, ownerID int64, ok bool) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return 0, 0, false
+	if err := service.RequireTeamManager(ctx, device.User.UserID, device.User.BusinessID); err != nil {
+		return 0, false
 	}
-	if _, err := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID); err != nil {
-		return 0, 0, false
-	}
-	ownerID, err := service.TeamManagerOwnerID(ctx, device.User.UserID, device.User.BusinessID)
-	return device.User.UserID, ownerID, err == nil && ownerID != 0
+	return device.User.UserID, true
 }
 
 func teamBusinessIDFromCtx(ctx context.Context) (int64, bool) {

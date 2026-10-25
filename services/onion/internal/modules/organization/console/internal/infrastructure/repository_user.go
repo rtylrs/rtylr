@@ -112,7 +112,7 @@ WHERE id = ?`,
 
 		// cross-schema write to subscriptions (subscriptions module) — grant the plan during provisioning
 		subRes, subErr := tx.ExecContext(ctx, `
-INSERT INTO subscriptions (owner_id, plan_id, status, seat_count, trial_ends_at, current_period_ends_at)
+INSERT INTO subscriptions (business_id, plan_id, status, seat_count, trial_ends_at, current_period_ends_at)
 VALUES (?, ?, ?, 1, ?, ?)
 ON DUPLICATE KEY UPDATE
   plan_id = VALUES(plan_id),
@@ -121,7 +121,7 @@ ON DUPLICATE KEY UPDATE
   trial_ends_at = VALUES(trial_ends_at),
   current_period_ends_at = VALUES(current_period_ends_at),
   updated_at = NOW()`,
-			ownerID,
+			businessID,
 			params.PlanID,
 			params.SubscriptionStatus,
 			trialEndsAt,
@@ -136,7 +136,7 @@ ON DUPLICATE KEY UPDATE
 		} else {
 			var existingID int64
 			// cross-schema read from subscriptions (subscriptions module) — resolve existing subscription ID after upsert
-			if scanErr := tx.QueryRowContext(ctx, "SELECT id FROM subscriptions WHERE owner_id = ? LIMIT 1", ownerID).Scan(&existingID); scanErr != nil {
+			if scanErr := tx.QueryRowContext(ctx, "SELECT id FROM subscriptions WHERE business_id = ? LIMIT 1", businessID).Scan(&existingID); scanErr != nil {
 				_ = tx.Rollback()
 				return nil, scanErr
 			}
@@ -159,7 +159,7 @@ func (r *Repository) DeleteCreatedBusinessOwner(ctx context.Context, ownerID, bu
 		_ = tx.Rollback()
 		return cause
 	}
-	if _, err := tx.ExecContext(ctx, "DELETE FROM subscriptions WHERE owner_id = ?", ownerID); err != nil {
+	if _, err := tx.ExecContext(ctx, "DELETE FROM subscriptions WHERE business_id = ?", businessID); err != nil {
 		return rollback(err)
 	}
 	if _, err := tx.ExecContext(ctx, "DELETE FROM businesses WHERE id = ? AND owner_id = ?", businessID, ownerID); err != nil {

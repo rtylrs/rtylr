@@ -72,7 +72,7 @@ func (r *Repository) CreateUser(ctx context.Context, email, username, passwordHa
 // DeleteInvitedUser removes the rows created while provisioning a new invitee.
 // It is used as compensation when a later invite step fails because CreateUser
 // is not part of the normalized authorization transaction.
-func (r *Repository) DeleteInvitedUser(ctx context.Context, businessID, ownerID, userID int64) error {
+func (r *Repository) DeleteInvitedUser(ctx context.Context, businessID, userID int64) error {
 	if userID <= 0 {
 		return nil
 	}
@@ -102,10 +102,9 @@ func (r *Repository) DeleteInvitedUser(ctx context.Context, businessID, ownerID,
 		args  []any
 	}{
 		{
-			name: "group memberships",
-			query: `DELETE FROM user_group_members
-				WHERE user_id = ? AND owner_id = ? AND (business_id = ? OR business_id = 0)`,
-			args: []any{userID, ownerID, businessID},
+			name:  "group memberships",
+			query: `DELETE FROM user_group_members WHERE business_id = ? AND user_id = ?`,
+			args:  []any{businessID, userID},
 		},
 		{
 			name: "role assignment scopes",
@@ -131,9 +130,9 @@ func (r *Repository) DeleteInvitedUser(ctx context.Context, businessID, ownerID,
 		{
 			name: "authorization audit events",
 			query: `DELETE FROM authorization_audit_events
-				WHERE business_id = ? AND actor_user_id = ? AND target_user_id = ?
+				WHERE business_id = ? AND target_user_id = ?
 				  AND action = 'member.authorization.updated'`,
-			args: []any{businessID, ownerID, userID},
+			args: []any{businessID, userID},
 		},
 		{
 			name: "authorization membership",
@@ -148,10 +147,9 @@ func (r *Repository) DeleteInvitedUser(ctx context.Context, businessID, ownerID,
 			args: []any{businessID, userID},
 		},
 		{
-			name: "invite tokens",
-			query: `DELETE FROM invite_tokens
-				WHERE owner_id = ? AND user_id = ?`,
-			args: []any{ownerID, userID},
+			name:  "invite tokens",
+			query: `DELETE FROM invite_tokens WHERE business_id = ? AND user_id = ?`,
+			args:  []any{businessID, userID},
 		},
 		{
 			name:  "MFA enrollments",

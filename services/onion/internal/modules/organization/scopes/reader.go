@@ -46,9 +46,9 @@ func (r *Reader) UserBusiness(ctx context.Context, businessID, userID int64) (in
 	return r.queries.GetAuthorizedBusinessID(ctx, sqlc.GetAuthorizedBusinessIDParams{ID: businessID, UserID: userID})
 }
 
-// SubscriptionAccess reads the owner's current billing status and unrevoked grant. Missing subscriptions return sql.ErrNoRows.
-func (r *Reader) SubscriptionAccess(ctx context.Context, ownerID int64) (string, bool, time.Time, error) {
-	row, err := r.queries.SubscriptionAccess(ctx, ownerID)
+// SubscriptionAccess reads the business's current billing status and unrevoked grant. Missing subscriptions return sql.ErrNoRows.
+func (r *Reader) SubscriptionAccess(ctx context.Context, businessID int64) (string, bool, time.Time, error) {
+	row, err := r.queries.SubscriptionAccess(ctx, businessID)
 	return string(row.Status.SubscriptionsStatus), row.Granted, row.TrialEndsAt.Time, err
 }
 

@@ -158,6 +158,8 @@ type CreateBusinessOwnerRow struct {
 
 type SubscriptionRow struct {
 	ID                   int64
+	BusinessID           int64
+	BusinessName         NullString
 	OwnerID              int64
 	OwnerName            NullString
 	PlanID               int64
@@ -175,12 +177,10 @@ type SubscriptionRow struct {
 	CreatedAt            NullTime
 	UpdatedAt            NullTime
 	OwnerEmail           NullString
-	BusinessID           NullInt64
-	BusinessName         NullString
 }
 
 type SubscriptionWriteParams struct {
-	OwnerID              int64
+	BusinessID           int64
 	PlanID               int64
 	Status               string
 	SeatCount            int
@@ -210,8 +210,11 @@ type PlanRow struct {
 
 type GrantRow struct {
 	ID              int64
-	UserID          int64
-	UserName        NullString
+	BusinessID      NullInt64
+	BusinessName    NullString
+	OwnerID         NullInt64
+	OwnerName       NullString
+	OwnerEmail      NullString
 	PlanID          int64
 	PlanName        string
 	GrantedBy       int64
@@ -220,9 +223,6 @@ type GrantRow struct {
 	ExpiresAt       NullTime
 	RevokedAt       NullTime
 	CreatedAt       NullTime
-	UserEmail       NullString
-	BusinessID      NullInt64
-	BusinessName    NullString
 	ActiveSeatCount int
 }
 
@@ -238,11 +238,11 @@ type AddonCatalogRow struct {
 
 type AddonGrantRow struct {
 	ID             int64
-	UserID         int64
-	UserName       NullString
-	UserEmail      NullString
 	BusinessID     int64
 	BusinessName   NullString
+	OwnerID        NullInt64
+	OwnerName      NullString
+	OwnerEmail     NullString
 	AddonID        string
 	AddonName      string
 	AddonPrice     NullString
@@ -256,7 +256,6 @@ type AddonGrantRow struct {
 }
 
 type AddonGrantScopeRow struct {
-	UserID         int64
 	BusinessID     int64
 	AddonID        string
 	EnabledByGrant bool
@@ -325,6 +324,6 @@ type DeletedUser struct {
 	DeactivatedBusinessIDs []int64
 	// MemberBusinessIDs are businesses the user belonged to without owning.
 	MemberBusinessIDs []int64
-	// SeatOwnerIDs own businesses where the user held an active seat.
-	SeatOwnerIDs []int64
+	// SeatBusinessIDs are active businesses where the user held a seat.
+	SeatBusinessIDs []int64
 }

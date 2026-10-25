@@ -32,15 +32,15 @@ func (s *Service) computeMyProfile(ctx context.Context, userID, businessID int64
 	if err != nil {
 		return domain.MyProfile{}, err
 	}
-	businessName, businessOwnerID, err := s.repo.GetBusinessByID(ctx, businessID)
+	businessName, _, err := s.repo.GetBusinessByID(ctx, businessID)
 	if err != nil {
 		return domain.MyProfile{}, err
 	}
-	businessApps, err := s.GetOwnerApps(ctx, businessOwnerID)
+	businessApps, err := s.GetBusinessApps(ctx, businessID)
 	if err != nil {
 		return domain.MyProfile{}, err
 	}
-	planSlug, subscriptionStatus, err := s.GetOwnerSubscriptionInfo(ctx, businessOwnerID)
+	planSlug, subscriptionStatus, err := s.GetBusinessSubscriptionInfo(ctx, businessID)
 	if err != nil {
 		return domain.MyProfile{}, err
 	}
@@ -79,17 +79,11 @@ func (s *Service) computeMyProfile(ctx context.Context, userID, businessID int64
 	}, nil
 }
 
-func (s *Service) GetStaffUserByID(ctx context.Context, ownerID, businessID, userID int64) (*domain.StaffUser, error) {
+func (s *Service) GetStaffUserByID(ctx context.Context, businessID, userID int64) (*domain.StaffUser, error) {
 	if userID == 0 {
 		return nil, domain.ErrUserNotFound
 	}
-
-	resolvedOwnerID, err := s.resolveBusinessOwnerID(ctx, ownerID, businessID)
-	if err != nil {
-		return nil, err
-	}
-
-	return s.repo.GetStaffUserByID(ctx, resolvedOwnerID, businessID, userID)
+	return s.repo.GetStaffUserByID(ctx, businessID, userID)
 }
 
 // InviteUser creates a user account (no password) and generates an invite token.
@@ -98,7 +92,7 @@ func (s *Service) GetStaffUserByID(ctx context.Context, ownerID, businessID, use
 // businessID is passed in (rather than looked up) so the service can invalidate
 // the business-scoped team list cache without an extra query. Tests that don't
 // care about the cache key may pass 0.
-func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, input domain.InviteUserInput) (int64, string, error) {
+func (s *Service) InviteUser(ctx context.Context, actorID, businessID int64, input domain.InviteUserInput) (int64, string, error) {
 	if input.Email == "" {
 		return 0, "", errors.New("email is required")
 	}
@@ -142,12 +136,11 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 		}
 	}
 
-	actorID := ownerID
 	ownerID, err := s.requireTeamManager(ctx, actorID, businessID)
 	if err != nil {
 		return 0, "", err
 	}
-	if err := s.enforceAuthorizationDelegation(ctx, actorID, ownerID, businessID, domain.UpdatePermissionsInput{
+	if err := s.enforceAuthorizationDelegation(ctx, actorID, businessID, domain.UpdatePermissionsInput{
 		MemberType:                   memberType,
 		LicensedAppIDs:               &input.LicensedAppIDs,
 		PermissionProfileAssignments: &input.PermissionProfileAssignments,
@@ -175,7 +168,7 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 				cleanupErrors = append(cleanupErrors, fmt.Errorf("delete HR records: %w", cleanupErr))
 			}
 		}
-		if cleanupErr := s.repo.DeleteInvitedUser(ctx, businessID, ownerID, userID); cleanupErr != nil {
+		if cleanupErr := s.repo.DeleteInvitedUser(ctx, businessID, userID); cleanupErr != nil {
 			cleanupErrors = append(cleanupErrors, fmt.Errorf("delete organization records: %w", cleanupErr))
 		}
 		if len(cleanupErrors) > 0 {
@@ -234,7 +227,7 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 			logger.Int("user_id", int(userID)), logger.Int("business_id", int(businessID)))
 	}
 
-	if err := s.repo.UpsertNormalizedAuthorization(ctx, businessID, ownerID, actorID, userID, input.LicensedAppIDs, memberType, "pending", input.PermissionProfileAssignments, input.GroupIDs); err != nil {
+	if err := s.repo.UpsertNormalizedAuthorization(ctx, businessID, actorID, userID, input.LicensedAppIDs, memberType, "pending", input.PermissionProfileAssignments, input.GroupIDs); err != nil {
 		return cleanupCreatedUser(err)
 	}
 	provisioningState := "pending_invitation"
@@ -290,7 +283,7 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 	token := hex.EncodeToString(tokenBytes)
 
 	expiresAt := time.Now().Add(domain.InviteTokenTTL)
-	if err := s.repo.CreateInviteToken(ctx, userID, ownerID, businessID, token, expiresAt); err != nil {
+	if err := s.repo.CreateInviteToken(ctx, userID, businessID, token, expiresAt); err != nil {
 		return cleanupCreatedUser(err)
 	}
 

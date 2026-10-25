@@ -40,9 +40,8 @@ WHERE business_id = ?;
 SELECT u.id, u.email, COALESCE(u.full_name,'') AS full_name, u.created_at,
        member.member_type, member.status AS member_status
 FROM authorization_business_members AS member
-JOIN businesses AS business ON business.id = member.business_id
 JOIN users AS u ON u.id = member.user_id
-WHERE business.owner_id = ? AND member.business_id = ? AND member.user_id = ?
+WHERE member.business_id = ? AND member.user_id = ?
 LIMIT 1;
 
 -- A consumer that owns a durable notification can resolve only the creator's
@@ -55,10 +54,10 @@ WHERE member.business_id = ? AND member.user_id = ? AND member.status = 'active'
 LIMIT 1;
 
 -- name: CreateInviteToken :exec
-INSERT INTO invite_tokens (user_id, owner_id, business_id, token, expires_at) VALUES (?, ?, ?, ?, ?);
+INSERT INTO invite_tokens (user_id, business_id, token, expires_at) VALUES (?, ?, ?, ?);
 
 -- name: GetInviteToken :one
-SELECT user_id, owner_id, business_id, expires_at, used_at FROM invite_tokens WHERE token = ?;
+SELECT user_id, business_id, expires_at, used_at FROM invite_tokens WHERE token = ?;
 
 -- name: MarkInviteTokenUsed :exec
 UPDATE invite_tokens SET used_at = NOW() WHERE token = ?;
@@ -103,36 +102,41 @@ FROM (
     SELECT b.owner_id AS user_id
     FROM businesses b
     JOIN users u ON u.id = b.owner_id
-    WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
+    WHERE b.id = sqlc.arg(business_id) AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
     UNION
     SELECT member.user_id
     FROM authorization_business_members member
     JOIN businesses b ON b.id = member.business_id
     JOIN users u ON u.id = member.user_id
-    WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE
+    WHERE member.business_id = sqlc.arg(business_id) AND COALESCE(b.is_active, TRUE) = TRUE
       AND member.status = 'active' AND COALESCE(u.is_banned, FALSE) = FALSE
 ) active_users;
 
--- cross-schema read from subscriptions + plans — approved for owner app resolution
--- name: GetOwnerApps :one
+-- cross-schema read from subscriptions + plans — approved for business app resolution
+-- name: GetBusinessApps :one
 SELECT p.apps
 FROM subscriptions s
 JOIN plans p ON p.id = s.plan_id
-WHERE s.owner_id = ?;
+WHERE s.business_id = ?;
 
--- cross-schema read from subscriptions + plans — approved for owner subscription info
--- name: GetOwnerSubscriptionInfo :one
+-- cross-schema read from plans — a business without a subscription row is on
+-- the free plan until billing reconciliation writes the row.
+-- name: GetDefaultPlanApps :one
+SELECT apps FROM plans WHERE slug = 'free';
+
+-- cross-schema read from subscriptions + plans — approved for business subscription info
+-- name: GetBusinessSubscriptionInfo :one
 SELECT p.slug, s.status
 FROM subscriptions s
 JOIN plans p ON p.id = s.plan_id
-WHERE s.owner_id = ?;
+WHERE s.business_id = ?;
 
 -- cross-schema read from subscriptions — approved for seat period management
 -- name: LockSubscriptionForSeatChange :one
 SELECT s.id, p.price_per_seat_cents, p.max_seats
 FROM subscriptions s
 JOIN plans p ON p.id = s.plan_id
-WHERE s.owner_id = ?
+WHERE s.business_id = ?
 FOR UPDATE;
 
 -- cross-schema write to seat_periods — approved for seat billing accuracy
@@ -142,12 +146,12 @@ WHERE subscription_id = ? AND period_end IS NULL;
 
 -- cross-schema write to seat_periods — approved for seat billing accuracy
 -- name: OpenSeatPeriod :exec
-INSERT INTO seat_periods (subscription_id, owner_id, seat_count, price_per_seat_cents, period_start, billing_month)
+INSERT INTO seat_periods (subscription_id, business_id, seat_count, price_per_seat_cents, period_start, billing_month)
 VALUES (?, ?, ?, ?, ?, ?);
 
 -- cross-schema write to subscriptions — approved for seat billing accuracy
 -- name: UpdateSubscriptionSeatCount :exec
-UPDATE subscriptions SET seat_count = ?, updated_at = CURRENT_TIMESTAMP WHERE owner_id = ?;
+UPDATE subscriptions SET seat_count = ?, updated_at = CURRENT_TIMESTAMP WHERE business_id = ?;
 
 -- cross-schema read from hub — business administrator notification fan-out
 -- name: ListAdminsAndOwnerUserIDs :many

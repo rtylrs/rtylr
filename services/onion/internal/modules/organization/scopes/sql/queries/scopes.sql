@@ -17,11 +17,11 @@ LIMIT 1;
 -- name: SubscriptionAccess :one
 SELECT s.status,
        EXISTS (SELECT 1 FROM manual_access_grants g
-           WHERE g.user_id = s.owner_id AND g.plan_id = s.plan_id
+           WHERE g.business_id = s.business_id AND g.plan_id = s.plan_id
              AND g.revoked_at IS NULL
              AND (g.expires_at IS NULL OR g.expires_at > CURRENT_TIMESTAMP)) AS granted,
        s.trial_ends_at
-FROM subscriptions s WHERE s.owner_id = ?;
+FROM subscriptions s WHERE s.business_id = ?;
 
 -- name: UploadKeyScope :one
 SELECT owner_id, business_id FROM hub_api_keys
@@ -52,7 +52,7 @@ WHERE b.id = sqlc.arg(business_id) AND b.is_active = TRUE
 
 -- name: LocationLimit :one
 SELECT p.max_locations FROM businesses b
-JOIN subscriptions s ON s.owner_id = b.owner_id
+JOIN subscriptions s ON s.business_id = b.id
 JOIN plans p ON p.id = s.plan_id
 WHERE b.id = ? AND b.is_active = TRUE;
 

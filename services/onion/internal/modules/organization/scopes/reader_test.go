@@ -61,13 +61,13 @@ func TestScopeReaderUsesCurrentBusinessMembershipAndDefault(t *testing.T) {
 func TestSubscriptionAccessUsesCurrentGrantAndTrial(t *testing.T) {
 	db := testutil.OpenDB(t)
 	ctx := context.Background()
-	const ownerID = int64(9968301)
+	const businessID = int64(9968301)
 	reader := scopes.NewReader(db)
-	if _, _, _, err := reader.SubscriptionAccess(ctx, ownerID); !errors.Is(err, sql.ErrNoRows) {
+	if _, _, _, err := reader.SubscriptionAccess(ctx, businessID); !errors.Is(err, sql.ErrNoRows) {
 		t.Fatalf("missing subscription: %v", err)
 	}
 	trialEnd := time.Now().UTC().Add(time.Hour).Truncate(time.Second)
-	res, err := db.Exec("INSERT INTO subscriptions (owner_id, plan_id, status, trial_ends_at) VALUES (?, 1, 'trial', ?)", ownerID, trialEnd)
+	res, err := db.Exec("INSERT INTO subscriptions (business_id, plan_id, status, trial_ends_at) VALUES (?, 1, 'trial', ?)", businessID, trialEnd)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -76,11 +76,11 @@ func TestSubscriptionAccessUsesCurrentGrantAndTrial(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _, _ = db.Exec("DELETE FROM subscriptions WHERE id = ?", subscriptionID) })
-	status, granted, expires, err := reader.SubscriptionAccess(ctx, ownerID)
+	status, granted, expires, err := reader.SubscriptionAccess(ctx, businessID)
 	if err != nil || status != "trial" || granted || !expires.Equal(trialEnd) {
 		t.Fatalf("trial: status=%s, grant=%v, end=%v, error=%v", status, granted, expires, err)
 	}
-	res, err = db.Exec("INSERT INTO manual_access_grants (user_id, plan_id, granted_by) VALUES (?, 1, ?)", ownerID, ownerID)
+	res, err = db.Exec("INSERT INTO manual_access_grants (business_id, plan_id, granted_by) VALUES (?, 1, 1)", businessID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -89,13 +89,13 @@ func TestSubscriptionAccessUsesCurrentGrantAndTrial(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _, _ = db.Exec("DELETE FROM manual_access_grants WHERE id = ?", grantID) })
-	if _, granted, _, err := reader.SubscriptionAccess(ctx, ownerID); err != nil || !granted {
+	if _, granted, _, err := reader.SubscriptionAccess(ctx, businessID); err != nil || !granted {
 		t.Fatalf("grant: granted=%v, err=%v", granted, err)
 	}
 	if _, err := db.Exec("UPDATE manual_access_grants SET revoked_at = CURRENT_TIMESTAMP WHERE id = ?", grantID); err != nil {
 		t.Fatal(err)
 	}
-	if _, granted, _, err := reader.SubscriptionAccess(ctx, ownerID); err != nil || granted {
+	if _, granted, _, err := reader.SubscriptionAccess(ctx, businessID); err != nil || granted {
 		t.Fatalf("revoked grant: granted=%v, err=%v", granted, err)
 	}
 }

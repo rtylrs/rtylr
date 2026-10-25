@@ -31,20 +31,20 @@ func invalidateBusinessTeamScope(ctx context.Context, businessID int64) {
 	}
 }
 
-// invalidateSeatSubscriptionScope drops the owner's cached subscription
+// invalidateSeatSubscriptionScope drops the business's cached subscription
 // payload after a seat-affecting team change. Seat counts are embedded in that
 // payload, so without this GET /hub/subscription/me keeps serving the
 // pre-change seat usage until the 10-minute subscription cache TTL expires.
 // The local replica is cleared synchronously; the published pattern clears the
 // other processes' replicas and the Redis entry.
-func invalidateSeatSubscriptionScope(ctx context.Context, ownerID int64) {
+func invalidateSeatSubscriptionScope(ctx context.Context, businessID int64) {
 	// The exact payload key carries no suffix, so pair it with the derived-key
 	// wildcard instead of relying on one pattern to match both.
 	local := cacher.GetInMemoryCache(ctx)
-	for _, pattern := range []string{cacheKeys.Subscription(ownerID), cacheKeys.SubscriptionPrefix(ownerID)} {
+	for _, pattern := range cacheKeys.SubscriptionPatterns(businessID) {
 		local.DeleteByPattern(ctx, pattern)
 	}
-	cacheInvalidate.InvalidateAsync(ctx, cacheKeys.InvalidateSubscription, strconv.FormatInt(ownerID, 10))
+	cacheInvalidate.InvalidateAsync(ctx, cacheKeys.InvalidateSubscription, strconv.FormatInt(businessID, 10))
 }
 
 type Service struct {

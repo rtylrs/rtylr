@@ -53,7 +53,7 @@ func (a *AiAPI) GetAiQuotaSettings(ctx context.Context, _ *hubaiv1.GetAiQuotaSet
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	mode, err := a.Service.GetMode(ctx, device.User.BusinessID, device.User.UserID)
+	mode, err := a.Service.GetMode(ctx, device.User.BusinessID)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load AI quota settings")
 	}
@@ -78,7 +78,7 @@ func (a *AiAPI) UpdateAiQuotaSettings(ctx context.Context, req *hubaiv1.UpdateAi
 		return nil, onekiterrors.New(http.StatusBadRequest, "mode must be 'pool' or 'per_person'")
 	}
 
-	if err := a.Service.SetMode(ctx, device.User.BusinessID, device.User.UserID, mode); err != nil {
+	if err := a.Service.SetMode(ctx, device.User.BusinessID, mode); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update AI quota settings")
 	}
 

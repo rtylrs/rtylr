@@ -75,7 +75,7 @@ func (a *MembersAPI) GetMember(ctx context.Context, req *hubteammembersv1.GetMem
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid member id")
 	}
 
-	member, err := a.Service.GetStaffUserByID(ctx, device.UserID, device.BusinessID, memberID)
+	member, err := a.Service.GetStaffUserByID(ctx, device.BusinessID, memberID)
 	if err != nil {
 		if errors.Is(err, domain.ErrUserNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Member not found")
@@ -133,7 +133,7 @@ func (a *MembersAPI) RemoveMember(ctx context.Context, req *hubteammembersv1.Rem
 		}
 	}
 
-	recordSeatChangeAsync(ctx, a.Service, actorID, device.BusinessID)
+	recordSeatChangeAsync(ctx, a.Service, device.BusinessID)
 
 	return &hubteammembersv1.RemoveMemberResponse{Message: "Member deactivated"}, nil
 }

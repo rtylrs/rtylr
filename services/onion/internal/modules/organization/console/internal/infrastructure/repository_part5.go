@@ -3,11 +3,9 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
-	"errors"
 
 	sq "github.com/Masterminds/squirrel"
 
-	"github.com/voxire/onion/internal/modules/organization/console/internal/application"
 	"github.com/voxire/onion/internal/modules/organization/console/internal/infrastructure/persistence/sqlc"
 )
 
@@ -103,15 +101,18 @@ func (r *Repository) GetBusinessByID(ctx context.Context, id int64) (*BusinessRo
 	return businessFromRow(row.ID, row.Name, row.OwnerID, row.CreatedAt), nil
 }
 
-func (r *Repository) GetActiveBusinessByOwner(ctx context.Context, ownerID int64) (*BusinessRow, error) {
-	row, err := r.queries.GetActiveBusinessByOwner(ctx, ownerID)
+// ListActiveBusinessesByOwner lists the owner's active businesses, the one
+// their session opens in first.
+func (r *Repository) ListActiveBusinessesByOwner(ctx context.Context, ownerID int64) ([]BusinessRow, error) {
+	rows, err := r.queries.ListActiveBusinessesByOwner(ctx, ownerID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, application.ErrRecordNotFound
-		}
 		return nil, err
 	}
-	return businessFromRow(row.ID, row.Name, row.OwnerID, row.CreatedAt), nil
+	businesses := make([]BusinessRow, 0, len(rows))
+	for _, row := range rows {
+		businesses = append(businesses, *businessFromRow(row.ID, row.Name, row.OwnerID, row.CreatedAt))
+	}
+	return businesses, nil
 }
 
 func (r *Repository) UpdateBusiness(ctx context.Context, id int64, name string) error {
@@ -125,11 +126,8 @@ func (r *Repository) DeleteBusiness(ctx context.Context, id int64) error {
 	return r.queries.DeleteBusiness(ctx, id)
 }
 
-func (r *Repository) CountActiveSeatsForOwner(ctx context.Context, ownerID int64) (int, error) {
-	count, err := r.queries.CountActiveSeatsForOwner(ctx, sqlc.CountActiveSeatsForOwnerParams{
-		OwnerID:   ownerID,
-		OwnerID_2: ownerID,
-	})
+func (r *Repository) CountActiveSeatsForBusiness(ctx context.Context, businessID int64) (int, error) {
+	count, err := r.queries.CountActiveSeatsForBusiness(ctx, sqlc.CountActiveSeatsForBusinessParams{BusinessID: businessID})
 	if err != nil {
 		return 0, err
 	}
@@ -140,7 +138,7 @@ func (r *Repository) CountActiveSeatsForOwner(ctx context.Context, ownerID int64
 }
 
 func (r *Repository) decorateSubscriptionSeats(ctx context.Context, sub *SubscriptionRow) error {
-	activeSeats, err := r.CountActiveSeatsForOwner(ctx, sub.OwnerID)
+	activeSeats, err := r.CountActiveSeatsForBusiness(ctx, sub.BusinessID)
 	if err != nil {
 		return err
 	}
@@ -157,7 +155,8 @@ func (r *Repository) decorateSubscriptionSeats(ctx context.Context, sub *Subscri
 
 // dynamic-query: squirrel
 func (r *Repository) ListSubscriptions(ctx context.Context, limit, offset int, status string) ([]SubscriptionRow, int64, error) {
-	conds := sq.And{}
+	// A row the billing migration could not tie to a business is unreachable.
+	conds := sq.And{sq.NotEq{"s.business_id": nil}}
 	if status != "" {
 		conds = append(conds, sq.Eq{"s.status": status})
 	}
@@ -165,8 +164,6 @@ func (r *Repository) ListSubscriptions(ctx context.Context, limit, offset int, s
 	countSQL, countArgs, err := sq.
 		Select("COUNT(*)").
 		From("subscriptions s").
-		Join("plans p ON p.id = s.plan_id").
-		LeftJoin("users u ON u.id = s.owner_id").
 		Where(conds).
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -180,13 +177,14 @@ func (r *Repository) ListSubscriptions(ctx context.Context, limit, offset int, s
 	}
 
 	listSQL, listArgs, err := sq.
-		Select("s.id", "s.owner_id", "COALESCE(u.full_name, '')", "s.plan_id", "p.name", "s.status", "s.seat_count",
+		Select("s.id", "s.business_id", "b.name", "COALESCE(b.owner_id, 0)", "COALESCE(u.full_name, '')", "u.email",
+			"s.plan_id", "p.name", "s.status", "s.seat_count",
 			"s.trial_ends_at", "s.next_billing_date", "s.current_period_ends_at", "s.paddle_subscription_id", "s.paddle_customer_id",
-			"s.created_at", "s.updated_at", "u.email", "b.id", "b.name").
+			"s.created_at", "s.updated_at").
 		From("subscriptions s").
 		Join("plans p ON p.id = s.plan_id").
-		LeftJoin("users u ON u.id = s.owner_id").
-		LeftJoin("businesses b ON b.owner_id = s.owner_id AND COALESCE(b.is_active, TRUE) = TRUE").
+		LeftJoin("businesses b ON b.id = s.business_id").
+		LeftJoin("users u ON u.id = b.owner_id").
 		Where(conds).
 		OrderBy("s.created_at DESC").
 		Limit(uint64(limit)).   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
@@ -206,9 +204,10 @@ func (r *Repository) ListSubscriptions(ctx context.Context, limit, offset int, s
 	subs := make([]SubscriptionRow, 0, limit)
 	for rows.Next() {
 		var s SubscriptionRow
-		if err := rows.Scan(&s.ID, &s.OwnerID, &s.OwnerName, &s.PlanID, &s.PlanName, &s.Status, &s.SeatCount,
+		if err := rows.Scan(&s.ID, &s.BusinessID, &s.BusinessName, &s.OwnerID, &s.OwnerName, &s.OwnerEmail,
+			&s.PlanID, &s.PlanName, &s.Status, &s.SeatCount,
 			&s.TrialEndsAt, &s.NextBillingDate, &s.CurrentPeriodEndsAt, &s.PaddleSubscriptionID, &s.PaddleCustomerID,
-			&s.CreatedAt, &s.UpdatedAt, &s.OwnerEmail, &s.BusinessID, &s.BusinessName); err != nil {
+			&s.CreatedAt, &s.UpdatedAt); err != nil {
 			return nil, 0, err
 		}
 		if err := r.decorateSubscriptionSeats(ctx, &s); err != nil {

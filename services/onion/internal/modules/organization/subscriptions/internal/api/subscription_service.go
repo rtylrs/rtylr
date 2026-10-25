@@ -28,8 +28,11 @@ func (a *SubscriptionAPI) GetMySubscription(ctx context.Context, _ *hubsubscript
 	if device.User == nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
+	if device.User.BusinessID <= 0 {
+		return &hubsubscriptionv1.GetMySubscriptionResponse{}, nil
+	}
 
-	sub, err := a.Service.GetMySubscription(ctx, device.User.UserID)
+	sub, err := a.Service.GetMySubscription(ctx, device.User.BusinessID)
 	if err != nil {
 		if errors.Is(err, domain.ErrSubscriptionNotFound) {
 			return &hubsubscriptionv1.GetMySubscriptionResponse{}, nil
@@ -37,7 +40,13 @@ func (a *SubscriptionAPI) GetMySubscription(ctx context.Context, _ *hubsubscript
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get subscription")
 	}
 
-	return &hubsubscriptionv1.GetMySubscriptionResponse{Subscription: toProtoSubscription(sub)}, nil
+	// Members see the plan their business is on; the Paddle reference is for
+	// whoever can view its billing.
+	payload := toProtoSubscription(sub)
+	if !canViewBilling(device.User) {
+		payload.PaddleSubscriptionId = ""
+	}
+	return &hubsubscriptionv1.GetMySubscriptionResponse{Subscription: payload}, nil
 }
 
 func (a *SubscriptionAPI) ListPlans(ctx context.Context, _ *hubsubscriptionv1.ListPlansRequest) (*hubsubscriptionv1.ListPlansResponse, error) {
@@ -55,11 +64,15 @@ func (a *SubscriptionAPI) ListPlans(ctx context.Context, _ *hubsubscriptionv1.Li
 
 func (a *SubscriptionAPI) GetBillingDetail(ctx context.Context, _ *hubsubscriptionv1.GetBillingDetailRequest) (*hubsubscriptionv1.GetBillingDetailResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if device.User == nil || !canViewBilling(device.User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	detail, err := a.Service.GetBillingDetail(ctx, device.User.UserID, device.User.BusinessID)
+	if device.User.BusinessID <= 0 {
+		return &hubsubscriptionv1.GetBillingDetailResponse{}, nil
+	}
+
+	detail, err := a.Service.GetBillingDetail(ctx, device.User.BusinessID)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get billing detail")
 	}
@@ -69,11 +82,15 @@ func (a *SubscriptionAPI) GetBillingDetail(ctx context.Context, _ *hubsubscripti
 
 func (a *SubscriptionAPI) GetBillingHistory(ctx context.Context, _ *hubsubscriptionv1.GetBillingHistoryRequest) (*hubsubscriptionv1.GetBillingHistoryResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if device.User == nil || !canViewBilling(device.User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	months, err := a.Service.GetBillingHistory(ctx, device.User.UserID, device.User.BusinessID, 12)
+	if device.User.BusinessID <= 0 {
+		return &hubsubscriptionv1.GetBillingHistoryResponse{}, nil
+	}
+
+	months, err := a.Service.GetBillingHistory(ctx, device.User.BusinessID, 12)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get billing history")
 	}
@@ -96,7 +113,7 @@ func (a *SubscriptionAPI) UpsertSubscription(ctx context.Context, req *hubsubscr
 		return nil, onekiterrors.New(http.StatusBadRequest, "plan_slug is required")
 	}
 
-	err = a.Service.UpsertSubscription(ctx, authUser.UserID, planSlug)
+	err = a.Service.UpsertSubscription(ctx, authUser.BusinessID, planSlug)
 	if err != nil {
 		if errors.Is(err, domain.ErrPlanNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Plan not found")
@@ -118,7 +135,7 @@ func (a *SubscriptionAPI) CreateCheckout(ctx context.Context, req *hubsubscripti
 		return nil, onekiterrors.New(http.StatusBadRequest, "plan_slug is required")
 	}
 
-	checkoutURL, err := a.Service.CreateCheckout(ctx, authUser.UserID, planSlug, req.GetEmail())
+	checkoutURL, err := a.Service.CreateCheckout(ctx, authUser.BusinessID, planSlug, req.GetEmail())
 	if err != nil {
 		if errors.Is(err, domain.ErrPlanNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Plan not found")
@@ -138,11 +155,19 @@ func (a *SubscriptionAPI) CreateCheckout(ctx context.Context, req *hubsubscripti
 // before touching billing or Paddle state.
 func billingUser(ctx context.Context) (*authPkg.AuthUser, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok || authUser == nil || authUser.UserID <= 0 ||
+	if !ok || authUser == nil || authUser.UserID <= 0 || authUser.BusinessID <= 0 ||
 		(!authPkg.IsBusinessAdmin(authUser) && !authPkg.HasDashboardPermission(authUser, "hub:billing:manage")) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 	return authUser, nil
+}
+
+// canViewBilling reports whether the user may read the business's charges and
+// payment references, which belong to the business, not to each member.
+func canViewBilling(user *authPkg.AuthUser) bool {
+	return authPkg.IsBusinessAdmin(user) ||
+		authPkg.HasDashboardPermission(user, "hub:billing:view") ||
+		authPkg.HasDashboardPermission(user, "hub:billing:manage")
 }
 
 // consoleAdminUser is intentionally narrower than billingUser. Plan changes
@@ -150,7 +175,7 @@ func billingUser(ctx context.Context) (*authPkg.AuthUser, error) {
 // must come from Paddle checkout/webhook processing or a console grant.
 func consoleAdminUser(ctx context.Context) (*authPkg.AuthUser, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok || authUser == nil || authUser.UserID <= 0 || !authPkg.IsConsoleAdmin(authUser) {
+	if !ok || authUser == nil || authUser.UserID <= 0 || authUser.BusinessID <= 0 || !authPkg.IsConsoleAdmin(authUser) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 	return authUser, nil

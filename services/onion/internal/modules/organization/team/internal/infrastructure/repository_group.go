@@ -11,9 +11,9 @@ import (
 	"github.com/voxire/onion/internal/platform/authorization"
 )
 
-func (r *Repository) CreateGroup(ctx context.Context, ownerID int64, input domain.CreateGroupInput) (int64, error) {
-	if ownerID <= 0 || input.BusinessID <= 0 {
-		return 0, errors.New("owner and business are required")
+func (r *Repository) CreateGroup(ctx context.Context, actorID int64, input domain.CreateGroupInput) (int64, error) {
+	if actorID <= 0 || input.BusinessID <= 0 {
+		return 0, errors.New("actor and business are required")
 	}
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
@@ -22,7 +22,7 @@ func (r *Repository) CreateGroup(ctx context.Context, ownerID int64, input domai
 	rollback := func(cause error) (int64, error) { _ = tx.Rollback(); return 0, cause }
 	qtx := r.queries.WithTx(tx)
 	result, err := qtx.CreateGroup(ctx, sqlc.CreateGroupParams{
-		OwnerID: ownerID, BusinessID: input.BusinessID, Name: input.Name,
+		BusinessID: input.BusinessID, Name: input.Name,
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		Color:       sql.NullString{String: input.Color, Valid: input.Color != ""},
 	})
@@ -33,7 +33,7 @@ func (r *Repository) CreateGroup(ctx context.Context, ownerID int64, input domai
 	if err != nil {
 		return rollback(err)
 	}
-	if err := r.replaceGroupAuthorization(ctx, tx, input.BusinessID, ownerID, groupID, input.LicensedAppIDs, input.PermissionProfileAssignments); err != nil {
+	if err := r.replaceGroupAuthorization(ctx, tx, input.BusinessID, actorID, groupID, input.LicensedAppIDs, input.PermissionProfileAssignments); err != nil {
 		return rollback(err)
 	}
 	if err := tx.Commit(); err != nil {
@@ -108,13 +108,13 @@ func (r *Repository) replaceGroupAuthorization(ctx context.Context, tx *sql.Tx, 
 	return err
 }
 
-func (r *Repository) GetGroup(ctx context.Context, ownerID, businessID, groupID int64) (*domain.Group, error) {
-	row, err := r.queries.GetGroup(ctx, sqlc.GetGroupParams{ID: groupID, OwnerID: ownerID, BusinessID: businessID})
+func (r *Repository) GetGroup(ctx context.Context, businessID, groupID int64) (*domain.Group, error) {
+	row, err := r.queries.GetGroup(ctx, sqlc.GetGroupParams{ID: groupID, BusinessID: businessID})
 	if err != nil {
 		return nil, err
 	}
 	group := &domain.Group{
-		ID: row.ID, OwnerID: row.OwnerID, BusinessID: row.BusinessID,
+		ID: row.ID, BusinessID: row.BusinessID,
 		Name: row.Name, Description: row.Description, Color: row.Color.String,
 	}
 	if row.CreatedAt.Valid {
@@ -196,15 +196,15 @@ func (r *Repository) groupAuthorization(ctx context.Context, businessID, groupID
 	return licenses, assignments, nil
 }
 
-func (r *Repository) ListGroups(ctx context.Context, ownerID, businessID int64) ([]domain.Group, error) {
-	rows, err := r.queries.ListGroups(ctx, sqlc.ListGroupsParams{OwnerID: ownerID, BusinessID: businessID})
+func (r *Repository) ListGroups(ctx context.Context, businessID int64) ([]domain.Group, error) {
+	rows, err := r.queries.ListGroups(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
 	groups := make([]domain.Group, 0, len(rows))
 	for _, row := range rows {
 		group := domain.Group{
-			ID: row.ID, OwnerID: row.OwnerID, BusinessID: row.BusinessID,
+			ID: row.ID, BusinessID: row.BusinessID,
 			Name: row.Name, Description: row.Description, Color: row.Color.String, MemberCount: int(row.MemberCount),
 		}
 		if row.CreatedAt.Valid {
@@ -222,7 +222,7 @@ func (r *Repository) ListGroups(ctx context.Context, ownerID, businessID int64) 
 	return groups, nil
 }
 
-func (r *Repository) UpdateGroup(ctx context.Context, ownerID, businessID, groupID int64, input domain.UpdateGroupInput) error {
+func (r *Repository) UpdateGroup(ctx context.Context, actorID, businessID, groupID int64, input domain.UpdateGroupInput) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -233,7 +233,7 @@ func (r *Repository) UpdateGroup(ctx context.Context, ownerID, businessID, group
 		Name:        input.Name,
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		Color:       sql.NullString{String: input.Color, Valid: input.Color != ""},
-		ID:          groupID, OwnerID: ownerID, BusinessID: businessID,
+		ID:          groupID, BusinessID: businessID,
 	})
 	if err != nil {
 		return rollback(err)
@@ -244,19 +244,19 @@ func (r *Repository) UpdateGroup(ctx context.Context, ownerID, businessID, group
 	}
 	if affected == 0 {
 		var found int
-		if err := tx.QueryRowContext(ctx, `SELECT 1 FROM user_groups WHERE id = ? AND owner_id = ? AND business_id = ?`, groupID, ownerID, businessID).Scan(&found); errors.Is(err, sql.ErrNoRows) {
+		if err := tx.QueryRowContext(ctx, `SELECT 1 FROM user_groups WHERE id = ? AND business_id = ?`, groupID, businessID).Scan(&found); errors.Is(err, sql.ErrNoRows) {
 			return rollback(domain.ErrGroupNotFound)
 		} else if err != nil {
 			return rollback(err)
 		}
 	}
-	if err := r.replaceGroupAuthorization(ctx, tx, businessID, ownerID, groupID, input.LicensedAppIDs, input.PermissionProfileAssignments); err != nil {
+	if err := r.replaceGroupAuthorization(ctx, tx, businessID, actorID, groupID, input.LicensedAppIDs, input.PermissionProfileAssignments); err != nil {
 		return rollback(err)
 	}
 	return tx.Commit()
 }
 
-func (r *Repository) DeleteGroup(ctx context.Context, ownerID, businessID, groupID int64) error {
+func (r *Repository) DeleteGroup(ctx context.Context, businessID, groupID int64) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -277,7 +277,7 @@ func (r *Repository) DeleteGroup(ctx context.Context, ownerID, businessID, group
 	if _, err := tx.ExecContext(ctx, `DELETE FROM user_group_members WHERE business_id = ? AND group_id = ?`, businessID, groupID); err != nil {
 		return rollback(err)
 	}
-	result, err := r.queries.WithTx(tx).DeleteGroup(ctx, sqlc.DeleteGroupParams{ID: groupID, OwnerID: ownerID, BusinessID: businessID})
+	result, err := r.queries.WithTx(tx).DeleteGroup(ctx, sqlc.DeleteGroupParams{ID: groupID, BusinessID: businessID})
 	if err != nil {
 		return rollback(err)
 	}
@@ -291,12 +291,12 @@ func (r *Repository) DeleteGroup(ctx context.Context, ownerID, businessID, group
 	return tx.Commit()
 }
 
-func (r *Repository) AddGroupMembers(ctx context.Context, ownerID, groupID, businessID, addedBy int64, userIDs []int64) error {
+func (r *Repository) AddGroupMembers(ctx context.Context, groupID, businessID, addedBy int64, userIDs []int64) error {
 	for _, userID := range uniqueInt64(userIDs) {
 		if err := r.queries.AddGroupMember(ctx, sqlc.AddGroupMemberParams{
-			GroupID: groupID, UserID: userID, OwnerID: ownerID, BusinessID: businessID,
+			GroupID: groupID, UserID: userID, BusinessID: businessID,
 			AddedBy:  sql.NullInt64{Int64: addedBy, Valid: addedBy > 0},
-			UserID_2: userID, ID: groupID, OwnerID_2: ownerID, BusinessID_2: businessID,
+			UserID_2: userID, ID: groupID, BusinessID_2: businessID,
 		}); err != nil {
 			return err
 		}
@@ -304,16 +304,16 @@ func (r *Repository) AddGroupMembers(ctx context.Context, ownerID, groupID, busi
 	return nil
 }
 
-func (r *Repository) RemoveGroupMember(ctx context.Context, ownerID, businessID, groupID, userID int64) error {
-	return r.queries.RemoveGroupMember(ctx, sqlc.RemoveGroupMemberParams{GroupID: groupID, UserID: userID, OwnerID: ownerID, BusinessID: businessID})
+func (r *Repository) RemoveGroupMember(ctx context.Context, businessID, groupID, userID int64) error {
+	return r.queries.RemoveGroupMember(ctx, sqlc.RemoveGroupMemberParams{GroupID: groupID, UserID: userID, BusinessID: businessID})
 }
 
-func (r *Repository) GetGroupDetail(ctx context.Context, ownerID, businessID, groupID int64) (*domain.GroupDetail, error) {
-	group, err := r.GetGroup(ctx, ownerID, businessID, groupID)
+func (r *Repository) GetGroupDetail(ctx context.Context, businessID, groupID int64) (*domain.GroupDetail, error) {
+	group, err := r.GetGroup(ctx, businessID, groupID)
 	if err != nil {
 		return nil, err
 	}
-	rows, err := r.queries.ListGroupMembers(ctx, sqlc.ListGroupMembersParams{GroupID: groupID, OwnerID: ownerID, BusinessID: businessID})
+	rows, err := r.queries.ListGroupMembers(ctx, sqlc.ListGroupMembersParams{GroupID: groupID, BusinessID: businessID})
 	if err != nil {
 		return nil, err
 	}
@@ -328,8 +328,8 @@ func (r *Repository) GetGroupDetail(ctx context.Context, ownerID, businessID, gr
 	return detail, nil
 }
 
-func (r *Repository) GetUserGroups(ctx context.Context, ownerID, businessID, userID int64) ([]domain.GroupSummary, error) {
-	rows, err := r.queries.ListUserGroups(ctx, sqlc.ListUserGroupsParams{UserID: userID, OwnerID: ownerID, BusinessID: businessID})
+func (r *Repository) GetUserGroups(ctx context.Context, businessID, userID int64) ([]domain.GroupSummary, error) {
+	rows, err := r.queries.ListUserGroups(ctx, sqlc.ListUserGroupsParams{UserID: userID, BusinessID: businessID})
 	if err != nil {
 		return nil, err
 	}

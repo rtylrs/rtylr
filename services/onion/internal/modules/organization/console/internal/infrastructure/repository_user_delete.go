@@ -13,9 +13,12 @@ import (
 // business data keep the bare id.
 var userErasureStatements = []string{
 	`UPDATE businesses SET is_active = FALSE WHERE owner_id = ? AND COALESCE(is_active, TRUE) = TRUE`,
-	`UPDATE subscriptions SET status = 'cancelled' WHERE owner_id = ? AND status IN ('active', 'trial', 'past_due')`,
-	`UPDATE manual_access_grants SET revoked_at = NOW() WHERE user_id = ? AND revoked_at IS NULL`,
-	`UPDATE manual_addon_grants SET revoked_at = NOW() WHERE user_id = ? AND revoked_at IS NULL`,
+	`UPDATE subscriptions SET status = 'cancelled'
+		WHERE business_id IN (SELECT id FROM businesses WHERE owner_id = ?) AND status IN ('active', 'trial', 'past_due')`,
+	`UPDATE manual_access_grants SET revoked_at = NOW()
+		WHERE business_id IN (SELECT id FROM businesses WHERE owner_id = ?) AND revoked_at IS NULL`,
+	`UPDATE manual_addon_grants SET revoked_at = NOW()
+		WHERE business_id IN (SELECT id FROM businesses WHERE owner_id = ?) AND revoked_at IS NULL`,
 	`DELETE scope FROM authorization_role_assignment_scopes scope
 		JOIN authorization_role_assignments assignment ON assignment.id = scope.assignment_id
 		WHERE assignment.user_id = ?`,
@@ -72,7 +75,8 @@ func (r *Repository) DeleteUser(ctx context.Context, id int64) (*application.Del
 	var billed int
 	if err := tx.QueryRowContext(ctx, `
 		SELECT COUNT(*) FROM subscriptions
-		WHERE owner_id = ? AND status IN ('active', 'trial', 'past_due')
+		WHERE business_id IN (SELECT id FROM businesses WHERE owner_id = ?)
+		  AND status IN ('active', 'trial', 'past_due')
 		  AND COALESCE(paddle_subscription_id, '') <> ''`, id).Scan(&billed); err != nil {
 		return rollback(err)
 	}
@@ -113,12 +117,12 @@ func (r *Repository) DeleteUser(ctx context.Context, id int64) (*application.Del
 		ORDER BY m.business_id`, id); err != nil {
 		return rollback(err)
 	}
-	if deleted.SeatOwnerIDs, err = queryIDs(ctx, tx, `
-		SELECT DISTINCT b.owner_id FROM authorization_business_members m
+	if deleted.SeatBusinessIDs, err = queryIDs(ctx, tx, `
+		SELECT DISTINCT m.business_id FROM authorization_business_members m
 		JOIN businesses b ON b.id = m.business_id
 		WHERE m.user_id = ? AND m.status = 'active' AND b.owner_id <> m.user_id
 		  AND COALESCE(b.is_active, TRUE) = TRUE
-		ORDER BY b.owner_id`, id); err != nil {
+		ORDER BY m.business_id`, id); err != nil {
 		return rollback(err)
 	}
 

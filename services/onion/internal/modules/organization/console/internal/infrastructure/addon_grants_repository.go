@@ -75,17 +75,11 @@ func (r *Repository) ListAddonGrants(ctx context.Context, limit, offset int) ([]
 	}
 
 	listSQL, listArgs, err := sq.
-		Select(
-			"g.id", "g.user_id", "COALESCE(u.full_name, '')", "u.email",
-			"g.business_id", "COALESCE(b.name, '')",
-			"g.addon_id", "a.name", "a.price",
-			"g.granted_by", "adm.full_name", "g.note", "g.expires_at", "g.revoked_at",
-			"g.enabled_by_grant", "g.created_at",
-		).
+		Select(addonGrantColumns...).
 		From("manual_addon_grants g").
 		Join("addons a ON a.id = g.addon_id").
-		LeftJoin("users u ON u.id = g.user_id").
 		LeftJoin("businesses b ON b.id = g.business_id").
+		LeftJoin("users u ON u.id = b.owner_id").
 		LeftJoin("users adm ON adm.id = g.granted_by").
 		OrderBy("g.created_at DESC").
 		Limit(uint64(limit)).   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
@@ -105,9 +99,7 @@ func (r *Repository) ListAddonGrants(ctx context.Context, limit, offset int) ([]
 	grants := make([]AddonGrantRow, 0, limit)
 	for rows.Next() {
 		var g AddonGrantRow
-		if err := rows.Scan(&g.ID, &g.UserID, &g.UserName, &g.UserEmail, &g.BusinessID, &g.BusinessName,
-			&g.AddonID, &g.AddonName, &g.AddonPrice, &g.GrantedBy, &g.GranterName, &g.Note,
-			&g.ExpiresAt, &g.RevokedAt, &g.EnabledByGrant, &g.CreatedAt); err != nil {
+		if err := rows.Scan(addonGrantDestinations(&g)...); err != nil {
 			return nil, 0, err
 		}
 		grants = append(grants, g)
@@ -115,15 +107,15 @@ func (r *Repository) ListAddonGrants(ctx context.Context, limit, offset int) ([]
 	return grants, total, rows.Err()
 }
 
-func (r *Repository) CreateAddonGrant(ctx context.Context, userID, businessID int64, addonID string, grantedBy int64, note string, expiresAt *time.Time, enabledByGrant bool) (int64, error) {
+func (r *Repository) CreateAddonGrant(ctx context.Context, businessID int64, addonID string, grantedBy int64, note string, expiresAt *time.Time, enabledByGrant bool) (int64, error) {
 	var expiresSQL interface{}
 	if expiresAt != nil {
 		expiresSQL = *expiresAt
 	}
 	query, args, err := sq.
 		Insert("manual_addon_grants").
-		Columns("user_id", "business_id", "addon_id", "granted_by", "note", "expires_at", "enabled_by_grant").
-		Values(userID, businessID, addonID, grantedBy, note, expiresSQL, enabledByGrant).
+		Columns("business_id", "addon_id", "granted_by", "note", "expires_at", "enabled_by_grant").
+		Values(businessID, addonID, grantedBy, note, expiresSQL, enabledByGrant).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -141,17 +133,11 @@ func (r *Repository) CreateAddonGrant(ctx context.Context, userID, businessID in
 // full grant history. CreateAddonGrant uses it to build its response.
 func (r *Repository) GetAddonGrant(ctx context.Context, id int64) (*AddonGrantRow, error) {
 	query, args, err := sq.
-		Select(
-			"g.id", "g.user_id", "COALESCE(u.full_name, '')", "u.email",
-			"g.business_id", "COALESCE(b.name, '')",
-			"g.addon_id", "a.name", "a.price",
-			"g.granted_by", "adm.full_name", "g.note", "g.expires_at", "g.revoked_at",
-			"g.enabled_by_grant", "g.created_at",
-		).
+		Select(addonGrantColumns...).
 		From("manual_addon_grants g").
 		Join("addons a ON a.id = g.addon_id").
-		LeftJoin("users u ON u.id = g.user_id").
 		LeftJoin("businesses b ON b.id = g.business_id").
+		LeftJoin("users u ON u.id = b.owner_id").
 		LeftJoin("users adm ON adm.id = g.granted_by").
 		Where(sq.Eq{"g.id": id}).
 		PlaceholderFormat(sq.Question).
@@ -161,19 +147,32 @@ func (r *Repository) GetAddonGrant(ctx context.Context, id int64) (*AddonGrantRo
 	}
 
 	var grant AddonGrantRow
-	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(
-		&grant.ID, &grant.UserID, &grant.UserName, &grant.UserEmail, &grant.BusinessID, &grant.BusinessName,
-		&grant.AddonID, &grant.AddonName, &grant.AddonPrice, &grant.GrantedBy, &grant.GranterName, &grant.Note,
-		&grant.ExpiresAt, &grant.RevokedAt, &grant.EnabledByGrant, &grant.CreatedAt,
-	); err != nil {
+	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(addonGrantDestinations(&grant)...); err != nil {
 		return nil, err
 	}
 	return &grant, nil
 }
 
+// addonGrantColumns pairs with addonGrantDestinations; the owner fields
+// describe the granted business's current owner.
+var addonGrantColumns = []string{
+	"g.id", "g.business_id", "COALESCE(b.name, '')", "b.owner_id", "COALESCE(u.full_name, '')", "u.email",
+	"g.addon_id", "a.name", "a.price",
+	"g.granted_by", "adm.full_name", "g.note", "g.expires_at", "g.revoked_at",
+	"g.enabled_by_grant", "g.created_at",
+}
+
+func addonGrantDestinations(g *AddonGrantRow) []any {
+	return []any{
+		&g.ID, &g.BusinessID, &g.BusinessName, &g.OwnerID, &g.OwnerName, &g.OwnerEmail,
+		&g.AddonID, &g.AddonName, &g.AddonPrice, &g.GrantedBy, &g.GranterName, &g.Note,
+		&g.ExpiresAt, &g.RevokedAt, &g.EnabledByGrant, &g.CreatedAt,
+	}
+}
+
 func (r *Repository) GetAddonGrantScope(ctx context.Context, id int64) (*AddonGrantScopeRow, error) {
 	query, args, err := sq.
-		Select("user_id", "business_id", "addon_id", "enabled_by_grant").
+		Select("business_id", "addon_id", "enabled_by_grant").
 		From("manual_addon_grants").
 		Where(sq.Eq{"id": id}).
 		Limit(1).
@@ -184,7 +183,7 @@ func (r *Repository) GetAddonGrantScope(ctx context.Context, id int64) (*AddonGr
 	}
 
 	var scope AddonGrantScopeRow
-	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(&scope.UserID, &scope.BusinessID, &scope.AddonID, &scope.EnabledByGrant); err != nil {
+	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(&scope.BusinessID, &scope.AddonID, &scope.EnabledByGrant); err != nil {
 		return nil, err
 	}
 	return &scope, nil

@@ -53,9 +53,9 @@ func TestBusinessEnabledAddonsIsBusinessScoped(t *testing.T) {
 	}
 }
 
-func TestSubscriptionPatternsDelimitOwnerID(t *testing.T) {
+func TestSubscriptionPatternsDelimitBusinessID(t *testing.T) {
 	patterns := SubscriptionPatterns(4)
-	want := []string{"cache:subscription:4", "cache:subscription:4:*"}
+	want := []string{"cache:subscription:business:4", "cache:subscription:business:4:*"}
 	if len(patterns) != len(want) {
 		t.Fatalf("SubscriptionPatterns(4) = %v, want %v", patterns, want)
 	}
@@ -65,8 +65,8 @@ func TestSubscriptionPatternsDelimitOwnerID(t *testing.T) {
 		}
 	}
 
-	// The wildcard covers the owner's derived keys but must not bleed into
-	// neighbouring owner ids (4 vs 42) the way "cache:subscription:4*" would.
+	// The wildcard covers the business's derived keys but must not bleed into
+	// neighbouring business ids (4 vs 42) the way "cache:subscription:business:4*" would.
 	matched, err := path.Match(SubscriptionPrefix(4), SubscriptionAccess(4))
 	if err != nil {
 		t.Fatal(err)
@@ -79,6 +79,6 @@ func TestSubscriptionPatternsDelimitOwnerID(t *testing.T) {
 		t.Fatal(err)
 	}
 	if matched {
-		t.Fatalf("prefix %q leaked into owner 42's key", SubscriptionPrefix(4))
+		t.Fatalf("prefix %q leaked into business 42's key", SubscriptionPrefix(4))
 	}
 }

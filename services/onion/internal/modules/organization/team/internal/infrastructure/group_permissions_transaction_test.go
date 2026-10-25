@@ -27,7 +27,7 @@ func TestTeam_UpdateGroup_InvalidProfileRollsBack(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateGroup: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteGroup(ctx, testutil.OwnerID, testutil.BusinessID, groupID) })
+	t.Cleanup(func() { _ = repo.DeleteGroup(ctx, testutil.BusinessID, groupID) })
 
 	err = repo.UpdateGroup(ctx, testutil.OwnerID, testutil.BusinessID, groupID, domain.UpdateGroupInput{
 		BusinessID:     testutil.BusinessID,
@@ -41,7 +41,7 @@ func TestTeam_UpdateGroup_InvalidProfileRollsBack(t *testing.T) {
 		t.Fatal("UpdateGroup with a nonexistent permission profile: expected error, got nil")
 	}
 
-	group, err := repo.GetGroup(ctx, testutil.OwnerID, testutil.BusinessID, groupID)
+	group, err := repo.GetGroup(ctx, testutil.BusinessID, groupID)
 	if err != nil {
 		t.Fatalf("GetGroup: %v", err)
 	}
@@ -77,5 +77,5 @@ func TestTeam_CreateGroup_InvalidProfileLeavesNoGroup(t *testing.T) {
 	if err != nil {
 		t.Fatalf("retry CreateGroup with the same name: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteGroup(ctx, testutil.OwnerID, testutil.BusinessID, groupID) })
+	t.Cleanup(func() { _ = repo.DeleteGroup(ctx, testutil.BusinessID, groupID) })
 }

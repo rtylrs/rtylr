@@ -15,8 +15,8 @@ const (
 )
 
 type repository interface {
-	GetSummary(ctx context.Context, ownerID int64) (domain.BillingSummary, error)
-	ListInvoices(ctx context.Context, ownerID int64) ([]domain.Invoice, error)
+	GetSummary(ctx context.Context, businessID int64) (domain.BillingSummary, error)
+	ListInvoices(ctx context.Context, businessID int64) ([]domain.Invoice, error)
 }
 
 type Service struct {
@@ -29,21 +29,21 @@ func NewService(_ context.Context, repo repository) *Service {
 	}
 }
 
-func (s *Service) GetSummary(ctx context.Context, ownerID int64) (domain.BillingSummary, error) {
+func (s *Service) GetSummary(ctx context.Context, businessID int64) (domain.BillingSummary, error) {
 	return cacher.Of[domain.BillingSummary]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(billingScope, ownerID, "summary"),
+		cacheKeys.Scoped(billingScope, businessID, "business_summary"),
 		func(ctx context.Context) (domain.BillingSummary, error) {
-			return s.repo.GetSummary(ctx, ownerID)
+			return s.repo.GetSummary(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, billingTTL),
 	)
 }
 
-func (s *Service) ListInvoices(ctx context.Context, ownerID int64) ([]domain.Invoice, error) {
+func (s *Service) ListInvoices(ctx context.Context, businessID int64) ([]domain.Invoice, error) {
 	return cacher.Of[[]domain.Invoice]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(billingScope, ownerID, "invoices"),
+		cacheKeys.Scoped(billingScope, businessID, "business_invoices"),
 		func(ctx context.Context) ([]domain.Invoice, error) {
-			return s.repo.ListInvoices(ctx, ownerID)
+			return s.repo.ListInvoices(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, billingTTL),
 	)

@@ -161,19 +161,27 @@ func TestUser_AssignSubscription_FreeCreatesActiveSubscription(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
-	email := fmt.Sprintf("free-subscription+%d@example.com", time.Now().UnixNano())
+	suffix := time.Now().UnixNano()
 	id, err := repo.CreateUser(ctx, &domain.User{
-		Email:        email,
+		Email:        fmt.Sprintf("free-subscription+%d@example.com", suffix),
 		PasswordHash: "hash",
 		FullName:     "Free Owner",
 	})
 	if err != nil {
 		t.Fatalf("CreateUser: %v", err)
 	}
+	businessID, err := repo.CreateBusiness(ctx, fmt.Sprintf("Free Subscription %d", suffix), id)
+	if err != nil {
+		t.Fatalf("CreateBusiness: %v", err)
+	}
 	t.Cleanup(func() {
-		_, _ = db.ExecContext(context.Background(), "DELETE FROM subscriptions WHERE owner_id = ?", id)
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM subscriptions WHERE business_id = ?", businessID)
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM businesses WHERE id = ?", businessID)
 		_ = repo.DeleteUser(context.Background(), id)
 	})
+	if err := repo.SetUserBusinessID(ctx, id, businessID); err != nil {
+		t.Fatalf("SetUserBusinessID: %v", err)
+	}
 
 	if err := repo.AssignSubscription(ctx, id, "free"); err != nil {
 		t.Fatalf("AssignSubscription: %v", err)
@@ -185,7 +193,7 @@ func TestUser_AssignSubscription_FreeCreatesActiveSubscription(t *testing.T) {
 SELECT p.slug, s.status, s.trial_ends_at
 FROM subscriptions s
 JOIN plans p ON p.id = s.plan_id
-WHERE s.owner_id = ?`, id).Scan(&slug, &status, &trialEndsAt)
+WHERE s.business_id = ?`, businessID).Scan(&slug, &status, &trialEndsAt)
 	if err != nil {
 		t.Fatalf("read subscription: %v", err)
 	}
@@ -197,6 +205,25 @@ WHERE s.owner_id = ?`, id).Scan(&slug, &status, &trialEndsAt)
 	}
 	if trialEndsAt.Valid {
 		t.Fatalf("expected no trial end for free signup, got %v", trialEndsAt.Time)
+	}
+}
+
+// A plan belongs to a business, so a user who has none yet gets nothing.
+func TestUser_AssignSubscription_WithoutBusinessIsANoop(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	id, err := repo.CreateUser(ctx, &domain.User{
+		Email:        fmt.Sprintf("no-business-subscription+%d@example.com", time.Now().UnixNano()),
+		PasswordHash: "hash",
+	})
+	if err != nil {
+		t.Fatalf("CreateUser: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteUser(context.Background(), id) })
+
+	if err := repo.AssignSubscription(ctx, id, "free"); err != nil {
+		t.Fatalf("AssignSubscription: %v", err)
 	}
 }
 

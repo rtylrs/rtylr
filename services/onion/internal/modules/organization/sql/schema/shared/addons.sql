@@ -27,7 +27,6 @@ CREATE TABLE IF NOT EXISTS `business_addons` (
 
 CREATE TABLE IF NOT EXISTS `manual_addon_grants` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `user_id` bigint NOT NULL COMMENT 'organization owner user_id',
   `business_id` bigint NOT NULL,
   `addon_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `granted_by` bigint NOT NULL COMMENT 'console admin user_id who created the grant',
@@ -38,7 +37,6 @@ CREATE TABLE IF NOT EXISTS `manual_addon_grants` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `idx_manual_addon_grants_user` (`user_id`),
   KEY `idx_manual_addon_grants_business` (`business_id`),
   KEY `idx_manual_addon_grants_lookup` (`business_id`,`addon_id`,`revoked_at`,`expires_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
