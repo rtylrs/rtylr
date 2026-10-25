@@ -317,28 +317,28 @@ func TestGetPublicBusiness_InactiveBusinessNotFound(t *testing.T) {
 	}
 }
 
-func TestGetProfile_OwnerID1001_ReturnsProfile(t *testing.T) {
+func TestGetProfile_ByBusinessID_ReturnsProfile(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
 	profile, err := repo.GetProfile(ctx, testutil.BusinessID)
 	if err != nil {
-		t.Fatalf("GetProfile(1001): %v", err)
+		t.Fatalf("GetProfile(%d): %v", testutil.BusinessID, err)
 	}
-	if profile.ID != testutil.OwnerID {
-		t.Errorf("expected ID=%d, got %d", testutil.OwnerID, profile.ID)
+	if profile.ID != testutil.BusinessID {
+		t.Errorf("expected ID=%d, got %d", testutil.BusinessID, profile.ID)
 	}
 }
 
-func TestGetProfile_ZeroOwner_Errors(t *testing.T) {
+func TestGetProfile_ZeroBusiness_Errors(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
 	_, err := repo.GetProfile(ctx, 0)
 	if err == nil {
-		t.Fatal("expected error for ownerID=0, got nil")
+		t.Fatal("expected error for businessID=0, got nil")
 	}
 }
 

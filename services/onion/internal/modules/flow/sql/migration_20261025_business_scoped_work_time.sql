@@ -2,6 +2,39 @@
 -- owner: keys move to business_id and owner_id goes nullable so this build can
 -- stop writing it. A later release drops the column.
 
+-- The old key included owner_id, so a business whose days were written under
+-- two owners (an ownership change) can hold two rows for one employee and
+-- date. Keep the earliest, move the other rows' actions and HR time entries
+-- onto it, then drop them, so the business key below can be added.
+CREATE TEMPORARY TABLE flow_work_day_merge (
+  dup_id bigint NOT NULL PRIMARY KEY,
+  keep_id bigint NOT NULL
+);
+
+INSERT INTO flow_work_day_merge (dup_id, keep_id)
+SELECT d.id, k.keep_id
+FROM flow_work_days d
+JOIN (
+    SELECT business_id, employee_id, date, MIN(id) AS keep_id
+    FROM flow_work_days
+    GROUP BY business_id, employee_id, date
+    HAVING COUNT(*) > 1
+) k ON k.business_id = d.business_id AND k.employee_id = d.employee_id AND k.date = d.date
+WHERE d.id <> k.keep_id;
+
+UPDATE flow_work_day_actions a
+JOIN flow_work_day_merge m ON m.dup_id = a.work_day_id
+SET a.work_day_id = m.keep_id;
+
+UPDATE hr_time_entries e
+JOIN flow_work_day_merge m ON m.dup_id = e.work_day_id
+SET e.work_day_id = m.keep_id;
+
+DELETE d FROM flow_work_days d
+JOIN flow_work_day_merge m ON m.dup_id = d.id;
+
+DROP TEMPORARY TABLE flow_work_day_merge;
+
 SET @apply := (SELECT COUNT(*) = 0 FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'flow_work_days' AND index_name = 'uk_work_day_business');
 SET @stmt := IF(@apply, 'ALTER TABLE flow_work_days ADD UNIQUE KEY uk_work_day_business (business_id, employee_id, date)', 'SELECT 1');
 PREPARE work_time_stmt FROM @stmt;

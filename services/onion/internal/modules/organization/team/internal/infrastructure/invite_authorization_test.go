@@ -82,12 +82,17 @@ func TestInviteDoesNotAssignPermissionProfilesByDefault(t *testing.T) {
 		t.Fatalf("pending app licenses = %d, want 2", licenses)
 	}
 
+	// HR rows carry the business ID in owner_id.
+	var employeeOwnerID int64
 	var employeeFirstName, employeeLastName, employeeEmail string
 	if err := db.QueryRowContext(ctx, `
-		SELECT first_name, last_name, email FROM hr_employees
-		WHERE owner_id = ? AND business_id = ? AND user_id = ?`,
-		testutil.OwnerID, testutil.BusinessID, userID).Scan(&employeeFirstName, &employeeLastName, &employeeEmail); err != nil {
+		SELECT owner_id, first_name, last_name, email FROM hr_employees
+		WHERE business_id = ? AND user_id = ?`,
+		testutil.BusinessID, userID).Scan(&employeeOwnerID, &employeeFirstName, &employeeLastName, &employeeEmail); err != nil {
 		t.Fatalf("read HR employee provisioned by the HR owner: %v", err)
+	}
+	if employeeOwnerID != testutil.BusinessID {
+		t.Fatalf("HR employee owner_id = %d, want %d", employeeOwnerID, testutil.BusinessID)
 	}
 	if employeeFirstName != "Ada" || employeeLastName != "Lovelace" || employeeEmail != email {
 		t.Fatalf("HR employee = %q %q <%s>", employeeFirstName, employeeLastName, employeeEmail)
@@ -95,8 +100,8 @@ func TestInviteDoesNotAssignPermissionProfilesByDefault(t *testing.T) {
 	var staffCount int
 	if err := db.QueryRowContext(ctx, `
 		SELECT COUNT(*) FROM hr_staff
-		WHERE owner_id = ? AND business_id = ? AND user_id = ?`,
-		testutil.OwnerID, testutil.BusinessID, userID).Scan(&staffCount); err != nil {
+		WHERE owner_id = business_id AND business_id = ? AND user_id = ?`,
+		testutil.BusinessID, userID).Scan(&staffCount); err != nil {
 		t.Fatalf("count HR staff directory rows: %v", err)
 	}
 	if staffCount != 1 {
