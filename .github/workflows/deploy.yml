@@ -27,7 +27,7 @@ on:
       migrate:
         description: "'false' when the release's migrations are already applied; anything else migrates"
         required: false
-        default: 'true'
+        default: "true"
         type: string
 
 permissions:
@@ -83,6 +83,37 @@ jobs:
       go_package: ${{ matrix.go_package }}
     secrets: inherit
 
+  # Several targets can ship containers of one ECS service (the api task runs
+  # the api, worker and SearXNG containers). Deploying them as separate jobs
+  # would roll the service once per container and race on its task
+  # definition, so the deploy runs once per service with all of its containers.
+  ecs_services:
+    name: Group ECS targets by service
+    if: inputs.ecs != '[]'
+    runs-on: ubuntu-24.04
+    outputs:
+      services: ${{ steps.group.outputs.services }}
+    steps:
+      - name: Group targets
+        id: group
+        env:
+          ECS: ${{ inputs.ecs }}
+        run: |
+          set -euo pipefail
+          services="$(jq -c '
+            group_by([.cluster, .service])
+            | map({
+                app: (map(.app) | join(" + ")),
+                cluster: .[0].cluster,
+                service: .[0].service,
+                desired_count: (map(.desired_count // "1" | tonumber) | max | tostring),
+                health_url: (map(.health_url // "" | select(. != "")) | first // ""),
+                version_url: (map(.version_url // "" | select(. != "")) | first // ""),
+                containers: map({container, image_repository})
+              })' <<< "$ECS")"
+          echo "services=$services" >> "$GITHUB_OUTPUT"
+          jq . <<< "$services"
+
   # The API and the worker read the columns their release's migrations add, so
   # they ship only after the migration succeeded or was not needed. A failed
   # (or cancelled) migration stops their deploy: the running release keeps
@@ -90,23 +121,24 @@ jobs:
   # deploy of the release.
   ecs:
     name: Deploy ${{ matrix.app }}
-    needs: [images, migrate]
-    if: ${{ !cancelled() && inputs.ecs != '[]' && needs.images.result == 'success' && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') }}
+    needs: [ecs_services, images, migrate]
+    if: ${{ !cancelled() && inputs.ecs != '[]' && needs.ecs_services.result == 'success' && needs.images.result == 'success' && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') }}
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJSON(inputs.ecs) }}
+        include: ${{ fromJSON(needs.ecs_services.outputs.services) }}
+    # Keyed by service, not app: two releases must not both clone and register
+    # the same service's task definition at once.
     concurrency:
-      group: deploy-${{ matrix.app }}
+      group: deploy-ecs-${{ matrix.cluster }}-${{ matrix.service }}
       cancel-in-progress: false
     uses: ./.github/workflows/deploy-ecs-release.yml
     with:
       source_ref: ${{ inputs.release_tag }}
       version: ${{ inputs.version }}
-      image_repository: ${{ matrix.image_repository }}
+      containers: ${{ toJSON(matrix.containers) }}
       cluster: ${{ matrix.cluster }}
       service: ${{ matrix.service }}
-      container: ${{ matrix.container }}
       desired_count: ${{ matrix.desired_count }}
       health_url: ${{ matrix.health_url }}
       version_url: ${{ matrix.version_url }}

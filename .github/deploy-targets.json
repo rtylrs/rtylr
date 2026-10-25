@@ -25,9 +25,7 @@
   {
     "app": "auth",
     "type": "pages",
-    "paths": [
-      "clients/app/entrypoints/auth/"
-    ],
+    "paths": ["clients/app/entrypoints/auth/"],
     "project_name": "rtylr-auth",
     "working_directory": "clients/app",
     "app_filter": "@rtylr/portal",
@@ -38,9 +36,7 @@
   {
     "app": "recruit",
     "type": "pages",
-    "paths": [
-      "clients/app/entrypoints/recruit/"
-    ],
+    "paths": ["clients/app/entrypoints/recruit/"],
     "project_name": "rtylr-recruit",
     "working_directory": "clients/app",
     "app_filter": "@rtylr/portal",
@@ -102,13 +98,8 @@
   {
     "app": "onion-api",
     "type": "ecs",
-    "paths": [
-      "services/onion/",
-      "voxie/"
-    ],
-    "ignore": [
-      "services/onion/.github/"
-    ],
+    "paths": ["services/onion/", "voxie/"],
+    "ignore": ["services/onion/.github/"],
     "dockerfile": "services/onion/Dockerfile",
     "go_package": "./cmd/api",
     "image_repository": "voxire/onion",
@@ -122,18 +113,13 @@
   {
     "app": "onion-worker",
     "type": "ecs",
-    "paths": [
-      "services/onion/",
-      "voxie/"
-    ],
-    "ignore": [
-      "services/onion/.github/"
-    ],
+    "paths": ["services/onion/", "voxie/"],
+    "ignore": ["services/onion/.github/"],
     "dockerfile": "services/onion/Dockerfile.worker",
     "go_package": "./cmd/worker",
     "image_repository": "voxire/onion-worker",
     "cluster": "voxire-prod",
-    "service": "worker",
+    "service": "api",
     "container": "worker",
     "desired_count": "1",
     "health_url": ""
@@ -141,13 +127,11 @@
   {
     "app": "searxng",
     "type": "ecs",
-    "paths": [
-      "services/searxng/"
-    ],
+    "paths": ["services/searxng/"],
     "dockerfile": "services/searxng/Dockerfile",
     "image_repository": "voxire/searxng",
     "cluster": "voxire-prod",
-    "service": "searxng",
+    "service": "api",
     "container": "searxng",
     "desired_count": "1",
     "health_url": ""
