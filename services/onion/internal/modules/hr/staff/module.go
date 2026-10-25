@@ -65,12 +65,12 @@ func (m *Module) LoadDashboardStats(ctx context.Context, businessID int64) (tota
 	return stats.TotalStaff, stats.OnShiftToday, stats.PendingTimeOff, stats.PayrollDraft, nil
 }
 
-func (m *Module) EnsureStaffForUser(ctx context.Context, ownerID, businessID, userID int64, role string) error {
-	return m.service.EnsureStaffForUser(ctx, ownerID, businessID, userID, role)
+func (m *Module) EnsureStaffForUser(ctx context.Context, businessID, userID int64, role string) error {
+	return m.service.EnsureStaffForUser(ctx, businessID, userID, role)
 }
 
-func (m *Module) DeleteStaffForUser(ctx context.Context, ownerID, businessID, userID int64) error {
-	return m.service.DeleteStaffForUser(ctx, ownerID, businessID, userID)
+func (m *Module) DeleteStaffForUser(ctx context.Context, businessID, userID int64) error {
+	return m.service.DeleteStaffForUser(ctx, businessID, userID)
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

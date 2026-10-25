@@ -19,22 +19,22 @@ func TestEnsureStaffForUserMirrorsTheHRCoreEmployee(t *testing.T) {
 	userID := time.Now().UnixNano()
 	email := fmt.Sprintf("hr-staff-owner-%d@example.test", userID)
 
-	if err := core.EnsureEmployeeForUser(ctx, testutil.OwnerID, testutil.BusinessID, userID, "Ada", "Lovelace", email); err != nil {
+	if err := core.EnsureEmployeeForUser(ctx, testutil.BusinessID, userID, "Ada", "Lovelace", email); err != nil {
 		t.Fatalf("ensure HR employee: %v", err)
 	}
 	t.Cleanup(func() {
-		if err := repo.DeleteStaffForUser(context.Background(), testutil.OwnerID, testutil.BusinessID, userID); err != nil {
+		if err := repo.DeleteStaffForUser(context.Background(), testutil.BusinessID, userID); err != nil {
 			t.Errorf("delete staff record: %v", err)
 		}
-		if err := core.DeleteEmployeeForUser(context.Background(), testutil.OwnerID, testutil.BusinessID, userID); err != nil {
+		if err := core.DeleteEmployeeForUser(context.Background(), testutil.BusinessID, userID); err != nil {
 			t.Errorf("delete employee record: %v", err)
 		}
 	})
 
-	if err := repo.EnsureStaffForUser(ctx, testutil.OwnerID, testutil.BusinessID, userID, "member"); err != nil {
+	if err := repo.EnsureStaffForUser(ctx, testutil.BusinessID, userID, "member"); err != nil {
 		t.Fatalf("ensure staff: %v", err)
 	}
-	if err := repo.EnsureStaffForUser(ctx, testutil.OwnerID, testutil.BusinessID, userID, "changed"); err != nil {
+	if err := repo.EnsureStaffForUser(ctx, testutil.BusinessID, userID, "changed"); err != nil {
 		t.Fatalf("ensure staff a second time: %v", err)
 	}
 

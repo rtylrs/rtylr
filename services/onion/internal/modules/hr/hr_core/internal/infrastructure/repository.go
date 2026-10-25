@@ -129,21 +129,18 @@ func (r *Repository) GetEmployeeIDByUserID(ctx context.Context, businessID, user
 	return id, nil
 }
 
-func (r *Repository) EnsureEmployeeForUser(ctx context.Context, ownerID, businessID, userID int64, firstName, lastName, email string) error {
+func (r *Repository) EnsureEmployeeForUser(ctx context.Context, businessID, userID int64, firstName, lastName, email string) error {
 	return r.queries.EnsureEmployeeForUser(ctx, sqlc.EnsureEmployeeForUserParams{
-		OwnerID:    ownerID,
 		BusinessID: businessID,
 		UserID:     sql.NullInt64{Int64: userID, Valid: true},
 		FirstName:  firstName,
 		LastName:   lastName,
 		Email:      email,
-		UserID_2:   sql.NullInt64{Int64: userID, Valid: true},
 	})
 }
 
-func (r *Repository) DeleteEmployeeForUser(ctx context.Context, ownerID, businessID, userID int64) error {
+func (r *Repository) DeleteEmployeeForUser(ctx context.Context, businessID, userID int64) error {
 	return r.queries.DeleteEmployeeForUser(ctx, sqlc.DeleteEmployeeForUserParams{
-		OwnerID:    ownerID,
 		BusinessID: businessID,
 		UserID:     sql.NullInt64{Int64: userID, Valid: true},
 	})

@@ -19,19 +19,19 @@ type hrMemberProvisioner struct {
 	staff *hrstaff.Module
 }
 
-func (p hrMemberProvisioner) EnsureEmployeeForUser(ctx context.Context, ownerID, businessID, userID int64, firstName, lastName, email string) error {
-	return p.core.EnsureEmployeeForUser(ctx, ownerID, businessID, userID, firstName, lastName, email)
+func (p hrMemberProvisioner) EnsureEmployeeForUser(ctx context.Context, businessID, userID int64, firstName, lastName, email string) error {
+	return p.core.EnsureEmployeeForUser(ctx, businessID, userID, firstName, lastName, email)
 }
 
-func (p hrMemberProvisioner) EnsureStaffForUser(ctx context.Context, ownerID, businessID, userID int64, role string) error {
-	return p.staff.EnsureStaffForUser(ctx, ownerID, businessID, userID, role)
+func (p hrMemberProvisioner) EnsureStaffForUser(ctx context.Context, businessID, userID int64, role string) error {
+	return p.staff.EnsureStaffForUser(ctx, businessID, userID, role)
 }
 
-func (p hrMemberProvisioner) DeleteProvisionedMember(ctx context.Context, ownerID, businessID, userID int64) error {
-	if err := p.staff.DeleteStaffForUser(ctx, ownerID, businessID, userID); err != nil {
+func (p hrMemberProvisioner) DeleteProvisionedMember(ctx context.Context, businessID, userID int64) error {
+	if err := p.staff.DeleteStaffForUser(ctx, businessID, userID); err != nil {
 		return err
 	}
-	return p.core.DeleteEmployeeForUser(ctx, ownerID, businessID, userID)
+	return p.core.DeleteEmployeeForUser(ctx, businessID, userID)
 }
 
 func TestInviteDoesNotAssignPermissionProfilesByDefault(t *testing.T) {
@@ -56,7 +56,7 @@ func TestInviteDoesNotAssignPermissionProfilesByDefault(t *testing.T) {
 		t.Fatalf("InviteUser: %v", err)
 	}
 	t.Cleanup(func() {
-		if err := provisioner.DeleteProvisionedMember(ctx, testutil.OwnerID, testutil.BusinessID, userID); err != nil {
+		if err := provisioner.DeleteProvisionedMember(ctx, testutil.BusinessID, userID); err != nil {
 			t.Errorf("clean up HR member: %v", err)
 		}
 		if err := repo.DeleteInvitedUser(ctx, testutil.BusinessID, userID); err != nil {

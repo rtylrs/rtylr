@@ -120,20 +120,20 @@ func (s *Service) GetEmployeeIDByUserID(ctx context.Context, ownerID, userID int
 // EnsureEmployeeForUser creates an active employee record for an account
 // provisioned by another module. HR owns the employee row; caller-owned
 // identity details arrive through this narrow command boundary.
-func (s *Service) EnsureEmployeeForUser(ctx context.Context, ownerID, businessID, userID int64, firstName, lastName, email string) error {
-	if ownerID <= 0 || businessID <= 0 || userID <= 0 {
-		return fmt.Errorf("employee provisioning requires positive owner, business, and user IDs")
+func (s *Service) EnsureEmployeeForUser(ctx context.Context, businessID, userID int64, firstName, lastName, email string) error {
+	if businessID <= 0 || userID <= 0 {
+		return fmt.Errorf("employee provisioning requires positive business and user IDs")
 	}
 	defer invalidateHRCoreScope(ctx, businessID)
-	return s.repo.EnsureEmployeeForUser(ctx, ownerID, businessID, userID, firstName, lastName, email)
+	return s.repo.EnsureEmployeeForUser(ctx, businessID, userID, firstName, lastName, email)
 }
 
-func (s *Service) DeleteEmployeeForUser(ctx context.Context, ownerID, businessID, userID int64) error {
-	if ownerID <= 0 || businessID <= 0 || userID <= 0 {
+func (s *Service) DeleteEmployeeForUser(ctx context.Context, businessID, userID int64) error {
+	if businessID <= 0 || userID <= 0 {
 		return nil
 	}
 	defer invalidateHRCoreScope(ctx, businessID)
-	return s.repo.DeleteEmployeeForUser(ctx, ownerID, businessID, userID)
+	return s.repo.DeleteEmployeeForUser(ctx, businessID, userID)
 }
 
 func (s *Service) ListTerminatedEmployees(ctx context.Context) ([]domain.TerminatedEmployee, error) {
@@ -498,8 +498,8 @@ type repository interface {
 	GetApprovalChain(ctx context.Context, businessID int64, requestType string) (*domain.ApprovalChainRecord, error)
 	GetEmployee(ctx context.Context, businessID, employeeID int64) (*domain.EmployeeRecord, error)
 	GetEmployeeIDByUserID(ctx context.Context, businessID, userID int64) (int64, error)
-	EnsureEmployeeForUser(ctx context.Context, ownerID, businessID, userID int64, firstName, lastName, email string) error
-	DeleteEmployeeForUser(ctx context.Context, ownerID, businessID, userID int64) error
+	EnsureEmployeeForUser(ctx context.Context, businessID, userID int64, firstName, lastName, email string) error
+	DeleteEmployeeForUser(ctx context.Context, businessID, userID int64) error
 	GetHRConfig(ctx context.Context, businessID int64) (*domain.HRCompanyConfigRecord, error)
 	GetInviteByToken(ctx context.Context, token string) (*domain.InviteRecord, error)
 	GetSetupSteps(ctx context.Context, businessID int64) ([]domain.SetupStepRecord, error)

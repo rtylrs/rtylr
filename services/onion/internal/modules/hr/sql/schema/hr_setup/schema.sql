@@ -8,5 +8,6 @@ CREATE TABLE IF NOT EXISTS `hr_configs` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `owner_id` (`owner_id`)
+  UNIQUE KEY `owner_id` (`owner_id`),
+  UNIQUE KEY `uniq_hr_configs_business` (`business_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

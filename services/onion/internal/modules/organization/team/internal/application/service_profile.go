@@ -164,7 +164,7 @@ func (s *Service) InviteUser(ctx context.Context, actorID, businessID int64, inp
 		}
 		var cleanupErrors []error
 		if s.members != nil {
-			if cleanupErr := s.members.DeleteProvisionedMember(ctx, ownerID, businessID, userID); cleanupErr != nil {
+			if cleanupErr := s.members.DeleteProvisionedMember(ctx, businessID, userID); cleanupErr != nil {
 				cleanupErrors = append(cleanupErrors, fmt.Errorf("delete HR records: %w", cleanupErr))
 			}
 		}
@@ -252,10 +252,10 @@ func (s *Service) InviteUser(ctx context.Context, actorID, businessID int64, inp
 		if len(name) > 1 {
 			lastName = strings.Join(name[1:], " ")
 		}
-		if err := s.members.EnsureEmployeeForUser(ctx, ownerID, businessID, userID, firstName, lastName, provisionedEmail); err != nil {
+		if err := s.members.EnsureEmployeeForUser(ctx, businessID, userID, firstName, lastName, provisionedEmail); err != nil {
 			logger.Ctx(ctx).Error("failed to create employee record for invited user",
 				logger.Int("owner_id", int(ownerID)), logger.Int("user_id", int(userID)), logger.Error(err))
-		} else if err := s.members.EnsureStaffForUser(ctx, ownerID, businessID, userID, "member"); err != nil {
+		} else if err := s.members.EnsureStaffForUser(ctx, businessID, userID, "member"); err != nil {
 			logger.Ctx(ctx).Error("failed to create staff directory record for invited user",
 				logger.Int("owner_id", int(ownerID)), logger.Int("business_id", int(businessID)),
 				logger.Int("user_id", int(userID)), logger.Error(err))

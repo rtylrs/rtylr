@@ -108,7 +108,7 @@ func (h *UpsertHRConfigHandler) Serve(ctx context.Context, req *UpsertHRConfigRe
 		}
 	}
 
-	cfg, err := h.Service.UpsertHRConfig(ctx, device.User.UserID, req.SetupCompletedAt)
+	cfg, err := h.Service.UpsertHRConfig(ctx, businessID, req.SetupCompletedAt)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to upsert hr config", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return UpsertHRConfigResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update HR config")

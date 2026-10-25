@@ -13,19 +13,19 @@ type teamHRProvisionerAdapter struct {
 	staff *staff.Module
 }
 
-func (a teamHRProvisionerAdapter) EnsureEmployeeForUser(ctx context.Context, ownerID, businessID, userID int64, firstName, lastName, email string) error {
-	return a.core.EnsureEmployeeForUser(ctx, ownerID, businessID, userID, firstName, lastName, email)
+func (a teamHRProvisionerAdapter) EnsureEmployeeForUser(ctx context.Context, businessID, userID int64, firstName, lastName, email string) error {
+	return a.core.EnsureEmployeeForUser(ctx, businessID, userID, firstName, lastName, email)
 }
 
-func (a teamHRProvisionerAdapter) EnsureStaffForUser(ctx context.Context, ownerID, businessID, userID int64, role string) error {
-	return a.staff.EnsureStaffForUser(ctx, ownerID, businessID, userID, role)
+func (a teamHRProvisionerAdapter) EnsureStaffForUser(ctx context.Context, businessID, userID int64, role string) error {
+	return a.staff.EnsureStaffForUser(ctx, businessID, userID, role)
 }
 
-func (a teamHRProvisionerAdapter) DeleteProvisionedMember(ctx context.Context, ownerID, businessID, userID int64) error {
-	if err := a.staff.DeleteStaffForUser(ctx, ownerID, businessID, userID); err != nil {
+func (a teamHRProvisionerAdapter) DeleteProvisionedMember(ctx context.Context, businessID, userID int64) error {
+	if err := a.staff.DeleteStaffForUser(ctx, businessID, userID); err != nil {
 		return err
 	}
-	return a.core.DeleteEmployeeForUser(ctx, ownerID, businessID, userID)
+	return a.core.DeleteEmployeeForUser(ctx, businessID, userID)
 }
 
 func (a teamHRProvisionerAdapter) ListTerminatedEmployees(ctx context.Context) ([]team.TerminatedEmployee, error) {

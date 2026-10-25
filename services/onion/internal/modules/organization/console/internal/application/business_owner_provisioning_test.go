@@ -31,7 +31,7 @@ func TestCreateBusinessOwnerProvisionsEmployeeThroughHRCore(t *testing.T) {
 		t.Fatalf("create business owner: %v", err)
 	}
 	t.Cleanup(func() {
-		if err := core.DeleteEmployeeForUser(context.Background(), created.Owner.ID, created.Business.ID, created.Owner.ID); err != nil {
+		if err := core.DeleteEmployeeForUser(context.Background(), created.Business.ID, created.Owner.ID); err != nil {
 			t.Errorf("delete HR employee: %v", err)
 		}
 		if err := repo.DeleteCreatedBusinessOwner(context.Background(), created.Owner.ID, created.Business.ID); err != nil {
