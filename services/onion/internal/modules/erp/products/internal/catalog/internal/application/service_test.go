@@ -23,16 +23,12 @@ func (m *mockRepo) IsOnlineOrderingEnabled(_ context.Context, _ int64) (bool, er
 	return true, nil
 }
 
-func (m *mockRepo) QuickCreate(_ context.Context, _, _ int64, _ domain.MenuItemInput) (int64, error) {
+func (m *mockRepo) QuickCreate(_ context.Context, _ int64, _ domain.MenuItemInput) (int64, error) {
 	return m.createID, m.createErr
 }
 
-func (m *mockRepo) Update(_ context.Context, _, _, _ int64, _ domain.MenuItemUpdateInput) error {
+func (m *mockRepo) Update(_ context.Context, _, _ int64, _ domain.MenuItemUpdateInput) error {
 	return m.updateErr
-}
-
-func (m *mockRepo) BusinessOwnerID(_ context.Context, businessID int64) (int64, error) {
-	return businessID, nil
 }
 
 func TestList_Delegates(t *testing.T) {
@@ -45,8 +41,8 @@ func TestList_Delegates(t *testing.T) {
 
 func TestQuickCreate_PropagatesError(t *testing.T) {
 	want := errors.New("boom")
-	s := &Service{repo: &mockRepo{createErr: want}, owner: func(context.Context, int64) (int64, error) { return 1, nil }}
-	if _, err := s.QuickCreate(context.Background(), 1, 1, domain.MenuItemInput{}); !errors.Is(err, want) {
+	s := &Service{repo: &mockRepo{createErr: want}}
+	if _, err := s.QuickCreate(context.Background(), 1, domain.MenuItemInput{}); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }

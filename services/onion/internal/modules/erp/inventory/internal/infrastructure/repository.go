@@ -73,7 +73,7 @@ func (r *Repository) AdjustInventory(ctx context.Context, ownerID, productID int
 	}
 
 	before, after, err := stock.ApplyMovementTx(ctx, tx, stock.Movement{
-		OwnerID:    ownerID,
+		BusinessID: ownerID,
 		LocationID: locID,
 		ProductID:  productID,
 		EntryType:  stock.EntryType(txType),

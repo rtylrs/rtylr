@@ -92,7 +92,7 @@ func toPublicProtoMenuItem(item domain.MenuItem) *posmenuitemv1.MenuItem {
 }
 
 func (a *MenuItemAPI) CreateMenuItem(ctx context.Context, req *posmenuitemv1.CreateMenuItemRequest) (*posmenuitemv1.CreateMenuItemResponse, error) {
-	authUser, businessID, err := requireMenuPermission(ctx, "menu:menus:edit")
+	_, businessID, err := requireMenuPermission(ctx, "menu:menus:edit")
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (a *MenuItemAPI) CreateMenuItem(ctx context.Context, req *posmenuitemv1.Cre
 		return nil, onekiterrors.New(http.StatusBadRequest, "Sale price must be zero or greater")
 	}
 
-	id, createErr := a.Service.QuickCreate(ctx, authUser.UserID, businessID, domain.MenuItemInput{
+	id, createErr := a.Service.QuickCreate(ctx, businessID, domain.MenuItemInput{
 		Name:      name,
 		SKU:       req.GetSku(),
 		SalePrice: req.GetSalePrice(),

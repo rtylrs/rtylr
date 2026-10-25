@@ -51,7 +51,7 @@ func (r *Repository) UpdateProduct(ctx context.Context, ownerID, id int64, input
 			return err
 		}
 		if _, _, err := stock.SetTotalTx(ctx, tx, stock.Movement{
-			OwnerID:       ownerID,
+			BusinessID:    ownerID,
 			LocationID:    locationID,
 			ProductID:     id,
 			EntryType:     stock.EntryAdjustment,
@@ -179,7 +179,7 @@ func (r *Repository) applyProductStockTotal(
 	}
 
 	_, _, err = stock.ApplyMovementTx(ctx, tx, stock.Movement{
-		OwnerID:       ownerID,
+		BusinessID:    ownerID,
 		LocationID:    locationID,
 		ProductID:     productID,
 		EntryType:     entryType,

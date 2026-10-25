@@ -65,7 +65,7 @@ func (m *Module) executePOSStockTool(ctx context.Context, name string, input map
 }
 
 func (m *Module) executeListStockMovementsTool(ctx context.Context, input map[string]any) (map[string]any, error) {
-	authUser, ownerID, err := posStockToolAuth(ctx)
+	businessID, err := posStockToolAuth(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (m *Module) executeListStockMovementsTool(ctx context.Context, input map[st
 		return nil, err
 	}
 
-	movements, err := m.posStockService.ListMovements(ctx, authUser.BusinessID, ownerID, parsed.BranchID, parsed.ProductID)
+	movements, err := m.posStockService.ListMovements(ctx, businessID, parsed.BranchID, parsed.ProductID)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +104,7 @@ func (m *Module) executeListStockMovementsTool(ctx context.Context, input map[st
 }
 
 func (m *Module) executeListBranchInventoryTool(ctx context.Context, input map[string]any) (map[string]any, error) {
-	authUser, ownerID, err := posStockToolAuth(ctx)
+	businessID, err := posStockToolAuth(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func (m *Module) executeListBranchInventoryTool(ctx context.Context, input map[s
 		return nil, err
 	}
 
-	items, err := m.posStockService.ListBranchInventory(ctx, authUser.BusinessID, ownerID, parsed.BranchID)
+	items, err := m.posStockService.ListBranchInventory(ctx, businessID, parsed.BranchID)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +139,7 @@ func (m *Module) executeListBranchInventoryTool(ctx context.Context, input map[s
 }
 
 func (m *Module) executeListLowStockItemsTool(ctx context.Context, input map[string]any) (map[string]any, error) {
-	authUser, ownerID, err := posStockToolAuth(ctx)
+	businessID, err := posStockToolAuth(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +149,7 @@ func (m *Module) executeListLowStockItemsTool(ctx context.Context, input map[str
 		return nil, err
 	}
 
-	items, err := m.posStockService.ListLowStockItems(ctx, authUser.BusinessID, ownerID, parsed.BranchID)
+	items, err := m.posStockService.ListLowStockItems(ctx, businessID, parsed.BranchID)
 	if err != nil {
 		return nil, err
 	}
@@ -374,19 +374,20 @@ func firstPOSStockToolValue(input map[string]any, keys ...string) any {
 	return nil
 }
 
-func posStockToolAuth(ctx context.Context) (*authPkg.AuthUser, int64, error) {
+// posStockToolAuth returns the caller's verified business.
+func posStockToolAuth(ctx context.Context) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil || authUser.UserID <= 0 {
-		return nil, 0, errors.New("authentication is required")
+		return 0, errors.New("authentication is required")
 	}
 	if authUser.BusinessID <= 0 {
-		return nil, 0, errors.New("business context is required")
+		return 0, errors.New("business context is required")
 	}
 	businessID, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if err != nil {
-		return nil, 0, errors.New("business context is required")
+		return 0, errors.New("business context is required")
 	}
-	return authUser, businessID, nil
+	return businessID, nil
 }
 
 func posStockToolNonNegativeInt64(value any) (int64, error) {

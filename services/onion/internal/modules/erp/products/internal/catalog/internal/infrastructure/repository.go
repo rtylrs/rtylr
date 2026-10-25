@@ -75,9 +75,11 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.MenuI
 	return items, nil
 }
 
-func (r *Repository) QuickCreate(ctx context.Context, ownerID, businessID int64, input domain.MenuItemInput) (int64, error) {
+// QuickCreate writes the business ID into owner_id, as every ERP product row
+// does.
+func (r *Repository) QuickCreate(ctx context.Context, businessID int64, input domain.MenuItemInput) (int64, error) {
 	result, err := r.queries.QuickCreateMenuItem(ctx, sqlc.QuickCreateMenuItemParams{
-		OwnerID:    ownerID,
+		OwnerID:    businessID,
 		BusinessID: businessID,
 		Name:       input.Name,
 		Sku:        sql.NullString{String: input.SKU, Valid: input.SKU != ""},
@@ -90,19 +92,18 @@ func (r *Repository) QuickCreate(ctx context.Context, ownerID, businessID int64,
 	return result.LastInsertId()
 }
 
-func (r *Repository) Update(ctx context.Context, ownerID, businessID, id int64, input domain.MenuItemUpdateInput) error {
+func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.MenuItemUpdateInput) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
 
-	locationID, err := stock.DefaultLocationID(ctx, tx, ownerID)
+	locationID, err := stock.DefaultLocationID(ctx, tx, businessID)
 	if err != nil {
 		return err
 	}
 	if _, _, err := stock.SetTotalTx(ctx, tx, stock.Movement{
-		OwnerID:       ownerID,
 		BusinessID:    businessID,
 		LocationID:    locationID,
 		ProductID:     id,

@@ -8,7 +8,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/erp/inventory/internal/pos_stock/domain"
 	"github.com/voxire/onion/internal/modules/erp/inventory/internal/pos_stock/infrastructure"
-	"github.com/voxire/onion/internal/modules/organization/business"
 	"github.com/voxire/onion/internal/modules/pos/locations"
 	"github.com/voxire/onion/internal/testutil"
 )
@@ -25,7 +24,7 @@ func TestStockMovements_ListMovements_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := configuredStockRepository(db)
 
-	mvts, err := repo.ListMovements(context.Background(), fixtureBusinessID, fixtureOwnerID, fixtureBranchID, fixtureProductID)
+	mvts, err := repo.ListMovements(context.Background(), fixtureBusinessID, fixtureBranchID, fixtureProductID)
 	if err != nil {
 		t.Fatalf("ListMovements: %v", err)
 	}
@@ -36,7 +35,7 @@ func TestStockMovements_ListMovements_ReturnsNonNilSlice(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := configuredStockRepository(db)
 
-	mvts, err := repo.ListMovements(context.Background(), fixtureBusinessID, fixtureOwnerID, fixtureBranchID, fixtureProductID)
+	mvts, err := repo.ListMovements(context.Background(), fixtureBusinessID, fixtureBranchID, fixtureProductID)
 	if err != nil {
 		t.Fatalf("ListMovements: %v", err)
 	}
@@ -49,7 +48,7 @@ func TestStockMovements_ListMovements_WrongBusinessReturnsEmpty(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := configuredStockRepository(db)
 
-	mvts, err := repo.ListMovements(context.Background(), 999999, 999999, fixtureBranchID, fixtureProductID)
+	mvts, err := repo.ListMovements(context.Background(), 999999, fixtureBranchID, fixtureProductID)
 	if err != nil {
 		t.Fatalf("ListMovements wrong business: %v", err)
 	}
@@ -84,7 +83,7 @@ func TestStockMovements_CreateMovement_ThenListContainsNew(t *testing.T) {
 		t.Fatalf("CreateMovement: %v", err)
 	}
 
-	mvts, err := repo.ListMovements(ctx, fixtureBusinessID, fixtureOwnerID, fixtureBranchID, fixtureProductID)
+	mvts, err := repo.ListMovements(ctx, fixtureBusinessID, fixtureBranchID, fixtureProductID)
 	if err != nil {
 		t.Fatalf("ListMovements: %v", err)
 	}
@@ -107,7 +106,7 @@ func TestStockMovements_ListMovements_AllHaveNonZeroID(t *testing.T) {
 
 	_, _ = repo.CreateMovement(ctx, fixtureBusinessID, fixtureBranchID, fixtureProductID, "receive", 1.0, nil, nil, nil, nil)
 
-	mvts, err := repo.ListMovements(ctx, fixtureBusinessID, fixtureOwnerID, fixtureBranchID, fixtureProductID)
+	mvts, err := repo.ListMovements(ctx, fixtureBusinessID, fixtureBranchID, fixtureProductID)
 	if err != nil {
 		t.Fatalf("ListMovements: %v", err)
 	}
@@ -125,7 +124,7 @@ func TestStockMovements_ListMovements_AllHaveNonEmptyType(t *testing.T) {
 
 	_, _ = repo.CreateMovement(ctx, fixtureBusinessID, fixtureBranchID, fixtureProductID, "receive", 1.0, nil, nil, nil, nil)
 
-	mvts, err := repo.ListMovements(ctx, fixtureBusinessID, fixtureOwnerID, fixtureBranchID, fixtureProductID)
+	mvts, err := repo.ListMovements(ctx, fixtureBusinessID, fixtureBranchID, fixtureProductID)
 	if err != nil {
 		t.Fatalf("ListMovements: %v", err)
 	}
@@ -166,7 +165,7 @@ func TestStockMovements_GetInventoryItem_AfterSet(t *testing.T) {
 		t.Fatalf("SetInventoryQuantity: %v", err)
 	}
 
-	item, err := repo.GetInventoryItem(ctx, fixtureBusinessID, fixtureOwnerID, fixtureBranchID, fixtureProductID)
+	item, err := repo.GetInventoryItem(ctx, fixtureBusinessID, fixtureBranchID, fixtureProductID)
 	if err != nil {
 		t.Fatalf("GetInventoryItem: %v", err)
 	}
@@ -179,7 +178,7 @@ func TestStockMovements_GetInventoryItem_UnknownReturnsNotFound(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := configuredStockRepository(db)
 
-	_, err := repo.GetInventoryItem(context.Background(), 999999, 999999, 999999, 999999)
+	_, err := repo.GetInventoryItem(context.Background(), 999999, 999999, 999999)
 	if !errors.Is(err, domain.ErrInventoryNotFound) {
 		t.Fatalf("expected ErrInventoryNotFound, got %v", err)
 	}
@@ -189,7 +188,7 @@ func TestStockMovements_ListBranchInventory_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := configuredStockRepository(db)
 
-	items, err := repo.ListBranchInventory(context.Background(), fixtureBusinessID, fixtureOwnerID, fixtureBranchID)
+	items, err := repo.ListBranchInventory(context.Background(), fixtureBusinessID, fixtureBranchID)
 	if err != nil {
 		t.Fatalf("ListBranchInventory: %v", err)
 	}
@@ -202,7 +201,7 @@ func TestStockMovements_ListBranchInventory_AllHaveNonNegativeQuantity(t *testin
 	db := testutil.OpenDB(t)
 	repo := configuredStockRepository(db)
 
-	items, err := repo.ListBranchInventory(context.Background(), fixtureBusinessID, fixtureOwnerID, fixtureBranchID)
+	items, err := repo.ListBranchInventory(context.Background(), fixtureBusinessID, fixtureBranchID)
 	if err != nil {
 		t.Fatalf("ListBranchInventory: %v", err)
 	}
@@ -217,7 +216,7 @@ func TestStockMovements_ListLowStockItems_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := configuredStockRepository(db)
 
-	items, err := repo.ListLowStockItems(context.Background(), fixtureBusinessID, fixtureOwnerID, fixtureBranchID)
+	items, err := repo.ListLowStockItems(context.Background(), fixtureBusinessID, fixtureBranchID)
 	if err != nil {
 		t.Fatalf("ListLowStockItems: %v", err)
 	}
@@ -229,11 +228,10 @@ func TestStockMovements_ListLowStockItems_NoError(t *testing.T) {
 func configuredStockRepository(db *sql.DB) *infrastructure.Repository {
 	ctx := context.Background()
 	return infrastructure.NewRepository(db).
-		WithBusinessOwnerResolver(business.NewModule(ctx, db).GetBusinessOwnerID).
-		WithBranchOwnerReader(locations.NewModule(ctx, db).StockBranchOwner)
+		WithBranchReader(locations.NewModule(ctx, db).StockBranchExists)
 }
 
-func TestStockMovementsRejectForeignBranchWithSameOwner(t *testing.T) {
+func TestStockMovementsRejectAnotherBusinessesBranch(t *testing.T) {
 	db := testutil.OpenDB(t)
 	ctx := context.Background()
 	result, err := db.ExecContext(ctx, `INSERT INTO pos_locations (owner_id, business_id, name) VALUES (?, ?, 'Foreign branch')`, fixtureOwnerID, testutil.OtherBusinessID)
@@ -250,7 +248,7 @@ func TestStockMovementsRejectForeignBranchWithSameOwner(t *testing.T) {
 	if err := db.QueryRowContext(ctx, "SELECT stock_quantity FROM erp_products WHERE id = ?", fixtureProductID).Scan(&before); err != nil {
 		t.Fatal(err)
 	}
-	_, err = repo.ReceiveStock(ctx, domain.ReceiveStockInput{BusinessID: fixtureBusinessID, OwnerID: fixtureOwnerID, BranchID: branchID, ProductID: fixtureProductID, Quantity: 2})
+	_, err = repo.ReceiveStock(ctx, domain.ReceiveStockInput{BusinessID: fixtureBusinessID, BranchID: branchID, ProductID: fixtureProductID, Quantity: 2})
 	if !errors.Is(err, sql.ErrNoRows) {
 		t.Fatalf("foreign branch should be unavailable, got %v", err)
 	}
@@ -263,10 +261,11 @@ func TestStockMovementsRejectForeignBranchWithSameOwner(t *testing.T) {
 	}
 }
 
-func TestStockMovementsUseBusinessOwnerForMemberRequest(t *testing.T) {
+// A movement made by a member is keyed by the business, whoever owns it.
+func TestStockMovementsKeyMemberRequestsByBusiness(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := configuredStockRepository(db)
-	id, err := repo.ReceiveStock(context.Background(), domain.ReceiveStockInput{BusinessID: fixtureBusinessID, OwnerID: 1002, BranchID: fixtureBranchID, ProductID: fixtureProductID, Quantity: 2})
+	id, err := repo.ReceiveStock(context.Background(), domain.ReceiveStockInput{BusinessID: fixtureBusinessID, BranchID: fixtureBranchID, ProductID: fixtureProductID, Quantity: 2})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -274,8 +273,8 @@ func TestStockMovementsUseBusinessOwnerForMemberRequest(t *testing.T) {
 	if err := db.QueryRow("SELECT owner_id, business_id FROM stock_ledger WHERE id = ?", id).Scan(&owner, &businessID); err != nil {
 		t.Fatal(err)
 	}
-	if owner != fixtureOwnerID || businessID != fixtureBusinessID {
-		t.Fatalf("ledger ownership = %d/%d", owner, businessID)
+	if owner != fixtureBusinessID || businessID != fixtureBusinessID {
+		t.Fatalf("ledger owner_id/business_id = %d/%d, want the business in both", owner, businessID)
 	}
 }
 
@@ -294,7 +293,7 @@ func TestStockMovements_TransferStockPairsLegsAndCarriesCost(t *testing.T) {
 	}
 	result, err = db.ExecContext(ctx, `
 		INSERT INTO erp_products (owner_id, business_id, name, cost_price, track_inventory)
-		VALUES (?, ?, 'pos-transfer-cost', 9.00, TRUE)`, fixtureOwnerID, fixtureBusinessID)
+		VALUES (?, ?, 'pos-transfer-cost', 9.00, TRUE)`, fixtureBusinessID, fixtureBusinessID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -308,18 +307,17 @@ func TestStockMovements_TransferStockPairsLegsAndCarriesCost(t *testing.T) {
 			"DELETE FROM stock_ledger WHERE owner_id = ? AND product_id = ?",
 			"DELETE FROM stock_levels WHERE owner_id = ? AND product_id = ?",
 		} {
-			_, _ = db.ExecContext(ctx, query, fixtureOwnerID, productID)
+			_, _ = db.ExecContext(ctx, query, fixtureBusinessID, productID)
 		}
 		_, _ = db.ExecContext(ctx, "DELETE FROM stock_locations WHERE source_table = 'pos_locations' AND source_id = ?", destinationBranchID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM pos_locations WHERE id = ?", destinationBranchID)
 	})
 
-	if _, err := repo.ReceiveStock(ctx, domain.ReceiveStockInput{BusinessID: fixtureBusinessID, OwnerID: fixtureOwnerID, BranchID: fixtureBranchID, ProductID: productID, Quantity: 5}); err != nil {
+	if _, err := repo.ReceiveStock(ctx, domain.ReceiveStockInput{BusinessID: fixtureBusinessID, BranchID: fixtureBranchID, ProductID: productID, Quantity: 5}); err != nil {
 		t.Fatalf("ReceiveStock: %v", err)
 	}
 	inID, err := repo.TransferStock(ctx, domain.TransferStockInput{
-		BusinessID: fixtureBusinessID, OwnerID: fixtureOwnerID,
-		FromBranchID: fixtureBranchID, ToBranchID: destinationBranchID,
+		BusinessID: fixtureBusinessID, FromBranchID: fixtureBranchID, ToBranchID: destinationBranchID,
 		ProductID: productID, Quantity: 3,
 	})
 	if err != nil {
@@ -352,7 +350,7 @@ func TestStockMovements_TransferStockPairsLegsAndCarriesCost(t *testing.T) {
 			FROM stock_levels sl
 			JOIN stock_locations l ON l.id = sl.location_id
 			WHERE sl.owner_id = ? AND sl.product_id = ? AND l.source_table = 'pos_locations' AND l.source_id = ?`,
-			fixtureOwnerID, productID, branchID).Scan(&onHand, &layered, &value); err != nil {
+			fixtureBusinessID, productID, branchID).Scan(&onHand, &layered, &value); err != nil {
 			t.Fatalf("read branch %d stock: %v", branchID, err)
 		}
 		return onHand, layered, value

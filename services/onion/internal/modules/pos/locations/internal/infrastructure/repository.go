@@ -134,8 +134,8 @@ func (r *Repository) Update(ctx context.Context, input domain.LocationUpdateInpu
 	return nil
 }
 
-func (r *Repository) StockBranchOwner(ctx context.Context, businessID, branchID int64) (int64, error) {
-	return r.queries.StockBranchOwner(ctx, sqlc.StockBranchOwnerParams{BusinessID: businessID, ID: branchID})
+func (r *Repository) StockBranchExists(ctx context.Context, businessID, branchID int64) (bool, error) {
+	return r.queries.StockBranchExists(ctx, sqlc.StockBranchExistsParams{BusinessID: businessID, ID: branchID})
 }
 
 func (r *Repository) WithLocationLimitReader(reader func(context.Context, int64) (int64, bool, error)) *Repository {

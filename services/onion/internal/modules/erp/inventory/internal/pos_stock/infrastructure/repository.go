@@ -15,8 +15,7 @@ import (
 )
 
 type Repository struct {
-	resolveOwner func(context.Context, int64) (int64, error)
-	branchOwner  func(context.Context, int64, int64) (int64, error)
+	branchExists func(context.Context, int64, int64) (bool, error)
 	queries      *sqlc.Queries
 	pool         *sql.DB
 }
@@ -25,7 +24,7 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{queries: sqlc.New(db), pool: db}
 }
 
-func (r *Repository) ListMovements(ctx context.Context, businessID, _, branchID, productID int64) ([]domain.StockMovement, error) {
+func (r *Repository) ListMovements(ctx context.Context, businessID, branchID, productID int64) ([]domain.StockMovement, error) {
 	rows, err := r.queries.ListPOSStockMovements(ctx, sqlc.ListPOSStockMovementsParams{
 		BusinessID: businessID,
 		SourceID:   branchID,
@@ -69,7 +68,6 @@ func (r *Repository) ListMovements(ctx context.Context, businessID, _, branchID,
 func (r *Repository) ReceiveStock(ctx context.Context, input domain.ReceiveStockInput) (int64, error) {
 	return r.applySingleMovement(ctx, movementInput{
 		BusinessID:  input.BusinessID,
-		OwnerID:     input.OwnerID,
 		BranchID:    input.BranchID,
 		ProductID:   input.ProductID,
 		EntryType:   stock.EntryPurchase,
@@ -83,7 +81,6 @@ func (r *Repository) ReceiveStock(ctx context.Context, input domain.ReceiveStock
 func (r *Repository) AdjustStock(ctx context.Context, input domain.AdjustStockInput) (int64, error) {
 	return r.applySingleMovement(ctx, movementInput{
 		BusinessID:  input.BusinessID,
-		OwnerID:     input.OwnerID,
 		BranchID:    input.BranchID,
 		ProductID:   input.ProductID,
 		EntryType:   stock.EntryAdjustment,
@@ -97,7 +94,6 @@ func (r *Repository) AdjustStock(ctx context.Context, input domain.AdjustStockIn
 func (r *Repository) RecordWaste(ctx context.Context, input domain.WasteStockInput) (int64, error) {
 	return r.applySingleMovement(ctx, movementInput{
 		BusinessID:  input.BusinessID,
-		OwnerID:     input.OwnerID,
 		BranchID:    input.BranchID,
 		ProductID:   input.ProductID,
 		EntryType:   stock.EntryWaste,
@@ -109,13 +105,8 @@ func (r *Repository) RecordWaste(ctx context.Context, input domain.WasteStockInp
 }
 
 func (r *Repository) TransferStock(ctx context.Context, input domain.TransferStockInput) (int64, error) {
-	ownerID, err := r.ownerIDForBusiness(ctx, input.BusinessID)
-	if err != nil {
-		return 0, err
-	}
-	input.OwnerID = ownerID
 	for _, branchID := range []int64{input.FromBranchID, input.ToBranchID} {
-		if err := r.validateBranch(ctx, input.BusinessID, ownerID, branchID); err != nil {
+		if err := r.validateBranch(ctx, input.BusinessID, branchID); err != nil {
 			return 0, err
 		}
 	}
@@ -130,12 +121,12 @@ func (r *Repository) TransferStock(ctx context.Context, input domain.TransferSto
 	if err = r.ensureInventoryProduct(ctx, tx, input.BusinessID, input.ProductID); err != nil {
 		return 0, err
 	}
-	fromLocationID, err := stock.POSBranchLocationID(ctx, tx, ownerID, input.BusinessID, input.FromBranchID)
+	fromLocationID, err := stock.POSBranchLocationID(ctx, tx, input.BusinessID, input.FromBranchID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to resolve POS transfer source location", logger.Error(err))
 		return 0, err
 	}
-	toLocationID, err := stock.POSBranchLocationID(ctx, tx, ownerID, input.BusinessID, input.ToBranchID)
+	toLocationID, err := stock.POSBranchLocationID(ctx, tx, input.BusinessID, input.ToBranchID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to resolve POS transfer destination location", logger.Error(err))
 		return 0, err
@@ -143,7 +134,6 @@ func (r *Repository) TransferStock(ctx context.Context, input domain.TransferSto
 
 	note := stringPtrValue(input.Note)
 	outID, inID, err := stock.TransferTx(ctx, tx, stock.Movement{
-		OwnerID:       ownerID,
 		BusinessID:    input.BusinessID,
 		LocationID:    fromLocationID,
 		ProductID:     input.ProductID,
@@ -155,7 +145,6 @@ func (r *Repository) TransferStock(ctx context.Context, input domain.TransferSto
 		EmployeeID:    input.EmployeeID,
 		CreatedBy:     input.EmployeeID,
 	}, stock.Movement{
-		OwnerID:       ownerID,
 		BusinessID:    input.BusinessID,
 		LocationID:    toLocationID,
 		ProductID:     input.ProductID,
@@ -232,11 +221,7 @@ func (r *Repository) UpdateInventory(ctx context.Context, businessID, branchID, 
 }
 
 func (r *Repository) SetInventoryQuantity(ctx context.Context, businessID, branchID, productID int64, quantity float64) error {
-	ownerID, err := r.ownerIDForBusiness(ctx, businessID)
-	if err != nil {
-		return err
-	}
-	if err := r.validateBranch(ctx, businessID, ownerID, branchID); err != nil {
+	if err := r.validateBranch(ctx, businessID, branchID); err != nil {
 		return err
 	}
 	tx, err := r.pool.BeginTx(ctx, nil)
@@ -249,13 +234,12 @@ func (r *Repository) SetInventoryQuantity(ctx context.Context, businessID, branc
 	if err = r.ensureInventoryProduct(ctx, tx, businessID, productID); err != nil {
 		return err
 	}
-	locationID, err := stock.POSBranchLocationID(ctx, tx, ownerID, businessID, branchID)
+	locationID, err := stock.POSBranchLocationID(ctx, tx, businessID, branchID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to resolve POS branch stock location", logger.Error(err))
 		return err
 	}
 	_, _, err = stock.SetLevelTx(ctx, tx, stock.Movement{
-		OwnerID:       ownerID,
 		BusinessID:    businessID,
 		LocationID:    locationID,
 		ProductID:     productID,
@@ -278,7 +262,7 @@ func (r *Repository) SetInventoryQuantity(ctx context.Context, businessID, branc
 	return nil
 }
 
-func (r *Repository) ListBranchInventory(ctx context.Context, businessID, _, branchID int64) ([]domain.BranchInventory, error) {
+func (r *Repository) ListBranchInventory(ctx context.Context, businessID, branchID int64) ([]domain.BranchInventory, error) {
 	rows, err := r.queries.ListBranchInventory(ctx, sqlc.ListBranchInventoryParams{
 		SourceID:   branchID,
 		BusinessID: businessID,
@@ -290,7 +274,7 @@ func (r *Repository) ListBranchInventory(ctx context.Context, businessID, _, bra
 	return mapBranchInventoryRows(ctx, rows, businessID, branchID)
 }
 
-func (r *Repository) ListLowStockItems(ctx context.Context, businessID, _, branchID int64) ([]domain.BranchInventory, error) {
+func (r *Repository) ListLowStockItems(ctx context.Context, businessID, branchID int64) ([]domain.BranchInventory, error) {
 	rows, err := r.queries.ListLowStockBranchInventory(ctx, sqlc.ListLowStockBranchInventoryParams{
 		SourceID:   branchID,
 		BusinessID: businessID,
@@ -306,7 +290,7 @@ func (r *Repository) ListLowStockItems(ctx context.Context, businessID, _, branc
 	return mapBranchInventoryRows(ctx, converted, businessID, branchID)
 }
 
-func (r *Repository) GetInventoryItem(ctx context.Context, businessID, _, branchID, productID int64) (domain.BranchInventory, error) {
+func (r *Repository) GetInventoryItem(ctx context.Context, businessID, branchID, productID int64) (domain.BranchInventory, error) {
 	rows, err := r.queries.GetBranchInventoryItem(ctx, sqlc.GetBranchInventoryItemParams{
 		SourceID:   branchID,
 		BusinessID: businessID,
@@ -332,7 +316,6 @@ func (r *Repository) GetInventoryItem(ctx context.Context, businessID, _, branch
 
 type movementInput struct {
 	BusinessID     int64
-	OwnerID        int64
 	BranchID       int64
 	ProductID      int64
 	EntryType      stock.EntryType
@@ -348,11 +331,7 @@ type movementInput struct {
 }
 
 func (r *Repository) applySingleMovement(ctx context.Context, input movementInput) (id int64, err error) {
-	input.OwnerID, err = r.ownerIDForBusiness(ctx, input.BusinessID)
-	if err != nil {
-		return 0, err
-	}
-	if err = r.validateBranch(ctx, input.BusinessID, input.OwnerID, input.BranchID); err != nil {
+	if err = r.validateBranch(ctx, input.BusinessID, input.BranchID); err != nil {
 		return 0, err
 	}
 
@@ -379,7 +358,7 @@ func (r *Repository) applyMovementTx(ctx context.Context, tx *sql.Tx, input move
 		return 0, err
 	}
 
-	locationID, err := stock.POSBranchLocationID(ctx, tx, input.OwnerID, input.BusinessID, input.BranchID)
+	locationID, err := stock.POSBranchLocationID(ctx, tx, input.BusinessID, input.BranchID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to resolve POS branch stock location", logger.Error(err))
 		return 0, err
@@ -390,7 +369,6 @@ func (r *Repository) applyMovementTx(ctx context.Context, tx *sql.Tx, input move
 		referenceType = "pos_stock_movement"
 	}
 	_, _, err = stock.ApplyMovementTx(ctx, tx, stock.Movement{
-		OwnerID:       input.OwnerID,
 		BusinessID:    input.BusinessID,
 		LocationID:    locationID,
 		ProductID:     input.ProductID,
@@ -436,43 +414,24 @@ func (r *Repository) ensureInventoryProduct(ctx context.Context, tx *sql.Tx, bus
 	return nil
 }
 
-func (r *Repository) WithBusinessOwnerResolver(resolve func(context.Context, int64) (int64, error)) *Repository {
-	r.resolveOwner = resolve
+func (r *Repository) WithBranchReader(exists func(context.Context, int64, int64) (bool, error)) *Repository {
+	r.branchExists = exists
 	return r
 }
 
-func (r *Repository) WithBranchOwnerReader(read func(context.Context, int64, int64) (int64, error)) *Repository {
-	r.branchOwner = read
-	return r
-}
-
-func (r *Repository) ownerIDForBusiness(ctx context.Context, businessID int64) (int64, error) {
-	if r.resolveOwner == nil {
-		return 0, fmt.Errorf("inventory requires a business owner resolver")
-	}
-	ownerID, err := r.resolveOwner(ctx, businessID)
-	if err != nil {
-		return 0, err
-	}
-	if ownerID <= 0 {
-		return 0, fmt.Errorf("inventory received an invalid business owner")
-	}
-	return ownerID, nil
-}
-
-func (r *Repository) validateBranch(ctx context.Context, businessID, ownerID, branchID int64) error {
+func (r *Repository) validateBranch(ctx context.Context, businessID, branchID int64) error {
 	if branchID == 0 {
 		return nil
 	}
-	if r.branchOwner == nil {
+	if r.branchExists == nil {
 		return fmt.Errorf("inventory requires a POS branch reader")
 	}
-	branchOwner, err := r.branchOwner(ctx, businessID, branchID)
+	exists, err := r.branchExists(ctx, businessID, branchID)
 	if err != nil {
 		return err
 	}
-	if branchOwner != ownerID {
-		return fmt.Errorf("POS branch %d is outside business %d", branchID, businessID)
+	if !exists {
+		return fmt.Errorf("POS branch %d is outside business %d: %w", branchID, businessID, sql.ErrNoRows)
 	}
 	return nil
 }

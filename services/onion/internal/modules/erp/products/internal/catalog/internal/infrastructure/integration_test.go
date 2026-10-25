@@ -111,7 +111,7 @@ func TestMenu_QuickCreate_ReturnsNonZeroID(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.QuickCreate(ctx, testutil.OwnerID, testutil.BusinessID, domain.MenuItemInput{
+	id, err := repo.QuickCreate(ctx, testutil.BusinessID, domain.MenuItemInput{
 		Name:      "Integration Test Item",
 		SKU:       "INT-001",
 		SalePrice: 9.99,
@@ -129,7 +129,7 @@ func TestMenu_QuickCreate_ThenListContainsNew(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.QuickCreate(ctx, testutil.OwnerID, testutil.BusinessID, domain.MenuItemInput{
+	id, err := repo.QuickCreate(ctx, testutil.BusinessID, domain.MenuItemInput{
 		Name:      "List Check Item",
 		SalePrice: 5.0,
 	})
@@ -159,7 +159,7 @@ func TestMenu_QuickCreate_NameStoredCorrectly(t *testing.T) {
 	ctx := context.Background()
 
 	const itemName = "Name Check Burger"
-	id, err := repo.QuickCreate(ctx, testutil.OwnerID, testutil.BusinessID, domain.MenuItemInput{
+	id, err := repo.QuickCreate(ctx, testutil.BusinessID, domain.MenuItemInput{
 		Name:      itemName,
 		SalePrice: 12.50,
 	})
@@ -187,7 +187,7 @@ func TestMenu_List_AtLeastOneItemAfterCreate(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	_, err := repo.QuickCreate(ctx, testutil.OwnerID, testutil.BusinessID, domain.MenuItemInput{
+	_, err := repo.QuickCreate(ctx, testutil.BusinessID, domain.MenuItemInput{
 		Name:      "Ensure Non-Empty",
 		SalePrice: 1.0,
 	})
@@ -209,7 +209,7 @@ func TestMenu_QuickCreate_ZeroPriceAllowed(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.QuickCreate(ctx, testutil.OwnerID, testutil.BusinessID, domain.MenuItemInput{
+	id, err := repo.QuickCreate(ctx, testutil.BusinessID, domain.MenuItemInput{
 		Name:      "Free Item",
 		SalePrice: 0,
 	})

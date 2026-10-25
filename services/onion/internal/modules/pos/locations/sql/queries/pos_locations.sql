@@ -19,5 +19,5 @@ SELECT COUNT(*) FROM pos_locations WHERE business_id = ?;
 UPDATE pos_locations SET name = ?, address = ?, phone = ?, is_active = COALESCE(?, is_active)
 WHERE id = ? AND business_id = ?;
 
--- name: StockBranchOwner :one
-SELECT owner_id FROM pos_locations WHERE business_id = ? AND id = ?;
+-- name: StockBranchExists :one
+SELECT COUNT(*) > 0 FROM pos_locations WHERE business_id = ? AND id = ?;

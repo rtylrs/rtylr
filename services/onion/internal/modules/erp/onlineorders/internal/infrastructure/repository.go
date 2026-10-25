@@ -99,7 +99,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 	defer tx.Rollback()
 
 	qtx := r.queries.WithTx(tx)
-	input, err = r.priceOrderInput(ctx, qtx, ownerID, input)
+	input, err = r.priceOrderInput(ctx, qtx, businessID, input)
 	if err != nil {
 		return 0, err
 	}
@@ -163,8 +163,8 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 	return id, nil
 }
 
-func (r *Repository) applyStoreOrderItemStockTx(ctx context.Context, tx *sql.Tx, qtx *sqlc.Queries, ownerID, businessID, locationID, orderID, productID int64, quantity float64, entryType string) error {
-	tracked, err := r.productTracksInventory(ctx, qtx, ownerID, productID)
+func (r *Repository) applyStoreOrderItemStockTx(ctx context.Context, tx *sql.Tx, qtx *sqlc.Queries, businessID, locationID, orderID, productID int64, quantity float64, entryType string) error {
+	tracked, err := r.productTracksInventory(ctx, qtx, businessID, productID)
 	if err != nil {
 		return err
 	}
@@ -173,7 +173,6 @@ func (r *Repository) applyStoreOrderItemStockTx(ctx context.Context, tx *sql.Tx,
 	}
 
 	movement := stock.Movement{
-		OwnerID:       ownerID,
 		BusinessID:    businessID,
 		LocationID:    locationID,
 		ProductID:     productID,
@@ -199,7 +198,7 @@ func (r *Repository) applyStoreOrderItemStockTx(ctx context.Context, tx *sql.Tx,
 	return nil
 }
 
-func (r *Repository) priceOrderInput(ctx context.Context, qtx *sqlc.Queries, ownerID int64, input domain.StoreOrderInput) (domain.StoreOrderInput, error) {
+func (r *Repository) priceOrderInput(ctx context.Context, qtx *sqlc.Queries, businessID int64, input domain.StoreOrderInput) (domain.StoreOrderInput, error) {
 	if input.ShippingCost < 0 {
 		return domain.StoreOrderInput{}, domain.ErrInvalidAmount
 	}
@@ -232,7 +231,7 @@ func (r *Repository) priceOrderInput(ctx context.Context, qtx *sqlc.Queries, own
 		if requested.Quantity <= 0 {
 			return domain.StoreOrderInput{}, domain.ErrInvalidAmount
 		}
-		product, err := qtx.GetStoreProductPricing(ctx, sqlc.GetStoreProductPricingParams{OwnerID: ownerID, ID: requested.ProductID})
+		product, err := qtx.GetStoreProductPricing(ctx, sqlc.GetStoreProductPricingParams{BusinessID: businessID, ID: requested.ProductID})
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.StoreOrderInput{}, fmt.Errorf("store order product %d is unavailable", requested.ProductID)
 		}
@@ -275,13 +274,13 @@ func decimalCents(value string) (int64, error) {
 	return int64(math.Round(amount * 100)), nil
 }
 
-func (r *Repository) productTracksInventory(ctx context.Context, qtx *sqlc.Queries, ownerID, productID int64) (bool, error) {
+func (r *Repository) productTracksInventory(ctx context.Context, qtx *sqlc.Queries, businessID, productID int64) (bool, error) {
 	pricing, err := qtx.GetStoreProductPricing(ctx, sqlc.GetStoreProductPricingParams{
-		OwnerID: ownerID,
-		ID:      productID,
+		BusinessID: businessID,
+		ID:         productID,
 	})
 	if errors.Is(err, sql.ErrNoRows) {
-		return false, fmt.Errorf("store order product %d not found for owner %d", productID, ownerID)
+		return false, fmt.Errorf("store order product %d not found for business %d", productID, businessID)
 	}
 	if err != nil {
 		return false, err
@@ -316,7 +315,7 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 
 	entryType, moveStock := stockMovementForTransition(currentStatus, nextStatus)
 	if moveStock {
-		locationID, locationErr := stock.DefaultLocationID(ctx, tx, current.OwnerID)
+		locationID, locationErr := stock.DefaultLocationID(ctx, tx, businessID)
 		if locationErr != nil {
 			return locationErr
 		}
@@ -339,7 +338,7 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		sort.Slice(productIDs, func(i, j int) bool { return productIDs[i] < productIDs[j] })
 
 		for _, pid := range productIDs {
-			if moveErr := r.applyStoreOrderItemStockTx(ctx, tx, qtx, current.OwnerID, businessID, locationID, id, pid, qtyByProduct[pid], entryType); moveErr != nil {
+			if moveErr := r.applyStoreOrderItemStockTx(ctx, tx, qtx, businessID, locationID, id, pid, qtyByProduct[pid], entryType); moveErr != nil {
 				return moveErr
 			}
 		}

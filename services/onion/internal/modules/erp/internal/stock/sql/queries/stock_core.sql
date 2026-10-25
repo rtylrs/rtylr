@@ -1,3 +1,6 @@
+-- ERP rows carry the business ID in owner_id as well as business_id, so every
+-- owner_id parameter here is a business ID.
+
 -- name: GetDefaultWarehouseLocationID :one
 SELECT id FROM stock_locations
  WHERE owner_id = ? AND kind = 'warehouse' AND source_table = 'native' AND source_id = 0
@@ -17,8 +20,8 @@ INSERT INTO stock_locations (owner_id, business_id, kind, source_table, source_i
  VALUES (?, ?, 'pos_branch', 'pos_locations', ?, 'POS Branch', FALSE, TRUE)
  ON DUPLICATE KEY UPDATE source_id = VALUES(source_id);
 
--- name: GetWarehouseOwnerID :one
-SELECT owner_id FROM erp_warehouses WHERE id = ?;
+-- name: GetWarehouseBusinessID :one
+SELECT business_id FROM erp_warehouses WHERE id = ?;
 
 -- name: GetWarehouseLocationID :one
 SELECT id FROM stock_locations
@@ -49,4 +52,4 @@ INSERT INTO stock_ledger
 
 -- name: SyncProductStockScalar :exec
 UPDATE erp_products SET stock_quantity = stock_quantity + ?
- WHERE owner_id = ? AND id = ?;
+ WHERE business_id = ? AND id = ?;

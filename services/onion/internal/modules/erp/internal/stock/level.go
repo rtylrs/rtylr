@@ -19,8 +19,8 @@ func SetLevelTx(ctx context.Context, tx DBTX, m Movement, target float64) (befor
 	q := queries(tx)
 
 	if err = q.EnsureStockLevelRow(ctx, stocksqlc.EnsureStockLevelRowParams{
-		OwnerID:    m.OwnerID,
-		BusinessID: movementBusinessID(m),
+		OwnerID:    m.BusinessID,
+		BusinessID: m.BusinessID,
 		LocationID: m.LocationID,
 		ProductID:  m.ProductID,
 	}); err != nil {
@@ -28,7 +28,7 @@ func SetLevelTx(ctx context.Context, tx DBTX, m Movement, target float64) (befor
 	}
 
 	onHandStr, err := q.LockStockLevelOnHand(ctx, stocksqlc.LockStockLevelOnHandParams{
-		OwnerID:    m.OwnerID,
+		OwnerID:    m.BusinessID,
 		LocationID: m.LocationID,
 		ProductID:  m.ProductID,
 	})
@@ -51,7 +51,7 @@ func SetLevelTx(ctx context.Context, tx DBTX, m Movement, target float64) (befor
 	return before, delta, nil
 }
 
-// SetTotalTx sets the product's owner-wide stock total to target by applying
+// SetTotalTx sets the product's business-wide stock total to target by applying
 // the variance to one location. Every stock-level row for the product is
 // locked in location order before the product scalar is updated, which keeps
 // absolute stock edits from clobbering concurrent movements or acquiring locks
@@ -68,7 +68,7 @@ func SetTotalTx(ctx context.Context, tx DBTX, m Movement, target float64) (befor
 		INSERT INTO stock_levels (owner_id, business_id, location_id, product_id, on_hand)
 		VALUES (?, ?, ?, ?, 0)
 		ON DUPLICATE KEY UPDATE on_hand = on_hand`,
-		m.OwnerID, movementBusinessID(m), m.LocationID, m.ProductID,
+		m.BusinessID, m.BusinessID, m.LocationID, m.ProductID,
 	); err != nil {
 		return 0, 0, fmt.Errorf("stock_core: ensure total level row: %w", err)
 	}
@@ -78,7 +78,7 @@ func SetTotalTx(ctx context.Context, tx DBTX, m Movement, target float64) (befor
 		FROM stock_levels
 		WHERE owner_id = ? AND product_id = ?
 		ORDER BY location_id
-		FOR UPDATE`, m.OwnerID, m.ProductID)
+		FOR UPDATE`, m.BusinessID, m.ProductID)
 	if err != nil {
 		return 0, 0, fmt.Errorf("stock_core: lock total levels: %w", err)
 	}
@@ -114,8 +114,8 @@ func SetTotalTx(ctx context.Context, tx DBTX, m Movement, target float64) (befor
 	// product lock order.
 	var productID int64
 	if err := tx.QueryRowContext(ctx,
-		"SELECT id FROM erp_products WHERE owner_id = ? AND id = ? FOR UPDATE",
-		m.OwnerID, m.ProductID,
+		"SELECT id FROM erp_products WHERE business_id = ? AND id = ? FOR UPDATE",
+		m.BusinessID, m.ProductID,
 	).Scan(&productID); err != nil {
 		return 0, 0, fmt.Errorf("stock_core: lock product for total adjustment: %w", err)
 	}
@@ -151,13 +151,13 @@ func settleLevelCostTx(ctx context.Context, tx DBTX, m Movement, before, after f
 // LockProductLevelsTx locks every stock level row of a product in location
 // order. A caller that also locks the product row must call this first, so it
 // takes locks in the same level-then-product order as every stock movement.
-func LockProductLevelsTx(ctx context.Context, tx DBTX, ownerID, productID int64) error {
+func LockProductLevelsTx(ctx context.Context, tx DBTX, businessID, productID int64) error {
 	rows, err := tx.QueryContext(ctx, `
 		SELECT location_id
 		FROM stock_levels
 		WHERE owner_id = ? AND product_id = ?
 		ORDER BY location_id
-		FOR UPDATE`, ownerID, productID)
+		FOR UPDATE`, businessID, productID)
 	if err != nil {
 		return fmt.Errorf("stock_core: lock product levels: %w", err)
 	}

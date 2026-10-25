@@ -28,12 +28,12 @@ func invalidateStockMovementsScope(ctx context.Context, businessID int64) {
 	cacher.InvalidateScope(ctx, cacheKeys.ProductPrefix(businessID))
 }
 
-func (s *Service) ListMovements(ctx context.Context, businessID, ownerID, branchID, productID int64) ([]domain.StockMovement, error) {
+func (s *Service) ListMovements(ctx context.Context, businessID, branchID, productID int64) ([]domain.StockMovement, error) {
 	key := fmt.Sprintf("%s|stock|b=%d|p=%d"+"|domain=v2",
 		cacheKeys.ProductsList(businessID), branchID, productID)
 	return cacher.Of[[]domain.StockMovement]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.StockMovement, error) {
-			return s.repo.ListMovements(ctx, businessID, ownerID, branchID, productID)
+			return s.repo.ListMovements(ctx, businessID, branchID, productID)
 		},
 		cacher.WithExpiry(ctx, stockMovementsTTL),
 	)
@@ -88,7 +88,7 @@ func (s *Service) TransferStock(ctx context.Context, input domain.TransferStockI
 }
 
 func (s *Service) ApplyRecordedOrderInventory(ctx context.Context, input domain.RecordedOrderInventory) error {
-	if input.BusinessID <= 0 || input.OwnerID <= 0 || input.SourceID <= 0 || input.LocationKind == "" || input.Channel == "" {
+	if input.BusinessID <= 0 || input.SourceID <= 0 || input.LocationKind == "" || input.Channel == "" {
 		return errors.New("recorded order inventory is missing required identifiers")
 	}
 	if input.SourceType != "pos_order" && input.SourceType != "store_order" {
@@ -112,21 +112,21 @@ func (s *Service) ApplyRecordedOrderInventory(ctx context.Context, input domain.
 	return nil
 }
 
-func (s *Service) ListBranchInventory(ctx context.Context, businessID, ownerID, branchID int64) ([]domain.BranchInventory, error) {
+func (s *Service) ListBranchInventory(ctx context.Context, businessID, branchID int64) ([]domain.BranchInventory, error) {
 	key := fmt.Sprintf("%s|branch_inv|b=%d", cacheKeys.ProductsList(businessID), branchID) + "|domain=v2"
 	return cacher.Of[[]domain.BranchInventory]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.BranchInventory, error) {
-			return s.repo.ListBranchInventory(ctx, businessID, ownerID, branchID)
+			return s.repo.ListBranchInventory(ctx, businessID, branchID)
 		},
 		cacher.WithExpiry(ctx, stockMovementsTTL),
 	)
 }
 
-func (s *Service) ListLowStockItems(ctx context.Context, businessID, ownerID, branchID int64) ([]domain.BranchInventory, error) {
+func (s *Service) ListLowStockItems(ctx context.Context, businessID, branchID int64) ([]domain.BranchInventory, error) {
 	key := fmt.Sprintf("%s|branch_low|b=%d", cacheKeys.ProductsList(businessID), branchID) + "|domain=v2"
 	return cacher.Of[[]domain.BranchInventory]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.BranchInventory, error) {
-			return s.repo.ListLowStockItems(ctx, businessID, ownerID, branchID)
+			return s.repo.ListLowStockItems(ctx, businessID, branchID)
 		},
 		cacher.WithExpiry(ctx, stockMovementsTTL),
 	)
@@ -135,9 +135,9 @@ func (s *Service) ListLowStockItems(ctx context.Context, businessID, ownerID, br
 type repository interface {
 	ApplyRecordedOrderInventory(ctx context.Context, input domain.RecordedOrderInventory) error
 	AdjustStock(ctx context.Context, input domain.AdjustStockInput) (int64, error)
-	ListBranchInventory(ctx context.Context, businessID, _, branchID int64) ([]domain.BranchInventory, error)
-	ListLowStockItems(ctx context.Context, businessID, _, branchID int64) ([]domain.BranchInventory, error)
-	ListMovements(ctx context.Context, businessID, _, branchID, productID int64) ([]domain.StockMovement, error)
+	ListBranchInventory(ctx context.Context, businessID, branchID int64) ([]domain.BranchInventory, error)
+	ListLowStockItems(ctx context.Context, businessID, branchID int64) ([]domain.BranchInventory, error)
+	ListMovements(ctx context.Context, businessID, branchID, productID int64) ([]domain.StockMovement, error)
 	ReceiveStock(ctx context.Context, input domain.ReceiveStockInput) (int64, error)
 	RecordWaste(ctx context.Context, input domain.WasteStockInput) (int64, error)
 	TransferStock(ctx context.Context, input domain.TransferStockInput) (int64, error)

@@ -13,7 +13,7 @@ import (
 )
 
 func (r *Repository) ApplyRecordedOrderInventory(ctx context.Context, input domain.RecordedOrderInventory) (err error) {
-	if err = r.validateBranch(ctx, input.BusinessID, input.OwnerID, input.LocationID); err != nil {
+	if err = r.validateBranch(ctx, input.BusinessID, input.LocationID); err != nil {
 		return err
 	}
 	tx, err := r.pool.BeginTx(ctx, nil)
@@ -25,9 +25,9 @@ func (r *Repository) ApplyRecordedOrderInventory(ctx context.Context, input doma
 	var locationID int64
 	switch input.LocationKind {
 	case "pos_branch":
-		locationID, err = stock.POSBranchLocationID(ctx, tx, input.OwnerID, input.BusinessID, input.LocationID)
+		locationID, err = stock.POSBranchLocationID(ctx, tx, input.BusinessID, input.LocationID)
 	case "default":
-		locationID, err = stock.DefaultLocationID(ctx, tx, input.OwnerID)
+		locationID, err = stock.DefaultLocationID(ctx, tx, input.BusinessID)
 	default:
 		return fmt.Errorf("unsupported inventory location kind %q", input.LocationKind)
 	}
@@ -49,8 +49,8 @@ func (r *Repository) ApplyRecordedOrderInventory(ctx context.Context, input doma
 		if err = tx.QueryRowContext(ctx, `
 			SELECT track_inventory
 			FROM erp_products
-			WHERE owner_id = ? AND business_id = ? AND id = ?
-			FOR UPDATE`, input.OwnerID, input.BusinessID, item.ProductID).Scan(&tracksInventory); err != nil {
+			WHERE business_id = ? AND id = ?
+			FOR UPDATE`, input.BusinessID, item.ProductID).Scan(&tracksInventory); err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				if input.SourceType == "pos_order" {
 					continue
@@ -73,7 +73,6 @@ func (r *Repository) ApplyRecordedOrderInventory(ctx context.Context, input doma
 		}
 		referenceID := input.SourceID
 		_, _, err = stock.ApplyMovementTx(ctx, tx, stock.Movement{
-			OwnerID:       input.OwnerID,
 			BusinessID:    input.BusinessID,
 			LocationID:    locationID,
 			ProductID:     item.ProductID,

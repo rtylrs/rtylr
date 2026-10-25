@@ -36,10 +36,10 @@ func (m *Module) GetAnonymousRoutes() []string {
 	return []string{}
 }
 
-// StockBranchOwner returns the current branch owner within a business, including
-// inactive branches referenced by paid orders. Missing or foreign branches return sql.ErrNoRows.
-func (m *Module) StockBranchOwner(ctx context.Context, businessID, branchID int64) (int64, error) {
-	return m.repository.StockBranchOwner(ctx, businessID, branchID)
+// StockBranchExists reports whether branchID is a branch of businessID,
+// including inactive branches referenced by paid orders.
+func (m *Module) StockBranchExists(ctx context.Context, businessID, branchID int64) (bool, error) {
+	return m.repository.StockBranchExists(ctx, businessID, branchID)
 }
 
 func (m *Module) WithLocationLimitReader(reader func(context.Context, int64) (int64, bool, error)) *Module {
