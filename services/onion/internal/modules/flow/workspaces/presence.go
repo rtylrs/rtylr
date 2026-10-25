@@ -45,16 +45,9 @@ type PresenceEntry struct {
 // date, gated by view_directory - the same permission Directory uses,
 // because this answers the same underlying question ("who works here") from
 // a different angle.
-//
-// The three ids passed to different modules are deliberately not the same
-// value: hr_core/staff resolve "ownerID" to the tenant's businessID (see
-// canViewDirectory), while hr_leave's own handlers pass the caller's raw hub
-// user id as what it calls "ownerID" - every leave request already on disk
-// was written under that convention, so querying it any other way would
-// silently return nothing rather than fail loudly.
 func (m *Module) ListPresenceForBusiness(
 	ctx context.Context,
-	resolvedOwnerID, businessID, callerUserID int64,
+	businessID, callerUserID int64,
 	date string,
 ) ([]PresenceEntry, error) {
 	if m.presence == nil {
@@ -78,11 +71,11 @@ func (m *Module) ListPresenceForBusiness(
 		employeeIDs = append(employeeIDs, e.ID)
 	}
 
-	workDays, err := m.service.WorkDaysForDate(ctx, resolvedOwnerID, businessID, employeeIDs, date)
+	workDays, err := m.service.WorkDaysForDate(ctx, businessID, employeeIDs, date)
 	if err != nil {
 		return nil, err
 	}
-	onLeave, err := m.presence.ApprovedLeaveEmployeeIDs(ctx, callerUserID, date)
+	onLeave, err := m.presence.ApprovedLeaveEmployeeIDs(ctx, businessID, date)
 	if err != nil {
 		return nil, err
 	}

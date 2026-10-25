@@ -9,10 +9,9 @@ import (
 )
 
 // DeleteWorkType removes a node. Reports whether a row was removed.
-func (r *Repository) DeleteWorkType(ctx context.Context, id, ownerID, businessID int64) (bool, error) {
+func (r *Repository) DeleteWorkType(ctx context.Context, id, businessID int64) (bool, error) {
 	res, err := r.queries.DeleteWorkType(ctx, sqlc.DeleteWorkTypeParams{
 		ID:         id,
-		OwnerID:    ownerID,
 		BusinessID: businessID,
 	})
 	if err != nil {
@@ -25,9 +24,8 @@ func (r *Repository) DeleteWorkType(ctx context.Context, id, ownerID, businessID
 
 // CountWorkTypeChildren reports how many nodes hang off a parent, which is what
 // keeps the tree to two levels and stops a parent with children being nested.
-func (r *Repository) CountWorkTypeChildren(ctx context.Context, ownerID, businessID, parentID int64) (int64, error) {
+func (r *Repository) CountWorkTypeChildren(ctx context.Context, businessID, parentID int64) (int64, error) {
 	return r.queries.CountWorkTypeChildren(ctx, sqlc.CountWorkTypeChildrenParams{
-		OwnerID:    ownerID,
 		BusinessID: businessID,
 		ParentID:   nullInt64(parentID),
 	})
@@ -36,7 +34,7 @@ func (r *Repository) CountWorkTypeChildren(ctx context.Context, ownerID, busines
 // ListWorkDays returns a person's days across a date range, newest first, with
 // the total for pagination. Paginated because a year of days is 250 rows and no
 // list endpoint here reads unbounded.
-func (r *Repository) ListWorkDays(ctx context.Context, ownerID, businessID, employeeID int64, from, to string, limit int32, offset int64) ([]domain.WorkDay, int64, error) {
+func (r *Repository) ListWorkDays(ctx context.Context, businessID, employeeID int64, from, to string, limit int32, offset int64) ([]domain.WorkDay, int64, error) {
 	fromDate, err := parseDate(from)
 	if err != nil {
 		return nil, 0, err
@@ -47,7 +45,6 @@ func (r *Repository) ListWorkDays(ctx context.Context, ownerID, businessID, empl
 	}
 
 	rows, err := r.queries.ListWorkDays(ctx, sqlc.ListWorkDaysParams{
-		OwnerID:    ownerID,
 		BusinessID: businessID,
 		EmployeeID: employeeID,
 		Date:       fromDate,
@@ -66,7 +63,6 @@ func (r *Repository) ListWorkDays(ctx context.Context, ownerID, businessID, empl
 	}
 
 	total, err := r.queries.CountWorkDays(ctx, sqlc.CountWorkDaysParams{
-		OwnerID:    ownerID,
 		BusinessID: businessID,
 		EmployeeID: employeeID,
 		Date:       fromDate,
@@ -83,7 +79,7 @@ func (r *Repository) ListWorkDays(ctx context.Context, ownerID, businessID, empl
 // employees rather than one, for the workspace team view. Ordered by
 // employee then date so the caller can group rows into a roster without a
 // second pass.
-func (r *Repository) ListWorkDaysByEmployeeIDs(ctx context.Context, ownerID, businessID int64, employeeIDs []int64, from, to string, limit int32, offset int64) ([]domain.WorkDay, int64, error) {
+func (r *Repository) ListWorkDaysByEmployeeIDs(ctx context.Context, businessID int64, employeeIDs []int64, from, to string, limit int32, offset int64) ([]domain.WorkDay, int64, error) {
 	fromDate, err := parseDate(from)
 	if err != nil {
 		return nil, 0, err
@@ -97,7 +93,6 @@ func (r *Repository) ListWorkDaysByEmployeeIDs(ctx context.Context, ownerID, bus
 	}
 
 	rows, err := r.queries.ListWorkDaysByEmployeeIDs(ctx, sqlc.ListWorkDaysByEmployeeIDsParams{
-		OwnerID:     ownerID,
 		BusinessID:  businessID,
 		EmployeeIds: employeeIDs,
 		Date:        fromDate,
@@ -116,7 +111,6 @@ func (r *Repository) ListWorkDaysByEmployeeIDs(ctx context.Context, ownerID, bus
 	}
 
 	total, err := r.queries.CountWorkDaysByEmployeeIDs(ctx, sqlc.CountWorkDaysByEmployeeIDsParams{
-		OwnerID:     ownerID,
 		BusinessID:  businessID,
 		EmployeeIds: employeeIDs,
 		Date:        fromDate,

@@ -16,8 +16,8 @@ func New(ctx context.Context, db *sql.DB) *Adapter {
 	return &Adapter{module: hrtime.NewModule(ctx, db, nil)}
 }
 
-func (a *Adapter) ListWorkDayLines(ctx context.Context, ownerID, businessID, workDayID int64) ([]flow.WorkDayLine, int32, error) {
-	entries, total, err := a.module.ListFlowWorkdayEntries(ctx, ownerID, businessID, workDayID)
+func (a *Adapter) ListWorkDayLines(ctx context.Context, businessID, workDayID int64) ([]flow.WorkDayLine, int32, error) {
+	entries, total, err := a.module.ListFlowWorkdayEntries(ctx, businessID, workDayID)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -64,18 +64,18 @@ func (a *Adapter) UpdateWorkDayLine(ctx context.Context, input flow.WorkDayLineI
 	return toFlow(*entry), nil
 }
 
-func (a *Adapter) GetWorkDayLineOwner(ctx context.Context, id, ownerID, businessID int64) (flow.WorkDayLineOwner, bool, error) {
-	owner, found, err := a.module.FlowWorkdayEntryOwner(ctx, id, ownerID, businessID)
+func (a *Adapter) GetWorkDayLineOwner(ctx context.Context, id, businessID int64) (flow.WorkDayLineOwner, bool, error) {
+	owner, found, err := a.module.FlowWorkdayEntryOwner(ctx, id, businessID)
 	return flow.WorkDayLineOwner{WorkDayID: owner.WorkDayID, EmployeeID: owner.EmployeeID, TaskID: owner.TaskID}, found, err
 }
 
-func (a *Adapter) DeleteWorkDayLine(ctx context.Context, id, ownerID, businessID int64) (bool, error) {
-	return a.module.DeleteFlowWorkdayEntry(ctx, id, ownerID, businessID)
+func (a *Adapter) DeleteWorkDayLine(ctx context.Context, id, businessID int64) (bool, error) {
+	return a.module.DeleteFlowWorkdayEntry(ctx, id, businessID)
 }
 
 func toHRInput(input flow.WorkDayLineInput) hrtime.FlowWorkdayEntryInput {
 	return hrtime.FlowWorkdayEntryInput{
-		ID: input.ID, OwnerID: input.OwnerID, BusinessID: input.BusinessID,
+		ID: input.ID, BusinessID: input.BusinessID,
 		EmployeeID: input.EmployeeID, WorkDayID: input.WorkDayID, Date: input.Date,
 		ProjectID: input.ProjectID, TaskID: input.TaskID, WorkTypeID: input.WorkTypeID,
 		WorkMode: input.WorkMode, Timezone: input.Timezone, Description: input.Description,

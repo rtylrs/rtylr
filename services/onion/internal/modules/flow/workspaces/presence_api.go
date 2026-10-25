@@ -49,13 +49,9 @@ func (a *PresenceAPI) GetPresence(
 	if err != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	resolvedOwnerID, err := tenant.ResolveOwnerID(ctx, businessID, device.User.UserID)
-	if err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to resolve business owner")
-	}
 
 	date := time.Now().UTC().Format("2006-01-02")
-	entries, err := a.Module.ListPresenceForBusiness(ctx, resolvedOwnerID, businessID, device.User.UserID, date)
+	entries, err := a.Module.ListPresenceForBusiness(ctx, businessID, device.User.UserID, date)
 	if err != nil {
 		if errors.Is(err, errPresenceAccessDenied) {
 			return nil, onekiterrors.PermissionDenied()

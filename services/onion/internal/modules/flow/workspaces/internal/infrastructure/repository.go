@@ -11,14 +11,14 @@ import (
 )
 
 type workDayLineStore interface {
-	ListWorkDayLines(context.Context, int64, int64, int64) ([]domain.WorkDayLine, int32, error)
+	ListWorkDayLines(context.Context, int64, int64) ([]domain.WorkDayLine, int32, error)
 	SumWorkDayLineMinutesByDayIDs(context.Context, int64, []int64) (map[int64]int32, error)
 	SumWorkDayLineMinutesByMemberAndTaskIDs(context.Context, int64, []int64) ([]domain.WorkDayMemberMinutes, error)
 	SumWorkDayLineMinutesByTaskIDs(context.Context, int64, []int64) (map[int64]int64, error)
 	CreateWorkDayLine(context.Context, domain.WorkDayLineInput) (domain.WorkDayLine, error)
 	UpdateWorkDayLine(context.Context, domain.WorkDayLineInput) (domain.WorkDayLine, error)
-	GetWorkDayLineOwner(context.Context, int64, int64, int64) (domain.WorkDayLineOwner, bool, error)
-	DeleteWorkDayLine(context.Context, int64, int64, int64) (bool, error)
+	GetWorkDayLineOwner(context.Context, int64, int64) (domain.WorkDayLineOwner, bool, error)
+	DeleteWorkDayLine(context.Context, int64, int64) (bool, error)
 }
 
 type Repository struct {

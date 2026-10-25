@@ -84,8 +84,8 @@ func (a presenceTestAdapter) ListActiveEmployees(ctx context.Context, businessID
 	return result, nil
 }
 
-func (a presenceTestAdapter) ApprovedLeaveEmployeeIDs(ctx context.Context, userID int64, date string) (map[int64]bool, error) {
-	return a.leave.ApprovedLeaveEmployeeIDs(ctx, userID, date)
+func (a presenceTestAdapter) ApprovedLeaveEmployeeIDs(ctx context.Context, businessID int64, date string) (map[int64]bool, error) {
+	return a.leave.ApprovedLeaveEmployeeIDs(ctx, businessID, date)
 }
 
 func newPresenceModule(ctx context.Context, db *sql.DB) *workspaces.Module {
@@ -135,9 +135,9 @@ func TestListPresenceForBusiness_ResolvesStatusPerEmployee(t *testing.T) {
 	})
 
 	if _, err := db.ExecContext(ctx,
-		`INSERT INTO flow_work_days (owner_id, business_id, employee_id, date, timezone, work_mode, logged_by)
-		 VALUES (?, ?, ?, ?, 'UTC', 'remote', ?)`,
-		presenceOwnerID, presenceBusinessID, onsiteEmployeeID, presenceDate, presenceOnsiteUserID,
+		`INSERT INTO flow_work_days (business_id, employee_id, date, timezone, work_mode, logged_by)
+		 VALUES (?, ?, ?, 'UTC', 'remote', ?)`,
+		presenceBusinessID, onsiteEmployeeID, presenceDate, presenceOnsiteUserID,
 	); err != nil {
 		t.Fatalf("insert flow_work_days: %v", err)
 	}
@@ -162,15 +162,11 @@ func TestListPresenceForBusiness_ResolvesStatusPerEmployee(t *testing.T) {
 		_, _ = db.ExecContext(context.Background(), "DELETE FROM hr_leave_types WHERE id = ?", leaveTypeID)
 	})
 
-	// hr_leave scopes owner_id/business_id to the raw caller id, not the
-	// tenant's resolved businessID (see the ListPresenceForBusiness doc
-	// comment) - so this row must be written under presenceCallerUserID,
-	// the same id ApprovedLeaveEmployeeIDs is queried with below, or the
-	// lookup silently finds nothing.
+	// HR rows carry the business ID as owner_id.
 	if _, err := db.ExecContext(ctx,
 		`INSERT INTO hr_leave_requests (owner_id, business_id, employee_id, leave_type_id, start_date, end_date, total_days, status)
 		 VALUES (?, ?, ?, ?, ?, ?, 1, 'approved')`,
-		presenceCallerUserID, presenceCallerUserID, leaveEmployeeID, leaveTypeID, presenceDate, presenceDate,
+		presenceBusinessID, presenceBusinessID, leaveEmployeeID, leaveTypeID, presenceDate, presenceDate,
 	); err != nil {
 		t.Fatalf("insert hr_leave_requests: %v", err)
 	}
@@ -178,7 +174,7 @@ func TestListPresenceForBusiness_ResolvesStatusPerEmployee(t *testing.T) {
 		_, _ = db.ExecContext(context.Background(), "DELETE FROM hr_leave_requests WHERE employee_id = ?", leaveEmployeeID)
 	})
 
-	entries, err := wsModule.ListPresenceForBusiness(ctx, presenceOwnerID, presenceBusinessID, presenceCallerUserID, presenceDate)
+	entries, err := wsModule.ListPresenceForBusiness(ctx, presenceBusinessID, presenceCallerUserID, presenceDate)
 	if err != nil {
 		t.Fatalf("ListPresenceForBusiness: %v", err)
 	}
@@ -212,7 +208,7 @@ func TestListPresenceForBusiness_DeniesCallerWithoutViewDirectory(t *testing.T) 
 	unauthorizedUserID := int64(930099)
 	insertPresenceEmployee(t, db, unauthorizedUserID, "Unauthorized")
 
-	_, err := wsModule.ListPresenceForBusiness(ctx, presenceOwnerID, presenceBusinessID, unauthorizedUserID, presenceDate)
+	_, err := wsModule.ListPresenceForBusiness(ctx, presenceBusinessID, unauthorizedUserID, presenceDate)
 	if err == nil {
 		t.Fatal("want an error for a caller with no view_directory permission")
 	}
@@ -280,9 +276,9 @@ func TestListPresenceForBusiness_DoesNotLeakAnotherTenantsEmployees(t *testing.T
 	// query that forgets to scope: the leak would be a real presence entry, not
 	// an employee with nothing to report.
 	if _, err := db.ExecContext(ctx,
-		`INSERT INTO flow_work_days (owner_id, business_id, employee_id, date, timezone, work_mode, logged_by)
-		 VALUES (?, ?, ?, ?, 'UTC', 'remote', ?)`,
-		testutil.OtherOwnerID, testutil.OtherBusinessID, otherEmployeeID, presenceDate, isoOtherUserID,
+		`INSERT INTO flow_work_days (business_id, employee_id, date, timezone, work_mode, logged_by)
+		 VALUES (?, ?, ?, 'UTC', 'remote', ?)`,
+		testutil.OtherBusinessID, otherEmployeeID, presenceDate, isoOtherUserID,
 	); err != nil {
 		t.Fatalf("insert flow_work_days for the other tenant: %v", err)
 	}
@@ -290,7 +286,7 @@ func TestListPresenceForBusiness_DoesNotLeakAnotherTenantsEmployees(t *testing.T
 		_, _ = db.ExecContext(context.Background(), "DELETE FROM flow_work_days WHERE employee_id = ?", otherEmployeeID)
 	})
 
-	entries, err := wsModule.ListPresenceForBusiness(ctx, isoOwnerID, isoBusinessID, isoCallerUserID, presenceDate)
+	entries, err := wsModule.ListPresenceForBusiness(ctx, isoBusinessID, isoCallerUserID, presenceDate)
 	if err != nil {
 		t.Fatalf("ListPresenceForBusiness: %v", err)
 	}

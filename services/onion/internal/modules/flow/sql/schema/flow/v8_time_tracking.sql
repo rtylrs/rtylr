@@ -1,6 +1,5 @@
 CREATE TABLE IF NOT EXISTS `flow_work_days` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `owner_id` bigint NOT NULL,
   `business_id` bigint NOT NULL,
   `employee_id` bigint NOT NULL,
   `date` date NOT NULL,
@@ -18,14 +17,12 @@ CREATE TABLE IF NOT EXISTS `flow_work_days` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_work_day` (`owner_id`,`business_id`,`employee_id`,`date`),
-  KEY `idx_work_days_tenant_employee_date` (`owner_id`,`business_id`,`employee_id`,`date`),
-  KEY `idx_work_days_tenant_status` (`owner_id`,`business_id`,`status`,`date`)
+  UNIQUE KEY `uk_work_day_business` (`business_id`,`employee_id`,`date`),
+  KEY `idx_work_days_business_status` (`business_id`,`status`,`date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `flow_work_day_actions` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `owner_id` bigint NOT NULL,
   `business_id` bigint NOT NULL,
   `work_day_id` bigint NOT NULL,
   `actor_id` bigint NOT NULL,
@@ -33,12 +30,11 @@ CREATE TABLE IF NOT EXISTS `flow_work_day_actions` (
   `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `idx_work_day_actions_day` (`owner_id`,`business_id`,`work_day_id`,`created_at`)
+  KEY `idx_work_day_actions_business_day` (`business_id`,`work_day_id`,`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `flow_work_types` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `owner_id` bigint NOT NULL,
   `business_id` bigint NOT NULL,
   `workspace_id` bigint NOT NULL,
   `parent_id` bigint DEFAULT NULL,
@@ -50,8 +46,8 @@ CREATE TABLE IF NOT EXISTS `flow_work_types` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `idx_work_types_tenant_workspace` (`owner_id`,`business_id`,`workspace_id`,`archived`,`sort_order`),
-  KEY `idx_work_types_parent` (`owner_id`,`business_id`,`parent_id`)
+  KEY `idx_work_types_business_workspace` (`business_id`,`workspace_id`,`archived`,`sort_order`),
+  KEY `idx_work_types_business_parent` (`business_id`,`parent_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 

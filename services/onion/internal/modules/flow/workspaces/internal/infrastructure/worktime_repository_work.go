@@ -13,13 +13,12 @@ import (
 
 // GetWorkDay reads one person's day. Returns ok=false when nothing has been
 // recorded for that date, which is an ordinary state rather than an error.
-func (r *Repository) GetWorkDay(ctx context.Context, ownerID, businessID, employeeID int64, date string) (domain.WorkDay, bool, error) {
+func (r *Repository) GetWorkDay(ctx context.Context, businessID, employeeID int64, date string) (domain.WorkDay, bool, error) {
 	parsed, err := parseDate(date)
 	if err != nil {
 		return domain.WorkDay{}, false, err
 	}
 	row, err := r.queries.GetWorkDay(ctx, sqlc.GetWorkDayParams{
-		OwnerID:    ownerID,
 		BusinessID: businessID,
 		EmployeeID: employeeID,
 		Date:       parsed,
@@ -43,7 +42,6 @@ func (r *Repository) UpsertWorkDay(ctx context.Context, input domain.WorkDayInpu
 		return domain.WorkDay{}, err
 	}
 	if _, err := r.queries.UpsertWorkDay(ctx, sqlc.UpsertWorkDayParams{
-		OwnerID:      input.OwnerID,
 		BusinessID:   input.BusinessID,
 		EmployeeID:   input.EmployeeID,
 		Date:         parsed,
@@ -59,7 +57,7 @@ func (r *Repository) UpsertWorkDay(ctx context.Context, input domain.WorkDayInpu
 	}
 	// Read back rather than trusting LastInsertId: on the update path it is zero,
 	// and the caller needs the row either way.
-	day, _, err := r.GetWorkDay(ctx, input.OwnerID, input.BusinessID, input.EmployeeID, input.Date)
+	day, _, err := r.GetWorkDay(ctx, input.BusinessID, input.EmployeeID, input.Date)
 	return day, err
 }
 
@@ -70,7 +68,7 @@ func (r *Repository) ListWorkDayLines(ctx context.Context, businessID, workDayID
 	if r.workDayLineStore == nil {
 		return nil, 0, domain.ErrWorkDayLineStoreUnavailable
 	}
-	return r.workDayLineStore.ListWorkDayLines(ctx, businessID, businessID, workDayID)
+	return r.workDayLineStore.ListWorkDayLines(ctx, businessID, workDayID)
 }
 
 func (r *Repository) SumWorkDayLineMinutesByDayIDs(ctx context.Context, businessID int64, workDayIDs []int64) (map[int64]int32, error) {
@@ -101,18 +99,18 @@ func (r *Repository) UpdateWorkDayLine(ctx context.Context, input domain.WorkDay
 	return r.workDayLineStore.UpdateWorkDayLine(ctx, input)
 }
 
-func (r *Repository) GetWorkDayLineOwner(ctx context.Context, id, ownerID, businessID int64) (domain.WorkDayLineOwner, bool, error) {
+func (r *Repository) GetWorkDayLineOwner(ctx context.Context, id, businessID int64) (domain.WorkDayLineOwner, bool, error) {
 	if r.workDayLineStore == nil {
 		return domain.WorkDayLineOwner{}, false, domain.ErrWorkDayLineStoreUnavailable
 	}
-	return r.workDayLineStore.GetWorkDayLineOwner(ctx, id, ownerID, businessID)
+	return r.workDayLineStore.GetWorkDayLineOwner(ctx, id, businessID)
 }
 
-func (r *Repository) DeleteWorkDayLine(ctx context.Context, id, ownerID, businessID int64) (bool, error) {
+func (r *Repository) DeleteWorkDayLine(ctx context.Context, id, businessID int64) (bool, error) {
 	if r.workDayLineStore == nil {
 		return false, domain.ErrWorkDayLineStoreUnavailable
 	}
-	return r.workDayLineStore.DeleteWorkDayLine(ctx, id, ownerID, businessID)
+	return r.workDayLineStore.DeleteWorkDayLine(ctx, id, businessID)
 }
 
 // GetWorkDayByID reads a day by id, scoped to the tenant.
@@ -131,11 +129,10 @@ func (r *Repository) GetWorkDayByID(ctx context.Context, id, businessID int64) (
 }
 
 // ListWorkTypes returns the workspace's classification tree.
-func (r *Repository) ListWorkTypes(ctx context.Context, ownerID, businessID int64, includeArchived bool) ([]domain.WorkType, error) {
+func (r *Repository) ListWorkTypes(ctx context.Context, businessID int64, includeArchived bool) ([]domain.WorkType, error) {
 	rows, err := r.queries.ListWorkTypes(ctx, sqlc.ListWorkTypesParams{
-		OwnerID:    ownerID,
 		BusinessID: businessID,
-		Column3:    includeArchived,
+		Column2:    includeArchived,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ListWorkTypes failed", logger.Error(err))
@@ -151,7 +148,6 @@ func (r *Repository) ListWorkTypes(ctx context.Context, ownerID, businessID int6
 // CreateWorkType adds a node to the tree.
 func (r *Repository) CreateWorkType(ctx context.Context, input domain.WorkTypeInput) (domain.WorkType, error) {
 	res, err := r.queries.CreateWorkType(ctx, sqlc.CreateWorkTypeParams{
-		OwnerID:      input.OwnerID,
 		BusinessID:   input.BusinessID,
 		ParentID:     nullInt64(input.ParentID),
 		Name:         input.Name,
@@ -167,14 +163,13 @@ func (r *Repository) CreateWorkType(ctx context.Context, input domain.WorkTypeIn
 	if err != nil {
 		return domain.WorkType{}, err
 	}
-	return r.GetWorkType(ctx, id, input.OwnerID, input.BusinessID)
+	return r.GetWorkType(ctx, id, input.BusinessID)
 }
 
 // GetWorkType reads one node, scoped to the tenant.
-func (r *Repository) GetWorkType(ctx context.Context, id, ownerID, businessID int64) (domain.WorkType, error) {
+func (r *Repository) GetWorkType(ctx context.Context, id, businessID int64) (domain.WorkType, error) {
 	row, err := r.queries.GetWorkType(ctx, sqlc.GetWorkTypeParams{
 		ID:         id,
-		OwnerID:    ownerID,
 		BusinessID: businessID,
 	})
 	if err != nil {
@@ -193,11 +188,10 @@ func (r *Repository) UpdateWorkType(ctx context.Context, input domain.WorkTypeIn
 		SortOrder:    input.SortOrder,
 		Archived:     input.Archived,
 		ID:           input.ID,
-		OwnerID:      input.OwnerID,
 		BusinessID:   input.BusinessID,
 	}); err != nil {
 		logger.Ctx(ctx).Error("UpdateWorkType failed", logger.Error(err))
 		return domain.WorkType{}, err
 	}
-	return r.GetWorkType(ctx, input.ID, input.OwnerID, input.BusinessID)
+	return r.GetWorkType(ctx, input.ID, input.BusinessID)
 }

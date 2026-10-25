@@ -26,9 +26,10 @@ type FlowWorkdayEntry struct {
 	UpdatedAt       time.Time
 }
 
+// FlowWorkdayEntryInput has no owner: an HR time entry's owner_id is its
+// business ID, so the business is the only scope Flow passes.
 type FlowWorkdayEntryInput struct {
 	ID              int64
-	OwnerID         int64
 	BusinessID      int64
 	EmployeeID      int64
 	WorkDayID       int64
@@ -56,8 +57,8 @@ type FlowWorkdayMemberMinutes struct {
 	Minutes    int64
 }
 
-func (m *Module) ListFlowWorkdayEntries(ctx context.Context, ownerID, businessID, workDayID int64) ([]FlowWorkdayEntry, int32, error) {
-	rows, total, err := m.service.ListFlowWorkdayEntries(ctx, ownerID, businessID, workDayID)
+func (m *Module) ListFlowWorkdayEntries(ctx context.Context, businessID, workDayID int64) ([]FlowWorkdayEntry, int32, error) {
+	rows, total, err := m.service.ListFlowWorkdayEntries(ctx, businessID, businessID, workDayID)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -106,18 +107,18 @@ func (m *Module) UpdateFlowWorkdayEntry(ctx context.Context, input FlowWorkdayEn
 	return &result, nil
 }
 
-func (m *Module) FlowWorkdayEntryOwner(ctx context.Context, id, ownerID, businessID int64) (FlowWorkdayEntryOwner, bool, error) {
-	owner, found, err := m.service.FlowWorkdayEntryOwner(ctx, id, ownerID, businessID)
+func (m *Module) FlowWorkdayEntryOwner(ctx context.Context, id, businessID int64) (FlowWorkdayEntryOwner, bool, error) {
+	owner, found, err := m.service.FlowWorkdayEntryOwner(ctx, id, businessID, businessID)
 	return FlowWorkdayEntryOwner{WorkDayID: owner.WorkDayID, EmployeeID: owner.EmployeeID, TaskID: owner.TaskID}, found, err
 }
 
-func (m *Module) DeleteFlowWorkdayEntry(ctx context.Context, id, ownerID, businessID int64) (bool, error) {
-	return m.service.DeleteFlowWorkdayEntry(ctx, id, ownerID, businessID)
+func (m *Module) DeleteFlowWorkdayEntry(ctx context.Context, id, businessID int64) (bool, error) {
+	return m.service.DeleteFlowWorkdayEntry(ctx, id, businessID, businessID)
 }
 
 func flowWorkdayEntryInputToDomain(input FlowWorkdayEntryInput) domain.FlowWorkdayEntryInput {
 	return domain.FlowWorkdayEntryInput{
-		ID: input.ID, OwnerID: input.OwnerID, BusinessID: input.BusinessID,
+		ID: input.ID, OwnerID: input.BusinessID, BusinessID: input.BusinessID,
 		EmployeeID: input.EmployeeID, WorkDayID: input.WorkDayID, Date: input.Date,
 		ProjectID: input.ProjectID, TaskID: input.TaskID, WorkTypeID: input.WorkTypeID,
 		WorkMode: input.WorkMode, Timezone: input.Timezone, Description: input.Description,

@@ -17,8 +17,8 @@ func newTestHRTimeStore(ctx context.Context, db *sql.DB) testHRTimeStore {
 	return testHRTimeStore{store: flowhrtime.New(ctx, db)}
 }
 
-func (s testHRTimeStore) ListWorkDayLines(ctx context.Context, ownerID, businessID, workDayID int64) ([]domain.WorkDayLine, int32, error) {
-	lines, total, err := s.store.ListWorkDayLines(ctx, ownerID, businessID, workDayID)
+func (s testHRTimeStore) ListWorkDayLines(ctx context.Context, businessID, workDayID int64) ([]domain.WorkDayLine, int32, error) {
+	lines, total, err := s.store.ListWorkDayLines(ctx, businessID, workDayID)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -65,18 +65,18 @@ func (s testHRTimeStore) UpdateWorkDayLine(ctx context.Context, input domain.Wor
 	return testDomainLine(line), nil
 }
 
-func (s testHRTimeStore) GetWorkDayLineOwner(ctx context.Context, id, ownerID, businessID int64) (domain.WorkDayLineOwner, bool, error) {
-	owner, found, err := s.store.GetWorkDayLineOwner(ctx, id, ownerID, businessID)
+func (s testHRTimeStore) GetWorkDayLineOwner(ctx context.Context, id, businessID int64) (domain.WorkDayLineOwner, bool, error) {
+	owner, found, err := s.store.GetWorkDayLineOwner(ctx, id, businessID)
 	return domain.WorkDayLineOwner{WorkDayID: owner.WorkDayID, EmployeeID: owner.EmployeeID, TaskID: owner.TaskID}, found, err
 }
 
-func (s testHRTimeStore) DeleteWorkDayLine(ctx context.Context, id, ownerID, businessID int64) (bool, error) {
-	return s.store.DeleteWorkDayLine(ctx, id, ownerID, businessID)
+func (s testHRTimeStore) DeleteWorkDayLine(ctx context.Context, id, businessID int64) (bool, error) {
+	return s.store.DeleteWorkDayLine(ctx, id, businessID)
 }
 
 func testFlowLineInput(input domain.WorkDayLineInput) flow.WorkDayLineInput {
 	return flow.WorkDayLineInput{
-		ID: input.ID, OwnerID: input.OwnerID, BusinessID: input.BusinessID,
+		ID: input.ID, BusinessID: input.BusinessID,
 		EmployeeID: input.EmployeeID, WorkDayID: input.WorkDayID, Date: input.Date,
 		ProjectID: input.ProjectID, TaskID: input.TaskID, WorkTypeID: input.WorkTypeID,
 		WorkMode: input.WorkMode, Timezone: input.Timezone, Description: input.Description,

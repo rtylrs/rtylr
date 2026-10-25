@@ -96,7 +96,7 @@ func TestAssertCallerOwnsWorkDay_ResolvesHRByBusinessScope(t *testing.T) {
 	})
 
 	input := domain.WorkDayLineInput{
-		OwnerID: flowOwnerID, BusinessID: businessID, LoggedBy: callerUserID,
+		BusinessID: businessID, LoggedBy: callerUserID,
 	}
 	svc.SetWorkdayRosterSource(workdayRosterTestSource{employeeUserIDs: map[int64]int64{employeeID: callerUserID}})
 	if err := svc.assertCallerOwnsWorkDay(ctx, input, employeeID); err != nil {
@@ -115,7 +115,6 @@ func (s workdayRosterTestSource) ResolveWorkdayRoster(_ context.Context, _ int64
 func workDayLineInputWithLoggedBy(userID int64) domain.WorkDayLineInput {
 	return domain.WorkDayLineInput{
 		WorkDayID:  409,
-		OwnerID:    9003,
 		BusinessID: 9003,
 		ProjectID:  998833,
 		LoggedBy:   userID,

@@ -92,23 +92,19 @@ func (a *WorkTimeAPIV2) ListTeamWorkDays(ctx context.Context, req *flowtimev2.Li
 func (a *WorkTimeAPIV2) scope(
 	ctx context.Context,
 	employeeID int64,
-) (ownerID, businessID, employee int64, err error) {
+) (businessID, employee int64, err error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return 0, 0, 0, onekiterrors.PermissionDenied()
+		return 0, 0, onekiterrors.PermissionDenied()
 	}
 	if !callerMayActFor(authUser.UserID, employeeID) {
-		return 0, 0, 0, onekiterrors.PermissionDenied()
+		return 0, 0, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return 0, 0, 0, onekiterrors.PermissionDenied()
+		return 0, 0, onekiterrors.PermissionDenied()
 	}
-	ownerID, ownerErr := tenant.ResolveOwnerID(ctx, businessID, authUser.UserID)
-	if ownerErr != nil {
-		return 0, 0, 0, workspaceInternalError(ctx, "ResolveOwnerID failed", ownerErr)
-	}
-	return ownerID, businessID, authUser.UserID, nil
+	return businessID, authUser.UserID, nil
 }
 
 func toContractLineV2(line domain.WorkDayLine) *flowtimev2.WorkDayLine {
@@ -145,12 +141,12 @@ func toContractWorkTypeV2(workType domain.WorkType) *flowtimev2.WorkType {
 }
 
 func (a *WorkTimeAPIV2) GetWorkDay(ctx context.Context, req *flowtimev2.GetWorkDayRequest) (*flowtimev2.GetWorkDayResponse, error) {
-	ownerID, businessID, employeeID, err := a.scope(ctx, req.GetEmployeeId())
+	businessID, employeeID, err := a.scope(ctx, req.GetEmployeeId())
 	if err != nil {
 		return nil, err
 	}
 
-	day, lines, found, err := a.Service.GetWorkDay(ctx, ownerID, businessID, employeeID, req.GetDate())
+	day, lines, found, err := a.Service.GetWorkDay(ctx, businessID, employeeID, req.GetDate())
 	if err != nil {
 		return nil, mapServiceError(ctx, err)
 	}
@@ -168,13 +164,12 @@ func (a *WorkTimeAPIV2) GetWorkDay(ctx context.Context, req *flowtimev2.GetWorkD
 }
 
 func (a *WorkTimeAPIV2) UpsertWorkDay(ctx context.Context, req *flowtimev2.UpsertWorkDayRequest) (*flowtimev2.UpsertWorkDayResponse, error) {
-	ownerID, businessID, employeeID, err := a.scope(ctx, req.GetEmployeeId())
+	businessID, employeeID, err := a.scope(ctx, req.GetEmployeeId())
 	if err != nil {
 		return nil, err
 	}
 
 	day, err := a.Service.UpsertWorkDay(ctx, domain.WorkDayInput{
-		OwnerID:      ownerID,
 		BusinessID:   businessID,
 		EmployeeID:   employeeID,
 		Date:         req.GetDate(),
@@ -192,13 +187,13 @@ func (a *WorkTimeAPIV2) UpsertWorkDay(ctx context.Context, req *flowtimev2.Upser
 }
 
 func (a *WorkTimeAPIV2) ListWorkDays(ctx context.Context, req *flowtimev2.ListWorkDaysRequest) (*flowtimev2.ListWorkDaysResponse, error) {
-	ownerID, businessID, employeeID, err := a.scope(ctx, req.GetEmployeeId())
+	businessID, employeeID, err := a.scope(ctx, req.GetEmployeeId())
 	if err != nil {
 		return nil, err
 	}
 
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
-	days, total, err := a.Service.ListWorkDays(ctx, ownerID, businessID, employeeID, req.GetFromDate(), req.GetToDate(), limit, offset)
+	days, total, err := a.Service.ListWorkDays(ctx, businessID, employeeID, req.GetFromDate(), req.GetToDate(), limit, offset)
 	if err != nil {
 		return nil, mapServiceError(ctx, err)
 	}
@@ -214,13 +209,12 @@ func (a *WorkTimeAPIV2) ListWorkDays(ctx context.Context, req *flowtimev2.ListWo
 }
 
 func (a *WorkTimeAPIV2) CreateWorkDayLine(ctx context.Context, req *flowtimev2.CreateWorkDayLineRequest) (*flowtimev2.CreateWorkDayLineResponse, error) {
-	_, businessID, _, err := a.scope(ctx, 0)
+	businessID, _, err := a.scope(ctx, 0)
 	if err != nil {
 		return nil, err
 	}
 
 	line, err := a.Service.CreateWorkDayLine(ctx, domain.WorkDayLineInput{
-		OwnerID:         businessID,
 		BusinessID:      businessID,
 		WorkDayID:       req.GetWorkDayId(),
 		ProjectID:       req.GetProjectId(),
@@ -240,14 +234,13 @@ func (a *WorkTimeAPIV2) CreateWorkDayLine(ctx context.Context, req *flowtimev2.C
 }
 
 func (a *WorkTimeAPIV2) UpdateWorkDayLine(ctx context.Context, req *flowtimev2.UpdateWorkDayLineRequest) (*flowtimev2.UpdateWorkDayLineResponse, error) {
-	_, businessID, _, err := a.scope(ctx, 0)
+	businessID, _, err := a.scope(ctx, 0)
 	if err != nil {
 		return nil, err
 	}
 
 	line, err := a.Service.UpdateWorkDayLine(ctx, domain.WorkDayLineInput{
 		ID:              req.GetId(),
-		OwnerID:         businessID,
 		BusinessID:      businessID,
 		ProjectID:       req.GetProjectId(),
 		TaskID:          req.GetTaskId(),
@@ -265,12 +258,12 @@ func (a *WorkTimeAPIV2) UpdateWorkDayLine(ctx context.Context, req *flowtimev2.U
 }
 
 func (a *WorkTimeAPIV2) DeleteWorkDayLine(ctx context.Context, req *flowtimev2.DeleteWorkDayLineRequest) (*flowtimev2.DeleteWorkDayLineResponse, error) {
-	_, businessID, _, err := a.scope(ctx, 0)
+	businessID, _, err := a.scope(ctx, 0)
 	if err != nil {
 		return nil, err
 	}
 
-	removed, err := a.Service.DeleteWorkDayLine(ctx, req.GetId(), businessID, businessID, actor(ctx))
+	removed, err := a.Service.DeleteWorkDayLine(ctx, req.GetId(), businessID, actor(ctx))
 	if err != nil {
 		return nil, mapServiceError(ctx, err)
 	}
@@ -283,12 +276,12 @@ func (a *WorkTimeAPIV2) DeleteWorkDayLine(ctx context.Context, req *flowtimev2.D
 }
 
 func (a *WorkTimeAPIV2) ListWorkTypes(ctx context.Context, req *flowtimev2.ListWorkTypesRequest) (*flowtimev2.ListWorkTypesResponse, error) {
-	ownerID, businessID, _, err := a.scope(ctx, 0)
+	businessID, _, err := a.scope(ctx, 0)
 	if err != nil {
 		return nil, err
 	}
 
-	types, err := a.Service.ListWorkTypes(ctx, ownerID, businessID, req.GetIncludeArchived())
+	types, err := a.Service.ListWorkTypes(ctx, businessID, req.GetIncludeArchived())
 	if err != nil {
 		return nil, mapServiceError(ctx, err)
 	}
@@ -301,13 +294,12 @@ func (a *WorkTimeAPIV2) ListWorkTypes(ctx context.Context, req *flowtimev2.ListW
 }
 
 func (a *WorkTimeAPIV2) CreateWorkType(ctx context.Context, req *flowtimev2.CreateWorkTypeRequest) (*flowtimev2.CreateWorkTypeResponse, error) {
-	ownerID, businessID, _, err := a.scope(ctx, 0)
+	businessID, _, err := a.scope(ctx, 0)
 	if err != nil {
 		return nil, err
 	}
 
 	workType, err := a.Service.CreateWorkType(ctx, domain.WorkTypeInput{
-		OwnerID:      ownerID,
 		BusinessID:   businessID,
 		ParentID:     req.GetParentId(),
 		Name:         req.GetName(),
@@ -322,14 +314,13 @@ func (a *WorkTimeAPIV2) CreateWorkType(ctx context.Context, req *flowtimev2.Crea
 }
 
 func (a *WorkTimeAPIV2) UpdateWorkType(ctx context.Context, req *flowtimev2.UpdateWorkTypeRequest) (*flowtimev2.UpdateWorkTypeResponse, error) {
-	ownerID, businessID, _, err := a.scope(ctx, 0)
+	businessID, _, err := a.scope(ctx, 0)
 	if err != nil {
 		return nil, err
 	}
 
 	workType, err := a.Service.UpdateWorkType(ctx, domain.WorkTypeInput{
 		ID:           req.GetId(),
-		OwnerID:      ownerID,
 		BusinessID:   businessID,
 		ParentID:     req.GetParentId(),
 		Name:         req.GetName(),
@@ -345,12 +336,12 @@ func (a *WorkTimeAPIV2) UpdateWorkType(ctx context.Context, req *flowtimev2.Upda
 }
 
 func (a *WorkTimeAPIV2) DeleteWorkType(ctx context.Context, req *flowtimev2.DeleteWorkTypeRequest) (*flowtimev2.DeleteWorkTypeResponse, error) {
-	ownerID, businessID, _, err := a.scope(ctx, 0)
+	businessID, _, err := a.scope(ctx, 0)
 	if err != nil {
 		return nil, err
 	}
 
-	removed, err := a.Service.DeleteWorkType(ctx, req.GetId(), ownerID, businessID)
+	removed, err := a.Service.DeleteWorkType(ctx, req.GetId(), businessID)
 	if err != nil {
 		return nil, mapServiceError(ctx, err)
 	}

@@ -103,11 +103,11 @@ func TestWorkTimeV2PersistsTotalsWithoutHROnboarding(t *testing.T) {
 		t.Fatal(err)
 	}
 	const legacyDate = "2026-10-01"
-	legacy, err := repo.UpsertWorkDay(ctx, domain.WorkDayInput{OwnerID: ownerID, BusinessID: businessID, EmployeeID: ownerID, Date: legacyDate, Timezone: "UTC", WorkMode: "onsite", LoggedBy: colleagueID})
+	legacy, err := repo.UpsertWorkDay(ctx, domain.WorkDayInput{BusinessID: businessID, EmployeeID: ownerID, Date: legacyDate, Timezone: "UTC", WorkMode: "onsite", LoggedBy: colleagueID})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := svc.CreateWorkDayLine(ctx, domain.WorkDayLineInput{OwnerID: businessID, BusinessID: businessID, EmployeeID: ownerID, WorkDayID: legacy.ID, Date: legacyDate, ProjectID: 123, DurationMinutes: 30, LoggedBy: colleagueID}); err != nil {
+	if _, err := svc.CreateWorkDayLine(ctx, domain.WorkDayLineInput{BusinessID: businessID, EmployeeID: ownerID, WorkDayID: legacy.ID, Date: legacyDate, ProjectID: 123, DurationMinutes: 30, LoggedBy: colleagueID}); err != nil {
 		t.Fatal(err)
 	}
 	team, err := handler.ListTeamWorkDays(ctx, &timev2.ListTeamWorkDaysRequest{FromDate: legacyDate, ToDate: date, Limit: 50})
