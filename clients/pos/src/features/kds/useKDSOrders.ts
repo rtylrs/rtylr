@@ -46,8 +46,8 @@ export function useKDSOrders(station?: string) {
     ordersRef.current = orders;
   }, [orders]);
 
-  const rawUserId = useUserStore((s) => s.userId);
-  const ownerID = rawUserId != null ? parsePositiveInteger(rawUserId) : undefined;
+  const rawBusinessId = useUserStore((s) => s.businessId);
+  const businessID = rawBusinessId != null ? parsePositiveInteger(rawBusinessId) : undefined;
 
   const load = useCallback(async (options?: { silent?: boolean }): Promise<void> => {
     // Silent reloads (realtime pings) keep the current tickets on screen
@@ -86,7 +86,7 @@ export function useKDSOrders(station?: string) {
     void load();
   }, [load]);
 
-  useKdsStream(ownerID, () => void load({ silent: true }));
+  useKdsStream(businessID, () => void load({ silent: true }));
 
   const setStatus = useCallback(
     async (id: string, status: KDSOrder['status']): Promise<void> => {

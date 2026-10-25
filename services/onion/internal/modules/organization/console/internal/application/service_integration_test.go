@@ -315,4 +315,14 @@ func TestCreateGrant_OwnerWithSeveralBusinessesMustNameOne(t *testing.T) {
 	if _, err := repo.GetSubscriptionByBusiness(ctx, accessGrantTestBusinessID); !errors.Is(err, sql.ErrNoRows) {
 		t.Fatalf("the other business got a subscription too: %v", err)
 	}
+
+	if _, err := svc.GetSubscriptionForUser(ctx, accessGrantTestOwnerID, 0); !errors.Is(err, application.ErrOwnerHasSeveralBusinesses) {
+		t.Fatalf("GetSubscriptionForUser by owner = %v, want ErrOwnerHasSeveralBusinesses", err)
+	}
+	if sub, err := svc.GetSubscriptionForUser(ctx, accessGrantTestOwnerID, secondBusinessID); err != nil || sub == nil {
+		t.Fatalf("GetSubscriptionForUser for the named business = %v, %v", sub, err)
+	}
+	if _, err := svc.GetSubscriptionForUser(ctx, accessGrantTestOwnerID, accessGrantTestBusinessID); !errors.Is(err, application.ErrRecordNotFound) {
+		t.Fatalf("GetSubscriptionForUser for the business without a plan = %v, want ErrRecordNotFound", err)
+	}
 }

@@ -56,6 +56,7 @@ interface UserState {
   error: string | null;
   effectiveAccess: EffectiveAccess | null;
   userId: string | null;
+  businessId: string | null;
   addons: Addons;
   visits: unknown[];
 }
@@ -78,6 +79,7 @@ const initialState: UserState = {
   error: null,
   effectiveAccess: null,
   userId: null,
+  businessId: null,
   addons: {
     feedback: false,
     about: false,
@@ -154,6 +156,7 @@ export const useUserStore = create<UserState & UserActions>()(
           error: null,
           effectiveAccess: null,
           userId: null,
+          businessId: null,
           token: null,
         });
       },
@@ -182,6 +185,7 @@ export const useUserStore = create<UserState & UserActions>()(
           set({
             effectiveAccess,
             userId: idText(me.userId) ?? state.userId,
+            businessId: idText(me.businessId) ?? state.businessId,
             token: state.token,
             user,
             businessProfile: profile ?? state.businessProfile,
@@ -245,6 +249,7 @@ export const useUserStore = create<UserState & UserActions>()(
         isAuthenticated: state.isAuthenticated,
         effectiveAccess: state.effectiveAccess,
         userId: state.userId,
+        businessId: state.businessId,
         addons: state.addons,
         visits: state.visits,
       }),

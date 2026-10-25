@@ -43,7 +43,7 @@ func (s *Service) VoidOrder(ctx context.Context, ownerID, orderID int64, reason 
 	}
 
 	wsbus.Publish(wsbus.Event{
-		Topic:    ownerTopic(ownerID),
+		Topic:    businessTopic(ownerID),
 		Type:     "pos:order:voided",
 		EntityID: orderID,
 	})
@@ -83,7 +83,7 @@ func (s *Service) SendToKitchen(ctx context.Context, ownerID, orderID int64) err
 	}
 	invalidateOrderScope(ctx, ownerID)
 	wsbus.Publish(wsbus.Event{
-		Topic:    ownerTopic(ownerID),
+		Topic:    businessTopic(ownerID),
 		Type:     "pos:order:preparing",
 		EntityID: orderID,
 	})

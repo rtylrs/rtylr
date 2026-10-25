@@ -2,11 +2,17 @@ package tenant
 
 import (
 	"context"
+	"database/sql"
 	"errors"
+	"fmt"
 	"sync"
 )
 
 var ErrNoBusinessScope = errors.New("no business scope for request")
+
+// ErrOwnerLookupFailed means the scope could not be checked, as opposed to
+// checked and refused; callers may report it as a temporary failure.
+var ErrOwnerLookupFailed = errors.New("business scope lookup failed")
 
 // ScopeResolver supplies verified active identity from the owning module.
 // Reads must reflect current grants, including revocations. Unresolved scope returns an error.
@@ -46,10 +52,20 @@ func ActiveBusinessID(ctx context.Context, businessID int64) (int64, error) {
 }
 
 func activeBusinessID(ctx context.Context, reader ScopeResolver, businessID int64) (int64, error) {
-	if businessID <= 0 || reader == nil {
+	if businessID <= 0 {
 		return 0, ErrNoBusinessScope
 	}
-	if ownerID, err := reader.ActiveBusinessOwner(ctx, businessID); err != nil || ownerID <= 0 {
+	if reader == nil {
+		return 0, ErrOwnerLookupFailed
+	}
+	ownerID, err := reader.ActiveBusinessOwner(ctx, businessID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, ErrNoBusinessScope
+	}
+	if err != nil {
+		return 0, fmt.Errorf("%w: %w", ErrOwnerLookupFailed, err)
+	}
+	if ownerID <= 0 {
 		return 0, ErrNoBusinessScope
 	}
 	return businessID, nil

@@ -15,15 +15,16 @@ func TestActiveBusinessIDNeverYieldsUsableScope(t *testing.T) {
 	for _, tt := range []struct {
 		name       string
 		businessID int64
+		want       error
 	}{
-		{name: "no business in scope", businessID: 0},
-		{name: "negative business id", businessID: -5},
-		{name: "resolver unavailable", businessID: 7},
+		{name: "no business in scope", businessID: 0, want: tenant.ErrNoBusinessScope},
+		{name: "negative business id", businessID: -5, want: tenant.ErrNoBusinessScope},
+		{name: "resolver unavailable", businessID: 7, want: tenant.ErrOwnerLookupFailed},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			businessID, err := NewRepository(nil).ActiveBusinessID(context.Background(), tt.businessID)
-			if !errors.Is(err, tenant.ErrNoBusinessScope) {
-				t.Fatalf("ActiveBusinessID error = %v, want %v", err, tenant.ErrNoBusinessScope)
+			if !errors.Is(err, tt.want) {
+				t.Fatalf("ActiveBusinessID error = %v, want %v", err, tt.want)
 			}
 			if businessID != 0 {
 				t.Errorf("ActiveBusinessID = %d, want 0 for an unverified business", businessID)

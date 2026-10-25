@@ -5,14 +5,14 @@ import { KDS_EVENT_TYPES } from '../../shared/services/api/realtimeEvents';
 
 const INVALIDATION_COALESCE_MS = 300;
 
-export function useKdsStream(ownerID: number | undefined, onInvalidate: () => void): void {
+export function useKdsStream(businessID: number | undefined, onInvalidate: () => void): void {
   // A burst of realtime events should trigger ONE refetch, not one per event.
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingRef = useRef(false);
 
   useEffect(() => {
-    if (!ownerID) return;
-    const topic = `owner:${ownerID}`;
+    if (!businessID) return;
+    const topic = `business:${businessID}`;
 
     const flush = (): void => {
       timerRef.current = null;
@@ -39,5 +39,5 @@ export function useKdsStream(ownerID: number | undefined, onInvalidate: () => vo
       }
       pendingRef.current = false;
     };
-  }, [ownerID, onInvalidate]);
+  }, [businessID, onInvalidate]);
 }

@@ -93,9 +93,6 @@ UPDATE users SET onboarded = TRUE WHERE id = ?;
 -- name: UpdateUserProfile :exec
 UPDATE users SET full_name = ?, updated_at = NOW() WHERE id = ?;
 
--- name: GetBusinessIDByOwnerID :one
-SELECT id FROM businesses WHERE owner_id = ? LIMIT 1;
-
 -- name: CountActiveMembers :one
 SELECT COUNT(*)
 FROM (

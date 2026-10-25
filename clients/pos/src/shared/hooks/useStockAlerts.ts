@@ -23,12 +23,12 @@ function pruneCooldowns(map: Map<string, number>): void {
  * product ID so the same product only triggers one toast per 5 minutes.
  */
 export function useStockAlerts(): void {
-  const userId = useUserStore((s) => s.userId);
+  const businessId = useUserStore((s) => s.businessId);
   const cooldowns = useRef(new Map<string, number>());
 
   useEffect(() => {
-    if (!userId) return;
-    const topic = `owner:${userId}`;
+    if (!businessId) return;
+    const topic = `business:${businessId}`;
 
     const handler = (e: RealtimeEvent): void => {
       // RealtimeEvent carries extra fields from the server beyond the typed interface
@@ -67,5 +67,5 @@ export function useStockAlerts(): void {
 
     const unsub = posRealtime.subscribe(topic, handler);
     return () => unsub();
-  }, [userId]);
+  }, [businessId]);
 }

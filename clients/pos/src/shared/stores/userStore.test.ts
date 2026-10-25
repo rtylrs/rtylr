@@ -140,6 +140,7 @@ describe('userStore', () => {
     expect(oauthClient.me).toHaveBeenCalledWith({});
     expect(configClient.getConfig).toHaveBeenCalledWith({});
     expect(getState().userId).toBe('u1');
+    expect(getState().businessId).toBe('b1');
     expect(getState().effectiveAccess?.isAdmin).toBe(true);
     expect(getState().isAuthenticated).toBe(true);
     expect(getState().businessProfile?.name).toBe('Alice Store');

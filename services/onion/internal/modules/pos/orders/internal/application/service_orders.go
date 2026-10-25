@@ -71,7 +71,7 @@ func (s *Service) CreateOrder(ctx context.Context, businessID, ownerID, staffID 
 	invalidateOrderScope(ctx, ownerID)
 
 	wsbus.Publish(wsbus.Event{
-		Topic:    ownerTopic(ownerID),
+		Topic:    businessTopic(ownerID),
 		Type:     "pos:order:created",
 		EntityID: orderID,
 	})
@@ -88,7 +88,7 @@ func (s *Service) ResumeOrder(ctx context.Context, ownerID, staffID, orderID int
 	}
 	invalidateOrderScope(ctx, ownerID)
 	wsbus.Publish(wsbus.Event{
-		Topic:    ownerTopic(ownerID),
+		Topic:    businessTopic(ownerID),
 		Type:     "pos:order:resumed",
 		EntityID: orderID,
 	})
@@ -127,7 +127,7 @@ func (s *Service) UpdateOrderItemStatus(ctx context.Context, ownerID, orderID, i
 	}
 
 	wsbus.Publish(wsbus.Event{
-		Topic:    ownerTopic(ownerID),
+		Topic:    businessTopic(ownerID),
 		Type:     "pos:kds:item:updated",
 		EntityID: itemID,
 	})
@@ -186,7 +186,7 @@ func (s *Service) ProcessPayment(ctx context.Context, ownerID int64, input domai
 	}
 
 	wsbus.Publish(wsbus.Event{
-		Topic:    ownerTopic(ownerID),
+		Topic:    businessTopic(ownerID),
 		Type:     "pos:order:paid",
 		EntityID: input.OrderID,
 	})

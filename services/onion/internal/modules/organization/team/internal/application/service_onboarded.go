@@ -135,25 +135,6 @@ func (s *Service) DeactivateUser(ctx context.Context, actorID, businessID, userI
 	return nil
 }
 
-func (s *Service) CanAccessOwner(ctx context.Context, userID, ownerID int64) bool {
-	if userID <= 0 || ownerID <= 0 {
-		return false
-	}
-	if userID == ownerID {
-		return true
-	}
-	businessID, err := s.repo.GetBusinessIDByOwnerID(ctx, ownerID)
-	if err != nil || businessID <= 0 {
-		return false
-	}
-	apps, err := s.GetBusinessApps(ctx, businessID)
-	if err != nil {
-		return false
-	}
-	snapshot, found, err := s.repo.GetAuthorizationSnapshot(ctx, businessID, userID, apps)
-	return err == nil && found && snapshot.MembershipActive
-}
-
 // RequireTeamManager reports whether the actor may manage the business's team.
 func (s *Service) RequireTeamManager(ctx context.Context, actorID, businessID int64) error {
 	_, err := s.requireTeamManager(ctx, actorID, businessID)

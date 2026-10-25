@@ -208,9 +208,12 @@ func (a *ConsoleAdminAPI) GetUserSubscription(ctx context.Context, req *consolea
 	if err := requireConsoleAdmin(ctx); err != nil {
 		return nil, err
 	}
-	subscription, err := a.service.GetSubscriptionForUser(ctx, req.GetUserId())
-	if errors.Is(err, sql.ErrNoRows) || errors.Is(err, application.ErrRecordNotFound) {
+	subscription, err := a.service.GetSubscriptionForUser(ctx, req.GetUserId(), req.GetBusinessId())
+	if errors.Is(err, application.ErrRecordNotFound) {
 		return &consoleadminv1.GetUserSubscriptionResponse{}, nil
+	}
+	if mapped := billingBusinessError(err); mapped != nil {
+		return nil, mapped
 	}
 	if err != nil {
 		return nil, internalError("Failed to get subscription")

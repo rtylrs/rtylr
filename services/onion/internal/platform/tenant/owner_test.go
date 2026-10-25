@@ -2,6 +2,7 @@ package tenant
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"testing"
 )
@@ -48,16 +49,18 @@ func TestActiveBusinessIDFailsClosed(t *testing.T) {
 		name       string
 		reader     ScopeResolver
 		businessID int64
+		want       error
 	}{
-		{"missing scope", scopeStub{ownerID: 7}, 0},
-		{"missing resolver", nil, 42},
-		{"inactive business", scopeStub{err: errors.New("no rows")}, 42},
-		{"no owner", scopeStub{}, 42},
+		{"missing scope", scopeStub{ownerID: 7}, 0, ErrNoBusinessScope},
+		{"inactive business", scopeStub{err: sql.ErrNoRows}, 42, ErrNoBusinessScope},
+		{"no owner", scopeStub{}, 42, ErrNoBusinessScope},
+		{"missing resolver", nil, 42, ErrOwnerLookupFailed},
+		{"failed lookup", scopeStub{err: errors.New("unavailable")}, 42, ErrOwnerLookupFailed},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			id, err := activeBusinessID(context.Background(), test.reader, test.businessID)
-			if id != 0 || !errors.Is(err, ErrNoBusinessScope) {
-				t.Fatalf("business=%d err=%v", id, err)
+			if id != 0 || !errors.Is(err, test.want) {
+				t.Fatalf("business=%d err=%v, want %v", id, err, test.want)
 			}
 		})
 	}
