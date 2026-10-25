@@ -9,10 +9,10 @@ import (
 	"github.com/voxire/onion/internal/modules/organization/team/internal/domain"
 )
 
-func (r *Repository) replaceUserGroupMemberships(ctx context.Context, tx *sql.Tx, businessID, ownerID, actorID, userID int64, groupIDs []int64) error {
+func (r *Repository) replaceUserGroupMemberships(ctx context.Context, tx *sql.Tx, businessID, actorID, userID int64, groupIDs []int64) error {
 	if _, err := tx.ExecContext(ctx, `
 		DELETE FROM user_group_members
-		WHERE user_id = ? AND owner_id = ? AND (business_id = ? OR business_id = 0)`, userID, ownerID, businessID); err != nil {
+		WHERE user_id = ? AND business_id = ?`, userID, businessID); err != nil {
 		return err
 	}
 	for _, groupID := range uniqueInt64(groupIDs) {
@@ -20,18 +20,18 @@ func (r *Repository) replaceUserGroupMemberships(ctx context.Context, tx *sql.Tx
 		if err := tx.QueryRowContext(ctx, `
 			SELECT 1
 			FROM user_groups
-			WHERE id = ? AND owner_id = ? AND (business_id = ? OR business_id = 0)
-			LIMIT 1`, groupID, ownerID, businessID).Scan(&found); err != nil {
+			WHERE id = ? AND business_id = ?
+			LIMIT 1`, groupID, businessID).Scan(&found); err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				return fmt.Errorf("group %d does not belong to this business", groupID)
 			}
 			return err
 		}
 		if _, err := tx.ExecContext(ctx, `
-			INSERT INTO user_group_members (group_id, user_id, owner_id, business_id, added_by)
-			VALUES (?, ?, ?, ?, ?)
+			INSERT INTO user_group_members (group_id, user_id, business_id, added_by)
+			VALUES (?, ?, ?, ?)
 			ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), added_by = VALUES(added_by)`,
-			groupID, userID, ownerID, businessID, actorID); err != nil {
+			groupID, userID, businessID, actorID); err != nil {
 			return err
 		}
 	}
@@ -94,8 +94,8 @@ func isTenantAppID(appID string) bool {
 	}
 }
 
-func (r *Repository) DeactivateUser(ctx context.Context, businessID, ownerID, actorID, userID int64) error {
-	if businessID <= 0 || ownerID <= 0 || actorID <= 0 || userID <= 0 {
+func (r *Repository) DeactivateUser(ctx context.Context, businessID, actorID, userID int64) error {
+	if businessID <= 0 || actorID <= 0 || userID <= 0 {
 		return domain.ErrUserNotFound
 	}
 	tx, err := r.pool.BeginTx(ctx, nil)
@@ -104,10 +104,9 @@ func (r *Repository) DeactivateUser(ctx context.Context, businessID, ownerID, ac
 	}
 	rollback := func(cause error) error { _ = tx.Rollback(); return cause }
 	result, err := tx.ExecContext(ctx, `
-		UPDATE authorization_business_members member
-		JOIN businesses business ON business.id = member.business_id
-		SET member.status = 'revoked', member.authorization_version = member.authorization_version + 1, member.updated_at = NOW()
-		WHERE business.id = ? AND business.owner_id = ? AND member.user_id = ? AND member.status <> 'revoked'`, businessID, ownerID, userID)
+		UPDATE authorization_business_members
+		SET status = 'revoked', authorization_version = authorization_version + 1, updated_at = NOW()
+		WHERE business_id = ? AND user_id = ? AND status <> 'revoked'`, businessID, userID)
 	if err != nil {
 		return rollback(err)
 	}

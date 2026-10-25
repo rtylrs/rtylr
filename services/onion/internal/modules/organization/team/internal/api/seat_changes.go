@@ -10,12 +10,11 @@ import (
 const asyncSeatChangeTimeout = 10 * time.Second
 
 type seatChangeRecorder interface {
-	BusinessOwnerID(ctx context.Context, fallbackOwnerID, businessID int64) (int64, error)
-	RecordSeatChange(ctx context.Context, ownerID int64) error
+	RecordSeatChange(ctx context.Context, businessID int64) error
 }
 
-func recordSeatChangeAsync(ctx context.Context, service seatChangeRecorder, actorID, businessID int64) {
-	if service == nil {
+func recordSeatChangeAsync(ctx context.Context, service seatChangeRecorder, businessID int64) {
+	if service == nil || businessID <= 0 {
 		return
 	}
 
@@ -29,18 +28,9 @@ func recordSeatChangeAsync(ctx context.Context, service seatChangeRecorder, acto
 		bgCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), asyncSeatChangeTimeout)
 		defer cancel()
 
-		ownerID, err := service.BusinessOwnerID(bgCtx, actorID, businessID)
-		if err != nil {
-			logger.Ctx(bgCtx).Error("failed to resolve owner for billing seat change",
-				logger.Any("actor_id", actorID),
-				logger.Error(err),
-			)
-			return
-		}
-
-		if err := service.RecordSeatChange(bgCtx, ownerID); err != nil {
+		if err := service.RecordSeatChange(bgCtx, businessID); err != nil {
 			logger.Ctx(bgCtx).Error("failed to record seat change for billing",
-				logger.Any("owner_id", ownerID),
+				logger.Any("business_id", businessID),
 				logger.Error(err),
 			)
 		}

@@ -435,8 +435,18 @@ func (r *Repository) CheckBusinessAccess(ctx context.Context, userID, businessID
 	return cnt > 0, err
 }
 
-// AssignSubscription looks up the plan by slug and creates the owner's initial subscription.
-func (r *Repository) AssignSubscription(ctx context.Context, ownerID int64, planSlug string) error {
+// AssignSubscription looks up the plan by slug and creates the subscription for
+// the business the user registered with. A user without a business has nothing
+// to bill yet; a business created later starts on the default plan.
+func (r *Repository) AssignSubscription(ctx context.Context, userID int64, planSlug string) error {
+	businessID, err := r.queries.GetOwnedDefaultBusinessID(ctx, userID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+
 	// cross-schema read from plans — approved for subscription assignment on registration
 	plan, err := r.queries.GetActivePlanForSignup(ctx, planSlug)
 	if err != nil {
@@ -456,7 +466,7 @@ func (r *Repository) AssignSubscription(ctx context.Context, ownerID int64, plan
 
 	// cross-schema write to subscriptions — approved for subscription creation on registration
 	return r.queries.UpsertSignupSubscription(ctx, sqlc.UpsertSignupSubscriptionParams{
-		OwnerID:     ownerID,
+		BusinessID:  businessID,
 		PlanID:      plan.ID,
 		Status:      sqlc.NullSubscriptionsStatus{SubscriptionsStatus: status, Valid: true},
 		TrialEndsAt: trialEnd,

@@ -20,11 +20,11 @@ func NewBillingAPI(service *application.Service) *BillingAPI {
 
 func (a *BillingAPI) GetBillingSummary(ctx context.Context, _ *hubbillingv1.GetBillingSummaryRequest) (*hubbillingv1.GetBillingSummaryResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if device.User == nil || !canViewBilling(device.User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	summary, err := a.Service.GetSummary(ctx, device.User.UserID)
+	summary, err := a.Service.GetSummary(ctx, device.User.BusinessID)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get billing summary")
 	}
@@ -44,11 +44,11 @@ func (a *BillingAPI) GetBillingSummary(ctx context.Context, _ *hubbillingv1.GetB
 
 func (a *BillingAPI) ListInvoices(ctx context.Context, _ *hubbillingv1.ListInvoicesRequest) (*hubbillingv1.ListInvoicesResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if device.User == nil || !canViewBilling(device.User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	invoices, err := a.Service.ListInvoices(ctx, device.User.UserID)
+	invoices, err := a.Service.ListInvoices(ctx, device.User.BusinessID)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list invoices")
 	}
@@ -69,4 +69,12 @@ func (a *BillingAPI) ListInvoices(ctx context.Context, _ *hubbillingv1.ListInvoi
 	}
 
 	return &hubbillingv1.ListInvoicesResponse{Invoices: payloads}, nil
+}
+
+// canViewBilling reports whether the user may read the business's billing,
+// which belongs to the business, not to each member.
+func canViewBilling(user *authPkg.AuthUser) bool {
+	return authPkg.IsBusinessAdmin(user) ||
+		authPkg.HasDashboardPermission(user, "hub:billing:view") ||
+		authPkg.HasDashboardPermission(user, "hub:billing:manage")
 }

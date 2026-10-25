@@ -59,6 +59,22 @@ func resolveOwnerID(ctx context.Context, reader ScopeResolver, businessID, _ int
 	return ownerID, nil
 }
 
+// ActiveBusinessID verifies that businessID names an active business, for
+// business-scoped reads that run without a user, such as billing.
+func ActiveBusinessID(ctx context.Context, businessID int64) (int64, error) {
+	return activeBusinessID(ctx, currentResolver(), businessID)
+}
+
+func activeBusinessID(ctx context.Context, reader ScopeResolver, businessID int64) (int64, error) {
+	if businessID <= 0 || reader == nil {
+		return 0, ErrNoBusinessScope
+	}
+	if ownerID, err := reader.ActiveBusinessOwner(ctx, businessID); err != nil || ownerID <= 0 {
+		return 0, ErrNoBusinessScope
+	}
+	return businessID, nil
+}
+
 // ResolveBusinessID preserves each business scope and rejects an unverified token or default business.
 func ResolveBusinessID(ctx context.Context, businessID, fallbackUserID int64) (int64, error) {
 	return resolveBusinessID(ctx, currentResolver(), businessID, fallbackUserID)

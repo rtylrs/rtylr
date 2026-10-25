@@ -91,7 +91,7 @@ func cleanupRegisteredUser(t *testing.T, db *sql.DB, email string) {
 	for _, query := range []string{
 		"DELETE FROM authorization_business_members WHERE user_id = ?",
 		"DELETE FROM hr_employees WHERE user_id = ?",
-		"DELETE FROM subscriptions WHERE owner_id = ?",
+		"DELETE FROM subscriptions WHERE business_id IN (SELECT id FROM businesses WHERE owner_id = ?)",
 		"DELETE FROM businesses WHERE owner_id = ?",
 		"DELETE FROM users WHERE id = ?",
 	} {

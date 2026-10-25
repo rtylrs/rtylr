@@ -26,30 +26,30 @@ type repository interface {
 	SetConsoleAdmin(ctx context.Context, id int64, isAdmin bool) error
 	ListBusinesses(ctx context.Context, limit, offset int, id int64, name string, ownerID int64) ([]BusinessRow, int64, error)
 	GetBusinessByID(ctx context.Context, id int64) (*BusinessRow, error)
-	GetActiveBusinessByOwner(ctx context.Context, ownerID int64) (*BusinessRow, error)
+	ListActiveBusinessesByOwner(ctx context.Context, ownerID int64) ([]BusinessRow, error)
 	UpdateBusiness(ctx context.Context, id int64, name string) error
 	DeleteBusiness(ctx context.Context, id int64) error
-	CountActiveSeatsForOwner(ctx context.Context, ownerID int64) (int, error)
+	CountActiveSeatsForBusiness(ctx context.Context, businessID int64) (int, error)
 	ListSubscriptions(ctx context.Context, limit, offset int, status string) ([]SubscriptionRow, int64, error)
 	GetSubscriptionByID(ctx context.Context, id int64) (*SubscriptionRow, error)
-	GetSubscriptionByOwner(ctx context.Context, ownerID int64) (*SubscriptionRow, error)
+	GetSubscriptionByBusiness(ctx context.Context, businessID int64) (*SubscriptionRow, error)
 	UpsertSubscription(ctx context.Context, params SubscriptionWriteParams) error
 	UpdateSubscription(ctx context.Context, id int64, params SubscriptionWriteParams) error
 	DeleteSubscription(ctx context.Context, id int64) error
 	ListPlans(ctx context.Context) ([]PlanRow, error)
 	UpdatePlan(ctx context.Context, id int64, name string, pricePerSeatCents, annualPricePerSeatCents int, isActive bool) error
 	ListGrants(ctx context.Context, limit, offset int) ([]GrantRow, int64, error)
-	CreateGrant(ctx context.Context, userID, planID, grantedBy int64, note string, expiresAt *time.Time) (int64, error)
-	CreateGrantAndActivateSubscription(ctx context.Context, userID, planID, grantedBy int64, note string, expiresAt *time.Time, sub SubscriptionWriteParams) (int64, error)
+	CreateGrant(ctx context.Context, businessID, planID, grantedBy int64, note string, expiresAt *time.Time) (int64, error)
+	CreateGrantAndActivateSubscription(ctx context.Context, businessID, planID, grantedBy int64, note string, expiresAt *time.Time, sub SubscriptionWriteParams) (int64, error)
 	GetGrant(ctx context.Context, id int64) (*GrantRow, error)
-	GetGrantUserID(ctx context.Context, id int64) (int64, error)
+	GetGrantBusinessID(ctx context.Context, id int64) (int64, error)
 	RevokeGrant(ctx context.Context, id int64) error
 	DeleteGrant(ctx context.Context, id int64) error
 	GetStats(ctx context.Context) (*StatsRow, error)
 	ListAddons(ctx context.Context) ([]AddonCatalogRow, error)
 	AddonExists(ctx context.Context, addonID string) (bool, error)
 	ListAddonGrants(ctx context.Context, limit, offset int) ([]AddonGrantRow, int64, error)
-	CreateAddonGrant(ctx context.Context, userID, businessID int64, addonID string, grantedBy int64, note string, expiresAt *time.Time, enabledByGrant bool) (int64, error)
+	CreateAddonGrant(ctx context.Context, businessID int64, addonID string, grantedBy int64, note string, expiresAt *time.Time, enabledByGrant bool) (int64, error)
 	GetAddonGrant(ctx context.Context, id int64) (*AddonGrantRow, error)
 	GetAddonGrantScope(ctx context.Context, id int64) (*AddonGrantScopeRow, error)
 	RevokeAddonGrant(ctx context.Context, id int64) error

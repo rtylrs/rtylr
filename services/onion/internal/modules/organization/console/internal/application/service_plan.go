@@ -13,6 +13,7 @@ func (s *Service) UpdatePlan(ctx context.Context, id int64, name string, pricePe
 
 // ── Grants ────────────────────────────────────────────────────────────────────
 
+// GrantDTO's user fields describe the granted business's current owner.
 type GrantDTO struct {
 	ID                int64   `json:"id"`
 	UserID            int64   `json:"user_id"`
@@ -39,14 +40,14 @@ type ListGrantsResult struct {
 
 func toGrantDTO(g GrantRow) GrantDTO {
 	dto := GrantDTO{
-		ID: g.ID, UserID: g.UserID, PlanID: g.PlanID, PlanName: g.PlanName, GrantedBy: g.GrantedBy,
+		ID: g.ID, UserID: g.OwnerID.Int64, PlanID: g.PlanID, PlanName: g.PlanName, GrantedBy: g.GrantedBy,
 		ActiveSeatCount: g.ActiveSeatCount, IncludedSeatLimit: freeIncludedSeatLimit,
 	}
-	if g.UserName.Valid {
-		dto.UserName = g.UserName.String
+	if g.OwnerName.Valid {
+		dto.UserName = g.OwnerName.String
 	}
-	if g.UserEmail.Valid {
-		dto.UserEmail = g.UserEmail.String
+	if g.OwnerEmail.Valid {
+		dto.UserEmail = g.OwnerEmail.String
 	}
 	if g.BusinessID.Valid {
 		id := g.BusinessID.Int64
@@ -87,16 +88,22 @@ func (s *Service) ListGrants(ctx context.Context, limit, offset int) (*ListGrant
 	return &ListGrantsResult{Grants: dtos, Total: total}, nil
 }
 
-func (s *Service) CreateGrant(ctx context.Context, userID, planID, grantedBy int64, note string, expiresAt *time.Time) (*GrantDTO, error) {
+// CreateGrant grants a plan to a business. ownerID names the business through
+// its owner when businessID is unset; see resolveBillingBusiness.
+func (s *Service) CreateGrant(ctx context.Context, ownerID, businessID, planID, grantedBy int64, note string, expiresAt *time.Time) (*GrantDTO, error) {
 	defer invalidateConsoleScope(ctx)
-	defer invalidateOwnerSubscriptionScope(ctx, userID)
-	seatCount, err := s.activeSeatCountForOwner(ctx, userID)
+	business, err := s.resolveBillingBusiness(ctx, ownerID, businessID)
+	if err != nil {
+		return nil, err
+	}
+	defer invalidateBusinessSubscriptionScope(ctx, business.ID)
+	seatCount, err := s.activeSeatCountForBusiness(ctx, business.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	id, err := s.repo.CreateGrantAndActivateSubscription(ctx, userID, planID, grantedBy, note, expiresAt, SubscriptionWriteParams{
-		OwnerID:             userID,
+	id, err := s.repo.CreateGrantAndActivateSubscription(ctx, business.ID, planID, grantedBy, note, expiresAt, SubscriptionWriteParams{
+		BusinessID:          business.ID,
 		PlanID:              planID,
 		Status:              "active",
 		SeatCount:           seatCount,
@@ -116,16 +123,16 @@ func (s *Service) CreateGrant(ctx context.Context, userID, planID, grantedBy int
 
 func (s *Service) RevokeGrant(ctx context.Context, id int64) error {
 	defer invalidateConsoleScope(ctx)
-	if ownerID, err := s.repo.GetGrantUserID(ctx, id); err == nil {
-		defer invalidateOwnerSubscriptionScope(ctx, ownerID)
+	if businessID, err := s.repo.GetGrantBusinessID(ctx, id); err == nil && businessID > 0 {
+		defer invalidateBusinessSubscriptionScope(ctx, businessID)
 	}
 	return s.repo.RevokeGrant(ctx, id)
 }
 
 func (s *Service) DeleteGrant(ctx context.Context, id int64) error {
 	defer invalidateConsoleScope(ctx)
-	if ownerID, err := s.repo.GetGrantUserID(ctx, id); err == nil {
-		defer invalidateOwnerSubscriptionScope(ctx, ownerID)
+	if businessID, err := s.repo.GetGrantBusinessID(ctx, id); err == nil && businessID > 0 {
+		defer invalidateBusinessSubscriptionScope(ctx, businessID)
 	}
 	return s.repo.DeleteGrant(ctx, id)
 }

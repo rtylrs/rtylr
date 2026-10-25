@@ -2,14 +2,13 @@ package application
 
 import (
 	"context"
-	"errors"
 	"time"
 )
 
 func toAddonGrantDTO(g AddonGrantRow) AddonGrantDTO {
 	dto := AddonGrantDTO{
 		ID:             g.ID,
-		UserID:         g.UserID,
+		UserID:         g.OwnerID.Int64,
 		BusinessID:     g.BusinessID,
 		AddonID:        g.AddonID,
 		AddonName:      g.AddonName,
@@ -17,11 +16,11 @@ func toAddonGrantDTO(g AddonGrantRow) AddonGrantDTO {
 		GrantedBy:      g.GrantedBy,
 		EnabledByGrant: g.EnabledByGrant,
 	}
-	if g.UserName.Valid {
-		dto.UserName = g.UserName.String
+	if g.OwnerName.Valid {
+		dto.UserName = g.OwnerName.String
 	}
-	if g.UserEmail.Valid {
-		dto.UserEmail = g.UserEmail.String
+	if g.OwnerEmail.Valid {
+		dto.UserEmail = g.OwnerEmail.String
 	}
 	if g.BusinessName.Valid {
 		dto.BusinessName = g.BusinessName.String
@@ -70,30 +69,10 @@ func (s *Service) ListAddonGrants(ctx context.Context, limit, offset int) (*List
 	return &ListAddonGrantsResult{Grants: dtos, Total: total}, nil
 }
 
-func (s *Service) resolveAddonGrantBusiness(ctx context.Context, userID, businessID int64) (*BusinessRow, error) {
-	if businessID > 0 {
-		business, err := s.repo.GetBusinessByID(ctx, businessID)
-		if err != nil {
-			return nil, err
-		}
-		if business.OwnerID != userID {
-			return nil, ErrBusinessNotOwnedByUser
-		}
-		return business, nil
-	}
-	business, err := s.repo.GetActiveBusinessByOwner(ctx, userID)
-	if err != nil {
-		if errors.Is(err, ErrRecordNotFound) {
-			return nil, ErrNotOrganizationOwner
-		}
-		return nil, err
-	}
-	return business, nil
-}
-
-func (s *Service) CreateAddonGrant(ctx context.Context, userID, businessID int64, addonID string, grantedBy int64, note string, expiresAt *time.Time) (*AddonGrantDTO, error) {
+// CreateAddonGrant grants an add-on to a business. ownerID names the business
+// through its owner when businessID is unset; see resolveBillingBusiness.
+func (s *Service) CreateAddonGrant(ctx context.Context, ownerID, businessID int64, addonID string, grantedBy int64, note string, expiresAt *time.Time) (*AddonGrantDTO, error) {
 	defer invalidateConsoleScope(ctx)
-	defer invalidateOwnerSubscriptionScope(ctx, userID)
 	exists, err := s.repo.AddonExists(ctx, addonID)
 	if err != nil {
 		return nil, err
@@ -102,10 +81,11 @@ func (s *Service) CreateAddonGrant(ctx context.Context, userID, businessID int64
 		return nil, ErrAddonNotFound
 	}
 
-	business, err := s.resolveAddonGrantBusiness(ctx, userID, businessID)
+	business, err := s.resolveBillingBusiness(ctx, ownerID, businessID)
 	if err != nil {
 		return nil, err
 	}
+	defer invalidateBusinessSubscriptionScope(ctx, business.ID)
 	defer invalidateBusinessAddonScope(ctx, business.ID)
 
 	wasEnabled, err := s.repo.IsBusinessAddonEnabled(ctx, business.ID, addonID)
@@ -114,7 +94,7 @@ func (s *Service) CreateAddonGrant(ctx context.Context, userID, businessID int64
 	}
 	enabledByGrant := !wasEnabled
 
-	id, err := s.repo.CreateAddonGrant(ctx, userID, business.ID, addonID, grantedBy, note, expiresAt, enabledByGrant)
+	id, err := s.repo.CreateAddonGrant(ctx, business.ID, addonID, grantedBy, note, expiresAt, enabledByGrant)
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +148,7 @@ func (s *Service) RevokeAddonGrant(ctx context.Context, id int64) error {
 	if err != nil {
 		return err
 	}
-	defer invalidateOwnerSubscriptionScope(ctx, scope.UserID)
+	defer invalidateBusinessSubscriptionScope(ctx, scope.BusinessID)
 	defer invalidateBusinessAddonScope(ctx, scope.BusinessID)
 	if err := s.repo.RevokeAddonGrant(ctx, id); err != nil {
 		return err
@@ -185,7 +165,7 @@ func (s *Service) DeleteAddonGrant(ctx context.Context, id int64) error {
 	if err != nil {
 		return err
 	}
-	defer invalidateOwnerSubscriptionScope(ctx, scope.UserID)
+	defer invalidateBusinessSubscriptionScope(ctx, scope.BusinessID)
 	defer invalidateBusinessAddonScope(ctx, scope.BusinessID)
 	if err := s.repo.DeleteAddonGrant(ctx, id); err != nil {
 		return err

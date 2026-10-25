@@ -18,9 +18,9 @@ type Module struct {
 }
 
 // EntitlementReader is the quota module's minimal subscription capability.
-// The subscription owner implements the reads; quota persistence stays local.
+// The subscriptions module implements the reads; quota persistence stays local.
 type EntitlementReader interface {
-	GetAIQuotaEntitlement(ctx context.Context, ownerID int64) (planSlug string, creditsPerMonth, seatCount int, status string, err error)
+	GetAIQuotaEntitlement(ctx context.Context, businessID int64) (planSlug string, creditsPerMonth, seatCount int, status string, err error)
 	GetFreePlanAICredits(ctx context.Context) (int64, error)
 }
 

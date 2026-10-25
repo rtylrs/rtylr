@@ -96,18 +96,18 @@ func TestSubscriptions_GetPlanByID_Unknown_ReturnsError(t *testing.T) {
 	}
 }
 
-func TestSubscriptions_GetSubscription_Owner(t *testing.T) {
+func TestSubscriptions_GetSubscription_Business(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	sub, err := repo.GetSubscription(context.Background(), testutil.OwnerID)
+	sub, err := repo.GetSubscription(context.Background(), testutil.BusinessID)
 	if err != nil {
 		if errors.Is(err, domain.ErrSubscriptionNotFound) {
-			t.Skip("fixture owner has no subscription")
+			t.Skip("fixture business has no subscription")
 		}
 		t.Fatalf("GetSubscription: %v", err)
 	}
-	if sub.OwnerID != testutil.OwnerID {
-		t.Errorf("expected owner_id %d, got %d", testutil.OwnerID, sub.OwnerID)
+	if sub.BusinessID != testutil.BusinessID {
+		t.Errorf("expected business_id %d, got %d", testutil.BusinessID, sub.BusinessID)
 	}
 }
 
@@ -116,19 +116,19 @@ func TestSubscriptions_GetSubscription_Unknown_ReturnsError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	_, err := repo.GetSubscription(context.Background(), 9999999)
 	if err == nil {
-		t.Fatal("expected ErrSubscriptionNotFound for unknown owner")
+		t.Fatal("expected ErrSubscriptionNotFound for unknown business")
 	}
 }
 
-func TestSubscriptions_GetOwnerApps_Owner(t *testing.T) {
+func TestSubscriptions_GetBusinessApps_Business(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	apps, err := repo.GetOwnerApps(context.Background(), testutil.OwnerID)
+	apps, err := repo.GetBusinessApps(context.Background(), testutil.BusinessID)
 	if err != nil {
 		if errors.Is(err, domain.ErrSubscriptionNotFound) {
-			t.Skip("fixture owner has no subscription")
+			t.Skip("fixture business has no subscription")
 		}
-		t.Fatalf("GetOwnerApps: %v", err)
+		t.Fatalf("GetBusinessApps: %v", err)
 	}
 	_ = apps
 }
@@ -136,7 +136,7 @@ func TestSubscriptions_GetOwnerApps_Owner(t *testing.T) {
 func TestSubscriptions_GetPeriodsForMonth_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	periods, err := repo.GetPeriodsForMonth(context.Background(), testutil.OwnerID, time.Now())
+	periods, err := repo.GetPeriodsForMonth(context.Background(), testutil.BusinessID, time.Now())
 	if err != nil {
 		t.Fatalf("GetPeriodsForMonth: %v", err)
 	}
@@ -146,17 +146,17 @@ func TestSubscriptions_GetPeriodsForMonth_NoError(t *testing.T) {
 func TestSubscriptions_GetBillingHistory_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	history, err := repo.GetBillingHistory(context.Background(), testutil.OwnerID, 12)
+	history, err := repo.GetBillingHistory(context.Background(), testutil.BusinessID, 12)
 	if err != nil {
 		t.Fatalf("GetBillingHistory: %v", err)
 	}
 	_ = history
 }
 
-func TestSubscriptions_GetOwnerIDByPaddleSubscription_Unknown(t *testing.T) {
+func TestSubscriptions_GetBusinessIDByPaddleSubscription_Unknown(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	_, err := repo.GetOwnerIDByPaddleSubscription(context.Background(), "nonexistent-paddle-sub-id")
+	_, err := repo.GetBusinessIDByPaddleSubscription(context.Background(), "nonexistent-paddle-sub-id")
 	if err == nil {
 		t.Fatal("expected error for unknown paddle subscription ID")
 	}
@@ -175,17 +175,17 @@ func TestSubscriptions_UpsertSubscription_ThenGetSubscription(t *testing.T) {
 		t.Skip("no active plans in DB")
 	}
 
-	const testOwner int64 = 7000001
-	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0, 1); err != nil {
+	const testBusiness int64 = 7000001
+	if err := repo.UpsertSubscription(ctx, testBusiness, plans[0].ID, 0, 1); err != nil {
 		t.Fatalf("UpsertSubscription: %v", err)
 	}
 
-	sub, err := repo.GetSubscription(ctx, testOwner)
+	sub, err := repo.GetSubscription(ctx, testBusiness)
 	if err != nil {
 		t.Fatalf("GetSubscription after upsert: %v", err)
 	}
-	if sub.OwnerID != testOwner {
-		t.Errorf("expected owner_id=%d, got %d", testOwner, sub.OwnerID)
+	if sub.BusinessID != testBusiness {
+		t.Errorf("expected business_id=%d, got %d", testBusiness, sub.BusinessID)
 	}
 }
 
@@ -202,11 +202,11 @@ func TestSubscriptions_UpsertSubscription_Idempotent(t *testing.T) {
 		t.Skip("no active plans in DB")
 	}
 
-	const testOwner int64 = 7000002
-	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0, 1); err != nil {
+	const testBusiness int64 = 7000002
+	if err := repo.UpsertSubscription(ctx, testBusiness, plans[0].ID, 0, 1); err != nil {
 		t.Fatalf("first UpsertSubscription: %v", err)
 	}
-	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0, 1); err != nil {
+	if err := repo.UpsertSubscription(ctx, testBusiness, plans[0].ID, 0, 1); err != nil {
 		t.Fatalf("second UpsertSubscription: %v", err)
 	}
 }
@@ -224,21 +224,21 @@ func TestSubscriptions_ReconcileSeatBilling_SplitsOnSeatChange(t *testing.T) {
 		t.Skip("no active plans in DB")
 	}
 
-	const testOwner int64 = 7000011
+	const testBusiness int64 = 7000011
 	plan := paidPlan(plans)
 	monthStart := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 
-	if err := repo.ReconcileSeatBilling(ctx, testOwner, plan.ID, 0, 12, monthStart); err != nil {
+	if err := repo.ReconcileSeatBilling(ctx, testBusiness, plan.ID, 0, 12, monthStart); err != nil {
 		t.Fatalf("ReconcileSeatBilling open: %v", err)
 	}
-	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM seat_periods WHERE owner_id = ?", testOwner) })
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM seat_periods WHERE business_id = ?", testBusiness) })
 
 	// A seat change on the 16th must leave the 1st-15th on the old count.
-	if err := repo.ReconcileSeatBilling(ctx, testOwner, plan.ID, 0, 20, monthStart.AddDate(0, 0, 15)); err != nil {
+	if err := repo.ReconcileSeatBilling(ctx, testBusiness, plan.ID, 0, 20, monthStart.AddDate(0, 0, 15)); err != nil {
 		t.Fatalf("ReconcileSeatBilling change: %v", err)
 	}
 
-	periods, err := repo.GetPeriodsForMonth(ctx, testOwner, monthStart)
+	periods, err := repo.GetPeriodsForMonth(ctx, testBusiness, monthStart)
 	if err != nil {
 		t.Fatalf("GetPeriodsForMonth: %v", err)
 	}
@@ -275,20 +275,20 @@ func TestSubscriptions_ReconcileSeatBilling_RollsOverMonth(t *testing.T) {
 		t.Skip("no active plans in DB")
 	}
 
-	const testOwner int64 = 7000012
+	const testBusiness int64 = 7000012
 	plan := paidPlan(plans)
 	january := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 
-	if err := repo.ReconcileSeatBilling(ctx, testOwner, plan.ID, 0, 12, january); err != nil {
+	if err := repo.ReconcileSeatBilling(ctx, testBusiness, plan.ID, 0, 12, january); err != nil {
 		t.Fatalf("ReconcileSeatBilling january: %v", err)
 	}
-	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM seat_periods WHERE owner_id = ?", testOwner) })
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM seat_periods WHERE business_id = ?", testBusiness) })
 
-	if err := repo.ReconcileSeatBilling(ctx, testOwner, plan.ID, 0, 12, january.AddDate(0, 1, 0)); err != nil {
+	if err := repo.ReconcileSeatBilling(ctx, testBusiness, plan.ID, 0, 12, january.AddDate(0, 1, 0)); err != nil {
 		t.Fatalf("ReconcileSeatBilling february: %v", err)
 	}
 
-	february, err := repo.GetPeriodsForMonth(ctx, testOwner, january.AddDate(0, 1, 0))
+	february, err := repo.GetPeriodsForMonth(ctx, testBusiness, january.AddDate(0, 1, 0))
 	if err != nil {
 		t.Fatalf("GetPeriodsForMonth february: %v", err)
 	}
@@ -299,7 +299,7 @@ func TestSubscriptions_ReconcileSeatBilling_RollsOverMonth(t *testing.T) {
 		t.Fatalf("february period starts %v, want %v", february[0].PeriodStart, january.AddDate(0, 1, 0))
 	}
 
-	jan, err := repo.GetPeriodsForMonth(ctx, testOwner, january)
+	jan, err := repo.GetPeriodsForMonth(ctx, testBusiness, january)
 	if err != nil {
 		t.Fatalf("GetPeriodsForMonth january: %v", err)
 	}
@@ -327,20 +327,20 @@ func TestSubscriptions_ReconcileSeatBilling_IsIdempotent(t *testing.T) {
 		t.Skip("no active plans in DB")
 	}
 
-	const testOwner int64 = 7000013
+	const testBusiness int64 = 7000013
 	plan := paidPlan(plans)
 	asOf := time.Date(2026, 1, 10, 0, 0, 0, 0, time.UTC)
-	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM seat_periods WHERE owner_id = ?", testOwner) })
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM seat_periods WHERE business_id = ?", testBusiness) })
 
 	for i := 0; i < 3; i++ {
-		if err := repo.ReconcileSeatBilling(ctx, testOwner, plan.ID, 0, 12, asOf); err != nil {
+		if err := repo.ReconcileSeatBilling(ctx, testBusiness, plan.ID, 0, 12, asOf); err != nil {
 			t.Fatalf("ReconcileSeatBilling run %d: %v", i, err)
 		}
 	}
 
 	var open int
 	if err := db.QueryRowContext(ctx,
-		"SELECT COUNT(*) FROM seat_periods WHERE owner_id = ? AND period_end IS NULL", testOwner).Scan(&open); err != nil {
+		"SELECT COUNT(*) FROM seat_periods WHERE business_id = ? AND period_end IS NULL", testBusiness).Scan(&open); err != nil {
 		t.Fatalf("count open periods: %v", err)
 	}
 	if open != 1 {
@@ -388,7 +388,7 @@ func TestSubscriptions_ListPlans_IDsArePositive(t *testing.T) {
 func TestSubscriptions_GetBillingHistory_LimitZero(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	history, err := repo.GetBillingHistory(context.Background(), testutil.OwnerID, 0)
+	history, err := repo.GetBillingHistory(context.Background(), testutil.BusinessID, 0)
 	if err != nil {
 		t.Fatalf("GetBillingHistory limit=0: %v", err)
 	}
@@ -399,7 +399,7 @@ func TestSubscriptions_GetPeriodsForMonth_PastMonth(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	past := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
-	periods, err := repo.GetPeriodsForMonth(context.Background(), testutil.OwnerID, past)
+	periods, err := repo.GetPeriodsForMonth(context.Background(), testutil.BusinessID, past)
 	if err != nil {
 		t.Fatalf("GetPeriodsForMonth past: %v", err)
 	}
@@ -419,11 +419,11 @@ func TestSubscriptions_UpdatePaddleSubscription_NoError(t *testing.T) {
 		t.Skip("no active plans in DB")
 	}
 
-	const testOwner int64 = 7000004
-	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 14, 1); err != nil {
+	const testBusiness int64 = 7000004
+	if err := repo.UpsertSubscription(ctx, testBusiness, plans[0].ID, 14, 1); err != nil {
 		t.Fatalf("UpsertSubscription: %v", err)
 	}
-	updated, err := repo.UpdatePaddleSubscription(ctx, testOwner, "paddle-sub-test-001", "paddle-cust-001", "active")
+	updated, err := repo.UpdatePaddleSubscription(ctx, testBusiness, "paddle-sub-test-001", "paddle-cust-001", "active")
 	if err != nil {
 		t.Fatalf("UpdatePaddleSubscription: %v", err)
 	}
@@ -432,7 +432,7 @@ func TestSubscriptions_UpdatePaddleSubscription_NoError(t *testing.T) {
 	}
 }
 
-func TestSubscriptions_GetOwnerIDByPaddleSubscription_AfterUpdate(t *testing.T) {
+func TestSubscriptions_GetBusinessIDByPaddleSubscription_AfterUpdate(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
@@ -445,35 +445,35 @@ func TestSubscriptions_GetOwnerIDByPaddleSubscription_AfterUpdate(t *testing.T) 
 		t.Skip("no active plans in DB")
 	}
 
-	const testOwner int64 = 7000005
+	const testBusiness int64 = 7000005
 	const paddleSubID = "paddle-sub-lookup-test"
-	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0, 1); err != nil {
+	if err := repo.UpsertSubscription(ctx, testBusiness, plans[0].ID, 0, 1); err != nil {
 		t.Fatalf("UpsertSubscription: %v", err)
 	}
-	if _, err := repo.UpdatePaddleSubscription(ctx, testOwner, paddleSubID, "paddle-cust-lookup", "active"); err != nil {
+	if _, err := repo.UpdatePaddleSubscription(ctx, testBusiness, paddleSubID, "paddle-cust-lookup", "active"); err != nil {
 		t.Fatalf("UpdatePaddleSubscription: %v", err)
 	}
 
-	ownerID, err := repo.GetOwnerIDByPaddleSubscription(ctx, paddleSubID)
+	businessID, err := repo.GetBusinessIDByPaddleSubscription(ctx, paddleSubID)
 	if err != nil {
-		t.Fatalf("GetOwnerIDByPaddleSubscription: %v", err)
+		t.Fatalf("GetBusinessIDByPaddleSubscription: %v", err)
 	}
-	if ownerID != testOwner {
-		t.Errorf("expected ownerID=%d, got %d", testOwner, ownerID)
+	if businessID != testBusiness {
+		t.Errorf("expected businessID=%d, got %d", testBusiness, businessID)
 	}
 }
 
 func TestSubscriptions_GetBillingHistory_LargeLimit(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	history, err := repo.GetBillingHistory(context.Background(), testutil.OwnerID, 100)
+	history, err := repo.GetBillingHistory(context.Background(), testutil.BusinessID, 100)
 	if err != nil {
 		t.Fatalf("GetBillingHistory large limit: %v", err)
 	}
 	_ = history
 }
 
-func TestSubscriptions_GetOwnerApps_NonEmptySubscription(t *testing.T) {
+func TestSubscriptions_GetBusinessApps_NonEmptySubscription(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
@@ -486,17 +486,17 @@ func TestSubscriptions_GetOwnerApps_NonEmptySubscription(t *testing.T) {
 		t.Skip("no active plans in DB")
 	}
 
-	const testOwner int64 = 7000006
-	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0, 1); err != nil {
+	const testBusiness int64 = 7000006
+	if err := repo.UpsertSubscription(ctx, testBusiness, plans[0].ID, 0, 1); err != nil {
 		t.Fatalf("UpsertSubscription: %v", err)
 	}
 
-	apps, err := repo.GetOwnerApps(ctx, testOwner)
+	apps, err := repo.GetBusinessApps(ctx, testBusiness)
 	if err != nil {
 		if errors.Is(err, domain.ErrSubscriptionNotFound) {
 			t.Skip("subscription not found after upsert (fixture constraint)")
 		}
-		t.Fatalf("GetOwnerApps: %v", err)
+		t.Fatalf("GetBusinessApps: %v", err)
 	}
 	_ = apps
 }
@@ -517,16 +517,16 @@ func TestSubscriptions_ReconcileSeatBilling_ConcurrentCallersLeaveOneOpenPeriod(
 		t.Skip("no active plans in DB")
 	}
 
-	const testOwner int64 = 7000014
+	const testBusiness int64 = 7000014
 	plan := paidPlan(plans)
 	asOf := time.Date(2026, 1, 10, 0, 0, 0, 0, time.UTC)
-	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM seat_periods WHERE owner_id = ?", testOwner) })
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM seat_periods WHERE business_id = ?", testBusiness) })
 
 	const callers = 4
 	errs := make(chan error, callers)
 	for i := 0; i < callers; i++ {
 		go func() {
-			errs <- repo.ReconcileSeatBilling(ctx, testOwner, plan.ID, 0, 12, asOf)
+			errs <- repo.ReconcileSeatBilling(ctx, testBusiness, plan.ID, 0, 12, asOf)
 		}()
 	}
 	for i := 0; i < callers; i++ {
@@ -537,7 +537,7 @@ func TestSubscriptions_ReconcileSeatBilling_ConcurrentCallersLeaveOneOpenPeriod(
 
 	var open int
 	if err := db.QueryRowContext(ctx,
-		"SELECT COUNT(*) FROM seat_periods WHERE owner_id = ? AND period_end IS NULL", testOwner).Scan(&open); err != nil {
+		"SELECT COUNT(*) FROM seat_periods WHERE business_id = ? AND period_end IS NULL", testBusiness).Scan(&open); err != nil {
 		t.Fatalf("count open periods: %v", err)
 	}
 	if open != 1 {
@@ -545,7 +545,7 @@ func TestSubscriptions_ReconcileSeatBilling_ConcurrentCallersLeaveOneOpenPeriod(
 	}
 }
 
-// An owner with no subscription row gets one on the default plan without
+// A business with no subscription row gets one on the default plan without
 // disturbing an existing subscription's plan.
 func TestSubscriptions_ReconcileSeatBilling_CreatesMissingRowOnly(t *testing.T) {
 	db := testutil.OpenDB(t)
@@ -564,17 +564,19 @@ func TestSubscriptions_ReconcileSeatBilling_CreatesMissingRowOnly(t *testing.T) 
 	free := plans[len(plans)-1]
 	asOf := time.Date(2026, 1, 5, 0, 0, 0, 0, time.UTC)
 
-	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM seat_periods WHERE owner_id = ?", testOwnerCreate) })
-	if err := repo.ReconcileSeatBilling(ctx, testOwnerCreate, paid.ID, 0, 12, asOf); err != nil {
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx, "DELETE FROM seat_periods WHERE business_id = ?", testBusinessCreate)
+	})
+	if err := repo.ReconcileSeatBilling(ctx, testBusinessCreate, paid.ID, 0, 12, asOf); err != nil {
 		t.Fatalf("ReconcileSeatBilling create: %v", err)
 	}
-	// Reconcile again with a different default plan: an existing owner must
+	// Reconcile again with a different default plan: an existing business must
 	// keep the plan they are on.
-	if err := repo.ReconcileSeatBilling(ctx, testOwnerCreate, free.ID, 0, 3, asOf); err != nil {
+	if err := repo.ReconcileSeatBilling(ctx, testBusinessCreate, free.ID, 0, 3, asOf); err != nil {
 		t.Fatalf("ReconcileSeatBilling again: %v", err)
 	}
 
-	sub, err := repo.GetSubscription(ctx, testOwnerCreate)
+	sub, err := repo.GetSubscription(ctx, testBusinessCreate)
 	if err != nil {
 		t.Fatalf("GetSubscription: %v", err)
 	}
@@ -586,4 +588,4 @@ func TestSubscriptions_ReconcileSeatBilling_CreatesMissingRowOnly(t *testing.T) 
 	}
 }
 
-const testOwnerCreate int64 = 7000015
+const testBusinessCreate int64 = 7000015

@@ -40,7 +40,7 @@ func (s *Service) UpdatePermissions(ctx context.Context, actorID, businessID int
 	if err != nil {
 		return err
 	}
-	existing, err := s.repo.GetStaffUserByID(ctx, ownerID, businessID, input.UserID)
+	existing, err := s.repo.GetStaffUserByID(ctx, businessID, input.UserID)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func (s *Service) UpdatePermissions(ctx context.Context, actorID, businessID int
 	for _, group := range existing.Groups {
 		currentGroupIDs = append(currentGroupIDs, group.ID)
 	}
-	if err := s.enforceAuthorizationDelegation(ctx, actorID, ownerID, businessID, input, &delegationCurrent{
+	if err := s.enforceAuthorizationDelegation(ctx, actorID, businessID, input, &delegationCurrent{
 		MemberType: existing.MemberType,
 		Grants:     grantsOfAssignments(existing.PermissionProfileAssignments),
 		GroupIDs:   currentGroupIDs,
@@ -96,7 +96,7 @@ func (s *Service) UpdatePermissions(ctx context.Context, actorID, businessID int
 			return err
 		}
 	}
-	if err := s.repo.UpsertNormalizedAuthorization(ctx, businessID, ownerID, actorID, input.UserID, licensedApps, memberType, "active", assignments, groupIDs); err != nil {
+	if err := s.repo.UpsertNormalizedAuthorization(ctx, businessID, actorID, input.UserID, licensedApps, memberType, "active", assignments, groupIDs); err != nil {
 		return err
 	}
 	invalidateUserScope(ctx, input.UserID)
@@ -119,11 +119,11 @@ func (s *Service) DeactivateUser(ctx context.Context, actorID, businessID, userI
 		return domain.ErrForbidden
 	}
 	label := memberLabel("", "")
-	if member, lookupErr := s.repo.GetStaffUserByID(ctx, ownerID, businessID, userID); lookupErr == nil && member != nil {
+	if member, lookupErr := s.repo.GetStaffUserByID(ctx, businessID, userID); lookupErr == nil && member != nil {
 		label = memberLabel(member.FullName, member.Email)
 	}
 
-	if err := s.repo.DeactivateUser(ctx, businessID, ownerID, actorID, userID); err != nil {
+	if err := s.repo.DeactivateUser(ctx, businessID, actorID, userID); err != nil {
 		return err
 	}
 
@@ -133,23 +133,6 @@ func (s *Service) DeactivateUser(ctx context.Context, actorID, businessID, userI
 	}
 	s.recordAudit(ctx, businessID, actorID, "member", userID, "member.deactivated", "Deactivated "+label)
 	return nil
-}
-
-func (s *Service) resolveBusinessOwnerID(ctx context.Context, fallbackOwnerID, businessID int64) (int64, error) {
-	if businessID == 0 {
-		return fallbackOwnerID, nil
-	}
-
-	_, ownerID, err := s.repo.GetBusinessByID(ctx, businessID)
-	if err != nil {
-		return 0, err
-	}
-
-	return ownerID, nil
-}
-
-func (s *Service) BusinessOwnerID(ctx context.Context, fallbackOwnerID, businessID int64) (int64, error) {
-	return s.resolveBusinessOwnerID(ctx, fallbackOwnerID, businessID)
 }
 
 func (s *Service) CanAccessOwner(ctx context.Context, userID, ownerID int64) bool {
@@ -163,7 +146,7 @@ func (s *Service) CanAccessOwner(ctx context.Context, userID, ownerID int64) boo
 	if err != nil || businessID <= 0 {
 		return false
 	}
-	apps, err := s.GetOwnerApps(ctx, ownerID)
+	apps, err := s.GetBusinessApps(ctx, businessID)
 	if err != nil {
 		return false
 	}
@@ -171,10 +154,15 @@ func (s *Service) CanAccessOwner(ctx context.Context, userID, ownerID int64) boo
 	return err == nil && found && snapshot.MembershipActive
 }
 
-func (s *Service) TeamManagerOwnerID(ctx context.Context, actorID, businessID int64) (int64, error) {
-	return s.requireTeamManager(ctx, actorID, businessID)
+// RequireTeamManager reports whether the actor may manage the business's team.
+func (s *Service) RequireTeamManager(ctx context.Context, actorID, businessID int64) error {
+	_, err := s.requireTeamManager(ctx, actorID, businessID)
+	return err
 }
 
+// requireTeamManager returns the business's current owner once the actor is
+// confirmed to manage its team; callers use it to protect the owner's own
+// membership.
 func (s *Service) requireTeamManager(ctx context.Context, actorID, businessID int64) (int64, error) {
 	if actorID <= 0 || businessID <= 0 {
 		return 0, domain.ErrForbidden
@@ -186,7 +174,7 @@ func (s *Service) requireTeamManager(ctx context.Context, actorID, businessID in
 	if actorID == ownerID {
 		return ownerID, nil
 	}
-	apps, err := s.GetOwnerApps(ctx, ownerID)
+	apps, err := s.GetBusinessApps(ctx, businessID)
 	if err != nil {
 		return 0, domain.ErrForbidden
 	}
@@ -216,7 +204,7 @@ type roleGrantReader interface {
 
 type delegationStore interface {
 	roleGrantReader
-	GetGroup(ctx context.Context, ownerID, businessID, groupID int64) (*domain.Group, error)
+	GetGroup(ctx context.Context, businessID, groupID int64) (*domain.Group, error)
 }
 
 // roleGrant is one role granted in one app with its scopes.
@@ -292,11 +280,15 @@ func grantsWithinCeiling(ctx context.Context, reader roleGrantReader, businessID
 
 // delegationAccess resolves the actor's access. unrestricted is true for the
 // owner and business admins, who are not subject to a ceiling.
-func (s *Service) delegationAccess(ctx context.Context, actorID, ownerID, businessID int64) (access authorization.EffectiveAccess, unrestricted bool, err error) {
+func (s *Service) delegationAccess(ctx context.Context, actorID, businessID int64) (access authorization.EffectiveAccess, unrestricted bool, err error) {
+	_, ownerID, err := s.repo.GetBusinessByID(ctx, businessID)
+	if err != nil {
+		return authorization.EffectiveAccess{}, false, domain.ErrDelegationCeiling
+	}
 	if actorID == ownerID {
 		return authorization.EffectiveAccess{}, true, nil
 	}
-	apps, err := s.GetOwnerApps(ctx, ownerID)
+	apps, err := s.GetBusinessApps(ctx, businessID)
 	if err != nil {
 		return authorization.EffectiveAccess{}, false, domain.ErrDelegationCeiling
 	}
@@ -310,8 +302,8 @@ func (s *Service) delegationAccess(ctx context.Context, actorID, ownerID, busine
 
 // enforceGroupMembershipDelegation applies the ceiling to adding someone to, or
 // removing someone from, a group: membership confers or strips the group's roles.
-func (s *Service) enforceGroupMembershipDelegation(ctx context.Context, actorID, ownerID, businessID int64, group *domain.Group) error {
-	access, unrestricted, err := s.delegationAccess(ctx, actorID, ownerID, businessID)
+func (s *Service) enforceGroupMembershipDelegation(ctx context.Context, actorID, businessID int64, group *domain.Group) error {
+	access, unrestricted, err := s.delegationAccess(ctx, actorID, businessID)
 	if err != nil {
 		return err
 	}
@@ -334,19 +326,19 @@ func grantsOfGroupAssignments(assignments []authorization.RoleAssignment) []role
 	return grants
 }
 
-func (s *Service) enforceAuthorizationDelegation(ctx context.Context, actorID, ownerID, businessID int64, input domain.UpdatePermissionsInput, current *delegationCurrent) error {
-	access, unrestricted, err := s.delegationAccess(ctx, actorID, ownerID, businessID)
+func (s *Service) enforceAuthorizationDelegation(ctx context.Context, actorID, businessID int64, input domain.UpdatePermissionsInput, current *delegationCurrent) error {
+	access, unrestricted, err := s.delegationAccess(ctx, actorID, businessID)
 	if err != nil {
 		return err
 	}
 	if unrestricted {
 		return nil
 	}
-	return checkDelegation(ctx, s.repo, &access, ownerID, businessID, input, current)
+	return checkDelegation(ctx, s.repo, &access, businessID, input, current)
 }
 
 // checkDelegation applies the ceiling of a non-admin actor to an edit.
-func checkDelegation(ctx context.Context, store delegationStore, access *authorization.EffectiveAccess, ownerID, businessID int64, input domain.UpdatePermissionsInput, current *delegationCurrent) error {
+func checkDelegation(ctx context.Context, store delegationStore, access *authorization.EffectiveAccess, businessID int64, input domain.UpdatePermissionsInput, current *delegationCurrent) error {
 	if input.MemberType == "admin" || (current != nil && current.MemberType == "admin" && input.MemberType != "" && input.MemberType != "admin") {
 		return domain.ErrDelegationCeiling
 	}
@@ -362,7 +354,7 @@ func checkDelegation(ctx context.Context, store delegationStore, access *authori
 			currentGroups = current.GroupIDs
 		}
 		for _, groupID := range changedGroupIDs(currentGroups, *input.GroupIDs) {
-			group, groupErr := store.GetGroup(ctx, ownerID, businessID, groupID)
+			group, groupErr := store.GetGroup(ctx, businessID, groupID)
 			if groupErr != nil || group == nil || !grantsWithinCeiling(ctx, store, businessID, access, grantsOfGroupAssignments(group.PermissionProfileAssignments)) {
 				return domain.ErrDelegationCeiling
 			}

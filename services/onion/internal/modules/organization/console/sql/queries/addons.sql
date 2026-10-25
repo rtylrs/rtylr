@@ -11,25 +11,25 @@ SELECT COUNT(*) FROM addons WHERE id = ?;
 
 -- name: ListAddonGrants :many
 -- cross-schema read from addons (addons module) — include add-on names and prices in grant administration results.
-SELECT g.id, g.user_id, COALESCE(u.full_name, '') AS user_name, u.email AS user_email,
-       g.business_id, COALESCE(b.name, '') AS business_name,
+SELECT g.id, g.business_id, COALESCE(b.name, '') AS business_name,
+       b.owner_id, COALESCE(u.full_name, '') AS owner_name, u.email AS owner_email,
        g.addon_id, a.name AS addon_name, a.price AS addon_price,
        g.granted_by, adm.full_name AS granter_name, g.note, g.expires_at, g.revoked_at,
        g.enabled_by_grant, g.created_at
 FROM manual_addon_grants g
 JOIN addons a ON a.id = g.addon_id
-LEFT JOIN users u ON u.id = g.user_id
 LEFT JOIN businesses b ON b.id = g.business_id
+LEFT JOIN users u ON u.id = b.owner_id
 LEFT JOIN users adm ON adm.id = g.granted_by
 ORDER BY g.created_at DESC
 LIMIT ? OFFSET ?;
 
 -- name: CreateAddonGrant :execresult
-INSERT INTO manual_addon_grants (user_id, business_id, addon_id, granted_by, note, expires_at, enabled_by_grant)
-VALUES (?, ?, ?, ?, ?, ?, ?);
+INSERT INTO manual_addon_grants (business_id, addon_id, granted_by, note, expires_at, enabled_by_grant)
+VALUES (?, ?, ?, ?, ?, ?);
 
 -- name: GetAddonGrantScope :one
-SELECT user_id, business_id, addon_id, enabled_by_grant
+SELECT business_id, addon_id, enabled_by_grant
 FROM manual_addon_grants
 WHERE id = ?
 ORDER BY id ASC

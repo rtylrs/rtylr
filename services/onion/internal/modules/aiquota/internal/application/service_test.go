@@ -22,37 +22,37 @@ type mockRepo struct {
 	adjusts  []int64
 	failAdjN int
 
-	// resolveErr reproduces an unverified tenant scope: owner resolution fails
-	// the way tenant.ResolveOwnerID does when the business cannot be confirmed.
+	// resolveErr reproduces an unverified tenant scope: the business check fails
+	// the way tenant.ActiveBusinessID does when the business cannot be confirmed.
 	resolveErr error
-	// scoped records every owner id the service used for a tenant-scoped call,
-	// so a test can prove a failed resolution reached no read and no write.
+	// scoped records every business id the service used for a tenant-scoped
+	// call, so a test can prove a failed check reached no read and no write.
 	scoped []int64
 }
 
-func (m *mockRepo) ResolveOwnerID(_ context.Context, _, _ int64) (int64, error) {
+func (m *mockRepo) ActiveBusinessID(_ context.Context, businessID int64) (int64, error) {
 	if m.resolveErr != nil {
 		return 0, m.resolveErr
 	}
-	return 1, nil
+	return businessID, nil
 }
 
-func (m *mockRepo) scope(ownerID int64) { m.scoped = append(m.scoped, ownerID) }
+func (m *mockRepo) scope(businessID int64) { m.scoped = append(m.scoped, businessID) }
 
-func (m *mockRepo) GetAIQuotaEntitlement(_ context.Context, ownerID int64) (string, int, int, string, error) {
-	m.scope(ownerID)
+func (m *mockRepo) GetAIQuotaEntitlement(_ context.Context, businessID int64) (string, int, int, string, error) {
+	m.scope(businessID)
 	return m.ent.PlanSlug, m.ent.AICreditsPerMonth, m.ent.SeatCount, m.ent.Status, m.entErr
 }
-func (m *mockRepo) GetMode(_ context.Context, ownerID int64) (domain.Mode, error) {
-	m.scope(ownerID)
+func (m *mockRepo) GetMode(_ context.Context, businessID int64) (domain.Mode, error) {
+	m.scope(businessID)
 	return m.mode, nil
 }
-func (m *mockRepo) SetMode(_ context.Context, ownerID int64, _ domain.Mode) error {
-	m.scope(ownerID)
+func (m *mockRepo) SetMode(_ context.Context, businessID int64, _ domain.Mode) error {
+	m.scope(businessID)
 	return nil
 }
-func (m *mockRepo) GetUsedTokens(_ context.Context, ownerID, _ int64, _ time.Time) (int64, error) {
-	m.scope(ownerID)
+func (m *mockRepo) GetUsedTokens(_ context.Context, businessID, _ int64, _ time.Time) (int64, error) {
+	m.scope(businessID)
 	return m.used, m.usedErr
 }
 
@@ -62,8 +62,8 @@ func (m *mockRepo) GetFreePlanAICredits(_ context.Context) (int64, error) {
 	return m.free, m.freeErr
 }
 
-func (m *mockRepo) Reserve(_ context.Context, ownerID, _ int64, _ time.Time, estimate, _ int64, allowOverage bool) (bool, error) {
-	m.scope(ownerID)
+func (m *mockRepo) Reserve(_ context.Context, businessID, _ int64, _ time.Time, estimate, _ int64, allowOverage bool) (bool, error) {
+	m.scope(businessID)
 	if m.reserveE != nil {
 		return false, m.reserveE
 	}
@@ -74,8 +74,8 @@ func (m *mockRepo) Reserve(_ context.Context, ownerID, _ int64, _ time.Time, est
 	return true, nil
 }
 
-func (m *mockRepo) Adjust(_ context.Context, ownerID, _ int64, _ time.Time, delta int64) error {
-	m.scope(ownerID)
+func (m *mockRepo) Adjust(_ context.Context, businessID, _ int64, _ time.Time, delta int64) error {
+	m.scope(businessID)
 	if m.failAdjN > 0 {
 		m.failAdjN--
 		if m.failAdjN == 0 {
@@ -186,16 +186,16 @@ func TestReconcile_AppliesDeltaAndRetriesOnFailure(t *testing.T) {
 	}
 }
 
-func TestUnverifiedOwnerReachesNoWrite(t *testing.T) {
+func TestUnverifiedBusinessReachesNoWrite(t *testing.T) {
 	m := &mockRepo{resolveErr: errors.New("no business scope for request")}
 	s := &Service{repo: m, entitlements: m}
 
 	t.Run("SetMode does not write another tenant's mode", func(t *testing.T) {
-		if err := s.SetMode(context.Background(), 1, 2, domain.ModePerPerson); err == nil {
+		if err := s.SetMode(context.Background(), 1, domain.ModePerPerson); err == nil {
 			t.Fatal("expected SetMode to fail")
 		}
 		if len(m.scoped) != 0 {
-			t.Errorf("SetMode touched owner IDs %v on unverified business", m.scoped)
+			t.Errorf("SetMode touched business IDs %v on unverified business", m.scoped)
 		}
 	})
 
@@ -208,34 +208,34 @@ func TestUnverifiedOwnerReachesNoWrite(t *testing.T) {
 			t.Error("Reserve must not report allowed for an unverified business")
 		}
 		if len(m.scoped) != 0 {
-			t.Errorf("Reserve touched owner IDs %v on unverified business", m.scoped)
+			t.Errorf("Reserve touched business IDs %v on unverified business", m.scoped)
 		}
 	})
 
 	t.Run("Reconcile does not debit another tenant's usage", func(t *testing.T) {
 		s.Reconcile(context.Background(), 1, 2, 3000, 4000)
 		if len(m.scoped) != 0 || len(m.adjusts) != 0 {
-			t.Errorf("Reconcile touched owner IDs %v (adjusts=%v) on unverified business", m.scoped, m.adjusts)
+			t.Errorf("Reconcile touched business IDs %v (adjusts=%v) on unverified business", m.scoped, m.adjusts)
 		}
 	})
 }
 
-func TestUnverifiedOwnerFailsClosedOnReads(t *testing.T) {
+func TestUnverifiedBusinessFailsClosedOnReads(t *testing.T) {
 	m := &mockRepo{resolveErr: errors.New("no business scope for request")}
 	s := &Service{repo: m, entitlements: m}
 
 	if _, err := s.Status(context.Background(), 1, 2); err == nil {
 		t.Error("expected Status to fail on unverified business")
 	}
-	if _, err := s.GetMode(context.Background(), 1, 2); err == nil {
+	if _, err := s.GetMode(context.Background(), 1); err == nil {
 		t.Error("expected GetMode to fail on unverified business")
 	}
 	if len(m.scoped) != 0 {
-		t.Errorf("read methods touched owner IDs %v on unverified business", m.scoped)
+		t.Errorf("read methods touched business IDs %v on unverified business", m.scoped)
 	}
 }
 
-func TestResolvedOwnerScopesEveryScopedCall(t *testing.T) {
+func TestVerifiedBusinessScopesEveryScopedCall(t *testing.T) {
 	m := &mockRepo{
 		ent: domain.Entitlement{PlanSlug: "free", AICreditsPerMonth: 10, SeatCount: 1, Status: "active"},
 	}
@@ -243,14 +243,14 @@ func TestResolvedOwnerScopesEveryScopedCall(t *testing.T) {
 
 	ctx := context.Background()
 	_, _ = s.Status(ctx, 1, 2)
-	_, _ = s.GetMode(ctx, 1, 2)
-	_ = s.SetMode(ctx, 1, 2, domain.ModePerPerson)
+	_, _ = s.GetMode(ctx, 1)
+	_ = s.SetMode(ctx, 1, domain.ModePerPerson)
 	_, _, _ = s.Reserve(ctx, 1, 2)
 	s.Reconcile(ctx, 1, 2, 3000, 4000)
 
 	for i, id := range m.scoped {
 		if id != 1 {
-			t.Errorf("scoped[%d] = %d, want resolved owner 1", i, id)
+			t.Errorf("scoped[%d] = %d, want verified business 1", i, id)
 		}
 	}
 }

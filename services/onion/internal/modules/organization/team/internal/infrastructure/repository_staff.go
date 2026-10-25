@@ -33,18 +33,14 @@ func (r *Repository) ListStaffUsersByBusinessID(ctx context.Context, businessID 
 		userIDs = append(userIDs, users[i].ID)
 		users[i].Groups = []domain.GroupSummary{}
 	}
-	_, ownerID, err := r.GetBusinessByID(ctx, businessID)
-	if err != nil {
-		return nil, err
-	}
-	groupsByUser, err := r.groupsForUsers(ctx, ownerID, businessID, userIDs)
+	groupsByUser, err := r.groupsForUsers(ctx, businessID, userIDs)
 	if err != nil {
 		return nil, err
 	}
 	for i := range users {
 		users[i].Groups = groupsByUser[users[i].ID]
 	}
-	businessApps, err := r.GetOwnerApps(ctx, ownerID)
+	businessApps, err := r.GetBusinessApps(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -65,12 +61,12 @@ func (r *Repository) CountStaffUsersByBusinessID(ctx context.Context, businessID
 }
 
 // groupsForUsers batches group lookups for many users into one query.
-func (r *Repository) groupsForUsers(ctx context.Context, ownerID, businessID int64, userIDs []int64) (map[int64][]domain.GroupSummary, error) {
+func (r *Repository) groupsForUsers(ctx context.Context, businessID int64, userIDs []int64) (map[int64][]domain.GroupSummary, error) {
 	result := make(map[int64][]domain.GroupSummary, len(userIDs))
 	if len(userIDs) == 0 {
 		return result, nil
 	}
-	rows, err := r.queries.ListUserGroupsForUsers(ctx, sqlc.ListUserGroupsForUsersParams{UserIds: userIDs, OwnerID: ownerID, BusinessID: businessID})
+	rows, err := r.queries.ListUserGroupsForUsers(ctx, sqlc.ListUserGroupsForUsersParams{UserIds: userIDs, BusinessID: businessID})
 	if err != nil {
 		return nil, err
 	}
@@ -80,8 +76,8 @@ func (r *Repository) groupsForUsers(ctx context.Context, ownerID, businessID int
 	return result, nil
 }
 
-func (r *Repository) GetStaffUserByID(ctx context.Context, ownerID, businessID, userID int64) (*domain.StaffUser, error) {
-	row, err := r.queries.GetStaffUserByID(ctx, sqlc.GetStaffUserByIDParams{OwnerID: ownerID, BusinessID: businessID, UserID: userID})
+func (r *Repository) GetStaffUserByID(ctx context.Context, businessID, userID int64) (*domain.StaffUser, error) {
+	row, err := r.queries.GetStaffUserByID(ctx, sqlc.GetStaffUserByIDParams{BusinessID: businessID, UserID: userID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrUserNotFound
@@ -95,7 +91,7 @@ func (r *Repository) GetStaffUserByID(ctx context.Context, ownerID, businessID, 
 	if row.CreatedAt.Valid {
 		member.CreatedAt = row.CreatedAt.Time
 	}
-	businessApps, err := r.GetOwnerApps(ctx, ownerID)
+	businessApps, err := r.GetBusinessApps(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +103,7 @@ func (r *Repository) GetStaffUserByID(ctx context.Context, ownerID, businessID, 
 		return nil, domain.ErrUserNotFound
 	}
 	applyStaffAuthorization(member, snapshot)
-	member.Groups, err = r.GetUserGroups(ctx, ownerID, businessID, userID)
+	member.Groups, err = r.GetUserGroups(ctx, businessID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -134,14 +130,11 @@ func applyStaffAuthorization(member *domain.StaffUser, snapshot authorization.Sn
 // ─── Invite Tokens ──────────────────────────────────────────────────────────
 
 // CreateInviteToken records the business the invitation grants access in, so
-// the accept path resolves the tenant from the invitation itself instead of
-// re-deriving it from the owner (a `LIMIT 1` lookup that picks the wrong
-// business for an owner who has more than one).
-func (r *Repository) CreateInviteToken(ctx context.Context, userID, ownerID, businessID int64, token string, expiresAt time.Time) error {
+// the accept path resolves the tenant from the invitation itself.
+func (r *Repository) CreateInviteToken(ctx context.Context, userID, businessID int64, token string, expiresAt time.Time) error {
 	err := r.queries.CreateInviteToken(ctx, sqlc.CreateInviteTokenParams{
 		UserID:     userID,
-		OwnerID:    ownerID,
-		BusinessID: sql.NullInt64{Int64: businessID, Valid: businessID > 0},
+		BusinessID: businessID,
 		Token:      token,
 		ExpiresAt:  expiresAt,
 	})
@@ -165,12 +158,9 @@ func (r *Repository) GetInviteToken(ctx context.Context, token string) (domain.I
 		return domain.InviteToken{}, domain.ErrTokenExpired
 	}
 
-	// BusinessID is NULL on rows written before the business was recorded; the
-	// accept path treats that as "not resolved yet" rather than as business 0.
 	return domain.InviteToken{
 		UserID:     row.UserID,
-		OwnerID:    row.OwnerID,
-		BusinessID: row.BusinessID.Int64,
+		BusinessID: row.BusinessID,
 		ExpiresAt:  row.ExpiresAt,
 	}, nil
 }
@@ -258,12 +248,9 @@ func (r *Repository) MarkOnboarded(ctx context.Context, userID int64) error {
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
-// CountActiveMembers returns the billable active seat count for an owner.
-func (r *Repository) CountActiveMembers(ctx context.Context, ownerID int64) (int, error) {
-	count, err := r.queries.CountActiveMembers(ctx, sqlc.CountActiveMembersParams{
-		OwnerID:   ownerID,
-		OwnerID_2: ownerID,
-	})
+// CountActiveMembers returns the billable active seat count for a business.
+func (r *Repository) CountActiveMembers(ctx context.Context, businessID int64) (int, error) {
+	count, err := r.queries.CountActiveMembers(ctx, sqlc.CountActiveMembersParams{BusinessID: businessID})
 	if err != nil {
 		return 0, err
 	}

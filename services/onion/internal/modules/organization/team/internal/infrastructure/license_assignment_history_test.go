@@ -34,7 +34,7 @@ func TestAuthorizationReplacementCanRevokeRepeatedLicenseHistory(t *testing.T) {
 
 	repo := infrastructure.NewRepository(db)
 	update := func(apps []string) error {
-		return repo.UpsertNormalizedAuthorization(ctx, testutil.BusinessID, testutil.OwnerID, testutil.OwnerID, userID, apps, "member", "active", nil, nil)
+		return repo.UpsertNormalizedAuthorization(ctx, testutil.BusinessID, testutil.OwnerID, userID, apps, "member", "active", nil, nil)
 	}
 	if err := update([]string{"flow"}); err != nil {
 		t.Fatalf("grant Flow: %v", err)

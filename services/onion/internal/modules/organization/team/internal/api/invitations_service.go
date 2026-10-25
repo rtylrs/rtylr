@@ -70,7 +70,7 @@ func (a *InvitationsAPI) InviteUser(ctx context.Context, req *hubteaminvitations
 		}
 	}
 
-	recordSeatChangeAsync(ctx, a.Service, actorID, device.BusinessID)
+	recordSeatChangeAsync(ctx, a.Service, device.BusinessID)
 
 	if password == "" && token != "" {
 		inviteLink := config.AuthAppURL + "/invite/" + token
@@ -115,7 +115,7 @@ func (a *InvitationsAPI) BulkInvite(ctx context.Context, req *hubteaminvitations
 	if _, permissionErr := requireHubPermission(ctx, "hub:team:invite"); permissionErr != nil {
 		return nil, permissionErr
 	}
-	actorID, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
+	actorID, ok := teamManagerFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
@@ -138,7 +138,7 @@ func (a *InvitationsAPI) BulkInvite(ctx context.Context, req *hubteaminvitations
 	}
 	groupIDs := req.GetGroupIds()
 
-	results, err := a.Service.BulkInvite(ctx, ownerID, businessID, domain.BulkInviteInput{
+	results, err := a.Service.BulkInvite(ctx, actorID, businessID, domain.BulkInviteInput{
 		Emails:                       emails,
 		MemberType:                   req.GetMemberType(),
 		LicensedAppIDs:               licensedApps,

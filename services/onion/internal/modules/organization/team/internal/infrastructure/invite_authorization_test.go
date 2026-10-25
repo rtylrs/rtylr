@@ -59,7 +59,7 @@ func TestInviteDoesNotAssignPermissionProfilesByDefault(t *testing.T) {
 		if err := provisioner.DeleteProvisionedMember(ctx, testutil.OwnerID, testutil.BusinessID, userID); err != nil {
 			t.Errorf("clean up HR member: %v", err)
 		}
-		if err := repo.DeleteInvitedUser(ctx, testutil.BusinessID, testutil.OwnerID, userID); err != nil {
+		if err := repo.DeleteInvitedUser(ctx, testutil.BusinessID, userID); err != nil {
 			t.Errorf("clean up invited member: %v", err)
 		}
 	})

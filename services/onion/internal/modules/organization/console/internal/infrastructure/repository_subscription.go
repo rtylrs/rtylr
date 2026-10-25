@@ -2,6 +2,7 @@ package infrastructure
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -10,12 +11,12 @@ import (
 	"github.com/voxire/onion/internal/modules/organization/console/internal/infrastructure/persistence/sqlc"
 )
 
-func (r *Repository) GetSubscriptionByOwner(ctx context.Context, ownerID int64) (*SubscriptionRow, error) {
-	row, err := r.queries.GetSubscriptionByOwner(ctx, ownerID)
+func (r *Repository) GetSubscriptionByBusiness(ctx context.Context, businessID int64) (*SubscriptionRow, error) {
+	row, err := r.queries.GetSubscriptionByBusiness(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
-	sub := subscriptionFromOwnerRow(row)
+	sub := subscriptionFromBusinessRow(row)
 	if err := r.decorateSubscriptionSeats(ctx, sub); err != nil {
 		return nil, err
 	}
@@ -119,12 +120,11 @@ func (r *Repository) ListGrants(ctx context.Context, limit, offset int) ([]Grant
 	}
 
 	listSQL, listArgs, err := sq.
-		Select("g.id", "g.user_id", "COALESCE(u.full_name, '')", "g.plan_id", "p.name", "g.granted_by", "adm.full_name",
-			"g.note", "g.expires_at", "g.revoked_at", "g.created_at", "u.email", "b.id", "b.name").
+		Select(grantColumns...).
 		From("manual_access_grants g").
 		Join("plans p ON p.id = g.plan_id").
-		LeftJoin("users u ON u.id = g.user_id").
-		LeftJoin("businesses b ON b.owner_id = g.user_id AND COALESCE(b.is_active, TRUE) = TRUE").
+		LeftJoin("businesses b ON b.id = g.business_id").
+		LeftJoin("users u ON u.id = b.owner_id").
 		LeftJoin("users adm ON adm.id = g.granted_by").
 		OrderBy("g.created_at DESC").
 		Limit(uint64(limit)).   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
@@ -144,12 +144,11 @@ func (r *Repository) ListGrants(ctx context.Context, limit, offset int) ([]Grant
 	grants := make([]GrantRow, 0, limit)
 	for rows.Next() {
 		var g GrantRow
-		if err := rows.Scan(&g.ID, &g.UserID, &g.UserName, &g.PlanID, &g.PlanName, &g.GrantedBy, &g.GranterName,
-			&g.Note, &g.ExpiresAt, &g.RevokedAt, &g.CreatedAt, &g.UserEmail, &g.BusinessID, &g.BusinessName); err != nil {
+		if err := rows.Scan(grantDestinations(&g)...); err != nil {
 			return nil, 0, err
 		}
 		if g.BusinessID.Valid {
-			seatCount, err := r.CountActiveSeatsForOwner(ctx, g.UserID)
+			seatCount, err := r.CountActiveSeatsForBusiness(ctx, g.BusinessID.Int64)
 			if err != nil {
 				return nil, 0, err
 			}
@@ -160,8 +159,8 @@ func (r *Repository) ListGrants(ctx context.Context, limit, offset int) ([]Grant
 	return grants, total, rows.Err()
 }
 
-func (r *Repository) CreateGrant(ctx context.Context, userID, planID, grantedBy int64, note string, expiresAt *time.Time) (int64, error) {
-	query, args, err := buildCreateGrantSQL(userID, planID, grantedBy, note, expiresAt)
+func (r *Repository) CreateGrant(ctx context.Context, businessID, planID, grantedBy int64, note string, expiresAt *time.Time) (int64, error) {
+	query, args, err := buildCreateGrantSQL(businessID, planID, grantedBy, note, expiresAt)
 	if err != nil {
 		return 0, err
 	}
@@ -173,25 +172,25 @@ func (r *Repository) CreateGrant(ctx context.Context, userID, planID, grantedBy 
 	return res.LastInsertId()
 }
 
-func buildCreateGrantSQL(userID, planID, grantedBy int64, note string, expiresAt *time.Time) (string, []any, error) {
+func buildCreateGrantSQL(businessID, planID, grantedBy int64, note string, expiresAt *time.Time) (string, []any, error) {
 	var expiresSQL interface{}
 	if expiresAt != nil {
 		expiresSQL = *expiresAt
 	}
 	return sq.
 		Insert("manual_access_grants").
-		Columns("user_id", "plan_id", "granted_by", "note", "expires_at").
-		Values(userID, planID, grantedBy, note, expiresSQL).
+		Columns("business_id", "plan_id", "granted_by", "note", "expires_at").
+		Values(businessID, planID, grantedBy, note, expiresSQL).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 }
 
 // CreateGrantAndActivateSubscription inserts a manual access grant and mirrors
-// it onto the owner's subscription row in one transaction. Entitlement is
+// it onto the business's subscription row in one transaction. Entitlement is
 // resolved from subscriptions, so a grant whose subscription write failed would
 // report success while granting nothing; either both writes land or neither does.
-func (r *Repository) CreateGrantAndActivateSubscription(ctx context.Context, userID, planID, grantedBy int64, note string, expiresAt *time.Time, sub SubscriptionWriteParams) (int64, error) {
-	query, args, err := buildCreateGrantSQL(userID, planID, grantedBy, note, expiresAt)
+func (r *Repository) CreateGrantAndActivateSubscription(ctx context.Context, businessID, planID, grantedBy int64, note string, expiresAt *time.Time, sub SubscriptionWriteParams) (int64, error) {
+	query, args, err := buildCreateGrantSQL(businessID, planID, grantedBy, note, expiresAt)
 	if err != nil {
 		return 0, err
 	}
@@ -233,12 +232,11 @@ func (r *Repository) CreateGrantAndActivateSubscription(ctx context.Context, use
 // grant history. CreateGrant uses it to build its response efficiently.
 func (r *Repository) GetGrant(ctx context.Context, id int64) (*GrantRow, error) {
 	query, args, err := sq.
-		Select("g.id", "g.user_id", "COALESCE(u.full_name, '')", "g.plan_id", "p.name", "g.granted_by", "adm.full_name",
-			"g.note", "g.expires_at", "g.revoked_at", "g.created_at", "u.email", "b.id", "b.name").
+		Select(grantColumns...).
 		From("manual_access_grants g").
 		Join("plans p ON p.id = g.plan_id").
-		LeftJoin("users u ON u.id = g.user_id").
-		LeftJoin("businesses b ON b.owner_id = g.user_id AND COALESCE(b.is_active, TRUE) = TRUE").
+		LeftJoin("businesses b ON b.id = g.business_id").
+		LeftJoin("users u ON u.id = b.owner_id").
 		LeftJoin("users adm ON adm.id = g.granted_by").
 		Where(sq.Eq{"g.id": id}).
 		PlaceholderFormat(sq.Question).
@@ -248,14 +246,11 @@ func (r *Repository) GetGrant(ctx context.Context, id int64) (*GrantRow, error) 
 	}
 
 	var grant GrantRow
-	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(
-		&grant.ID, &grant.UserID, &grant.UserName, &grant.PlanID, &grant.PlanName, &grant.GrantedBy, &grant.GranterName,
-		&grant.Note, &grant.ExpiresAt, &grant.RevokedAt, &grant.CreatedAt, &grant.UserEmail, &grant.BusinessID, &grant.BusinessName,
-	); err != nil {
+	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(grantDestinations(&grant)...); err != nil {
 		return nil, err
 	}
 	if grant.BusinessID.Valid {
-		seatCount, err := r.CountActiveSeatsForOwner(ctx, grant.UserID)
+		seatCount, err := r.CountActiveSeatsForBusiness(ctx, grant.BusinessID.Int64)
 		if err != nil {
 			return nil, err
 		}
@@ -264,9 +259,25 @@ func (r *Repository) GetGrant(ctx context.Context, id int64) (*GrantRow, error) 
 	return &grant, nil
 }
 
-func (r *Repository) GetGrantUserID(ctx context.Context, id int64) (int64, error) {
+// grantColumns pairs with grantDestinations; the user fields describe the
+// granted business's current owner.
+var grantColumns = []string{
+	"g.id", "g.business_id", "b.name", "b.owner_id", "COALESCE(u.full_name, '')", "u.email",
+	"g.plan_id", "p.name", "g.granted_by", "adm.full_name", "g.note", "g.expires_at", "g.revoked_at", "g.created_at",
+}
+
+func grantDestinations(g *GrantRow) []any {
+	return []any{
+		&g.ID, &g.BusinessID, &g.BusinessName, &g.OwnerID, &g.OwnerName, &g.OwnerEmail,
+		&g.PlanID, &g.PlanName, &g.GrantedBy, &g.GranterName, &g.Note, &g.ExpiresAt, &g.RevokedAt, &g.CreatedAt,
+	}
+}
+
+// GetGrantBusinessID returns 0 for a grant the billing migration could not tie
+// to a business.
+func (r *Repository) GetGrantBusinessID(ctx context.Context, id int64) (int64, error) {
 	query, args, err := sq.
-		Select("user_id").
+		Select("business_id").
 		From("manual_access_grants").
 		Where(sq.Eq{"id": id}).
 		Limit(1).
@@ -276,11 +287,11 @@ func (r *Repository) GetGrantUserID(ctx context.Context, id int64) (int64, error
 		return 0, err
 	}
 
-	var userID int64
-	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(&userID); err != nil {
+	var businessID sql.NullInt64
+	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(&businessID); err != nil {
 		return 0, err
 	}
-	return userID, nil
+	return businessID.Int64, nil
 }
 
 // dynamic-query: squirrel

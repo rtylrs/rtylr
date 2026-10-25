@@ -76,7 +76,7 @@ func TestTeam_GetUserByID_Unknown_Error(t *testing.T) {
 func TestTeam_CountActiveMembers_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	count, err := repo.CountActiveMembers(context.Background(), testutil.OwnerID)
+	count, err := repo.CountActiveMembers(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("CountActiveMembers: %v", err)
 	}
@@ -94,7 +94,7 @@ func TestTeam_IsOnboarded_NoError(t *testing.T) {
 func TestTeam_ListGroups_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	_, err := repo.ListGroups(context.Background(), testutil.OwnerID, testutil.BusinessID)
+	_, err := repo.ListGroups(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("ListGroups: %v", err)
 	}
@@ -115,7 +115,7 @@ func TestTeam_CreateGroup_ReturnsPositiveID(t *testing.T) {
 	if id <= 0 {
 		t.Fatalf("expected positive ID, got %d", id)
 	}
-	t.Cleanup(func() { _ = repo.DeleteGroup(context.Background(), testutil.OwnerID, testutil.BusinessID, id) })
+	t.Cleanup(func() { _ = repo.DeleteGroup(context.Background(), testutil.BusinessID, id) })
 }
 
 func TestTeam_CreateGroup_AppearsInList(t *testing.T) {
@@ -125,9 +125,9 @@ func TestTeam_CreateGroup_AppearsInList(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateGroup: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteGroup(context.Background(), testutil.OwnerID, testutil.BusinessID, id) })
+	t.Cleanup(func() { _ = repo.DeleteGroup(context.Background(), testutil.BusinessID, id) })
 
-	groups, err := repo.ListGroups(context.Background(), testutil.OwnerID, testutil.BusinessID)
+	groups, err := repo.ListGroups(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("ListGroups: %v", err)
 	}
@@ -148,7 +148,7 @@ func TestTeam_CreateInviteToken_NoError(t *testing.T) {
 	t.Cleanup(func() {
 		db.ExecContext(context.Background(), "DELETE FROM invite_tokens WHERE token = ?", "test-invite-token-xyz")
 	})
-	err := repo.CreateInviteToken(context.Background(), teamStaffUserID, testutil.OwnerID, testutil.BusinessID,
+	err := repo.CreateInviteToken(context.Background(), teamStaffUserID, testutil.BusinessID,
 		"test-invite-token-xyz", time.Now().Add(24*time.Hour))
 	if err != nil {
 		t.Fatalf("CreateInviteToken: %v", err)
@@ -163,7 +163,7 @@ func TestTeam_GetInviteToken_ReturnsData(t *testing.T) {
 	t.Cleanup(func() {
 		db.ExecContext(context.Background(), "DELETE FROM invite_tokens WHERE token = ?", token)
 	})
-	if err := repo.CreateInviteToken(context.Background(), teamStaffUserID, testutil.OwnerID, testutil.BusinessID, token, expiry); err != nil {
+	if err := repo.CreateInviteToken(context.Background(), teamStaffUserID, testutil.BusinessID, token, expiry); err != nil {
 		t.Fatalf("CreateInviteToken: %v", err)
 	}
 
@@ -174,11 +174,8 @@ func TestTeam_GetInviteToken_ReturnsData(t *testing.T) {
 	if invite.UserID != teamStaffUserID {
 		t.Errorf("expected user_id %d, got %d", teamStaffUserID, invite.UserID)
 	}
-	if invite.OwnerID != testutil.OwnerID {
-		t.Errorf("expected owner_id %d, got %d", testutil.OwnerID, invite.OwnerID)
-	}
 	// The accept path resolves the tenant from this column, so a round-trip
-	// that loses it would silently fall back to the inviter's business.
+	// that loses it would leave the invitation without a business.
 	if invite.BusinessID != testutil.BusinessID {
 		t.Errorf("expected business_id %d, got %d", testutil.BusinessID, invite.BusinessID)
 	}
@@ -207,7 +204,7 @@ func TestTeam_MarkInviteTokenUsed_IsSingleUse(t *testing.T) {
 	t.Cleanup(func() {
 		db.ExecContext(context.Background(), "DELETE FROM invite_tokens WHERE token = ?", token)
 	})
-	if err := repo.CreateInviteToken(ctx, teamStaffUserID, testutil.OwnerID, testutil.BusinessID, token, time.Now().Add(1*time.Hour)); err != nil {
+	if err := repo.CreateInviteToken(ctx, teamStaffUserID, testutil.BusinessID, token, time.Now().Add(1*time.Hour)); err != nil {
 		t.Fatalf("CreateInviteToken: %v", err)
 	}
 
@@ -227,7 +224,7 @@ func TestTeam_MarkInviteTokenUsed_RejectsExpired(t *testing.T) {
 	t.Cleanup(func() {
 		db.ExecContext(context.Background(), "DELETE FROM invite_tokens WHERE token = ?", token)
 	})
-	if err := repo.CreateInviteToken(ctx, teamStaffUserID, testutil.OwnerID, testutil.BusinessID, token, time.Now().Add(-1*time.Hour)); err != nil {
+	if err := repo.CreateInviteToken(ctx, teamStaffUserID, testutil.BusinessID, token, time.Now().Add(-1*time.Hour)); err != nil {
 		t.Fatalf("CreateInviteToken: %v", err)
 	}
 

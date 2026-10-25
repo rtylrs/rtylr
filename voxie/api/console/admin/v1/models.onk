@@ -22,6 +22,7 @@ message Business {
 
 message Subscription {
   id: int64 @encode(number)
+  /// The business's current owner.
   owner_id: int64 @encode(number)
   owner_name: string
   owner_email: string
@@ -147,6 +148,8 @@ message SetConsoleAdminResponse {
   message: string
 }
 
+/// Reads the subscription of the business the user owns, preferring the one
+/// their session opens in.
 message GetUserSubscriptionRequest {
   user_id: int64 @gt(0) @encode(number)
 }
@@ -219,7 +222,11 @@ message ListSubscriptionsResponse {
 }
 
 message UpsertSubscriptionRequest {
-  owner_id: int64 @gt(0) @encode(number)
+  /// The business the plan applies to.
+  business_id: int64? @encode(number)
+  /// Names the business through its owner when business_id is unset. This is
+  /// accepted only while the owner has exactly one active business.
+  owner_id: int64? @encode(number)
   plan_id: int64 @gt(0) @encode(number)
   status: string
   seat_count: int32?

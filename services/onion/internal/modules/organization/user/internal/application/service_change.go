@@ -209,8 +209,8 @@ func (s *Service) RecordLogin(ctx context.Context, userID int64, email, method, 
 	return s.repo.RecordLogin(ctx, userID, email, method, ip, userAgent, success)
 }
 
-func (s *Service) AssignSubscription(ctx context.Context, ownerID int64, planSlug string) error {
-	return s.repo.AssignSubscription(ctx, ownerID, planSlug)
+func (s *Service) AssignSubscription(ctx context.Context, userID int64, planSlug string) error {
+	return s.repo.AssignSubscription(ctx, userID, planSlug)
 }
 
 // SwitchBusiness validates the user's access to businessID and issues

@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS `plans` (
 
 CREATE TABLE IF NOT EXISTS `subscriptions` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL,
   `plan_id` bigint NOT NULL,
   `status` enum('active','trial','past_due','cancelled','expired') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'trial',
   `seat_count` int NOT NULL DEFAULT '1',
@@ -37,15 +37,14 @@ CREATE TABLE IF NOT EXISTS `subscriptions` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `owner_id` (`owner_id`),
-  KEY `idx_sub_owner` (`owner_id`),
+  UNIQUE KEY `uk_subscriptions_business` (`business_id`),
   KEY `idx_sub_plan` (`plan_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `seat_periods` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `subscription_id` bigint NOT NULL,
-  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL,
   `seat_count` int NOT NULL,
   `price_per_seat_cents` int NOT NULL,
   `period_start` date NOT NULL,
@@ -54,7 +53,7 @@ CREATE TABLE IF NOT EXISTS `seat_periods` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_sp_subscription` (`subscription_id`),
-  KEY `idx_sp_owner_month` (`owner_id`,`billing_month`)
+  KEY `idx_sp_business_month` (`business_id`,`billing_month`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ── Retire old tier names ─────────────────────────────────────────────────

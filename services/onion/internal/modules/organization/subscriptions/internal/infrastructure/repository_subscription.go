@@ -13,7 +13,7 @@ import (
 	"github.com/voxire/onion/internal/modules/organization/subscriptions/internal/infrastructure/persistence/sqlc"
 )
 
-func (r *Repository) UpsertSubscription(ctx context.Context, ownerID, planID int64, trialDays, seatCount int) error {
+func (r *Repository) UpsertSubscription(ctx context.Context, businessID, planID int64, trialDays, seatCount int) error {
 	status := sqlc.SubscriptionsStatusActive
 	trialEnd := sql.NullTime{}
 	if trialDays > 0 {
@@ -27,7 +27,7 @@ func (r *Repository) UpsertSubscription(ctx context.Context, ownerID, planID int
 	nextBilling := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, time.UTC)
 
 	return r.queries.UpsertSubscription(ctx, sqlc.UpsertSubscriptionParams{
-		OwnerID:         ownerID,
+		BusinessID:      businessID,
 		PlanID:          planID,
 		Status:          sqlc.NullSubscriptionsStatus{SubscriptionsStatus: status, Valid: true},
 		SeatCount:       int32(seatCount),
@@ -36,11 +36,8 @@ func (r *Repository) UpsertSubscription(ctx context.Context, ownerID, planID int
 	})
 }
 
-func (r *Repository) CountActiveSeats(ctx context.Context, ownerID int64) (int, error) {
-	count, err := r.queries.CountActiveSeats(ctx, sqlc.CountActiveSeatsParams{
-		OwnerID:   ownerID,
-		OwnerID_2: ownerID,
-	})
+func (r *Repository) CountActiveSeats(ctx context.Context, businessID int64) (int, error) {
+	count, err := r.queries.CountActiveSeats(ctx, sqlc.CountActiveSeatsParams{BusinessID: businessID})
 	if err != nil {
 		return 0, err
 	}
@@ -50,8 +47,8 @@ func (r *Repository) CountActiveSeats(ctx context.Context, ownerID int64) (int, 
 	return int(count), nil
 }
 
-func (r *Repository) GetOwnerApps(ctx context.Context, ownerID int64) ([]string, error) {
-	appsJSON, err := r.queries.GetOwnerApps(ctx, ownerID)
+func (r *Repository) GetBusinessApps(ctx context.Context, businessID int64) ([]string, error) {
+	appsJSON, err := r.queries.GetBusinessApps(ctx, businessID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrSubscriptionNotFound
@@ -81,7 +78,7 @@ func (r *Repository) ExpireTrialSubscriptions(ctx context.Context) error {
 // row exists and then locks it, so two concurrent callers serialise instead of
 // both opening a period — the read path that used to do this work had no lock
 // and could leave two open periods that are then both billed.
-func (r *Repository) ReconcileSeatBilling(ctx context.Context, ownerID, defaultPlanID int64, defaultTrialDays, seatCount int, asOf time.Time) error {
+func (r *Repository) ReconcileSeatBilling(ctx context.Context, businessID, defaultPlanID int64, defaultTrialDays, seatCount int, asOf time.Time) error {
 	if seatCount < 1 {
 		seatCount = 1
 	}
@@ -98,10 +95,10 @@ func (r *Repository) ReconcileSeatBilling(ctx context.Context, ownerID, defaultP
 	// subscription keeps its plan, status and seat count. It also takes the row
 	// lock, so a concurrent creator waits instead of racing.
 	if _, err := tx.ExecContext(ctx, `
-		INSERT INTO subscriptions (owner_id, plan_id, status, seat_count, trial_ends_at, next_billing_date)
+		INSERT INTO subscriptions (business_id, plan_id, status, seat_count, trial_ends_at, next_billing_date)
 		VALUES (?, ?, ?, ?, ?, ?)
-		ON DUPLICATE KEY UPDATE owner_id = owner_id`,
-		ownerID, defaultPlanID, newSubscriptionStatus(defaultTrialDays), seatCount,
+		ON DUPLICATE KEY UPDATE business_id = business_id`,
+		businessID, defaultPlanID, newSubscriptionStatus(defaultTrialDays), seatCount,
 		newTrialEnd(defaultTrialDays, asOf), nextBilling,
 	); err != nil {
 		return err
@@ -113,8 +110,8 @@ func (r *Repository) ReconcileSeatBilling(ctx context.Context, ownerID, defaultP
 		SELECT s.id, p.price_per_seat_cents
 		FROM subscriptions s
 		JOIN plans p ON p.id = s.plan_id
-		WHERE s.owner_id = ?
-		FOR UPDATE`, ownerID).Scan(&subID, &pricePerSeatCents); err != nil {
+		WHERE s.business_id = ?
+		FOR UPDATE`, businessID).Scan(&subID, &pricePerSeatCents); err != nil {
 		return err
 	}
 
@@ -136,9 +133,9 @@ func (r *Repository) ReconcileSeatBilling(ctx context.Context, ownerID, defaultP
 	}
 	if plan.OpenNew {
 		if _, err := tx.ExecContext(ctx, `
-			INSERT INTO seat_periods (subscription_id, owner_id, seat_count, price_per_seat_cents, period_start, billing_month)
+			INSERT INTO seat_periods (subscription_id, business_id, seat_count, price_per_seat_cents, period_start, billing_month)
 			VALUES (?, ?, ?, ?, ?, ?)`,
-			subID, ownerID, seatCount, pricePerSeatCents, plan.NewStart, plan.NewBillingM,
+			subID, businessID, seatCount, pricePerSeatCents, plan.NewStart, plan.NewBillingM,
 		); err != nil {
 			return err
 		}
@@ -197,31 +194,27 @@ func closeSeatPeriod(ctx context.Context, tx *sql.Tx, periodID int64, periodEnd 
 	return err
 }
 
-// ListOwnerIDsForReconciliation pages the owners whose ledger may be stale:
-// every owner with an active business, an active permission grant, or an
-// existing subscription row (an owner whose team was deactivated still has to
-// be invoiced for the days they were active).
-func (r *Repository) ListOwnerIDsForReconciliation(ctx context.Context, afterOwnerID int64, limit int) ([]int64, error) {
+// ListBusinessIDsForReconciliation pages the businesses whose ledger may be
+// stale: every active business, plus every business with a subscription row (a
+// business that was deactivated still has to be invoiced for the days it was
+// active).
+func (r *Repository) ListBusinessIDsForReconciliation(ctx context.Context, afterBusinessID int64, limit int) ([]int64, error) {
 	if limit < 1 {
 		limit = 1
 	}
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT owner_id FROM (
-		    SELECT b.owner_id AS owner_id
+		SELECT business_id FROM (
+		    SELECT b.id AS business_id
 		    FROM businesses b
 		    WHERE COALESCE(b.is_active, TRUE) = TRUE
 		    UNION
-		    SELECT business.owner_id
-		    FROM authorization_business_members member
-		    JOIN businesses business ON business.id = member.business_id
-		    WHERE member.status = 'active' AND COALESCE(business.is_active, TRUE) = TRUE
-		    UNION
-		    SELECT s.owner_id
+		    SELECT s.business_id
 		    FROM subscriptions s
+		    WHERE s.business_id IS NOT NULL
 		) candidates
-		WHERE owner_id > ?
-		ORDER BY owner_id ASC
-		LIMIT ?`, afterOwnerID, limit) // #nosec G115 -- Reviewed width conversion is a validated application batch size.
+		WHERE business_id > ?
+		ORDER BY business_id ASC
+		LIMIT ?`, afterBusinessID, limit) // #nosec G115 -- Reviewed width conversion is a validated application batch size.
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +232,7 @@ func (r *Repository) ListOwnerIDsForReconciliation(ctx context.Context, afterOwn
 }
 
 func seatPeriodFromRow(
-	id, subscriptionID, ownerID int64,
+	id, subscriptionID, businessID int64,
 	seatCount, pricePerSeatCents int,
 	periodStart time.Time,
 	periodEnd sql.NullTime,
@@ -248,7 +241,7 @@ func seatPeriodFromRow(
 	sp := &domain.SeatPeriod{
 		ID:                id,
 		SubscriptionID:    subscriptionID,
-		OwnerID:           ownerID,
+		BusinessID:        businessID,
 		SeatCount:         seatCount,
 		PricePerSeatCents: pricePerSeatCents,
 		PeriodStart:       periodStart,
@@ -261,10 +254,10 @@ func seatPeriodFromRow(
 	return sp
 }
 
-func (r *Repository) GetPeriodsForMonth(ctx context.Context, ownerID int64, month time.Time) ([]domain.SeatPeriod, error) {
+func (r *Repository) GetPeriodsForMonth(ctx context.Context, businessID int64, month time.Time) ([]domain.SeatPeriod, error) {
 	billingMonth := domain.FirstOfUTCMonth(month)
 	rows, err := r.queries.GetSeatPeriodsForMonth(ctx, sqlc.GetSeatPeriodsForMonthParams{
-		OwnerID:      ownerID,
+		BusinessID:   businessID,
 		BillingMonth: billingMonth,
 	})
 	if err != nil {
@@ -274,7 +267,7 @@ func (r *Repository) GetPeriodsForMonth(ctx context.Context, ownerID int64, mont
 	periods := make([]domain.SeatPeriod, 0, len(rows))
 	for _, row := range rows {
 		sp := seatPeriodFromRow(
-			row.ID, row.SubscriptionID, row.OwnerID,
+			row.ID, row.SubscriptionID, row.BusinessID,
 			int(row.SeatCount), int(row.PricePerSeatCents),
 			row.PeriodStart, row.PeriodEnd, row.BillingMonth,
 		)
@@ -284,7 +277,7 @@ func (r *Repository) GetPeriodsForMonth(ctx context.Context, ownerID int64, mont
 }
 
 // dynamic-query: squirrel
-func (r *Repository) GetAddonPeriodsForMonth(ctx context.Context, ownerID, businessID int64, month time.Time) ([]domain.AddonBillingPeriod, error) {
+func (r *Repository) GetAddonPeriodsForMonth(ctx context.Context, businessID int64, month time.Time) ([]domain.AddonBillingPeriod, error) {
 	if businessID <= 0 {
 		return []domain.AddonBillingPeriod{}, nil
 	}
@@ -292,8 +285,7 @@ func (r *Repository) GetAddonPeriodsForMonth(ctx context.Context, ownerID, busin
 	billingMonth := time.Date(month.Year(), month.Month(), 1, 0, 0, 0, 0, time.UTC)
 	firstOfNextMonth := time.Date(billingMonth.Year(), billingMonth.Month()+1, 1, 0, 0, 0, 0, time.UTC)
 	activeGrantPredicate := `
-mag.user_id = ?
-AND mag.business_id = ba.business_id
+mag.business_id = ba.business_id
 AND mag.addon_id = ba.addon_id
 AND mag.revoked_at IS NULL
 AND mag.created_at < ?
@@ -301,8 +293,8 @@ AND (mag.expires_at IS NULL OR mag.expires_at >= ?)`
 
 	query, args, err := sq.
 		Select("ba.addon_id", "a.name", "a.price", "ba.enabled_at", "ba.disabled_at").
-		Column(sq.Expr("EXISTS (SELECT 1 FROM manual_addon_grants mag WHERE "+activeGrantPredicate+") AS is_granted", ownerID, firstOfNextMonth, billingMonth)).
-		Column(sq.Expr("(SELECT mag.expires_at FROM manual_addon_grants mag WHERE "+activeGrantPredicate+" ORDER BY mag.created_at DESC LIMIT 1) AS grant_expires_at", ownerID, firstOfNextMonth, billingMonth)).
+		Column(sq.Expr("EXISTS (SELECT 1 FROM manual_addon_grants mag WHERE "+activeGrantPredicate+") AS is_granted", firstOfNextMonth, billingMonth)).
+		Column(sq.Expr("(SELECT mag.expires_at FROM manual_addon_grants mag WHERE "+activeGrantPredicate+" ORDER BY mag.created_at DESC LIMIT 1) AS grant_expires_at", firstOfNextMonth, billingMonth)).
 		From("business_addons ba").
 		Join("addons a ON a.id = ba.addon_id").
 		Where(sq.Eq{"ba.business_id": businessID, "a.is_free": false}).

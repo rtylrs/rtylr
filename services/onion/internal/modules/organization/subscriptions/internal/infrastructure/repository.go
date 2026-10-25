@@ -146,8 +146,8 @@ func (r *Repository) GetPlanByID(ctx context.Context, id int64) (*domain.Plan, e
 
 // ── Subscriptions ─────────────────────────────────────────────────────────────
 
-func (r *Repository) GetSubscription(ctx context.Context, ownerID int64) (*domain.Subscription, error) {
-	row, err := r.queries.GetSubscription(ctx, ownerID)
+func (r *Repository) GetSubscription(ctx context.Context, businessID int64) (*domain.Subscription, error) {
+	row, err := r.queries.GetSubscription(ctx, businessID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrSubscriptionNotFound
@@ -157,7 +157,7 @@ func (r *Repository) GetSubscription(ctx context.Context, ownerID int64) (*domai
 
 	sub := &domain.Subscription{
 		ID:                row.ID,
-		OwnerID:           row.OwnerID,
+		BusinessID:        row.BusinessID,
 		PlanID:            row.PlanID,
 		PlanName:          row.PlanName,
 		PlanSlug:          row.PlanSlug,
@@ -202,8 +202,8 @@ func (r *Repository) GetSubscription(ctx context.Context, ownerID int64) (*domai
 
 func (r *Repository) hydrateActiveGrant(ctx context.Context, sub *domain.Subscription) error {
 	expiresAt, err := r.queries.GetActiveManualGrantExpiresAt(ctx, sqlc.GetActiveManualGrantExpiresAtParams{
-		UserID: sub.OwnerID,
-		PlanID: sub.PlanID,
+		BusinessID: sub.BusinessID,
+		PlanID:     sub.PlanID,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

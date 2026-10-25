@@ -16,14 +16,16 @@ const (
 )
 
 var (
-	ErrNotOrganizationOwner   = errors.New("access can only be granted to organization owners")
-	ErrBusinessNotOwnedByUser = errors.New("business does not belong to the requested owner")
-	ErrAddonNotFound          = errors.New("addon not found")
-	ErrInvalidSubscription    = errors.New("invalid subscription input")
-	ErrRecordNotFound         = errors.New("record not found")
-	ErrDeleteSelf             = errors.New("console admins cannot delete their own account")
-	ErrDeleteConsoleAdmin     = errors.New("remove console admin access before deleting this user")
-	ErrUserHasBilledPlan      = errors.New("user has a Paddle subscription that can still bill")
+	ErrNotOrganizationOwner      = errors.New("access can only be granted to organization owners")
+	ErrBusinessNotOwnedByUser    = errors.New("business does not belong to the requested owner")
+	ErrBusinessRequired          = errors.New("business_id is required")
+	ErrOwnerHasSeveralBusinesses = errors.New("this owner has several businesses; pass business_id")
+	ErrAddonNotFound             = errors.New("addon not found")
+	ErrInvalidSubscription       = errors.New("invalid subscription input")
+	ErrRecordNotFound            = errors.New("record not found")
+	ErrDeleteSelf                = errors.New("console admins cannot delete their own account")
+	ErrDeleteConsoleAdmin        = errors.New("remove console admin access before deleting this user")
+	ErrUserHasBilledPlan         = errors.New("user has a Paddle subscription that can still bill")
 )
 
 // Console is a global admin surface — caches are keyed on the admin namespace
@@ -36,8 +38,12 @@ func invalidateConsoleScope(ctx context.Context) {
 	cacher.InvalidateScope(ctx, "cache:console:*")
 }
 
-func invalidateOwnerSubscriptionScope(ctx context.Context, ownerID int64) {
-	patterns := append(cacheKeys.SubscriptionPatterns(ownerID), cacheKeys.UserPrefix(ownerID))
+func invalidateUserScope(ctx context.Context, userID int64) {
+	cacher.InvalidateScope(ctx, cacheKeys.UserPrefix(userID))
+}
+
+func invalidateBusinessSubscriptionScope(ctx context.Context, businessID int64) {
+	patterns := append(cacheKeys.SubscriptionPatterns(businessID), cacheKeys.BusinessUserMePrefix(businessID))
 	cacher.InvalidateScope(ctx, patterns...)
 }
 
@@ -59,10 +65,10 @@ type EmployeeProvisioner interface {
 	DeleteEmployeeForUser(ctx context.Context, ownerID, businessID, userID int64) error
 }
 
-// SeatChangeRecorder reprices an owner's seat period after their member count
+// SeatChangeRecorder reprices a business's seat period after its member count
 // changes. The team module owns seat billing.
 type SeatChangeRecorder interface {
-	RecordSeatChange(ctx context.Context, ownerID int64) error
+	RecordSeatChange(ctx context.Context, businessID int64) error
 }
 
 func NewService(_ context.Context, repo repository) *Service {

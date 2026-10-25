@@ -18,9 +18,9 @@ func TestListAddonGrantsClampsNegativeOffset(t *testing.T) {
 
 	result, err := db.ExecContext(ctx, `
 		INSERT INTO manual_addon_grants
-			(user_id, business_id, addon_id, granted_by, note, enabled_by_grant)
-		VALUES (?, ?, 'menu', ?, ?, FALSE)`,
-		testutil.OwnerID, testutil.BusinessID, testutil.OwnerID, note,
+			(business_id, addon_id, granted_by, note, enabled_by_grant)
+		VALUES (?, 'menu', ?, ?, FALSE)`,
+		testutil.BusinessID, testutil.OwnerID, note,
 	)
 	if err != nil {
 		t.Fatalf("seed addon grant: %v", err)

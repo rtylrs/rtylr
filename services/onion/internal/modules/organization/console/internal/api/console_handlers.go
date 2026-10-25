@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"net/http"
 	"time"
@@ -54,11 +55,14 @@ func (h *ListGrantsHandler) Serve(ctx context.Context, req *ListGrantsRequest) (
 	return *result, nil
 }
 
+// CreateGrantRequest names the business directly or through its owner; see
+// application.Service.CreateGrant.
 type CreateGrantRequest struct {
-	UserID    int64  `json:"user_id"`
-	PlanID    int64  `json:"plan_id"`
-	Note      string `json:"note"`
-	ExpiresAt string `json:"expires_at,omitempty"`
+	BusinessID int64  `json:"business_id"`
+	UserID     int64  `json:"user_id"`
+	PlanID     int64  `json:"plan_id"`
+	Note       string `json:"note"`
+	ExpiresAt  string `json:"expires_at,omitempty"`
 }
 
 type CreateGrantResponse struct {
@@ -73,8 +77,8 @@ func parseGrantExpiresAt(value string) (*time.Time, error) {
 }
 
 func (h *CreateGrantHandler) Validate(_ context.Context, req *CreateGrantRequest) error {
-	if req.UserID == 0 || req.PlanID == 0 {
-		return onekiterrors.New(http.StatusBadRequest, "user_id and plan_id are required")
+	if (req.BusinessID == 0 && req.UserID == 0) || req.PlanID == 0 {
+		return onekiterrors.New(http.StatusBadRequest, "business_id (or user_id) and plan_id are required")
 	}
 	if _, err := parseGrantExpiresAt(req.ExpiresAt); err != nil {
 		return badRequest("Invalid expires_at")
@@ -94,10 +98,13 @@ func (h *CreateGrantHandler) Serve(ctx context.Context, req *CreateGrantRequest)
 	if err != nil {
 		return CreateGrantResponse{}, badRequest("Invalid expires_at")
 	}
-	grant, err := h.Service.CreateGrant(ctx, req.UserID, req.PlanID, admin.UserID, req.Note, expiresAt)
+	grant, err := h.Service.CreateGrant(ctx, req.UserID, req.BusinessID, req.PlanID, admin.UserID, req.Note, expiresAt)
 	if err != nil {
 		if errors.Is(err, application.ErrNotOrganizationOwner) {
 			return CreateGrantResponse{}, onekiterrors.New(http.StatusBadRequest, "Access grants can only be created for organization owners")
+		}
+		if mapped := billingBusinessError(err); mapped != nil {
+			return CreateGrantResponse{}, mapped
 		}
 		return CreateGrantResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create grant")
 	}
@@ -163,8 +170,8 @@ type CreateAddonGrantResponse struct {
 type CreateAddonGrantHandler struct{ Service *application.Service }
 
 func (h *CreateAddonGrantHandler) Validate(_ context.Context, req *CreateAddonGrantRequest) error {
-	if req.UserID == 0 || req.AddonID == "" {
-		return onekiterrors.New(http.StatusBadRequest, "user_id and addon_id are required")
+	if (req.BusinessID == 0 && req.UserID == 0) || req.AddonID == "" {
+		return onekiterrors.New(http.StatusBadRequest, "business_id (or user_id) and addon_id are required")
 	}
 	if _, err := parseGrantExpiresAt(req.ExpiresAt); err != nil {
 		return badRequest("Invalid expires_at")
@@ -189,13 +196,32 @@ func (h *CreateAddonGrantHandler) Serve(ctx context.Context, req *CreateAddonGra
 		switch {
 		case errors.Is(err, application.ErrNotOrganizationOwner):
 			return CreateAddonGrantResponse{}, onekiterrors.New(http.StatusBadRequest, "Addon grants can only be created for organization owners")
-		case errors.Is(err, application.ErrBusinessNotOwnedByUser):
-			return CreateAddonGrantResponse{}, onekiterrors.New(http.StatusBadRequest, "Business does not belong to this owner")
 		case errors.Is(err, application.ErrAddonNotFound):
 			return CreateAddonGrantResponse{}, onekiterrors.New(http.StatusBadRequest, "Addon not found")
-		default:
-			return CreateAddonGrantResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create addon grant")
 		}
+		if mapped := billingBusinessError(err); mapped != nil {
+			return CreateAddonGrantResponse{}, mapped
+		}
+		return CreateAddonGrantResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create addon grant")
 	}
 	return CreateAddonGrantResponse{Grant: *grant, Message: "Addon grant created"}, nil
+}
+
+// billingBusinessError maps the errors that pick the business of a console
+// billing write, and returns nil for any other error.
+func billingBusinessError(err error) error {
+	switch {
+	case errors.Is(err, sql.ErrNoRows):
+		return onekiterrors.New(http.StatusNotFound, "Business not found")
+	case errors.Is(err, application.ErrBusinessRequired):
+		return badRequest("business_id is required")
+	case errors.Is(err, application.ErrOwnerHasSeveralBusinesses):
+		return badRequest("This owner has several businesses; pass business_id")
+	case errors.Is(err, application.ErrNotOrganizationOwner):
+		return badRequest("This user owns no active business")
+	case errors.Is(err, application.ErrBusinessNotOwnedByUser):
+		return badRequest("Business does not belong to this owner")
+	default:
+		return nil
+	}
 }

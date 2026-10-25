@@ -16,19 +16,19 @@ import (
 type statefulRepo struct {
 	mu sync.Mutex
 
-	plan      *domain.Plan
-	freePlan  *domain.Plan
-	sub       *domain.Subscription
-	seats     int
-	periods   []domain.SeatPeriod
-	ownerIDs  []int64
-	nextID    int64
-	writes    int
-	upserts   int
-	closings  int
-	opens     int
-	seatSets  int
-	reconcile int
+	plan        *domain.Plan
+	freePlan    *domain.Plan
+	sub         *domain.Subscription
+	seats       int
+	periods     []domain.SeatPeriod
+	businessIDs []int64
+	nextID      int64
+	writes      int
+	upserts     int
+	closings    int
+	opens       int
+	seatSets    int
+	reconcile   int
 }
 
 func (r *statefulRepo) write() { r.writes++ }
@@ -50,26 +50,26 @@ func (r *statefulRepo) GetPlanByID(_ context.Context, _ int64) (*domain.Plan, er
 	return r.plan, nil
 }
 
-func (r *statefulRepo) GetSubscription(_ context.Context, ownerID int64) (*domain.Subscription, error) {
+func (r *statefulRepo) GetSubscription(_ context.Context, businessID int64) (*domain.Subscription, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if r.sub == nil || r.sub.OwnerID != ownerID {
+	if r.sub == nil || r.sub.BusinessID != businessID {
 		return nil, domain.ErrSubscriptionNotFound
 	}
 	copied := *r.sub
 	return &copied, nil
 }
 
-func (r *statefulRepo) UpsertSubscription(_ context.Context, ownerID, planID int64, _ int, seatCount int) error {
+func (r *statefulRepo) UpsertSubscription(_ context.Context, businessID, planID int64, _ int, seatCount int) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.upserts++
 	r.write()
 	if r.sub == nil {
 		r.sub = &domain.Subscription{
-			ID:      1,
-			OwnerID: ownerID,
-			PlanID:  planID,
+			ID:         1,
+			BusinessID: businessID,
+			PlanID:     planID,
 		}
 	}
 	r.sub.PlanID = planID
@@ -84,10 +84,10 @@ func (r *statefulRepo) UpsertSubscription(_ context.Context, ownerID, planID int
 	return nil
 }
 
-func (r *statefulRepo) GetOwnerApps(_ context.Context, ownerID int64) ([]string, error) {
+func (r *statefulRepo) GetBusinessApps(_ context.Context, businessID int64) ([]string, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if r.sub == nil || r.sub.OwnerID != ownerID {
+	if r.sub == nil || r.sub.BusinessID != businessID {
 		return nil, domain.ErrSubscriptionNotFound
 	}
 	return r.sub.Apps, nil
@@ -105,7 +105,7 @@ func (r *statefulRepo) CountActiveSeats(context.Context, int64) (int, error) {
 // ReconcileSeatBilling applies domain.PlanSeatLedger against the in-memory
 // ledger, so the service tests exercise the real policy rather than a
 // reimplementation of it.
-func (r *statefulRepo) ReconcileSeatBilling(_ context.Context, ownerID, defaultPlanID int64, defaultTrialDays, seatCount int, asOf time.Time) error {
+func (r *statefulRepo) ReconcileSeatBilling(_ context.Context, businessID, defaultPlanID int64, defaultTrialDays, seatCount int, asOf time.Time) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -114,7 +114,7 @@ func (r *statefulRepo) ReconcileSeatBilling(_ context.Context, ownerID, defaultP
 	}
 	today := domain.UTCDay(asOf)
 	created := false
-	if r.sub == nil || r.sub.OwnerID != ownerID {
+	if r.sub == nil || r.sub.BusinessID != businessID {
 		def := r.plan
 		for _, p := range []*domain.Plan{r.plan, r.freePlan} {
 			if p != nil && p.ID == defaultPlanID {
@@ -126,7 +126,7 @@ func (r *statefulRepo) ReconcileSeatBilling(_ context.Context, ownerID, defaultP
 			status = "trial"
 		}
 		r.sub = &domain.Subscription{
-			ID: 1, OwnerID: ownerID, PlanID: defaultPlanID,
+			ID: 1, BusinessID: businessID, PlanID: defaultPlanID,
 			PlanName: def.Name, PlanSlug: def.Slug, Apps: def.Apps,
 			PricePerSeatCents: def.PricePerSeatCents, Status: status,
 		}
@@ -157,7 +157,7 @@ func (r *statefulRepo) ReconcileSeatBilling(_ context.Context, ownerID, defaultP
 		r.opens++
 		r.write()
 		r.periods = append(r.periods, domain.SeatPeriod{
-			ID: r.nextID, SubscriptionID: r.sub.ID, OwnerID: ownerID,
+			ID: r.nextID, SubscriptionID: r.sub.ID, BusinessID: businessID,
 			SeatCount: seatCount, PricePerSeatCents: r.sub.PricePerSeatCents,
 			PeriodStart: plan.NewStart, BillingMonth: plan.NewBillingM,
 		})
@@ -181,12 +181,12 @@ func (r *statefulRepo) closePeriod(periodID int64, end time.Time) {
 	}
 }
 
-func (r *statefulRepo) ListOwnerIDsForReconciliation(_ context.Context, afterOwnerID int64, limit int) ([]int64, error) {
+func (r *statefulRepo) ListBusinessIDsForReconciliation(_ context.Context, afterBusinessID int64, limit int) ([]int64, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	var out []int64
-	for _, id := range r.ownerIDs {
-		if id > afterOwnerID {
+	for _, id := range r.businessIDs {
+		if id > afterBusinessID {
 			out = append(out, id)
 			if len(out) == limit {
 				break
@@ -196,20 +196,20 @@ func (r *statefulRepo) ListOwnerIDsForReconciliation(_ context.Context, afterOwn
 	return out, nil
 }
 
-func (r *statefulRepo) GetPeriodsForMonth(_ context.Context, ownerID int64, month time.Time) ([]domain.SeatPeriod, error) {
+func (r *statefulRepo) GetPeriodsForMonth(_ context.Context, businessID int64, month time.Time) ([]domain.SeatPeriod, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	target := time.Date(month.Year(), month.Month(), 1, 0, 0, 0, 0, time.UTC)
 	out := make([]domain.SeatPeriod, 0, len(r.periods))
 	for _, p := range r.periods {
-		if p.OwnerID == ownerID && p.BillingMonth.Equal(target) {
+		if p.BusinessID == businessID && p.BillingMonth.Equal(target) {
 			out = append(out, p)
 		}
 	}
 	return out, nil
 }
 
-func (r *statefulRepo) GetAddonPeriodsForMonth(_ context.Context, _, _ int64, _ time.Time) ([]domain.AddonBillingPeriod, error) {
+func (r *statefulRepo) GetAddonPeriodsForMonth(_ context.Context, _ int64, _ time.Time) ([]domain.AddonBillingPeriod, error) {
 	return nil, nil
 }
 
@@ -233,13 +233,13 @@ func (r *statefulRepo) LastPaddleEventAt(context.Context, string) (time.Time, bo
 	return time.Time{}, false, nil
 }
 
-func (r *statefulRepo) GetOwnerIDByPaddleSubscription(context.Context, string) (int64, error) {
+func (r *statefulRepo) GetBusinessIDByPaddleSubscription(context.Context, string) (int64, error) {
 	return 0, domain.ErrSubscriptionNotFound
 }
 
 // ─── helpers ───────────────────────────────────────────────────────────────────
 
-const testOwnerID int64 = 4242
+const testBusinessID int64 = 4242
 
 // currentMonth is the UTC month the test clock sits in.
 func currentMonth() time.Time {
@@ -262,7 +262,7 @@ func newRepo(seats int) *statefulRepo {
 		freePlan: &domain.Plan{ID: 1, Name: "Free", Slug: "free", Apps: []string{"dash", "pos"}},
 		seats:    seats,
 		sub: &domain.Subscription{
-			ID: 1, OwnerID: testOwnerID, PlanID: 2,
+			ID: 1, BusinessID: testBusinessID, PlanID: 2,
 			PlanName: "Pro", PlanSlug: "pro", Apps: []string{"dash"},
 			PricePerSeatCents: 1000, Status: "active", SeatCount: seats,
 		},
@@ -273,7 +273,7 @@ func newRepo(seats int) *statefulRepo {
 func (r *statefulRepo) openPeriod(month time.Time, seats, price int) {
 	r.nextID++
 	r.periods = append(r.periods, domain.SeatPeriod{
-		ID: r.nextID, SubscriptionID: 1, OwnerID: testOwnerID,
+		ID: r.nextID, SubscriptionID: 1, BusinessID: testBusinessID,
 		SeatCount: seats, PricePerSeatCents: price,
 		PeriodStart: month, BillingMonth: month,
 	})
@@ -291,7 +291,7 @@ func TestReconcile_MonthRolloverBillsTheNewMonth(t *testing.T) {
 	s := &Service{repo: repo}
 
 	// Before any reconciliation the new month has nothing to bill.
-	before, err := s.GetBillingDetail(context.Background(), testOwnerID, testOwnerID)
+	before, err := s.GetBillingDetail(context.Background(), testBusinessID)
 	if err != nil {
 		t.Fatalf("GetBillingDetail: %v", err)
 	}
@@ -299,11 +299,11 @@ func TestReconcile_MonthRolloverBillsTheNewMonth(t *testing.T) {
 		t.Fatalf("a read must not create billing periods, got %d line items", len(before.LineItems))
 	}
 
-	if err := s.ReconcileOwnerBilling(context.Background(), testOwnerID); err != nil {
-		t.Fatalf("ReconcileOwnerBilling: %v", err)
+	if err := s.ReconcileBusinessBilling(context.Background(), testBusinessID); err != nil {
+		t.Fatalf("ReconcileBusinessBilling: %v", err)
 	}
 
-	after, err := s.GetBillingDetail(context.Background(), testOwnerID, testOwnerID)
+	after, err := s.GetBillingDetail(context.Background(), testBusinessID)
 	if err != nil {
 		t.Fatalf("GetBillingDetail: %v", err)
 	}
@@ -327,11 +327,11 @@ func TestReconcile_SeatsAddedMidCycleIsProrated(t *testing.T) {
 	repo.openPeriod(month, 3, 1000)
 	s := &Service{repo: repo}
 
-	if err := s.ReconcileOwnerBilling(context.Background(), testOwnerID); err != nil {
-		t.Fatalf("ReconcileOwnerBilling: %v", err)
+	if err := s.ReconcileBusinessBilling(context.Background(), testBusinessID); err != nil {
+		t.Fatalf("ReconcileBusinessBilling: %v", err)
 	}
 
-	detail, err := s.GetBillingDetail(context.Background(), testOwnerID, testOwnerID)
+	detail, err := s.GetBillingDetail(context.Background(), testBusinessID)
 	if err != nil {
 		t.Fatalf("GetBillingDetail: %v", err)
 	}
@@ -371,11 +371,11 @@ func TestReconcile_SeatsRemovedMidCycleIsProrated(t *testing.T) {
 	repo.openPeriod(month, 20, 1000)
 	s := &Service{repo: repo}
 
-	if err := s.ReconcileOwnerBilling(context.Background(), testOwnerID); err != nil {
-		t.Fatalf("ReconcileOwnerBilling: %v", err)
+	if err := s.ReconcileBusinessBilling(context.Background(), testBusinessID); err != nil {
+		t.Fatalf("ReconcileBusinessBilling: %v", err)
 	}
 
-	detail, err := s.GetBillingDetail(context.Background(), testOwnerID, testOwnerID)
+	detail, err := s.GetBillingDetail(context.Background(), testBusinessID)
 	if err != nil {
 		t.Fatalf("GetBillingDetail: %v", err)
 	}
@@ -400,10 +400,10 @@ func TestReconcile_PriceChangeIsNotReusedFromTheFirstCycle(t *testing.T) {
 	repo.openPeriod(month, 15, 1000)
 	s := &Service{repo: repo}
 
-	if err := s.ReconcileOwnerBilling(context.Background(), testOwnerID); err != nil {
-		t.Fatalf("ReconcileOwnerBilling: %v", err)
+	if err := s.ReconcileBusinessBilling(context.Background(), testBusinessID); err != nil {
+		t.Fatalf("ReconcileBusinessBilling: %v", err)
 	}
-	first, err := s.GetBillingDetail(context.Background(), testOwnerID, testOwnerID)
+	first, err := s.GetBillingDetail(context.Background(), testBusinessID)
 	if err != nil {
 		t.Fatalf("GetBillingDetail: %v", err)
 	}
@@ -411,11 +411,11 @@ func TestReconcile_PriceChangeIsNotReusedFromTheFirstCycle(t *testing.T) {
 	// The plan now charges half as much per seat.
 	repo.plan = &domain.Plan{ID: 2, Name: "Pro", Slug: "pro", Apps: []string{"dash"}, PricePerSeatCents: 500}
 	repo.sub.PricePerSeatCents = 500
-	if err := s.ReconcileOwnerBilling(context.Background(), testOwnerID); err != nil {
-		t.Fatalf("ReconcileOwnerBilling after price change: %v", err)
+	if err := s.ReconcileBusinessBilling(context.Background(), testBusinessID); err != nil {
+		t.Fatalf("ReconcileBusinessBilling after price change: %v", err)
 	}
 
-	second, err := s.GetBillingDetail(context.Background(), testOwnerID, testOwnerID)
+	second, err := s.GetBillingDetail(context.Background(), testBusinessID)
 	if err != nil {
 		t.Fatalf("GetBillingDetail: %v", err)
 	}
@@ -440,8 +440,8 @@ func TestReconcile_CollapsesDuplicateOpenPeriods(t *testing.T) {
 	repo.openPeriod(month, 15, 1000)
 	s := &Service{repo: repo}
 
-	if err := s.ReconcileOwnerBilling(context.Background(), testOwnerID); err != nil {
-		t.Fatalf("ReconcileOwnerBilling: %v", err)
+	if err := s.ReconcileBusinessBilling(context.Background(), testBusinessID); err != nil {
+		t.Fatalf("ReconcileBusinessBilling: %v", err)
 	}
 
 	open := 0
@@ -454,7 +454,7 @@ func TestReconcile_CollapsesDuplicateOpenPeriods(t *testing.T) {
 		t.Fatalf("expected exactly 1 open seat period, got %d", open)
 	}
 
-	detail, err := s.GetBillingDetail(context.Background(), testOwnerID, testOwnerID)
+	detail, err := s.GetBillingDetail(context.Background(), testBusinessID)
 	if err != nil {
 		t.Fatalf("GetBillingDetail: %v", err)
 	}
@@ -474,8 +474,8 @@ func TestReconcile_RepeatedRunsDoNotChurnPeriods(t *testing.T) {
 	repo := newRepo(15)
 	s := &Service{repo: repo}
 	for i := 0; i < 5; i++ {
-		if err := s.ReconcileOwnerBilling(context.Background(), testOwnerID); err != nil {
-			t.Fatalf("ReconcileOwnerBilling run %d: %v", i, err)
+		if err := s.ReconcileBusinessBilling(context.Background(), testBusinessID); err != nil {
+			t.Fatalf("ReconcileBusinessBilling run %d: %v", i, err)
 		}
 	}
 	if len(repo.periods) != 1 {
@@ -490,18 +490,18 @@ func TestReconcile_CreatesMissingSubscription(t *testing.T) {
 	repo.sub = nil
 	s := &Service{repo: repo}
 
-	if _, err := s.GetMySubscription(context.Background(), testOwnerID); err != nil {
+	if _, err := s.GetMySubscription(context.Background(), testBusinessID); err != nil {
 		t.Fatalf("GetMySubscription: %v", err)
 	}
 	if repo.sub != nil {
 		t.Fatal("a read created the subscription row")
 	}
 
-	if err := s.ReconcileOwnerBilling(context.Background(), testOwnerID); err != nil {
-		t.Fatalf("ReconcileOwnerBilling: %v", err)
+	if err := s.ReconcileBusinessBilling(context.Background(), testBusinessID); err != nil {
+		t.Fatalf("ReconcileBusinessBilling: %v", err)
 	}
 	if repo.sub == nil {
-		t.Fatal("ReconcileOwnerBilling did not create the subscription row")
+		t.Fatal("ReconcileBusinessBilling did not create the subscription row")
 	}
 	if repo.sub.PlanSlug != defaultPlanSlug {
 		t.Fatalf("expected the default plan %q, got %q", defaultPlanSlug, repo.sub.PlanSlug)
@@ -513,15 +513,15 @@ func TestReconcile_CreatesMissingSubscription(t *testing.T) {
 
 // ReconcileAllSubscriptions walks every candidate owner and keeps going when
 // one fails, so a single bad tenant cannot stop billing for everyone.
-func TestReconcileAllSubscriptions_PagesThroughOwners(t *testing.T) {
+func TestReconcileAllSubscriptions_PagesThroughBusinesses(t *testing.T) {
 	repo := newRepo(15)
-	repo.ownerIDs = []int64{1, 2, 3, 4, 5, 6, 7}
+	repo.businessIDs = []int64{1, 2, 3, 4, 5, 6, 7}
 	s := &Service{repo: repo}
 	if err := s.ReconcileAllSubscriptions(context.Background()); err != nil {
 		t.Fatalf("ReconcileAllSubscriptions: %v", err)
 	}
-	if repo.reconcile != len(repo.ownerIDs) {
-		t.Fatalf("reconciled %d owners, want %d", repo.reconcile, len(repo.ownerIDs))
+	if repo.reconcile != len(repo.businessIDs) {
+		t.Fatalf("reconciled %d businesses, want %d", repo.reconcile, len(repo.businessIDs))
 	}
 }
 
@@ -531,25 +531,25 @@ func TestReconcileAllSubscriptions_PagesThroughOwners(t *testing.T) {
 // HTTP/edge caching, makes retries non-idempotent, races with itself under
 // concurrent reads, and can be triggered by a prefetch.
 func TestReads_PerformNoWrites(t *testing.T) {
-	cases := map[string]func(t *testing.T, s *Service, ownerID int64){
-		"GetMySubscription": func(t *testing.T, s *Service, ownerID int64) {
-			if _, err := s.GetMySubscription(context.Background(), ownerID); err != nil {
+	cases := map[string]func(t *testing.T, s *Service, businessID int64){
+		"GetMySubscription": func(t *testing.T, s *Service, businessID int64) {
+			if _, err := s.GetMySubscription(context.Background(), businessID); err != nil {
 				t.Fatalf("GetMySubscription: %v", err)
 			}
 		},
-		"GetBillingDetail": func(t *testing.T, s *Service, ownerID int64) {
-			if _, err := s.GetBillingDetail(context.Background(), ownerID, ownerID); err != nil {
+		"GetBillingDetail": func(t *testing.T, s *Service, businessID int64) {
+			if _, err := s.GetBillingDetail(context.Background(), businessID); err != nil {
 				t.Fatalf("GetBillingDetail: %v", err)
 			}
 		},
-		"GetBillingHistory": func(t *testing.T, s *Service, ownerID int64) {
-			if _, err := s.GetBillingHistory(context.Background(), ownerID, ownerID, 12); err != nil {
+		"GetBillingHistory": func(t *testing.T, s *Service, businessID int64) {
+			if _, err := s.GetBillingHistory(context.Background(), businessID, 12); err != nil {
 				t.Fatalf("GetBillingHistory: %v", err)
 			}
 		},
-		"GetOwnerApps": func(t *testing.T, s *Service, ownerID int64) {
-			if _, err := s.GetOwnerApps(context.Background(), ownerID); err != nil {
-				t.Fatalf("GetOwnerApps: %v", err)
+		"GetBusinessApps": func(t *testing.T, s *Service, businessID int64) {
+			if _, err := s.GetBusinessApps(context.Background(), businessID); err != nil {
+				t.Fatalf("GetBusinessApps: %v", err)
 			}
 		},
 	}
@@ -558,14 +558,14 @@ func TestReads_PerformNoWrites(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			// With an existing subscription.
 			repo := newRepo(15)
-			call(t, &Service{repo: repo}, testOwnerID)
+			call(t, &Service{repo: repo}, testBusinessID)
 			assertNoWrites(t, repo, name)
 
 			// And with no subscription row, which is where the old path
 			// inserted one.
 			fresh := newRepo(1)
 			fresh.sub = nil
-			call(t, &Service{repo: fresh}, testOwnerID)
+			call(t, &Service{repo: fresh}, testBusinessID)
 			assertNoWrites(t, fresh, name)
 		})
 	}
@@ -586,19 +586,19 @@ func TestReads_ProjectDefaultPlanWithoutWriting(t *testing.T) {
 	repo.sub = nil
 	s := &Service{repo: repo}
 
-	sub, err := s.GetMySubscription(context.Background(), testOwnerID)
+	sub, err := s.GetMySubscription(context.Background(), testBusinessID)
 	if err != nil {
 		t.Fatalf("GetMySubscription: %v", err)
 	}
 	if sub.PlanSlug != "free" || sub.Status != "active" || sub.SeatCount != 4 {
 		t.Fatalf("unexpected projected subscription: %+v", sub)
 	}
-	apps, err := s.GetOwnerApps(context.Background(), testOwnerID)
+	apps, err := s.GetBusinessApps(context.Background(), testBusinessID)
 	if err != nil {
-		t.Fatalf("GetOwnerApps: %v", err)
+		t.Fatalf("GetBusinessApps: %v", err)
 	}
 	if len(apps) != 2 {
-		t.Fatalf("GetOwnerApps = %v, want the default plan's apps", apps)
+		t.Fatalf("GetBusinessApps = %v, want the default plan's apps", apps)
 	}
 	assertNoWrites(t, repo, "GetMySubscription")
 }

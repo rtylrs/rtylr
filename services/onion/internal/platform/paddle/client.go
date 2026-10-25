@@ -196,7 +196,7 @@ func CreatePOSTransaction(ctx context.Context, req POSPaymentRequest) (POSPaymen
 
 // CreateTransaction creates a Paddle transaction (checkout session).
 // Returns the checkout URL the user should be redirected to.
-func CreateTransaction(ctx context.Context, ownerID int64, priceID, customerEmail string) (string, error) {
+func CreateTransaction(ctx context.Context, businessID int64, priceID, customerEmail string) (string, error) {
 	if !config.IsPaddleConfigured() {
 		return "", errors.New("paddle not configured")
 	}
@@ -208,7 +208,7 @@ func CreateTransaction(ctx context.Context, ownerID int64, priceID, customerEmai
 		"collection_mode": "automatic",
 		"customer_email":  customerEmail,
 		"custom_data": map[string]string{
-			"owner_id": strconv.FormatInt(ownerID, 10),
+			"business_id": strconv.FormatInt(businessID, 10),
 		},
 	}
 

@@ -26,8 +26,8 @@ type subscriptionAccess struct {
 }
 
 // SubscriptionEnforcementMiddleware blocks authenticated tenant requests when
-// the owner's subscription is cancelled or expired. Billing endpoints remain
-// available so an owner can recover access, and console administrators are
+// the business's subscription is cancelled or expired. Billing endpoints remain
+// available so the business can recover access, and console administrators are
 // never tenant-gated. The decision is cached briefly and invalidated whenever
 // subscription state changes.
 func SubscriptionEnforcementMiddleware(read SubscriptionAccessReader, accessPolicy *RouteAccessPolicy) MiddlewareFunc {
@@ -48,13 +48,13 @@ func SubscriptionEnforcementMiddleware(read SubscriptionAccessReader, accessPoli
 				return
 			}
 
-			ownerID, err := tenant.ResolveOwnerID(r.Context(), authUser.BusinessID, authUser.UserID)
-			if err != nil || ownerID <= 0 {
+			businessID, err := tenant.ActiveBusinessID(r.Context(), authUser.BusinessID)
+			if err != nil {
 				writeSubscriptionError(r.Context(), w, http.StatusServiceUnavailable, "Subscription status is temporarily unavailable")
 				return
 			}
 
-			access, err := cachedSubscriptionAccess(r.Context(), read, ownerID)
+			access, err := cachedSubscriptionAccess(r.Context(), read, businessID)
 			if err != nil {
 				if errors.Is(err, sql.ErrNoRows) {
 					next.ServeHTTP(w, r)
@@ -73,16 +73,16 @@ func SubscriptionEnforcementMiddleware(read SubscriptionAccessReader, accessPoli
 	}
 }
 
-func cachedSubscriptionAccess(ctx context.Context, read SubscriptionAccessReader, ownerID int64) (subscriptionAccess, error) {
+func cachedSubscriptionAccess(ctx context.Context, read SubscriptionAccessReader, businessID int64) (subscriptionAccess, error) {
 	if read == nil {
 		return subscriptionAccess{}, errors.New("subscription reader is unavailable")
 	}
 	return cacher.Of[subscriptionAccess]().GetOrComputeSingle(
 		ctx,
-		cacheKeys.SubscriptionAccess(ownerID),
+		cacheKeys.SubscriptionAccess(businessID),
 		func(ctx context.Context) (subscriptionAccess, error) {
 			var access subscriptionAccess
-			status, granted, trialEnd, err := read(ctx, ownerID)
+			status, granted, trialEnd, err := read(ctx, businessID)
 			if err != nil {
 				return subscriptionAccess{}, err
 			}

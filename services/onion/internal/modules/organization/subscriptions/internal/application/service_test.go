@@ -23,8 +23,8 @@ type mockRepo struct {
 	ownerApps           []string
 	billingHistory      []domain.BillingHistoryMonth
 	addonPeriods        []domain.AddonBillingPeriod
-	ownerID             int64
-	upsertOwnerID       int64
+	businessID          int64
+	upsertBusinessID    int64
 	upsertPlanID        int64
 	upsertTrialDays     int
 	upsertSeatCount     int
@@ -42,7 +42,7 @@ type mockRepo struct {
 	paddleOwnerErr      error
 	reconcileCalls      int
 	reconcileErr        error
-	ownerIDs            []int64
+	businessIDs         []int64
 	listOwnersErr       error
 }
 
@@ -73,15 +73,15 @@ func (m *mockRepo) GetSubscription(_ context.Context, _ int64) (*domain.Subscrip
 	return m.subscription, nil
 }
 
-func (m *mockRepo) UpsertSubscription(_ context.Context, ownerID, planID int64, trialDays, seatCount int) error {
-	m.upsertOwnerID = ownerID
+func (m *mockRepo) UpsertSubscription(_ context.Context, businessID, planID int64, trialDays, seatCount int) error {
+	m.upsertBusinessID = businessID
 	m.upsertPlanID = planID
 	m.upsertTrialDays = trialDays
 	m.upsertSeatCount = seatCount
 	return m.upsertSubErr
 }
 
-func (m *mockRepo) GetOwnerApps(_ context.Context, _ int64) ([]string, error) {
+func (m *mockRepo) GetBusinessApps(_ context.Context, _ int64) ([]string, error) {
 	return m.ownerApps, m.getAppsErr
 }
 
@@ -101,7 +101,7 @@ func (m *mockRepo) GetPeriodsForMonth(_ context.Context, _ int64, _ time.Time) (
 	return nil, m.getPeriodsErr
 }
 
-func (m *mockRepo) GetAddonPeriodsForMonth(_ context.Context, _, _ int64, _ time.Time) ([]domain.AddonBillingPeriod, error) {
+func (m *mockRepo) GetAddonPeriodsForMonth(_ context.Context, _ int64, _ time.Time) ([]domain.AddonBillingPeriod, error) {
 	return m.addonPeriods, m.getAddonPeriodsErr
 }
 
@@ -110,8 +110,8 @@ func (m *mockRepo) ReconcileSeatBilling(_ context.Context, _, _ int64, _, _ int,
 	return m.reconcileErr
 }
 
-func (m *mockRepo) ListOwnerIDsForReconciliation(_ context.Context, _ int64, _ int) ([]int64, error) {
-	return m.ownerIDs, m.listOwnersErr
+func (m *mockRepo) ListBusinessIDsForReconciliation(_ context.Context, _ int64, _ int) ([]int64, error) {
+	return m.businessIDs, m.listOwnersErr
 }
 
 func (m *mockRepo) GetBillingHistory(_ context.Context, _ int64, _ int) ([]domain.BillingHistoryMonth, error) {
@@ -122,7 +122,7 @@ func (m *mockRepo) UpdatePaddleSubscription(_ context.Context, _ int64, _, _, _ 
 	return !m.paddleUpdateMissing, m.paddleUpdateErr
 }
 
-func (m *mockRepo) ApplyPaddleSubscriptionEvent(_ context.Context, _, _ string, _ time.Time, fallbackOwnerID int64, _, _ string) (bool, int64, error) {
+func (m *mockRepo) ApplyPaddleSubscriptionEvent(_ context.Context, _, _ string, _ time.Time, fallbackBusinessID int64, _, _ string) (bool, int64, error) {
 	if !m.eventNew {
 		return false, 0, nil
 	}
@@ -132,10 +132,10 @@ func (m *mockRepo) ApplyPaddleSubscriptionEvent(_ context.Context, _, _ string, 
 	if m.paddleUpdateMissing {
 		return false, 0, errors.New("no subscription row")
 	}
-	if m.paddleOwnerErr != nil && fallbackOwnerID == 0 {
+	if m.paddleOwnerErr != nil && fallbackBusinessID == 0 {
 		return false, 0, m.paddleOwnerErr
 	}
-	return m.eventNew, fallbackOwnerID, nil
+	return m.eventNew, fallbackBusinessID, nil
 }
 
 func (m *mockRepo) RecordPaddleEvent(_ context.Context, _, _ string, _ time.Time) (bool, error) {
@@ -146,8 +146,8 @@ func (m *mockRepo) LastPaddleEventAt(_ context.Context, _ string) (time.Time, bo
 	return time.Time{}, false, nil
 }
 
-func (m *mockRepo) GetOwnerIDByPaddleSubscription(_ context.Context, _ string) (int64, error) {
-	return m.ownerID, m.paddleOwnerErr
+func (m *mockRepo) GetBusinessIDByPaddleSubscription(_ context.Context, _ string) (int64, error) {
+	return m.businessID, m.paddleOwnerErr
 }
 
 // ─── tests ─────────────────────────────────────────────────────────────────────
@@ -348,24 +348,24 @@ func TestGetMySubscription_ProjectsDefaultWithoutWriting(t *testing.T) {
 	if repo.planSlug != defaultPlanSlug {
 		t.Fatalf("expected default plan slug %q, got %q", defaultPlanSlug, repo.planSlug)
 	}
-	if repo.upsertOwnerID != 0 || repo.reconcileCalls != 0 {
-		t.Fatalf("read wrote: upsertOwner=%d reconcileCalls=%d", repo.upsertOwnerID, repo.reconcileCalls)
+	if repo.upsertBusinessID != 0 || repo.reconcileCalls != 0 {
+		t.Fatalf("read wrote: upsertOwner=%d reconcileCalls=%d", repo.upsertBusinessID, repo.reconcileCalls)
 	}
 }
 
-func TestGetOwnerApps_Delegates(t *testing.T) {
+func TestGetBusinessApps_Delegates(t *testing.T) {
 	apps := []string{"pos", "erp"}
 	s := &Service{repo: &mockRepo{ownerApps: apps}}
-	got, err := s.GetOwnerApps(context.Background(), 1)
+	got, err := s.GetBusinessApps(context.Background(), 1)
 	if err != nil || len(got) != 2 {
 		t.Errorf("got %v err %v", got, err)
 	}
 }
 
-func TestGetOwnerApps_PropagatesError(t *testing.T) {
+func TestGetBusinessApps_PropagatesError(t *testing.T) {
 	want := errors.New("fail")
 	s := &Service{repo: &mockRepo{getAppsErr: want}}
-	if _, err := s.GetOwnerApps(context.Background(), 1); !errors.Is(err, want) {
+	if _, err := s.GetBusinessApps(context.Background(), 1); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
@@ -373,7 +373,7 @@ func TestGetOwnerApps_PropagatesError(t *testing.T) {
 func TestGetBillingHistory_Delegates(t *testing.T) {
 	history := []domain.BillingHistoryMonth{{TotalCents: 1000}}
 	s := &Service{repo: &mockRepo{billingHistory: history}}
-	got, err := s.GetBillingHistory(context.Background(), 1, 2, 6)
+	got, err := s.GetBillingHistory(context.Background(), 2, 6)
 	if err != nil || len(got) != 1 {
 		t.Errorf("got %v err %v", got, err)
 	}
@@ -394,7 +394,7 @@ func TestGetBillingHistory_IncludesAddonCharges(t *testing.T) {
 		}},
 	}}
 
-	got, err := s.GetBillingHistory(context.Background(), 1, 2, 6)
+	got, err := s.GetBillingHistory(context.Background(), 2, 6)
 	if err != nil {
 		t.Fatalf("GetBillingHistory: %v", err)
 	}
@@ -409,28 +409,28 @@ func TestGetBillingHistory_IncludesAddonCharges(t *testing.T) {
 func TestGetBillingHistory_PropagatesError(t *testing.T) {
 	want := errors.New("db fail")
 	s := &Service{repo: &mockRepo{billingHistErr: want}}
-	if _, err := s.GetBillingHistory(context.Background(), 1, 2, 6); !errors.Is(err, want) {
+	if _, err := s.GetBillingHistory(context.Background(), 2, 6); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
 
-func TestHandlePaddleWebhook_ResolvesOwnerFromCustomData(t *testing.T) {
-	// When GetOwnerIDByPaddleSubscription fails but custom_data has owner_id
+func TestHandlePaddleWebhook_ResolvesBusinessFromCustomData(t *testing.T) {
+	// When GetBusinessIDByPaddleSubscription fails but custom_data has business_id
 	s := &Service{repo: &mockRepo{paddleOwnerErr: errors.New("not found")}}
 	data := paddlePkg.SubscriptionData{
 		ID:         "sub_123",
 		Status:     "active",
-		CustomData: map[string]string{"owner_id": "42"},
+		CustomData: map[string]string{"business_id": "42"},
 	}
 	err := s.HandlePaddleWebhook(context.Background(), paddlePkg.WebhookEvent{EventID: "evt_owner"}, data)
-	// The transaction mock treats this as a duplicate after the fallback owner
-	// was parsed, so the handler acknowledges it without a second write.
+	// The transaction mock treats this as a duplicate after the fallback
+	// business was parsed, so the handler acknowledges it without a second write.
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 }
 
-func TestHandlePaddleWebhook_FailsWithNoOwnerInfo(t *testing.T) {
+func TestHandlePaddleWebhook_FailsWithNoBusinessInfo(t *testing.T) {
 	s := &Service{repo: &mockRepo{paddleOwnerErr: errors.New("not found"), eventNew: true}}
 	data := paddlePkg.SubscriptionData{
 		ID:         "sub_xyz",
@@ -438,7 +438,7 @@ func TestHandlePaddleWebhook_FailsWithNoOwnerInfo(t *testing.T) {
 		CustomData: map[string]string{},
 	}
 	if err := s.HandlePaddleWebhook(context.Background(), paddlePkg.WebhookEvent{}, data); err == nil {
-		t.Fatal("expected error when owner cannot be resolved")
+		t.Fatal("expected error when business cannot be resolved")
 	}
 }
 
@@ -462,7 +462,7 @@ func TestComputeLineItem_PeriodEndPreservedOnResult(t *testing.T) {
 }
 
 func TestHandlePaddleWebhook_DuplicateEventAckedWithoutProcessing(t *testing.T) {
-	// A redelivered event_id must short-circuit before any owner resolution or
+	// A redelivered event_id must short-circuit before any business resolution or
 	// status write, so Paddle retries cannot re-apply stale transitions.
 	s := &Service{repo: &mockRepo{paddleOwnerErr: errors.New("must not be reached")}}
 	data := paddlePkg.SubscriptionData{
@@ -486,7 +486,7 @@ func TestHandlePaddleWebhook_MissingRowReturnsErrorForRetry(t *testing.T) {
 	data := paddlePkg.SubscriptionData{
 		ID:         "sub_missing",
 		Status:     "active",
-		CustomData: map[string]string{"owner_id": "42"},
+		CustomData: map[string]string{"business_id": "42"},
 	}
 	if err := s.HandlePaddleWebhook(context.Background(), paddlePkg.WebhookEvent{EventID: "evt_2"}, data); err == nil {
 		t.Fatal("expected error when no subscription row matched")

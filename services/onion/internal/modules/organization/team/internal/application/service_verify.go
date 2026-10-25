@@ -28,39 +28,26 @@ func (s *Service) VerifyInviteToken(ctx context.Context, token string) (int64, s
 	return invite.UserID, email, fullName, []string{}, nil
 }
 
-// resolveInviteBusinessID returns the business recorded on the invitation and
-// verifies that the inviter owns it.
+// resolveInviteBusinessID returns the business recorded on the invitation,
+// which must still exist.
 //
 // The invite row is the authoritative binding: InviteUser records the business
-// it granted access in, so that is what the accept activates. users.business_id
-// is deliberately not consulted. It is the member's *own* default business, not
-// the invitation's, so it names a different tenant whenever somebody who
-// already belongs to one is invited to another — the previous code substituted
-// it whenever the owner lookup failed and then activated the member and granted
-// its authorization in that unrelated business.
+// it granted access in, so that is what the accept activates. It does not
+// depend on who owns the business now, so an invitation survives an ownership
+// transfer. users.business_id is deliberately not consulted. It is the member's
+// *own* default business, not the invitation's, so it names a different tenant
+// whenever somebody who already belongs to one is invited to another.
 //
 // The invitation itself grants pending membership. Requiring an active
 // membership before accepting would make new invitations impossible to accept.
 func (s *Service) resolveInviteBusinessID(ctx context.Context, invite domain.InviteToken) (int64, error) {
-	candidate := invite.BusinessID
-	if candidate <= 0 {
-		ownerBusinessID, err := s.repo.GetBusinessIDByOwnerID(ctx, invite.OwnerID)
-		if err != nil {
-			return 0, err
-		}
-		candidate = ownerBusinessID
-	}
-	if candidate <= 0 {
+	if invite.BusinessID <= 0 {
 		return 0, tenant.ErrNoBusinessScope
 	}
-	_, ownerID, err := s.repo.GetBusinessByID(ctx, candidate)
-	if err != nil {
+	if _, _, err := s.repo.GetBusinessByID(ctx, invite.BusinessID); err != nil {
 		return 0, err
 	}
-	if ownerID != invite.OwnerID {
-		return 0, tenant.ErrNoBusinessScope
-	}
-	return candidate, nil
+	return invite.BusinessID, nil
 }
 
 // AcceptInvite sets the user's password and marks the token as used.
@@ -73,7 +60,7 @@ func (s *Service) AcceptInvite(ctx context.Context, token, password string) (int
 	if err != nil {
 		return 0, err
 	}
-	userID, ownerID := invite.UserID, invite.OwnerID
+	userID := invite.UserID
 
 	// Resolve and verify the business before the token is claimed: an
 	// invitation whose tenant cannot be verified must not write anything at
@@ -81,7 +68,7 @@ func (s *Service) AcceptInvite(ctx context.Context, token, password string) (int
 	businessID, err := s.resolveInviteBusinessID(ctx, invite)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to resolve business for accepted invitation",
-			logger.Int("user_id", int(userID)), logger.Int("owner_id", int(ownerID)), logger.Error(err))
+			logger.Int("user_id", int(userID)), logger.Int("business_id", int(invite.BusinessID)), logger.Error(err))
 		return 0, fmt.Errorf("resolve business for accepted invitation: %w", err)
 	}
 
@@ -166,12 +153,11 @@ func (s *Service) ApproveAccessRequest(ctx context.Context, actorID, businessID,
 	if _, ok := domain.ValidApps[app]; !ok {
 		return domain.ErrPermissionNotFound
 	}
-	ownerID, err := s.requireTeamManager(ctx, actorID, businessID)
-	if err != nil {
+	if _, err := s.requireTeamManager(ctx, actorID, businessID); err != nil {
 		return domain.ErrForbidden
 	}
 
-	existing, err := s.repo.GetStaffUserByID(ctx, ownerID, businessID, targetUserID)
+	existing, err := s.repo.GetStaffUserByID(ctx, businessID, targetUserID)
 	if err != nil {
 		return err
 	}
@@ -201,7 +187,7 @@ func (s *Service) ApproveAccessRequest(ctx context.Context, actorID, businessID,
 	if memberType == "" {
 		memberType = "member"
 	}
-	if err := s.repo.UpsertNormalizedAuthorization(ctx, businessID, ownerID, actorID, targetUserID, apps, memberType, "active", assignments, groupIDs); err != nil {
+	if err := s.repo.UpsertNormalizedAuthorization(ctx, businessID, actorID, targetUserID, apps, memberType, "active", assignments, groupIDs); err != nil {
 		return err
 	}
 	invalidateUserScope(ctx, targetUserID)

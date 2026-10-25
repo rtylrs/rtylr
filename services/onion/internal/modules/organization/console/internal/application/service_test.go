@@ -116,10 +116,13 @@ func TestToUserDTO_CreatedAtFormattedWhenValid(t *testing.T) {
 // ── toSubDTO ──────────────────────────────────────────────────────────────────
 
 func TestToSubDTO_BasicFields(t *testing.T) {
-	row := SubscriptionRow{ID: 5, OwnerID: 10, PlanID: 2, PlanName: "Pro", Status: "active", SeatCount: 3}
+	row := SubscriptionRow{ID: 5, BusinessID: 20, OwnerID: 10, PlanID: 2, PlanName: "Pro", Status: "active", SeatCount: 3}
 	dto := toSubDTO(row)
-	if dto.ID != 5 || dto.Status != "active" || dto.SeatCount != 3 {
+	if dto.ID != 5 || dto.Status != "active" || dto.SeatCount != 3 || dto.OwnerID != 10 {
 		t.Errorf("basic fields mismatch: %+v", dto)
+	}
+	if dto.BusinessID == nil || *dto.BusinessID != 20 {
+		t.Errorf("business_id = %v, want 20", dto.BusinessID)
 	}
 }
 
@@ -142,11 +145,18 @@ func TestToSubDTO_TrialEndsAtFormattedWhenValid(t *testing.T) {
 
 // ── toGrantDTO ────────────────────────────────────────────────────────────────
 
+// The grant's user fields describe the granted business's current owner.
 func TestToGrantDTO_BasicFields(t *testing.T) {
-	row := GrantRow{ID: 7, UserID: 3, PlanID: 1, PlanName: "Enterprise", GrantedBy: 99}
+	row := GrantRow{
+		ID: 7, BusinessID: NullInt64{Int64: 20, Valid: true}, OwnerID: NullInt64{Int64: 3, Valid: true},
+		PlanID: 1, PlanName: "Enterprise", GrantedBy: 99,
+	}
 	dto := toGrantDTO(row)
 	if dto.ID != 7 || dto.UserID != 3 || dto.PlanName != "Enterprise" || dto.GrantedBy != 99 {
 		t.Errorf("basic fields mismatch: %+v", dto)
+	}
+	if dto.BusinessID == nil || *dto.BusinessID != 20 {
+		t.Errorf("business_id = %v, want 20", dto.BusinessID)
 	}
 }
 

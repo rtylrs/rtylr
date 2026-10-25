@@ -62,19 +62,19 @@ func TestGetStats_TracksGlobalCounterTransitions(t *testing.T) {
 		t.Fatalf("business id: %v", err)
 	}
 	t.Cleanup(func() {
-		_, _ = db.ExecContext(context.Background(), "DELETE FROM manual_addon_grants WHERE user_id = ?", userID)
-		_, _ = db.ExecContext(context.Background(), "DELETE FROM manual_access_grants WHERE user_id = ?", userID)
-		_, _ = db.ExecContext(context.Background(), "DELETE FROM subscriptions WHERE owner_id = ?", userID)
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM manual_addon_grants WHERE business_id = ?", businessID)
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM manual_access_grants WHERE business_id = ?", businessID)
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM subscriptions WHERE business_id = ?", businessID)
 		_, _ = db.ExecContext(context.Background(), "DELETE FROM businesses WHERE id = ?", businessID)
 		_, _ = db.ExecContext(context.Background(), "DELETE FROM users WHERE id = ?", userID)
 	})
-	if _, err := db.ExecContext(ctx, "INSERT INTO subscriptions (owner_id, plan_id, status) VALUES (?, ?, 'trial')", userID, 0); err != nil {
+	if _, err := db.ExecContext(ctx, "INSERT INTO subscriptions (business_id, plan_id, status) VALUES (?, ?, 'trial')", businessID, 0); err != nil {
 		t.Fatalf("insert subscription: %v", err)
 	}
-	if _, err := db.ExecContext(ctx, "INSERT INTO manual_access_grants (user_id, plan_id, granted_by) VALUES (?, ?, ?)", userID, 0, userID); err != nil {
+	if _, err := db.ExecContext(ctx, "INSERT INTO manual_access_grants (business_id, plan_id, granted_by) VALUES (?, ?, ?)", businessID, 0, userID); err != nil {
 		t.Fatalf("insert access grant: %v", err)
 	}
-	if _, err := db.ExecContext(ctx, "INSERT INTO manual_addon_grants (user_id, business_id, addon_id, granted_by) VALUES (?, ?, ?, ?)", userID, businessID, "counter-test", userID); err != nil {
+	if _, err := db.ExecContext(ctx, "INSERT INTO manual_addon_grants (business_id, addon_id, granted_by) VALUES (?, ?, ?)", businessID, "counter-test", userID); err != nil {
 		t.Fatalf("insert addon grant: %v", err)
 	}
 
@@ -91,13 +91,13 @@ func TestGetStats_TracksGlobalCounterTransitions(t *testing.T) {
 	if _, err := db.ExecContext(ctx, "UPDATE users SET is_banned = TRUE, is_console_admin = TRUE WHERE id = ?", userID); err != nil {
 		t.Fatalf("update user flags: %v", err)
 	}
-	if _, err := db.ExecContext(ctx, "UPDATE subscriptions SET status = 'active' WHERE owner_id = ?", userID); err != nil {
+	if _, err := db.ExecContext(ctx, "UPDATE subscriptions SET status = 'active' WHERE business_id = ?", businessID); err != nil {
 		t.Fatalf("activate subscription: %v", err)
 	}
-	if _, err := db.ExecContext(ctx, "UPDATE manual_access_grants SET revoked_at = NOW() WHERE user_id = ?", userID); err != nil {
+	if _, err := db.ExecContext(ctx, "UPDATE manual_access_grants SET revoked_at = NOW() WHERE business_id = ?", businessID); err != nil {
 		t.Fatalf("revoke access grant: %v", err)
 	}
-	if _, err := db.ExecContext(ctx, "UPDATE manual_addon_grants SET revoked_at = NOW() WHERE user_id = ?", userID); err != nil {
+	if _, err := db.ExecContext(ctx, "UPDATE manual_addon_grants SET revoked_at = NOW() WHERE business_id = ?", businessID); err != nil {
 		t.Fatalf("revoke addon grant: %v", err)
 	}
 
@@ -139,7 +139,7 @@ func TestGetGrant_ReturnsCreatedGrant(t *testing.T) {
 		t.Skip("no plan fixtures available")
 	}
 
-	grantID, err := repo.CreateGrant(ctx, testutil.OwnerID, plans[0].ID, testutil.OwnerID, "lookup test", nil)
+	grantID, err := repo.CreateGrant(ctx, testutil.BusinessID, plans[0].ID, testutil.OwnerID, "lookup test", nil)
 	if err != nil {
 		t.Fatalf("CreateGrant: %v", err)
 	}

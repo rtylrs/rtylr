@@ -90,9 +90,9 @@ func TestSubscriptions_CountActiveSeats_DeactivatedMemberFreesSeat(t *testing.T)
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
-	ownerID, businessID := seedSeatOwner(t, db)
+	_, businessID := seedSeatOwner(t, db)
 
-	before, err := repo.CountActiveSeats(ctx, ownerID)
+	before, err := repo.CountActiveSeats(ctx, businessID)
 	if err != nil {
 		t.Fatalf("CountActiveSeats before: %v", err)
 	}
@@ -102,7 +102,7 @@ func TestSubscriptions_CountActiveSeats_DeactivatedMemberFreesSeat(t *testing.T)
 
 	userID := insertTenantMember(t, db, businessID, "active", true)
 
-	active, err := repo.CountActiveSeats(ctx, ownerID)
+	active, err := repo.CountActiveSeats(ctx, businessID)
 	if err != nil {
 		t.Fatalf("CountActiveSeats active: %v", err)
 	}
@@ -116,7 +116,7 @@ func TestSubscriptions_CountActiveSeats_DeactivatedMemberFreesSeat(t *testing.T)
 		t.Fatalf("revoke membership: %v", err)
 	}
 
-	after, err := repo.CountActiveSeats(ctx, ownerID)
+	after, err := repo.CountActiveSeats(ctx, businessID)
 	if err != nil {
 		t.Fatalf("CountActiveSeats after deactivate: %v", err)
 	}
@@ -130,20 +130,56 @@ func TestSubscriptions_CountActiveSeats_UnlicensedMemberStillCounts(t *testing.T
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
-	ownerID, businessID := seedSeatOwner(t, db)
+	_, businessID := seedSeatOwner(t, db)
 
-	before, err := repo.CountActiveSeats(ctx, ownerID)
+	before, err := repo.CountActiveSeats(ctx, businessID)
 	if err != nil {
 		t.Fatalf("CountActiveSeats before: %v", err)
 	}
 
 	insertTenantMember(t, db, businessID, "active", false)
 
-	after, err := repo.CountActiveSeats(ctx, ownerID)
+	after, err := repo.CountActiveSeats(ctx, businessID)
 	if err != nil {
 		t.Fatalf("CountActiveSeats after: %v", err)
 	}
 	if after != before+1 {
 		t.Fatalf("count with unlicensed member = %d, want %d", after, before+1)
+	}
+}
+
+// Billing is per business: a member of the owner's other business holds no
+// seat in this one.
+func TestSubscriptions_CountActiveSeats_CountsOnlyThisBusiness(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	ownerID, businessID := seedSeatOwner(t, db)
+
+	otherBusinessID := businessID + 1_000_000
+	if _, err := db.ExecContext(ctx,
+		`INSERT INTO businesses (id, name, owner_id) VALUES (?, ?, ?)`,
+		otherBusinessID, fmt.Sprintf("Second Seat Business %d", otherBusinessID), ownerID); err != nil {
+		t.Fatalf("insert second business: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx, "DELETE FROM authorization_business_members WHERE business_id = ?", otherBusinessID)
+		_, _ = db.ExecContext(ctx, "DELETE FROM businesses WHERE id = ?", otherBusinessID)
+	})
+	insertTenantMember(t, db, otherBusinessID, "active", false)
+
+	seats, err := repo.CountActiveSeats(ctx, businessID)
+	if err != nil {
+		t.Fatalf("CountActiveSeats: %v", err)
+	}
+	if seats != 1 {
+		t.Fatalf("seat count = %d, want 1: the other business's member was counted", seats)
+	}
+	otherSeats, err := repo.CountActiveSeats(ctx, otherBusinessID)
+	if err != nil {
+		t.Fatalf("CountActiveSeats other: %v", err)
+	}
+	if otherSeats != 2 {
+		t.Fatalf("other business seat count = %d, want 2 (owner and member)", otherSeats)
 	}
 }

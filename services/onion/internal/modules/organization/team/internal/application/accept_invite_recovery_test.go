@@ -12,20 +12,20 @@ import (
 
 const acceptInvitePassword = "Str0ng!Passw0rd"
 
-// ghostOwnerID returns an owner id that has no businesses row, which is the
-// sql.ErrNoRows case of GetBusinessIDByOwnerID.
-func ghostOwnerID(t *testing.T, db *sql.DB) int64 {
+// ghostBusinessID returns a business id with no businesses row, as left by an
+// invitation whose business was removed.
+func ghostBusinessID(t *testing.T, db *sql.DB) int64 {
 	t.Helper()
-	ownerID := time.Now().UnixNano() % 100000000
+	businessID := 900000000 + time.Now().UnixNano()%100000000
 	var count int
 	if err := db.QueryRowContext(context.Background(),
-		"SELECT COUNT(*) FROM businesses WHERE owner_id = ?", ownerID).Scan(&count); err != nil {
-		t.Fatalf("count businesses for ghost owner: %v", err)
+		"SELECT COUNT(*) FROM businesses WHERE id = ?", businessID).Scan(&count); err != nil {
+		t.Fatalf("count ghost business: %v", err)
 	}
 	if count != 0 {
-		t.Fatalf("ghost owner %d unexpectedly owns %d businesses", ownerID, count)
+		t.Fatalf("ghost business %d unexpectedly exists", businessID)
 	}
-	return ownerID
+	return businessID
 }
 
 // insertInvitee creates a bare invited user (no password, no permissions) with
@@ -54,12 +54,12 @@ func insertInvitee(t *testing.T, db *sql.DB, businessID *int64) int64 {
 	return userID
 }
 
-func createInviteTokenFor(t *testing.T, db *sql.DB, userID, ownerID int64, businessID *int64) string {
+func createInviteTokenFor(t *testing.T, db *sql.DB, userID, businessID int64) string {
 	t.Helper()
 	token := fmt.Sprintf("accept-invite-token-%d", time.Now().UnixNano())
 	if _, err := db.ExecContext(context.Background(),
-		`INSERT INTO invite_tokens (user_id, owner_id, business_id, token, expires_at) VALUES (?, ?, ?, ?, ?)`,
-		userID, ownerID, businessID, token, time.Now().Add(time.Hour)); err != nil {
+		`INSERT INTO invite_tokens (user_id, business_id, token, expires_at) VALUES (?, ?, ?, ?)`,
+		userID, businessID, token, time.Now().Add(time.Hour)); err != nil {
 		t.Fatalf("insert invite token: %v", err)
 	}
 	return token
@@ -74,7 +74,7 @@ func TestAcceptInviteFailsWhenBusinessCannotBeResolved(t *testing.T) {
 	service := newTestService(ctx, db)
 
 	userID := insertInvitee(t, db, nil)
-	token := createInviteTokenFor(t, db, userID, ghostOwnerID(t, db), nil)
+	token := createInviteTokenFor(t, db, userID, ghostBusinessID(t, db))
 
 	if _, err := service.AcceptInvite(ctx, token, acceptInvitePassword); err == nil {
 		t.Fatal("AcceptInvite succeeded with no resolvable business, want error")
@@ -87,11 +87,10 @@ func TestAcceptInviteFailsWhenBusinessCannotBeResolved(t *testing.T) {
 }
 
 // The member's own users.business_id is NOT the invitation's business: it is
-// whatever tenant their session already resolved to. It used to be substituted
-// whenever the owner lookup failed, and the accept then activated the member
-// and granted its authorization in that unrelated business. The accept has to
-// refuse instead, leaving the invitation retryable and writing nothing.
-func TestAcceptInviteRefusesMemberBusinessWhenOwnerLookupFails(t *testing.T) {
+// whatever tenant their session already resolved to. When the invited business
+// is gone the accept must not fall back to it; it has to refuse instead,
+// leaving the invitation retryable and writing nothing.
+func TestAcceptInviteRefusesMemberBusinessWhenInvitedBusinessIsGone(t *testing.T) {
 	db := testutil.OpenDB(t)
 	ctx := context.Background()
 	service := newTestService(ctx, db)
@@ -101,10 +100,10 @@ func TestAcceptInviteRefusesMemberBusinessWhenOwnerLookupFails(t *testing.T) {
 	// re-seed it (without deleting it) before writing rows that reference it.
 	testutil.EnsureBusiness(t, db, businessID, testutil.OwnerID)
 	userID := insertInvitee(t, db, &businessID)
-	token := createInviteTokenFor(t, db, userID, ghostOwnerID(t, db), nil)
+	token := createInviteTokenFor(t, db, userID, ghostBusinessID(t, db))
 
 	if _, err := service.AcceptInvite(ctx, token, acceptInvitePassword); err == nil {
-		t.Fatal("AcceptInvite succeeded on users.business_id after the owner lookup failed, want error")
+		t.Fatal("AcceptInvite succeeded on users.business_id after the invited business was removed, want error")
 	}
 
 	if status, found, err := service.repo.GetProvisioningStatus(ctx, userID); err != nil {
@@ -135,7 +134,7 @@ func TestAcceptInviteActivatesInTheInviteBusinessNotTheMemberDefault(t *testing.
 	}
 
 	userID := insertInvitee(t, db, &otherBusinessID)
-	token := createInviteTokenFor(t, db, userID, testutil.OwnerID, &inviteBusinessID)
+	token := createInviteTokenFor(t, db, userID, inviteBusinessID)
 
 	// The rows the invite created in the invited business, both still pending.
 	if _, err := db.ExecContext(ctx,

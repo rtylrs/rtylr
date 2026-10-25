@@ -208,8 +208,8 @@ func (a *ConsoleAdminAPI) GetUserSubscription(ctx context.Context, req *consolea
 	if err := requireConsoleAdmin(ctx); err != nil {
 		return nil, err
 	}
-	subscription, err := a.service.GetSubscriptionByOwner(ctx, req.GetUserId())
-	if errors.Is(err, sql.ErrNoRows) {
+	subscription, err := a.service.GetSubscriptionForUser(ctx, req.GetUserId())
+	if errors.Is(err, sql.ErrNoRows) || errors.Is(err, application.ErrRecordNotFound) {
 		return &consoleadminv1.GetUserSubscriptionResponse{}, nil
 	}
 	if err != nil {
@@ -328,12 +328,16 @@ func (a *ConsoleAdminAPI) UpsertSubscription(ctx context.Context, req *consolead
 		days = &value
 	}
 	err = a.service.UpsertSubscription(ctx, application.SubscriptionWriteInput{
-		OwnerID: req.GetOwnerId(), PlanID: req.GetPlanId(), Status: req.GetStatus(), SeatCount: int(req.GetSeatCount()),
+		BusinessID: req.GetBusinessId(), OwnerID: req.GetOwnerId(),
+		PlanID: req.GetPlanId(), Status: req.GetStatus(), SeatCount: int(req.GetSeatCount()),
 		TrialEndsAt: trial, NextBillingDate: next, CurrentPeriodEndsAt: period, TotalDays: days,
 		PaddleSubscriptionID: req.GetPaddleSubscriptionId(), PaddleCustomerID: req.GetPaddleCustomerId(),
 	})
-	if errors.Is(err, application.ErrNotOrganizationOwner) || errors.Is(err, application.ErrInvalidSubscription) {
+	if errors.Is(err, application.ErrInvalidSubscription) {
 		return nil, badRequest(err.Error())
+	}
+	if mapped := billingBusinessError(err); mapped != nil {
+		return nil, mapped
 	}
 	if err != nil {
 		return nil, internalError("Failed to upsert subscription")

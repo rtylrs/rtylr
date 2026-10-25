@@ -22,7 +22,7 @@ func (f fakeDelegationStore) GetAuthorizationRoleGrant(_ context.Context, _, rol
 	return grant, nil
 }
 
-func (f fakeDelegationStore) GetGroup(_ context.Context, _, _, groupID int64) (*domain.Group, error) {
+func (f fakeDelegationStore) GetGroup(_ context.Context, _, groupID int64) (*domain.Group, error) {
 	group, ok := f.groups[groupID]
 	if !ok {
 		return nil, errors.New("unknown group")
@@ -68,7 +68,7 @@ func currentWith(roleIDs ...int64) *delegationCurrent {
 
 func TestDelegateCannotGrantARoleAboveTheirCeiling(t *testing.T) {
 	store, access := delegationFixture()
-	err := checkDelegation(context.Background(), store, access, 1, 1, domain.UpdatePermissionsInput{PermissionProfileAssignments: roleInput(managerRole)}, currentWith())
+	err := checkDelegation(context.Background(), store, access, 1, domain.UpdatePermissionsInput{PermissionProfileAssignments: roleInput(managerRole)}, currentWith())
 	if !errors.Is(err, domain.ErrDelegationCeiling) {
 		t.Fatalf("err = %v, want ErrDelegationCeiling", err)
 	}
@@ -76,7 +76,7 @@ func TestDelegateCannotGrantARoleAboveTheirCeiling(t *testing.T) {
 
 func TestDelegateCannotRemoveARoleAboveTheirCeiling(t *testing.T) {
 	store, access := delegationFixture()
-	err := checkDelegation(context.Background(), store, access, 1, 1, domain.UpdatePermissionsInput{PermissionProfileAssignments: roleInput(cashierRole)}, currentWith(cashierRole, managerRole))
+	err := checkDelegation(context.Background(), store, access, 1, domain.UpdatePermissionsInput{PermissionProfileAssignments: roleInput(cashierRole)}, currentWith(cashierRole, managerRole))
 	if !errors.Is(err, domain.ErrDelegationCeiling) {
 		t.Fatalf("stripping the manager role: err = %v, want ErrDelegationCeiling", err)
 	}
@@ -85,7 +85,7 @@ func TestDelegateCannotRemoveARoleAboveTheirCeiling(t *testing.T) {
 func TestDelegateCannotClearAllRolesWithoutRoleEditPermission(t *testing.T) {
 	store, access := delegationFixture()
 	access.DashPermissions = []string{"hub:team:edit"}
-	err := checkDelegation(context.Background(), store, access, 1, 1, domain.UpdatePermissionsInput{PermissionProfileAssignments: &[]domain.AppRoleAssignmentInput{}}, currentWith(cashierRole))
+	err := checkDelegation(context.Background(), store, access, 1, domain.UpdatePermissionsInput{PermissionProfileAssignments: &[]domain.AppRoleAssignmentInput{}}, currentWith(cashierRole))
 	if !errors.Is(err, domain.ErrDelegationCeiling) {
 		t.Fatalf("err = %v, want ErrDelegationCeiling", err)
 	}
@@ -93,7 +93,7 @@ func TestDelegateCannotClearAllRolesWithoutRoleEditPermission(t *testing.T) {
 
 func TestDelegateMayRemoveARoleWithinTheirCeiling(t *testing.T) {
 	store, access := delegationFixture()
-	err := checkDelegation(context.Background(), store, access, 1, 1, domain.UpdatePermissionsInput{PermissionProfileAssignments: &[]domain.AppRoleAssignmentInput{}}, currentWith(cashierRole))
+	err := checkDelegation(context.Background(), store, access, 1, domain.UpdatePermissionsInput{PermissionProfileAssignments: &[]domain.AppRoleAssignmentInput{}}, currentWith(cashierRole))
 	if err != nil {
 		t.Fatalf("err = %v, want nil", err)
 	}
@@ -102,7 +102,7 @@ func TestDelegateMayRemoveARoleWithinTheirCeiling(t *testing.T) {
 func TestResendingUnchangedRolesNeedsNoRolePermission(t *testing.T) {
 	store, access := delegationFixture()
 	access.DashPermissions = []string{"hub:team:edit"}
-	err := checkDelegation(context.Background(), store, access, 1, 1, domain.UpdatePermissionsInput{PermissionProfileAssignments: roleInput(cashierRole, managerRole)}, currentWith(cashierRole, managerRole))
+	err := checkDelegation(context.Background(), store, access, 1, domain.UpdatePermissionsInput{PermissionProfileAssignments: roleInput(cashierRole, managerRole)}, currentWith(cashierRole, managerRole))
 	if err != nil {
 		t.Fatalf("a no-op role list was refused: %v", err)
 	}
@@ -110,22 +110,22 @@ func TestResendingUnchangedRolesNeedsNoRolePermission(t *testing.T) {
 
 func TestDelegateCannotAddOrRemoveGroupsThatCarryHigherRoles(t *testing.T) {
 	store, access := delegationFixture()
-	add := checkDelegation(context.Background(), store, access, 1, 1, domain.UpdatePermissionsInput{GroupIDs: &[]int64{10}}, &delegationCurrent{})
+	add := checkDelegation(context.Background(), store, access, 1, domain.UpdatePermissionsInput{GroupIDs: &[]int64{10}}, &delegationCurrent{})
 	if !errors.Is(add, domain.ErrDelegationCeiling) {
 		t.Fatalf("joining the manager group: err = %v", add)
 	}
-	remove := checkDelegation(context.Background(), store, access, 1, 1, domain.UpdatePermissionsInput{GroupIDs: &[]int64{}}, &delegationCurrent{GroupIDs: []int64{10}})
+	remove := checkDelegation(context.Background(), store, access, 1, domain.UpdatePermissionsInput{GroupIDs: &[]int64{}}, &delegationCurrent{GroupIDs: []int64{10}})
 	if !errors.Is(remove, domain.ErrDelegationCeiling) {
 		t.Fatalf("leaving the manager group: err = %v", remove)
 	}
-	if err := checkDelegation(context.Background(), store, access, 1, 1, domain.UpdatePermissionsInput{GroupIDs: &[]int64{11}}, &delegationCurrent{}); err != nil {
+	if err := checkDelegation(context.Background(), store, access, 1, domain.UpdatePermissionsInput{GroupIDs: &[]int64{11}}, &delegationCurrent{}); err != nil {
 		t.Fatalf("joining a cashier group: %v", err)
 	}
 }
 
 func TestDelegateCannotDemoteAnAdmin(t *testing.T) {
 	store, access := delegationFixture()
-	err := checkDelegation(context.Background(), store, access, 1, 1, domain.UpdatePermissionsInput{MemberType: "member"}, &delegationCurrent{MemberType: "admin"})
+	err := checkDelegation(context.Background(), store, access, 1, domain.UpdatePermissionsInput{MemberType: "member"}, &delegationCurrent{MemberType: "admin"})
 	if !errors.Is(err, domain.ErrDelegationCeiling) {
 		t.Fatalf("err = %v, want ErrDelegationCeiling", err)
 	}

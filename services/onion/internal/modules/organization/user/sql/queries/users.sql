@@ -77,8 +77,14 @@ INSERT INTO businesses (name, owner_id) VALUES (?, ?);
 -- name: GetActivePlanForSignup :one
 SELECT id, trial_days FROM plans WHERE slug = ? AND is_active = TRUE;
 
+-- name: GetOwnedDefaultBusinessID :one
+SELECT b.id
+FROM users u
+JOIN businesses b ON b.id = u.business_id AND b.owner_id = u.id
+WHERE u.id = ?;
+
 -- name: UpsertSignupSubscription :exec
-INSERT INTO subscriptions (owner_id, plan_id, status, trial_ends_at)
+INSERT INTO subscriptions (business_id, plan_id, status, trial_ends_at)
 VALUES (?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
   plan_id = VALUES(plan_id),

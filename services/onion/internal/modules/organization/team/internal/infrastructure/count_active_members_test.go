@@ -93,7 +93,7 @@ func TestTeam_CountActiveMembers_DeactivatedMemberFreesSeat(t *testing.T) {
 	ctx := context.Background()
 	ownerID, businessID := seedSeatOwner(t, db)
 
-	before, err := repo.CountActiveMembers(ctx, ownerID)
+	before, err := repo.CountActiveMembers(ctx, businessID)
 	if err != nil {
 		t.Fatalf("CountActiveMembers before: %v", err)
 	}
@@ -103,7 +103,7 @@ func TestTeam_CountActiveMembers_DeactivatedMemberFreesSeat(t *testing.T) {
 
 	userID := insertTenantMember(t, db, businessID, "active")
 
-	active, err := repo.CountActiveMembers(ctx, ownerID)
+	active, err := repo.CountActiveMembers(ctx, businessID)
 	if err != nil {
 		t.Fatalf("CountActiveMembers active: %v", err)
 	}
@@ -111,11 +111,11 @@ func TestTeam_CountActiveMembers_DeactivatedMemberFreesSeat(t *testing.T) {
 		t.Fatalf("count with active member = %d, want %d", active, before+1)
 	}
 
-	if err := repo.DeactivateUser(ctx, businessID, ownerID, ownerID, userID); err != nil {
+	if err := repo.DeactivateUser(ctx, businessID, ownerID, userID); err != nil {
 		t.Fatalf("DeactivateUser: %v", err)
 	}
 
-	after, err := repo.CountActiveMembers(ctx, ownerID)
+	after, err := repo.CountActiveMembers(ctx, businessID)
 	if err != nil {
 		t.Fatalf("CountActiveMembers after deactivate: %v", err)
 	}
@@ -129,16 +129,16 @@ func TestTeam_CountActiveMembers_UnprovisionedUserDoesNotCount(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
-	ownerID, businessID := seedSeatOwner(t, db)
+	_, businessID := seedSeatOwner(t, db)
 
-	before, err := repo.CountActiveMembers(ctx, ownerID)
+	before, err := repo.CountActiveMembers(ctx, businessID)
 	if err != nil {
 		t.Fatalf("CountActiveMembers before: %v", err)
 	}
 
 	insertTenantMember(t, db, businessID, "none")
 
-	after, err := repo.CountActiveMembers(ctx, ownerID)
+	after, err := repo.CountActiveMembers(ctx, businessID)
 	if err != nil {
 		t.Fatalf("CountActiveMembers after: %v", err)
 	}

@@ -1,6 +1,5 @@
 CREATE TABLE IF NOT EXISTS `user_groups` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `owner_id` bigint NOT NULL,
   `business_id` bigint NOT NULL,
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
@@ -9,13 +8,12 @@ CREATE TABLE IF NOT EXISTS `user_groups` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_group_business_name` (`business_id`,`name`),
-  KEY `idx_user_groups_business` (`business_id`,`owner_id`)
+  KEY `idx_user_groups_business` (`business_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `user_group_members` (
   `group_id` bigint NOT NULL,
   `user_id` bigint NOT NULL,
-  `owner_id` bigint NOT NULL,
   `business_id` bigint NOT NULL,
   `added_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `added_by` bigint DEFAULT NULL,

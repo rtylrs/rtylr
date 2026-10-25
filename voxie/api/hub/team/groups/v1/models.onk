@@ -8,8 +8,8 @@ message GroupSummary {
 
 message Group {
   id: int64
-  /// Identifies the owner of the group.
-  owner_id: int64
+  /// Identifies the business the group belongs to.
+  business_id: int64
   name: string
   description: string
   color: string
@@ -36,8 +36,8 @@ message GroupMember {
 /// (the legacy payload embeds the group fields at the top level).
 message GroupDetail {
   id: int64
-  /// Identifies the owner of the group.
-  owner_id: int64
+  /// Identifies the business the group belongs to.
+  business_id: int64
   name: string
   description: string
   color: string

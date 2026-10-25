@@ -36,7 +36,7 @@ type Plan struct {
 
 type Subscription struct {
 	ID                   int64
-	OwnerID              int64
+	BusinessID           int64
 	PlanID               int64
 	PlanName             string
 	PlanSlug             string
@@ -64,7 +64,7 @@ type Subscription struct {
 type SeatPeriod struct {
 	ID                int64
 	SubscriptionID    int64
-	OwnerID           int64
+	BusinessID        int64
 	SeatCount         int
 	PricePerSeatCents int
 	PeriodStart       time.Time
@@ -137,27 +137,27 @@ type Repository interface {
 	ListPlans(ctx context.Context) ([]Plan, error)
 	GetPlanBySlug(ctx context.Context, slug string) (*Plan, error)
 	GetPlanByID(ctx context.Context, id int64) (*Plan, error)
-	GetSubscription(ctx context.Context, ownerID int64) (*Subscription, error)
-	UpsertSubscription(ctx context.Context, ownerID, planID int64, trialDays, seatCount int) error
-	GetOwnerApps(ctx context.Context, ownerID int64) ([]string, error)
+	GetSubscription(ctx context.Context, businessID int64) (*Subscription, error)
+	UpsertSubscription(ctx context.Context, businessID, planID int64, trialDays, seatCount int) error
+	GetBusinessApps(ctx context.Context, businessID int64) ([]string, error)
 	ExpireTrialSubscriptions(ctx context.Context) error
-	CountActiveSeats(ctx context.Context, ownerID int64) (int, error)
+	CountActiveSeats(ctx context.Context, businessID int64) (int, error)
 	// Seat period management
-	GetPeriodsForMonth(ctx context.Context, ownerID int64, month time.Time) ([]SeatPeriod, error)
-	GetAddonPeriodsForMonth(ctx context.Context, ownerID, businessID int64, month time.Time) ([]AddonBillingPeriod, error)
+	GetPeriodsForMonth(ctx context.Context, businessID int64, month time.Time) ([]SeatPeriod, error)
+	GetAddonPeriodsForMonth(ctx context.Context, businessID int64, month time.Time) ([]AddonBillingPeriod, error)
 	// ReconcileSeatBilling is the only writer of seat_periods and
-	// subscriptions.seat_count. It creates the subscription row for an owner
+	// subscriptions.seat_count. It creates the subscription row for a business
 	// that has none, using defaultPlanID/defaultTrialDays, and then rolls the
 	// seat ledger forward to asOf. It takes a row lock on the subscription, so
 	// concurrent callers serialise rather than each opening a period.
-	ReconcileSeatBilling(ctx context.Context, ownerID, defaultPlanID int64, defaultTrialDays, seatCount int, asOf time.Time) error
-	// ListOwnerIDsForReconciliation pages the owner ids that may need a seat
-	// ledger, ascending and strictly greater than afterOwnerID.
-	ListOwnerIDsForReconciliation(ctx context.Context, afterOwnerID int64, limit int) ([]int64, error)
-	GetBillingHistory(ctx context.Context, ownerID int64, limit int) ([]BillingHistoryMonth, error)
-	UpdatePaddleSubscription(ctx context.Context, ownerID int64, paddleSubID, paddleCustID, status string) (bool, error)
-	ApplyPaddleSubscriptionEvent(ctx context.Context, eventID, paddleSubID string, occurredAt time.Time, fallbackOwnerID int64, paddleCustID, status string) (bool, int64, error)
+	ReconcileSeatBilling(ctx context.Context, businessID, defaultPlanID int64, defaultTrialDays, seatCount int, asOf time.Time) error
+	// ListBusinessIDsForReconciliation pages the business ids that may need a
+	// seat ledger, ascending and strictly greater than afterBusinessID.
+	ListBusinessIDsForReconciliation(ctx context.Context, afterBusinessID int64, limit int) ([]int64, error)
+	GetBillingHistory(ctx context.Context, businessID int64, limit int) ([]BillingHistoryMonth, error)
+	UpdatePaddleSubscription(ctx context.Context, businessID int64, paddleSubID, paddleCustID, status string) (bool, error)
+	ApplyPaddleSubscriptionEvent(ctx context.Context, eventID, paddleSubID string, occurredAt time.Time, fallbackBusinessID int64, paddleCustID, status string) (bool, int64, error)
 	RecordPaddleEvent(ctx context.Context, eventID, paddleSubID string, occurredAt time.Time) (bool, error)
 	LastPaddleEventAt(ctx context.Context, paddleSubID string) (time.Time, bool, error)
-	GetOwnerIDByPaddleSubscription(ctx context.Context, paddleSubID string) (int64, error)
+	GetBusinessIDByPaddleSubscription(ctx context.Context, paddleSubID string) (int64, error)
 }

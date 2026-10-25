@@ -3,6 +3,7 @@ package application_test
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"testing"
 
@@ -185,40 +186,43 @@ func TestRevokeAndDeleteAddonGrant_UnknownGrantReturnsError(t *testing.T) {
 	}
 }
 
-func resetAccessGrantState(t *testing.T, db *sql.DB, ownerID int64) {
+func resetAccessGrantState(t *testing.T, db *sql.DB, businessIDs ...int64) {
 	t.Helper()
 	ctx := context.Background()
 
-	_, _ = db.ExecContext(ctx, `DELETE FROM manual_access_grants WHERE user_id = ?`, ownerID)
-	_, _ = db.ExecContext(ctx, `DELETE FROM subscriptions WHERE owner_id = ?`, ownerID)
-	t.Cleanup(func() {
-		_, _ = db.ExecContext(ctx, `DELETE FROM manual_access_grants WHERE user_id = ?`, ownerID)
-		_, _ = db.ExecContext(ctx, `DELETE FROM subscriptions WHERE owner_id = ?`, ownerID)
-	})
+	reset := func() {
+		for _, businessID := range businessIDs {
+			_, _ = db.ExecContext(ctx, `DELETE FROM manual_access_grants WHERE business_id = ?`, businessID)
+			_, _ = db.ExecContext(ctx, `DELETE FROM subscriptions WHERE business_id = ?`, businessID)
+		}
+	}
+	reset()
+	t.Cleanup(reset)
 }
 
-// blockSubscriptionWritesFor makes every subscription write for ownerID fail,
-// standing in for the transient database error CreateGrant must not swallow.
-func blockSubscriptionWritesFor(t *testing.T, db *sql.DB, ownerID int64) {
+// blockSubscriptionWritesFor makes every subscription write for businessID
+// fail, standing in for the transient database error CreateGrant must not
+// swallow.
+func blockSubscriptionWritesFor(t *testing.T, db *sql.DB, businessID int64) {
 	t.Helper()
 	ctx := context.Background()
 
 	for _, timing := range []string{"INSERT", "UPDATE"} {
-		name := fmt.Sprintf("triage_block_sub_%s_%d", timing, ownerID)
+		name := fmt.Sprintf("triage_block_sub_%s_%d", timing, businessID)
 		_, _ = db.ExecContext(ctx, fmt.Sprintf("DROP TRIGGER IF EXISTS %s", name))
 		stmt := fmt.Sprintf(`CREATE TRIGGER %s BEFORE %s ON subscriptions FOR EACH ROW
 BEGIN
-	IF NEW.owner_id = %d THEN
+	IF NEW.business_id = %d THEN
 		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'subscription write blocked by test';
 	END IF;
-END`, name, timing, ownerID)
+END`, name, timing, businessID)
 		if _, err := db.ExecContext(ctx, stmt); err != nil {
 			t.Fatalf("create %s trigger: %v", timing, err)
 		}
 	}
 	t.Cleanup(func() {
 		for _, timing := range []string{"INSERT", "UPDATE"} {
-			name := fmt.Sprintf("triage_block_sub_%s_%d", timing, ownerID)
+			name := fmt.Sprintf("triage_block_sub_%s_%d", timing, businessID)
 			_, _ = db.ExecContext(context.Background(), fmt.Sprintf("DROP TRIGGER IF EXISTS %s", name))
 		}
 	})
@@ -243,14 +247,15 @@ func TestCreateGrant_ActivatesSubscription(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 
 	seedOwnerBusiness(t, db, accessGrantTestBusinessID, accessGrantTestOwnerID)
-	resetAccessGrantState(t, db, accessGrantTestOwnerID)
+	resetAccessGrantState(t, db, accessGrantTestBusinessID)
 	planID := firstPlanID(t, repo)
 
-	if _, err := svc.CreateGrant(ctx, accessGrantTestOwnerID, planID, accessGrantTestOwnerID, "mirror test", nil); err != nil {
+	// Partials still names an owner with a single business by user id.
+	if _, err := svc.CreateGrant(ctx, accessGrantTestOwnerID, 0, planID, accessGrantTestOwnerID, "mirror test", nil); err != nil {
 		t.Fatalf("CreateGrant: %v", err)
 	}
 
-	sub, err := repo.GetSubscriptionByOwner(ctx, accessGrantTestOwnerID)
+	sub, err := repo.GetSubscriptionByBusiness(ctx, accessGrantTestBusinessID)
 	if err != nil {
 		t.Fatalf("subscription was not mirrored: %v", err)
 	}
@@ -266,21 +271,48 @@ func TestCreateGrant_SubscriptionWriteFailureRollsBackGrant(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 
 	seedOwnerBusiness(t, db, accessGrantTestBusinessID, accessGrantTestOwnerID)
-	resetAccessGrantState(t, db, accessGrantTestOwnerID)
+	resetAccessGrantState(t, db, accessGrantTestBusinessID)
 	planID := firstPlanID(t, repo)
-	blockSubscriptionWritesFor(t, db, accessGrantTestOwnerID)
+	blockSubscriptionWritesFor(t, db, accessGrantTestBusinessID)
 
-	if _, err := svc.CreateGrant(ctx, accessGrantTestOwnerID, planID, accessGrantTestOwnerID, "must fail", nil); err == nil {
+	if _, err := svc.CreateGrant(ctx, 0, accessGrantTestBusinessID, planID, accessGrantTestOwnerID, "must fail", nil); err == nil {
 		t.Fatal("CreateGrant reported success although the subscription write failed")
 	}
 
 	var count int
 	if err := db.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM manual_access_grants WHERE user_id = ?`, accessGrantTestOwnerID,
+		`SELECT COUNT(*) FROM manual_access_grants WHERE business_id = ?`, accessGrantTestBusinessID,
 	).Scan(&count); err != nil {
 		t.Fatalf("count grants: %v", err)
 	}
 	if count != 0 {
 		t.Errorf("grant row persisted after the transaction failed: %d", count)
+	}
+}
+
+// A plan belongs to one business, so an owner with several must say which.
+func TestCreateGrant_OwnerWithSeveralBusinessesMustNameOne(t *testing.T) {
+	db := testutil.OpenDB(t)
+	ctx := context.Background()
+	svc := application.NewService(ctx, infrastructure.NewRepository(db))
+	repo := infrastructure.NewRepository(db)
+
+	secondBusinessID := accessGrantTestBusinessID + 100
+	seedOwnerBusiness(t, db, accessGrantTestBusinessID, accessGrantTestOwnerID)
+	seedOwnerBusiness(t, db, secondBusinessID, accessGrantTestOwnerID)
+	resetAccessGrantState(t, db, accessGrantTestBusinessID, secondBusinessID)
+	planID := firstPlanID(t, repo)
+
+	if _, err := svc.CreateGrant(ctx, accessGrantTestOwnerID, 0, planID, accessGrantTestOwnerID, "ambiguous", nil); !errors.Is(err, application.ErrOwnerHasSeveralBusinesses) {
+		t.Fatalf("CreateGrant by owner = %v, want ErrOwnerHasSeveralBusinesses", err)
+	}
+	if _, err := svc.CreateGrant(ctx, accessGrantTestOwnerID, secondBusinessID, planID, accessGrantTestOwnerID, "named", nil); err != nil {
+		t.Fatalf("CreateGrant for the named business: %v", err)
+	}
+	if _, err := repo.GetSubscriptionByBusiness(ctx, secondBusinessID); err != nil {
+		t.Fatalf("named business has no subscription: %v", err)
+	}
+	if _, err := repo.GetSubscriptionByBusiness(ctx, accessGrantTestBusinessID); !errors.Is(err, sql.ErrNoRows) {
+		t.Fatalf("the other business got a subscription too: %v", err)
 	}
 }

@@ -16,6 +16,9 @@ VALUES
     (5100, 5202, 'member', 'active')
 ON DUPLICATE KEY UPDATE member_type = VALUES(member_type), status = VALUES(status);
 
-INSERT INTO subscriptions (owner_id, plan_id, status)
-SELECT 1001, id, 'active' FROM plans WHERE slug = 'free'
+INSERT INTO subscriptions (business_id, plan_id, status)
+SELECT business.id, plan.id, 'active'
+FROM businesses business
+JOIN plans plan ON plan.slug = 'free'
+WHERE business.id IN (1, 1001)
 ON DUPLICATE KEY UPDATE plan_id = VALUES(plan_id), status = VALUES(status);

@@ -163,31 +163,32 @@ func MenuPrefix(ownerID int64) string {
 	return fmt.Sprintf("%smenu:%d:*", Namespace, ownerID)
 }
 
-func Subscription(ownerID int64) string {
-	return fmt.Sprintf("%ssubscription:%d", Namespace, ownerID)
+func Subscription(businessID int64) string {
+	return fmt.Sprintf("%ssubscription:business:%d", Namespace, businessID)
 }
 
 // SubscriptionAccess is the short-lived entitlement decision used by the
 // request middleware. Keep it under the subscription prefix so billing and
-// console mutations invalidate it with the rest of the owner's subscription
+// console mutations invalidate it with the rest of the business's subscription
 // state.
-func SubscriptionAccess(ownerID int64) string {
-	return fmt.Sprintf("%ssubscription:%d:access", Namespace, ownerID)
+func SubscriptionAccess(businessID int64) string {
+	return fmt.Sprintf("%ssubscription:business:%d:access", Namespace, businessID)
 }
 
-// SubscriptionPrefix matches every subscription-scoped key for the owner. The
-// trailing ':' is load-bearing: a bare "cache:subscription:4*" glob would also
-// match owner 42's keys. The exact Subscription key carries no suffix, so
-// invalidation must pair this with Subscription() — see SubscriptionPatterns.
-func SubscriptionPrefix(ownerID int64) string {
-	return fmt.Sprintf("%ssubscription:%d:*", Namespace, ownerID)
+// SubscriptionPrefix matches every subscription-scoped key for the business.
+// The trailing ':' is load-bearing: a bare "cache:subscription:business:4*"
+// glob would also match business 42's keys. The exact Subscription key carries
+// no suffix, so invalidation must pair this with Subscription() — see
+// SubscriptionPatterns.
+func SubscriptionPrefix(businessID int64) string {
+	return fmt.Sprintf("%ssubscription:business:%d:*", Namespace, businessID)
 }
 
 // SubscriptionPatterns returns the exact subscription object key plus the
 // delimited wildcard covering its derived keys (e.g. SubscriptionAccess).
 // Invalidation callers should delete both.
-func SubscriptionPatterns(ownerID int64) []string {
-	return []string{Subscription(ownerID), SubscriptionPrefix(ownerID)}
+func SubscriptionPatterns(businessID int64) []string {
+	return []string{Subscription(businessID), SubscriptionPrefix(businessID)}
 }
 
 // ─── generic per-module scoping ────────────────────────────────────────────

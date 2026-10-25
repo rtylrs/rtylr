@@ -13,11 +13,11 @@ import (
 	"github.com/voxire/onion/internal/modules/organization/subscriptions/internal/infrastructure/persistence/sqlc"
 )
 
-func (r *Repository) GetBillingHistory(ctx context.Context, ownerID int64, limit int) ([]domain.BillingHistoryMonth, error) {
+func (r *Repository) GetBillingHistory(ctx context.Context, businessID int64, limit int) ([]domain.BillingHistoryMonth, error) {
 	currentMonth := domain.FirstOfUTCMonth(time.Now().UTC())
 
 	rows, err := r.queries.GetBillingHistoryPeriods(ctx, sqlc.GetBillingHistoryPeriodsParams{
-		OwnerID:      ownerID,
+		BusinessID:   businessID,
 		BillingMonth: currentMonth,
 		Limit:        int32(limit * 20), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
@@ -135,9 +135,9 @@ func decimalStringToCents(value string) int {
 // ── Paddle ─────────────────────────────────────────────────────────────────────
 
 // UpdatePaddleSubscription reports whether a row matched: the first webhook
-// for an account can arrive before the lazily-created subscription row does,
+// for a business can arrive before the lazily-created subscription row does,
 // and a silently-dropped update leaves a paying customer on free access (#755).
-func (r *Repository) UpdatePaddleSubscription(ctx context.Context, ownerID int64, paddleSubID, paddleCustID, status string) (bool, error) {
+func (r *Repository) UpdatePaddleSubscription(ctx context.Context, businessID int64, paddleSubID, paddleCustID, status string) (bool, error) {
 	res, err := r.queries.UpdatePaddleSubscription(ctx, sqlc.UpdatePaddleSubscriptionParams{
 		PaddleSubscriptionID: sql.NullString{String: paddleSubID, Valid: paddleSubID != ""},
 		PaddleCustomerID:     sql.NullString{String: paddleCustID, Valid: paddleCustID != ""},
@@ -145,7 +145,7 @@ func (r *Repository) UpdatePaddleSubscription(ctx context.Context, ownerID int64
 			SubscriptionsStatus: sqlc.SubscriptionsStatus(status),
 			Valid:               status != "",
 		},
-		OwnerID: ownerID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		return false, err
@@ -160,7 +160,7 @@ func (r *Repository) UpdatePaddleSubscription(ctx context.Context, ownerID int64
 // ApplyPaddleSubscriptionEvent atomically deduplicates and orders a webhook
 // with the subscription transition. A failed update rolls back the ledger
 // insert so Paddle can retry when a subscription row is created later.
-func (r *Repository) ApplyPaddleSubscriptionEvent(ctx context.Context, eventID, paddleSubID string, occurredAt time.Time, fallbackOwnerID int64, paddleCustID, status string) (bool, int64, error) {
+func (r *Repository) ApplyPaddleSubscriptionEvent(ctx context.Context, eventID, paddleSubID string, occurredAt time.Time, fallbackBusinessID int64, paddleCustID, status string) (bool, int64, error) {
 	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
 	if err != nil {
 		return false, 0, err
@@ -210,16 +210,16 @@ func (r *Repository) ApplyPaddleSubscriptionEvent(ctx context.Context, eventID, 
 		return false, 0, nil
 	}
 
-	ownerID, ownerErr := qtx.GetOwnerIDByPaddleSubscription(ctx, sql.NullString{String: paddleSubID, Valid: true})
-	if errors.Is(ownerErr, sql.ErrNoRows) {
-		ownerID = fallbackOwnerID
-		ownerErr = nil
+	businessID, lookupErr := qtx.GetBusinessIDByPaddleSubscription(ctx, sql.NullString{String: paddleSubID, Valid: true})
+	if errors.Is(lookupErr, sql.ErrNoRows) {
+		businessID = fallbackBusinessID
+		lookupErr = nil
 	}
-	if ownerErr != nil {
-		return false, 0, ownerErr
+	if lookupErr != nil {
+		return false, 0, lookupErr
 	}
-	if ownerID == 0 {
-		return false, 0, fmt.Errorf("cannot resolve owner from paddle subscription %s", paddleSubID)
+	if businessID == 0 {
+		return false, 0, fmt.Errorf("cannot resolve business from paddle subscription %s", paddleSubID)
 	}
 
 	updateResult, err := qtx.UpdatePaddleSubscription(ctx, sqlc.UpdatePaddleSubscriptionParams{
@@ -229,7 +229,7 @@ func (r *Repository) ApplyPaddleSubscriptionEvent(ctx context.Context, eventID, 
 			SubscriptionsStatus: sqlc.SubscriptionsStatus(status),
 			Valid:               status != "",
 		},
-		OwnerID: ownerID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		return false, 0, err
@@ -239,12 +239,12 @@ func (r *Repository) ApplyPaddleSubscriptionEvent(ctx context.Context, eventID, 
 		return false, 0, err
 	}
 	if updated == 0 {
-		return false, 0, fmt.Errorf("no subscription row for owner %d yet; retry after local creation", ownerID)
+		return false, 0, fmt.Errorf("no subscription row for business %d yet; retry after local creation", businessID)
 	}
 	if err := tx.Commit(); err != nil {
 		return false, 0, err
 	}
-	return true, ownerID, nil
+	return true, businessID, nil
 }
 
 // RecordPaddleEvent inserts the event id into the dedupe ledger and reports
@@ -300,6 +300,6 @@ func (r *Repository) LastPaddleEventAt(ctx context.Context, paddleSubID string) 
 	}
 }
 
-func (r *Repository) GetOwnerIDByPaddleSubscription(ctx context.Context, paddleSubID string) (int64, error) {
-	return r.queries.GetOwnerIDByPaddleSubscription(ctx, sql.NullString{String: paddleSubID, Valid: paddleSubID != ""})
+func (r *Repository) GetBusinessIDByPaddleSubscription(ctx context.Context, paddleSubID string) (int64, error) {
+	return r.queries.GetBusinessIDByPaddleSubscription(ctx, sql.NullString{String: paddleSubID, Valid: paddleSubID != ""})
 }
