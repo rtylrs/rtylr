@@ -11,7 +11,6 @@ import (
 	"github.com/voxire/onion/internal/modules/hub_menu/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/sqlutil"
-	"github.com/voxire/onion/internal/platform/tenant"
 	posmenuitemv1 "github.com/voxire/voxie/gen/go/pos/menu_item/v1"
 )
 
@@ -42,12 +41,12 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]*posmenuitem
 	return items, nil
 }
 
-func (r *Repository) Update(ctx context.Context, ownerID, businessID int64, items []*posmenuitemv1.MenuItem) error {
+func (r *Repository) Update(ctx context.Context, businessID int64, items []*posmenuitemv1.MenuItem) error {
 	rawItems, err := json.Marshal(items)
 	if err != nil {
 		return err
 	}
-	return r.queries.UpsertHubNavigationMenu(ctx, sqlc.UpsertHubNavigationMenuParams{OwnerID: ownerID, BusinessID: businessID, Items: rawItems})
+	return r.queries.UpsertHubNavigationMenu(ctx, sqlc.UpsertHubNavigationMenuParams{BusinessID: businessID, Items: rawItems})
 }
 
 func (r *Repository) ListBanners(ctx context.Context, businessID int64) ([]domain.Banner, error) {
@@ -63,9 +62,8 @@ func (r *Repository) ListBanners(ctx context.Context, businessID int64) ([]domai
 	return banners, nil
 }
 
-func (r *Repository) CreateBanner(ctx context.Context, ownerID, businessID int64, input domain.BannerInput) (int64, error) {
+func (r *Repository) CreateBanner(ctx context.Context, businessID int64, input domain.BannerInput) (int64, error) {
 	result, err := r.queries.CreateMenuBanner(ctx, sqlc.CreateMenuBannerParams{
-		OwnerID:    ownerID,
 		BusinessID: businessID,
 		Title:      input.Title,
 		Body:       sqlutil.NullString(input.Body),
@@ -128,19 +126,9 @@ func (r *Repository) GetBanner(ctx context.Context, businessID, id int64) (domai
 	return getRowToBanner(row), nil
 }
 
-func (r *Repository) BusinessOwnerID(ctx context.Context, businessID int64) (int64, error) {
-	ownerID, err := tenant.ResolveOwnerID(ctx, businessID, 0)
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to resolve hub menu business owner", logger.Error(err))
-		return 0, err
-	}
-	return ownerID, nil
-}
-
 func listRowToBanner(row sqlc.ListMenuBannersRow) domain.Banner {
 	return bannerFromFields(domain.Banner{
 		ID:         row.ID,
-		OwnerID:    row.OwnerID,
 		BusinessID: row.BusinessID,
 		Title:      row.Title,
 		Body:       row.Body,
@@ -154,7 +142,6 @@ func listRowToBanner(row sqlc.ListMenuBannersRow) domain.Banner {
 func getRowToBanner(row sqlc.GetMenuBannerRow) domain.Banner {
 	return bannerFromFields(domain.Banner{
 		ID:         row.ID,
-		OwnerID:    row.OwnerID,
 		BusinessID: row.BusinessID,
 		Title:      row.Title,
 		Body:       row.Body,

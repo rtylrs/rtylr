@@ -12,19 +12,17 @@ import (
 )
 
 type mockBannerRepo struct {
-	banners       []domain.Banner
-	ownerID       int64
-	createdID     int64
-	createInput   domain.BannerInput
-	updateInput   domain.BannerInput
-	updateID      int64
-	deleteID      int64
-	businessID    int64
-	createErr     error
-	updateErr     error
-	deleteErr     error
-	getErr        error
-	bizOwnerIDErr error
+	banners     []domain.Banner
+	createdID   int64
+	createInput domain.BannerInput
+	updateInput domain.BannerInput
+	updateID    int64
+	deleteID    int64
+	businessID  int64
+	createErr   error
+	updateErr   error
+	deleteErr   error
+	getErr      error
 }
 
 func (m *mockBannerRepo) ListBanners(_ context.Context, businessID int64) ([]domain.Banner, error) {
@@ -32,7 +30,7 @@ func (m *mockBannerRepo) ListBanners(_ context.Context, businessID int64) ([]dom
 	return m.banners, nil
 }
 
-func (m *mockBannerRepo) CreateBanner(_ context.Context, _, businessID int64, input domain.BannerInput) (int64, error) {
+func (m *mockBannerRepo) CreateBanner(_ context.Context, businessID int64, input domain.BannerInput) (int64, error) {
 	m.businessID = businessID
 	m.createInput = input
 	return m.createdID, m.createErr
@@ -59,22 +57,17 @@ func (m *mockBannerRepo) GetBanner(_ context.Context, businessID, id int64) (dom
 	return domain.Banner{ID: id, BusinessID: businessID, Title: "Saved"}, nil
 }
 
-func (m *mockBannerRepo) BusinessOwnerID(_ context.Context, businessID int64) (int64, error) {
-	m.businessID = businessID
-	return m.ownerID, m.bizOwnerIDErr
-}
-
 func (m *mockBannerRepo) List(_ context.Context, businessID int64) ([]*posmenuitemv1.MenuItem, error) {
 	m.businessID = businessID
 	return nil, nil
 }
 
-func (m *mockBannerRepo) Update(_ context.Context, _, _ int64, _ []*posmenuitemv1.MenuItem) error {
+func (m *mockBannerRepo) Update(_ context.Context, _ int64, _ []*posmenuitemv1.MenuItem) error {
 	return nil
 }
 
 func TestCreateBannerNormalizesAndReturnsSavedBanner(t *testing.T) {
-	repo := &mockBannerRepo{ownerID: 7, createdID: 55}
+	repo := &mockBannerRepo{createdID: 55}
 	s := &Service{repo: repo}
 
 	got, err := s.CreateBanner(context.Background(), 11, domain.BannerInput{

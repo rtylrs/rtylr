@@ -20,13 +20,12 @@ const (
 
 type repository interface {
 	ListBanners(ctx context.Context, businessID int64) ([]domain.Banner, error)
-	CreateBanner(ctx context.Context, ownerID, businessID int64, input domain.BannerInput) (int64, error)
+	CreateBanner(ctx context.Context, businessID int64, input domain.BannerInput) (int64, error)
 	UpdateBanner(ctx context.Context, businessID, id int64, input domain.BannerInput) error
 	DeleteBanner(ctx context.Context, businessID, id int64) error
 	GetBanner(ctx context.Context, businessID, id int64) (domain.Banner, error)
-	BusinessOwnerID(ctx context.Context, businessID int64) (int64, error)
 	List(ctx context.Context, businessID int64) ([]*posmenuitemv1.MenuItem, error)
-	Update(ctx context.Context, ownerID, businessID int64, items []*posmenuitemv1.MenuItem) error
+	Update(ctx context.Context, businessID int64, items []*posmenuitemv1.MenuItem) error
 }
 
 type Service struct {
@@ -54,11 +53,7 @@ func (s *Service) Update(ctx context.Context, businessID int64, items []*posmenu
 			return fmt.Errorf("%w: item[%d] is required", ErrInvalidMenuItems, i)
 		}
 	}
-	ownerID, err := s.repo.BusinessOwnerID(ctx, businessID)
-	if err != nil {
-		return err
-	}
-	return s.repo.Update(ctx, ownerID, businessID, items)
+	return s.repo.Update(ctx, businessID, items)
 }
 
 func (s *Service) CreateBanner(ctx context.Context, businessID int64, input domain.BannerInput) (domain.Banner, error) {
@@ -66,11 +61,7 @@ func (s *Service) CreateBanner(ctx context.Context, businessID int64, input doma
 	if err != nil {
 		return domain.Banner{}, err
 	}
-	ownerID, err := s.repo.BusinessOwnerID(ctx, businessID)
-	if err != nil {
-		return domain.Banner{}, err
-	}
-	id, err := s.repo.CreateBanner(ctx, ownerID, businessID, normalized)
+	id, err := s.repo.CreateBanner(ctx, businessID, normalized)
 	if err != nil {
 		return domain.Banner{}, err
 	}

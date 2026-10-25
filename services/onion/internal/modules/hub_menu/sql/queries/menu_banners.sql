@@ -1,7 +1,6 @@
 -- name: ListMenuBanners :many
 SELECT
     id,
-    owner_id,
     business_id,
     title,
     COALESCE(body, '') AS body,
@@ -21,7 +20,6 @@ LIMIT 200;
 -- name: GetMenuBanner :one
 SELECT
     id,
-    owner_id,
     business_id,
     title,
     COALESCE(body, '') AS body,
@@ -40,7 +38,6 @@ LIMIT 1;
 
 -- name: CreateMenuBanner :execresult
 INSERT INTO hub_menu_banners (
-    owner_id,
     business_id,
     title,
     body,
@@ -51,7 +48,7 @@ INSERT INTO hub_menu_banners (
     starts_at,
     ends_at
 ) VALUES (
-    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+    ?, ?, ?, ?, ?, ?, ?, ?, ?
 );
 
 -- name: UpdateMenuBanner :exec

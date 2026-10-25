@@ -27,9 +27,9 @@ func TestScopeReaderUsesCurrentBusinessMembershipAndDefault(t *testing.T) {
 			t.Fatalf("business access for %d: id=%d, err=%v", userID, id, err)
 		}
 	}
-	owner, err := tenant.ResolveOwnerID(ctx, businessID, memberID)
+	owner, err := reader.ActiveBusinessOwner(ctx, businessID)
 	if err != nil || owner != ownerID {
-		t.Fatalf("member resolved owner=%d, err=%v", owner, err)
+		t.Fatalf("active business owner=%d, err=%v", owner, err)
 	}
 	if _, err := db.Exec("UPDATE users SET business_id = ? WHERE id = ?", businessID, memberID); err != nil {
 		t.Fatal(err)
@@ -53,8 +53,8 @@ func TestScopeReaderUsesCurrentBusinessMembershipAndDefault(t *testing.T) {
 	if id, err := tenant.ResolveBusinessID(ctx, businessID, ownerID); id != 0 || !errors.Is(err, tenant.ErrNoBusinessScope) {
 		t.Fatalf("inactive business: id=%d, err=%v", id, err)
 	}
-	if id, err := tenant.ResolveOwnerID(ctx, businessID, memberID); id != 0 || !errors.Is(err, tenant.ErrOwnerLookupFailed) {
-		t.Fatalf("inactive owner lookup: id=%d, err=%v", id, err)
+	if id, err := tenant.ActiveBusinessID(ctx, businessID); id != 0 || !errors.Is(err, tenant.ErrNoBusinessScope) {
+		t.Fatalf("inactive business lookup: id=%d, err=%v", id, err)
 	}
 }
 

@@ -6,7 +6,6 @@ import (
 	"sync"
 )
 
-var ErrOwnerLookupFailed = errors.New("failed to resolve business owner")
 var ErrNoBusinessScope = errors.New("no business scope for request")
 
 // ScopeResolver supplies verified active identity from the owning module.
@@ -38,25 +37,6 @@ func currentResolver() ScopeResolver {
 	scopeResolver.RLock()
 	defer scopeResolver.RUnlock()
 	return scopeResolver.reader
-}
-
-// ResolveOwnerID is for billing aggregation and legacy owner columns, not tenant data scoping.
-func ResolveOwnerID(ctx context.Context, businessID, fallbackUserID int64) (int64, error) {
-	return resolveOwnerID(ctx, currentResolver(), businessID, fallbackUserID)
-}
-
-func resolveOwnerID(ctx context.Context, reader ScopeResolver, businessID, _ int64) (int64, error) {
-	if businessID <= 0 {
-		return 0, ErrNoBusinessScope
-	}
-	if reader == nil {
-		return 0, ErrOwnerLookupFailed
-	}
-	ownerID, err := reader.ActiveBusinessOwner(ctx, businessID)
-	if err != nil || ownerID <= 0 {
-		return 0, ErrOwnerLookupFailed
-	}
-	return ownerID, nil
 }
 
 // ActiveBusinessID verifies that businessID names an active business, for

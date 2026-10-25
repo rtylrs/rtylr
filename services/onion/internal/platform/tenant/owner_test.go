@@ -18,32 +18,6 @@ func (s scopeStub) UserBusiness(context.Context, int64, int64) (int64, error) {
 	return s.businessID, s.err
 }
 
-func TestResolveOwnerIDFailsClosed(t *testing.T) {
-	for _, test := range []struct {
-		name       string
-		reader     ScopeResolver
-		businessID int64
-		want       error
-	}{
-		{"missing scope", scopeStub{ownerID: 7}, 0, ErrNoBusinessScope},
-		{"negative scope", scopeStub{ownerID: 7}, -1, ErrNoBusinessScope},
-		{"missing resolver", nil, 42, ErrOwnerLookupFailed},
-		{"failed lookup", scopeStub{ownerID: 7, err: errors.New("unavailable")}, 42, ErrOwnerLookupFailed},
-		{"invalid owner", scopeStub{}, 42, ErrOwnerLookupFailed},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			id, err := resolveOwnerID(context.Background(), test.reader, test.businessID, 4242)
-			if id != 0 || !errors.Is(err, test.want) {
-				t.Fatalf("owner=%d err=%v, want zero and %v", id, err, test.want)
-			}
-		})
-	}
-	id, err := resolveOwnerID(context.Background(), scopeStub{ownerID: 7}, 42, 4242)
-	if err != nil || id != 7 {
-		t.Fatalf("verified owner=%d, err=%v", id, err)
-	}
-}
-
 func TestResolveBusinessIDFailsClosed(t *testing.T) {
 	for _, test := range []struct {
 		name   string

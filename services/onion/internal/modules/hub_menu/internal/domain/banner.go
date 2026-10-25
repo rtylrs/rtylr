@@ -12,7 +12,6 @@ var (
 
 type Banner struct {
 	ID         int64
-	OwnerID    int64
 	BusinessID int64
 	Title      string
 	Body       string
