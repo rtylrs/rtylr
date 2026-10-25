@@ -39,16 +39,17 @@ INSERT INTO hr_employees (
 
 -- name: EnsureEmployeeForUser :exec
 INSERT INTO hr_employees (owner_id, business_id, user_id, first_name, last_name, email, status)
-SELECT ?, ?, ?, ?, ?, ?, 'active'
+SELECT sqlc.arg('business_id'), sqlc.arg('business_id'), sqlc.arg('user_id'),
+       sqlc.arg('first_name'), sqlc.arg('last_name'), sqlc.arg('email'), 'active'
 WHERE NOT EXISTS (
     SELECT 1
     FROM hr_employees e
-    WHERE e.user_id = ?
+    WHERE e.user_id = sqlc.arg('user_id')
 );
 
 -- name: DeleteEmployeeForUser :exec
 DELETE FROM hr_employees
-WHERE owner_id = ? AND business_id = ? AND user_id = ?;
+WHERE business_id = ? AND user_id = ?;
 
 -- name: ListTerminatedEmployees :many
 SELECT DISTINCT business_id, user_id

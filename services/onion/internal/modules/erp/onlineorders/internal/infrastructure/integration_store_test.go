@@ -343,7 +343,6 @@ func seedStoreOrderStock(t *testing.T, db *sql.DB, onHand, unitCost float64) (pr
 		t.Fatalf("default stock location: %v", err)
 	}
 	if _, _, err := stock.SetTotalTx(ctx, tx, stock.Movement{
-		OwnerID:       testutil.OwnerID,
 		BusinessID:    testutil.BusinessID,
 		LocationID:    locationID,
 		ProductID:     productID,

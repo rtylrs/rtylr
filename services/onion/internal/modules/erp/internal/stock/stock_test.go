@@ -9,18 +9,6 @@ import (
 	"github.com/voxire/onion/internal/testutil"
 )
 
-func TestMovementBusinessIDDefaultsToOwnerID(t *testing.T) {
-	if got := movementBusinessID(Movement{OwnerID: 42}); got != 42 {
-		t.Fatalf("movementBusinessID() = %d, want owner id 42", got)
-	}
-}
-
-func TestMovementBusinessIDUsesExplicitBusinessID(t *testing.T) {
-	if got := movementBusinessID(Movement{OwnerID: 42, BusinessID: 99}); got != 99 {
-		t.Fatalf("movementBusinessID() = %d, want explicit business id 99", got)
-	}
-}
-
 func TestSetTotalTxRejectsNegativeTarget(t *testing.T) {
 	_, _, err := SetTotalTx(context.Background(), nil, Movement{LocationID: 1}, -1)
 	if !errors.Is(err, ErrInsufficientStock) {
@@ -29,7 +17,7 @@ func TestSetTotalTxRejectsNegativeTarget(t *testing.T) {
 }
 
 func TestSetTotalTxRequiresLocation(t *testing.T) {
-	_, _, err := SetTotalTx(context.Background(), nil, Movement{OwnerID: 42}, 1)
+	_, _, err := SetTotalTx(context.Background(), nil, Movement{BusinessID: 42}, 1)
 	if err == nil || err.Error() != "stock_core: location is required for total adjustment" {
 		t.Fatalf("SetTotalTx() error = %v, want missing-location error", err)
 	}
@@ -90,7 +78,6 @@ func TestApplyMovementTxAllowsDistinctProductsForOneReference(t *testing.T) {
 	}
 	for _, productID := range productIDs {
 		_, _, err = ApplyMovementTx(ctx, tx, Movement{
-			OwnerID:       ownerID,
 			BusinessID:    ownerID,
 			LocationID:    locationID,
 			ProductID:     productID,

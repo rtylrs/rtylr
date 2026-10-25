@@ -11,10 +11,10 @@ import (
 )
 
 // ApplyMovementTx applies one movement inside the caller's transaction: it
-// row-locks (and creates if absent) the (owner, location, product) stock_levels
+// row-locks (and creates if absent) the (business, location, product) stock_levels
 // row, adjusts on_hand by Change, rejects a negative result unless
 // AllowNegative, writes the ledger row, and re-syncs the product's scalar
-// cache to the owner-wide SUM of on_hand. Inbound stock opens a cost layer and
+// cache to the business-wide SUM of on_hand. Inbound stock opens a cost layer and
 // outbound stock depletes layers in FIFO order. Returns the before/after
 // on_hand at the location. MUST be called with a *sql.Tx.
 func ApplyMovementTx(ctx context.Context, tx DBTX, m Movement) (before, after float64, err error) {
@@ -42,8 +42,8 @@ func applyMovementLevelTx(ctx context.Context, tx DBTX, m Movement) (before, aft
 
 	// Ensure the level row exists so FOR UPDATE has something to lock.
 	if err = q.EnsureStockLevelRow(ctx, stocksqlc.EnsureStockLevelRowParams{
-		OwnerID:    m.OwnerID,
-		BusinessID: movementBusinessID(m),
+		OwnerID:    m.BusinessID,
+		BusinessID: m.BusinessID,
 		LocationID: m.LocationID,
 		ProductID:  m.ProductID,
 	}); err != nil {
@@ -51,7 +51,8 @@ func applyMovementLevelTx(ctx context.Context, tx DBTX, m Movement) (before, aft
 	}
 
 	onHandStr, err := q.LockStockLevelOnHand(ctx, stocksqlc.LockStockLevelOnHandParams{
-		OwnerID:    m.OwnerID,
+		OwnerID:    m.BusinessID,
+		BusinessID: m.BusinessID,
 		LocationID: m.LocationID,
 		ProductID:  m.ProductID,
 	})
@@ -68,10 +69,10 @@ func applyMovementLevelTx(ctx context.Context, tx DBTX, m Movement) (before, aft
 		err = tx.QueryRowContext(ctx, `
 			SELECT id
 			FROM stock_ledger
-			WHERE owner_id = ? AND reference_type = ? AND reference_id = ?
+			WHERE owner_id = ? AND business_id = ? AND reference_type = ? AND reference_id = ?
 			  AND entry_type = ? AND product_id = ? AND location_id = ?
 			FOR UPDATE`,
-			m.OwnerID, m.ReferenceType, *m.ReferenceID, string(m.EntryType), m.ProductID, m.LocationID,
+			m.BusinessID, m.BusinessID, m.ReferenceType, *m.ReferenceID, string(m.EntryType), m.ProductID, m.LocationID,
 		).Scan(&existingID)
 		if err == nil {
 			return before, before, existingID, false, nil
@@ -98,8 +99,8 @@ func applyMovementLevelTx(ctx context.Context, tx DBTX, m Movement) (before, aft
 // destination with their original unit costs, so a transfer never changes the
 // valuation of the stock it moves.
 func TransferTx(ctx context.Context, tx DBTX, out, in Movement) (outLedgerID, inLedgerID int64, err error) {
-	if out.ProductID != in.ProductID || out.OwnerID != in.OwnerID {
-		return 0, 0, fmt.Errorf("stock_core: transfer legs must move the same product for the same owner")
+	if out.ProductID != in.ProductID || out.BusinessID != in.BusinessID {
+		return 0, 0, fmt.Errorf("stock_core: transfer legs must move the same product for the same business")
 	}
 	if out.LocationID == in.LocationID {
 		return 0, 0, fmt.Errorf("stock_core: transfer source and destination must differ")
@@ -115,15 +116,16 @@ func TransferTx(ctx context.Context, tx DBTX, out, in Movement) (outLedgerID, in
 	}
 	for _, leg := range legs {
 		if err := q.EnsureStockLevelRow(ctx, stocksqlc.EnsureStockLevelRowParams{
-			OwnerID:    leg.OwnerID,
-			BusinessID: movementBusinessID(leg),
+			OwnerID:    leg.BusinessID,
+			BusinessID: leg.BusinessID,
 			LocationID: leg.LocationID,
 			ProductID:  leg.ProductID,
 		}); err != nil {
 			return 0, 0, fmt.Errorf("stock_core: ensure transfer level row: %w", err)
 		}
 		if _, err := q.LockStockLevelOnHand(ctx, stocksqlc.LockStockLevelOnHandParams{
-			OwnerID:    leg.OwnerID,
+			OwnerID:    leg.BusinessID,
+			BusinessID: leg.BusinessID,
 			LocationID: leg.LocationID,
 			ProductID:  leg.ProductID,
 		}); err != nil {
@@ -179,7 +181,7 @@ func consumeCostLayersTx(ctx context.Context, tx DBTX, m Movement, quantity floa
 		  AND quantity_remaining > 0
 		ORDER BY received_at ASC, id ASC
 		FOR UPDATE`,
-		m.OwnerID, movementBusinessID(m), m.ProductID, m.LocationID,
+		m.BusinessID, m.BusinessID, m.ProductID, m.LocationID,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("stock_core: lock cost layers: %w", err)
@@ -259,7 +261,7 @@ func openCostLayersTx(ctx context.Context, tx DBTX, m Movement, quantity float64
 			INSERT INTO inventory_cost_layers
 			(owner_id, business_id, product_id, location_id, quantity_remaining, unit_cost, reference_id, reference_type)
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-			m.OwnerID, movementBusinessID(m), m.ProductID, m.LocationID,
+			m.BusinessID, m.BusinessID, m.ProductID, m.LocationID,
 			fmtQty(qty), fmtQty(unitCost), nullInt(m.ReferenceID), referenceType,
 		); err != nil {
 			return fmt.Errorf("stock_core: open cost layer: %w", err)
@@ -291,8 +293,8 @@ func openCostLayersTx(ctx context.Context, tx DBTX, m Movement, quantity float64
 	} else {
 		var cost sql.NullString
 		err := tx.QueryRowContext(ctx,
-			"SELECT cost_price FROM erp_products WHERE owner_id = ? AND id = ?",
-			m.OwnerID, m.ProductID,
+			"SELECT cost_price FROM erp_products WHERE business_id = ? AND id = ?",
+			m.BusinessID, m.ProductID,
 		).Scan(&cost)
 		if err != nil && !errors.Is(err, sql.ErrNoRows) {
 			return fmt.Errorf("stock_core: read product cost: %w", err)
@@ -338,7 +340,8 @@ func fifoLayerConsumption(available []float64, quantity float64) []float64 {
 func applyKnown(ctx context.Context, q *stocksqlc.Queries, m Movement, before, after float64) (int64, error) {
 	if err := q.UpdateStockLevelOnHand(ctx, stocksqlc.UpdateStockLevelOnHandParams{
 		OnHand:     fmtQty(after),
-		OwnerID:    m.OwnerID,
+		OwnerID:    m.BusinessID,
+		BusinessID: m.BusinessID,
 		LocationID: m.LocationID,
 		ProductID:  m.ProductID,
 	}); err != nil {
@@ -350,8 +353,8 @@ func applyKnown(ctx context.Context, q *stocksqlc.Queries, m Movement, before, a
 		channel = "erp"
 	}
 	result, err := q.InsertStockLedgerEntry(ctx, stocksqlc.InsertStockLedgerEntryParams{
-		OwnerID:        m.OwnerID,
-		BusinessID:     movementBusinessID(m),
+		OwnerID:        m.BusinessID,
+		BusinessID:     m.BusinessID,
 		LocationID:     m.LocationID,
 		ProductID:      m.ProductID,
 		EntryType:      stocksqlc.StockLedgerEntryType(m.EntryType),
@@ -382,7 +385,7 @@ func applyKnown(ctx context.Context, q *stocksqlc.Queries, m Movement, before, a
 	// The scalar therefore stays == SUM(on_hand) by construction.
 	if err := q.SyncProductStockScalar(ctx, stocksqlc.SyncProductStockScalarParams{
 		StockQuantity: fmtQty(after - before),
-		OwnerID:       m.OwnerID,
+		BusinessID:    m.BusinessID,
 		ID:            m.ProductID,
 	}); err != nil {
 		return 0, fmt.Errorf("stock_core: sync scalar cache: %w", err)

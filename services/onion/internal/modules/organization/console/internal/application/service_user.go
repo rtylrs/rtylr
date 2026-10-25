@@ -218,12 +218,12 @@ func (s *Service) CreateBusinessOwner(ctx context.Context, input CreateBusinessO
 		if len(name) > 1 {
 			lastName = strings.Join(name[1:], " ")
 		}
-		provisionErr = s.employeeProvisioner.EnsureEmployeeForUser(ctx, created.OwnerID, created.BusinessID, created.OwnerID, firstName, lastName, email)
+		provisionErr = s.employeeProvisioner.EnsureEmployeeForUser(ctx, created.BusinessID, created.OwnerID, firstName, lastName, email)
 	}
 	if provisionErr != nil {
 		var cleanupErrors []error
 		if s.employeeProvisioner != nil {
-			if cleanupErr := s.employeeProvisioner.DeleteEmployeeForUser(ctx, created.OwnerID, created.BusinessID, created.OwnerID); cleanupErr != nil {
+			if cleanupErr := s.employeeProvisioner.DeleteEmployeeForUser(ctx, created.BusinessID, created.OwnerID); cleanupErr != nil {
 				cleanupErrors = append(cleanupErrors, fmt.Errorf("delete partially provisioned HR employee: %w", cleanupErr))
 			}
 		}

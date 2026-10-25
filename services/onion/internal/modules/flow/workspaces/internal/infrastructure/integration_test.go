@@ -108,9 +108,9 @@ func TestWorkspaces_WorkDayLineMutationsScopeToCaller(t *testing.T) {
 		t.Fatalf("delete stale work day fixture: %v", err)
 	}
 	if _, err := db.ExecContext(ctx, `
-		INSERT INTO flow_work_days (id, owner_id, business_id, employee_id, date, timezone, work_mode, status)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-		workDayID, testutil.BusinessID, testutil.BusinessID, 4101, "2035-01-01", "UTC", "onsite", "draft",
+		INSERT INTO flow_work_days (id, business_id, employee_id, date, timezone, work_mode, status)
+		VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		workDayID, testutil.BusinessID, 4101, "2035-01-01", "UTC", "onsite", "draft",
 	); err != nil {
 		t.Fatalf("insert work day fixture: %v", err)
 	}
@@ -134,7 +134,6 @@ func TestWorkspaces_WorkDayLineMutationsScopeToCaller(t *testing.T) {
 
 	foreignLine, err := service.UpdateWorkDayLine(ctx, domain.WorkDayLineInput{
 		ID:              lineID,
-		OwnerID:         testutil.BusinessID,
 		BusinessID:      testutil.BusinessID,
 		ProjectID:       998833,
 		DurationMinutes: 90,
@@ -161,7 +160,6 @@ func TestWorkspaces_WorkDayLineMutationsScopeToCaller(t *testing.T) {
 
 	if _, err := service.UpdateWorkDayLine(ctx, domain.WorkDayLineInput{
 		ID:              lineID,
-		OwnerID:         testutil.BusinessID,
 		BusinessID:      testutil.BusinessID,
 		ProjectID:       998833,
 		DurationMinutes: 60,
@@ -171,7 +169,7 @@ func TestWorkspaces_WorkDayLineMutationsScopeToCaller(t *testing.T) {
 		t.Fatalf("owner update: %v", err)
 	}
 
-	removed, err := service.DeleteWorkDayLine(ctx, lineID, testutil.BusinessID, testutil.BusinessID, 1002)
+	removed, err := service.DeleteWorkDayLine(ctx, lineID, testutil.BusinessID, 1002)
 	if !errors.Is(err, application.ErrWorkDayNotFound) {
 		t.Fatalf("foreign delete error = %v, want ErrWorkDayNotFound", err)
 	}
@@ -179,7 +177,7 @@ func TestWorkspaces_WorkDayLineMutationsScopeToCaller(t *testing.T) {
 		t.Fatal("foreign delete reported a removal")
 	}
 
-	removed, err = service.DeleteWorkDayLine(ctx, lineID, testutil.BusinessID, testutil.BusinessID, 1001)
+	removed, err = service.DeleteWorkDayLine(ctx, lineID, testutil.BusinessID, 1001)
 	if err != nil {
 		t.Fatalf("owner delete: %v", err)
 	}

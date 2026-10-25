@@ -61,8 +61,8 @@ type Service struct {
 }
 
 type EmployeeProvisioner interface {
-	EnsureEmployeeForUser(ctx context.Context, ownerID, businessID, userID int64, firstName, lastName, email string) error
-	DeleteEmployeeForUser(ctx context.Context, ownerID, businessID, userID int64) error
+	EnsureEmployeeForUser(ctx context.Context, businessID, userID int64, firstName, lastName, email string) error
+	DeleteEmployeeForUser(ctx context.Context, businessID, userID int64) error
 }
 
 // SeatChangeRecorder reprices a business's seat period after its member count

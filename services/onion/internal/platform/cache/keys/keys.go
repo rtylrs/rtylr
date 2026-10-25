@@ -24,14 +24,16 @@ const Namespace = "cache:"
 type InvalidationType string
 
 const (
-	InvalidateUser         InvalidationType = "user"
-	InvalidateBusiness     InvalidationType = "business"
-	InvalidateOrder        InvalidationType = "order"
-	InvalidateProduct      InvalidationType = "product"
-	InvalidateCustomer     InvalidationType = "customer"
-	InvalidateMenu         InvalidationType = "menu"
-	InvalidateTeam         InvalidationType = "team"
-	InvalidateConfig       InvalidationType = "config"
+	InvalidateUser     InvalidationType = "user"
+	InvalidateBusiness InvalidationType = "business"
+	InvalidateOrder    InvalidationType = "order"
+	InvalidateProduct  InvalidationType = "product"
+	InvalidateCustomer InvalidationType = "customer"
+	InvalidateMenu     InvalidationType = "menu"
+	InvalidateTeam     InvalidationType = "team"
+	InvalidateConfig   InvalidationType = "config"
+	// InvalidateSubscription takes a business ID: plans belong to businesses,
+	// so an owner's user ID would clear an unrelated business's entry.
 	InvalidateSubscription InvalidationType = "subscription"
 	InvalidateAll          InvalidationType = "all"
 )

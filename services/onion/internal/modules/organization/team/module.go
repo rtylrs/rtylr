@@ -33,9 +33,9 @@ type NotificationPublisher interface {
 }
 
 type MemberProvisioner interface {
-	EnsureEmployeeForUser(ctx context.Context, ownerID, businessID, userID int64, firstName, lastName, email string) error
-	EnsureStaffForUser(ctx context.Context, ownerID, businessID, userID int64, role string) error
-	DeleteProvisionedMember(ctx context.Context, ownerID, businessID, userID int64) error
+	EnsureEmployeeForUser(ctx context.Context, businessID, userID int64, firstName, lastName, email string) error
+	EnsureStaffForUser(ctx context.Context, businessID, userID int64, role string) error
+	DeleteProvisionedMember(ctx context.Context, businessID, userID int64) error
 }
 
 type TerminatedEmployee struct {

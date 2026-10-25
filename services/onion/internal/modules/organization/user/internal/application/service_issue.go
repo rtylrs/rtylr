@@ -103,7 +103,7 @@ func (s *Service) ensureEmployeeForUser(ctx context.Context, ownerID, businessID
 	if len(name) > 1 {
 		lastName = strings.Join(name[1:], " ")
 	}
-	return s.employeeProvisioner.EnsureEmployeeForUser(ctx, ownerID, businessID, userID, firstName, lastName, email)
+	return s.employeeProvisioner.EnsureEmployeeForUser(ctx, businessID, userID, firstName, lastName, email)
 }
 
 type PlatformClaims struct {

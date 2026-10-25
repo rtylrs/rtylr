@@ -37,7 +37,7 @@ func TestUpsertHRConfigPartialCorePayloadKeepsOmittedFields(t *testing.T) {
 		if _, err := db.ExecContext(context.Background(), "DELETE FROM hr_company_config WHERE business_id = ?", testutil.BusinessID); err != nil {
 			t.Errorf("cleanup hr_company_config: %v", err)
 		}
-		if _, err := db.ExecContext(context.Background(), "DELETE FROM hr_configs WHERE owner_id = ?", testutil.OwnerID); err != nil {
+		if _, err := db.ExecContext(context.Background(), "DELETE FROM hr_configs WHERE business_id = ?", testutil.BusinessID); err != nil {
 			t.Errorf("cleanup hr_configs: %v", err)
 		}
 	})

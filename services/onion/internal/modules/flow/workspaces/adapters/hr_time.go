@@ -14,8 +14,8 @@ type flowHRTimeAdapter struct {
 	core   *hrcore.Module
 }
 
-func (a flowHRTimeAdapter) ListWorkDayLines(ctx context.Context, ownerID, businessID, workDayID int64) ([]flowworkspaces.WorkDayLine, int32, error) {
-	rows, total, err := a.module.ListFlowWorkdayEntries(ctx, ownerID, businessID, workDayID)
+func (a flowHRTimeAdapter) ListWorkDayLines(ctx context.Context, businessID, workDayID int64) ([]flowworkspaces.WorkDayLine, int32, error) {
+	rows, total, err := a.module.ListFlowWorkdayEntries(ctx, businessID, workDayID)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -57,7 +57,7 @@ func (a flowHRTimeAdapter) SumWorkDayLineMinutesByMemberAndTaskIDs(ctx context.C
 
 func (a flowHRTimeAdapter) CreateWorkDayLine(ctx context.Context, input flowworkspaces.WorkDayLineInput) (flowworkspaces.WorkDayLine, error) {
 	row, err := a.module.CreateFlowWorkdayEntry(ctx, hrtime.FlowWorkdayEntryInput{
-		ID: input.ID, OwnerID: input.OwnerID, BusinessID: input.BusinessID,
+		ID: input.ID, BusinessID: input.BusinessID,
 		EmployeeID: input.EmployeeID, WorkDayID: input.WorkDayID, Date: input.Date,
 		ProjectID: input.ProjectID, TaskID: input.TaskID, WorkTypeID: input.WorkTypeID,
 		WorkMode: input.WorkMode, Timezone: input.Timezone, Description: input.Description,
@@ -72,7 +72,7 @@ func (a flowHRTimeAdapter) CreateWorkDayLine(ctx context.Context, input flowwork
 
 func (a flowHRTimeAdapter) UpdateWorkDayLine(ctx context.Context, input flowworkspaces.WorkDayLineInput) (flowworkspaces.WorkDayLine, error) {
 	row, err := a.module.UpdateFlowWorkdayEntry(ctx, hrtime.FlowWorkdayEntryInput{
-		ID: input.ID, OwnerID: input.OwnerID, BusinessID: input.BusinessID,
+		ID: input.ID, BusinessID: input.BusinessID,
 		EmployeeID: input.EmployeeID, WorkDayID: input.WorkDayID, Date: input.Date,
 		ProjectID: input.ProjectID, TaskID: input.TaskID, WorkTypeID: input.WorkTypeID,
 		WorkMode: input.WorkMode, Timezone: input.Timezone, Description: input.Description,
@@ -85,13 +85,13 @@ func (a flowHRTimeAdapter) UpdateWorkDayLine(ctx context.Context, input flowwork
 	return flowWorkdayLine(*row), nil
 }
 
-func (a flowHRTimeAdapter) GetWorkDayLineOwner(ctx context.Context, id, ownerID, businessID int64) (flowworkspaces.WorkDayLineOwner, bool, error) {
-	owner, found, err := a.module.FlowWorkdayEntryOwner(ctx, id, ownerID, businessID)
+func (a flowHRTimeAdapter) GetWorkDayLineOwner(ctx context.Context, id, businessID int64) (flowworkspaces.WorkDayLineOwner, bool, error) {
+	owner, found, err := a.module.FlowWorkdayEntryOwner(ctx, id, businessID)
 	return flowworkspaces.WorkDayLineOwner{WorkDayID: owner.WorkDayID, EmployeeID: owner.EmployeeID, TaskID: owner.TaskID}, found, err
 }
 
-func (a flowHRTimeAdapter) DeleteWorkDayLine(ctx context.Context, id, ownerID, businessID int64) (bool, error) {
-	return a.module.DeleteFlowWorkdayEntry(ctx, id, ownerID, businessID)
+func (a flowHRTimeAdapter) DeleteWorkDayLine(ctx context.Context, id, businessID int64) (bool, error) {
+	return a.module.DeleteFlowWorkdayEntry(ctx, id, businessID)
 }
 
 func flowWorkdayLine(row hrtime.FlowWorkdayEntry) flowworkspaces.WorkDayLine {

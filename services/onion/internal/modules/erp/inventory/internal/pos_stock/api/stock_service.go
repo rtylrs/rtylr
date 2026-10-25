@@ -31,7 +31,7 @@ func (a *StockAPI) ListStockMovements(ctx context.Context, req *posstockv1.ListS
 		return nil, onekiterrors.New(http.StatusBadRequest, "branch_id and product_id are required")
 	}
 
-	movements, listErr := a.Service.ListMovements(ctx, businessID, businessID, req.GetBranchId(), req.GetProductId())
+	movements, listErr := a.Service.ListMovements(ctx, businessID, req.GetBranchId(), req.GetProductId())
 	if listErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list stock movements")
 	}
@@ -44,7 +44,7 @@ func (a *StockAPI) ListStockMovements(ctx context.Context, req *posstockv1.ListS
 }
 
 func (a *StockAPI) ReceiveStock(ctx context.Context, req *posstockv1.ReceiveStockRequest) (*posstockv1.ReceiveStockResponse, error) {
-	businessID, device, err := requireStockPermission(ctx, "pos:employees:manage")
+	businessID, _, err := requireStockPermission(ctx, "pos:employees:manage")
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,6 @@ func (a *StockAPI) ReceiveStock(ctx context.Context, req *posstockv1.ReceiveStoc
 
 	id, receiveErr := a.Service.ReceiveStock(ctx, domain.ReceiveStockInput{
 		BusinessID: businessID,
-		OwnerID:    device.User.UserID,
 		BranchID:   req.GetBranchId(),
 		ProductID:  req.GetProductId(),
 		Quantity:   req.GetQuantity(),
@@ -68,7 +67,7 @@ func (a *StockAPI) ReceiveStock(ctx context.Context, req *posstockv1.ReceiveStoc
 }
 
 func (a *StockAPI) AdjustStock(ctx context.Context, req *posstockv1.AdjustStockRequest) (*posstockv1.AdjustStockResponse, error) {
-	businessID, device, err := requireStockPermission(ctx, "pos:employees:manage")
+	businessID, _, err := requireStockPermission(ctx, "pos:employees:manage")
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +80,6 @@ func (a *StockAPI) AdjustStock(ctx context.Context, req *posstockv1.AdjustStockR
 
 	id, adjustErr := a.Service.AdjustStock(ctx, domain.AdjustStockInput{
 		BusinessID: businessID,
-		OwnerID:    device.User.UserID,
 		BranchID:   req.GetBranchId(),
 		ProductID:  req.GetProductId(),
 		Quantity:   req.GetQuantity(),
@@ -95,7 +93,7 @@ func (a *StockAPI) AdjustStock(ctx context.Context, req *posstockv1.AdjustStockR
 }
 
 func (a *StockAPI) WasteStock(ctx context.Context, req *posstockv1.WasteStockRequest) (*posstockv1.WasteStockResponse, error) {
-	businessID, device, err := requireStockPermission(ctx, "pos:employees:manage")
+	businessID, _, err := requireStockPermission(ctx, "pos:employees:manage")
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +103,6 @@ func (a *StockAPI) WasteStock(ctx context.Context, req *posstockv1.WasteStockReq
 
 	id, wasteErr := a.Service.RecordWaste(ctx, domain.WasteStockInput{
 		BusinessID: businessID,
-		OwnerID:    device.User.UserID,
 		BranchID:   req.GetBranchId(),
 		ProductID:  req.GetProductId(),
 		Quantity:   req.GetQuantity(),
@@ -119,7 +116,7 @@ func (a *StockAPI) WasteStock(ctx context.Context, req *posstockv1.WasteStockReq
 }
 
 func (a *StockAPI) TransferStock(ctx context.Context, req *posstockv1.TransferStockRequest) (*posstockv1.TransferStockResponse, error) {
-	businessID, device, err := requireStockPermission(ctx, "pos:employees:manage")
+	businessID, _, err := requireStockPermission(ctx, "pos:employees:manage")
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +126,6 @@ func (a *StockAPI) TransferStock(ctx context.Context, req *posstockv1.TransferSt
 
 	id, transferErr := a.Service.TransferStock(ctx, domain.TransferStockInput{
 		BusinessID:   businessID,
-		OwnerID:      device.User.UserID,
 		FromBranchID: req.GetFromBranchId(),
 		ToBranchID:   req.GetToBranchId(),
 		ProductID:    req.GetProductId(),
@@ -152,7 +148,7 @@ func (a *StockAPI) ListInventory(ctx context.Context, req *posstockv1.ListInvent
 		return nil, onekiterrors.New(http.StatusBadRequest, "branch_id is required")
 	}
 
-	items, listErr := a.Service.ListBranchInventory(ctx, businessID, businessID, req.GetBranchId())
+	items, listErr := a.Service.ListBranchInventory(ctx, businessID, req.GetBranchId())
 	if listErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list inventory")
 	}
@@ -173,7 +169,7 @@ func (a *StockAPI) LowStock(ctx context.Context, req *posstockv1.LowStockRequest
 		return nil, onekiterrors.New(http.StatusBadRequest, "branch_id is required")
 	}
 
-	items, listErr := a.Service.ListLowStockItems(ctx, businessID, businessID, req.GetBranchId())
+	items, listErr := a.Service.ListLowStockItems(ctx, businessID, req.GetBranchId())
 	if listErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list low stock items")
 	}

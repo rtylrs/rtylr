@@ -45,21 +45,21 @@ func (s *Service) CreateStaff(ctx context.Context, input domain.StaffInput) (int
 
 // EnsureStaffForUser mirrors an existing HR employee into the staff directory.
 // HR owns both records; external modules request this through a narrow command.
-func (s *Service) EnsureStaffForUser(ctx context.Context, ownerID, businessID, userID int64, role string) error {
-	if ownerID <= 0 || businessID <= 0 || userID <= 0 {
-		return fmt.Errorf("staff provisioning requires positive owner, business, and user IDs")
+func (s *Service) EnsureStaffForUser(ctx context.Context, businessID, userID int64, role string) error {
+	if businessID <= 0 || userID <= 0 {
+		return fmt.Errorf("staff provisioning requires positive business and user IDs")
 	}
 	if role == "" {
 		role = "member"
 	}
-	return s.repo.EnsureStaffForUser(ctx, ownerID, businessID, userID, role)
+	return s.repo.EnsureStaffForUser(ctx, businessID, userID, role)
 }
 
-func (s *Service) DeleteStaffForUser(ctx context.Context, ownerID, businessID, userID int64) error {
-	if ownerID <= 0 || businessID <= 0 || userID <= 0 {
+func (s *Service) DeleteStaffForUser(ctx context.Context, businessID, userID int64) error {
+	if businessID <= 0 || userID <= 0 {
 		return nil
 	}
-	return s.repo.DeleteStaffForUser(ctx, ownerID, businessID, userID)
+	return s.repo.DeleteStaffForUser(ctx, businessID, userID)
 }
 
 func (s *Service) UpdateStaff(ctx context.Context, businessID int64, input domain.StaffUpdateInput) error {
@@ -141,8 +141,8 @@ type repository interface {
 	CountPendingTimeOff(ctx context.Context, businessID int64) (int, error)
 	CountStaffDirectory(ctx context.Context, businessID int64) (int64, error)
 	CreateStaff(ctx context.Context, input domain.StaffInput) (int64, error)
-	EnsureStaffForUser(ctx context.Context, ownerID, businessID, userID int64, role string) error
-	DeleteStaffForUser(ctx context.Context, ownerID, businessID, userID int64) error
+	EnsureStaffForUser(ctx context.Context, businessID, userID int64, role string) error
+	DeleteStaffForUser(ctx context.Context, businessID, userID int64) error
 	DeleteStaff(ctx context.Context, businessID, staffID int64) error
 	GetStaffByID(ctx context.Context, businessID, staffID int64) (*domain.Staff, error)
 	ListManagedUserIDs(ctx context.Context, businessID, managerUserID int64) ([]int64, error)

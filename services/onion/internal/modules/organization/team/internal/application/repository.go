@@ -25,7 +25,6 @@ type repository interface {
 	GetAuthorizationRoleGrant(ctx context.Context, businessID, roleID int64) (domain.AuthorizationRoleGrant, error)
 	GetAuthorizationSnapshot(ctx context.Context, businessID, userID int64, businessApps []string) (authorization.Snapshot, bool, error)
 	GetBusinessByID(ctx context.Context, businessID int64) (string, int64, error)
-	GetBusinessIDByOwnerID(ctx context.Context, ownerID int64) (int64, error)
 	GetGroup(ctx context.Context, businessID, groupID int64) (*domain.Group, error)
 	GetGroupDetail(ctx context.Context, businessID, groupID int64) (*domain.GroupDetail, error)
 	GetInviteToken(ctx context.Context, token string) (domain.InviteToken, error)

@@ -50,8 +50,8 @@ func (r *Repository) UpsertSetupStep(ctx context.Context, businessID int64, step
 	})
 }
 
-func (r *Repository) GetHRConfig(ctx context.Context, ownerID int64) (*domain.HRConfig, error) {
-	row, err := r.queries.GetHRConfig(ctx, ownerID)
+func (r *Repository) GetHRConfig(ctx context.Context, businessID int64) (*domain.HRConfig, error) {
+	row, err := r.queries.GetHRConfig(ctx, businessID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrConfigNotFound
@@ -61,7 +61,7 @@ func (r *Repository) GetHRConfig(ctx context.Context, ownerID int64) (*domain.HR
 
 	cfg := &domain.HRConfig{
 		ID:      row.ID,
-		OwnerID: row.OwnerID,
+		OwnerID: row.BusinessID,
 	}
 	if row.SetupCompletedAt.Valid {
 		cfg.SetupCompletedAt = &row.SetupCompletedAt.Time
@@ -71,16 +71,16 @@ func (r *Repository) GetHRConfig(ctx context.Context, ownerID int64) (*domain.HR
 	return cfg, nil
 }
 
-func (r *Repository) UpsertHRConfig(ctx context.Context, ownerID int64, completedAt *time.Time) (*domain.HRConfig, error) {
+func (r *Repository) UpsertHRConfig(ctx context.Context, businessID int64, completedAt *time.Time) (*domain.HRConfig, error) {
 	var completed sql.NullTime
 	if completedAt != nil {
 		completed = sql.NullTime{Time: *completedAt, Valid: true}
 	}
 	if err := r.queries.UpsertHRConfig(ctx, sqlc.UpsertHRConfigParams{
-		OwnerID:          ownerID,
+		BusinessID:       businessID,
 		SetupCompletedAt: completed,
 	}); err != nil {
 		return nil, err
 	}
-	return r.GetHRConfig(ctx, ownerID)
+	return r.GetHRConfig(ctx, businessID)
 }

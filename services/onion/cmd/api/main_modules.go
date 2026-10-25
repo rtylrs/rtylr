@@ -189,7 +189,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	campaignsModule := campaigns.NewModule(ctx, dbclient.Pool())
 	inventoryModule := inventory.NewModule(ctx, dbclient.Pool())
 	productsModule := products.NewModule(ctx, dbclient.Pool())
-	productsModule.SetCatalogBusinessContext(businessModule.GetBusinessOwnerID, addonsModule.OnlineOrderingEnabled)
+	productsModule.SetCatalogOnlineOrdering(addonsModule.OnlineOrderingEnabled)
 	categoriesModule := categories.NewModule(ctx, dbclient.Pool())
 	brandsModule := brands.NewModule(ctx, dbclient.Pool())
 	loyaltyModule := loyalty.NewModule(ctx, dbclient.Pool())
@@ -222,7 +222,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		WithSalesProductReader(productsModule.SalesProduct).
 		WithOnlineOrderingReader(addonsModule.OnlineOrderingEnabled)
 	posLocationsModule := locations.NewModule(ctx, dbclient.Pool()).WithLocationLimitReader(scopes.NewReader(dbclient.Pool()).LocationLimit)
-	inventoryModule.WithBusinessOwnerResolver(businessModule.GetBusinessOwnerID).WithPOSBranchOwnerReader(posLocationsModule.StockBranchOwner)
+	inventoryModule.WithPOSBranchReader(posLocationsModule.StockBranchExists)
 	posTerminalsModule := terminals.NewModule(ctx, dbclient.Pool())
 	posUsersModule := users.NewModule(ctx, dbclient.Pool()).WithAuthorizationVersionReader(scopes.NewReader(dbclient.Pool()).AuthorizationVersion)
 	posFloorsModule := floors.NewModule(ctx, dbclient.Pool())

@@ -24,7 +24,7 @@ func TestActualHoursCombinesFlowAndHRTimeThroughTheOwnerPort(t *testing.T) {
 	clientKey := fmt.Sprintf("actual-hours-%d", time.Now().UnixNano())
 
 	entry, err := store.CreateWorkDayLine(ctx, domain.WorkDayLineInput{
-		OwnerID: testutil.BusinessID, BusinessID: businessID, EmployeeID: testutil.OwnerID,
+		BusinessID: businessID, EmployeeID: testutil.OwnerID,
 		WorkDayID: taskID, Date: "2035-01-01", ProjectID: taskID, TaskID: taskID,
 		DurationMinutes: 30, ClientKey: clientKey, LoggedBy: testutil.OwnerID,
 	})
@@ -32,7 +32,7 @@ func TestActualHoursCombinesFlowAndHRTimeThroughTheOwnerPort(t *testing.T) {
 		t.Fatalf("create HR-owned work-day entry: %v", err)
 	}
 	t.Cleanup(func() {
-		if _, err := store.DeleteWorkDayLine(ctx, entry.ID, testutil.BusinessID, businessID); err != nil {
+		if _, err := store.DeleteWorkDayLine(ctx, entry.ID, businessID); err != nil {
 			t.Errorf("delete HR-owned entry fixture: %v", err)
 		}
 	})
@@ -62,7 +62,7 @@ func TestActualHoursCombinesFlowAndHRTimeThroughTheOwnerPort(t *testing.T) {
 	}
 
 	day, err := repo.UpsertWorkDay(ctx, domain.WorkDayInput{
-		OwnerID: testutil.OwnerID, BusinessID: businessID, EmployeeID: testutil.OwnerID,
+		BusinessID: businessID, EmployeeID: testutil.OwnerID,
 		Date: "2035-01-01", Timezone: "UTC", WorkMode: domain.WorkModeOnsite, LoggedBy: testutil.OwnerID,
 	})
 	if err != nil {
@@ -76,7 +76,7 @@ func TestActualHoursCombinesFlowAndHRTimeThroughTheOwnerPort(t *testing.T) {
 
 	service := application.NewService(ctx, repo)
 	line, err := service.CreateWorkDayLine(ctx, domain.WorkDayLineInput{
-		OwnerID: businessID, BusinessID: businessID, EmployeeID: testutil.OwnerID,
+		BusinessID: businessID, EmployeeID: testutil.OwnerID,
 		WorkDayID: day.ID, Date: "2035-01-01", ProjectID: taskID, TaskID: taskID,
 		DurationMinutes: 15, ClientKey: clientKey + "-flow-line", LoggedBy: testutil.OwnerID,
 	})
@@ -95,7 +95,7 @@ func TestActualHoursCombinesFlowAndHRTimeThroughTheOwnerPort(t *testing.T) {
 	assertActualHours(1.50)
 
 	line, err = service.UpdateWorkDayLine(ctx, domain.WorkDayLineInput{
-		ID: line.ID, OwnerID: businessID, BusinessID: businessID,
+		ID: line.ID, BusinessID: businessID,
 		ProjectID: taskID, TaskID: taskID, DurationMinutes: 30,
 		Description: "updated Flow work-day line", LoggedBy: testutil.OwnerID,
 	})
@@ -104,7 +104,7 @@ func TestActualHoursCombinesFlowAndHRTimeThroughTheOwnerPort(t *testing.T) {
 	}
 	assertActualHours(1.75)
 
-	deleted, err := service.DeleteWorkDayLine(ctx, line.ID, businessID, businessID, testutil.OwnerID)
+	deleted, err := service.DeleteWorkDayLine(ctx, line.ID, businessID, testutil.OwnerID)
 	if err != nil || !deleted {
 		t.Fatalf("delete Flow work-day line = %t, err=%v", deleted, err)
 	}

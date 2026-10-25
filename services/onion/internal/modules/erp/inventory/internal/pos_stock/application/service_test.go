@@ -23,7 +23,7 @@ func TestReceiveStock_RejectsMissingBusinessID(t *testing.T) {
 func TestReceiveStock_RejectsMissingProductID(t *testing.T) {
 	s := &Service{}
 	_, err := s.ReceiveStock(context.Background(), domain.ReceiveStockInput{
-		BusinessID: 1, OwnerID: 1, BranchID: 2, Quantity: 10,
+		BusinessID: 1, BranchID: 2, Quantity: 10,
 	})
 	if err == nil {
 		t.Fatal("expected error for missing product id")
@@ -33,7 +33,7 @@ func TestReceiveStock_RejectsMissingProductID(t *testing.T) {
 func TestReceiveStock_RejectsZeroQuantity(t *testing.T) {
 	s := &Service{}
 	_, err := s.ReceiveStock(context.Background(), domain.ReceiveStockInput{
-		BusinessID: 1, OwnerID: 1, BranchID: 2, ProductID: 3, Quantity: 0,
+		BusinessID: 1, BranchID: 2, ProductID: 3, Quantity: 0,
 	})
 	if err == nil {
 		t.Fatal("expected error for zero quantity")
@@ -43,7 +43,7 @@ func TestReceiveStock_RejectsZeroQuantity(t *testing.T) {
 func TestTransferStock_RejectsSameBranch(t *testing.T) {
 	s := &Service{}
 	_, err := s.TransferStock(context.Background(), domain.TransferStockInput{
-		BusinessID: 1, OwnerID: 1, FromBranchID: 2, ToBranchID: 2, ProductID: 3, Quantity: 5,
+		BusinessID: 1, FromBranchID: 2, ToBranchID: 2, ProductID: 3, Quantity: 5,
 	})
 	if err == nil {
 		t.Fatal("expected error for same source and destination branch")
@@ -53,7 +53,7 @@ func TestTransferStock_RejectsSameBranch(t *testing.T) {
 func TestTransferStock_RejectsZeroQuantity(t *testing.T) {
 	s := &Service{}
 	_, err := s.TransferStock(context.Background(), domain.TransferStockInput{
-		BusinessID: 1, OwnerID: 1, FromBranchID: 2, ToBranchID: 3, ProductID: 4, Quantity: 0,
+		BusinessID: 1, FromBranchID: 2, ToBranchID: 3, ProductID: 4, Quantity: 0,
 	})
 	if err == nil {
 		t.Fatal("expected error for zero quantity")

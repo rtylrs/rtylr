@@ -38,8 +38,8 @@ func (a flowPresenceAdapter) ListActiveEmployees(ctx context.Context, businessID
 	return result, nil
 }
 
-func (a flowPresenceAdapter) ApprovedLeaveEmployeeIDs(ctx context.Context, userID int64, date string) (map[int64]bool, error) {
-	return a.leave.ApprovedLeaveEmployeeIDs(ctx, userID, date)
+func (a flowPresenceAdapter) ApprovedLeaveEmployeeIDs(ctx context.Context, businessID int64, date string) (map[int64]bool, error) {
+	return a.leave.ApprovedLeaveEmployeeIDs(ctx, businessID, date)
 }
 
 func NewPresenceSource(core *hrcore.Module, leave *hrleave.Module) workspaces.PresenceSource {

@@ -205,10 +205,6 @@ func (r *Repository) GetBusinessByID(ctx context.Context, businessID int64) (str
 	return row.Name, row.OwnerID, nil
 }
 
-func (r *Repository) GetBusinessIDByOwnerID(ctx context.Context, ownerID int64) (int64, error) {
-	return r.queries.GetBusinessIDByOwnerID(ctx, ownerID)
-}
-
 // ─── Access Requests ────────────────────────────────────────────────────────
 
 func (r *Repository) CreateAccessRequest(ctx context.Context, businessID, userID int64, app string) error {

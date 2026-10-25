@@ -47,7 +47,7 @@ func newValuationFixture(t *testing.T, costPrice float64) valuationFixture {
 		if f.warehouse, err = DefaultLocationID(ctx, tx, ownerID); err != nil {
 			return err
 		}
-		f.branch, err = POSBranchLocationID(ctx, tx, ownerID, ownerID, 9001)
+		f.branch, err = POSBranchLocationID(ctx, tx, ownerID, 9001)
 		return err
 	})
 	return f
@@ -70,7 +70,6 @@ func (f valuationFixture) inTx(t *testing.T, fn func(tx *sql.Tx) error) {
 
 func (f valuationFixture) movement(location int64, entry EntryType, change float64) Movement {
 	return Movement{
-		OwnerID:    f.ownerID,
 		BusinessID: f.ownerID,
 		LocationID: location,
 		ProductID:  f.productID,
@@ -164,11 +163,11 @@ func TestTransferTxValuesUnlayeredStockAtCostPrice(t *testing.T) {
 }
 
 func TestTransferTxRejectsMismatchedLegs(t *testing.T) {
-	out := Movement{OwnerID: 1, LocationID: 1, ProductID: 1, Change: -2}
+	out := Movement{BusinessID: 1, LocationID: 1, ProductID: 1, Change: -2}
 	for name, in := range map[string]Movement{
-		"different product":  {OwnerID: 1, LocationID: 2, ProductID: 2, Change: 2},
-		"different quantity": {OwnerID: 1, LocationID: 2, ProductID: 1, Change: 3},
-		"same location":      {OwnerID: 1, LocationID: 1, ProductID: 1, Change: 2},
+		"different product":  {BusinessID: 1, LocationID: 2, ProductID: 2, Change: 2},
+		"different quantity": {BusinessID: 1, LocationID: 2, ProductID: 1, Change: 3},
+		"same location":      {BusinessID: 1, LocationID: 1, ProductID: 1, Change: 2},
 	} {
 		if _, _, err := TransferTx(context.Background(), nil, out, in); err == nil {
 			t.Errorf("%s: TransferTx accepted mismatched legs", name)

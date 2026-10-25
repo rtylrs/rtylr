@@ -37,21 +37,21 @@ func (a *BusinessAPI) GetBusiness(ctx context.Context, req *hubbusinessv1.GetBus
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	profileScopeID := req.GetBusinessId()
-	if profileScopeID > 0 {
-		// An explicit business id is attacker-controlled: verify membership
-		// before reading another tenant's profile.
-		if _, err := tenant.ResolveBusinessID(ctx, profileScopeID, device.User.UserID); err != nil {
-			return nil, onekiterrors.PermissionDenied()
-		}
-	} else {
-		profileScopeID = device.User.BusinessID
+	// The requested business, else the session's, else the user's default;
+	// each must be one the caller can still reach.
+	requested := req.GetBusinessId()
+	if requested <= 0 {
+		requested = device.User.BusinessID
 	}
-	if profileScopeID == 0 {
-		profileScopeID = device.User.UserID
+	businessID, err := tenant.ResolveBusinessID(ctx, requested, device.User.UserID)
+	if err != nil {
+		return nil, onekiterrors.PermissionDenied()
 	}
 
-	profile, err := a.Service.GetProfile(ctx, profileScopeID)
+	profile, err := a.Service.GetProfile(ctx, businessID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, onekiterrors.New(http.StatusNotFound, "Business not found")
+	}
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get business profile")
 	}

@@ -32,7 +32,6 @@ type WorkDayMemberMinutes struct {
 
 type WorkDayLineInput struct {
 	ID              int64
-	OwnerID         int64
 	BusinessID      int64
 	EmployeeID      int64
 	WorkDayID       int64
@@ -56,22 +55,22 @@ type WorkDayLineOwner struct {
 }
 
 type WorkDayLineStore interface {
-	ListWorkDayLines(ctx context.Context, ownerID, businessID, workDayID int64) ([]WorkDayLine, int32, error)
+	ListWorkDayLines(ctx context.Context, businessID, workDayID int64) ([]WorkDayLine, int32, error)
 	SumWorkDayLineMinutesByDayIDs(ctx context.Context, businessID int64, workDayIDs []int64) (map[int64]int32, error)
 	SumWorkDayLineMinutesByMemberAndTaskIDs(ctx context.Context, businessID int64, taskIDs []int64) ([]WorkDayMemberMinutes, error)
 	SumWorkDayLineMinutesByTaskIDs(ctx context.Context, businessID int64, taskIDs []int64) (map[int64]int64, error)
 	CreateWorkDayLine(ctx context.Context, input WorkDayLineInput) (WorkDayLine, error)
 	UpdateWorkDayLine(ctx context.Context, input WorkDayLineInput) (WorkDayLine, error)
-	GetWorkDayLineOwner(ctx context.Context, id, ownerID, businessID int64) (WorkDayLineOwner, bool, error)
-	DeleteWorkDayLine(ctx context.Context, id, ownerID, businessID int64) (bool, error)
+	GetWorkDayLineOwner(ctx context.Context, id, businessID int64) (WorkDayLineOwner, bool, error)
+	DeleteWorkDayLine(ctx context.Context, id, businessID int64) (bool, error)
 }
 
 type workDayLineStoreAdapter struct {
 	store WorkDayLineStore
 }
 
-func (a workDayLineStoreAdapter) ListWorkDayLines(ctx context.Context, ownerID, businessID, workDayID int64) ([]domain.WorkDayLine, int32, error) {
-	lines, total, err := a.store.ListWorkDayLines(ctx, ownerID, businessID, workDayID)
+func (a workDayLineStoreAdapter) ListWorkDayLines(ctx context.Context, businessID, workDayID int64) ([]domain.WorkDayLine, int32, error) {
+	lines, total, err := a.store.ListWorkDayLines(ctx, businessID, workDayID)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -118,13 +117,13 @@ func (a workDayLineStoreAdapter) UpdateWorkDayLine(ctx context.Context, input do
 	return workDayLineToDomain(line), nil
 }
 
-func (a workDayLineStoreAdapter) GetWorkDayLineOwner(ctx context.Context, id, ownerID, businessID int64) (domain.WorkDayLineOwner, bool, error) {
-	owner, found, err := a.store.GetWorkDayLineOwner(ctx, id, ownerID, businessID)
+func (a workDayLineStoreAdapter) GetWorkDayLineOwner(ctx context.Context, id, businessID int64) (domain.WorkDayLineOwner, bool, error) {
+	owner, found, err := a.store.GetWorkDayLineOwner(ctx, id, businessID)
 	return domain.WorkDayLineOwner{WorkDayID: owner.WorkDayID, EmployeeID: owner.EmployeeID, TaskID: owner.TaskID}, found, err
 }
 
-func (a workDayLineStoreAdapter) DeleteWorkDayLine(ctx context.Context, id, ownerID, businessID int64) (bool, error) {
-	return a.store.DeleteWorkDayLine(ctx, id, ownerID, businessID)
+func (a workDayLineStoreAdapter) DeleteWorkDayLine(ctx context.Context, id, businessID int64) (bool, error) {
+	return a.store.DeleteWorkDayLine(ctx, id, businessID)
 }
 
 func workDayLineToDomain(line WorkDayLine) domain.WorkDayLine {
@@ -139,7 +138,7 @@ func workDayLineToDomain(line WorkDayLine) domain.WorkDayLine {
 
 func workDayLineInputFromDomain(input domain.WorkDayLineInput) WorkDayLineInput {
 	return WorkDayLineInput{
-		ID: input.ID, OwnerID: input.OwnerID, BusinessID: input.BusinessID,
+		ID: input.ID, BusinessID: input.BusinessID,
 		EmployeeID: input.EmployeeID, WorkDayID: input.WorkDayID, Date: input.Date,
 		ProjectID: input.ProjectID, TaskID: input.TaskID, WorkTypeID: input.WorkTypeID,
 		WorkMode: input.WorkMode, Timezone: input.Timezone, Description: input.Description,

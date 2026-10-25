@@ -294,7 +294,7 @@ type repository interface {
 	AddTaskDependency(ctx context.Context, input domain.AddTaskDependencyInput) error
 	AddWorkspaceMember(ctx context.Context, input domain.AddWorkspaceMemberInput) error
 	ArchiveProject(ctx context.Context, id, businessID int64, purgeAt *time.Time) error
-	CountWorkTypeChildren(ctx context.Context, ownerID, businessID, parentID int64) (int64, error)
+	CountWorkTypeChildren(ctx context.Context, businessID, parentID int64) (int64, error)
 	CountWorkspacesByOwner(ctx context.Context, businessID int64) (int64, error)
 	CreateAttachment(ctx context.Context, input domain.TaskAttachmentInput) (int64, error)
 	CreateColumn(ctx context.Context, input domain.ProjectColumnInput) (int64, error)
@@ -324,8 +324,8 @@ type repository interface {
 	DeleteTask(ctx context.Context, taskID, businessID int64) error
 	DeleteTimeLog(ctx context.Context, id, userID int64) error
 	DeleteView(ctx context.Context, id, actorID, businessID int64) error
-	DeleteWorkDayLine(ctx context.Context, id, ownerID, businessID int64) (bool, error)
-	DeleteWorkType(ctx context.Context, id, ownerID, businessID int64) (bool, error)
+	DeleteWorkDayLine(ctx context.Context, id, businessID int64) (bool, error)
+	DeleteWorkType(ctx context.Context, id, businessID int64) (bool, error)
 	DeleteWorkspace(ctx context.Context, id, businessID int64) error
 	GetActivityByTask(ctx context.Context, taskID int64, limit int) ([]domain.TaskActivity, error)
 	GetAttachmentTaskID(ctx context.Context, attachmentID int64) (int64, error)
@@ -365,10 +365,10 @@ type repository interface {
 	GetTimeLogsByTask(ctx context.Context, taskID int64) ([]domain.TimeLog, error)
 	GetUserSettings(ctx context.Context, userID int64) (domain.UserSettings, error)
 	GetUserWorkspaceRole(ctx context.Context, workspaceID, userID int64) (string, error)
-	GetWorkDay(ctx context.Context, ownerID, businessID, employeeID int64, date string) (domain.WorkDay, bool, error)
+	GetWorkDay(ctx context.Context, businessID, employeeID int64, date string) (domain.WorkDay, bool, error)
 	GetWorkDayByID(ctx context.Context, id, businessID int64) (domain.WorkDay, bool, error)
-	GetWorkDayLineOwner(ctx context.Context, id, ownerID, businessID int64) (domain.WorkDayLineOwner, bool, error)
-	GetWorkType(ctx context.Context, id, ownerID, businessID int64) (domain.WorkType, error)
+	GetWorkDayLineOwner(ctx context.Context, id, businessID int64) (domain.WorkDayLineOwner, bool, error)
+	GetWorkType(ctx context.Context, id, businessID int64) (domain.WorkType, error)
 	GetWorkspaceOwner(ctx context.Context, workspaceID int64) (int64, error)
 	GetWorkspacesByOwner(ctx context.Context, businessID, limit, offset int64) ([]domain.Workspace, int64, error)
 	IsProjectMember(ctx context.Context, userID, projectID int64) bool
@@ -393,9 +393,9 @@ type repository interface {
 	ListViews(ctx context.Context, businessID, workspaceID, callerID, limit, offset int64) ([]domain.View, int64, error)
 	ListViewsV2(ctx context.Context, businessID, callerID, limit, offset int64) ([]domain.View, int64, error)
 	ListWorkDayLines(ctx context.Context, businessID, workDayID int64) ([]domain.WorkDayLine, int32, error)
-	ListWorkDays(ctx context.Context, ownerID, businessID, employeeID int64, from, to string, limit int32, offset int64) ([]domain.WorkDay, int64, error)
-	ListWorkDaysByEmployeeIDs(ctx context.Context, ownerID, businessID int64, employeeIDs []int64, from, to string, limit int32, offset int64) ([]domain.WorkDay, int64, error)
-	ListWorkTypes(ctx context.Context, ownerID, businessID int64, includeArchived bool) ([]domain.WorkType, error)
+	ListWorkDays(ctx context.Context, businessID, employeeID int64, from, to string, limit int32, offset int64) ([]domain.WorkDay, int64, error)
+	ListWorkDaysByEmployeeIDs(ctx context.Context, businessID int64, employeeIDs []int64, from, to string, limit int32, offset int64) ([]domain.WorkDay, int64, error)
+	ListWorkTypes(ctx context.Context, businessID int64, includeArchived bool) ([]domain.WorkType, error)
 	ListWorkspaceMembers(ctx context.Context, workspaceID, limit, offset int64) ([]domain.WorkspaceMember, int64, error)
 	LogActivity(ctx context.Context, taskID, userID int64, action, oldValue, newValue string) error
 	LookupUserByEmail(ctx context.Context, email string) (int64, bool, error)

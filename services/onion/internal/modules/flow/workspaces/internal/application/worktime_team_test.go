@@ -19,7 +19,6 @@ const (
 	teamWSOwnerID    int64 = 920001 // owns the workspace; RequireWorkspaceRole admits owners with no membership row
 	teamWSMemberID   int64 = 920002 // flow_workspace_members.role = member; has an hr_employees row and a work day
 	teamWSStrangerID int64 = 920003 // no membership on the workspace at all
-	teamOwnerID      int64 = 920100 // flow_work_days.owner_id, distinct from the HR tenant key
 	teamBusinessID   int64 = 920200 // HR owner_id and business_id, and flow_work_days.business_id
 )
 
@@ -75,7 +74,7 @@ func newTeamFixture(t *testing.T) (svc *application.Service, repo *infrastructur
 	})
 
 	if _, err := repo.UpsertWorkDay(ctx, domain.WorkDayInput{
-		OwnerID: teamOwnerID, BusinessID: teamBusinessID, EmployeeID: employeeID,
+		BusinessID: teamBusinessID, EmployeeID: employeeID,
 		Date: "2026-08-16", Timezone: "UTC", WorkMode: domain.WorkModeOnsite, LoggedBy: teamWSMemberID,
 	}); err != nil {
 		t.Fatalf("UpsertWorkDay: %v", err)
@@ -105,7 +104,7 @@ func TestListWorkDaysForWorkspace_OwnerSeesMemberDay(t *testing.T) {
 	svc, _, workspaceID := newTeamFixture(t)
 
 	days, total, err := svc.ListWorkDaysForWorkspace(
-		context.Background(), teamWSOwnerID, workspaceID, teamOwnerID, teamBusinessID,
+		context.Background(), teamWSOwnerID, workspaceID, teamBusinessID,
 		"2026-08-01", "2026-08-31", 50, 0,
 	)
 	if err != nil {
@@ -126,7 +125,7 @@ func TestListWorkDaysForWorkspace_StrangerDenied(t *testing.T) {
 	svc, _, workspaceID := newTeamFixture(t)
 
 	_, _, err := svc.ListWorkDaysForWorkspace(
-		context.Background(), teamWSStrangerID, workspaceID, teamOwnerID, teamBusinessID,
+		context.Background(), teamWSStrangerID, workspaceID, teamBusinessID,
 		"2026-08-01", "2026-08-31", 50, 0,
 	)
 	if !errors.Is(err, domain.ErrUnauthorized) {
@@ -140,7 +139,7 @@ func TestListWorkDaysForWorkspace_OrdinaryMemberDenied(t *testing.T) {
 	// The member can see their own day elsewhere, but the team view itself
 	// needs admin: an ordinary member should not see the whole roster.
 	_, _, err := svc.ListWorkDaysForWorkspace(
-		context.Background(), teamWSMemberID, workspaceID, teamOwnerID, teamBusinessID,
+		context.Background(), teamWSMemberID, workspaceID, teamBusinessID,
 		"2026-08-01", "2026-08-31", 50, 0,
 	)
 	if !errors.Is(err, domain.ErrUnauthorized) {
@@ -161,7 +160,7 @@ func TestWorkDaysForDate_ResolvesByEmployeeID(t *testing.T) {
 	}
 
 	byEmployeeID, err := svc.WorkDaysForDate(
-		context.Background(), teamOwnerID, teamBusinessID, []int64{employeeID, 999999999}, "2026-08-16",
+		context.Background(), teamBusinessID, []int64{employeeID, 999999999}, "2026-08-16",
 	)
 	if err != nil {
 		t.Fatalf("WorkDaysForDate: %v", err)
@@ -181,7 +180,7 @@ func TestWorkDaysForDate_ResolvesByEmployeeID(t *testing.T) {
 func TestWorkDaysForDate_EmptyEmployeeIDsReturnsEmptyMap(t *testing.T) {
 	svc, _, _ := newTeamFixture(t)
 
-	byEmployeeID, err := svc.WorkDaysForDate(context.Background(), teamOwnerID, teamBusinessID, nil, "2026-08-16")
+	byEmployeeID, err := svc.WorkDaysForDate(context.Background(), teamBusinessID, nil, "2026-08-16")
 	if err != nil {
 		t.Fatalf("WorkDaysForDate: %v", err)
 	}

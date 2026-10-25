@@ -14,8 +14,8 @@ const menuCacheTTL = 5 * time.Minute
 
 type repository interface {
 	List(ctx context.Context, businessID int64) ([]domain.MenuItem, error)
-	QuickCreate(ctx context.Context, ownerID, businessID int64, input domain.MenuItemInput) (int64, error)
-	Update(ctx context.Context, ownerID, businessID, id int64, input domain.MenuItemUpdateInput) error
+	QuickCreate(ctx context.Context, businessID int64, input domain.MenuItemInput) (int64, error)
+	Update(ctx context.Context, businessID, id int64, input domain.MenuItemUpdateInput) error
 }
 
 func (s *Service) ListPublic(ctx context.Context, businessID int64) ([]domain.MenuItem, error) {
@@ -34,12 +34,11 @@ func (s *Service) ListPublic(ctx context.Context, businessID int64) ([]domain.Me
 
 type Service struct {
 	repo           repository
-	owner          func(context.Context, int64) (int64, error)
 	onlineOrdering func(context.Context, int64) (bool, error)
 }
 
-func (s *Service) SetBusinessContext(owner func(context.Context, int64) (int64, error), onlineOrdering func(context.Context, int64) (bool, error)) {
-	s.owner, s.onlineOrdering = owner, onlineOrdering
+func (s *Service) SetOnlineOrdering(onlineOrdering func(context.Context, int64) (bool, error)) {
+	s.onlineOrdering = onlineOrdering
 }
 
 func NewService(_ context.Context, repo repository) *Service {
@@ -60,12 +59,8 @@ func (s *Service) List(ctx context.Context, businessID int64) ([]domain.MenuItem
 	)
 }
 
-func (s *Service) QuickCreate(ctx context.Context, ownerID, businessID int64, input domain.MenuItemInput) (int64, error) {
-	ownerID, err := s.BusinessOwnerID(ctx, ownerID, businessID)
-	if err != nil {
-		return 0, err
-	}
-	id, err := s.repo.QuickCreate(ctx, ownerID, businessID, input)
+func (s *Service) QuickCreate(ctx context.Context, businessID int64, input domain.MenuItemInput) (int64, error) {
+	id, err := s.repo.QuickCreate(ctx, businessID, input)
 	if err != nil {
 		return 0, err
 	}
@@ -74,23 +69,9 @@ func (s *Service) QuickCreate(ctx context.Context, ownerID, businessID int64, in
 }
 
 func (s *Service) Update(ctx context.Context, businessID, id int64, input domain.MenuItemUpdateInput) error {
-	ownerID, err := s.BusinessOwnerID(ctx, 0, businessID)
-	if err != nil {
-		return err
-	}
-	if err := s.repo.Update(ctx, ownerID, businessID, id, input); err != nil {
+	if err := s.repo.Update(ctx, businessID, id, input); err != nil {
 		return err
 	}
 	invalidateMenuScope(ctx, businessID)
 	return nil
-}
-
-func (s *Service) BusinessOwnerID(ctx context.Context, fallbackOwnerID, businessID int64) (int64, error) {
-	if businessID == 0 {
-		return fallbackOwnerID, nil
-	}
-	if s.owner == nil {
-		return 0, errors.New("business owner resolver is unavailable")
-	}
-	return s.owner(ctx, businessID)
 }

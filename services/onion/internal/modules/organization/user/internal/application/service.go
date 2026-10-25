@@ -61,7 +61,7 @@ type BusinessProvisioner interface {
 }
 
 type EmployeeProvisioner interface {
-	EnsureEmployeeForUser(ctx context.Context, ownerID, businessID, userID int64, firstName, lastName, email string) error
+	EnsureEmployeeForUser(ctx context.Context, businessID, userID int64, firstName, lastName, email string) error
 }
 
 func NewService(repo repository, googleClientID string) *Service {

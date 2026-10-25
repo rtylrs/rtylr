@@ -5,11 +5,11 @@ Run `make generate` before baseline build, vet, lint, and test commands.
 ## HR time-entry ownership
 
 `hr_time_entries.owner_id` is the business ID, matching `business_id`. This is
-the convention used by the HR time-entry writer and by Flow when it persists
-work-day lines into the HR table. Flow's separate `flow_work_days.owner_id`
-continues to identify the resolved account owner. Any cross-module read of
-`hr_time_entries` must scope by `business_id` and must not rely on `owner_id`
-alone.
+the convention used by the HR time-entry writer, and HR Time applies it when
+Flow persists work-day lines into the HR table, so Flow passes only the
+business ID. Flow's own work days, work types and day actions are keyed by
+`business_id` alone. Any cross-module read of `hr_time_entries` must scope by
+`business_id` and must not rely on `owner_id` alone.
 
 ## Migration safety
 

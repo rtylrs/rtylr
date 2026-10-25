@@ -450,7 +450,7 @@ func (r *Repository) reconcileStockTake(ctx context.Context, tx *sql.Tx, qtx *sq
 		// Set the location's on-hand to the physical count; stock_core ledgers
 		// the 'count' entry and syncs the scalar cache.
 		before, delta, serr := stock.SetLevelTx(ctx, tx, stock.Movement{
-			OwnerID:       businessID,
+			BusinessID:    businessID,
 			LocationID:    locID,
 			ProductID:     it.ProductID,
 			EntryType:     stock.EntryCount,

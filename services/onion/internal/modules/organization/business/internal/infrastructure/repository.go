@@ -22,48 +22,30 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) GetProfile(ctx context.Context, ownerID int64) (domain.BusinessProfile, error) {
-	var profile domain.BusinessProfile
-
-	if ownerID == 0 {
-		return profile, errors.New("ownerID must be non-zero")
+// GetProfile reads an active business's profile. An unknown or inactive
+// business returns sql.ErrNoRows.
+func (r *Repository) GetProfile(ctx context.Context, businessID int64) (domain.BusinessProfile, error) {
+	if businessID <= 0 {
+		return domain.BusinessProfile{}, sql.ErrNoRows
 	}
-
-	row, err := r.queries.GetBusinessProfileByBusiness(ctx, sqlc.GetBusinessProfileByBusinessParams{OwnerID: ownerID})
-	if err == nil {
-		profile.ID = row.ID
-		profile.Name = row.Name
-		profile.SiteName = row.SiteName
-		profile.LogoURL = sqlcString(row.LogoUrl)
-		profile.ContactEmail = row.ContactEmail
-		profile.ContactPhone = row.ContactNumber
-		profile.Currency = row.Currency
-		profile.Timezone = row.Timezone
-		profile.Plan = "free"
-		return profile, nil
+	row, err := r.queries.GetBusinessProfileByBusiness(ctx, businessID)
+	if err != nil {
+		if !errors.Is(err, sql.ErrNoRows) {
+			logger.Ctx(ctx).Error("Failed to get business profile", logger.Error(err))
+		}
+		return domain.BusinessProfile{}, err
 	}
-	if !errors.Is(err, sql.ErrNoRows) {
-		logger.Ctx(ctx).Error("Failed to get business profile", logger.Error(err))
-		return profile, err
-	}
-
-	cfg, err := r.queries.GetBusinessProfile(ctx, int32(ownerID)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		logger.Ctx(ctx).Error("Failed to get business profile", logger.Error(err))
-		return profile, err
-	}
-
-	profile.ID = ownerID
-	profile.Name = cfg.SiteName
-	profile.SiteName = cfg.SiteName
-	profile.LogoURL = cfg.LogoUrl
-	profile.ContactEmail = cfg.ContactEmail
-	profile.ContactPhone = cfg.ContactNumber
-	profile.Currency = "USD"
-	profile.Timezone = "UTC"
-	profile.Plan = "free"
-
-	return profile, nil
+	return domain.BusinessProfile{
+		ID:           row.ID,
+		Name:         row.Name,
+		SiteName:     row.SiteName,
+		LogoURL:      sqlcString(row.LogoUrl),
+		ContactEmail: row.ContactEmail,
+		ContactPhone: row.ContactNumber,
+		Currency:     row.Currency,
+		Timezone:     row.Timezone,
+		Plan:         "free",
+	}, nil
 }
 
 func (r *Repository) GetBusinessOwnerID(ctx context.Context, businessID int64) (int64, error) {

@@ -19,10 +19,10 @@ const ordersCacheTTL = 30 * time.Second
 
 const publicOrderTokenTTL = 30 * 24 * time.Hour
 
-// ownerTopic builds the wsbus topic for an owner without the reflection and
-// format-parsing overhead of fmt.Sprintf; it runs on every order mutation.
-func ownerTopic(ownerID int64) string {
-	return "owner:" + strconv.FormatInt(ownerID, 10)
+// businessTopic builds the wsbus topic for a business without the reflection
+// and format-parsing overhead of fmt.Sprintf; it runs on every order mutation.
+func businessTopic(businessID int64) string {
+	return "business:" + strconv.FormatInt(businessID, 10)
 }
 
 func invalidateOrderScope(ctx context.Context, ownerID int64) {
@@ -120,7 +120,7 @@ func (s *Service) UpdateTableStatus(ctx context.Context, ownerID, tableID int64,
 	}
 
 	wsbus.Publish(wsbus.Event{
-		Topic:    ownerTopic(ownerID),
+		Topic:    businessTopic(ownerID),
 		Type:     "pos:table:status",
 		EntityID: tableID,
 	})

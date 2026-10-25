@@ -327,7 +327,7 @@ func initializeJobModules(ctx context.Context) *jobModules {
 		Customers:         customersModule,
 		CRMSales:          crmsales.NewModule(ctx, db).WithMembershipReader(scopes.NewReader(db).IsBusinessUser),
 		PosGiftCards:      giftcards.NewModule(ctx, db),
-		Inventory:         inventory.NewModule(ctx, db).WithBusinessOwnerResolver(businessModule.GetBusinessOwnerID).WithPOSBranchOwnerReader(locations.NewModule(ctx, db).WithLocationLimitReader(scopes.NewReader(db).LocationLimit).StockBranchOwner),
+		Inventory:         inventory.NewModule(ctx, db).WithPOSBranchReader(locations.NewModule(ctx, db).WithLocationLimitReader(scopes.NewReader(db).LocationLimit).StockBranchExists),
 		Webhooks:          webhooksModule,
 		Accounts:          accountsModule,
 		HRCore:            hrCoreModule,

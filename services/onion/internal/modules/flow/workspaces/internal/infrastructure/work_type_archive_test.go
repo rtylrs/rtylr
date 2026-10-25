@@ -25,11 +25,9 @@ func TestDeletingAWorkTypeArchivesItInstead(t *testing.T) {
 	if !strings.Contains(body, "archived = FALSE") {
 		t.Errorf("DeleteWorkType does not exclude already-archived rows, so a repeat delete reports success:\n%s", body)
 	}
-	// Tenancy is unchanged and must stay that way.
-	for _, scope := range []string{"owner_id = ?", "business_id = ?"} {
-		if !strings.Contains(body, scope) {
-			t.Errorf("DeleteWorkType lost its %s scope:\n%s", scope, body)
-		}
+	// Work types belong to a business.
+	if !strings.Contains(body, "business_id = ?") {
+		t.Errorf("DeleteWorkType lost its business_id scope:\n%s", body)
 	}
 }
 

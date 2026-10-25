@@ -41,10 +41,9 @@ func (r *Repository) GetStaffByID(ctx context.Context, businessID, staffID int64
 	return &s, nil
 }
 
-func (r *Repository) EnsureStaffForUser(ctx context.Context, ownerID, businessID, userID int64, role string) error {
+func (r *Repository) EnsureStaffForUser(ctx context.Context, businessID, userID int64, role string) error {
 	userIDParam := sql.NullInt64{Int64: userID, Valid: true}
 	if err := r.queries.LinkStaffEmployeeForUser(ctx, sqlc.LinkStaffEmployeeForUserParams{
-		OwnerID:    ownerID,
 		BusinessID: businessID,
 		UserID:     userIDParam,
 	}); err != nil {
@@ -52,15 +51,13 @@ func (r *Repository) EnsureStaffForUser(ctx context.Context, ownerID, businessID
 	}
 	return r.queries.EnsureStaffForUser(ctx, sqlc.EnsureStaffForUserParams{
 		Role:       role,
-		OwnerID:    ownerID,
 		BusinessID: businessID,
 		UserID:     userIDParam,
 	})
 }
 
-func (r *Repository) DeleteStaffForUser(ctx context.Context, ownerID, businessID, userID int64) error {
+func (r *Repository) DeleteStaffForUser(ctx context.Context, businessID, userID int64) error {
 	return r.queries.DeleteStaffForUser(ctx, sqlc.DeleteStaffForUserParams{
-		OwnerID:    ownerID,
 		BusinessID: businessID,
 		UserID:     sql.NullInt64{Int64: userID, Valid: true},
 	})

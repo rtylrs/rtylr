@@ -56,12 +56,7 @@ func TestPaidOrderFactUpdatesERPInventoryOnce(t *testing.T) {
 	if stock() != 0 {
 		t.Fatal("POS transaction mutated ERP stock")
 	}
-	consumer := inventory.NewModule(ctx, db).WithBusinessOwnerResolver(func(_ context.Context, businessID int64) (int64, error) {
-		if businessID != testutil.BusinessID {
-			return 0, errors.New("foreign business")
-		}
-		return testutil.OwnerID, nil
-	}).WithPOSBranchOwnerReader(locations.NewModule(ctx, db).StockBranchOwner)
+	consumer := inventory.NewModule(ctx, db).WithPOSBranchReader(locations.NewModule(ctx, db).StockBranchExists)
 	dispatcher := eventbus.NewDispatcher(db, consumer).WithSources(pos.Facts(db))
 	if _, err := dispatcher.DispatchBatch(ctx); err != nil {
 		t.Fatal(err)

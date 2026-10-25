@@ -2,6 +2,8 @@ package application
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -16,18 +18,23 @@ func (s *Service) GetSubscriptionByBusiness(ctx context.Context, businessID int6
 	return &dto, nil
 }
 
-// GetSubscriptionForUser returns the subscription of the business the user
-// owns, preferring the one their session opens in. A user who owns no active
-// business has none: ErrRecordNotFound.
-func (s *Service) GetSubscriptionForUser(ctx context.Context, userID int64) (*SubscriptionDTO, error) {
-	businesses, err := s.repo.ListActiveBusinessesByOwner(ctx, userID)
+// GetSubscriptionForUser returns the subscription of a business the user
+// owns. businessID names it; without one the owner must have exactly one
+// active business (ErrOwnerHasSeveralBusinesses otherwise). A user who owns no
+// active business has none: ErrRecordNotFound.
+func (s *Service) GetSubscriptionForUser(ctx context.Context, userID, businessID int64) (*SubscriptionDTO, error) {
+	business, err := s.resolveBillingBusiness(ctx, userID, businessID)
+	if errors.Is(err, ErrNotOrganizationOwner) {
+		return nil, ErrRecordNotFound
+	}
 	if err != nil {
 		return nil, err
 	}
-	if len(businesses) == 0 {
+	sub, err := s.GetSubscriptionByBusiness(ctx, business.ID)
+	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrRecordNotFound
 	}
-	return s.GetSubscriptionByBusiness(ctx, businesses[0].ID)
+	return sub, err
 }
 
 // resolveBillingBusiness picks the business a console billing write applies

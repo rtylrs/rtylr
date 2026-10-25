@@ -19,8 +19,8 @@ type Module struct {
 	repository *moduleinfra.Repository
 }
 
-func (m *Module) SetCatalogBusinessContext(owner func(context.Context, int64) (int64, error), onlineOrdering func(context.Context, int64) (bool, error)) {
-	m.catalog.SetBusinessContext(owner, onlineOrdering)
+func (m *Module) SetCatalogOnlineOrdering(onlineOrdering func(context.Context, int64) (bool, error)) {
+	m.catalog.SetOnlineOrdering(onlineOrdering)
 }
 
 func NewModule(ctx context.Context, db *sql.DB) *Module {

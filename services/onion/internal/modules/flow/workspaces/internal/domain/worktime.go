@@ -64,7 +64,6 @@ type WorkDay struct {
 
 // WorkDayInput is an upsert of the day itself. The lines are separate.
 type WorkDayInput struct {
-	OwnerID      int64
 	BusinessID   int64
 	EmployeeID   int64
 	Date         string
@@ -105,7 +104,6 @@ type WorkDayLineOwner struct {
 // idempotent rather than a second entry.
 type WorkDayLineInput struct {
 	ID              int64
-	OwnerID         int64
 	BusinessID      int64
 	EmployeeID      int64
 	WorkDayID       int64
@@ -138,7 +136,6 @@ type WorkType struct {
 // WorkTypeInput creates or updates a node.
 type WorkTypeInput struct {
 	ID           int64
-	OwnerID      int64
 	BusinessID   int64
 	ParentID     int64
 	Name         string

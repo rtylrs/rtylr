@@ -21,8 +21,8 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(ctx, moduleinfra.NewRepository(db))}
 }
 
-func (m *Module) SetBusinessContext(owner func(context.Context, int64) (int64, error), onlineOrdering func(context.Context, int64) (bool, error)) {
-	m.service.SetBusinessContext(owner, onlineOrdering)
+func (m *Module) SetOnlineOrdering(onlineOrdering func(context.Context, int64) (bool, error)) {
+	m.service.SetOnlineOrdering(onlineOrdering)
 }
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {

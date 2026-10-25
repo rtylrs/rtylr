@@ -21,10 +21,9 @@ import (
 )
 
 type Module struct {
-	service              *application.Service
-	posStockService      *posstockapplication.Service
-	posStockRepository   *posstockinfra.Repository
-	resolveBusinessOwner func(context.Context, int64) (int64, error)
+	service            *application.Service
+	posStockService    *posstockapplication.Service
+	posStockRepository *posstockinfra.Repository
 }
 
 func NewModule(ctx context.Context, db *sql.DB) *Module {
@@ -34,12 +33,6 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 		posStockService:    posstockapplication.NewService(ctx, posRepo),
 		posStockRepository: posRepo,
 	}
-}
-
-func (m *Module) WithBusinessOwnerResolver(resolve func(context.Context, int64) (int64, error)) *Module {
-	m.resolveBusinessOwner = resolve
-	m.posStockRepository.WithBusinessOwnerResolver(resolve)
-	return m
 }
 
 func (m *Module) DispatchEvent(ctx context.Context, event eventbus.Event) error {
@@ -71,17 +64,6 @@ func (m *Module) DispatchEvent(ctx context.Context, event eventbus.Event) error 
 	if event.BusinessID <= 0 || event.SubjectID <= 0 {
 		return fmt.Errorf("order inventory event requires positive business and subject ids")
 	}
-	if m.resolveBusinessOwner == nil {
-		return fmt.Errorf("inventory event consumer has no business owner resolver")
-	}
-	ownerID, err := m.resolveBusinessOwner(ctx, event.BusinessID)
-	if err != nil {
-		return fmt.Errorf("resolve inventory owner for business %d: %w", event.BusinessID, err)
-	}
-	if ownerID <= 0 {
-		return fmt.Errorf("inventory owner for business %d is invalid", event.BusinessID)
-	}
-	change.OwnerID = ownerID
 	return m.posStockService.ApplyRecordedOrderInventory(ctx, change)
 }
 
@@ -104,7 +86,9 @@ func (m *Module) GetAnonymousRoutes() []string {
 	return []string{}
 }
 
-func (m *Module) WithPOSBranchOwnerReader(read func(context.Context, int64, int64) (int64, error)) *Module {
-	m.posStockRepository.WithBranchOwnerReader(read)
+// WithPOSBranchReader supplies the POS check that a branch belongs to a
+// business.
+func (m *Module) WithPOSBranchReader(exists func(context.Context, int64, int64) (bool, error)) *Module {
+	m.posStockRepository.WithBranchReader(exists)
 	return m
 }

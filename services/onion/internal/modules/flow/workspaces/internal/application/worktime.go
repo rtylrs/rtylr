@@ -24,8 +24,8 @@ var (
 // A day that has never been recorded is not an error: the caller renders an
 // empty day for that date, which is what most days look like before someone
 // fills them in.
-func (s *Service) GetWorkDay(ctx context.Context, ownerID, businessID, employeeID int64, date string) (domain.WorkDay, []domain.WorkDayLine, bool, error) {
-	day, found, err := s.repo.GetWorkDay(ctx, ownerID, businessID, employeeID, date)
+func (s *Service) GetWorkDay(ctx context.Context, businessID, employeeID int64, date string) (domain.WorkDay, []domain.WorkDayLine, bool, error) {
+	day, found, err := s.repo.GetWorkDay(ctx, businessID, employeeID, date)
 	if err != nil || !found {
 		return domain.WorkDay{}, nil, found, err
 	}
@@ -49,7 +49,7 @@ func (s *Service) UpsertWorkDay(ctx context.Context, input domain.WorkDayInput) 
 		return domain.WorkDay{}, ErrInvalidWorkMode
 	}
 
-	existing, found, err := s.repo.GetWorkDay(ctx, input.OwnerID, input.BusinessID, input.EmployeeID, input.Date)
+	existing, found, err := s.repo.GetWorkDay(ctx, input.BusinessID, input.EmployeeID, input.Date)
 	if err != nil {
 		return domain.WorkDay{}, err
 	}
@@ -168,7 +168,7 @@ func (s *Service) UpdateWorkDayLine(ctx context.Context, input domain.WorkDayLin
 	if input.ProjectID <= 0 {
 		return domain.WorkDayLine{}, ErrProjectRequired
 	}
-	owner, found, err := s.repo.GetWorkDayLineOwner(ctx, input.ID, input.OwnerID, input.BusinessID)
+	owner, found, err := s.repo.GetWorkDayLineOwner(ctx, input.ID, input.BusinessID)
 	if err != nil {
 		return domain.WorkDayLine{}, err
 	}
@@ -191,8 +191,8 @@ func (s *Service) UpdateWorkDayLine(ctx context.Context, input domain.WorkDayLin
 }
 
 // DeleteWorkDayLine removes a line.
-func (s *Service) DeleteWorkDayLine(ctx context.Context, id, ownerID, businessID, callerUserID int64) (bool, error) {
-	owner, found, err := s.repo.GetWorkDayLineOwner(ctx, id, ownerID, businessID)
+func (s *Service) DeleteWorkDayLine(ctx context.Context, id, businessID, callerUserID int64) (bool, error) {
+	owner, found, err := s.repo.GetWorkDayLineOwner(ctx, id, businessID)
 	if err != nil {
 		return false, err
 	}
@@ -201,14 +201,13 @@ func (s *Service) DeleteWorkDayLine(ctx context.Context, id, ownerID, businessID
 	}
 	if err := s.assertCallerOwnsWorkDay(ctx, domain.WorkDayLineInput{
 		ID:         id,
-		OwnerID:    ownerID,
 		BusinessID: businessID,
 		WorkDayID:  owner.WorkDayID,
 		LoggedBy:   callerUserID,
 	}, owner.EmployeeID); err != nil {
 		return false, err
 	}
-	deleted, err := s.repo.DeleteWorkDayLine(ctx, id, ownerID, businessID)
+	deleted, err := s.repo.DeleteWorkDayLine(ctx, id, businessID)
 	if err != nil || !deleted {
 		return deleted, err
 	}
@@ -226,13 +225,13 @@ func (s *Service) recalculateActualHours(ctx context.Context, taskID, actorID in
 }
 
 // ListWorkTypes returns the workspace's classification tree.
-func (s *Service) ListWorkTypes(ctx context.Context, ownerID, businessID int64, includeArchived bool) ([]domain.WorkType, error) {
-	return s.repo.ListWorkTypes(ctx, ownerID, businessID, includeArchived)
+func (s *Service) ListWorkTypes(ctx context.Context, businessID int64, includeArchived bool) ([]domain.WorkType, error) {
+	return s.repo.ListWorkTypes(ctx, businessID, includeArchived)
 }
 
 // CreateWorkType adds a node, holding the tree to two levels.
 func (s *Service) CreateWorkType(ctx context.Context, input domain.WorkTypeInput) (domain.WorkType, error) {
-	if err := s.assertParentIsTopLevel(ctx, input.OwnerID, input.BusinessID, input.ParentID); err != nil {
+	if err := s.assertParentIsTopLevel(ctx, input.BusinessID, input.ParentID); err != nil {
 		return domain.WorkType{}, err
 	}
 	return s.repo.CreateWorkType(ctx, input)
@@ -242,11 +241,11 @@ func (s *Service) CreateWorkType(ctx context.Context, input domain.WorkTypeInput
 // directions: a node may not be nested under a child, and a node that already
 // has children may not itself become one.
 func (s *Service) UpdateWorkType(ctx context.Context, input domain.WorkTypeInput) (domain.WorkType, error) {
-	if err := s.assertParentIsTopLevel(ctx, input.OwnerID, input.BusinessID, input.ParentID); err != nil {
+	if err := s.assertParentIsTopLevel(ctx, input.BusinessID, input.ParentID); err != nil {
 		return domain.WorkType{}, err
 	}
 	if input.ParentID > 0 {
-		children, err := s.repo.CountWorkTypeChildren(ctx, input.OwnerID, input.BusinessID, input.ID)
+		children, err := s.repo.CountWorkTypeChildren(ctx, input.BusinessID, input.ID)
 		if err != nil {
 			return domain.WorkType{}, err
 		}
@@ -258,16 +257,16 @@ func (s *Service) UpdateWorkType(ctx context.Context, input domain.WorkTypeInput
 }
 
 // DeleteWorkType removes a node.
-func (s *Service) DeleteWorkType(ctx context.Context, id, ownerID, businessID int64) (bool, error) {
-	return s.repo.DeleteWorkType(ctx, id, ownerID, businessID)
+func (s *Service) DeleteWorkType(ctx context.Context, id, businessID int64) (bool, error) {
+	return s.repo.DeleteWorkType(ctx, id, businessID)
 }
 
 // assertParentIsTopLevel rejects nesting under a node that is already a child.
-func (s *Service) assertParentIsTopLevel(ctx context.Context, ownerID, businessID, parentID int64) error {
+func (s *Service) assertParentIsTopLevel(ctx context.Context, businessID, parentID int64) error {
 	if parentID <= 0 {
 		return nil
 	}
-	parent, err := s.repo.GetWorkType(ctx, parentID, ownerID, businessID)
+	parent, err := s.repo.GetWorkType(ctx, parentID, businessID)
 	if err != nil {
 		return ErrWorkTypeNotFound
 	}
@@ -278,8 +277,8 @@ func (s *Service) assertParentIsTopLevel(ctx context.Context, ownerID, businessI
 }
 
 // ListWorkDays adds totals without loading each day's individual lines.
-func (s *Service) ListWorkDays(ctx context.Context, ownerID, businessID, employeeID int64, from, to string, limit int32, offset int64) ([]domain.WorkDay, int64, error) {
-	days, total, err := s.repo.ListWorkDays(ctx, ownerID, businessID, employeeID, from, to, limit, offset)
+func (s *Service) ListWorkDays(ctx context.Context, businessID, employeeID int64, from, to string, limit int32, offset int64) ([]domain.WorkDay, int64, error) {
+	days, total, err := s.repo.ListWorkDays(ctx, businessID, employeeID, from, to, limit, offset)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -306,11 +305,11 @@ const workspaceMemberCap = 500
 // business-wide "who's in today" presence view, which resolves its employee
 // list from hr_core rather than workspace membership - an employee with no
 // row for the date simply has no entry, not an error.
-func (s *Service) WorkDaysForDate(ctx context.Context, ownerID, businessID int64, employeeIDs []int64, date string) (map[int64]domain.WorkDay, error) {
+func (s *Service) WorkDaysForDate(ctx context.Context, businessID int64, employeeIDs []int64, date string) (map[int64]domain.WorkDay, error) {
 	if len(employeeIDs) == 0 {
 		return map[int64]domain.WorkDay{}, nil
 	}
-	days, _, err := s.repo.ListWorkDaysByEmployeeIDs(ctx, ownerID, businessID, employeeIDs, date, date, int32(len(employeeIDs)), 0) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+	days, _, err := s.repo.ListWorkDaysByEmployeeIDs(ctx, businessID, employeeIDs, date, date, int32(len(employeeIDs)), 0) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	if err != nil {
 		return nil, err
 	}
@@ -325,7 +324,7 @@ func (s *Service) WorkDaysForDate(ctx context.Context, ownerID, businessID int64
 // user_id. The two are resolved through hr_employees.user_id, and a member
 // with no matching HR record simply contributes no rows - not an error, the
 // same way an employee with no day yet contributes none.
-func (s *Service) ListWorkDaysForWorkspace(ctx context.Context, callerID, workspaceID, ownerID, businessID int64, from, to string, limit int32, offset int64) ([]domain.WorkDay, int64, error) {
+func (s *Service) ListWorkDaysForWorkspace(ctx context.Context, callerID, workspaceID, businessID int64, from, to string, limit int32, offset int64) ([]domain.WorkDay, int64, error) {
 	if err := s.RequireWorkspaceRole(ctx, workspaceID, callerID, businessID, domain.FlowRoleAdmin); err != nil {
 		return nil, 0, err
 	}
@@ -350,7 +349,7 @@ func (s *Service) ListWorkDaysForWorkspace(ctx context.Context, callerID, worksp
 		return nil, 0, err
 	}
 	employeeIDs := roster.EmployeeIDs()
-	days, total, err := s.repo.ListWorkDaysByEmployeeIDs(ctx, ownerID, businessID, employeeIDs, from, to, limit, offset)
+	days, total, err := s.repo.ListWorkDaysByEmployeeIDs(ctx, businessID, employeeIDs, from, to, limit, offset)
 	if err != nil {
 		return nil, 0, err
 	}

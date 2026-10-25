@@ -19,19 +19,19 @@ type hrMemberProvisioner struct {
 	staff *hrstaff.Module
 }
 
-func (p hrMemberProvisioner) EnsureEmployeeForUser(ctx context.Context, ownerID, businessID, userID int64, firstName, lastName, email string) error {
-	return p.core.EnsureEmployeeForUser(ctx, ownerID, businessID, userID, firstName, lastName, email)
+func (p hrMemberProvisioner) EnsureEmployeeForUser(ctx context.Context, businessID, userID int64, firstName, lastName, email string) error {
+	return p.core.EnsureEmployeeForUser(ctx, businessID, userID, firstName, lastName, email)
 }
 
-func (p hrMemberProvisioner) EnsureStaffForUser(ctx context.Context, ownerID, businessID, userID int64, role string) error {
-	return p.staff.EnsureStaffForUser(ctx, ownerID, businessID, userID, role)
+func (p hrMemberProvisioner) EnsureStaffForUser(ctx context.Context, businessID, userID int64, role string) error {
+	return p.staff.EnsureStaffForUser(ctx, businessID, userID, role)
 }
 
-func (p hrMemberProvisioner) DeleteProvisionedMember(ctx context.Context, ownerID, businessID, userID int64) error {
-	if err := p.staff.DeleteStaffForUser(ctx, ownerID, businessID, userID); err != nil {
+func (p hrMemberProvisioner) DeleteProvisionedMember(ctx context.Context, businessID, userID int64) error {
+	if err := p.staff.DeleteStaffForUser(ctx, businessID, userID); err != nil {
 		return err
 	}
-	return p.core.DeleteEmployeeForUser(ctx, ownerID, businessID, userID)
+	return p.core.DeleteEmployeeForUser(ctx, businessID, userID)
 }
 
 func TestInviteDoesNotAssignPermissionProfilesByDefault(t *testing.T) {
@@ -56,7 +56,7 @@ func TestInviteDoesNotAssignPermissionProfilesByDefault(t *testing.T) {
 		t.Fatalf("InviteUser: %v", err)
 	}
 	t.Cleanup(func() {
-		if err := provisioner.DeleteProvisionedMember(ctx, testutil.OwnerID, testutil.BusinessID, userID); err != nil {
+		if err := provisioner.DeleteProvisionedMember(ctx, testutil.BusinessID, userID); err != nil {
 			t.Errorf("clean up HR member: %v", err)
 		}
 		if err := repo.DeleteInvitedUser(ctx, testutil.BusinessID, userID); err != nil {
@@ -82,12 +82,17 @@ func TestInviteDoesNotAssignPermissionProfilesByDefault(t *testing.T) {
 		t.Fatalf("pending app licenses = %d, want 2", licenses)
 	}
 
+	// HR rows carry the business ID in owner_id.
+	var employeeOwnerID int64
 	var employeeFirstName, employeeLastName, employeeEmail string
 	if err := db.QueryRowContext(ctx, `
-		SELECT first_name, last_name, email FROM hr_employees
-		WHERE owner_id = ? AND business_id = ? AND user_id = ?`,
-		testutil.OwnerID, testutil.BusinessID, userID).Scan(&employeeFirstName, &employeeLastName, &employeeEmail); err != nil {
+		SELECT owner_id, first_name, last_name, email FROM hr_employees
+		WHERE business_id = ? AND user_id = ?`,
+		testutil.BusinessID, userID).Scan(&employeeOwnerID, &employeeFirstName, &employeeLastName, &employeeEmail); err != nil {
 		t.Fatalf("read HR employee provisioned by the HR owner: %v", err)
+	}
+	if employeeOwnerID != testutil.BusinessID {
+		t.Fatalf("HR employee owner_id = %d, want %d", employeeOwnerID, testutil.BusinessID)
 	}
 	if employeeFirstName != "Ada" || employeeLastName != "Lovelace" || employeeEmail != email {
 		t.Fatalf("HR employee = %q %q <%s>", employeeFirstName, employeeLastName, employeeEmail)
@@ -95,8 +100,8 @@ func TestInviteDoesNotAssignPermissionProfilesByDefault(t *testing.T) {
 	var staffCount int
 	if err := db.QueryRowContext(ctx, `
 		SELECT COUNT(*) FROM hr_staff
-		WHERE owner_id = ? AND business_id = ? AND user_id = ?`,
-		testutil.OwnerID, testutil.BusinessID, userID).Scan(&staffCount); err != nil {
+		WHERE owner_id = business_id AND business_id = ? AND user_id = ?`,
+		testutil.BusinessID, userID).Scan(&staffCount); err != nil {
 		t.Fatalf("count HR staff directory rows: %v", err)
 	}
 	if staffCount != 1 {

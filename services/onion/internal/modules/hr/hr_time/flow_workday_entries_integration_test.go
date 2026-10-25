@@ -16,7 +16,7 @@ func TestFlowWorkdayEntriesOwnTheirPersistenceAndScope(t *testing.T) {
 	module := hrtime.NewModule(ctx, db, nil)
 	clientKey := fmt.Sprintf("flow-entry-owner-%d", time.Now().UnixNano())
 	input := hrtime.FlowWorkdayEntryInput{
-		OwnerID: testutil.BusinessID, BusinessID: testutil.BusinessID,
+		BusinessID: testutil.BusinessID,
 		EmployeeID: 4101, WorkDayID: 992001, TaskID: 992002, Date: "2026-10-04",
 		DurationMinutes: 45, Description: "Flow entry", ClientKey: clientKey,
 		LoggedBy: testutil.OwnerID,
@@ -24,7 +24,7 @@ func TestFlowWorkdayEntriesOwnTheirPersistenceAndScope(t *testing.T) {
 	var createdID int64
 	t.Cleanup(func() {
 		if createdID > 0 {
-			if _, err := module.DeleteFlowWorkdayEntry(ctx, createdID, input.OwnerID, input.BusinessID); err != nil {
+			if _, err := module.DeleteFlowWorkdayEntry(ctx, createdID, input.BusinessID); err != nil {
 				t.Errorf("delete Flow entry fixture: %v", err)
 			}
 		}
@@ -59,11 +59,11 @@ func TestFlowWorkdayEntriesOwnTheirPersistenceAndScope(t *testing.T) {
 		t.Fatalf("retry = %+v, want original entry %+v", retried, created)
 	}
 
-	entries, total, err := module.ListFlowWorkdayEntries(ctx, input.OwnerID, input.BusinessID, input.WorkDayID)
+	entries, total, err := module.ListFlowWorkdayEntries(ctx, input.BusinessID, input.WorkDayID)
 	if err != nil || len(entries) != 1 || total != 45 {
 		t.Fatalf("list entries = %+v, total=%d, err=%v", entries, total, err)
 	}
-	otherBusinessEntries, _, err := module.ListFlowWorkdayEntries(ctx, input.OwnerID, testutil.OtherBusinessID, input.WorkDayID)
+	otherBusinessEntries, _, err := module.ListFlowWorkdayEntries(ctx, testutil.OtherBusinessID, input.WorkDayID)
 	if err != nil || len(otherBusinessEntries) != 0 {
 		t.Fatalf("cross-business list = %+v, err=%v", otherBusinessEntries, err)
 	}
@@ -75,7 +75,7 @@ func TestFlowWorkdayEntriesOwnTheirPersistenceAndScope(t *testing.T) {
 	if _, err := module.UpdateFlowWorkdayEntry(ctx, foreign); err == nil {
 		t.Fatal("cross-business update succeeded")
 	}
-	entries, total, err = module.ListFlowWorkdayEntries(ctx, input.OwnerID, input.BusinessID, input.WorkDayID)
+	entries, total, err = module.ListFlowWorkdayEntries(ctx, input.BusinessID, input.WorkDayID)
 	if err != nil || len(entries) != 1 || total != 45 || entries[0].Description != input.Description {
 		t.Fatalf("cross-business update changed entry: %+v, total=%d, err=%v", entries, total, err)
 	}
@@ -89,15 +89,15 @@ func TestFlowWorkdayEntriesOwnTheirPersistenceAndScope(t *testing.T) {
 		t.Fatalf("update = %+v, err=%v", updated, err)
 	}
 
-	owner, found, err := module.FlowWorkdayEntryOwner(ctx, created.ID, input.OwnerID, input.BusinessID)
+	owner, found, err := module.FlowWorkdayEntryOwner(ctx, created.ID, input.BusinessID)
 	if err != nil || !found || owner.WorkDayID != input.WorkDayID || owner.EmployeeID != input.EmployeeID {
 		t.Fatalf("entry owner = %+v, found=%t, err=%v", owner, found, err)
 	}
-	deleted, err := module.DeleteFlowWorkdayEntry(ctx, created.ID, input.OwnerID, testutil.OtherBusinessID)
+	deleted, err := module.DeleteFlowWorkdayEntry(ctx, created.ID, testutil.OtherBusinessID)
 	if err != nil || deleted {
 		t.Fatalf("cross-business delete = %t, err=%v", deleted, err)
 	}
-	deleted, err = module.DeleteFlowWorkdayEntry(ctx, created.ID, input.OwnerID, input.BusinessID)
+	deleted, err = module.DeleteFlowWorkdayEntry(ctx, created.ID, input.BusinessID)
 	if err != nil || !deleted {
 		t.Fatalf("owner delete = %t, err=%v", deleted, err)
 	}

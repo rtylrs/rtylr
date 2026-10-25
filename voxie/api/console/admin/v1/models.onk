@@ -148,10 +148,12 @@ message SetConsoleAdminResponse {
   message: string
 }
 
-/// Reads the subscription of the business the user owns, preferring the one
-/// their session opens in.
+/// Reads the subscription of a business the user owns. business_id may be
+/// omitted while the user owns exactly one active business; an owner of
+/// several must pass it, or the request is rejected.
 message GetUserSubscriptionRequest {
   user_id: int64 @gt(0) @encode(number)
+  business_id: int64? @query("business_id") @encode(number)
 }
 
 message GetUserSubscriptionResponse {

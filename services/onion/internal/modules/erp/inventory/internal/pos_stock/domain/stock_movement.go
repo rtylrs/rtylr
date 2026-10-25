@@ -41,7 +41,6 @@ type BranchInventory struct {
 
 type ReceiveStockInput struct {
 	BusinessID int64
-	OwnerID    int64
 	BranchID   int64
 	ProductID  int64
 	Quantity   float64
@@ -51,7 +50,6 @@ type ReceiveStockInput struct {
 
 type AdjustStockInput struct {
 	BusinessID int64
-	OwnerID    int64
 	BranchID   int64
 	ProductID  int64
 	Quantity   float64
@@ -61,7 +59,6 @@ type AdjustStockInput struct {
 
 type WasteStockInput struct {
 	BusinessID int64
-	OwnerID    int64
 	BranchID   int64
 	ProductID  int64
 	Quantity   float64
@@ -71,7 +68,6 @@ type WasteStockInput struct {
 
 type TransferStockInput struct {
 	BusinessID   int64
-	OwnerID      int64
 	FromBranchID int64
 	ToBranchID   int64
 	ProductID    int64
@@ -82,7 +78,6 @@ type TransferStockInput struct {
 
 type RecordedOrderInventory struct {
 	BusinessID   int64
-	OwnerID      int64
 	SourceType   string
 	SourceID     int64
 	LocationKind string

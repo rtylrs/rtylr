@@ -24,7 +24,7 @@ LIMIT 500
 FOR UPDATE;
 
 -- name: GetStoreOrderStatus :one
-SELECT owner_id, status, total FROM store_orders WHERE business_id = ? AND id = ? FOR UPDATE;
+SELECT status, total FROM store_orders WHERE business_id = ? AND id = ? FOR UPDATE;
 
 -- name: CreateStoreOrder :execresult
 INSERT INTO store_orders (owner_id, business_id, customer_email, customer_name, customer_phone, status, subtotal, tax, shipping_cost, total, shipping_address, notes)
@@ -42,7 +42,7 @@ WHERE business_id = ? AND id = ?;
 -- name: GetStoreProductPricing :one
 SELECT name, sale_price, tax_rate, track_inventory
 FROM erp_products
-WHERE owner_id = ? AND id = ? AND is_active = TRUE;
+WHERE business_id = ? AND id = ? AND is_active = TRUE;
 
 -- name: ListStoreOrdersPaginated :many
 SELECT id, owner_id, business_id, customer_email, customer_name, customer_phone, status, subtotal, tax, shipping_cost, total, shipping_address, notes, created_at, updated_at

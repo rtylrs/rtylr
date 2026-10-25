@@ -33,7 +33,6 @@ func setupRoutes(ctx context.Context, mux *stdhttp.ServeMux) []http.MiddlewareFu
 	// workspace/project membership checks. The rules:
 	//
 	//   user:<id>        → caller must be that user
-	//   owner:<id>       → caller must own or belong to that owner account
 	//   business:<id>    → caller must belong to that business
 	//   workspace:<id>   → caller must belong to the workspace
 	//   project:<id>     → caller must be a project or workspace member
@@ -55,8 +54,6 @@ func setupRoutes(ctx context.Context, mux *stdhttp.ServeMux) []http.MiddlewareFu
 		switch scope {
 		case "user":
 			return id == userID
-		case "owner":
-			return teamSvc.CanAccessOwner(ctx, userID, id)
 		case "business":
 			// Workspace-removal topic: project lifecycle events fan out here.
 			// The authorizer only gets a user id, so membership resolves via

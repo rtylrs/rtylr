@@ -297,7 +297,7 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 		for _, receipt := range receipts {
 			unitCost := receipt.unitCost
 			before, after, merr := stock.ApplyMovementTx(ctx, tx, stock.Movement{
-				OwnerID:       businessID,
+				BusinessID:    businessID,
 				LocationID:    locID,
 				ProductID:     receipt.productID,
 				EntryType:     stock.EntryPurchase,

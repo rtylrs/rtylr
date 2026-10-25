@@ -18,15 +18,15 @@ func TestEnsureEmployeeForUserOwnsProvisioningAndTerminationReads(t *testing.T) 
 	email := fmt.Sprintf("hr-owner-%d@example.test", userID)
 
 	t.Cleanup(func() {
-		if err := repo.DeleteEmployeeForUser(context.Background(), testutil.OwnerID, testutil.BusinessID, userID); err != nil {
+		if err := repo.DeleteEmployeeForUser(context.Background(), testutil.BusinessID, userID); err != nil {
 			t.Errorf("delete employee: %v", err)
 		}
 	})
 
-	if err := repo.EnsureEmployeeForUser(ctx, testutil.OwnerID, testutil.BusinessID, userID, "Ada", "Lovelace", email); err != nil {
+	if err := repo.EnsureEmployeeForUser(ctx, testutil.BusinessID, userID, "Ada", "Lovelace", email); err != nil {
 		t.Fatalf("ensure employee: %v", err)
 	}
-	if err := repo.EnsureEmployeeForUser(ctx, testutil.OwnerID, testutil.BusinessID, userID, "Grace", "Hopper", "changed@example.test"); err != nil {
+	if err := repo.EnsureEmployeeForUser(ctx, testutil.BusinessID, userID, "Grace", "Hopper", "changed@example.test"); err != nil {
 		t.Fatalf("ensure employee a second time: %v", err)
 	}
 

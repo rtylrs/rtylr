@@ -38,7 +38,7 @@ type UserProfile struct {
 }
 
 type EmployeeProvisioner interface {
-	EnsureEmployeeForUser(ctx context.Context, ownerID, businessID, userID int64, firstName, lastName, email string) error
+	EnsureEmployeeForUser(ctx context.Context, businessID, userID int64, firstName, lastName, email string) error
 }
 
 type userTokenValidator struct {

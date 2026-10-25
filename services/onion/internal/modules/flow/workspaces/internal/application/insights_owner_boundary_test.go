@@ -62,7 +62,7 @@ func TestGetInsightsCombinesOwnerAggregatesAndProfiles(t *testing.T) {
 
 	clientKey := fmt.Sprintf("insights-time-%d", time.Now().UnixNano())
 	line, err := hrTime.CreateWorkDayLine(ctx, flowworkspaces.WorkDayLineInput{
-		OwnerID: testutil.BusinessID, BusinessID: testutil.BusinessID,
+		BusinessID: testutil.BusinessID,
 		EmployeeID: testutil.OwnerID, WorkDayID: taskID, Date: "2035-01-01",
 		ProjectID: projectID, TaskID: taskID, DurationMinutes: 30,
 		ClientKey: clientKey, LoggedBy: testutil.OwnerID,
@@ -71,7 +71,7 @@ func TestGetInsightsCombinesOwnerAggregatesAndProfiles(t *testing.T) {
 		t.Fatalf("create HR-owned workday line: %v", err)
 	}
 	t.Cleanup(func() {
-		if _, err := hrTime.DeleteWorkDayLine(ctx, line.ID, testutil.BusinessID, testutil.BusinessID); err != nil {
+		if _, err := hrTime.DeleteWorkDayLine(ctx, line.ID, testutil.BusinessID); err != nil {
 			t.Errorf("delete HR-owned workday line: %v", err)
 		}
 	})

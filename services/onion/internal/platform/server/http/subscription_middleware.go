@@ -49,6 +49,10 @@ func SubscriptionEnforcementMiddleware(read SubscriptionAccessReader, accessPoli
 			}
 
 			businessID, err := tenant.ActiveBusinessID(r.Context(), authUser.BusinessID)
+			if errors.Is(err, tenant.ErrNoBusinessScope) {
+				writeSubscriptionError(r.Context(), w, http.StatusForbidden, "No active business for this session")
+				return
+			}
 			if err != nil {
 				writeSubscriptionError(r.Context(), w, http.StatusServiceUnavailable, "Subscription status is temporarily unavailable")
 				return

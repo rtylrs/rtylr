@@ -54,7 +54,7 @@ func (h *GetHRConfigHandler) Serve(ctx context.Context, _ *GetHRConfigRequest) (
 		return GetHRConfigResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	cfg, setupErr := h.Service.GetHRConfig(ctx, device.User.UserID)
+	cfg, setupErr := h.Service.GetHRConfig(ctx, businessID)
 	setupNotFound := errors.Is(setupErr, domain.ErrConfigNotFound)
 	if setupErr != nil && !errors.Is(setupErr, domain.ErrConfigNotFound) {
 		logger.Ctx(ctx).Error("failed to get hr setup config", logger.Any("owner_id", device.User.UserID), logger.Error(setupErr))

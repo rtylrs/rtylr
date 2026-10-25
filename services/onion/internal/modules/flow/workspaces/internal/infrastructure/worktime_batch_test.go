@@ -27,28 +27,28 @@ func TestWorkspaces_SumWorkDayLineMinutesByDayIDs_ReturnsEachDayTotal(t *testing
 
 	t.Cleanup(func() {
 		if _, err := db.ExecContext(ctx,
-			"DELETE FROM hr_time_entries WHERE owner_id = ? AND business_id = ? AND client_key IN (?, ?, ?)",
-			testutil.OwnerID, testutil.BusinessID, clientKeyA1, clientKeyA2, clientKeyB1,
+			"DELETE FROM hr_time_entries WHERE business_id = ? AND client_key IN (?, ?, ?)",
+			testutil.BusinessID, clientKeyA1, clientKeyA2, clientKeyB1,
 		); err != nil {
 			t.Errorf("delete test time entries: %v", err)
 		}
 		if _, err := db.ExecContext(ctx,
-			"DELETE FROM flow_work_days WHERE owner_id = ? AND business_id = ? AND employee_id IN (?, ?)",
-			testutil.OwnerID, testutil.BusinessID, employeeA, employeeB,
+			"DELETE FROM flow_work_days WHERE business_id = ? AND employee_id IN (?, ?)",
+			testutil.BusinessID, employeeA, employeeB,
 		); err != nil {
 			t.Errorf("delete test work days: %v", err)
 		}
 	})
 
 	dayA, err := repo.UpsertWorkDay(ctx, domain.WorkDayInput{
-		OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, EmployeeID: employeeA,
+		BusinessID: testutil.BusinessID, EmployeeID: employeeA,
 		Date: dateA, Timezone: "UTC", WorkMode: "onsite", LoggedBy: testutil.OwnerID,
 	})
 	if err != nil {
 		t.Fatalf("UpsertWorkDay day A: %v", err)
 	}
 	dayB, err := repo.UpsertWorkDay(ctx, domain.WorkDayInput{
-		OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, EmployeeID: employeeB,
+		BusinessID: testutil.BusinessID, EmployeeID: employeeB,
 		Date: dateB, Timezone: "UTC", WorkMode: "onsite", LoggedBy: testutil.OwnerID,
 	})
 	if err != nil {
@@ -56,9 +56,9 @@ func TestWorkspaces_SumWorkDayLineMinutesByDayIDs_ReturnsEachDayTotal(t *testing
 	}
 
 	for _, line := range []domain.WorkDayLineInput{
-		{OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, EmployeeID: employeeA, WorkDayID: dayA.ID, Date: dateA, DurationMinutes: 45, ClientKey: clientKeyA1, LoggedBy: testutil.OwnerID},
-		{OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, EmployeeID: employeeA, WorkDayID: dayA.ID, Date: dateA, DurationMinutes: 30, ClientKey: clientKeyA2, LoggedBy: testutil.OwnerID},
-		{OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, EmployeeID: employeeB, WorkDayID: dayB.ID, Date: dateB, DurationMinutes: 90, ClientKey: clientKeyB1, LoggedBy: testutil.OwnerID},
+		{BusinessID: testutil.BusinessID, EmployeeID: employeeA, WorkDayID: dayA.ID, Date: dateA, DurationMinutes: 45, ClientKey: clientKeyA1, LoggedBy: testutil.OwnerID},
+		{BusinessID: testutil.BusinessID, EmployeeID: employeeA, WorkDayID: dayA.ID, Date: dateA, DurationMinutes: 30, ClientKey: clientKeyA2, LoggedBy: testutil.OwnerID},
+		{BusinessID: testutil.BusinessID, EmployeeID: employeeB, WorkDayID: dayB.ID, Date: dateB, DurationMinutes: 90, ClientKey: clientKeyB1, LoggedBy: testutil.OwnerID},
 	} {
 		if _, err := repo.CreateWorkDayLine(ctx, line); err != nil {
 			t.Fatalf("CreateWorkDayLine %s: %v", line.ClientKey, err)

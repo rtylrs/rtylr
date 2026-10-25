@@ -42,10 +42,11 @@ const (
 	EntryOpening     EntryType = "opening"
 )
 
-// Movement describes one signed stock change at a single location.
+// Movement describes one signed stock change at a single location. ERP rows
+// carry the business ID in owner_id as well as business_id, so BusinessID
+// fills both.
 type Movement struct {
-	OwnerID       int64
-	BusinessID    int64 // denormalized tenant id; defaults to OwnerID for legacy callers
+	BusinessID    int64
 	LocationID    int64
 	ProductID     int64
 	EntryType     EntryType
@@ -65,13 +66,6 @@ type Movement struct {
 
 func fmtQty(v float64) string { return strconv.FormatFloat(v, 'f', -1, 64) }
 
-func movementBusinessID(m Movement) int64 {
-	if m.BusinessID != 0 {
-		return m.BusinessID
-	}
-	return m.OwnerID
-}
-
 func parseQty(ctx context.Context, s string) (float64, error) {
 	if s == "" {
 		return 0, nil
@@ -88,13 +82,13 @@ func queries(tx DBTX) *stocksqlc.Queries {
 	return stocksqlc.New(tx)
 }
 
-// DefaultLocationID returns the tenant's default warehouse location, creating a
-// native one on first use. Concurrency-safe via the (owner_id, source_table,
-// source_id) unique key on stock_locations.
-func DefaultLocationID(ctx context.Context, tx DBTX, ownerID int64) (int64, error) {
+// DefaultLocationID returns the business's default warehouse location, creating
+// a native one on first use. Concurrency-safe via the (owner_id, source_table,
+// source_id) unique key on stock_locations, where owner_id is the business ID.
+func DefaultLocationID(ctx context.Context, tx DBTX, businessID int64) (int64, error) {
 	q := queries(tx)
 
-	id, err := q.GetDefaultWarehouseLocationID(ctx, ownerID)
+	id, err := q.GetDefaultWarehouseLocationID(ctx, stocksqlc.GetDefaultWarehouseLocationIDParams{OwnerID: businessID, BusinessID: businessID})
 	if err == nil {
 		return id, nil
 	}
@@ -104,27 +98,27 @@ func DefaultLocationID(ctx context.Context, tx DBTX, ownerID int64) (int64, erro
 
 	// Insert-or-ignore on the unique key, then re-read (handles a concurrent creator).
 	if err := q.InsertDefaultWarehouseLocation(ctx, stocksqlc.InsertDefaultWarehouseLocationParams{
-		OwnerID:    ownerID,
-		BusinessID: ownerID,
+		OwnerID:    businessID,
+		BusinessID: businessID,
 	}); err != nil {
 		return 0, fmt.Errorf("stock_core: create default location: %w", err)
 	}
-	id, err = q.GetDefaultWarehouseLocationID(ctx, ownerID)
+	id, err = q.GetDefaultWarehouseLocationID(ctx, stocksqlc.GetDefaultWarehouseLocationIDParams{OwnerID: businessID, BusinessID: businessID})
 	if err != nil {
 		return 0, fmt.Errorf("stock_core: re-read default location: %w", err)
 	}
 	return id, nil
 }
 
-// POSBranchLocationID maps a branch already validated by the POS owner API.
-// The caller performs that read before opening its ERP transaction.
-func POSBranchLocationID(ctx context.Context, tx DBTX, ownerID, businessID, posLocationID int64) (int64, error) {
+// POSBranchLocationID maps a branch the caller already confirmed belongs to
+// businessID; it does that read before opening its ERP transaction.
+func POSBranchLocationID(ctx context.Context, tx DBTX, businessID, posLocationID int64) (int64, error) {
 	if posLocationID == 0 {
-		return DefaultLocationID(ctx, tx, ownerID)
+		return DefaultLocationID(ctx, tx, businessID)
 	}
 	q := queries(tx)
 	id, err := q.GetPOSBranchLocationID(ctx, stocksqlc.GetPOSBranchLocationIDParams{
-		OwnerID:    ownerID,
+		OwnerID:    businessID,
 		BusinessID: businessID,
 		SourceID:   posLocationID,
 	})
@@ -136,14 +130,14 @@ func POSBranchLocationID(ctx context.Context, tx DBTX, ownerID, businessID, posL
 	}
 
 	if err = q.InsertPOSBranchLocation(ctx, stocksqlc.InsertPOSBranchLocationParams{
-		OwnerID:    ownerID,
+		OwnerID:    businessID,
 		BusinessID: businessID,
 		SourceID:   posLocationID,
 	}); err != nil {
 		return 0, fmt.Errorf("stock_core: create pos branch location: %w", err)
 	}
 	id, err = q.GetPOSBranchLocationID(ctx, stocksqlc.GetPOSBranchLocationIDParams{
-		OwnerID:    ownerID,
+		OwnerID:    businessID,
 		BusinessID: businessID,
 		SourceID:   posLocationID,
 	})
@@ -154,31 +148,31 @@ func POSBranchLocationID(ctx context.Context, tx DBTX, ownerID, businessID, posL
 }
 
 // WarehouseLocationID resolves (creating on first use) the stock_locations row
-// for an erp_warehouse, scoped to ownerID, with the same fail-closed owner
-// guard on ERP-owned warehouses. Zero or unknown warehouse IDs are rejected;
-// callers must explicitly request DefaultLocationID when default routing is
-// intended.
-func WarehouseLocationID(ctx context.Context, tx DBTX, ownerID, warehouseID int64) (int64, error) {
+// for an erp_warehouse of businessID, refusing a warehouse of any other
+// business. Zero or unknown warehouse IDs are rejected; callers must
+// explicitly request DefaultLocationID when default routing is intended.
+func WarehouseLocationID(ctx context.Context, tx DBTX, businessID, warehouseID int64) (int64, error) {
 	if warehouseID <= 0 {
 		return 0, fmt.Errorf("%w: %d", ErrWarehouseNotFound, warehouseID)
 	}
 
 	q := queries(tx)
 
-	whOwner, err := q.GetWarehouseOwnerID(ctx, warehouseID)
+	whBusiness, err := q.GetWarehouseBusinessID(ctx, warehouseID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return 0, fmt.Errorf("%w: %d", ErrWarehouseNotFound, warehouseID)
 	}
 	if err != nil {
-		return 0, fmt.Errorf("stock_core: read warehouse owner: %w", err)
+		return 0, fmt.Errorf("stock_core: read warehouse business: %w", err)
 	}
-	if whOwner != ownerID {
-		return 0, fmt.Errorf("stock_core: warehouse %d belongs to owner %d, not %d (refusing to attribute stock)", warehouseID, whOwner, ownerID)
+	if whBusiness != businessID {
+		return 0, fmt.Errorf("stock_core: warehouse %d belongs to business %d, not %d (refusing to attribute stock)", warehouseID, whBusiness, businessID)
 	}
 
 	id, err := q.GetWarehouseLocationID(ctx, stocksqlc.GetWarehouseLocationIDParams{
-		OwnerID:  ownerID,
-		SourceID: warehouseID,
+		OwnerID:    businessID,
+		BusinessID: businessID,
+		SourceID:   warehouseID,
 	})
 	if err == nil {
 		return id, nil
@@ -188,15 +182,16 @@ func WarehouseLocationID(ctx context.Context, tx DBTX, ownerID, warehouseID int6
 	}
 
 	if err = q.InsertWarehouseLocation(ctx, stocksqlc.InsertWarehouseLocationParams{
-		OwnerID:    ownerID,
-		BusinessID: ownerID,
+		OwnerID:    businessID,
+		BusinessID: businessID,
 		ID:         warehouseID,
 	}); err != nil {
 		return 0, fmt.Errorf("stock_core: create warehouse location: %w", err)
 	}
 	id, err = q.GetWarehouseLocationID(ctx, stocksqlc.GetWarehouseLocationIDParams{
-		OwnerID:  ownerID,
-		SourceID: warehouseID,
+		OwnerID:    businessID,
+		BusinessID: businessID,
+		SourceID:   warehouseID,
 	})
 	if err != nil {
 		return 0, fmt.Errorf("stock_core: re-read warehouse location: %w", err)

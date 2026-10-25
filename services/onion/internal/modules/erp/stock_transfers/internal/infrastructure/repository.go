@@ -369,13 +369,13 @@ func (r *Repository) receiveTransfer(ctx context.Context, businessID, id int64, 
 	for _, productID := range productIDs {
 		qty := quantities[productID]
 		out := stock.Movement{
-			OwnerID: businessID, LocationID: fromLoc, ProductID: productID,
+			BusinessID: businessID, LocationID: fromLoc, ProductID: productID,
 			EntryType: stock.EntryTransferOut, Change: -qty,
 			ReferenceID: &id, ReferenceType: "stock_transfer", TransferGroup: &group,
 			Channel: "erp", Note: "stock transfer",
 		}
 		in := stock.Movement{
-			OwnerID: businessID, LocationID: toLoc, ProductID: productID,
+			BusinessID: businessID, LocationID: toLoc, ProductID: productID,
 			EntryType: stock.EntryTransferIn, Change: qty,
 			ReferenceID: &id, ReferenceType: "stock_transfer", TransferGroup: &group,
 			Channel: "erp", Note: "stock transfer", AllowNegative: true,

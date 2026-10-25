@@ -212,12 +212,12 @@ func (m *Module) GetEmployeeUserID(ctx context.Context, businessID, employeeID i
 
 // EnsureEmployeeForUser provisions an employee from identity data supplied by
 // the module that owns the account or invitation.
-func (m *Module) EnsureEmployeeForUser(ctx context.Context, ownerID, businessID, userID int64, firstName, lastName, email string) error {
-	return m.service.EnsureEmployeeForUser(ctx, ownerID, businessID, userID, firstName, lastName, email)
+func (m *Module) EnsureEmployeeForUser(ctx context.Context, businessID, userID int64, firstName, lastName, email string) error {
+	return m.service.EnsureEmployeeForUser(ctx, businessID, userID, firstName, lastName, email)
 }
 
-func (m *Module) DeleteEmployeeForUser(ctx context.Context, ownerID, businessID, userID int64) error {
-	return m.service.DeleteEmployeeForUser(ctx, ownerID, businessID, userID)
+func (m *Module) DeleteEmployeeForUser(ctx context.Context, businessID, userID int64) error {
+	return m.service.DeleteEmployeeForUser(ctx, businessID, userID)
 }
 
 func (m *Module) ListTerminatedEmployees(ctx context.Context) ([]TerminatedEmployee, error) {
