@@ -31,6 +31,7 @@ type buddyStore interface {
 
 type buddyThreadOpener interface {
 	BuddyThread(ctx context.Context, businessID int64, userID int) (string, error)
+	BuddyLastPost(ctx context.Context, sessionID string, userID int) (time.Time, bool, error)
 }
 
 type BuddyAPI struct {
@@ -61,7 +62,11 @@ func (a *BuddyAPI) GetBuddyThread(ctx context.Context, _ *pb.GetBuddyThreadReque
 	if err != nil {
 		return nil, err
 	}
-	return &pb.GetBuddyThreadResponse{SessionId: sessionID}, nil
+	out := &pb.GetBuddyThreadResponse{SessionId: sessionID}
+	if at, ok, err := a.Threads.BuddyLastPost(ctx, sessionID, int(u)); err == nil && ok {
+		out.LastPostAt = stamp(at)
+	}
+	return out, nil
 }
 
 func routineProto(r buddy.Routine) *pb.BuddyRoutine {

@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { initTestI18nFrom } from '../../../test/i18nTestInstance';
 import type { ReactNode } from 'react';
@@ -22,7 +23,9 @@ vi.mock('@voxire/caret', () => ({
   useCaretStore: Object.assign(
     (selector: (state: unknown) => unknown) =>
       selector({
-        tabs: [{ id: 't', sessionId: store.sessionId, title: 'Chat' }],
+        tabs: [
+          { id: 't', sessionId: store.sessionId, title: 'Chat', messages: [], isStreaming: false },
+        ],
         activeTabId: 't',
       }),
     { getState: () => ({ newTab: vi.fn(), openChat: store.openChat }) }
@@ -69,12 +72,19 @@ vi.mock('./useCaretInstall', () => ({
   useCaretInstall: () => ({ canInstall: false, install: vi.fn() }),
 }));
 const buddy = vi.hoisted(() => ({ getBuddyThread: vi.fn() }));
+vi.mock('./BuddyPerch', () => ({ default: () => null }));
 vi.mock('./Buddy', () => ({
   BUDDY_SYSTEM_CONTEXT: 'You are Caret Buddy',
   buddyClient: buddy,
   default: () => <div>Routines drawer</div>,
 }));
-import CaretWorkspace from './CaretWorkspace';
+import CaretWorkspaceView from './CaretWorkspace';
+
+const CaretWorkspace = () => (
+  <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+    <CaretWorkspaceView />
+  </QueryClientProvider>
+);
 
 beforeAll(() => initTestI18nFrom(path.resolve(import.meta.dirname, '../../locales')));
 beforeEach(() => {
@@ -130,6 +140,31 @@ describe('Caret Buddy sidebar', () => {
     render(<CaretWorkspace />);
     await user.click(screen.getByRole('button', { name: 'Caret Buddy' }));
     expect(await screen.findByRole('alert')).toHaveTextContent("Couldn't open Caret Buddy");
+  });
+
+  it('flags a Buddy post you have not seen', async () => {
+    localStorage.clear();
+    store.sessionId = 'abc';
+    buddy.getBuddyThread.mockResolvedValue({
+      sessionId: 'buddy-2-1',
+      lastPostAt: new Date().toISOString(),
+    });
+    render(<CaretWorkspace />);
+    expect(
+      await screen.findByRole('status', { name: 'New message from Caret Buddy' })
+    ).toBeInTheDocument();
+  });
+
+  it('clears the flag once the Buddy chat is open', async () => {
+    localStorage.clear();
+    store.sessionId = 'buddy-2-1';
+    buddy.getBuddyThread.mockResolvedValue({
+      sessionId: 'buddy-2-1',
+      lastPostAt: new Date(Date.now() - 1000).toISOString(),
+    });
+    render(<CaretWorkspace />);
+    await screen.findByRole('button', { name: 'Routines' });
+    expect(screen.queryByRole('status', { name: 'New message from Caret Buddy' })).toBeNull();
   });
 
   it('closes the mobile sidebar when Buddy opens', async () => {

@@ -182,3 +182,9 @@ FROM conversation_messages
 WHERE session_id = ? AND user_id = ? AND role = 'user'
 ORDER BY created_at ASC, id ASC
 LIMIT 1;
+
+-- name: GetLatestAssistantMessageTime :one
+SELECT created_at FROM conversation_messages
+WHERE session_id = ? AND role = 'assistant'
+ORDER BY id DESC
+LIMIT 1;

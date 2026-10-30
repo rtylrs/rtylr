@@ -438,7 +438,21 @@
       "saveFailed": "Impossible d’enregistrer les réglages de Buddy.",
       "saved": "Réglages enregistrés.",
       "saving": "Enregistrement…",
-      "loading": "Chargement…"
+      "loading": "Chargement…",
+      "starterCheckIn": "Fais le point avec moi chaque soir sur ma journée",
+      "starterSupport": "Chaque matin à 9h, dis-moi ce qui demande de l’attention au support",
+      "starterInvoices": "Chaque vendredi après-midi, liste les factures impayées",
+      "starterWhat": "Que peux-tu faire pour moi ?",
+      "unread": "Nouveau message de Caret Buddy",
+      "look": "Apparence",
+      "colors": {
+        "ink": "Encre",
+        "tangerine": "Mandarine",
+        "sky": "Ciel",
+        "mint": "Menthe",
+        "grape": "Raisin",
+        "rose": "Rose"
+      }
     }
   }
 }

@@ -70,6 +70,11 @@ func (m *Module) BuddyThread(ctx context.Context, businessID int64, userID int) 
 	return m.memoryService.EnsureBuddyThread(ctx, businessID, userID, "Caret Buddy")
 }
 
+// BuddyLastPost is when the buddy last wrote in the person's buddy chat.
+func (m *Module) BuddyLastPost(ctx context.Context, sessionID string, userID int) (time.Time, bool, error) {
+	return m.memoryService.BuddyLastPost(ctx, sessionID, userID)
+}
+
 // RecentMessages returns the newest messages of a chat the person owns.
 func (m *Module) RecentMessages(ctx context.Context, sessionID string, userID, limit int) ([]ThreadMessage, error) {
 	messages, err := m.memoryService.RecentMessages(ctx, sessionID, userID, limit)

@@ -10,6 +10,8 @@ import type {
   BuddySettings,
   PutBuddySettingsRequest,
 } from '@voxire/voxie/hub/caret/v1/types';
+import BuddySprite from './BuddySprite';
+import { BUDDY_COLORS, useBuddyColor, type BuddyColor } from './useBuddyColor';
 import './buddy.css';
 
 export const buddyClient = createOneKitClient(BuddyServiceClient, 'dash');
@@ -118,6 +120,7 @@ export default function BuddyRoutines({
   const queryClient = useQueryClient();
   const closeRef = useRef<HTMLButtonElement>(null);
   const routinesKey = ['caret-buddy', scope, 'routines'];
+  const [color, setColor] = useBuddyColor(scope);
   const routines = useQuery({
     queryKey: routinesKey,
     queryFn: async () => (await buddyClient.listBuddyRoutines({})).routines ?? [],
@@ -166,6 +169,37 @@ export default function BuddyRoutines({
         </button>
       </header>
       <div className="buddy-drawer-body">
+        <section className="buddy-look" aria-label={t('common.caret.buddy.look')}>
+          <BuddySprite
+            size={52}
+            color={BUDDY_COLORS[color]}
+            pokeable
+            title={t('common.caret.buddy.title')}
+          />
+          <div>
+            <strong>{t('common.caret.buddy.look')}</strong>
+            <div
+              className="buddy-swatches"
+              role="radiogroup"
+              aria-label={t('common.caret.buddy.look')}
+            >
+              {(Object.keys(BUDDY_COLORS) as BuddyColor[]).map((name) => (
+                <button
+                  key={name}
+                  type="button"
+                  role="radio"
+                  aria-checked={color === name}
+                  aria-label={t(`common.caret.buddy.colors.${name}`)}
+                  title={t(`common.caret.buddy.colors.${name}`)}
+                  className="buddy-swatch"
+                  data-color={name}
+                  style={BUDDY_COLORS[name] ? { background: BUDDY_COLORS[name] } : undefined}
+                  onClick={() => setColor(name)}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
         <p className="buddy-note">{t('common.caret.buddy.routinesHint')}</p>
         {routines.isLoading && <p role="status">{t('common.caret.buddy.loading')}</p>}
         {routines.isError && (

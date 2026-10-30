@@ -1,0 +1,474 @@
+.buddy-sprite {
+  --bs-body: #ececea;
+  --bs-sclera: #131313;
+  --bs-pupil: #131313;
+  --bs-glint: #ffffff;
+  --bs-line: #131313;
+  --bs-cheek: #ff8a7a;
+  --bs-spark-on: #ffb347;
+  --bs-shadow: rgba(0, 0, 0, 0.55);
+  display: inline-block;
+  flex-shrink: 0;
+  overflow: visible;
+  vertical-align: middle;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+:root[data-theme='light'] .buddy-sprite {
+  --bs-body: #131313;
+  --bs-sclera: #ffffff;
+  --bs-pupil: #131313;
+  --bs-glint: #ffffff;
+  --bs-line: #ffffff;
+  --bs-spark-on: #f59e0b;
+  --bs-shadow: rgba(0, 0, 0, 0.16);
+}
+.buddy-sprite[data-tinted],
+:root[data-theme='light'] .buddy-sprite[data-tinted] {
+  --bs-body: var(--bs-tint);
+  --bs-sclera: #ffffff;
+  --bs-pupil: #131313;
+  --bs-glint: #ffffff;
+  --bs-cheek: #ffd1c7;
+  --bs-spark-on: #ffb347;
+}
+.buddy-sprite[data-pokeable] {
+  cursor: pointer;
+}
+.buddy-sprite g,
+.buddy-sprite ellipse,
+.buddy-sprite path,
+.buddy-sprite circle,
+.buddy-sprite text {
+  transform-box: fill-box;
+}
+
+.bs-blob {
+  fill: var(--bs-body);
+}
+.bs-shine {
+  fill: #ffffff;
+  opacity: 0.16;
+}
+:root[data-theme='light'] .bs-shine {
+  opacity: 0.12;
+}
+.bs-shadow {
+  fill: var(--bs-shadow);
+  opacity: 0.35;
+  transform-origin: center;
+}
+.bs-caret {
+  fill: none;
+  stroke: var(--bs-body);
+  stroke-width: 5.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform-origin: 50% 100%;
+  transition: stroke 0.3s ease;
+}
+.bs-sclera {
+  fill: var(--bs-sclera);
+}
+.bs-pupil {
+  fill: var(--bs-pupil);
+}
+.bs-glint {
+  fill: var(--bs-glint);
+}
+.bs-pupils {
+  transform: translate(var(--bs-px), var(--bs-py));
+  transition: transform 0.18s ease-out;
+}
+.bs-face {
+  transform: translate(var(--bs-fx), var(--bs-fy));
+  transition: transform 0.25s ease-out;
+}
+.bs-eyes {
+  transform-origin: center;
+  transition: transform 0.07s ease;
+}
+.buddy-sprite[data-blink] .bs-eyes {
+  transform: scaleY(0.08);
+}
+.bs-arcs,
+.bs-squint,
+.bs-smile {
+  fill: none;
+  stroke: var(--bs-line);
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.bs-arcs,
+.bs-squint {
+  stroke: var(--bs-sclera);
+  stroke-width: 4.2;
+  opacity: 0;
+}
+.bs-mouth {
+  fill: var(--bs-sclera);
+  opacity: 0;
+  transform-origin: center;
+}
+.bs-smile {
+  stroke: var(--bs-sclera);
+  stroke-width: 3;
+}
+.bs-cheek {
+  fill: var(--bs-cheek);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.bs-body {
+  transform-origin: 50% 100%;
+}
+.bs-hop {
+  transform-origin: 50% 100%;
+}
+.bs-dots circle,
+.bs-zzz path,
+.bs-ask {
+  opacity: 0;
+}
+.bs-dots circle {
+  fill: var(--bs-body);
+}
+.bs-zzz path {
+  fill: none;
+  stroke: var(--bs-body);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.bs-ask {
+  fill: var(--bs-body);
+  font:
+    700 24px/1 system-ui,
+    sans-serif;
+}
+
+/* Idle: breathe. */
+.buddy-sprite[data-mood='idle'] .bs-body,
+.buddy-sprite[data-mood='listening'] .bs-body,
+.buddy-sprite[data-mood='waiting'] .bs-body {
+  animation: bs-breathe 3.4s ease-in-out infinite;
+}
+@keyframes bs-breathe {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(1.025, 0.97);
+  }
+}
+
+/* Listening: leans in, attentive. */
+.buddy-sprite[data-mood='listening'] .bs-hop {
+  transform: rotate(-5deg) translateY(-1px);
+  transition: transform 0.25s ease;
+}
+.buddy-sprite[data-mood='listening'] .bs-caret {
+  stroke: var(--bs-spark-on);
+  transform: translateY(-2px);
+}
+
+/* Thinking: sways, spark glows, dots rise. */
+.buddy-sprite[data-mood='thinking'] .bs-body {
+  animation: bs-sway 1.6s ease-in-out infinite;
+}
+.buddy-sprite[data-mood='thinking'] .bs-caret,
+.buddy-sprite[data-mood='working'] .bs-caret {
+  stroke: var(--bs-spark-on);
+  animation: bs-pulse 0.9s ease-in-out infinite;
+}
+.buddy-sprite[data-mood='thinking'] .bs-dots circle {
+  animation: bs-dot 1.2s ease-in-out infinite;
+}
+.buddy-sprite[data-mood='thinking'] .bs-dots circle:nth-child(2) {
+  animation-delay: 0.18s;
+}
+.buddy-sprite[data-mood='thinking'] .bs-dots circle:nth-child(3) {
+  animation-delay: 0.36s;
+}
+.buddy-sprite[data-mood='thinking'] .bs-smile {
+  d: path('M46 72 L54 72');
+}
+@keyframes bs-sway {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(4deg);
+  }
+}
+@keyframes bs-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: translateY(-3px) scale(1.12);
+  }
+}
+@keyframes bs-dot {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+/* Working: busy little bounce while a tool runs. */
+.buddy-sprite[data-mood='working'] .bs-hop {
+  animation: bs-busy 0.42s ease-in-out infinite alternate;
+}
+@keyframes bs-busy {
+  from {
+    transform: translateY(0) scale(1.03, 0.97);
+  }
+  to {
+    transform: translateY(-4px) scale(0.98, 1.02);
+  }
+}
+
+/* Talking: mouth moves, gentle bob. */
+.buddy-sprite[data-mood='talking'] .bs-smile {
+  opacity: 0;
+}
+.buddy-sprite[data-mood='talking'] .bs-mouth {
+  opacity: 1;
+  animation: bs-talk 0.26s ease-in-out infinite alternate;
+}
+.buddy-sprite[data-mood='talking'] .bs-hop {
+  animation: bs-bob 0.52s ease-in-out infinite alternate;
+}
+@keyframes bs-talk {
+  from {
+    transform: scale(1, 0.25);
+  }
+  to {
+    transform: scale(0.9, 1.1);
+  }
+}
+@keyframes bs-bob {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-2.5px);
+  }
+}
+
+/* Waiting on the person: a question mark and a tilt. */
+.buddy-sprite[data-mood='waiting'] .bs-ask {
+  animation: bs-ask 1.6s ease-in-out infinite;
+}
+.buddy-sprite[data-mood='waiting'] .bs-hop {
+  transform: rotate(6deg);
+  transition: transform 0.3s ease;
+}
+@keyframes bs-ask {
+  0%,
+  100% {
+    opacity: 0.9;
+    transform: translateY(0) rotate(8deg);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-3px) rotate(-6deg);
+  }
+}
+
+/* Happy: hop with squash and stretch, eyes become arcs, cheeks blush. */
+.buddy-sprite[data-mood='happy'] .bs-hop {
+  animation: bs-hop 0.7s cubic-bezier(0.3, 0.6, 0.35, 1) 2;
+}
+.buddy-sprite[data-mood='happy'] .bs-body {
+  animation: bs-squash 0.7s ease-in-out 2;
+}
+.buddy-sprite[data-mood='happy'] .bs-shadow {
+  animation: bs-shadow 0.7s ease-in-out 2;
+}
+.buddy-sprite[data-mood='happy'] .bs-eyes,
+.buddy-sprite[data-mood='poked'] .bs-eyes {
+  opacity: 0;
+}
+.buddy-sprite[data-mood='happy'] .bs-arcs,
+.buddy-sprite[data-mood='happy'] .bs-cheek,
+.buddy-sprite[data-mood='poked'] .bs-cheek {
+  opacity: 1;
+}
+.buddy-sprite[data-mood='happy'] .bs-smile {
+  d: path('M43 70 Q50 78 57 70');
+}
+.buddy-sprite[data-mood='happy'] .bs-caret {
+  stroke: var(--bs-spark-on);
+}
+@keyframes bs-hop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  45% {
+    transform: translateY(-14px);
+  }
+}
+@keyframes bs-squash {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  12% {
+    transform: scale(1.12, 0.88);
+  }
+  45% {
+    transform: scale(0.94, 1.08);
+  }
+  88% {
+    transform: scale(1.1, 0.9);
+  }
+}
+@keyframes bs-shadow {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.35;
+  }
+  45% {
+    transform: scale(0.6);
+    opacity: 0.15;
+  }
+}
+
+/* Poked: squish and squeeze its eyes shut. */
+.buddy-sprite[data-mood='poked'] .bs-squint {
+  opacity: 1;
+}
+.buddy-sprite[data-mood='poked'] .bs-body {
+  animation: bs-poke 0.6s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.buddy-sprite[data-mood='poked'] .bs-smile {
+  d: path('M45 72 Q50 69 55 72');
+}
+@keyframes bs-poke {
+  0% {
+    transform: scale(1, 1);
+  }
+  20% {
+    transform: scale(1.18, 0.78);
+  }
+  50% {
+    transform: scale(0.92, 1.1);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+
+/* Sleepy: no routines yet. Eyes half shut, slow breath, z's. */
+.buddy-sprite[data-mood='sleepy'] .bs-eyes {
+  transform: scaleY(0.35);
+}
+.buddy-sprite[data-mood='sleepy'] .bs-body {
+  animation: bs-breathe 5s ease-in-out infinite;
+}
+.buddy-sprite[data-mood='sleepy'] .bs-zzz path {
+  animation: bs-z 3s ease-in-out infinite;
+}
+.buddy-sprite[data-mood='sleepy'] .bs-zzz path:nth-child(2) {
+  animation-delay: 0.9s;
+}
+@keyframes bs-z {
+  0% {
+    opacity: 0;
+    transform: translate(0, 4px);
+  }
+  30%,
+  60% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(4px, -6px);
+  }
+}
+
+/* Alert: something new is waiting in the chat. */
+.buddy-sprite[data-mood='alert'] .bs-hop {
+  animation: bs-nudge 2.2s ease-in-out infinite;
+}
+.buddy-sprite[data-mood='alert'] .bs-caret {
+  stroke: var(--bs-spark-on);
+}
+@keyframes bs-nudge {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+  }
+  70% {
+    transform: translateY(-5px);
+  }
+  80% {
+    transform: translateY(0);
+  }
+  88% {
+    transform: translateY(-2.5px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .buddy-sprite *,
+  .buddy-sprite[data-mood] * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.buddy-perch {
+  position: absolute;
+  bottom: calc(100% - 6px);
+  z-index: 2;
+  transform: translateX(-50%);
+  transition-property: left;
+  transition-timing-function: linear;
+  pointer-events: auto;
+}
+.buddy-perch[data-facing='left'] .buddy-sprite {
+  transform: scaleX(-1);
+}
+.buddy-perch[data-walking] .bs-hop {
+  animation: bs-walk 0.34s ease-in-out infinite alternate;
+}
+.buddy-perch[data-walking] .bs-body {
+  animation: bs-waddle 0.68s ease-in-out infinite;
+}
+@keyframes bs-walk {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-4px);
+  }
+}
+@keyframes bs-waddle {
+  0%,
+  100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .buddy-perch {
+    transition: none !important;
+  }
+}

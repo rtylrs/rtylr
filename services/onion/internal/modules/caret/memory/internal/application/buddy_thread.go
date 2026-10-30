@@ -57,3 +57,11 @@ func (s *Service) RecentMessages(ctx context.Context, sessionID string, userID, 
 	}
 	return messages, nil
 }
+
+// BuddyLastPost is when the buddy last wrote in a chat the person owns.
+func (s *Service) BuddyLastPost(ctx context.Context, sessionID string, userID int) (time.Time, bool, error) {
+	if _, err := s.repository.GetChatSession(ctx, sessionID, userID); err != nil {
+		return time.Time{}, false, err
+	}
+	return s.repository.LatestAssistantAt(ctx, sessionID)
+}
