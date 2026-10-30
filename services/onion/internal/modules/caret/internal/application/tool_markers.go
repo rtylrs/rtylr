@@ -16,6 +16,7 @@ type toolMarker struct {
 func parseToolMarkers(text string) ([]toolMarker, string) {
 	const openTag, closeTag = "<tool>", "</tool>"
 	var calls []toolMarker
+	text = nativeCallsAsMarkers(text)
 	var rest strings.Builder
 	for {
 		start := strings.Index(text, openTag)
@@ -40,4 +41,25 @@ func parseToolMarkers(text string) ([]toolMarker, string) {
 		text = text[start+end+len(closeTag):]
 	}
 	return calls, rest.String()
+}
+
+// nativeCallsAsMarkers rewrites a model's own function-call markup as <tool>
+// markers, so it is read like any other call.
+func nativeCallsAsMarkers(text string) string {
+	var out strings.Builder
+	for {
+		start := NativeToolCallStart(text)
+		if start < 0 {
+			out.WriteString(text)
+			return out.String()
+		}
+		out.WriteString(text[:start])
+		calls, end, _ := ParseNativeToolCalls(text[start:], true)
+		for _, call := range calls {
+			if raw, err := json.Marshal(call); err == nil {
+				out.WriteString("<tool>" + string(raw) + "</tool>")
+			}
+		}
+		text = text[start+end:]
+	}
 }

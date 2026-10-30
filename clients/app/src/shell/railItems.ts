@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 import type { TFunction } from 'i18next';
+import { CircleUserRound, Settings } from 'lucide-react';
 import { resolveAppUrl } from '@voxire/config';
 import {
   AutomationsIcon,
@@ -22,13 +23,15 @@ export interface RailItem {
   id: string;
   label: string;
   icon: ComponentType<{ size?: number }>;
-  /** A route of this Portal; `href` is another app. */
+  /** A route of this Portal; `href` is another app. Profile has neither:
+   *  it opens the profile menu. */
   to?: string;
   href?: string;
 }
 
-// Caret sits below the apps until the person moves it.
-export const RAIL_BOTTOM = ['caret'];
+// Caret, Settings and the profile menu sit below the apps until the person
+// moves them.
+export const RAIL_BOTTOM = ['caret', 'settings', 'profile'];
 
 export const RAIL_ICONS: Record<string, ComponentType<{ size?: number }>> = {
   home: HomeIcon,
@@ -41,6 +44,8 @@ export const RAIL_ICONS: Record<string, ComponentType<{ size?: number }>> = {
   pos: PosIcon,
   automations: AutomationsIcon,
   caret: CaretIcon,
+  settings: Settings,
+  profile: CircleUserRound,
 };
 
 /** The app bar icons this person can use, in default order. */
@@ -99,5 +104,12 @@ export function railItems(user: StoredUser | null, t: TFunction): RailItem[] {
         ]
       : []),
     { id: 'caret', label: 'Caret', icon: RAIL_ICONS.caret, to: '/caret' },
+    {
+      id: 'settings',
+      label: t('common.nav.settings'),
+      icon: RAIL_ICONS.settings,
+      to: '/settings',
+    },
+    { id: 'profile', label: t('common.portal.profile'), icon: RAIL_ICONS.profile },
   ];
 }

@@ -174,6 +174,18 @@ func TestRenderTurnNotesToolStepsAndClipsLongMessages(t *testing.T) {
 	}
 }
 
+// A reply that leaked DeepSeek's own call markup is replayed without it, or
+// the model copies the markup on every turn after.
+func TestRenderTurnDropsNativeCallMarkup(t *testing.T) {
+	turn := renderTurn(domain.ConversationMessage{
+		Role:    "assistant",
+		Content: "Checking.\n<｜DSML｜function_calls>\n<｜DSML｜invoke name=\"portal.layout\">\n</｜DSML｜invoke>\n</｜DSML｜function_calls>",
+	})
+	if strings.Contains(turn, "DSML") || !strings.Contains(turn, "Checking.") {
+		t.Fatalf("turn = %q", turn)
+	}
+}
+
 type lessonRepository struct{ *chatRepository }
 
 func (r lessonRepository) AssistantMemories(context.Context, string) ([]domain.UserMemory, error) {

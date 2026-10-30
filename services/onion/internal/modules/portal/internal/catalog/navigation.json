@@ -12,7 +12,9 @@
       { "id": "hr", "label": "HR" },
       { "id": "pos", "label": "POS" },
       { "id": "automations", "label": "Automations" },
-      { "id": "caret", "label": "Caret", "bottom": true }
+      { "id": "caret", "label": "Caret", "bottom": true },
+      { "id": "settings", "label": "Settings", "required": true, "bottom": true },
+      { "id": "profile", "label": "Profile", "required": true, "bottom": true }
     ]
   },
   "workspace": {

@@ -23,7 +23,8 @@ const languages = [
   { code: 'ar', label: 'العربية' },
 ] as const;
 
-export default function ProfileMenu() {
+/** The avatar menu. In the top of the app bar it opens downwards. */
+export default function ProfileMenu({ opensDown = false }: { opensDown?: boolean }) {
   const { user, logout } = useUserStore();
   const { theme, setTheme } = useThemeStore();
   const { t, i18n } = useTranslation();
@@ -55,7 +56,7 @@ export default function ProfileMenu() {
     };
   }, []);
   return (
-    <details className="portal-profile" ref={ref}>
+    <details className={`portal-profile${opensDown ? ' opens-down' : ''}`} ref={ref}>
       <summary
         role="button"
         className="portal-rail-button"

@@ -286,6 +286,10 @@
   box-shadow: var(--dash-shadow);
   z-index: 60;
 }
+.portal-profile.opens-down .portal-profile-menu {
+  top: 0;
+  bottom: auto;
+}
 .portal-profile-identity {
   padding: 4px 7px 12px;
   display: flex;

@@ -310,6 +310,7 @@
   },
   "portal": {
     "home": "Home",
+    "profile": "Profile",
     "workspace": "Workspace",
     "appNavigation": "Apps",
     "pageNavigation": "Home navigation",
