@@ -82,7 +82,7 @@ func findPage(input map[string]any) map[string]any {
 	found := catalog.Search(query, 4)
 	pages := make([]map[string]any, 0, len(found))
 	for _, page := range found {
-		card := map[string]string{"path": page.Path}
+		card := map[string]string{"path": page.Path, "title": page.Title}
 		if len(page.Actions) > 0 {
 			card["action"] = page.Actions[0]
 		}

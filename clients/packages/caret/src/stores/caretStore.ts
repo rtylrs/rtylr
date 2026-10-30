@@ -44,7 +44,11 @@ interface CaretActions {
   toggle: () => void;
   newTab: (input?: NewCaretTabInput) => string;
   /** Focus the tab already showing a saved chat, or open one for it. */
-  openChat: (input: { sessionId: string; title?: string; projectId?: string }) => string;
+  openChat: (input: {
+    sessionId: string;
+    title?: string;
+    projectId?: string;
+  }) => string;
   setActiveTab: (id: string) => void;
   closeTab: (id: string) => void;
   setTabTitle: (title: string, tabId?: string) => void;
@@ -132,7 +136,8 @@ function findToolBlock(
   tabId: string | undefined,
 ): ToolCallBlock | undefined {
   const id = activeTabId(state, tabId);
-  for (const message of state.tabs.find((tab) => tab.id === id)?.messages ?? []) {
+  for (const message of state.tabs.find((tab) => tab.id === id)?.messages ??
+    []) {
     for (const block of message.blocks) {
       if (block.id === blockId && block.type === "tool_call") return block;
     }
@@ -379,7 +384,8 @@ export const useCaretStore = create<CaretStore>()(
         set((state) =>
           updateTab(state, tabId, (tab) => {
             const index = tab.messages.length - 1;
-            if (index < 0 || tab.messages[index].role !== "assistant") return tab;
+            if (index < 0 || tab.messages[index].role !== "assistant")
+              return tab;
             const messages = [...tab.messages];
             messages[index] = { ...messages[index], followUps: items };
             return { ...tab, messages };

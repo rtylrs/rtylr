@@ -52,7 +52,11 @@ describe('PortalPageCard', () => {
   it('shows where the page is and opens it with the button to press', async () => {
     const onOpen = vi.fn();
     render(
-      <PortalPageCard spec={{ path: '/crm/customers', action: 'Add customer' }} rail={rail} onOpen={onOpen} />
+      <PortalPageCard
+        spec={{ path: '/crm/customers', action: 'Add customer' }}
+        rail={rail}
+        onOpen={onOpen}
+      />
     );
     const card = screen.getByRole('button', { name: 'Open Customers in CRM' });
     expect(card).toHaveTextContent('CRM · press Add customer');

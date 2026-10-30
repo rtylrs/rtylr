@@ -64,7 +64,7 @@ import { PortalHeaderActionsProvider } from './PortalHeaderActions';
 import { SidebarCollapseProvider } from './SidebarCollapseContext';
 import { rawNavItems, rawMenuSubItems, PortalNavLink, routeKeys } from './navigation';
 import { arrangeItems, portalLayoutKey, usePortalLayout } from './portalLayout';
-import { RAIL_BOTTOM, railItems, type RailItem } from './railItems';
+import { RAIL_BOTTOM, RAIL_ICONS, railItems, type RailItem } from './railItems';
 import { spotlightControl } from './spotlight';
 import PortalPageCard from '../features/caret/PortalPageCard';
 import { useFlowStore } from '../modules/flow/shared/stores/flowStore';
@@ -433,13 +433,20 @@ export default function PortalShell({ children }: { children: ReactNode }) {
     },
     [isMobile, navigate]
   );
-  const railPreviewKey = [...rail.top, ...rail.bottom].map((entry) => entry.id).join(',');
-  const railPreview = useMemo(
-    () => ({ top: rail.top, bottom: rail.bottom }),
-    // The entries are rebuilt every render; only their order matters here.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [railPreviewKey]
-  );
+  // The card's sketch only needs the order, which changes far less often
+  // than the entries are rebuilt.
+  const railOrder = [rail.top, rail.bottom]
+    .map((group) => group.map((e) => e.id).join(','))
+    .join('|');
+  const railPreview = useMemo(() => {
+    const [top, bottom] = railOrder.split('|').map((ids) =>
+      ids
+        .split(',')
+        .filter(Boolean)
+        .map((id) => ({ id, icon: RAIL_ICONS[id] }))
+    );
+    return { top, bottom };
+  }, [railOrder]);
   const caretHost = useMemo<CaretHost>(
     () => ({
       openPage,

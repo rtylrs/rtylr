@@ -46,8 +46,12 @@ interface Placed {
  * they were.
  */
 function placedIds(entries: Entry[], arrangement: PortalArrangement | undefined, bottom: string[]) {
-  const top = [...(arrangement?.top ?? entries.filter((e) => !bottom.includes(e.id)).map((e) => e.id))];
-  const low = [...(arrangement?.bottom ?? entries.filter((e) => bottom.includes(e.id)).map((e) => e.id))];
+  const top = [
+    ...(arrangement?.top ?? entries.filter((e) => !bottom.includes(e.id)).map((e) => e.id)),
+  ];
+  const low = [
+    ...(arrangement?.bottom ?? entries.filter((e) => bottom.includes(e.id)).map((e) => e.id)),
+  ];
   for (const entry of entries) {
     if (!top.includes(entry.id) && !low.includes(entry.id))
       (bottom.includes(entry.id) ? low : top).push(entry.id);
@@ -131,11 +135,11 @@ function ArrangeList({
       <ol className="nav-arrange-list">
         {rows.map((row, index) => {
           const entry = byId.get(row.id)!;
-          const startsBottom = hasBottom && row.group === 'bottom' && rows[index - 1]?.group !== 'bottom';
+          const startsBottom =
+            hasBottom && row.group === 'bottom' && rows[index - 1]?.group !== 'bottom';
           const isHidden = hidden.has(row.id);
           const canUp = index > 0 || (hasBottom && row.group === 'bottom');
-          const canDown =
-            index < rows.length - 1 || (hasBottom && row.group === 'top');
+          const canDown = index < rows.length - 1 || (hasBottom && row.group === 'top');
           return (
             <li key={row.id} className={isHidden ? 'is-hidden' : undefined}>
               {startsBottom && (

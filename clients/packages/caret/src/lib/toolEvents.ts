@@ -22,7 +22,10 @@ export function onCaretToolSuccess(listener: Listener): () => void {
   };
 }
 
-export function emitCaretToolSuccess(block: ToolCallBlock, output: unknown): void {
+export function emitCaretToolSuccess(
+  block: ToolCallBlock,
+  output: unknown,
+): void {
   const event = {
     name: block.name,
     input: block.input ?? {},

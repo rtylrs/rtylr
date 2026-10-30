@@ -83,7 +83,10 @@ export default function PortalPageCard({ spec, rail, onOpen }: PortalPageCardPro
       style={
         (COLOURED.has(place.app)
           ? { '--ppc-accent': `var(--app-${place.app})`, '--ppc-on-accent': '#fff' }
-          : { '--ppc-accent': 'var(--dash-text)', '--ppc-on-accent': 'var(--dash-surface)' }) as CSSProperties
+          : {
+              '--ppc-accent': 'var(--dash-text)',
+              '--ppc-on-accent': 'var(--dash-surface)',
+            }) as CSSProperties
       }
       disabled={!allowed}
       onClick={() => onOpen(spec)}

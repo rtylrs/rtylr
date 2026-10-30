@@ -2,11 +2,7 @@ const SPOTLIGHT_CLASS = 'portal-spotlight';
 const CONTROLS = 'button, a[href], [role="button"], [role="tab"], [role="menuitem"]';
 
 function normalize(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[+…]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return text.toLowerCase().replace(/[+…]/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
 function findControl(root: ParentNode, label: string): HTMLElement | null {

@@ -60,7 +60,18 @@ describe('NavigationSettings', () => {
     expect(api.save).toHaveBeenCalledWith(
       {
         rail: {
-          top: ['home', 'insights', 'flow', 'crm', 'erp', 'finance', 'hr', 'pos', 'automations', 'caret'],
+          top: [
+            'home',
+            'insights',
+            'flow',
+            'crm',
+            'erp',
+            'finance',
+            'hr',
+            'pos',
+            'automations',
+            'caret',
+          ],
           bottom: [],
           hidden: [],
         },

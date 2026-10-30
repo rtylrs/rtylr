@@ -30,6 +30,19 @@ export interface RailItem {
 // Caret sits below the apps until the person moves it.
 export const RAIL_BOTTOM = ['caret'];
 
+export const RAIL_ICONS: Record<string, ComponentType<{ size?: number }>> = {
+  home: HomeIcon,
+  insights: InsightsIcon,
+  flow: FlowIcon,
+  crm: CrmIcon,
+  erp: ErpIcon,
+  finance: FinanceIcon,
+  hr: HrIcon,
+  pos: PosIcon,
+  automations: AutomationsIcon,
+  caret: CaretIcon,
+};
+
 /** The app bar icons this person can use, in default order. */
 export function railItems(user: StoredUser | null, t: TFunction): RailItem[] {
   const insights = insightsNavItems.find((item) => canAccessPortalPath(user, item.path));
@@ -38,34 +51,53 @@ export function railItems(user: StoredUser | null, t: TFunction): RailItem[] {
     .map((app) => app.appId);
   const canAutomations = canAccessPortalPath(user, '/automations');
   return [
-    { id: 'home', label: t('common.portal.home'), icon: HomeIcon, to: '/' },
+    { id: 'home', label: t('common.portal.home'), icon: RAIL_ICONS.home, to: '/' },
     ...(insights
-      ? [{ id: 'insights', label: t('appNames.short.insights'), icon: InsightsIcon, to: insights.path }]
+      ? [
+          {
+            id: 'insights',
+            label: t('appNames.short.insights'),
+            icon: RAIL_ICONS.insights,
+            to: insights.path,
+          },
+        ]
       : []),
     ...(
       [
-        ['flow', '/flow', FlowIcon],
-        ['crm', '/crm', CrmIcon],
-        ['erp', '/erp', ErpIcon],
-        ['finance', '/finance', FinanceIcon],
-        ['hr', '/hr', HrIcon],
+        ['flow', '/flow'],
+        ['crm', '/crm'],
+        ['erp', '/erp'],
+        ['finance', '/finance'],
+        ['hr', '/hr'],
       ] as const
     )
       .filter(([, path]) => canAccessPortalPath(user, path))
-      .map(([id, path, icon]) => ({ id, label: t(`appNames.short.${id}`), icon, to: path })),
+      .map(([id, path]) => ({
+        id,
+        label: t(`appNames.short.${id}`),
+        icon: RAIL_ICONS[id],
+        to: path,
+      })),
     ...(apps?.includes('pos')
-      ? [{ id: 'pos', label: t('appNames.short.pos'), icon: PosIcon, href: resolveAppUrl('pos') }]
+      ? [
+          {
+            id: 'pos',
+            label: t('appNames.short.pos'),
+            icon: RAIL_ICONS.pos,
+            href: resolveAppUrl('pos'),
+          },
+        ]
       : []),
     ...(canAutomations || canAccessPortalPath(user, '/automations/webhooks')
       ? [
           {
             id: 'automations',
             label: t('common.nav.automations'),
-            icon: AutomationsIcon,
+            icon: RAIL_ICONS.automations,
             to: canAutomations ? '/automations' : '/automations/webhooks',
           },
         ]
       : []),
-    { id: 'caret', label: 'Caret', icon: CaretIcon, to: '/caret' },
+    { id: 'caret', label: 'Caret', icon: RAIL_ICONS.caret, to: '/caret' },
   ];
 }

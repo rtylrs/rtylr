@@ -106,3 +106,18 @@ func TestToolsNeedASignedInPerson(t *testing.T) {
 		t.Fatal("portal must leave other modules' tools alone")
 	}
 }
+
+func TestFindPageHandsCaretACardToShow(t *testing.T) {
+	out := findPage(map[string]any{"query": "add team members"})
+	pages := out["pages"].([]map[string]any)
+	if len(pages) == 0 {
+		t.Fatal("no page for adding team members")
+	}
+	block, _ := pages[0]["page_block"].(string)
+	if !strings.Contains(block, `"path":"/team`) || !strings.Contains(block, `"title":`) {
+		t.Fatalf("page_block = %s", block)
+	}
+	if empty := findPage(map[string]any{"query": "zzz"}); empty["count"] != 0 || empty["message"] == nil {
+		t.Fatalf("no match should say so: %v", empty)
+	}
+}
