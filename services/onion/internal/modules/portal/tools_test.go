@@ -207,3 +207,37 @@ func TestChangesReportTheOrderOnScreen(t *testing.T) {
 		t.Fatalf("order = %q\nmessage = %q", out["order"], out["message"])
 	}
 }
+
+func TestOneRequestCanChangeBothAreas(t *testing.T) {
+	m := &Module{store: newMemoryStore(), nav: catalog.Navigation()}
+	ctx := signedInAs(7)
+	out, _, err := m.ExecuteCaretTool(ctx, "portal.customize", map[string]any{"hide": []any{"pos", "auditLog"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(out["areas"].([]map[string]any)) != 2 || !strings.Contains(out["message"].(string), "hidden: POS") || !strings.Contains(out["message"].(string), "hidden: Audit Log") {
+		t.Fatalf("got %v", out)
+	}
+	// "Home" names an item in both areas; its neighbour says which one.
+	out, _, err = m.ExecuteCaretTool(ctx, "portal.customize", map[string]any{"area": "sidebar", "id": "Home", "position": "after:team"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out["area"] != layout.Workspace || !strings.HasPrefix(out["order"].(string), "Workspace sidebar from the top: Team, Home,") {
+		t.Fatalf("got %v", out["order"])
+	}
+	if _, _, err := m.ExecuteCaretTool(ctx, "portal.customize", map[string]any{"id": "payroll"}); err == nil {
+		t.Fatal("an unknown item should be refused")
+	}
+}
+
+func TestFractionalSlotsAreRefused(t *testing.T) {
+	m := &Module{store: newMemoryStore(), nav: catalog.Navigation()}
+	if _, _, err := m.ExecuteCaretTool(signedInAs(7), "portal.customize", map[string]any{"area": "rail", "id": "flow", "position": 2.5}); err == nil {
+		t.Fatal("slot 2.5 moved an item")
+	}
+	out, _, err := m.ExecuteCaretTool(signedInAs(7), "portal.customize", map[string]any{"area": "rail", "id": "flow", "position": float64(2)})
+	if err != nil || !strings.HasPrefix(out["order"].(string), "App bar from the top: Home, Work,") {
+		t.Fatalf("slot 2: %v %v", out["order"], err)
+	}
+}

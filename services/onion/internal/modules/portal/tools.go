@@ -39,23 +39,38 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 		}
 		return map[string]any{"areas": out}, true, nil
 	case "portal.customize":
-		area := areaName(input)
 		change, err := changeFromInput(input)
 		if err != nil {
 			return nil, true, err
 		}
-		if area == "all" {
-			area = m.inferArea(change)
+		edits := map[string]layout.Change{}
+		if area := areaName(input); area == "all" {
+			// "The sidebar" spans both areas: each item goes to the area it
+			// is in, and one request can change both.
+			if edits, err = m.splitByArea(change); err != nil {
+				return nil, true, err
+			}
+		} else {
+			edits[area] = change
 		}
-		saved, next, err := m.change(ctx, userID, area, func(a layout.Area, current layout.Arrangement) (layout.Arrangement, error) {
-			return a.Apply(current, change)
-		})
+		saved, err := m.changeAreas(ctx, userID, edits)
 		if err != nil {
 			return nil, true, err
 		}
-		out := m.areaOutput(area, next, saved.Saved(area) != nil)
-		out["message"] = "Done; the Portal shows it now. " + out["order"].(string)
-		return out, true, nil
+		changed, orders := []map[string]any{}, []string{}
+		for _, name := range areas {
+			if _, ok := edits[name]; ok {
+				out := m.areaOutput(name, m.arrangements(saved)[name], saved.Saved(name) != nil)
+				changed = append(changed, out)
+				orders = append(orders, out["order"].(string))
+			}
+		}
+		message := "Done; the Portal shows it now. " + strings.Join(orders, " ")
+		if len(changed) == 1 {
+			changed[0]["message"] = message
+			return changed[0], true, nil
+		}
+		return map[string]any{"areas": changed, "message": message}, true, nil
 	default:
 		area := areaName(input)
 		if area == "all" {
@@ -161,19 +176,64 @@ func areaName(input map[string]any) string {
 	return strings.ToLower(strings.TrimSpace(value))
 }
 
-// inferArea picks the area whose items the change names, preferring the app
-// bar.
-func (m *Module) inferArea(change layout.Change) string {
-	names := slices.Concat(change.Hide, change.Show)
+// splitByArea gives each part of a change to the area its item is in. An
+// item named in both areas ("Home") goes where its neighbour is, otherwise
+// to the app bar.
+func (m *Module) splitByArea(change layout.Change) (map[string]layout.Change, error) {
+	out := map[string]layout.Change{}
 	for _, move := range change.Moves {
-		names = append(names, move.ID)
+		neighbour := ""
+		if kind, name, ok := strings.Cut(move.Position, ":"); ok && (kind == "before" || kind == "after") {
+			neighbour = name
+		}
+		area, err := m.areaOf(move.ID, neighbour)
+		if err != nil {
+			return nil, err
+		}
+		part := out[area]
+		part.Moves = append(part.Moves, move)
+		out[area] = part
 	}
-	for _, name := range names {
-		if _, ok := m.nav.Rail.Lookup(name); ok {
-			return layout.Rail
+	for _, list := range []struct {
+		names []string
+		add   func(*layout.Change, string)
+	}{
+		{change.Hide, func(c *layout.Change, id string) { c.Hide = append(c.Hide, id) }},
+		{change.Show, func(c *layout.Change, id string) { c.Show = append(c.Show, id) }},
+	} {
+		for _, name := range list.names {
+			area, err := m.areaOf(name, "")
+			if err != nil {
+				return nil, err
+			}
+			part := out[area]
+			list.add(&part, name)
+			out[area] = part
 		}
 	}
-	return layout.Workspace
+	return out, nil
+}
+
+func (m *Module) areaOf(item, neighbour string) (string, error) {
+	in := func(name string) []string {
+		found := []string{}
+		for _, area := range areas {
+			if a, _ := m.nav.Area(area); name != "" {
+				if _, ok := a.Lookup(name); ok {
+					found = append(found, area)
+				}
+			}
+		}
+		return found
+	}
+	found := in(item)
+	if near := in(neighbour); len(near) > 0 {
+		found = slices.DeleteFunc(found, func(area string) bool { return !slices.Contains(near, area) })
+	}
+	if len(found) == 0 {
+		return "", fmt.Errorf("neither the app bar nor the workspace sidebar has %q where you asked; check portal.layout", item)
+	}
+	return found[0], nil
 }
 
 func changeFromInput(input map[string]any) (layout.Change, error) {
@@ -181,7 +241,8 @@ func changeFromInput(input map[string]any) (layout.Change, error) {
 	moveFrom := func(raw map[string]any) layout.Move {
 		position := firstString(raw, "position", "to")
 		if slot, ok := raw["position"].(float64); ok {
-			position = strconv.Itoa(int(slot))
+			// 2.5 stays 2.5 so it is refused, as the string would be.
+			position = strconv.FormatFloat(slot, 'f', -1, 64)
 		}
 		return layout.Move{ID: firstString(raw, "id", "item", "move"), Group: firstString(raw, "group"), Position: position}
 	}

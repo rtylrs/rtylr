@@ -298,6 +298,11 @@ func (a Area) move(current Arrangement, move Move) (Arrangement, error) {
 		}
 		slot = n - 1
 		position = "slot"
+		// People count the apps from the top, so a slot with no group is a
+		// place among them, even for an item pinned at the bottom.
+		if group == "" {
+			group = "top"
+		}
 	} else if position != "first" && position != "last" {
 		return current, fmt.Errorf("position %q isn't one of first, last, before:<id>, after:<id> or a slot number", move.Position)
 	}

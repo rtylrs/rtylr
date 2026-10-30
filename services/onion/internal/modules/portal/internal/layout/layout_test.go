@@ -117,3 +117,18 @@ func TestMoveToASlot(t *testing.T) {
 		t.Fatal("slot 0 should be refused")
 	}
 }
+
+// "Make Caret second" counts the apps from the top, even though Caret is
+// pinned at the bottom.
+func TestASlotCountsAmongTheApps(t *testing.T) {
+	got, err := rail.Apply(rail.Default(), Change{Moves: []Move{{ID: "caret", Position: "2"}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(got.Top, []string{"home", "caret", "insights", "crm", "automations"}) || len(got.Bottom) != 0 {
+		t.Fatalf("got %+v", got)
+	}
+	if got, _ := rail.Apply(rail.Default(), Change{Moves: []Move{{ID: "crm", Position: "top"}, {ID: "home", Position: "end"}}}); got.Top[0] != "crm" || got.Top[len(got.Top)-1] != "home" {
+		t.Fatalf("top/end: %v", got.Top)
+	}
+}

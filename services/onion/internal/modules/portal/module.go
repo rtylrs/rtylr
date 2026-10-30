@@ -79,6 +79,30 @@ func (m *Module) change(ctx context.Context, userID int64, name string, edit fun
 	return saved, next, err
 }
 
+// changeAreas applies a change to each named area as one locked update.
+func (m *Module) changeAreas(ctx context.Context, userID int64, edits map[string]layout.Change) (layout.Layout, error) {
+	for name := range edits {
+		if _, ok := m.nav.Area(name); !ok {
+			return layout.Layout{}, fmt.Errorf("unknown area %q; use rail or workspace", name)
+		}
+	}
+	return m.store.UpdateLayout(ctx, userID, func(saved layout.Layout) (layout.Layout, error) {
+		for _, name := range areas {
+			change, ok := edits[name]
+			if !ok {
+				continue
+			}
+			area, _ := m.nav.Area(name)
+			next, err := area.Apply(area.Resolve(saved.Saved(name)), change)
+			if err != nil {
+				return saved, err
+			}
+			saved = saved.With(name, area.Stored(next))
+		}
+		return saved, nil
+	})
+}
+
 // reset restores one area, or every area when name is empty.
 func (m *Module) reset(ctx context.Context, userID int64, name string) (layout.Layout, error) {
 	if name == "" {
