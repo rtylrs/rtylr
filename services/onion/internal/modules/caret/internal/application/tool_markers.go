@@ -3,6 +3,8 @@ package application
 import (
 	"encoding/json"
 	"strings"
+
+	"github.com/voxire/onion/internal/platform/snips"
 )
 
 // toolMarker is one <tool>{"name","input"}</tool> call in model output.
@@ -11,14 +13,26 @@ type toolMarker struct {
 	Input map[string]any `json:"input"`
 }
 
-// parseToolMarkers finds every well-formed tool marker in text and returns
-// the calls and the text with them removed.
+// parseToolMarkers finds every well-formed tool marker in text, and any call
+// in the model's own markup (see snips.ParseNativeToolCalls), and returns the
+// calls and the text with them removed.
 func parseToolMarkers(text string) ([]toolMarker, string) {
 	const openTag, closeTag = "<tool>", "</tool>"
 	var calls []toolMarker
 	var rest strings.Builder
 	for {
 		start := strings.Index(text, openTag)
+		// Native markup is read where it stands; inside a <tool> marker it is
+		// part of an input and stays as written.
+		if native := snips.NativeToolCallStart(text); native >= 0 && (start < 0 || native < start) {
+			rest.WriteString(text[:native])
+			found, end, _ := snips.ParseNativeToolCalls(text[native:], true)
+			for _, call := range found {
+				calls = append(calls, toolMarker{Name: strings.TrimSpace(call.Name), Input: call.Input})
+			}
+			text = text[native+end:]
+			continue
+		}
 		if start < 0 {
 			rest.WriteString(text)
 			break

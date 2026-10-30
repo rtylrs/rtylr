@@ -78,3 +78,39 @@ func TestPortalChangesApplyInOrder(t *testing.T) {
 		t.Fatalf("calls ran as %s", got)
 	}
 }
+
+// DeepSeek sometimes writes its own function-call markup instead of a <tool>
+// marker. The call still runs and the markup never reaches the person.
+func TestNativeToolCallMarkupRunsTheTool(t *testing.T) {
+	rec := httptest.NewRecorder()
+	executor := &portalExecutor{}
+	answer := &strings.Builder{}
+	renderer := newStreamEventRenderer(rec, nil, "assistant-1", answer,
+		withStreamMode(application.ModeAgent),
+		withStreamToolExecution(context.Background(), []application.ToolExecutor{executor}))
+	markup := "Moving it now.\n\n<｜DSML｜function_calls>\n<｜DSML｜invoke name=\"portal.customize\">\n" +
+		"<｜DSML｜parameter name=\"area\" string=\"true\">rail</｜DSML｜parameter>\n" +
+		"<｜DSML｜parameter name=\"id\" string=\"true\">profile</｜DSML｜parameter>\n" +
+		"<｜DSML｜parameter name=\"position\" string=\"true\">first</｜DSML｜parameter>\n" +
+		"</｜DSML｜invoke>\n</｜DSML｜function_calls>"
+	// Streamed in small pieces, as the provider sends it.
+	for len(markup) > 0 {
+		n := min(7, len(markup))
+		if err := renderer.AppendText(markup[:n]); err != nil {
+			t.Fatal(err)
+		}
+		markup = markup[n:]
+	}
+	if err := renderer.Finish(); err != nil {
+		t.Fatal(err)
+	}
+	if len(executor.calls) != 1 || executor.calls[0] != "portal.customize:profile" {
+		t.Fatalf("calls = %v", executor.calls)
+	}
+	if strings.Contains(rec.Body.String(), "DSML") || strings.Contains(answer.String(), "DSML") {
+		t.Fatalf("markup leaked:\n%s", rec.Body.String())
+	}
+	if !strings.Contains(answer.String(), "Moving it now.") {
+		t.Fatalf("answer = %q", answer.String())
+	}
+}

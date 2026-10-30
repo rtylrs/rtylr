@@ -72,7 +72,7 @@ describe('NavigationSettings', () => {
             'automations',
             'caret',
           ],
-          bottom: [],
+          bottom: ['settings', 'profile'],
           hidden: [],
         },
       },

@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Sun, Moon, Monitor, LogOut, ExternalLink, Check, ChevronDown } from 'lucide-react';
 import { signOut } from '@voxire/auth';
@@ -23,7 +23,11 @@ const languages = [
   { code: 'ar', label: 'العربية' },
 ] as const;
 
-export default function ProfileMenu() {
+/**
+ * The avatar menu. In the top of the app bar it opens downwards, unless the
+ * person moved it so low there's no room below.
+ */
+export default function ProfileMenu({ opensDown = false }: { opensDown?: boolean }) {
   const { user, logout } = useUserStore();
   const { theme, setTheme } = useThemeStore();
   const { t, i18n } = useTranslation();
@@ -33,6 +37,30 @@ export default function ProfileMenu() {
   const ref = useRef<HTMLDetailsElement>(null);
   const close = () => {
     if (ref.current) ref.current.open = false;
+  };
+  const [placement, setPlacement] = useState<{ down: boolean; room?: number }>({
+    down: opensDown,
+  });
+  // Open towards the side with room for the whole menu, so Sign out is never
+  // cut off. On a window too short for either side, take the roomier one and
+  // scroll inside the menu.
+  const place = () => {
+    const details = ref.current;
+    const menu = details?.querySelector<HTMLElement>('.portal-profile-menu');
+    if (!details?.open || !menu) return;
+    const { top, bottom } = details.getBoundingClientRect();
+    const below = window.innerHeight - top;
+    const height = menu.scrollHeight;
+    const fitsBelow = below >= height;
+    const fitsAbove = bottom >= height;
+    const down =
+      fitsBelow || fitsAbove
+        ? opensDown
+          ? fitsBelow || !fitsAbove
+          : fitsBelow && !fitsAbove
+        : below > bottom;
+    const room = down ? below : bottom;
+    setPlacement({ down, room: height > room ? room - 8 : undefined });
   };
   useEffect(() => {
     const outside = (event: MouseEvent) => {
@@ -55,7 +83,11 @@ export default function ProfileMenu() {
     };
   }, []);
   return (
-    <details className="portal-profile" ref={ref}>
+    <details
+      className={`portal-profile${placement.down ? ' opens-down' : ''}`}
+      ref={ref}
+      onToggle={place}
+    >
       <summary
         role="button"
         className="portal-rail-button"
@@ -69,7 +101,14 @@ export default function ProfileMenu() {
           size="sm"
         />
       </summary>
-      <div className="portal-profile-menu">
+      <div
+        className="portal-profile-menu"
+        style={
+          placement.room === undefined
+            ? undefined
+            : { maxHeight: placement.room, overflowY: 'auto' }
+        }
+      >
         <div className="portal-profile-identity">
           <strong>{user?.fullName}</strong>
           <span>{user?.email}</span>

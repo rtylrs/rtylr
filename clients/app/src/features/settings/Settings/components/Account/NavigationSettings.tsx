@@ -33,7 +33,7 @@ interface Entry {
 type Area = 'rail' | 'workspace';
 
 // Items that can move but never hide, as on the server.
-const REQUIRED = new Set(['home', 'dashboard']);
+const REQUIRED = new Set(['home', 'dashboard', 'settings', 'profile']);
 
 interface Placed {
   id: string;

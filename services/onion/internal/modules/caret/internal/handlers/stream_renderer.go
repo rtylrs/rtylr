@@ -12,6 +12,7 @@ import (
 
 	echoapp "github.com/voxire/onion/internal/modules/caret/internal/application"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/snips"
 )
 
 const (
@@ -33,6 +34,9 @@ const (
 	markerThinking
 	markerTool
 	markerFollowUps
+	// markerNativeTool is a model's own function-call markup; see
+	// snips.ParseNativeToolCalls.
+	markerNativeTool
 )
 
 type streamEventRenderer struct {
@@ -231,6 +235,8 @@ func (r *streamEventRenderer) drain(final bool) error {
 			handled, err = r.drainTool(final)
 		case markerFollowUps:
 			handled = r.drainFollowUps(final)
+		case markerNativeTool:
+			handled, err = r.drainNativeTool(final)
 		default:
 			handled = true
 		}
@@ -326,6 +332,26 @@ func (r *streamEventRenderer) drainTool(final bool) (bool, error) {
 		return false, err
 	}
 	r.pending = r.pending[end+len(toolCloseTag):]
+	return true, nil
+}
+
+// drainNativeTool runs the calls in a model's own function-call markup as
+// if they were <tool> markers, and keeps the markup out of the answer.
+func (r *streamEventRenderer) drainNativeTool(final bool) (bool, error) {
+	calls, end, ok := snips.ParseNativeToolCalls(r.pending, final)
+	if !ok {
+		return false, nil
+	}
+	r.pending = r.pending[end:]
+	for _, call := range calls {
+		raw, err := json.Marshal(call)
+		if err != nil {
+			continue
+		}
+		if err := r.emitToolMarker(string(raw)); err != nil {
+			return false, err
+		}
+	}
 	return true, nil
 }
 
@@ -643,6 +669,9 @@ func firstMarker(s string) (int, markerKind) {
 		if index := strings.Index(s, candidate.tag); index >= 0 && (best < 0 || index < best) {
 			best, kind = index, candidate.kind
 		}
+	}
+	if index := snips.NativeToolCallStart(s); index >= 0 && (best < 0 || index < best) {
+		best, kind = index, markerNativeTool
 	}
 	return best, kind
 }

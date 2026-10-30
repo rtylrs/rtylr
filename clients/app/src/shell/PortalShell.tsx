@@ -28,7 +28,7 @@ import {
   NEAR_WHITE,
 } from '@voxire/utils';
 import { useThemeStore } from '../shared/stores/themeStore';
-import { PanelLeft, Search, Bell, Settings, Webhook, Plus, X } from 'lucide-react';
+import { PanelLeft, Search, Bell, Webhook, Plus, X } from 'lucide-react';
 import { AutomationsIcon } from '@voxire/ui';
 import {
   CaretHostProvider,
@@ -391,34 +391,38 @@ export default function PortalShell({ children }: { children: ReactNode }) {
                     : '';
   const railEntries: RailEntry[] = railItems(user, t).map((item) => ({
     ...item,
-    active: item.id === activeRail,
+    active: item.id === 'settings' ? settingsOpen : item.id === activeRail,
   }));
   const rail = arrangeItems(railEntries, portalLayout?.rail, RAIL_BOTTOM);
-  const railButton = (entry: RailEntry) => (
-    <Tooltip
-      key={entry.id}
-      content={entry.label}
-      side={i18n.dir() === 'rtl' ? 'left' : 'right'}
-      focusable={false}
-      contentClassName={`portal-rail-tooltip portal-rail-tooltip-${entry.id}`}
-    >
-      {entry.href ? (
-        <a href={entry.href} className="portal-rail-button" aria-label={entry.label}>
-          <entry.icon size={21} />
-        </a>
-      ) : (
-        <Link
-          to={entry.to}
-          className={`portal-rail-button${entry.active ? ' is-active' : ''}`}
-          aria-label={entry.label}
-          aria-current={entry.active ? 'page' : undefined}
-          onClick={() => setMobileOpen(false)}
-        >
-          <entry.icon size={21} />
-        </Link>
-      )}
-    </Tooltip>
-  );
+  const railButton = (entry: RailEntry, group: 'top' | 'bottom') =>
+    entry.id === 'profile' ? (
+      <ProfileMenu key={entry.id} opensDown={group === 'top'} />
+    ) : (
+      <Tooltip
+        key={entry.id}
+        content={entry.label}
+        side={i18n.dir() === 'rtl' ? 'left' : 'right'}
+        focusable={false}
+        contentClassName={`portal-rail-tooltip portal-rail-tooltip-${entry.id}`}
+      >
+        {entry.href ? (
+          <a href={entry.href} className="portal-rail-button" aria-label={entry.label}>
+            <entry.icon size={21} />
+          </a>
+        ) : (
+          <Link
+            to={entry.to}
+            data-tour={entry.id === 'settings' ? 'settings' : undefined}
+            className={`portal-rail-button${entry.active ? ' is-active' : ''}`}
+            aria-label={entry.label}
+            aria-current={entry.active && entry.id !== 'settings' ? 'page' : undefined}
+            onClick={() => setMobileOpen(false)}
+          >
+            <entry.icon size={21} />
+          </Link>
+        )}
+      </Tooltip>
+    );
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   // A page Caret points at opens with Caret still beside it; on a phone the
@@ -553,21 +557,11 @@ export default function PortalShell({ children }: { children: ReactNode }) {
             {entry.id === 'automations' && index > 0 && (
               <div className="portal-rail-divider" role="separator" />
             )}
-            {railButton(entry)}
+            {railButton(entry, 'top')}
           </Fragment>
         ))}
         <div className="portal-rail-spacer" />
-        {rail.bottom.map(railButton)}
-        <Link
-          data-tour="settings"
-          to="/settings"
-          className={`portal-rail-button${settingsOpen ? ' is-active' : ''}`}
-          aria-label={t('common.nav.settings')}
-          title={t('common.nav.settings')}
-        >
-          <Settings size={21} />
-        </Link>
-        <ProfileMenu />
+        {rail.bottom.map((entry) => railButton(entry, 'bottom'))}
       </nav>
       <div className="portal-workspace">
         {!isInsights && !isFlow && !isCaret && !collapsed && (

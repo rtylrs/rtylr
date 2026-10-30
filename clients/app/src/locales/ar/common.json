@@ -314,6 +314,7 @@
   },
   "portal": {
     "home": "الرئيسية",
+    "profile": "الملف الشخصي",
     "workspace": "مساحة العمل",
     "appNavigation": "التطبيقات",
     "pageNavigation": "التنقل في الرئيسية",

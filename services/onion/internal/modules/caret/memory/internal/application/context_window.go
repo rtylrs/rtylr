@@ -8,6 +8,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/domain"
+	"github.com/voxire/onion/internal/platform/snips"
 )
 
 // Context window budgets, in bytes of prompt text (roughly four per token).
@@ -89,7 +90,13 @@ func renderTurn(message domain.ConversationMessage) string {
 	for _, note := range stepNotes(message.Metadata) {
 		turn.WriteString("[" + note + "]\n")
 	}
-	turn.WriteString(clipMiddle(strings.TrimSpace(message.Content), messageClipBytes))
+	content := message.Content
+	if speaker == "Caret" {
+		// An older reply may hold the model's own call markup; replayed, the
+		// model copies it instead of calling tools the way the prompt asks.
+		content = snips.StripNativeToolCalls(content)
+	}
+	turn.WriteString(clipMiddle(strings.TrimSpace(content), messageClipBytes))
 	return turn.String()
 }
 

@@ -58,7 +58,7 @@ func TestCaretMovesItselfToTheTopAndRestoresTheDefault(t *testing.T) {
 		t.Fatalf("first item = %v, want Caret at the top", first)
 	}
 	got, _ := (&layoutAPI{m}).GetPortalLayout(ctx, &portalv1.GetPortalLayoutRequest{})
-	if !got.Layout.Rail.Customized || got.Layout.Rail.Top[0] != "caret" || len(got.Layout.Rail.Bottom) != 0 {
+	if !got.Layout.Rail.Customized || got.Layout.Rail.Top[0] != "caret" || strings.Join(got.Layout.Rail.Bottom, ",") != "settings,profile" {
 		t.Fatalf("the Portal reads %+v", got.Layout.Rail)
 	}
 	if got.Layout.Workspace.Customized {
@@ -202,9 +202,26 @@ func TestChangesReportTheOrderOnScreen(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := "App bar from the top: Work, Home, Insights, CRM, Operations, Finance, HR, Automations; pinned at the bottom: Caret; hidden: POS."
+	want := "App bar from the top: Work, Home, Insights, CRM, Operations, Finance, HR, Automations; pinned at the bottom: Caret, Settings, Profile; hidden: POS."
 	if out["order"] != want || !strings.HasSuffix(out["message"].(string), want) {
 		t.Fatalf("order = %q\nmessage = %q", out["order"], out["message"])
+	}
+}
+
+// "Move the user profile to the top": the avatar menu and Settings arrange
+// like any app, but stay reachable.
+func TestProfileAndSettingsMoveButNeverHide(t *testing.T) {
+	m := &Module{store: newMemoryStore(), nav: catalog.Navigation()}
+	ctx := signedInAs(7)
+	out, _, err := m.ExecuteCaretTool(ctx, "portal.customize", map[string]any{"id": "Profile", "group": "top", "position": "first"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := "App bar from the top: Profile, Home,"; !strings.HasPrefix(out["order"].(string), want) {
+		t.Fatalf("order = %q", out["order"])
+	}
+	if _, _, err := m.ExecuteCaretTool(ctx, "portal.customize", map[string]any{"area": "rail", "hide": []any{"settings"}}); err == nil {
+		t.Fatal("hid Settings")
 	}
 }
 
