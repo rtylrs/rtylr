@@ -107,7 +107,7 @@ func (m *Module) changeAreas(ctx context.Context, userID int64, edits map[string
 		}
 		if !changed {
 			// Answering "Done" here would report a move nobody can see.
-			return saved, fmt.Errorf("nothing changed, so nothing moved on screen. It still reads: %s Without a group, first and last stay in the item's own group, and a slot counts the apps in the top group; to move an item between the top and the bottom group give group top or bottom, or place it before:<id> or after:<id> an item in that group", strings.Join(before, " "))
+			return saved, fmt.Errorf("nothing changed, so nothing moved on screen. It still reads: %s Without a group, first and last stay in the item's own group, and a slot counts the apps in the top group; to move an item between the top and the bottom group give group top or bottom, or place it before:<id> or after:<id> an item in that group. Slots count hidden items too, so to place an item among the ones on screen use before:<id> or after:<id> a visible item", strings.Join(before, " "))
 		}
 		return saved, nil
 	})
