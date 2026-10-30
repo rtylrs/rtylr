@@ -919,23 +919,13 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
             }}
           >
             {workspace?.sidebarHeader}
-            {workspace?.sidebarContent}
             <div style={{ padding: "8px 14px 0", flexShrink: 0 }}>
               <NewChatButton
                 onClick={newChat}
                 label={workspace?.historyLabels.newChat}
               />
             </div>
-            <ProjectSidebar
-              projects={projects}
-              activeId={workspace?.mainContent ? undefined : selectedProjectId}
-              labels={workspace?.projectLabels}
-              isLoading={projectsLoading}
-              loadError={projectsError !== null}
-              onSelect={selectProject}
-              onSave={saveProject}
-              onArchive={archiveProject}
-            />
+            {workspace?.sidebarContent}
             <ChatList
               labels={workspace?.historyLabels}
               chats={visibleSessions}
@@ -949,6 +939,16 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
               onRename={renameChat}
               onTogglePin={togglePinChat}
               showNewChat={false}
+            />
+            <ProjectSidebar
+              projects={projects}
+              activeId={workspace?.mainContent ? undefined : selectedProjectId}
+              labels={workspace?.projectLabels}
+              isLoading={projectsLoading}
+              loadError={projectsError !== null}
+              onSelect={selectProject}
+              onSave={saveProject}
+              onArchive={archiveProject}
             />
           </div>
           {workspace?.mainContent ?? mainColumn}

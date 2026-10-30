@@ -1,5 +1,5 @@
 import React from "react";
-import { Plus } from "lucide-react";
+import { SquarePen } from "lucide-react";
 import { caretTokens, caretRadius } from "../../ui/tokens";
 
 export interface NewChatButtonProps {
@@ -18,21 +18,21 @@ export const NewChatButton: React.FC<NewChatButtonProps> = ({
     style={{
       display: "flex",
       alignItems: "center",
-      gap: 6,
+      gap: 9,
       width: "100%",
-      minHeight: 36,
-      padding: "8px 10px",
+      minHeight: 34,
+      padding: "6px 9px",
       background: "transparent",
-      color: caretTokens.textMuted,
+      color: caretTokens.text,
       border: "1px solid transparent",
       borderRadius: caretRadius.md,
-      fontSize: 13,
-      fontWeight: 550,
+      fontSize: 12.5,
+      fontWeight: 500,
       cursor: "pointer",
       transition: "background 0.12s ease, color 0.12s ease",
     }}
   >
-    <Plus size={13} />
+    <SquarePen size={15} />
     {label}
   </button>
 );

@@ -119,18 +119,23 @@ export default function CaretWorkspace() {
             </div>
           ),
           sidebarContent: (user?.effectiveAccess?.isOwner || user?.effectiveAccess?.isAdmin) && (
-            <button
-              type="button"
-              className="caret-buddy-entry"
-              aria-current={buddyOpen ? 'page' : undefined}
-              onClick={() => {
-                setBuddyOpen(true);
-                if (window.matchMedia('(max-width: 700px)').matches) setSidebarOpen(false);
-              }}
-            >
-              <Bot size={17} />
-              {t('common.caret.buddy.title')}
-            </button>
+            <section className="caret-bots" aria-label={t('common.caret.buddy.bots')}>
+              <h2 className="caret-bots-heading">{t('common.caret.buddy.bots')}</h2>
+              <button
+                type="button"
+                className="caret-bot-row"
+                aria-current={buddyOpen ? 'page' : undefined}
+                onClick={() => {
+                  setBuddyOpen(true);
+                  if (window.matchMedia('(max-width: 700px)').matches) setSidebarOpen(false);
+                }}
+              >
+                <span className="caret-bot-avatar">
+                  <Bot size={13} />
+                </span>
+                {t('common.caret.buddy.title')}
+              </button>
+            </section>
           ),
           mainContent:
             buddyOpen && (user?.effectiveAccess?.isOwner || user?.effectiveAccess?.isAdmin) ? (

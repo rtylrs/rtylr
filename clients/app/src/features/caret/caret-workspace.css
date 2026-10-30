@@ -71,9 +71,6 @@
 .portal-caret-workspace .caret-conversation {
   padding-block: 16px;
 }
-.portal-caret-workspace .caret-chat-list {
-  padding-top: 14px !important;
-}
 @media (max-width: 700px) {
   .portal-caret-workspace .caret-history-sidebar {
     width: 100% !important;
@@ -94,7 +91,6 @@
 }
 .portal-caret-workspace .caret-chat-list-heading {
   order: 2;
-  margin-top: 16px !important;
 }
 .portal-caret-workspace .caret-chat-search {
   order: 1;
@@ -102,24 +98,44 @@
 .portal-caret-workspace .caret-chat-list-scroll {
   order: 3;
 }
-.caret-buddy-entry {
+.caret-bots {
+  flex-shrink: 0;
+  padding: 8px 14px 4px;
+}
+.caret-bots-heading {
+  margin: 0;
+  padding: 6px 2px;
+  color: var(--dash-text-dim);
+  font-size: 11.5px;
+  font-weight: 650;
+}
+.caret-bot-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-  margin: 8px 14px 0;
-  padding: 10px 12px;
-  border: 1px solid var(--dash-border);
-  border-radius: 8px;
+  gap: 9px;
+  width: 100%;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 6px;
   background: transparent;
-  color: var(--dash-text);
+  color: var(--dash-text-dim);
   font: inherit;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12.5px;
   text-align: start;
   cursor: pointer;
 }
-.caret-buddy-entry:hover,
-.caret-buddy-entry[aria-current='page'] {
+.caret-bot-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
   background: var(--dash-hover);
+  color: var(--dash-text);
+}
+.caret-bot-row:hover,
+.caret-bot-row[aria-current='page'] {
+  background: var(--dash-hover);
+  color: var(--dash-text);
 }
