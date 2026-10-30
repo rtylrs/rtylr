@@ -101,3 +101,34 @@ func TestResolveRepairsASavedArrangement(t *testing.T) {
 		t.Fatalf("got %+v", got)
 	}
 }
+
+func TestMoveToASlot(t *testing.T) {
+	got, err := rail.Apply(rail.Default(), Change{Moves: []Move{{ID: "crm", Position: "2"}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := []string{"home", "crm", "insights", "automations"}; !slices.Equal(got.Top, want) {
+		t.Fatalf("top = %v, want %v", got.Top, want)
+	}
+	if got, _ := rail.Apply(rail.Default(), Change{Moves: []Move{{ID: "crm", Position: "40"}}}); got.Top[len(got.Top)-1] != "crm" {
+		t.Fatalf("a slot past the end should mean last, got %v", got.Top)
+	}
+	if _, err := rail.Apply(rail.Default(), Change{Moves: []Move{{ID: "crm", Position: "0"}}}); err == nil {
+		t.Fatal("slot 0 should be refused")
+	}
+}
+
+// "Make Caret second" counts the apps from the top, even though Caret is
+// pinned at the bottom.
+func TestASlotCountsAmongTheApps(t *testing.T) {
+	got, err := rail.Apply(rail.Default(), Change{Moves: []Move{{ID: "caret", Position: "2"}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(got.Top, []string{"home", "caret", "insights", "crm", "automations"}) || len(got.Bottom) != 0 {
+		t.Fatalf("got %+v", got)
+	}
+	if got, _ := rail.Apply(rail.Default(), Change{Moves: []Move{{ID: "crm", Position: "top"}, {ID: "home", Position: "end"}}}); got.Top[0] != "crm" || got.Top[len(got.Top)-1] != "home" {
+		t.Fatalf("top/end: %v", got.Top)
+	}
+}

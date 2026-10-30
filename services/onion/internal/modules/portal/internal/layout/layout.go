@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 )
 
@@ -57,8 +58,8 @@ type Move struct {
 	// Group is "top" or "bottom" of the app bar; empty keeps the item's group,
 	// or takes the group of the item named in Position.
 	Group string
-	// Position is "first", "last", "before:<id>" or "after:<id>"; empty means
-	// first.
+	// Position is "first", "last", "before:<id>", "after:<id>" or a slot
+	// number counted from 1 within the group; empty means first.
 	Position string
 }
 
@@ -269,6 +270,7 @@ func (a Area) move(current Arrangement, move Move) (Arrangement, error) {
 	position := strings.ToLower(strings.TrimSpace(move.Position))
 	group := strings.ToLower(strings.TrimSpace(move.Group))
 	var anchor string
+	slot := 0
 	if kind, name, ok := strings.Cut(position, ":"); ok && (kind == "before" || kind == "after") {
 		other, err := a.item(name)
 		if err != nil {
@@ -286,10 +288,23 @@ func (a Area) move(current Arrangement, move Move) (Arrangement, error) {
 			return current, fmt.Errorf("%s is in the %s group, not %s", other.Label, anchorGroup, group)
 		}
 		group = anchorGroup
-	} else if position == "" {
+	} else if position == "" || position == "top" || position == "start" {
 		position = "first"
+	} else if position == "end" {
+		position = "last"
+	} else if n, err := strconv.Atoi(position); err == nil {
+		if n < 1 {
+			return current, fmt.Errorf("slot %d doesn't exist; slots count from 1", n)
+		}
+		slot = n - 1
+		position = "slot"
+		// People count the apps from the top, so a slot with no group is a
+		// place among them, even for an item pinned at the bottom.
+		if group == "" {
+			group = "top"
+		}
 	} else if position != "first" && position != "last" {
-		return current, fmt.Errorf("position %q isn't one of first, last, before:<id> or after:<id>", move.Position)
+		return current, fmt.Errorf("position %q isn't one of first, last, before:<id>, after:<id> or a slot number", move.Position)
 	}
 	switch group {
 	case "":
@@ -325,6 +340,8 @@ func (a Area) move(current Arrangement, move Move) (Arrangement, error) {
 		*target = slices.Insert(*target, slices.Index(*target, anchor), item.ID)
 	case "after":
 		*target = slices.Insert(*target, slices.Index(*target, anchor)+1, item.ID)
+	case "slot":
+		*target = slices.Insert(*target, min(slot, len(*target)), item.ID)
 	}
 	return out, nil
 }

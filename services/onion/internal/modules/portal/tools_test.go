@@ -158,3 +158,96 @@ func TestParallelChangesBothLand(t *testing.T) {
 		t.Fatalf("a change was lost: %+v", got.Layout)
 	}
 }
+
+// People call the whole left side "the sidebar": resetting it puts Caret back
+// at the bottom too, and moving Caret "in the sidebar" moves it in the app bar.
+func TestTheSidebarMeansTheWholeLeftSide(t *testing.T) {
+	store := newMemoryStore()
+	m := &Module{store: store, nav: catalog.Navigation()}
+	ctx := signedInAs(7)
+	if _, _, err := m.ExecuteCaretTool(ctx, "portal.customize", map[string]any{"area": "sidebar", "id": "caret", "position": "first", "group": "top"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := m.ExecuteCaretTool(ctx, "portal.customize", map[string]any{"area": "sidebar", "hide": []any{"auditLog"}}); err != nil {
+		t.Fatal(err)
+	}
+	out, _, err := m.ExecuteCaretTool(ctx, "portal.restore_default", map[string]any{"area": "sidebar"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := store.layouts[7]; ok {
+		t.Fatalf("resetting the sidebar left %+v", store.layouts[7])
+	}
+	if msg, _ := out["message"].(string); !strings.Contains(msg, "app bar") || !strings.Contains(msg, "workspace sidebar") {
+		t.Fatalf("message = %q", msg)
+	}
+	if _, _, err := m.ExecuteCaretTool(ctx, "portal.customize", map[string]any{"area": "home sidebar", "hide": []any{"auditLog"}}); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := m.ExecuteCaretTool(ctx, "portal.restore_default", map[string]any{"area": "home sidebar"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := store.layouts[7]; ok {
+		t.Fatal("naming the Home sidebar should reset it")
+	}
+}
+
+func TestChangesReportTheOrderOnScreen(t *testing.T) {
+	m := &Module{store: newMemoryStore(), nav: catalog.Navigation()}
+	out, _, err := m.ExecuteCaretTool(signedInAs(7), "portal.customize", map[string]any{
+		"area":  "rail",
+		"moves": []any{map[string]any{"id": "flow", "position": "top"}},
+		"hide":  []any{"pos"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "App bar from the top: Work, Home, Insights, CRM, Operations, Finance, HR, Automations; pinned at the bottom: Caret; hidden: POS."
+	if out["order"] != want || !strings.HasSuffix(out["message"].(string), want) {
+		t.Fatalf("order = %q\nmessage = %q", out["order"], out["message"])
+	}
+}
+
+func TestOneRequestCanChangeBothAreas(t *testing.T) {
+	m := &Module{store: newMemoryStore(), nav: catalog.Navigation()}
+	ctx := signedInAs(7)
+	out, _, err := m.ExecuteCaretTool(ctx, "portal.customize", map[string]any{"hide": []any{"pos", "auditLog"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if order, _ := out["order"].(string); len(out["areas"].([]map[string]any)) != 2 || !strings.Contains(order, "hidden: POS") || !strings.Contains(order, "hidden: Audit Log") {
+		t.Fatalf("got %v", out)
+	}
+	// "Home" names an item in both areas; its neighbour says which one.
+	out, _, err = m.ExecuteCaretTool(ctx, "portal.customize", map[string]any{"area": "sidebar", "id": "Home", "position": "after:team"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out["area"] != layout.Workspace || !strings.HasPrefix(out["order"].(string), "Workspace sidebar from the top: Team, Home,") {
+		t.Fatalf("got %v", out["order"])
+	}
+	if _, _, err := m.ExecuteCaretTool(ctx, "portal.customize", map[string]any{"id": "payroll"}); err == nil {
+		t.Fatal("an unknown item should be refused")
+	}
+}
+
+func TestFractionalSlotsAreRefused(t *testing.T) {
+	m := &Module{store: newMemoryStore(), nav: catalog.Navigation()}
+	if _, _, err := m.ExecuteCaretTool(signedInAs(7), "portal.customize", map[string]any{"area": "rail", "id": "flow", "position": 2.5}); err == nil {
+		t.Fatal("slot 2.5 moved an item")
+	}
+	out, _, err := m.ExecuteCaretTool(signedInAs(7), "portal.customize", map[string]any{"area": "rail", "id": "flow", "position": float64(2)})
+	if err != nil || !strings.HasPrefix(out["order"].(string), "App bar from the top: Home, Work,") {
+		t.Fatalf("slot 2: %v %v", out["order"], err)
+	}
+}
+
+func TestAnEmptyChangeIsRefused(t *testing.T) {
+	store := newMemoryStore()
+	m := &Module{store: store, nav: catalog.Navigation()}
+	for _, input := range []map[string]any{{}, {"area": "sidebar"}, {"area": "rail"}} {
+		if _, _, err := m.ExecuteCaretTool(signedInAs(7), "portal.customize", input); err == nil || !strings.Contains(err.Error(), "nothing to change") {
+			t.Errorf("%v: got %v", input, err)
+		}
+	}
+}
