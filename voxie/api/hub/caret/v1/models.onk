@@ -156,3 +156,25 @@ message DecideBuddyActionRequest {
   decision: string
 }
 message DecideBuddyActionResponse { action: BuddyAction }
+
+message GetBuddyThreadRequest {}
+message GetBuddyThreadResponse { session_id: string }
+
+message BuddyRoutine {
+  id: int64 @encode(number)
+  name: string
+  instructions: string
+  every_minutes: int32
+  enabled: bool
+  next_run_at: string
+  last_run_at: string
+}
+message ListBuddyRoutinesRequest {}
+message ListBuddyRoutinesResponse { routines: BuddyRoutine[] }
+message SetBuddyRoutineEnabledRequest {
+  id: int64 @encode(number)
+  enabled: bool
+}
+message SetBuddyRoutineEnabledResponse { routine: BuddyRoutine }
+message DeleteBuddyRoutineRequest { id: int64 @encode(number) }
+message DeleteBuddyRoutineResponse {}

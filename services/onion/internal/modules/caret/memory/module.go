@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/api"
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/application"
@@ -56,6 +57,30 @@ func (m *Module) CreateSession(ctx context.Context, userID int, title string) (s
 		return "", err
 	}
 	return session.SessionID, nil
+}
+
+// ThreadMessage is one message of a chat, as the buddy reads it.
+type ThreadMessage struct {
+	Role, Content string
+	CreatedAt     time.Time
+}
+
+// BuddyThread returns the person's buddy chat, creating it on first use.
+func (m *Module) BuddyThread(ctx context.Context, businessID int64, userID int) (string, error) {
+	return m.memoryService.EnsureBuddyThread(ctx, businessID, userID, "Caret Buddy")
+}
+
+// RecentMessages returns the newest messages of a chat the person owns.
+func (m *Module) RecentMessages(ctx context.Context, sessionID string, userID, limit int) ([]ThreadMessage, error) {
+	messages, err := m.memoryService.RecentMessages(ctx, sessionID, userID, limit)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]ThreadMessage, 0, len(messages))
+	for _, message := range messages {
+		out = append(out, ThreadMessage{Role: message.Role, Content: message.Content, CreatedAt: message.CreatedAt})
+	}
+	return out, nil
 }
 
 func (m *Module) StoreMessage(ctx context.Context, sessionID string, userID int, role, content string, tokens int) (any, error) {

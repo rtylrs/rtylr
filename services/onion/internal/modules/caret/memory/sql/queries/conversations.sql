@@ -19,7 +19,7 @@ SELECT
     id, user_id, session_id, title, summary, metadata,
     created_at, updated_at, last_activity
 FROM chat_sessions
-WHERE user_id = ?
+WHERE user_id = ? AND session_id NOT LIKE 'buddy-%'
 ORDER BY last_activity DESC
 LIMIT ? OFFSET ?;
 

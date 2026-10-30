@@ -47,17 +47,20 @@ func NewModule(ctx context.Context, memoryService application.MemoryService, quo
 	// list is resolved at call time because it includes the agent executor.
 	agents := &application.SubAgentExecutor{AI: snipsService}
 	find := &application.BusinessFindExecutor{}
-	toolExecutors = append(toolExecutors, agents, find)
+	buddyTools := &buddyToolExecutor{}
+	toolExecutors = append(toolExecutors, agents, find, buddyTools)
 	agents.Executors = func() []application.ToolExecutor { return toolExecutors }
 	find.Executors = agents.Executors
 
-	return &Module{
+	m := &Module{
 		snipsService:   snipsService,
 		memoryService:  memoryService,
 		quotaService:   quotaService,
 		analystService: analystService,
 		toolExecutors:  toolExecutors,
 	}
+	buddyTools.module = m
+	return m
 }
 
 func (m *Module) GetSnipsService() *application.Service {
@@ -87,7 +90,8 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 		panic(fmt.Errorf("register caret runtime service: %w", err))
 	}
 	if m.buddies != nil {
-		if err := hubcaretv1.RegisterBuddyServiceServer(&handlers.BuddyAPI{Store: m.buddies, Executors: m.toolExecutors}, hubcaretv1.WithMux(mux)); err != nil {
+		threads, _ := m.memoryService.(buddyThreads)
+		if err := hubcaretv1.RegisterBuddyServiceServer(&handlers.BuddyAPI{Store: m.buddies, Threads: threads, Executors: m.toolExecutors}, hubcaretv1.WithMux(mux)); err != nil {
 			panic(fmt.Errorf("register buddy service: %w", err))
 		}
 	}

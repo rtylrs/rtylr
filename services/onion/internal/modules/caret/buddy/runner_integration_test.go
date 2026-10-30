@@ -55,6 +55,7 @@ func runOnce(t *testing.T, agent Agent, access authPkg.EffectiveAccessResolver) 
 		for _, q := range []string{
 			"DELETE FROM caret_buddy_actions WHERE business_id = ?",
 			"DELETE FROM caret_buddy_runs WHERE business_id = ?",
+			"DELETE FROM caret_buddy_routines WHERE business_id = ?",
 			"DELETE FROM caret_buddies WHERE business_id = ?",
 		} {
 			if _, err := db.Exec(q, runnerBusinessID); err != nil {
@@ -70,6 +71,12 @@ func runOnce(t *testing.T, agent Agent, access authPkg.EffectiveAccessResolver) 
 	if err := m.repo.UpsertBuddy(ctx, domain.Buddy{
 		BusinessID: runnerBusinessID, RunAsUserID: 88, Enabled: true,
 		Instructions: "check the inbox", IntervalMinutes: 15, DailyRunCap: 24,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	due := time.Now().Add(-time.Minute)
+	if _, err := m.repo.CreateRoutine(ctx, runnerBusinessID, 89, domain.Routine{
+		Name: "Inbox", Instructions: "check the inbox", EveryMinutes: 15, NextRunAt: &due,
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -100,16 +107,16 @@ func runOnce(t *testing.T, agent Agent, access authPkg.EffectiveAccessResolver) 
 	return
 }
 
-func TestRunnerRunsTheAgentAsTheBuddyUserAndSavesTheReport(t *testing.T) {
+func TestRunnerRunsTheRoutineAsItsOwnerAndSavesTheReport(t *testing.T) {
 	agent := &fakeAgent{outcome: Outcome{Report: "inbox is clear", ToolCalls: 2, Tokens: 400}}
 	status, report, _ := runOnce(t, agent, &fakeAccess{})
 	if status != "done" || report != "inbox is clear" {
 		t.Fatalf("status=%s report=%q", status, report)
 	}
-	if agent.user == nil || agent.user.UserID != 88 || agent.user.BusinessID != runnerBusinessID || agent.user.EffectiveAccess == nil {
-		t.Fatalf("agent identity = %+v, want user 88 in business %d with resolved access", agent.user, runnerBusinessID)
+	if agent.user == nil || agent.user.UserID != 89 || agent.user.BusinessID != runnerBusinessID || agent.user.EffectiveAccess == nil {
+		t.Fatalf("agent identity = %+v, want the routine owner 89 in business %d with resolved access", agent.user, runnerBusinessID)
 	}
-	if agent.task.Instructions != "check the inbox" || agent.task.BusinessID != runnerBusinessID || agent.task.RunID == 0 {
+	if agent.task.Routine == nil || agent.task.Routine.Name != "Inbox" || agent.task.UserID != 89 || agent.task.BusinessID != runnerBusinessID || agent.task.RunID == 0 {
 		t.Fatalf("task = %+v", agent.task)
 	}
 }

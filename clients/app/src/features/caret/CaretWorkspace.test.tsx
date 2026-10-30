@@ -16,23 +16,30 @@ vi.mock('../../shared/stores/userStore', () => ({
       },
     }),
 }));
+const store = vi.hoisted(() => ({ sessionId: null as string | null, openChat: vi.fn() }));
 vi.mock('@voxire/caret', () => ({
   CaretIcon: () => null,
   useCaretStore: Object.assign(
-    (selector: (state: unknown) => unknown) => selector({ tabs: [], activeTabId: null }),
-    { getState: () => ({ newTab: vi.fn() }) }
+    (selector: (state: unknown) => unknown) =>
+      selector({
+        tabs: [{ id: 't', sessionId: store.sessionId, title: 'Chat' }],
+        activeTabId: 't',
+      }),
+    { getState: () => ({ newTab: vi.fn(), openChat: store.openChat }) }
   ),
   useCaretUIStore: (selector: (state: unknown) => unknown) =>
     selector({ view: 'chat', setView: vi.fn() }),
   CaretPanel: ({
+    systemContext,
     workspace,
   }: {
+    systemContext: string;
     workspace: {
       sidebarOpen: boolean;
       sidebarHeader: ReactNode;
       sidebarContent: ReactNode;
-      mainContent: ReactNode;
       header: ReactNode;
+      pollSessionId?: string;
       onSelectChat: () => void;
     };
   }) => (
@@ -44,7 +51,11 @@ vi.mock('@voxire/caret', () => ({
           <button onClick={workspace.onSelectChat}>New chat</button>
         </aside>
       )}
-      <main>{workspace.mainContent || workspace.header}</main>
+      <main>
+        {workspace.header}
+        <p data-testid="context">{systemContext}</p>
+        <p data-testid="poll">{workspace.pollSessionId ?? ''}</p>
+      </main>
     </div>
   ),
 }));
@@ -57,10 +68,11 @@ vi.mock('../../shell/PortalHeaderActions', () => ({ usePortalHeaderActions: () =
 vi.mock('./useCaretInstall', () => ({
   useCaretInstall: () => ({ canInstall: false, install: vi.fn() }),
 }));
+const buddy = vi.hoisted(() => ({ getBuddyThread: vi.fn() }));
 vi.mock('./Buddy', () => ({
-  default: ({ sidebarToggle }: { sidebarToggle: ReactNode }) => (
-    <div>{sidebarToggle}Buddy conversation</div>
-  ),
+  BUDDY_SYSTEM_CONTEXT: 'You are Caret Buddy',
+  buddyClient: buddy,
+  default: () => <div>Routines drawer</div>,
 }));
 import CaretWorkspace from './CaretWorkspace';
 
@@ -77,34 +89,55 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 describe('Caret Buddy sidebar', () => {
-  it('opens Buddy in the workspace and returns to a new chat', async () => {
+  beforeEach(() => {
+    store.sessionId = null;
+    store.openChat.mockReset();
+    buddy.getBuddyThread.mockResolvedValue({ sessionId: 'buddy-2-1' });
+  });
+
+  it('opens the Buddy chat for any member', async () => {
+    state.owner = false;
     const user = userEvent.setup();
     render(<CaretWorkspace />);
     await user.click(screen.getByRole('button', { name: 'Caret Buddy' }));
-    expect(screen.getByText('Buddy conversation')).toBeInTheDocument();
+    expect(store.openChat).toHaveBeenCalledWith({ sessionId: 'buddy-2-1', title: 'Caret Buddy' });
+  });
+
+  it('chats as Buddy, keeps the chat fresh and opens routines', async () => {
+    store.sessionId = 'buddy-2-1';
+    const user = userEvent.setup();
+    render(<CaretWorkspace />);
     expect(screen.getByRole('button', { name: 'Caret Buddy' })).toHaveAttribute(
       'aria-current',
       'page'
     );
-    await user.click(screen.getByRole('button', { name: 'New chat' }));
-    expect(screen.queryByText('Buddy conversation')).not.toBeInTheDocument();
+    expect(screen.getByTestId('context')).toHaveTextContent('You are Caret Buddy');
+    expect(screen.getByTestId('poll')).toHaveTextContent('buddy-2-1');
+    await user.click(screen.getByRole('button', { name: 'Routines' }));
+    expect(screen.getByText('Routines drawer')).toBeInTheDocument();
   });
-  it('hides Buddy from non-admins', () => {
-    state.owner = false;
+
+  it('is a normal chat elsewhere', () => {
+    store.sessionId = 'abc';
     render(<CaretWorkspace />);
-    expect(screen.queryByRole('button', { name: 'Caret Buddy' })).not.toBeInTheDocument();
+    expect(screen.getByTestId('context')).not.toHaveTextContent('You are Caret Buddy');
+    expect(screen.queryByRole('button', { name: 'Routines' })).not.toBeInTheDocument();
   });
-  it('closes the mobile sidebar on selection and lets an admin reopen it', async () => {
-    state.owner = false;
-    state.admin = true;
+
+  it('says so when the chat cannot open', async () => {
+    buddy.getBuddyThread.mockRejectedValue(new Error('down'));
+    const user = userEvent.setup();
+    render(<CaretWorkspace />);
+    await user.click(screen.getByRole('button', { name: 'Caret Buddy' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent("Couldn't open Caret Buddy");
+  });
+
+  it('closes the mobile sidebar when Buddy opens', async () => {
     state.mobile = true;
     const user = userEvent.setup();
     render(<CaretWorkspace />);
     await user.click(screen.getByRole('button', { name: 'Toggle chat sidebar' }));
     await user.click(screen.getByRole('button', { name: 'Caret Buddy' }));
-    expect(screen.getByText('Buddy conversation')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Caret Buddy' })).not.toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Toggle chat sidebar' }));
-    expect(screen.getByRole('button', { name: 'Caret Buddy' })).toBeInTheDocument();
   });
 });

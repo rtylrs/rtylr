@@ -20,6 +20,14 @@ type buddyFake struct {
 	saved  buddy.Settings
 }
 
+func (f *buddyFake) Routines(context.Context, int64, int64) ([]buddy.Routine, error) { return nil, nil }
+func (f *buddyFake) UpdateRoutine(context.Context, int64, int64, int64, buddy.RoutineChange) (buddy.Routine, error) {
+	return buddy.Routine{}, buddy.ErrRoutineNotFound
+}
+func (f *buddyFake) DeleteRoutine(context.Context, int64, int64, int64) error {
+	return buddy.ErrRoutineNotFound
+}
+
 func (f *buddyFake) Settings(context.Context, int64) (buddy.Settings, error)        { return f.saved, nil }
 func (f *buddyFake) Save(_ context.Context, s buddy.Settings) error                 { f.saved = s; return nil }
 func (f *buddyFake) Runs(context.Context, int64) ([]buddy.Run, error)               { return nil, nil }

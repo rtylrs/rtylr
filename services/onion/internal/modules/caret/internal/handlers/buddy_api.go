@@ -24,11 +24,95 @@ type buddyStore interface {
 	Action(context.Context, int64, int64) (buddy.Action, error)
 	ClaimAction(context.Context, int64, int64, int64, string) (bool, error)
 	FinishAction(context.Context, int64, int64, int64, string, json.RawMessage) error
+	Routines(context.Context, int64, int64) ([]buddy.Routine, error)
+	UpdateRoutine(context.Context, int64, int64, int64, buddy.RoutineChange) (buddy.Routine, error)
+	DeleteRoutine(context.Context, int64, int64, int64) error
+}
+
+type buddyThreadOpener interface {
+	BuddyThread(ctx context.Context, businessID int64, userID int) (string, error)
 }
 
 type BuddyAPI struct {
 	Store     buddyStore
+	Threads   buddyThreadOpener
 	Executors []application.ToolExecutor
+}
+
+// buddyMember is anyone signed in to a business: every person has their own
+// buddy chat and routines.
+func buddyMember(ctx context.Context) (int64, int64, error) {
+	u, ok := resolveAuthUser(ctx)
+	if !ok || u.BusinessID <= 0 || u.UserID <= 0 {
+		return 0, 0, onekiterrors.PermissionDenied()
+	}
+	return u.BusinessID, u.UserID, nil
+}
+
+func (a *BuddyAPI) GetBuddyThread(ctx context.Context, _ *pb.GetBuddyThreadRequest) (*pb.GetBuddyThreadResponse, error) {
+	b, u, err := buddyMember(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if a.Threads == nil {
+		return nil, onekiterrors.New(http.StatusServiceUnavailable, "Caret Buddy is not available")
+	}
+	sessionID, err := a.Threads.BuddyThread(ctx, b, int(u))
+	if err != nil {
+		return nil, err
+	}
+	return &pb.GetBuddyThreadResponse{SessionId: sessionID}, nil
+}
+
+func routineProto(r buddy.Routine) *pb.BuddyRoutine {
+	return &pb.BuddyRoutine{Id: r.ID, Name: r.Name, Instructions: r.Instructions, EveryMinutes: int32(r.EveryMinutes), Enabled: r.Enabled, NextRunAt: nullStamp(r.NextRunAt), LastRunAt: nullStamp(r.LastRunAt)}
+}
+
+func (a *BuddyAPI) ListBuddyRoutines(ctx context.Context, _ *pb.ListBuddyRoutinesRequest) (*pb.ListBuddyRoutinesResponse, error) {
+	b, u, err := buddyMember(ctx)
+	if err != nil {
+		return nil, err
+	}
+	routines, err := a.Store.Routines(ctx, b, u)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*pb.BuddyRoutine, 0, len(routines))
+	for _, r := range routines {
+		out = append(out, routineProto(r))
+	}
+	return &pb.ListBuddyRoutinesResponse{Routines: out}, nil
+}
+
+func (a *BuddyAPI) SetBuddyRoutineEnabled(ctx context.Context, r *pb.SetBuddyRoutineEnabledRequest) (*pb.SetBuddyRoutineEnabledResponse, error) {
+	b, u, err := buddyMember(ctx)
+	if err != nil {
+		return nil, err
+	}
+	enabled := r.GetEnabled()
+	routine, err := a.Store.UpdateRoutine(ctx, b, u, r.GetId(), buddy.RoutineChange{Enabled: &enabled})
+	if errors.Is(err, buddy.ErrRoutineNotFound) {
+		return nil, onekiterrors.New(http.StatusNotFound, "routine not found")
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &pb.SetBuddyRoutineEnabledResponse{Routine: routineProto(routine)}, nil
+}
+
+func (a *BuddyAPI) DeleteBuddyRoutine(ctx context.Context, r *pb.DeleteBuddyRoutineRequest) (*pb.DeleteBuddyRoutineResponse, error) {
+	b, u, err := buddyMember(ctx)
+	if err != nil {
+		return nil, err
+	}
+	err = a.Store.DeleteRoutine(ctx, b, u, r.GetId())
+	if errors.Is(err, buddy.ErrRoutineNotFound) {
+		return nil, onekiterrors.New(http.StatusNotFound, "routine not found")
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &pb.DeleteBuddyRoutineResponse{}, nil
 }
 
 func buddyIdentity(ctx context.Context) (int64, int64, error) {
