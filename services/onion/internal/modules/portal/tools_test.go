@@ -191,3 +191,19 @@ func TestTheSidebarMeansTheWholeLeftSide(t *testing.T) {
 		t.Fatal("naming the Home sidebar should reset it")
 	}
 }
+
+func TestChangesReportTheOrderOnScreen(t *testing.T) {
+	m := &Module{store: newMemoryStore(), nav: catalog.Navigation()}
+	out, _, err := m.ExecuteCaretTool(signedInAs(7), "portal.customize", map[string]any{
+		"area":  "rail",
+		"moves": []any{map[string]any{"id": "flow", "position": "top"}},
+		"hide":  []any{"pos"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "App bar from the top: Work, Home, Insights, CRM, Operations, Finance, HR, Automations; pinned at the bottom: Caret; hidden: POS."
+	if out["order"] != want || !strings.HasSuffix(out["message"].(string), want) {
+		t.Fatalf("order = %q\nmessage = %q", out["order"], out["message"])
+	}
+}

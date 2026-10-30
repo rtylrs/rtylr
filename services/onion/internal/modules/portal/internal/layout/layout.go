@@ -288,8 +288,10 @@ func (a Area) move(current Arrangement, move Move) (Arrangement, error) {
 			return current, fmt.Errorf("%s is in the %s group, not %s", other.Label, anchorGroup, group)
 		}
 		group = anchorGroup
-	} else if position == "" {
+	} else if position == "" || position == "top" || position == "start" {
 		position = "first"
+	} else if position == "end" {
+		position = "last"
 	} else if n, err := strconv.Atoi(position); err == nil {
 		if n < 1 {
 			return current, fmt.Errorf("slot %d doesn't exist; slots count from 1", n)

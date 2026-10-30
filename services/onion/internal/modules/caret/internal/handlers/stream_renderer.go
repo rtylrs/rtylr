@@ -58,6 +58,9 @@ type streamEventRenderer struct {
 	// inflight reads started during this turn; progress carries their
 	// status lines.
 	inflight []*inflightTool
+	// lastChange finishes when the latest personal change has run; the next
+	// one waits for it so changes apply in the order the model asked.
+	lastChange chan struct{}
 	// storedID is the saved reply's message id, sent with message_end.
 	storedID string
 	progress chan string
@@ -480,8 +483,19 @@ func (r *streamEventRenderer) startTool(ctx context.Context, tool *inflightTool)
 		}
 	})
 	tool.done = make(chan toolOutcome, 1)
+	var after, finished chan struct{}
+	if def, ok := echoapp.ToolByName(tool.call.Name); ok && def.Personal {
+		after, finished = r.lastChange, make(chan struct{})
+		r.lastChange = finished
+	}
 	go func() {
+		if after != nil {
+			<-after
+		}
 		output, executed, duration, err := echoapp.ExecuteToolWithTimeout(ctx, r.executors, tool.call.Name, tool.call.Input)
+		if finished != nil {
+			close(finished)
+		}
 		tool.done <- toolOutcome{output, executed, duration, err}
 	}()
 	r.inflight = append(r.inflight, tool)

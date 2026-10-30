@@ -54,7 +54,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 			return nil, true, err
 		}
 		out := m.areaOutput(area, next, saved.Saved(area) != nil)
-		out["message"] = "Done. The Portal shows the change now."
+		out["message"] = "Done; the Portal shows it now. " + out["order"].(string)
 		return out, true, nil
 	default:
 		area := areaName(input)
@@ -116,7 +116,33 @@ func (m *Module) areaOutput(name string, arrangement layout.Arrangement, customi
 	}
 	add(arrangement.Top, "top")
 	add(arrangement.Bottom, "bottom")
-	return map[string]any{"area": name, "name": area.Name, "description": area.Description, "items": items, "customized": customized}
+	return map[string]any{"area": name, "name": area.Name, "description": area.Description, "order": describeOrder(area, arrangement), "items": items, "customized": customized}
+}
+
+// describeOrder spells the area out as the person sees it, so Caret reports
+// what is on screen rather than working it out from positions.
+func describeOrder(area layout.Area, arrangement layout.Arrangement) string {
+	labels := func(ids []string) string {
+		out := []string{}
+		for _, id := range ids {
+			if !slices.Contains(arrangement.Hidden, id) {
+				out = append(out, area.Label(id))
+			}
+		}
+		return strings.Join(out, ", ")
+	}
+	text := area.Name + " from the top: " + labels(arrangement.Top)
+	if bottom := labels(arrangement.Bottom); bottom != "" {
+		text += "; pinned at the bottom: " + bottom
+	}
+	if len(arrangement.Hidden) > 0 {
+		hidden := []string{}
+		for _, id := range arrangement.Hidden {
+			hidden = append(hidden, area.Label(id))
+		}
+		text += "; hidden: " + strings.Join(hidden, ", ")
+	}
+	return text + "."
 }
 
 // areaName reads the area. People call the whole left side "the sidebar",
