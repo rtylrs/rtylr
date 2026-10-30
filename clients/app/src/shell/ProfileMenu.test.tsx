@@ -16,7 +16,7 @@ function open(opensDown: boolean, top: number, height: number) {
     top,
     bottom: top + 40,
   } as DOMRect);
-  Object.defineProperty(menu, 'offsetHeight', { value: height });
+  Object.defineProperty(menu, 'scrollHeight', { value: height });
   details.open = true;
   fireEvent(details, new Event('toggle'));
   return details;
@@ -29,6 +29,15 @@ describe('ProfileMenu', () => {
 
   it('opens upwards when moved too low for the menu to fit below', () => {
     expect(open(true, window.innerHeight - 60, 400)).not.toHaveClass('opens-down');
+  });
+
+  it('scrolls inside the roomier side when neither side fits', () => {
+    const details = open(true, 20, window.innerHeight + 100);
+    expect(details).toHaveClass('opens-down');
+    expect(details.querySelector('.portal-profile-menu')).toHaveStyle({
+      maxHeight: `${window.innerHeight - 28}px`,
+      overflowY: 'auto',
+    });
   });
 
   it('opens upwards from the bottom of the app bar', () => {

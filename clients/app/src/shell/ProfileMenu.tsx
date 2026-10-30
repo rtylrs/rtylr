@@ -38,17 +38,29 @@ export default function ProfileMenu({ opensDown = false }: { opensDown?: boolean
   const close = () => {
     if (ref.current) ref.current.open = false;
   };
-  const [down, setDown] = useState(opensDown);
-  // Open towards the side with room for the whole menu, so Sign out is
-  // never cut off.
+  const [placement, setPlacement] = useState<{ down: boolean; room?: number }>({
+    down: opensDown,
+  });
+  // Open towards the side with room for the whole menu, so Sign out is never
+  // cut off. On a window too short for either side, take the roomier one and
+  // scroll inside the menu.
   const place = () => {
     const details = ref.current;
     const menu = details?.querySelector<HTMLElement>('.portal-profile-menu');
     if (!details?.open || !menu) return;
     const { top, bottom } = details.getBoundingClientRect();
-    const fitsBelow = window.innerHeight - top >= menu.offsetHeight;
-    const fitsAbove = bottom >= menu.offsetHeight;
-    setDown(opensDown ? fitsBelow || !fitsAbove : fitsBelow && !fitsAbove);
+    const below = window.innerHeight - top;
+    const height = menu.scrollHeight;
+    const fitsBelow = below >= height;
+    const fitsAbove = bottom >= height;
+    const down =
+      fitsBelow || fitsAbove
+        ? opensDown
+          ? fitsBelow || !fitsAbove
+          : fitsBelow && !fitsAbove
+        : below > bottom;
+    const room = down ? below : bottom;
+    setPlacement({ down, room: height > room ? room - 8 : undefined });
   };
   useEffect(() => {
     const outside = (event: MouseEvent) => {
@@ -71,7 +83,11 @@ export default function ProfileMenu({ opensDown = false }: { opensDown?: boolean
     };
   }, []);
   return (
-    <details className={`portal-profile${down ? ' opens-down' : ''}`} ref={ref} onToggle={place}>
+    <details
+      className={`portal-profile${placement.down ? ' opens-down' : ''}`}
+      ref={ref}
+      onToggle={place}
+    >
       <summary
         role="button"
         className="portal-rail-button"
@@ -85,7 +101,14 @@ export default function ProfileMenu({ opensDown = false }: { opensDown?: boolean
           size="sm"
         />
       </summary>
-      <div className="portal-profile-menu">
+      <div
+        className="portal-profile-menu"
+        style={
+          placement.room === undefined
+            ? undefined
+            : { maxHeight: placement.room, overflowY: 'auto' }
+        }
+      >
         <div className="portal-profile-identity">
           <strong>{user?.fullName}</strong>
           <span>{user?.email}</span>
