@@ -7,6 +7,7 @@ sql:
       - "../../sql/schema/rtylr/caret_buddy_runs.sql"
       - "../../sql/schema/rtylr/caret_buddy_actions.sql"
       - "../../sql/schema/rtylr/caret_buddy_events.sql"
+      - "../../sql/schema/rtylr/caret_buddy_routines.sql"
     gen:
       go:
         package: "sqlc"

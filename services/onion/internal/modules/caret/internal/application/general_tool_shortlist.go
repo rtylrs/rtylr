@@ -30,6 +30,8 @@ var generalToolTriggers = map[string][]string{
 	"text.count":               {"word count", "how many words", "how many characters", "character count", "too long for"},
 	"chats.search":             {"last time we", "we discussed", "we talked about", "i told you", "i mentioned", "earlier chat", "we decided"},
 	"memory.list":              {"what do you know about me", "what do you remember", "your memory", "my memories"},
+	"buddy.routines":           {"routine", "check-in", "check in", "remind me", "every day", "every morning", "every night", "every week", "every monday", "each day", "daily", "weekly", "pause", "stop asking", "كل يوم", "ذكرني", "tous les jours", "rappelle-moi"},
+	"buddy.create_routine":     {"routine", "check-in", "check in", "remind me", "every day", "every morning", "every night", "every week", "every monday", "each day", "daily", "weekly", "كل يوم", "ذكرني", "tous les jours", "rappelle-moi"},
 }
 
 var urlInText = regexp.MustCompile(`https?://[^\s]+|\b[a-z0-9-]+\.(com|org|net|io|co|ai|dev|app|lb|ae|sa)(/[^\s]*)?\b`)
@@ -62,7 +64,7 @@ func GeneralToolsForRequest(request string) []ToolDef {
 			}
 		}
 	}
-	for _, name := range []string{"chats.search", "memory.list"} {
+	for _, name := range []string{"chats.search", "memory.list", "buddy.routines", "buddy.create_routine"} {
 		for _, trigger := range generalToolTriggers[name] {
 			if strings.Contains(text, trigger) {
 				add(name)

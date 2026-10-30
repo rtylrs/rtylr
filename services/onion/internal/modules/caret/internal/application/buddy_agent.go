@@ -59,6 +59,11 @@ type BuddyTask struct {
 	BusinessID   int64
 	UserID       int64
 	Instructions string
+	// RoutineName and RoutineInstructions are set when a routine started the run.
+	RoutineName         string
+	RoutineInstructions string
+	// Thread is the recent chat between the person and their buddy.
+	Thread string
 }
 
 type BuddyOutcome struct {
@@ -76,7 +81,7 @@ type buddyCallResult struct {
 // Run works through the task until the model writes a report or runs out of
 // rounds. The context must already carry the identity the tools run as.
 func (a *BuddyAgent) Run(ctx context.Context, task BuddyTask) (BuddyOutcome, error) {
-	if a == nil || a.AI == nil || a.Executors == nil || a.Store == nil || a.Quota == nil || task.BusinessID <= 0 || task.UserID <= 0 {
+	if a == nil || a.AI == nil || a.Executors == nil || a.Quota == nil || task.BusinessID <= 0 || task.UserID <= 0 {
 		return BuddyOutcome{}, errors.New("buddy agent is not configured")
 	}
 	ctx = snips.WithImages(WithWebSearchBudget(ctx), nil)
@@ -154,6 +159,10 @@ func (a *BuddyAgent) runCalls(ctx context.Context, task BuddyTask, state *ToolCa
 			continue
 		}
 		out.ToolCalls++
+		if (def.Scope != "read" || def.RequiresApproval) && a.Store == nil {
+			results[i].output.err = errors.New("changes can't be made during a routine; ask in your message and they'll answer you in chat")
+			continue
+		}
 		if def.Scope != "read" || def.RequiresApproval {
 			if err := a.Store.ProposeAction(ctx, task.RunID, task.BusinessID, call.Name, input, ToolCallFingerprint(call.Name, input), buddyProposalTTL); err != nil {
 				results[i].output.err = errors.New("the proposal could not be saved")
@@ -196,13 +205,24 @@ func (a *BuddyAgent) prompt(task BuddyTask, results string, final bool) string {
 	if final {
 		results += "\n\nNo more tool calls are possible. Write your <report> now from what you found."
 	}
-	instructions := strings.TrimSpace(task.Instructions)
-	if instructions == "" {
-		instructions = "Check for new or unanswered support tickets and inbox messages and say what needs attention."
+	job := strings.TrimSpace(task.RoutineInstructions)
+	if job == "" {
+		job = "Something new arrived in support. Check new or unanswered tickets and inbox messages and tell them what needs attention."
+	}
+	name := strings.TrimSpace(task.RoutineName)
+	if name == "" {
+		name = "New support activity"
+	}
+	thread := strings.TrimSpace(task.Thread)
+	if thread == "" {
+		thread = "(no messages yet)"
 	}
 	return strings.NewReplacer(
-		"{{TODAY}}", now.Format("Monday, January 2, 2006"),
-		"{{INSTRUCTIONS}}", escapeCaretPromptData(instructions),
+		"{{TODAY}}", now.Format("Monday, January 2, 2006 15:04 MST"),
+		"{{INSTRUCTIONS}}", escapeCaretPromptData(strings.TrimSpace(task.Instructions)),
+		"{{ROUTINE}}", escapeCaretPromptData(name),
+		"{{JOB}}", escapeCaretPromptData(job),
+		"{{THREAD}}", escapeCaretPromptData(TruncateUTF8ToBytes(thread, 12000)),
 		"{{STEPS}}", fmt.Sprint(buddyMaxRounds),
 		"{{TOOLS}}", catalog.String(),
 		"{{RESULTS}}", TruncateUTF8ToBytes(results, 60000),

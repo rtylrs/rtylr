@@ -26,6 +26,9 @@ type Task struct {
 	BusinessID   int64
 	UserID       int64
 	Instructions string
+	TriggerKind  string
+	// Routine is set when a routine started the run.
+	Routine *Routine
 }
 
 type Outcome struct {
@@ -83,7 +86,7 @@ func (m *Module) claimAndRun(ctx context.Context, agent Agent, access authPkg.Ef
 	default:
 		return false
 	}
-	run, buddy, err := m.repo.ClaimRun(ctx, runLease)
+	run, buddy, routine, err := m.repo.ClaimRun(ctx, runLease)
 	if err != nil || run == nil {
 		<-slots
 		if err != nil && ctx.Err() == nil {
@@ -93,13 +96,13 @@ func (m *Module) claimAndRun(ctx context.Context, agent Agent, access authPkg.Ef
 	}
 	go func() {
 		defer func() { <-slots }()
-		m.execute(ctx, agent, access, *run, *buddy)
+		m.execute(ctx, agent, access, *run, *buddy, routine)
 	}()
 	return true
 }
 
-func (m *Module) execute(parent context.Context, agent Agent, access authPkg.EffectiveAccessResolver, run domain.Run, buddy domain.Buddy) {
-	result := m.perform(parent, agent, access, run, buddy)
+func (m *Module) execute(parent context.Context, agent Agent, access authPkg.EffectiveAccessResolver, run domain.Run, buddy domain.Buddy, routine *domain.Routine) {
+	result := m.perform(parent, agent, access, run, buddy, routine)
 	// The run may have been cut short by shutdown, so the result is saved on a
 	// fresh context.
 	ctx, cancel := context.WithTimeout(context.WithoutCancel(parent), finishTimeout)
@@ -109,24 +112,35 @@ func (m *Module) execute(parent context.Context, agent Agent, access authPkg.Eff
 	}
 }
 
-func (m *Module) perform(parent context.Context, agent Agent, access authPkg.EffectiveAccessResolver, run domain.Run, buddy domain.Buddy) (result domain.RunResult) {
+func (m *Module) perform(parent context.Context, agent Agent, access authPkg.EffectiveAccessResolver, run domain.Run, buddy domain.Buddy, routine *domain.Routine) (result domain.RunResult) {
 	defer func() {
 		if recovered := recover(); recovered != nil {
 			logger.Ctx(parent).Error("caret buddy: run panicked", logger.Any("run_id", run.ID), logger.Any("panic", recovered))
 			result = domain.RunResult{Error: reportPanicText}
 		}
 	}()
+	if run.TriggerKind == domain.TriggerRoutine && routine == nil {
+		return domain.RunResult{Error: "the routine was removed"}
+	}
 	ctx, cancel := context.WithTimeout(parent, runTimeout)
 	defer cancel()
 
-	effective, err := access.GetEffectiveAccess(ctx, buddy.BusinessID, buddy.RunAsUserID)
+	// A routine acts as the person who set it up; other runs as the buddy's owner.
+	userID := buddy.RunAsUserID
+	if routine != nil {
+		userID = routine.UserID
+	}
+	effective, err := access.GetEffectiveAccess(ctx, buddy.BusinessID, userID)
 	if err != nil || effective == nil {
-		return domain.RunResult{Error: "the buddy's account no longer has access to this business"}
+		return domain.RunResult{Error: "this account no longer has access to the business"}
 	}
 	ctx = authPkg.WithAuthUser(ctx, &authPkg.AuthUser{
-		UserID: buddy.RunAsUserID, BusinessID: buddy.BusinessID, EffectiveAccess: effective,
+		UserID: userID, BusinessID: buddy.BusinessID, EffectiveAccess: effective,
 	})
-	outcome, err := agent.Run(ctx, Task{RunID: run.ID, BusinessID: buddy.BusinessID, UserID: buddy.RunAsUserID, Instructions: buddy.Instructions})
+	outcome, err := agent.Run(ctx, Task{
+		RunID: run.ID, BusinessID: buddy.BusinessID, UserID: userID,
+		Instructions: buddy.Instructions, TriggerKind: run.TriggerKind, Routine: routine,
+	})
 	result = domain.RunResult{Report: outcome.Report, ToolCalls: outcome.ToolCalls, Tokens: outcome.Tokens}
 	if err != nil {
 		result.Error = trimError(err)

@@ -20,6 +20,7 @@ func newFixtureRepo(t *testing.T) (*Repository, *sql.DB) {
 		for _, query := range []string{
 			"DELETE FROM caret_buddy_actions WHERE business_id = ?",
 			"DELETE FROM caret_buddy_runs WHERE business_id = ?",
+			"DELETE FROM caret_buddy_routines WHERE business_id = ?",
 			"DELETE FROM caret_buddies WHERE business_id = ?",
 		} {
 			if _, err := db.Exec(query, fixtureBusinessID); err != nil {
@@ -45,7 +46,21 @@ func saveBuddy(t *testing.T, repo *Repository, cap int) domain.Buddy {
 	if err != nil {
 		t.Fatalf("BuddyByBusiness: %v", err)
 	}
+	dueRoutine(t, repo)
 	return buddy
+}
+
+// dueRoutine adds a routine owned by user 77 that is already due.
+func dueRoutine(t *testing.T, repo *Repository) domain.Routine {
+	t.Helper()
+	due := time.Now().Add(-time.Minute)
+	routine, err := repo.CreateRoutine(context.Background(), fixtureBusinessID, 77, domain.Routine{
+		Name: "Inbox check", Instructions: "watch tickets", EveryMinutes: 15, NextRunAt: &due,
+	})
+	if err != nil {
+		t.Fatalf("CreateRoutine: %v", err)
+	}
+	return routine
 }
 
 func countRuns(t *testing.T, db *sql.DB) int {
@@ -59,10 +74,7 @@ func countRuns(t *testing.T, db *sql.DB) int {
 
 func TestEnqueueDueQueuesOnceThenWaitsForTheInterval(t *testing.T) {
 	repo, db := newFixtureRepo(t)
-	buddy := saveBuddy(t, repo, 24)
-	if buddy.NextRunAt == nil {
-		t.Fatal("an enabled buddy must be scheduled immediately")
-	}
+	saveBuddy(t, repo, 24)
 	ctx := context.Background()
 
 	if _, err := repo.EnqueueDue(ctx, 100); err != nil {
@@ -75,18 +87,18 @@ func TestEnqueueDueQueuesOnceThenWaitsForTheInterval(t *testing.T) {
 		t.Fatalf("second EnqueueDue: %v", err)
 	}
 	if got := countRuns(t, db); got != 1 {
-		t.Fatalf("a buddy that just ran queued again: runs = %d", got)
+		t.Fatalf("a routine that just ran queued again: runs = %d", got)
 	}
 }
 
 func TestEnqueueDueRespectsTheDailyCap(t *testing.T) {
 	repo, db := newFixtureRepo(t)
-	buddy := saveBuddy(t, repo, 1)
+	saveBuddy(t, repo, 1)
 	ctx := context.Background()
 	if _, err := repo.EnqueueDue(ctx, 100); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := db.Exec("UPDATE caret_buddies SET next_run_at = NOW() WHERE id = ?", buddy.ID); err != nil {
+	if _, err := db.Exec("UPDATE caret_buddy_routines SET next_run_at = NOW() WHERE business_id = ?", fixtureBusinessID); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := repo.EnqueueDue(ctx, 100); err != nil {
@@ -95,28 +107,62 @@ func TestEnqueueDueRespectsTheDailyCap(t *testing.T) {
 	if got := countRuns(t, db); got != 1 {
 		t.Fatalf("runs = %d, want the cap of 1", got)
 	}
-	reloaded, _ := repo.BuddyByBusiness(ctx, fixtureBusinessID)
-	if reloaded.NextRunAt == nil || !reloaded.NextRunAt.After(time.Now().Add(10*time.Minute)) {
-		t.Fatalf("a capped buddy must still move to its next slot, got %v", reloaded.NextRunAt)
+	routines, _ := repo.Routines(ctx, fixtureBusinessID, 77)
+	if len(routines) != 1 || routines[0].NextRunAt == nil || !routines[0].NextRunAt.After(time.Now().Add(10*time.Minute)) {
+		t.Fatalf("a capped routine must still move to its next slot, got %+v", routines)
 	}
 }
 
-func TestDisabledBuddyIsNeverScheduled(t *testing.T) {
+func TestPausedRoutineIsNeverScheduled(t *testing.T) {
 	repo, db := newFixtureRepo(t)
 	saveBuddy(t, repo, 24)
-	if err := repo.UpsertBuddy(context.Background(), domain.Buddy{
-		BusinessID: fixtureBusinessID, RunAsUserID: 77, Enabled: false, IntervalMinutes: 15, DailyRunCap: 24,
-	}); err != nil {
+	ctx := context.Background()
+	routines, err := repo.Routines(ctx, fixtureBusinessID, 77)
+	if err != nil || len(routines) != 1 {
+		t.Fatalf("Routines: %v %v", routines, err)
+	}
+	paused := routines[0]
+	paused.Enabled = false
+	if err := repo.UpdateRoutine(ctx, paused); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := db.Exec("DELETE FROM caret_buddy_runs WHERE business_id = ?", fixtureBusinessID); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := repo.EnqueueDue(context.Background(), 100); err != nil {
+	if _, err := repo.EnqueueDue(ctx, 100); err != nil {
 		t.Fatal(err)
 	}
 	if got := countRuns(t, db); got != 0 {
-		t.Fatalf("disabled buddy queued %d runs", got)
+		t.Fatalf("paused routine queued %d runs", got)
+	}
+}
+
+func TestRoutinesBelongToTheirOwner(t *testing.T) {
+	repo, _ := newFixtureRepo(t)
+	saveBuddy(t, repo, 24)
+	ctx := context.Background()
+	routines, _ := repo.Routines(ctx, fixtureBusinessID, 77)
+	if others, _ := repo.Routines(ctx, fixtureBusinessID, 78); len(others) != 0 {
+		t.Fatalf("another member sees %d routines", len(others))
+	}
+	if _, err := repo.Routine(ctx, fixtureBusinessID, 78, routines[0].ID); err != ErrRoutineNotFound {
+		t.Fatalf("another member read the routine: %v", err)
+	}
+	if err := repo.DeleteRoutine(ctx, fixtureBusinessID, 78, routines[0].ID); err != ErrRoutineNotFound {
+		t.Fatalf("another member deleted the routine: %v", err)
+	}
+}
+
+func TestClaimRunCarriesTheRoutine(t *testing.T) {
+	repo, _ := newFixtureRepo(t)
+	saveBuddy(t, repo, 24)
+	ctx := context.Background()
+	if _, err := repo.EnqueueDue(ctx, 100); err != nil {
+		t.Fatal(err)
+	}
+	run, _, routine, err := repo.ClaimRun(ctx, time.Minute)
+	if err != nil || run == nil {
+		t.Fatalf("ClaimRun: %v %v", run, err)
+	}
+	if run.TriggerKind != domain.TriggerRoutine || routine == nil || routine.UserID != 77 || routine.Name != "Inbox check" {
+		t.Fatalf("run %+v routine %+v", run, routine)
 	}
 }
 
@@ -135,7 +181,7 @@ func TestClaimRunHandsEachRunToOneClaimer(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			run, buddy, err := repo.ClaimRun(ctx, time.Minute)
+			run, buddy, _, err := repo.ClaimRun(ctx, time.Minute)
 			if err != nil {
 				t.Errorf("ClaimRun: %v", err)
 				return
@@ -163,7 +209,7 @@ func TestExpiredLeaseIsRequeuedThenFailedAfterTheLastAttempt(t *testing.T) {
 	if _, err := repo.EnqueueDue(ctx, 100); err != nil {
 		t.Fatal(err)
 	}
-	run, _, err := repo.ClaimRun(ctx, time.Minute)
+	run, _, _, err := repo.ClaimRun(ctx, time.Minute)
 	if err != nil || run == nil {
 		t.Fatalf("claim: %v %v", run, err)
 	}
@@ -204,7 +250,7 @@ func TestFinishRunStoresTheReportAndMarksFailures(t *testing.T) {
 	saveBuddy(t, repo, 24)
 	ctx := context.Background()
 	_, _ = repo.EnqueueDue(ctx, 100)
-	run, _, _ := repo.ClaimRun(ctx, time.Minute)
+	run, _, _, _ := repo.ClaimRun(ctx, time.Minute)
 
 	if err := repo.FinishRun(ctx, run.ID, domain.RunResult{Report: "all quiet", ToolCalls: 3, Tokens: 900}); err != nil {
 		t.Fatal(err)
@@ -232,7 +278,7 @@ func TestProposeActionIsIdempotentPerRunAndCall(t *testing.T) {
 	saveBuddy(t, repo, 24)
 	ctx := context.Background()
 	_, _ = repo.EnqueueDue(ctx, 100)
-	run, _, _ := repo.ClaimRun(ctx, time.Minute)
+	run, _, _, _ := repo.ClaimRun(ctx, time.Minute)
 
 	for i := 0; i < 2; i++ {
 		if err := repo.ProposeAction(ctx, run.ID, fixtureBusinessID, "crm.create_customer", map[string]any{"name": "Dana"}, "fp-1", 72*time.Hour); err != nil {
@@ -267,7 +313,7 @@ func TestClaimActionIsAtomicAndRejectsExpired(t *testing.T) {
 	if _, err := repo.EnqueueDue(ctx, 100); err != nil {
 		t.Fatal(err)
 	}
-	run, _, err := repo.ClaimRun(ctx, time.Minute)
+	run, _, _, err := repo.ClaimRun(ctx, time.Minute)
 	if err != nil {
 		t.Fatal(err)
 	}

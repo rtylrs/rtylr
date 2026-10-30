@@ -34,3 +34,19 @@ const (
 	// MaxRunAttempts bounds how often an interrupted run is retried.
 	MaxRunAttempts = 3
 )
+
+// Routine is a recurring job a person set up with their buddy in chat.
+type Routine struct {
+	ID           int64
+	BuddyID      int64
+	BusinessID   int64
+	UserID       int64
+	Name         string
+	Instructions string
+	EveryMinutes int
+	Enabled      bool
+	NextRunAt    *time.Time
+	LastRunAt    *time.Time
+}
+
+const TriggerRoutine = "routine"

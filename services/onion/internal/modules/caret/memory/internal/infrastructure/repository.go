@@ -243,7 +243,7 @@ func (r *Repository) ListUserSessions(ctx context.Context, userID, limit, offset
 			return nil, err
 		}
 		rows, err := r.pool.QueryContext(ctx, `SELECT id,user_id,session_id,title,summary,metadata,created_at,updated_at,last_activity
-			FROM chat_sessions WHERE user_id=? AND (
+			FROM chat_sessions WHERE user_id=? AND session_id NOT LIKE 'buddy-%' AND (
 			 CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata,'$.business_id')) AS UNSIGNED)=? OR
 			 ((metadata IS NULL OR JSON_EXTRACT(metadata,'$.business_id') IS NULL) AND ?=?))
 			ORDER BY last_activity DESC LIMIT ? OFFSET ?`, userID, user.BusinessID, legacyBusiness, user.BusinessID, limit, offset)

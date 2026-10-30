@@ -19,19 +19,6 @@ SELECT * FROM caret_buddies WHERE business_id = ?;
 -- name: GetBuddy :one
 SELECT * FROM caret_buddies WHERE id = ?;
 
--- name: ListDueBuddiesForUpdate :many
-SELECT * FROM caret_buddies
-WHERE enabled = 1 AND next_run_at IS NOT NULL AND next_run_at <= NOW()
-ORDER BY next_run_at
-LIMIT ?
-FOR UPDATE;
-
--- name: AdvanceBuddy :exec
-UPDATE caret_buddies
-SET last_run_at = NOW(),
-    next_run_at = DATE_ADD(NOW(), INTERVAL interval_minutes MINUTE)
-WHERE id = ?;
-
 -- name: CountRunsSince :one
 SELECT COUNT(*) FROM caret_buddy_runs
 WHERE buddy_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR);

@@ -41,8 +41,9 @@ func (r *Repository) BuddyByBusiness(ctx context.Context, businessID int64) (dom
 	return buddyFromRow(row), nil
 }
 
-// EnqueueDue queues one run for every buddy whose time has come and moves its
-// next run forward. A buddy over its daily cap is advanced without a run.
+// EnqueueDue queues one run for every routine whose time has come and moves
+// its next run forward. A buddy over its daily cap skips the run but still
+// advances, so a backlog never piles up.
 func (r *Repository) EnqueueDue(ctx context.Context, limit int) (queued int, err error) {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -51,23 +52,29 @@ func (r *Repository) EnqueueDue(ctx context.Context, limit int) (queued int, err
 	defer func() { _ = tx.Rollback() }()
 	q := r.q.WithTx(tx)
 
-	due, err := q.ListDueBuddiesForUpdate(ctx, int32(limit))
+	due, err := q.ListDueRoutinesForUpdate(ctx, int32(limit))
 	if err != nil {
-		return 0, fmt.Errorf("list due buddies: %w", err)
+		return 0, fmt.Errorf("list due routines: %w", err)
 	}
-	for _, b := range due {
+	for _, routine := range due {
+		b, err := q.GetBuddy(ctx, routine.BuddyID)
+		if err != nil {
+			return 0, fmt.Errorf("load buddy: %w", err)
+		}
 		runs, err := q.CountRunsSince(ctx, b.ID)
 		if err != nil {
 			return 0, fmt.Errorf("count runs: %w", err)
 		}
 		if runs < int64(b.DailyRunCap) {
-			if _, err := q.InsertRun(ctx, sqlc.InsertRunParams{BuddyID: b.ID, BusinessID: b.BusinessID, TriggerKind: domain.TriggerSchedule}); err != nil {
+			if _, err := q.InsertRoutineRun(ctx, sqlc.InsertRoutineRunParams{
+				BuddyID: b.ID, BusinessID: b.BusinessID, RoutineID: sql.NullInt64{Int64: routine.ID, Valid: true},
+			}); err != nil {
 				return 0, fmt.Errorf("insert run: %w", err)
 			}
 			queued++
 		}
-		if err := q.AdvanceBuddy(ctx, b.ID); err != nil {
-			return 0, fmt.Errorf("advance buddy: %w", err)
+		if err := q.AdvanceRoutine(ctx, routine.ID); err != nil {
+			return 0, fmt.Errorf("advance routine: %w", err)
 		}
 	}
 	return queued, tx.Commit()
@@ -75,36 +82,47 @@ func (r *Repository) EnqueueDue(ctx context.Context, limit int) (queued int, err
 
 // ClaimRun leases the oldest queued run to the caller, or returns nil when
 // nothing is waiting.
-func (r *Repository) ClaimRun(ctx context.Context, lease time.Duration) (*domain.Run, *domain.Buddy, error) {
+func (r *Repository) ClaimRun(ctx context.Context, lease time.Duration) (*domain.Run, *domain.Buddy, *domain.Routine, error) {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	defer func() { _ = tx.Rollback() }()
 	q := r.q.WithTx(tx)
 
 	row, err := q.ClaimNextRunForUpdate(ctx)
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil, nil
+		return nil, nil, nil, nil
 	}
 	if err != nil {
-		return nil, nil, fmt.Errorf("claim run: %w", err)
+		return nil, nil, nil, fmt.Errorf("claim run: %w", err)
 	}
 	if err := q.MarkRunRunning(ctx, sqlc.MarkRunRunningParams{LeaseSeconds: int64(lease.Seconds()), ID: row.ID}); err != nil {
-		return nil, nil, fmt.Errorf("mark run running: %w", err)
+		return nil, nil, nil, fmt.Errorf("mark run running: %w", err)
 	}
 	buddyRow, err := q.GetBuddy(ctx, row.BuddyID)
 	if err != nil {
-		return nil, nil, fmt.Errorf("load buddy: %w", err)
+		return nil, nil, nil, fmt.Errorf("load buddy: %w", err)
+	}
+	var routine *domain.Routine
+	if row.RoutineID.Valid {
+		routineRow, err := q.GetRoutineByID(ctx, row.RoutineID.Int64)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			return nil, nil, nil, fmt.Errorf("load routine: %w", err)
+		}
+		if err == nil {
+			loaded := routineFromRow(routineRow)
+			routine = &loaded
+		}
 	}
 	if err := tx.Commit(); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	buddy := buddyFromRow(buddyRow)
 	return &domain.Run{
 		ID: row.ID, BuddyID: row.BuddyID, BusinessID: row.BusinessID,
 		TriggerKind: row.TriggerKind, Attempts: int(row.Attempts) + 1,
-	}, &buddy, nil
+	}, &buddy, routine, nil
 }
 
 func (r *Repository) FinishRun(ctx context.Context, runID int64, result domain.RunResult) error {

@@ -27,4 +27,8 @@ service BuddyService {
   listBuddyRuns(ListBuddyRunsRequest) -> ListBuddyRunsResponse @get("/caret/buddy/runs")
   listBuddyActions(ListBuddyActionsRequest) -> ListBuddyActionsResponse @get("/caret/buddy/actions")
   decideBuddyAction(DecideBuddyActionRequest) -> DecideBuddyActionResponse @post("/caret/buddy/actions/decision")
+  getBuddyThread(GetBuddyThreadRequest) -> GetBuddyThreadResponse @get("/caret/buddy/thread")
+  listBuddyRoutines(ListBuddyRoutinesRequest) -> ListBuddyRoutinesResponse @get("/caret/buddy/routines")
+  setBuddyRoutineEnabled(SetBuddyRoutineEnabledRequest) -> SetBuddyRoutineEnabledResponse @post("/caret/buddy/routines/enabled")
+  deleteBuddyRoutine(DeleteBuddyRoutineRequest) -> DeleteBuddyRoutineResponse @post("/caret/buddy/routines/delete")
 }

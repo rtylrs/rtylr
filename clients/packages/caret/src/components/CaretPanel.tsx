@@ -38,6 +38,8 @@ import { ChatList, type ChatListLabels } from "./sidebar";
 import NewChatButton from "./sidebar/NewChatButton";
 import ProjectSidebar, { type ProjectLabels } from "./sidebar/ProjectSidebar";
 
+const BACKGROUND_POLL_MS = 30_000;
+
 export interface CaretWorkspaceOptions {
   header: React.ReactNode;
   sidebarHeader: React.ReactNode;
@@ -49,6 +51,8 @@ export interface CaretWorkspaceOptions {
   composerPlaceholder: string;
   sidebarOpen: boolean;
   onSelectChat: () => void;
+  /** Reloads this chat now and then while it is open, for messages posted in the background. */
+  pollSessionId?: string;
 }
 
 export interface CaretPanelProps {
@@ -393,6 +397,32 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
   }, [activeTab, caret, loadChat, pollBackgroundReply]);
 
 
+
+  // A background routine can post into the open chat; pick its messages up.
+  const pollSessionId = workspace?.pollSessionId;
+  useEffect(() => {
+    if (!pollSessionId || sessionId !== pollSessionId || !activeTabId) return;
+    const timer = setInterval(() => {
+      const tab = useCaretStore
+        .getState()
+        .tabs.find((candidate) => candidate.id === activeTabId);
+      if (!tab || tab.sessionId !== pollSessionId || tab.isStreaming || tab.isLoading) return;
+      void loadChat(pollSessionId)
+        .then((loaded) => {
+          const current = useCaretStore
+            .getState()
+            .tabs.find((candidate) => candidate.id === activeTabId);
+          if (
+            current?.sessionId === pollSessionId &&
+            !current.isStreaming &&
+            loaded.length > current.messages.length
+          )
+            caret.setMessages(loaded, activeTabId);
+        })
+        .catch(() => undefined);
+    }, BACKGROUND_POLL_MS);
+    return () => clearInterval(timer);
+  }, [activeTabId, caret, loadChat, pollSessionId, sessionId]);
 
   const closeChatTab = useCallback(
     (tabId: string): void => {

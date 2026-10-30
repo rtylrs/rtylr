@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Bot, Download, PanelLeft, Settings } from 'lucide-react';
+import { Bot, CalendarClock, Download, PanelLeft, Settings } from 'lucide-react';
 import { resolveApiBase } from '@voxire/config';
 import { HelmetContainer } from '@voxire/components';
 import { CaretIcon, CaretPanel, useCaretStore, useCaretUIStore } from '@voxire/caret';
@@ -11,7 +11,7 @@ import {
 } from '../../shared/lib/portalCaretContext';
 import { usePortalHeaderActions } from '../../shell/PortalHeaderActions';
 import { useCaretInstall } from './useCaretInstall';
-import Buddy from './Buddy';
+import BuddyRoutines, { BUDDY_SYSTEM_CONTEXT, buddyClient } from './Buddy';
 import './caret-workspace.css';
 
 export default function CaretWorkspace() {
@@ -21,10 +21,28 @@ export default function CaretWorkspace() {
   const title = useCaretStore(
     (state) => state.tabs.find((tab) => tab.id === state.activeTabId)?.title
   );
+  const activeSessionId = useCaretStore(
+    (state) => state.tabs.find((tab) => tab.id === state.activeTabId)?.sessionId
+  );
+  const buddyActive = Boolean(activeSessionId?.startsWith('buddy-'));
   const setView = useCaretUIStore((state) => state.setView);
   const { canInstall, install } = useCaretInstall();
   const view = useCaretUIStore((state) => state.view);
-  const [buddyOpen, setBuddyOpen] = useState(false);
+  const [routinesOpen, setRoutinesOpen] = useState(false);
+  const [buddyError, setBuddyError] = useState(false);
+  const isAdmin = Boolean(user?.effectiveAccess?.isOwner || user?.effectiveAccess?.isAdmin);
+  const openBuddy = async () => {
+    setBuddyError(false);
+    try {
+      const { sessionId } = await buddyClient.getBuddyThread({});
+      if (!sessionId) throw new Error('missing buddy chat');
+      useCaretStore.getState().openChat({ sessionId, title: t('common.caret.buddy.title') });
+      setView('chat');
+      if (window.matchMedia('(max-width: 700px)').matches) setSidebarOpen(false);
+    } catch {
+      setBuddyError(true);
+    }
+  };
   const [sidebarOpen, setSidebarOpen] = useState(
     () => !window.matchMedia('(max-width: 700px)').matches
   );
@@ -101,12 +119,17 @@ export default function CaretWorkspace() {
         appId="dash"
         userId={Number(user?.id) || 0}
         apiBaseUrl={resolveApiBase()}
-        systemContext={buildPortalSystemContext(context)}
+        systemContext={
+          buddyActive
+            ? `${buildPortalSystemContext(context)}\n\n${BUDDY_SYSTEM_CONTEXT}`
+            : buildPortalSystemContext(context)
+        }
         pageContext={buildPortalPageContext(context)}
         workspace={{
           sidebarOpen,
+          pollSessionId: buddyActive ? (activeSessionId ?? undefined) : undefined,
           onSelectChat: () => {
-            setBuddyOpen(false);
+            setRoutinesOpen(false);
             if (window.matchMedia('(max-width: 700px)').matches) setSidebarOpen(false);
           },
           sidebarHeader: (
@@ -118,40 +141,51 @@ export default function CaretWorkspace() {
               {toggle('sidebar')}
             </div>
           ),
-          sidebarContent: (user?.effectiveAccess?.isOwner || user?.effectiveAccess?.isAdmin) && (
+          sidebarContent: (
             <section className="caret-bots" aria-label={t('common.caret.buddy.bots')}>
               <h2 className="caret-bots-heading">{t('common.caret.buddy.bots')}</h2>
               <button
                 type="button"
                 className="caret-bot-row"
-                aria-current={buddyOpen ? 'page' : undefined}
-                onClick={() => {
-                  setBuddyOpen(true);
-                  if (window.matchMedia('(max-width: 700px)').matches) setSidebarOpen(false);
-                }}
+                aria-current={buddyActive ? 'page' : undefined}
+                onClick={() => void openBuddy()}
               >
                 <span className="caret-bot-avatar">
                   <Bot size={13} />
                 </span>
                 {t('common.caret.buddy.title')}
               </button>
+              {buddyError && (
+                <p role="alert" className="caret-bots-error">
+                  {t('common.caret.buddy.openFailed')}
+                </p>
+              )}
             </section>
           ),
-          mainContent:
-            buddyOpen && (user?.effectiveAccess?.isOwner || user?.effectiveAccess?.isAdmin) ? (
-              <Buddy
-                key={`${user?.businessId}:${user?.id}`}
-                scope={`${user?.businessId}:${user?.id}`}
-                sidebarToggle={!sidebarOpen && toggle('header')}
-              />
-            ) : undefined,
           header: (
             <header className="caret-workspace-header">
               <div>
                 {!sidebarOpen && toggle('header')}
-                <span>{title || 'Caret'}</span>
+                {buddyActive && (
+                  <span className="caret-bot-avatar">
+                    <Bot size={13} />
+                  </span>
+                )}
+                <span>{buddyActive ? t('common.caret.buddy.title') : title || 'Caret'}</span>
               </div>
               <div className="caret-workspace-header-actions">
+                {buddyActive && (
+                  <button
+                    type="button"
+                    className="portal-icon-button"
+                    onClick={() => setRoutinesOpen((open) => !open)}
+                    aria-label={t('common.caret.buddy.routines')}
+                    aria-pressed={routinesOpen}
+                    title={t('common.caret.buddy.routines')}
+                  >
+                    <CalendarClock size={18} />
+                  </button>
+                )}
                 {canInstall && (
                   <button
                     type="button"
@@ -177,14 +211,24 @@ export default function CaretWorkspace() {
               </div>
             </header>
           ),
-          welcome: (
+          welcome: buddyActive ? (
+            <div className="caret-workspace-welcome">
+              <span className="caret-bot-avatar caret-bot-avatar-large">
+                <Bot size={22} />
+              </span>
+              <h1>{t('common.caret.buddy.welcome')}</h1>
+              <p>{t('common.caret.buddy.welcomeHint')}</p>
+            </div>
+          ) : (
             <div className="caret-workspace-welcome">
               <CaretIcon size={38} />
               <h1>{t('common.caret.welcome')}</h1>
               <p>{t('common.caret.welcomeHint')}</p>
             </div>
           ),
-          composerPlaceholder: t('common.caret.composer'),
+          composerPlaceholder: buddyActive
+            ? t('common.caret.buddy.composer')
+            : t('common.caret.composer'),
           historyLabels: {
             heading: t('common.caret.recents'),
             description: '',
@@ -236,6 +280,14 @@ export default function CaretWorkspace() {
           },
         }}
       />
+      {buddyActive && routinesOpen && (
+        <BuddyRoutines
+          key={`${user?.businessId}:${user?.id}`}
+          scope={`${user?.businessId}:${user?.id}`}
+          isAdmin={isAdmin}
+          onClose={() => setRoutinesOpen(false)}
+        />
+      )}
     </div>
   );
 }

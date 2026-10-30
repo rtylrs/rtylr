@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS `caret_buddy_runs` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `buddy_id` bigint NOT NULL,
+  `routine_id` bigint DEFAULT NULL,
   `business_id` bigint NOT NULL,
   `trigger_kind` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'schedule',
   `status` enum('queued','running','done','failed') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'queued',

@@ -149,3 +149,5 @@ internal/modules/finance/bank_accounts/sql/migration_20261020_bank_account_colum
 internal/modules/crm/crm_sales/sql/migration_20261020_sales_redesign.sql	internal/modules/crm/crm_sales/sql/migration_20261020_sales_redesign.sql
 shared/zz_self_signup_provisioning.sql	internal/modules/organization/sql/schema/shared/zz_self_signup_provisioning.sql
 rtylr/caret_buddy_events.sql	internal/modules/caret/sql/schema/rtylr/caret_buddy_events.sql
+rtylr/caret_buddy_routines.sql	internal/modules/caret/sql/schema/rtylr/caret_buddy_routines.sql
+internal/modules/caret/sql/migration_20261030_buddy_run_routine.sql	internal/modules/caret/sql/migration_20261030_buddy_run_routine.sql
