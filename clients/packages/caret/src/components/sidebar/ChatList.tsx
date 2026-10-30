@@ -130,22 +130,23 @@ export const ChatList: React.FC<ChatListProps> = ({
       style={{
         display: "flex",
         flexDirection: "column",
-        gap: 9,
-        padding: "18px 14px 14px",
+        gap: 4,
+        padding: "8px 14px 8px",
         flex: 1,
         minHeight: 0,
         overflow: "hidden",
         boxSizing: "border-box",
       }}
     >
-      <div className="caret-chat-list-heading" style={{ margin: "0 2px 7px" }}>
+      <div className="caret-chat-list-heading" style={{ margin: "0 2px" }}>
         <h2
           style={{
             margin: 0,
-            color: caretTokens.text,
-            fontSize: 15,
+            color: caretTokens.textDim,
+            fontSize: 11.5,
             fontWeight: 650,
             lineHeight: 1.4,
+            padding: "4px 0",
           }}
         >
           {labels?.heading ?? "History"}

@@ -4,7 +4,6 @@ import {
   BookOpen,
   BriefcaseBusiness,
   Check,
-  ChevronDown,
   Code2,
   Coffee,
   Folder,
@@ -129,7 +128,6 @@ const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
   const [archiving, setArchiving] = useState<CaretProject | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [expanded, setExpanded] = useState(true);
   const modalRef = useRef<HTMLDivElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   useFocusTrap(modalRef, editing !== undefined || archiving !== null);
@@ -209,122 +207,81 @@ const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
     <>
       <section
         aria-label={copy.heading}
-        style={{ padding: "8px 14px 4px", flexShrink: 0 }}
+        style={{ padding: "8px 14px 8px", flexShrink: 0 }}
       >
-        <div
+        <h2
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-            minHeight: 30,
+            margin: 0,
+            padding: "4px 2px",
+            color: caretTokens.textDim,
+            fontSize: 11.5,
+            fontWeight: 650,
           }}
         >
-          <button
-            type="button"
-            aria-expanded={expanded}
-            onClick={() => setExpanded((value) => !value)}
-            style={{
-              flex: 1,
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              border: 0,
-              background: "transparent",
-              color: caretTokens.textDim,
-              padding: "4px 2px",
-              cursor: "pointer",
-              textAlign: "left",
-              fontSize: 11.5,
-              fontWeight: 650,
-            }}
-          >
-            <ChevronDown
-              size={13}
-              style={{ transform: expanded ? undefined : "rotate(-90deg)" }}
+          {copy.heading}
+        </h2>
+        <div style={{ display: "grid", gap: 2 }}>
+          {loadError ? (
+            <p
+              role="alert"
+              style={{
+                margin: "6px 8px",
+                fontSize: 11,
+                color: caretTokens.textDim,
+              }}
+            >
+              {copy.loadFailed}
+            </p>
+          ) : null}
+          {isLoading ? (
+            <p
+              role="status"
+              style={{
+                margin: "6px 8px",
+                fontSize: 11,
+                color: caretTokens.textDim,
+              }}
+            >
+              {copy.loading}
+            </p>
+          ) : null}
+          {projects.map((project) => (
+            <ProjectRow
+              key={project.id}
+              name={project.name}
+              icon={project.icon}
+              color={project.color}
+              active={activeId === project.id}
+              onSelect={() =>
+                onSelect(activeId === project.id ? null : project.id)
+              }
+              onEdit={() => setEditing(project)}
+              onArchive={() => setArchiving(project)}
+              editLabel={copy.editTitle}
+              archiveLabel={copy.archive}
             />
-            {copy.heading}
-          </button>
+          ))}
           <button
             type="button"
-            aria-label={copy.create}
-            title={copy.create}
             onClick={() => setEditing(null)}
             style={{
-              display: "grid",
-              placeItems: "center",
-              width: 26,
-              height: 26,
+              display: "flex",
+              alignItems: "center",
+              gap: 9,
               border: 0,
               borderRadius: caretRadius.sm,
               background: "transparent",
-              color: caretTokens.textDim,
+              color: caretTokens.textMuted,
+              padding: "6px 9px",
               cursor: "pointer",
+              textAlign: "left",
+              fontSize: 12.5,
             }}
           >
-            <Plus size={15} />
+            <Plus size={15} style={{ flexShrink: 0 }} />
+            {copy.create}
           </button>
         </div>
-        {expanded && (
-          <div style={{ display: "grid", gap: 2 }}>
-            <ProjectRow
-              name={copy.allChats}
-              icon="folder"
-              color="neutral"
-              active={activeId === null}
-              onSelect={() => onSelect(null)}
-            />
-            {loadError ? (
-              <p
-                role="alert"
-                style={{
-                  margin: "6px 8px",
-                  fontSize: 11,
-                  color: caretTokens.textDim,
-                }}
-              >
-                {copy.loadFailed}
-              </p>
-            ) : null}
-            {isLoading ? (
-              <p
-                role="status"
-                style={{
-                  margin: "6px 8px",
-                  fontSize: 11,
-                  color: caretTokens.textDim,
-                }}
-              >
-                {copy.loading}
-              </p>
-            ) : null}
-            {!isLoading && !loadError && projects.length === 0 ? (
-              <p
-                style={{
-                  margin: "6px 8px",
-                  fontSize: 11,
-                  lineHeight: 1.4,
-                  color: caretTokens.textDim,
-                }}
-              >
-                {copy.empty}
-              </p>
-            ) : null}
-            {projects.map((project) => (
-              <ProjectRow
-                key={project.id}
-                name={project.name}
-                icon={project.icon}
-                color={project.color}
-                active={activeId === project.id}
-                onSelect={() => onSelect(project.id)}
-                onEdit={() => setEditing(project)}
-                onArchive={() => setArchiving(project)}
-                editLabel={copy.editTitle}
-                archiveLabel={copy.archive}
-              />
-            ))}
-          </div>
-        )}
       </section>
 
       {modalOpen && (
