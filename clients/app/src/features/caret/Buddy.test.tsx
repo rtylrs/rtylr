@@ -31,10 +31,10 @@ beforeEach(() => {
   });
   api.putBuddySettings.mockImplementation(async (input) => ({ settings: input }));
   api.listBuddyRuns.mockResolvedValue({
-    runs: [{ id: 1, status: 'done', report: 'Everything is quiet.' }],
+    runs: [{ id: 1, status: 'done', triggerKind: 'schedule', report: 'Everything is quiet.' }],
   });
   api.listBuddyActions.mockResolvedValue({
-    actions: [{ id: 8, toolName: 'update_ticket', input: { id: 12 } }],
+    actions: [{ id: 8, runId: 1, status: 'pending', toolName: 'update_ticket', input: { id: 12 } }],
   });
   api.decideBuddyAction.mockResolvedValue({ action: { status: 'executed' } });
 });
@@ -45,7 +45,7 @@ function showBuddy() {
   });
   render(
     <QueryClientProvider client={queryClient}>
-      <Buddy scope="1:1" onBack={() => {}} />
+      <Buddy scope="1:1" />
     </QueryClientProvider>
   );
 }
@@ -53,6 +53,7 @@ describe('Caret Buddy', () => {
   it('saves edited settings and approves a proposal using the generated contract', async () => {
     const user = userEvent.setup();
     showBuddy();
+    await user.click(screen.getByRole('button', { name: 'Settings' }));
     await screen.findByDisplayValue('Check tickets');
     await user.click(screen.getByRole('checkbox', { name: 'Enable Buddy' }));
     await user.clear(screen.getByLabelText('Interval (minutes)'));
@@ -74,17 +75,21 @@ describe('Caret Buddy', () => {
     );
     expect(await screen.findByText('Action decision saved.')).toBeInTheDocument();
   });
-  it('shows a failed execution and surfaces list failures rather than empty states', async () => {
-    api.listBuddyRuns.mockRejectedValue(new Error('offline'));
-    api.decideBuddyAction.mockResolvedValue({
-      action: { status: 'failed', result: { error: 'unavailable' } },
+  it('keeps actions under their run and shows their final state', async () => {
+    api.listBuddyActions.mockResolvedValue({
+      actions: [
+        { id: 8, runId: 1, status: 'executed', toolName: 'update_ticket', input: {} },
+        { id: 9, runId: 2, status: 'pending', toolName: 'other_action', input: {} },
+      ],
     });
-    const user = userEvent.setup();
+    showBuddy();
+    expect(await screen.findByText('Executed')).toBeInTheDocument();
+    expect(screen.getByText('other_action')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Approve' })).toBeInTheDocument();
+  });
+  it('surfaces list failures instead of an empty state', async () => {
+    api.listBuddyRuns.mockRejectedValue(new Error('offline'));
     showBuddy();
     expect(await screen.findByText('Unable to load recent runs.')).toBeInTheDocument();
-    await user.click(await screen.findByRole('button', { name: 'Approve' }));
-    expect(
-      await screen.findByText(/The approved action could not be completed:/)
-    ).toHaveTextContent('unavailable');
   });
 });

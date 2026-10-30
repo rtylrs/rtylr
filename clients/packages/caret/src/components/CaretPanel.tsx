@@ -41,6 +41,8 @@ import ProjectSidebar, { type ProjectLabels } from "./sidebar/ProjectSidebar";
 export interface CaretWorkspaceOptions {
   header: React.ReactNode;
   sidebarHeader: React.ReactNode;
+  sidebarContent?: React.ReactNode;
+  mainContent?: React.ReactNode;
   welcome: React.ReactNode;
   historyLabels: ChatListLabels;
   projectLabels?: Partial<ProjectLabels>;
@@ -246,11 +248,15 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
           .getState()
           .tabs.find((tab) => tab.projectId === projectId);
         if (existing) caret.setActiveTab(existing.id);
-        else createChat(projectId);
+        else {
+          createChat(projectId);
+          return;
+        }
       }
       setView("chat");
+      workspace?.onSelectChat();
     },
-    [caret, createChat, setView],
+    [caret, createChat, setView, workspace],
   );
 
   const saveProject = useCallback(
@@ -913,6 +919,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
             }}
           >
             {workspace?.sidebarHeader}
+            {workspace?.sidebarContent}
             <div style={{ padding: "8px 14px 0", flexShrink: 0 }}>
               <NewChatButton
                 onClick={newChat}
@@ -921,7 +928,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
             </div>
             <ProjectSidebar
               projects={projects}
-              activeId={selectedProjectId}
+              activeId={workspace?.mainContent ? undefined : selectedProjectId}
               labels={workspace?.projectLabels}
               isLoading={projectsLoading}
               loadError={projectsError !== null}
@@ -935,7 +942,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
               isLoading={sessionsLoading}
               error={sessionsError}
               onRetry={retrySessions}
-              activeId={sessionId}
+              activeId={workspace?.mainContent ? undefined : sessionId}
               onSelect={selectChat}
               onNew={newChat}
               onDelete={deleteChat}
@@ -944,7 +951,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
               showNewChat={false}
             />
           </div>
-          {mainColumn}
+          {workspace?.mainContent ?? mainColumn}
         </div>
       ) : (
         mainColumn

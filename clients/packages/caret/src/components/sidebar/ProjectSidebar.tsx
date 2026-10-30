@@ -52,7 +52,7 @@ export interface ProjectLabels {
 
 interface ProjectSidebarProps {
   projects: CaretProject[];
-  activeId: string | null;
+  activeId: string | null | undefined;
   labels?: Partial<ProjectLabels>;
   isLoading?: boolean;
   loadError?: boolean;
