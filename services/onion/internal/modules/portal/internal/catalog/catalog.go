@@ -198,12 +198,14 @@ func terms(text string) map[string]bool {
 // "adding" finds "add".
 func stem(word string) string {
 	switch {
-	case len(word) > 5 && strings.HasSuffix(word, "ing"):
-		word = strings.TrimSuffix(word, "ing")
 	case len(word) > 4 && strings.HasSuffix(word, "ies"):
-		word = strings.TrimSuffix(word, "ies") + "y"
+		return strings.TrimSuffix(word, "ies") + "y"
 	case len(word) > 3 && strings.HasSuffix(word, "s") && !strings.HasSuffix(word, "ss"):
 		word = strings.TrimSuffix(word, "s")
+	}
+	// After the plural, so "settings" and "setting" fold the same way.
+	if len(word) > 5 && strings.HasSuffix(word, "ing") {
+		word = strings.TrimSuffix(word, "ing")
 	}
 	return word
 }

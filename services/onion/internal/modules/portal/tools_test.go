@@ -4,6 +4,7 @@ import (
 	"context"
 	"slices"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/portal/internal/catalog"
@@ -12,19 +13,32 @@ import (
 	portalv1 "github.com/voxire/voxie/gen/go/hub/portal/v1"
 )
 
-type memoryStore map[int64]layout.Layout
-
-func (s memoryStore) Layout(_ context.Context, userID int64) (layout.Layout, error) {
-	return s[userID], nil
+type memoryStore struct {
+	mu      sync.Mutex
+	layouts map[int64]layout.Layout
 }
 
-func (s memoryStore) SaveLayout(_ context.Context, userID int64, l layout.Layout) error {
-	if l.Empty() {
-		delete(s, userID)
-	} else {
-		s[userID] = l
+func newMemoryStore() *memoryStore { return &memoryStore{layouts: map[int64]layout.Layout{}} }
+
+func (s *memoryStore) Layout(_ context.Context, userID int64) (layout.Layout, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.layouts[userID], nil
+}
+
+func (s *memoryStore) UpdateLayout(_ context.Context, userID int64, edit func(layout.Layout) (layout.Layout, error)) (layout.Layout, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	next, err := edit(s.layouts[userID])
+	if err != nil {
+		return layout.Layout{}, err
 	}
-	return nil
+	if next.Empty() {
+		delete(s.layouts, userID)
+	} else {
+		s.layouts[userID] = next
+	}
+	return next, nil
 }
 
 func signedInAs(userID int64) context.Context {
@@ -32,7 +46,7 @@ func signedInAs(userID int64) context.Context {
 }
 
 func TestCaretMovesItselfToTheTopAndRestoresTheDefault(t *testing.T) {
-	store := memoryStore{}
+	store := newMemoryStore()
 	m := &Module{store: store, nav: catalog.Navigation()}
 	ctx := signedInAs(7)
 
@@ -50,20 +64,20 @@ func TestCaretMovesItselfToTheTopAndRestoresTheDefault(t *testing.T) {
 	if got.Layout.Workspace.Customized {
 		t.Fatal("moving Caret must not touch the workspace sidebar")
 	}
-	if _, ok := store[8]; ok {
+	if _, ok := store.layouts[8]; ok {
 		t.Fatal("another person's layout changed")
 	}
 
 	if _, _, err := m.ExecuteCaretTool(ctx, "portal.restore_default", map[string]any{"area": "all"}); err != nil {
 		t.Fatal(err)
 	}
-	if _, ok := store[7]; ok {
+	if _, ok := store.layouts[7]; ok {
 		t.Fatal("restoring the default should forget the saved layout")
 	}
 }
 
 func TestCustomizeInfersTheAreaAndHidesPages(t *testing.T) {
-	m := &Module{store: memoryStore{}, nav: catalog.Navigation()}
+	m := &Module{store: newMemoryStore(), nav: catalog.Navigation()}
 	out, _, err := m.ExecuteCaretTool(signedInAs(7), "portal.customize", map[string]any{"hide": []any{"Audit Log"}})
 	if err != nil {
 		t.Fatal(err)
@@ -78,7 +92,7 @@ func TestCustomizeInfersTheAreaAndHidesPages(t *testing.T) {
 }
 
 func TestSaveRepairsWhatTheClientSends(t *testing.T) {
-	m := &Module{store: memoryStore{}, nav: catalog.Navigation()}
+	m := &Module{store: newMemoryStore(), nav: catalog.Navigation()}
 	api := &layoutAPI{m}
 	ctx := signedInAs(7)
 	def, _ := m.nav.Area(layout.Rail)
@@ -98,7 +112,7 @@ func TestSaveRepairsWhatTheClientSends(t *testing.T) {
 }
 
 func TestToolsNeedASignedInPerson(t *testing.T) {
-	m := &Module{store: memoryStore{}, nav: catalog.Navigation()}
+	m := &Module{store: newMemoryStore(), nav: catalog.Navigation()}
 	if _, executed, err := m.ExecuteCaretTool(context.Background(), "portal.layout", nil); !executed || err == nil {
 		t.Fatalf("executed=%v err=%v", executed, err)
 	}
@@ -119,5 +133,28 @@ func TestFindPageHandsCaretACardToShow(t *testing.T) {
 	}
 	if empty := findPage(map[string]any{"query": "zzz"}); empty["count"] != 0 || empty["message"] == nil {
 		t.Fatalf("no match should say so: %v", empty)
+	}
+}
+
+func TestParallelChangesBothLand(t *testing.T) {
+	m := &Module{store: newMemoryStore(), nav: catalog.Navigation()}
+	ctx := signedInAs(7)
+	var wg sync.WaitGroup
+	for _, input := range []map[string]any{
+		{"area": "rail", "id": "caret", "group": "top", "position": "first"},
+		{"area": "workspace", "hide": []any{"auditLog"}},
+	} {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if _, _, err := m.ExecuteCaretTool(ctx, "portal.customize", input); err != nil {
+				t.Error(err)
+			}
+		}()
+	}
+	wg.Wait()
+	got, _ := (&layoutAPI{m}).GetPortalLayout(ctx, &portalv1.GetPortalLayoutRequest{})
+	if got.Layout.Rail.Top[0] != "caret" || !slices.Equal(got.Layout.Workspace.Hidden, []string{"auditLog"}) {
+		t.Fatalf("a change was lost: %+v", got.Layout)
 	}
 }

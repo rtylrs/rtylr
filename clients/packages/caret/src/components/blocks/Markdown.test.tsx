@@ -118,8 +118,19 @@ describe("Markdown page blocks", () => {
     expect(
       screen.getByRole("link", { name: "/team" }).getAttribute("href"),
     ).toBe("/team");
-    render(<Markdown source={'```page\n{"path":"//evil.example"}\n```'} />);
-    expect(screen.queryByRole("link", { name: "//evil.example" })).toBeNull();
+    // Browsers drop tabs and newlines and read "\" as "/": each of these
+    // would leave the app.
+    for (const path of [
+      "//evil.example",
+      "/\t/evil.example",
+      "/\n/evil.example",
+      "/\\evil.example",
+    ]) {
+      const { container } = render(
+        <Markdown source={"```page\n" + JSON.stringify({ path }) + "\n```"} />,
+      );
+      expect(container.querySelector("a")).toBeNull();
+    }
   });
 
   it("opens in-app links through the host so the chat stays open", () => {

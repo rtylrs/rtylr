@@ -87,4 +87,31 @@ describe('NavigationSettings', () => {
     await userEvent.click(appBar.getByRole('button', { name: 'Hide HR' }));
     expect(api.save.mock.calls[0][0].rail.hidden).toEqual(['hr']);
   });
+
+  it('reads a saved bar without a bottom group as Caret at the top, not twice', () => {
+    const saved = api.layout.rail;
+    // The API leaves out empty lists.
+    api.layout.rail = {
+      top: [
+        'caret',
+        'home',
+        'insights',
+        'flow',
+        'crm',
+        'erp',
+        'finance',
+        'hr',
+        'pos',
+        'automations',
+      ],
+      customized: true,
+    } as typeof saved;
+    try {
+      const appBar = renderSettings();
+      expect(appBar.getAllByText('Caret')).toHaveLength(1);
+      expect(appBar.getByRole('button', { name: 'Move Caret up' })).toBeDisabled();
+    } finally {
+      api.layout.rail = saved;
+    }
+  });
 });

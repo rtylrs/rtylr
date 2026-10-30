@@ -19,7 +19,8 @@ import (
 
 type layoutStore interface {
 	Layout(ctx context.Context, userID int64) (layout.Layout, error)
-	SaveLayout(ctx context.Context, userID int64, l layout.Layout) error
+	// UpdateLayout applies edit to the saved layout as one locked change.
+	UpdateLayout(ctx context.Context, userID int64, edit func(layout.Layout) (layout.Layout, error)) (layout.Layout, error)
 }
 
 type Module struct {
@@ -66,25 +67,24 @@ func (m *Module) change(ctx context.Context, userID int64, name string, edit fun
 	if !ok {
 		return layout.Layout{}, layout.Arrangement{}, fmt.Errorf("unknown area %q; use rail or workspace", name)
 	}
-	saved, err := m.store.Layout(ctx, userID)
-	if err != nil {
-		return layout.Layout{}, layout.Arrangement{}, err
-	}
-	next, err := edit(area, area.Resolve(saved.Saved(name)))
-	if err != nil {
-		return layout.Layout{}, layout.Arrangement{}, err
-	}
-	saved = saved.With(name, area.Stored(next))
-	if err := m.store.SaveLayout(ctx, userID, saved); err != nil {
-		return layout.Layout{}, layout.Arrangement{}, err
-	}
-	return saved, next, nil
+	var next layout.Arrangement
+	saved, err := m.store.UpdateLayout(ctx, userID, func(saved layout.Layout) (layout.Layout, error) {
+		arrangement, err := edit(area, area.Resolve(saved.Saved(name)))
+		if err != nil {
+			return saved, err
+		}
+		next = arrangement
+		return saved.With(name, area.Stored(arrangement)), nil
+	})
+	return saved, next, err
 }
 
 // reset restores one area, or every area when name is empty.
 func (m *Module) reset(ctx context.Context, userID int64, name string) (layout.Layout, error) {
 	if name == "" {
-		return layout.Layout{}, m.store.SaveLayout(ctx, userID, layout.Layout{})
+		return m.store.UpdateLayout(ctx, userID, func(layout.Layout) (layout.Layout, error) {
+			return layout.Layout{}, nil
+		})
 	}
 	saved, _, err := m.change(ctx, userID, name, func(area layout.Area, _ layout.Arrangement) (layout.Arrangement, error) {
 		return area.Default(), nil

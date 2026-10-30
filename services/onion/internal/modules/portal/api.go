@@ -29,18 +29,17 @@ func (a *layoutAPI) SavePortalLayout(ctx context.Context, req *portalv1.SavePort
 	if err != nil {
 		return nil, err
 	}
-	saved, err := a.m.store.Layout(ctx, userID)
-	if err != nil {
-		return nil, err
-	}
-	for name, sent := range map[string]*portalv1.PortalArrangement{layout.Rail: req.Rail, layout.Workspace: req.Workspace} {
-		if sent == nil {
-			continue
+	saved, err := a.m.store.UpdateLayout(ctx, userID, func(saved layout.Layout) (layout.Layout, error) {
+		for name, sent := range map[string]*portalv1.PortalArrangement{layout.Rail: req.Rail, layout.Workspace: req.Workspace} {
+			if sent == nil {
+				continue
+			}
+			area, _ := a.m.nav.Area(name)
+			saved = saved.With(name, area.Stored(area.Resolve(&layout.Arrangement{Top: sent.Top, Bottom: sent.Bottom, Hidden: sent.Hidden})))
 		}
-		area, _ := a.m.nav.Area(name)
-		saved = saved.With(name, area.Stored(area.Resolve(&layout.Arrangement{Top: sent.Top, Bottom: sent.Bottom, Hidden: sent.Hidden})))
-	}
-	if err := a.m.store.SaveLayout(ctx, userID, saved); err != nil {
+		return saved, nil
+	})
+	if err != nil {
 		return nil, err
 	}
 	return &portalv1.SavePortalLayoutResponse{Layout: a.m.layoutProto(saved)}, nil

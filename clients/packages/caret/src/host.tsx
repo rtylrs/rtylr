@@ -46,7 +46,9 @@ export function parsePageSpec(raw: string): CaretPageSpec | null {
   };
 }
 
-/** A path inside the app: "/team", not "//evil.example" or a full URL. */
+/** A path inside the app: "/team", not "//evil.example" or a full URL.
+ *  Browsers drop tabs and newlines from URLs and read "\\" as "/", so
+ *  "/\t/evil.example" would leave the app; any of them is refused. */
 export function isAppPath(path: string): boolean {
-  return /^\/(?![/\\])/.test(path);
+  return /^\/(?![/\\])/.test(path) && !/[\s\\\u0000-\u001f\u007f]/.test(path);
 }

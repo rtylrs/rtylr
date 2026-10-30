@@ -11,9 +11,12 @@ import (
 )
 
 // Repository keeps each person's Portal layout.
-type Repository struct{ q *sqlc.Queries }
+type Repository struct {
+	db *sql.DB
+	q  *sqlc.Queries
+}
 
-func NewRepository(db *sql.DB) *Repository { return &Repository{q: sqlc.New(db)} }
+func NewRepository(db *sql.DB) *Repository { return &Repository{db: db, q: sqlc.New(db)} }
 
 // Layout is the person's saved layout; empty when they never changed it.
 func (r *Repository) Layout(ctx context.Context, userID int64) (layout.Layout, error) {
@@ -24,21 +27,47 @@ func (r *Repository) Layout(ctx context.Context, userID int64) (layout.Layout, e
 	if err != nil {
 		return layout.Layout{}, err
 	}
+	return decode(raw)
+}
+
+// UpdateLayout edits the person's layout with their row locked, so two
+// changes at once (Caret runs tool calls in parallel) can't undo each other.
+func (r *Repository) UpdateLayout(ctx context.Context, userID int64, edit func(layout.Layout) (layout.Layout, error)) (layout.Layout, error) {
+	if err := r.q.EnsureLayout(ctx, userID); err != nil {
+		return layout.Layout{}, err
+	}
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return layout.Layout{}, err
+	}
+	defer tx.Rollback()
+	q := r.q.WithTx(tx)
+	raw, err := q.LockLayout(ctx, userID)
+	if err != nil {
+		return layout.Layout{}, err
+	}
+	current, err := decode(raw)
+	if err != nil {
+		return layout.Layout{}, err
+	}
+	next, err := edit(current)
+	if err != nil {
+		return layout.Layout{}, err
+	}
+	encoded, err := json.Marshal(next)
+	if err != nil {
+		return layout.Layout{}, err
+	}
+	if err := q.SetLayout(ctx, sqlc.SetLayoutParams{Layout: encoded, UserID: userID}); err != nil {
+		return layout.Layout{}, err
+	}
+	return next, tx.Commit()
+}
+
+func decode(raw json.RawMessage) (layout.Layout, error) {
 	var out layout.Layout
 	if err := json.Unmarshal(raw, &out); err != nil {
 		return layout.Layout{}, err
 	}
 	return out, nil
-}
-
-// SaveLayout stores the layout, or forgets it once it is all default again.
-func (r *Repository) SaveLayout(ctx context.Context, userID int64, l layout.Layout) error {
-	if l.Empty() {
-		return r.q.DeleteLayout(ctx, userID)
-	}
-	raw, err := json.Marshal(l)
-	if err != nil {
-		return err
-	}
-	return r.q.SaveLayout(ctx, sqlc.SaveLayoutParams{UserID: userID, Layout: raw})
 }

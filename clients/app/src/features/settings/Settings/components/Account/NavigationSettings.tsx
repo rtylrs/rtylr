@@ -43,15 +43,17 @@ interface Placed {
 /**
  * The person's arrangement with every id in place, including ones this
  * screen doesn't show (an app they can't open), so saving keeps them where
- * they were.
+ * they were. A saved arrangement comes back without its empty lists, so a
+ * missing bottom group means empty, not the default.
  */
 function placedIds(entries: Entry[], arrangement: PortalArrangement | undefined, bottom: string[]) {
-  const top = [
-    ...(arrangement?.top ?? entries.filter((e) => !bottom.includes(e.id)).map((e) => e.id)),
-  ];
-  const low = [
-    ...(arrangement?.bottom ?? entries.filter((e) => bottom.includes(e.id)).map((e) => e.id)),
-  ];
+  const saved = arrangement?.top !== undefined || arrangement?.bottom !== undefined;
+  const top = saved
+    ? [...(arrangement?.top ?? [])]
+    : entries.filter((e) => !bottom.includes(e.id)).map((e) => e.id);
+  const low = saved
+    ? (arrangement?.bottom ?? []).filter((id) => !top.includes(id))
+    : entries.filter((e) => bottom.includes(e.id)).map((e) => e.id);
   for (const entry of entries) {
     if (!top.includes(entry.id) && !low.includes(entry.id))
       (bottom.includes(entry.id) ? low : top).push(entry.id);

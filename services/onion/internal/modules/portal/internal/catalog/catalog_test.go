@@ -35,7 +35,7 @@ func TestSearchFindsThePageForWhatPeopleAsk(t *testing.T) {
 }
 
 func TestStemFoldsCommonEndings(t *testing.T) {
-	for word, want := range map[string]string{"members": "member", "adding": "add", "categories": "category", "address": "address"} {
+	for word, want := range map[string]string{"members": "member", "adding": "add", "categories": "category", "address": "address", "settings": "sett", "setting": "sett"} {
 		if got := stem(word); got != want {
 			t.Errorf("stem(%q) = %q, want %q", word, got, want)
 		}
