@@ -436,6 +436,22 @@
       "runsHint": "Reports and status from Buddy’s checks.",
       "runsFailed": "Unable to load recent runs.",
       "noRuns": "No runs yet.",
+      "emptyHint": "Buddy will post its reports here. Open settings to turn it on and choose what it should check.",
+      "openSettings": "Open settings",
+      "triggerSchedule": "Scheduled",
+      "triggerEvent": "Event",
+      "olderActions": "These proposals are from runs outside the available history.",
+      "status": {
+        "queued": "Queued",
+        "running": "Running",
+        "done": "Completed",
+        "failed": "Failed",
+        "pending": "Pending",
+        "approved": "Approved",
+        "denied": "Denied",
+        "executed": "Executed",
+        "expired": "Expired"
+      },
       "decisionSaved": "Action decision saved.",
       "executionFailed": "The approved action could not be completed:"
     }

@@ -1,10 +1,15 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft } from 'lucide-react';
+import { Bot, Settings } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { BuddyServiceClient } from '@voxire/voxie/hub/caret/v1/client';
-import type { BuddySettings, PutBuddySettingsRequest } from '@voxire/voxie/hub/caret/v1/types';
+import type {
+  BuddyAction,
+  BuddySettings,
+  PutBuddySettingsRequest,
+} from '@voxire/voxie/hub/caret/v1/types';
 import './buddy.css';
 
 const client = createOneKitClient(BuddyServiceClient, 'dash');
@@ -99,10 +104,17 @@ function SettingsForm({ settings, scope }: { settings: BuddySettings; scope: str
   );
 }
 
-export default function Buddy({ onBack, scope }: { onBack: () => void; scope: string }) {
+export default function Buddy({
+  scope,
+  sidebarToggle,
+}: {
+  scope: string;
+  sidebarToggle?: ReactNode;
+}) {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const [decisionMessage, setDecisionMessage] = useState('');
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const settings = useQuery({
     queryKey: ['caret-buddy', scope, 'settings'],
     queryFn: async () => {
@@ -117,7 +129,16 @@ export default function Buddy({ onBack, scope }: { onBack: () => void; scope: st
   });
   const actions = useQuery({
     queryKey: ['caret-buddy', scope, 'actions'],
-    queryFn: async () => (await client.listBuddyActions({ status: 'pending' })).actions ?? [],
+    queryFn: async () => {
+      const [all, pending] = await Promise.all([
+        client.listBuddyActions({}),
+        client.listBuddyActions({ status: 'pending' }),
+      ]);
+      const combined = new Map<number | undefined, BuddyAction>();
+      for (const action of [...(all.actions ?? []), ...(pending.actions ?? [])])
+        combined.set(action.id, action);
+      return [...combined.values()];
+    },
   });
   const decide = useMutation({
     mutationFn: ({ actionId, decision }: { actionId: number; decision: 'approve' | 'deny' }) =>
@@ -140,139 +161,171 @@ export default function Buddy({ onBack, scope }: { onBack: () => void; scope: st
     const parsed = new Date(value);
     return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString(i18n.language);
   };
+  const statusLabel = (status?: string) =>
+    status ? t(`common.caret.buddy.status.${status}`, { defaultValue: status }) : '';
+  const renderAction = (action: BuddyAction) => (
+    <div className="buddy-action" key={action.id}>
+      <div className="buddy-item-top">
+        <strong>{action.toolName}</strong>
+        <span>{statusLabel(action.status)}</span>
+      </div>
+      <pre>{JSON.stringify(action.input, null, 2)}</pre>
+      {action.status === 'pending' && action.expiresAt && (
+        <p className="buddy-note">
+          {t('common.caret.buddy.expires', { date: date(action.expiresAt) })}
+        </p>
+      )}
+      {action.status === 'pending' && (
+        <div className="buddy-buttons">
+          <button
+            className="buddy-primary"
+            type="button"
+            disabled={decide.isPending || action.id == null}
+            onClick={() =>
+              action.id != null && decide.mutate({ actionId: action.id, decision: 'approve' })
+            }
+          >
+            {t('common.caret.buddy.approve')}
+          </button>
+          <button
+            className="buddy-secondary"
+            type="button"
+            disabled={decide.isPending || action.id == null}
+            onClick={() =>
+              action.id != null && decide.mutate({ actionId: action.id, decision: 'deny' })
+            }
+          >
+            {t('common.caret.buddy.deny')}
+          </button>
+        </div>
+      )}
+      {action.status === 'failed' && action.result != null && (
+        <p className="buddy-error">{JSON.stringify(action.result)}</p>
+      )}
+    </div>
+  );
+  const unmatchedPending =
+    actions.data?.filter(
+      (action) =>
+        action.status === 'pending' &&
+        !runs.data?.some((run) => run.id != null && run.id === action.runId)
+    ) ?? [];
   return (
-    <div className="buddy-page">
-      <header className="buddy-header">
+    <div className="buddy-page caret-main-column">
+      <header className="caret-workspace-header buddy-header">
+        <div>
+          {sidebarToggle}
+          <span>{t('common.caret.buddy.title')}</span>
+        </div>
         <button
           type="button"
           className="portal-icon-button"
-          onClick={onBack}
-          aria-label={t('common.caret.buddy.back')}
+          onClick={() => setSettingsOpen((open) => !open)}
+          aria-label={t('common.caret.buddy.settings')}
+          aria-expanded={settingsOpen}
+          aria-controls="buddy-settings-panel"
+          title={t('common.caret.buddy.settings')}
         >
-          <ArrowLeft size={18} />
+          <Settings size={18} />
         </button>
-        <span>{t('common.caret.buddy.title')}</span>
       </header>
       <main className="buddy-content">
-        <div className="buddy-intro">
-          <span className="buddy-eyebrow">CARET / BUDDY</span>
-          <h1>{t('common.caret.buddy.title')}</h1>
-          <p>{t('common.caret.buddy.description')}</p>
-        </div>
-        <section className="buddy-section" aria-labelledby="buddy-settings-title">
-          <div className="buddy-section-heading">
-            <h2 id="buddy-settings-title">{t('common.caret.buddy.settings')}</h2>
-            <p>{t('common.caret.buddy.settingsHint')}</p>
+        {settingsOpen && (
+          <section
+            className="buddy-settings-panel"
+            id="buddy-settings-panel"
+            aria-labelledby="buddy-settings-title"
+          >
+            <div className="buddy-section-heading">
+              <h2 id="buddy-settings-title">{t('common.caret.buddy.settings')}</h2>
+              <p>{t('common.caret.buddy.settingsHint')}</p>
+            </div>
+            {settings.isPending ? (
+              <p>{t('common.caret.buddy.loading')}</p>
+            ) : settings.isError ? (
+              <div role="alert">
+                <p>{t('common.caret.buddy.loadFailed')}</p>
+                <button type="button" onClick={() => void settings.refetch()}>
+                  {t('common.refresh')}
+                </button>
+              </div>
+            ) : (
+              <SettingsForm settings={settings.data} scope={scope} />
+            )}
+          </section>
+        )}
+        {actions.isError && (
+          <div role="alert">
+            <p>{t('common.caret.buddy.actionsFailed')}</p>
+            <button type="button" onClick={() => void actions.refetch()}>
+              {t('common.refresh')}
+            </button>
           </div>
-          {settings.isPending ? (
-            <p>{t('common.caret.buddy.loading')}</p>
-          ) : settings.isError ? (
-            <div role="alert">
-              <p>{t('common.caret.buddy.loadFailed')}</p>
-              <button type="button" onClick={() => void settings.refetch()}>
-                {t('common.refresh')}
-              </button>
-            </div>
-          ) : (
-            <SettingsForm settings={settings.data} scope={scope} />
-          )}
-        </section>
-        <section className="buddy-section" aria-labelledby="buddy-actions-title">
-          <div className="buddy-section-heading">
-            <h2 id="buddy-actions-title">{t('common.caret.buddy.actions')}</h2>
-            <p>{t('common.caret.buddy.actionsHint')}</p>
+        )}
+        {decisionMessage && <p role="status">{decisionMessage}</p>}
+        {decide.isError && (
+          <p role="alert" className="buddy-error">
+            {getOneKitErrorMessage(decide.error, t('common.caret.buddy.decisionFailed'))}
+          </p>
+        )}
+        {unmatchedPending.length > 0 && !runs.isPending && (
+          <section className="buddy-unmatched" aria-label={t('common.caret.buddy.actions')}>
+            <h2>{t('common.caret.buddy.actions')}</h2>
+            <p className="buddy-note">{t('common.caret.buddy.olderActions')}</p>
+            {unmatchedPending.map(renderAction)}
+          </section>
+        )}
+        {runs.isPending || actions.isPending ? (
+          <p>{t('common.caret.buddy.loading')}</p>
+        ) : runs.isError ? (
+          <div role="alert">
+            <p>{t('common.caret.buddy.runsFailed')}</p>
+            <button type="button" onClick={() => void runs.refetch()}>
+              {t('common.refresh')}
+            </button>
           </div>
-          {actions.isPending ? (
-            <p>{t('common.caret.buddy.loading')}</p>
-          ) : actions.isError ? (
-            <div role="alert">
-              <p>{t('common.caret.buddy.actionsFailed')}</p>
-              <button type="button" onClick={() => void actions.refetch()}>
-                {t('common.refresh')}
-              </button>
+        ) : runs.data.length === 0 ? (
+          <div className="buddy-empty-state">
+            <div className="buddy-avatar">
+              <Bot size={22} />
             </div>
-          ) : actions.data.length === 0 ? (
-            <p className="buddy-empty">{t('common.caret.buddy.noActions')}</p>
-          ) : (
-            <div className="buddy-list">
-              {actions.data.map((action) => (
-                <article className="buddy-item" key={action.id}>
-                  <div className="buddy-item-top">
-                    <strong>{action.toolName}</strong>
-                    <span>{date(action.createdAt)}</span>
-                  </div>
-                  <pre>{JSON.stringify(action.input, null, 2)}</pre>
-                  {action.expiresAt && (
-                    <p className="buddy-note">
-                      {t('common.caret.buddy.expires', { date: date(action.expiresAt) })}
-                    </p>
-                  )}
-                  <div className="buddy-buttons">
-                    <button
-                      className="buddy-primary"
-                      type="button"
-                      disabled={decide.isPending || action.id == null}
-                      onClick={() =>
-                        action.id != null &&
-                        decide.mutate({ actionId: action.id, decision: 'approve' })
-                      }
-                    >
-                      {t('common.caret.buddy.approve')}
-                    </button>
-                    <button
-                      className="buddy-secondary"
-                      type="button"
-                      disabled={decide.isPending || action.id == null}
-                      onClick={() =>
-                        action.id != null &&
-                        decide.mutate({ actionId: action.id, decision: 'deny' })
-                      }
-                    >
-                      {t('common.caret.buddy.deny')}
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-          {decisionMessage && <p role="status">{decisionMessage}</p>}
-          {decide.isError && (
-            <p role="alert" className="buddy-error">
-              {getOneKitErrorMessage(decide.error, t('common.caret.buddy.decisionFailed'))}
-            </p>
-          )}
-        </section>
-        <section className="buddy-section" aria-labelledby="buddy-runs-title">
-          <div className="buddy-section-heading">
-            <h2 id="buddy-runs-title">{t('common.caret.buddy.runs')}</h2>
-            <p>{t('common.caret.buddy.runsHint')}</p>
+            <h1>{t('common.caret.buddy.title')}</h1>
+            <p>{t('common.caret.buddy.description')}</p>
+            <p>{t('common.caret.buddy.emptyHint')}</p>
+            <button type="button" className="buddy-secondary" onClick={() => setSettingsOpen(true)}>
+              {t('common.caret.buddy.openSettings')}
+            </button>
           </div>
-          {runs.isPending ? (
-            <p>{t('common.caret.buddy.loading')}</p>
-          ) : runs.isError ? (
-            <div role="alert">
-              <p>{t('common.caret.buddy.runsFailed')}</p>
-              <button type="button" onClick={() => void runs.refetch()}>
-                {t('common.refresh')}
-              </button>
-            </div>
-          ) : runs.data.length === 0 ? (
-            <p className="buddy-empty">{t('common.caret.buddy.noRuns')}</p>
-          ) : (
-            <div className="buddy-list">
-              {runs.data.map((run) => (
-                <article className="buddy-item" key={run.id}>
-                  <div className="buddy-item-top">
-                    <strong>{run.status}</strong>
+        ) : (
+          <div className="buddy-feed">
+            {[...runs.data].reverse().map((run, index) => (
+              <article className="buddy-message" key={run.id ?? index}>
+                <div className="buddy-avatar">
+                  <Bot size={17} />
+                </div>
+                <div className="buddy-message-body">
+                  <div className="buddy-message-meta">
+                    <strong>{t('common.caret.buddy.title')}</strong>
+                    <span>
+                      {run.triggerKind === 'schedule'
+                        ? t('common.caret.buddy.triggerSchedule')
+                        : run.triggerKind === 'event'
+                          ? t('common.caret.buddy.triggerEvent')
+                          : run.triggerKind}
+                    </span>
                     <span>{date(run.createdAt)}</span>
+                    <span>{statusLabel(run.status)}</span>
                   </div>
                   {run.report && <p className="buddy-report">{run.report}</p>}
                   {run.error && <p className="buddy-error">{run.error}</p>}
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
+                  {actions.data
+                    ?.filter((action) => run.id != null && action.runId === run.id)
+                    .map(renderAction)}
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );

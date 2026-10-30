@@ -92,17 +92,6 @@ export default function CaretWorkspace() {
     </button>
   );
 
-  if (buddyOpen)
-    return (
-      <div className="portal-caret-workspace">
-        <Buddy
-          key={`${user?.businessId}:${user?.id}`}
-          scope={`${user?.businessId}:${user?.id}`}
-          onBack={() => setBuddyOpen(false)}
-        />
-      </div>
-    );
-
   return (
     <div className="portal-caret-workspace portal-caret">
       <HelmetContainer title="Caret · rtylr" />
@@ -117,6 +106,7 @@ export default function CaretWorkspace() {
         workspace={{
           sidebarOpen,
           onSelectChat: () => {
+            setBuddyOpen(false);
             if (window.matchMedia('(max-width: 700px)').matches) setSidebarOpen(false);
           },
           sidebarHeader: (
@@ -128,6 +118,28 @@ export default function CaretWorkspace() {
               {toggle('sidebar')}
             </div>
           ),
+          sidebarContent: (user?.effectiveAccess?.isOwner || user?.effectiveAccess?.isAdmin) && (
+            <button
+              type="button"
+              className="caret-buddy-entry"
+              aria-current={buddyOpen ? 'page' : undefined}
+              onClick={() => {
+                setBuddyOpen(true);
+                if (window.matchMedia('(max-width: 700px)').matches) setSidebarOpen(false);
+              }}
+            >
+              <Bot size={17} />
+              {t('common.caret.buddy.title')}
+            </button>
+          ),
+          mainContent:
+            buddyOpen && (user?.effectiveAccess?.isOwner || user?.effectiveAccess?.isAdmin) ? (
+              <Buddy
+                key={`${user?.businessId}:${user?.id}`}
+                scope={`${user?.businessId}:${user?.id}`}
+                sidebarToggle={!sidebarOpen && toggle('header')}
+              />
+            ) : undefined,
           header: (
             <header className="caret-workspace-header">
               <div>
@@ -144,17 +156,6 @@ export default function CaretWorkspace() {
                     title={t('common.caret.installApp')}
                   >
                     <Download size={18} />
-                  </button>
-                )}
-                {(user?.effectiveAccess?.isOwner || user?.effectiveAccess?.isAdmin) && (
-                  <button
-                    type="button"
-                    className="portal-icon-button"
-                    onClick={() => setBuddyOpen(true)}
-                    aria-label={t('common.caret.buddy.title')}
-                    title={t('common.caret.buddy.title')}
-                  >
-                    <Bot size={18} />
                   </button>
                 )}
                 <button

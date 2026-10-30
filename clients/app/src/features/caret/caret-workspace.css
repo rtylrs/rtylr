@@ -102,3 +102,24 @@
 .portal-caret-workspace .caret-chat-list-scroll {
   order: 3;
 }
+.caret-buddy-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  margin: 8px 14px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--dash-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dash-text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: start;
+  cursor: pointer;
+}
+.caret-buddy-entry:hover,
+.caret-buddy-entry[aria-current='page'] {
+  background: var(--dash-hover);
+}

@@ -436,6 +436,22 @@
       "runsHint": "Rapports et état des vérifications de Buddy.",
       "runsFailed": "Impossible de charger les vérifications récentes.",
       "noRuns": "Aucune vérification pour le moment.",
+      "emptyHint": "Buddy publiera ses rapports ici. Ouvrez les paramètres pour l’activer et choisir les éléments à surveiller.",
+      "openSettings": "Ouvrir les paramètres",
+      "triggerSchedule": "Planifié",
+      "triggerEvent": "Événement",
+      "olderActions": "Ces propositions proviennent de vérifications absentes de l’historique disponible.",
+      "status": {
+        "queued": "En attente",
+        "running": "En cours",
+        "done": "Terminé",
+        "failed": "Échec",
+        "pending": "En attente",
+        "approved": "Approuvé",
+        "denied": "Refusé",
+        "executed": "Exécuté",
+        "expired": "Expiré"
+      },
       "decisionSaved": "Décision enregistrée.",
       "executionFailed": "L’action approuvée n’a pas pu être exécutée :"
     }
