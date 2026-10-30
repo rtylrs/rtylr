@@ -12,6 +12,7 @@ import (
 
 	echoapp "github.com/voxire/onion/internal/modules/caret/internal/application"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/snips"
 )
 
 const (
@@ -34,7 +35,7 @@ const (
 	markerTool
 	markerFollowUps
 	// markerNativeTool is a model's own function-call markup; see
-	// echoapp.ParseNativeToolCalls.
+	// snips.ParseNativeToolCalls.
 	markerNativeTool
 )
 
@@ -337,7 +338,7 @@ func (r *streamEventRenderer) drainTool(final bool) (bool, error) {
 // drainNativeTool runs the calls in a model's own function-call markup as
 // if they were <tool> markers, and keeps the markup out of the answer.
 func (r *streamEventRenderer) drainNativeTool(final bool) (bool, error) {
-	calls, end, ok := echoapp.ParseNativeToolCalls(r.pending, final)
+	calls, end, ok := snips.ParseNativeToolCalls(r.pending, final)
 	if !ok {
 		return false, nil
 	}
@@ -669,7 +670,7 @@ func firstMarker(s string) (int, markerKind) {
 			best, kind = index, candidate.kind
 		}
 	}
-	if index := echoapp.NativeToolCallStart(s); index >= 0 && (best < 0 || index < best) {
+	if index := snips.NativeToolCallStart(s); index >= 0 && (best < 0 || index < best) {
 		best, kind = index, markerNativeTool
 	}
 	return best, kind

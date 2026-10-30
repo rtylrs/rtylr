@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Sun, Moon, Monitor, LogOut, ExternalLink, Check, ChevronDown } from 'lucide-react';
 import { signOut } from '@voxire/auth';
@@ -23,7 +23,10 @@ const languages = [
   { code: 'ar', label: 'العربية' },
 ] as const;
 
-/** The avatar menu. In the top of the app bar it opens downwards. */
+/**
+ * The avatar menu. In the top of the app bar it opens downwards, unless the
+ * person moved it so low there's no room below.
+ */
 export default function ProfileMenu({ opensDown = false }: { opensDown?: boolean }) {
   const { user, logout } = useUserStore();
   const { theme, setTheme } = useThemeStore();
@@ -34,6 +37,18 @@ export default function ProfileMenu({ opensDown = false }: { opensDown?: boolean
   const ref = useRef<HTMLDetailsElement>(null);
   const close = () => {
     if (ref.current) ref.current.open = false;
+  };
+  const [down, setDown] = useState(opensDown);
+  // Open towards the side with room for the whole menu, so Sign out is
+  // never cut off.
+  const place = () => {
+    const details = ref.current;
+    const menu = details?.querySelector<HTMLElement>('.portal-profile-menu');
+    if (!details?.open || !menu) return;
+    const { top, bottom } = details.getBoundingClientRect();
+    const fitsBelow = window.innerHeight - top >= menu.offsetHeight;
+    const fitsAbove = bottom >= menu.offsetHeight;
+    setDown(opensDown ? fitsBelow || !fitsAbove : fitsBelow && !fitsAbove);
   };
   useEffect(() => {
     const outside = (event: MouseEvent) => {
@@ -56,7 +71,7 @@ export default function ProfileMenu({ opensDown = false }: { opensDown?: boolean
     };
   }, []);
   return (
-    <details className={`portal-profile${opensDown ? ' opens-down' : ''}`} ref={ref}>
+    <details className={`portal-profile${down ? ' opens-down' : ''}`} ref={ref} onToggle={place}>
       <summary
         role="button"
         className="portal-rail-button"

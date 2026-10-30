@@ -3,12 +3,12 @@ package application
 import (
 	"encoding/json"
 	"fmt"
-	"regexp"
 	"sort"
 	"strings"
 	"unicode/utf8"
 
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/domain"
+	"github.com/voxire/onion/internal/platform/snips"
 )
 
 // Context window budgets, in bytes of prompt text (roughly four per token).
@@ -71,11 +71,6 @@ func uncoveredMessages(messages []domain.ConversationMessage, through int) []dom
 	return nil
 }
 
-// nativeCallTagRe matches a model's own function-call markup (DeepSeek's
-// DSML) that an older reply may still hold; replayed, the model copies it
-// instead of calling tools the way the prompt asks.
-var nativeCallTagRe = regexp.MustCompile(`<\s*/?\s*[｜|]\s*DSML\s*[｜|][^<>]*>`)
-
 // renderTurn writes one message as a transcript entry, with a note for each
 // tool step the reply took so follow-ups like "search that again" make sense.
 func renderTurn(message domain.ConversationMessage) string {
@@ -95,7 +90,12 @@ func renderTurn(message domain.ConversationMessage) string {
 	for _, note := range stepNotes(message.Metadata) {
 		turn.WriteString("[" + note + "]\n")
 	}
-	content := nativeCallTagRe.ReplaceAllString(message.Content, "")
+	content := message.Content
+	if speaker == "Caret" {
+		// An older reply may hold the model's own call markup; replayed, the
+		// model copies it instead of calling tools the way the prompt asks.
+		content = snips.StripNativeToolCalls(content)
+	}
 	turn.WriteString(clipMiddle(strings.TrimSpace(content), messageClipBytes))
 	return turn.String()
 }

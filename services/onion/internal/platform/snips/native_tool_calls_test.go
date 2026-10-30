@@ -1,4 +1,4 @@
-package application
+package snips
 
 import (
 	"reflect"
@@ -44,6 +44,14 @@ func TestParseNativeToolCallsWaitsForTheWholeBlock(t *testing.T) {
 	}
 }
 
+// A tag cut off before its ">" drops alone; what follows it is kept.
+func TestParseNativeToolCallsKeepsTextAfterABrokenTag(t *testing.T) {
+	_, end, ok := ParseNativeToolCalls("<｜DSML｜ and then the answer", true)
+	if !ok || end != len("<｜DSML｜") {
+		t.Fatalf("end = %d, ok = %v", end, ok)
+	}
+}
+
 func TestParseNativeToolCallsAcceptsPlainBars(t *testing.T) {
 	calls, _, ok := ParseNativeToolCalls(`<|DSML|tool_calls><|DSML|invoke name="portal.restore_default"><|DSML|parameter name="area" string="true">all</|DSML|parameter></|DSML|invoke></|DSML|tool_calls>`, false)
 	if !ok || len(calls) != 1 || calls[0].Name != "portal.restore_default" || calls[0].Input["area"] != "all" {
@@ -55,12 +63,5 @@ func TestStripNativeToolCallsKeepsTheProse(t *testing.T) {
 	got := StripNativeToolCalls("Checking your layout.\n\n" + nativeLayoutCall + "\nDone.")
 	if got != "Checking your layout.\n\n\nDone." {
 		t.Fatalf("got %q", got)
-	}
-}
-
-func TestParseToolMarkersReadsNativeCalls(t *testing.T) {
-	calls, rest := parseToolMarkers("One moment. " + nativeLayoutCall)
-	if len(calls) != 1 || calls[0].Name != "portal.layout" || rest != "One moment. " {
-		t.Fatalf("calls = %v, rest = %q", calls, rest)
 	}
 }

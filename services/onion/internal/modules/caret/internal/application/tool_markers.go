@@ -3,6 +3,8 @@ package application
 import (
 	"encoding/json"
 	"strings"
+
+	"github.com/voxire/onion/internal/platform/snips"
 )
 
 // toolMarker is one <tool>{"name","input"}</tool> call in model output.
@@ -11,15 +13,26 @@ type toolMarker struct {
 	Input map[string]any `json:"input"`
 }
 
-// parseToolMarkers finds every well-formed tool marker in text and returns
-// the calls and the text with them removed.
+// parseToolMarkers finds every well-formed tool marker in text, and any call
+// in the model's own markup (see snips.ParseNativeToolCalls), and returns the
+// calls and the text with them removed.
 func parseToolMarkers(text string) ([]toolMarker, string) {
 	const openTag, closeTag = "<tool>", "</tool>"
 	var calls []toolMarker
-	text = nativeCallsAsMarkers(text)
 	var rest strings.Builder
 	for {
 		start := strings.Index(text, openTag)
+		// Native markup is read where it stands; inside a <tool> marker it is
+		// part of an input and stays as written.
+		if native := snips.NativeToolCallStart(text); native >= 0 && (start < 0 || native < start) {
+			rest.WriteString(text[:native])
+			found, end, _ := snips.ParseNativeToolCalls(text[native:], true)
+			for _, call := range found {
+				calls = append(calls, toolMarker{Name: strings.TrimSpace(call.Name), Input: call.Input})
+			}
+			text = text[native+end:]
+			continue
+		}
 		if start < 0 {
 			rest.WriteString(text)
 			break
@@ -41,25 +54,4 @@ func parseToolMarkers(text string) ([]toolMarker, string) {
 		text = text[start+end+len(closeTag):]
 	}
 	return calls, rest.String()
-}
-
-// nativeCallsAsMarkers rewrites a model's own function-call markup as <tool>
-// markers, so it is read like any other call.
-func nativeCallsAsMarkers(text string) string {
-	var out strings.Builder
-	for {
-		start := NativeToolCallStart(text)
-		if start < 0 {
-			out.WriteString(text)
-			return out.String()
-		}
-		out.WriteString(text[:start])
-		calls, end, _ := ParseNativeToolCalls(text[start:], true)
-		for _, call := range calls {
-			if raw, err := json.Marshal(call); err == nil {
-				out.WriteString("<tool>" + string(raw) + "</tool>")
-			}
-		}
-		text = text[start+end:]
-	}
 }

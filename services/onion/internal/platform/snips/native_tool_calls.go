@@ -1,4 +1,4 @@
-package application
+package snips
 
 import (
 	"encoding/json"
@@ -43,14 +43,18 @@ func NativeToolCallStart(text string) int {
 // ParseNativeToolCalls reads the native call block text starts with. It
 // returns the calls and the block's length, or ok false while the block is
 // still arriving. At the end of the reply (final) an unclosed block runs to
-// the end of text, since the model may stop before closing it.
+// the end of text, since the model may stop before closing it; a tag that
+// never finished drops alone, keeping the text after it.
 func ParseNativeToolCalls(text string, final bool) (calls []NativeToolCall, end int, ok bool) {
 	open := nativeCallTagRe.FindStringSubmatchIndex(text)
 	if open == nil || open[0] != 0 {
-		if final {
-			return nil, len(text), true
+		if !final {
+			return nil, 0, false
 		}
-		return nil, 0, false
+		if start := nativeCallStartRe.FindStringIndex(text); start != nil && start[0] == 0 {
+			return nil, start[1], true
+		}
+		return nil, len(text), true
 	}
 	if text[open[2]:open[3]] == "/" {
 		// A stray closing tag: drop it.

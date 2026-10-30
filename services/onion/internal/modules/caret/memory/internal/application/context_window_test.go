@@ -175,14 +175,19 @@ func TestRenderTurnNotesToolStepsAndClipsLongMessages(t *testing.T) {
 }
 
 // A reply that leaked DeepSeek's own call markup is replayed without it, or
-// the model copies the markup on every turn after.
+// the model copies the markup on every turn after. The person's own words
+// stay as written.
 func TestRenderTurnDropsNativeCallMarkup(t *testing.T) {
-	turn := renderTurn(domain.ConversationMessage{
-		Role:    "assistant",
-		Content: "Checking.\n<｜DSML｜function_calls>\n<｜DSML｜invoke name=\"portal.layout\">\n</｜DSML｜invoke>\n</｜DSML｜function_calls>",
-	})
-	if strings.Contains(turn, "DSML") || !strings.Contains(turn, "Checking.") {
+	call := "<｜DSML｜function_calls>\n<｜DSML｜invoke name=\"portal.customize\">\n" +
+		"<｜DSML｜parameter name=\"id\" string=\"true\">profile</｜DSML｜parameter>\n" +
+		"</｜DSML｜invoke>\n</｜DSML｜function_calls>"
+	turn := renderTurn(domain.ConversationMessage{Role: "assistant", Content: "Checking.\n" + call + "\nDone."})
+	if strings.Contains(turn, "DSML") || strings.Contains(turn, "profile") || !strings.Contains(turn, "Checking.") || !strings.Contains(turn, "Done.") {
 		t.Fatalf("turn = %q", turn)
+	}
+	asked := renderTurn(domain.ConversationMessage{Role: "user", Content: "What does " + call + " mean?"})
+	if !strings.Contains(asked, call) {
+		t.Fatalf("user turn changed: %q", asked)
 	}
 }
 
