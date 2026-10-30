@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/voxire/onion/internal/modules/portal/internal/catalog"
@@ -43,7 +44,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 		if err != nil {
 			return nil, true, err
 		}
-		if area == "" {
+		if area == "all" {
 			area = m.inferArea(change)
 		}
 		saved, next, err := m.change(ctx, userID, area, func(a layout.Area, current layout.Arrangement) (layout.Arrangement, error) {
@@ -67,13 +68,15 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 		if err != nil {
 			return nil, true, err
 		}
-		out := []map[string]any{}
+		out, names := []map[string]any{}, []string{}
 		for _, name := range areas {
 			if area == "" || area == name {
 				out = append(out, m.areaOutput(name, m.arrangements(saved)[name], saved.Saved(name) != nil))
+				named, _ := m.nav.Area(name)
+				names = append(names, strings.ToLower(named.Name))
 			}
 		}
-		return map[string]any{"areas": out, "message": "Restored the rtylr default."}, true, nil
+		return map[string]any{"areas": out, "message": "Restored the rtylr default of the " + strings.Join(names, " and the ") + "."}, true, nil
 	}
 }
 
@@ -116,15 +119,17 @@ func (m *Module) areaOutput(name string, arrangement layout.Arrangement, customi
 	return map[string]any{"area": name, "name": area.Name, "description": area.Description, "items": items, "customized": customized}
 }
 
-// areaName reads the area, accepting the words people use for each.
+// areaName reads the area. People call the whole left side "the sidebar",
+// so a bare "sidebar" names no single area: a reset covers both, and a move
+// follows the items it names.
 func areaName(input map[string]any) string {
 	value, _ := input["area"].(string)
 	switch strings.ToLower(strings.TrimSpace(value)) {
-	case "rail", "app bar", "app_bar", "appbar", "apps", "icons", "left bar":
+	case "rail", "app bar", "app_bar", "appbar", "apps", "icons", "app icons", "left bar":
 		return layout.Rail
-	case "workspace", "sidebar", "workspace sidebar", "pages", "menu":
+	case "workspace", "workspace sidebar", "home sidebar", "pages", "page list":
 		return layout.Workspace
-	case "all", "everything", "both":
+	case "", "all", "everything", "both", "sidebar", "side bar", "navigation", "nav", "menu", "left side":
 		return "all"
 	}
 	return strings.ToLower(strings.TrimSpace(value))
@@ -148,7 +153,11 @@ func (m *Module) inferArea(change layout.Change) string {
 func changeFromInput(input map[string]any) (layout.Change, error) {
 	change := layout.Change{Hide: stringList(input["hide"]), Show: stringList(input["show"])}
 	moveFrom := func(raw map[string]any) layout.Move {
-		return layout.Move{ID: firstString(raw, "id", "item", "move"), Group: firstString(raw, "group"), Position: firstString(raw, "position", "to")}
+		position := firstString(raw, "position", "to")
+		if slot, ok := raw["position"].(float64); ok {
+			position = strconv.Itoa(int(slot))
+		}
+		return layout.Move{ID: firstString(raw, "id", "item", "move"), Group: firstString(raw, "group"), Position: position}
 	}
 	if moves, ok := input["moves"].([]any); ok {
 		for _, raw := range moves {

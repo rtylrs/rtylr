@@ -158,3 +158,36 @@ func TestParallelChangesBothLand(t *testing.T) {
 		t.Fatalf("a change was lost: %+v", got.Layout)
 	}
 }
+
+// People call the whole left side "the sidebar": resetting it puts Caret back
+// at the bottom too, and moving Caret "in the sidebar" moves it in the app bar.
+func TestTheSidebarMeansTheWholeLeftSide(t *testing.T) {
+	store := newMemoryStore()
+	m := &Module{store: store, nav: catalog.Navigation()}
+	ctx := signedInAs(7)
+	if _, _, err := m.ExecuteCaretTool(ctx, "portal.customize", map[string]any{"area": "sidebar", "id": "caret", "position": "first", "group": "top"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := m.ExecuteCaretTool(ctx, "portal.customize", map[string]any{"area": "sidebar", "hide": []any{"auditLog"}}); err != nil {
+		t.Fatal(err)
+	}
+	out, _, err := m.ExecuteCaretTool(ctx, "portal.restore_default", map[string]any{"area": "sidebar"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := store.layouts[7]; ok {
+		t.Fatalf("resetting the sidebar left %+v", store.layouts[7])
+	}
+	if msg, _ := out["message"].(string); !strings.Contains(msg, "app bar") || !strings.Contains(msg, "workspace sidebar") {
+		t.Fatalf("message = %q", msg)
+	}
+	if _, _, err := m.ExecuteCaretTool(ctx, "portal.customize", map[string]any{"area": "home sidebar", "hide": []any{"auditLog"}}); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := m.ExecuteCaretTool(ctx, "portal.restore_default", map[string]any{"area": "home sidebar"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := store.layouts[7]; ok {
+		t.Fatal("naming the Home sidebar should reset it")
+	}
+}

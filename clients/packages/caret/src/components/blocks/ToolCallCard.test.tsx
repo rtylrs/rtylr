@@ -110,15 +110,47 @@ describe("ToolCallCard", () => {
       status: "success",
       output: {
         reports: [
-          { task: "Compare supplier A", status: "done", report: "A is cheaper." },
+          {
+            task: "Compare supplier A",
+            status: "done",
+            report: "A is cheaper.",
+          },
           { task: "Compare supplier B", status: "error", report: "" },
         ],
       },
     };
     render(<ToolCallCard call={agents} />);
-    fireEvent.click(screen.getByRole("button", { name: /work on it in parallel/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /work on it in parallel/i }),
+    );
     expect(screen.getByText("Done: Compare supplier A")).not.toBeNull();
     expect(screen.getByText("A is cheaper.")).not.toBeNull();
-    expect(screen.getByText("Could not finish: Compare supplier B")).not.toBeNull();
+    expect(
+      screen.getByText("Could not finish: Compare supplier B"),
+    ).not.toBeNull();
+  });
+
+  it("says what a Portal change did instead of a generic check", () => {
+    const call = (name: string): ToolCallBlock => ({
+      id: name,
+      type: "tool_call",
+      name,
+      input: {},
+      status: "success",
+    });
+    render(<ToolCallCard call={call("portal.customize")} />);
+    render(<ToolCallCard call={call("portal.restore_default")} />);
+    render(<ToolCallCard call={call("buddy.create_routine")} />);
+    expect(
+      screen.getByRole("button", { name: /Completed: rearrange your Portal/ }),
+    ).not.toBeNull();
+    expect(
+      screen.getByRole("button", {
+        name: /Completed: restore the default navigation/,
+      }),
+    ).not.toBeNull();
+    expect(
+      screen.getByRole("button", { name: /Completed: set up a routine/ }),
+    ).not.toBeNull();
   });
 });
