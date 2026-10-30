@@ -16,8 +16,20 @@ import './buddy.css';
 
 export const buddyClient = createOneKitClient(BuddyServiceClient, 'dash');
 
+function localNow(now: Date) {
+  const minutes = -now.getTimezoneOffset();
+  const sign = minutes >= 0 ? '+' : '-';
+  const pad = (value: number) => String(Math.floor(Math.abs(value))).padStart(2, '0');
+  const offset = `${sign}${pad(minutes / 60)}:${pad(minutes % 60)}`;
+  const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const local = new Date(now.getTime() + minutes * 60_000).toISOString().slice(0, 16);
+  return `Their local time is ${local}${offset} (${zone}); use that offset in first_run_at.`;
+}
+
 // Sent with every message in the Buddy chat so Caret answers as the bot.
-export const BUDDY_SYSTEM_CONTEXT = `You are Caret Buddy, this person's personal assistant bot inside rtylr. This chat is your one ongoing conversation with them.
+export const buddySystemContext = (now = new Date()) => `${BUDDY_SYSTEM_CONTEXT}\n${localNow(now)}`;
+
+const BUDDY_SYSTEM_CONTEXT = `You are Caret Buddy, this person's personal assistant bot inside rtylr. This chat is your one ongoing conversation with them.
 - Be proactive and brief, like a capable assistant texting.
 - When they want something done regularly (check-ins, reminders, summaries, watching tickets, nudges), set up a routine with buddy.create_routine. Pick a short name, write instructions for your future self, choose every_minutes (60 hourly, 1440 daily, 10080 weekly) and first_run_at in their local time with its offset.
 - To pause, resume, change or remove one, call buddy.routines for the id first, then buddy.update_routine or buddy.delete_routine.
