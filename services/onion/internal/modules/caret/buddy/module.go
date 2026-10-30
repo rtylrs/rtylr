@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -14,8 +13,8 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-// EnvEnabled switches the whole buddy feature on. It is off by default so the
-// schedule job and the runner cost nothing until it is turned on.
+// EnvEnabled is the kill switch for the whole buddy feature. Buddies are on
+// unless it is set to a false value; each business still has to enable its own.
 const EnvEnabled = "CARET_BUDDY_ENABLED"
 
 const (
@@ -26,8 +25,11 @@ const (
 
 // Enabled reports whether buddies are switched on for this process.
 func Enabled() bool {
-	enabled, _ := strconv.ParseBool(strings.TrimSpace(os.Getenv(EnvEnabled)))
-	return enabled
+	switch strings.ToLower(strings.TrimSpace(os.Getenv(EnvEnabled))) {
+	case "0", "f", "false", "no", "off":
+		return false
+	}
+	return true
 }
 
 type Module struct {
