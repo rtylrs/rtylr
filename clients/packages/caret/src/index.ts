@@ -76,6 +76,13 @@ export * from "./hooks";
 // Protocol
 export * from "./protocol";
 
+// Host integration: the app around Caret renders page cards and reacts to
+// what Caret's tools change.
+export { onCaretToolSuccess } from "./lib/toolEvents";
+export type { CaretToolSuccess } from "./lib/toolEvents";
+export { CaretHostProvider, useCaretHost } from "./host";
+export type { CaretHost, CaretPageSpec } from "./host";
+
 // Markdown (escape-hatch for embedding renderer elsewhere)
 export { renderMarkdown, renderInlineMarkdown } from "./markdown";
 

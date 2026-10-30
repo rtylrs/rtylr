@@ -1,0 +1,33 @@
+{
+  "rail": {
+    "name": "App bar",
+    "description": "the column of app icons on the far left of the Portal",
+    "items": [
+      { "id": "home", "label": "Home", "required": true },
+      { "id": "insights", "label": "Insights" },
+      { "id": "flow", "label": "Work" },
+      { "id": "crm", "label": "CRM" },
+      { "id": "erp", "label": "Operations" },
+      { "id": "finance", "label": "Finance" },
+      { "id": "hr", "label": "HR" },
+      { "id": "pos", "label": "POS" },
+      { "id": "automations", "label": "Automations" },
+      { "id": "caret", "label": "Caret", "bottom": true }
+    ]
+  },
+  "workspace": {
+    "name": "Workspace sidebar",
+    "description": "the list of pages beside the app bar on Home",
+    "items": [
+      { "id": "dashboard", "label": "Home", "required": true },
+      { "id": "team", "label": "Team" },
+      { "id": "groups", "label": "Groups" },
+      { "id": "roles", "label": "Permissions" },
+      { "id": "auditLog", "label": "Audit Log" },
+      { "id": "menus", "label": "Menus" },
+      { "id": "qrCodes", "label": "QR Codes" },
+      { "id": "design", "label": "Design" },
+      { "id": "extensions", "label": "Extensions" }
+    ]
+  }
+}

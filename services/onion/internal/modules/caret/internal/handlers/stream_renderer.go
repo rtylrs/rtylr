@@ -380,7 +380,7 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 		return r.emitToolExecutionNotice(call, "error", "I could not run that business check because the requested inputs were invalid.", err.Error())
 	}
 
-	requiresApproval := def.RequiresApproval || def.Scope == "write"
+	requiresApproval := def.RequiresApproval || (def.Scope == "write" && !def.Personal)
 	if requiresApproval && call.Name == "memory.remember" && len(r.inflight) > 0 {
 		// A memory proposal stops the reply until it is approved, so one made
 		// while lookups are still running would leave the person with no

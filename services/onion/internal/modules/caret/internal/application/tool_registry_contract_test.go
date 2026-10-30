@@ -20,8 +20,12 @@ func TestToolLookupNormalizesWhitespace(t *testing.T) {
 
 func TestEveryWriteToolRequiresApproval(t *testing.T) {
 	for _, tool := range CoreTools {
-		if tool.Scope == "write" && !tool.RequiresApproval {
+		if tool.Scope == "write" && !tool.RequiresApproval && !tool.Personal {
 			t.Errorf("write tool %q must require approval", tool.Name)
+		}
+		// Skipping approval is only for rearranging the person's own Portal.
+		if tool.Personal && tool.Module != "portal" {
+			t.Errorf("tool %q changes more than the person's own Portal view, so it can't skip approval", tool.Name)
 		}
 	}
 }

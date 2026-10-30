@@ -1,0 +1,2768 @@
+[
+  {
+    "path": "/",
+    "app": "workspace",
+    "title": "Home",
+    "summary": "Start page for the business, with a search across apps, pages and actions.",
+    "tasks": [
+      "Find an app, page or action",
+      "Open an app from the home page"
+    ],
+    "actions": [
+      "Search apps, pages and actions…"
+    ],
+    "keywords": [
+      "dashboard",
+      "start page",
+      "overview",
+      "search",
+      "main page"
+    ]
+  },
+  {
+    "path": "/team",
+    "app": "workspace",
+    "title": "Team",
+    "summary": "Everyone with access to the business, with their roles and groups.",
+    "tasks": [
+      "Invite a team member",
+      "Add members to a group",
+      "Open a member to see or edit their access"
+    ],
+    "actions": [
+      "Add a member",
+      "Add to group"
+    ],
+    "keywords": [
+      "staff",
+      "users",
+      "people",
+      "members",
+      "employees",
+      "invite",
+      "access"
+    ]
+  },
+  {
+    "path": "/team/groups",
+    "app": "workspace",
+    "title": "Groups",
+    "summary": "Bundle users into shared groups to control access across apps.",
+    "tasks": [
+      "Create a group",
+      "Give a group access to apps",
+      "Add members to a group"
+    ],
+    "actions": [
+      "New group"
+    ],
+    "keywords": [
+      "teams",
+      "user groups",
+      "access groups",
+      "bundles",
+      "shared access"
+    ]
+  },
+  {
+    "path": "/roles",
+    "app": "workspace",
+    "title": "Permissions",
+    "summary": "Define app access and assign it to members or groups.",
+    "tasks": [
+      "Create a permission set",
+      "Change what a permission set can do",
+      "Archive a permission set"
+    ],
+    "actions": [
+      "New permissions"
+    ],
+    "keywords": [
+      "roles",
+      "permission profiles",
+      "access levels",
+      "rights",
+      "role"
+    ]
+  },
+  {
+    "path": "/audit",
+    "app": "workspace",
+    "title": "Audit Log",
+    "summary": "Review security events and changes to your workspace.",
+    "tasks": [
+      "See who changed what in the workspace",
+      "Review security events",
+      "Export the log to CSV"
+    ],
+    "actions": [],
+    "keywords": [
+      "history",
+      "activity",
+      "security log",
+      "changes",
+      "who did what",
+      "logs"
+    ]
+  },
+  {
+    "path": "/extensions",
+    "app": "workspace",
+    "title": "Extensions",
+    "summary": "Discover tools, add capabilities, and connect your business in one place.",
+    "tasks": [
+      "Find a tool to add to the business",
+      "Manage an extension that is already added"
+    ],
+    "actions": [
+      "Manage"
+    ],
+    "keywords": [
+      "integrations",
+      "marketplace",
+      "apps",
+      "add-ons",
+      "addons",
+      "store",
+      "connect"
+    ]
+  },
+  {
+    "path": "/menus",
+    "app": "workspace",
+    "title": "Menus",
+    "summary": "Your menus, with the items on each one.",
+    "tasks": [
+      "See the menus for the business",
+      "Add an item to a menu"
+    ],
+    "actions": [],
+    "keywords": [
+      "menu",
+      "food menu",
+      "products list",
+      "public menu"
+    ]
+  },
+  {
+    "path": "/qr-codes",
+    "app": "workspace",
+    "title": "QR Codes",
+    "summary": "QR codes for your public menu, including a custom QR generator.",
+    "tasks": [
+      "Create a QR code for a table",
+      "Find an existing QR code"
+    ],
+    "actions": [
+      "Custom QR Generator"
+    ],
+    "keywords": [
+      "qr",
+      "table codes",
+      "scan",
+      "menu code",
+      "qr generator"
+    ]
+  },
+  {
+    "path": "/design",
+    "app": "workspace",
+    "title": "Design",
+    "summary": "Storefront appearance for your public menu: pages, header, navigation, items, colors and typography.",
+    "tasks": [
+      "Change the colors of the storefront",
+      "Change the fonts used on the storefront",
+      "Change the header or navigation"
+    ],
+    "actions": [],
+    "keywords": [
+      "storefront",
+      "look",
+      "theme",
+      "colors",
+      "fonts",
+      "layout",
+      "appearance"
+    ]
+  },
+  {
+    "path": "/orders",
+    "app": "workspace",
+    "title": "Orders",
+    "summary": "Orders placed with the business, with their status and details.",
+    "tasks": [
+      "See recent orders",
+      "Open an order to see its details"
+    ],
+    "actions": [
+      "View"
+    ],
+    "keywords": [
+      "sales",
+      "purchases",
+      "order list",
+      "customer orders"
+    ]
+  },
+  {
+    "path": "/notifications",
+    "app": "workspace",
+    "title": "Notifications",
+    "summary": "Alerts about activity in your business, with unread and all filters.",
+    "tasks": [
+      "See what needs your attention",
+      "Mark all notifications as read"
+    ],
+    "actions": [
+      "Mark all read"
+    ],
+    "keywords": [
+      "alerts",
+      "updates",
+      "unread",
+      "inbox",
+      "activity"
+    ]
+  },
+  {
+    "path": "/help",
+    "app": "workspace",
+    "title": "Help Center",
+    "summary": "Help and guidance for using the portal.",
+    "tasks": [
+      "Find help for a feature",
+      "Read guidance on using the portal"
+    ],
+    "actions": [],
+    "keywords": [
+      "support",
+      "docs",
+      "documentation",
+      "guide",
+      "faq",
+      "how to"
+    ]
+  },
+  {
+    "path": "/theme",
+    "app": "workspace",
+    "title": "Theme",
+    "summary": "Your business name, logo and workspace branding.",
+    "tasks": [
+      "Change the business name or logo",
+      "Update the workspace branding"
+    ],
+    "actions": [
+      "Save Theme"
+    ],
+    "keywords": [
+      "branding",
+      "logo",
+      "brand",
+      "colors",
+      "business name"
+    ]
+  },
+  {
+    "path": "/team/invite",
+    "app": "workspace",
+    "title": "Add a member",
+    "summary": "Invite a new person to the business and set their access.",
+    "tasks": [
+      "Invite a new team member",
+      "Set a new member's permissions",
+      "Add a new member to a group"
+    ],
+    "actions": [
+      "Send invitation",
+      "Create member"
+    ],
+    "keywords": [
+      "invite",
+      "new user",
+      "new staff",
+      "onboard",
+      "add user",
+      "add team member"
+    ]
+  },
+  {
+    "path": "/create-item",
+    "app": "workspace",
+    "title": "Create item",
+    "summary": "Add a new item to the menu.",
+    "tasks": [
+      "Add a new item to a menu"
+    ],
+    "actions": [
+      "Save item"
+    ],
+    "keywords": [
+      "new item",
+      "add product",
+      "menu item",
+      "new dish"
+    ]
+  },
+  {
+    "path": "/qr-codes/create",
+    "app": "workspace",
+    "title": "QR Code Generator",
+    "summary": "Generate a custom QR code and download it.",
+    "tasks": [
+      "Generate a custom QR code",
+      "Download a QR code"
+    ],
+    "actions": [
+      "Download QR Code"
+    ],
+    "keywords": [
+      "qr generator",
+      "custom qr",
+      "make qr",
+      "print qr"
+    ]
+  },
+  {
+    "path": "/insights",
+    "app": "insights",
+    "title": "Overview",
+    "summary": "Business overview with the main figures in one place.",
+    "tasks": [
+      "See how the business is doing overall"
+    ],
+    "actions": [],
+    "keywords": [
+      "dashboard",
+      "summary",
+      "analytics",
+      "home",
+      "kpis"
+    ]
+  },
+  {
+    "path": "/insights/revenue",
+    "app": "insights",
+    "title": "Revenue",
+    "summary": "Revenue across all channels, with the trend over time.",
+    "tasks": [
+      "See how revenue is trending",
+      "Check revenue across channels"
+    ],
+    "actions": [],
+    "keywords": [
+      "sales",
+      "income",
+      "turnover",
+      "earnings"
+    ]
+  },
+  {
+    "path": "/insights/customers",
+    "app": "insights",
+    "title": "Customers",
+    "summary": "Customer figures for the business.",
+    "tasks": [
+      "Review customer figures"
+    ],
+    "actions": [],
+    "keywords": [
+      "clients",
+      "guests",
+      "buyers",
+      "people"
+    ]
+  },
+  {
+    "path": "/insights/products",
+    "app": "insights",
+    "title": "Products",
+    "summary": "Product figures for the business.",
+    "tasks": [
+      "Review how products are performing"
+    ],
+    "actions": [],
+    "keywords": [
+      "items",
+      "catalog",
+      "best sellers",
+      "top products"
+    ]
+  },
+  {
+    "path": "/insights/operations",
+    "app": "insights",
+    "title": "Workforce",
+    "summary": "Workforce and operations figures for the business.",
+    "tasks": [
+      "Review workforce figures"
+    ],
+    "actions": [],
+    "keywords": [
+      "staff",
+      "operations",
+      "employees",
+      "team",
+      "labour"
+    ]
+  },
+  {
+    "path": "/insights/financial",
+    "app": "insights",
+    "title": "Financial",
+    "summary": "Financial figures for the business.",
+    "tasks": [
+      "Review financial figures"
+    ],
+    "actions": [],
+    "keywords": [
+      "finance",
+      "money",
+      "profit",
+      "cash"
+    ]
+  },
+  {
+    "path": "/insights/reports",
+    "app": "insights",
+    "title": "Reports",
+    "summary": "Reports built from the business figures.",
+    "tasks": [
+      "Open a report"
+    ],
+    "actions": [],
+    "keywords": [
+      "export",
+      "summary reports",
+      "documents"
+    ]
+  },
+  {
+    "path": "/flow",
+    "app": "flow",
+    "title": "Work",
+    "summary": "Entry point to Work, the task and project app, which opens the first page you can access.",
+    "tasks": [
+      "Open Work"
+    ],
+    "actions": [],
+    "keywords": [
+      "tasks",
+      "projects",
+      "todo",
+      "work app",
+      "flow"
+    ]
+  },
+  {
+    "path": "/flow/my-issues",
+    "app": "flow",
+    "title": "My tasks",
+    "summary": "Every task assigned to you, across all workspaces and projects.",
+    "tasks": [
+      "See the tasks assigned to me",
+      "Open a task"
+    ],
+    "actions": [],
+    "keywords": [
+      "assigned",
+      "my work",
+      "todo",
+      "issues",
+      "my tasks"
+    ]
+  },
+  {
+    "path": "/flow/today",
+    "app": "flow",
+    "title": "Today",
+    "summary": "Your focus list for today.",
+    "tasks": [
+      "See what to focus on today"
+    ],
+    "actions": [],
+    "keywords": [
+      "focus",
+      "daily",
+      "today's tasks",
+      "plan my day"
+    ]
+  },
+  {
+    "path": "/flow/projects",
+    "app": "flow",
+    "title": "All projects",
+    "summary": "Every project in Work, with a way to create a new one.",
+    "tasks": [
+      "Find a project",
+      "Create a project"
+    ],
+    "actions": [],
+    "keywords": [
+      "projects",
+      "workstreams",
+      "boards",
+      "new project"
+    ]
+  },
+  {
+    "path": "/flow/inbox",
+    "app": "flow",
+    "title": "Inbox",
+    "summary": "The Work inbox, for items sent to you.",
+    "tasks": [
+      "Read items sent to you"
+    ],
+    "actions": [],
+    "keywords": [
+      "notifications",
+      "messages",
+      "incoming"
+    ]
+  },
+  {
+    "path": "/flow/calendar",
+    "app": "flow",
+    "title": "Calendar",
+    "summary": "Tasks organized by due date. Click a day to add a task.",
+    "tasks": [
+      "See tasks by due date",
+      "Add a task on a day"
+    ],
+    "actions": [],
+    "keywords": [
+      "schedule",
+      "due dates",
+      "dates",
+      "deadlines"
+    ]
+  },
+  {
+    "path": "/flow/cycles",
+    "app": "flow",
+    "title": "Cycles",
+    "summary": "Two-week delivery sprints.",
+    "tasks": [
+      "Start a two-week cycle",
+      "Track progress of a cycle"
+    ],
+    "actions": [],
+    "keywords": [
+      "sprints",
+      "iterations",
+      "sprint"
+    ]
+  },
+  {
+    "path": "/flow/milestones",
+    "app": "flow",
+    "title": "Milestones",
+    "summary": "Major delivery targets across your projects.",
+    "tasks": [
+      "Track delivery targets"
+    ],
+    "actions": [],
+    "keywords": [
+      "targets",
+      "goals",
+      "deliverables",
+      "releases"
+    ]
+  },
+  {
+    "path": "/flow/views",
+    "app": "flow",
+    "title": "Views",
+    "summary": "Saved views of tasks, built from filters.",
+    "tasks": [
+      "Open a saved view",
+      "Filter tasks"
+    ],
+    "actions": [],
+    "keywords": [
+      "saved filters",
+      "filters",
+      "lists",
+      "boards"
+    ]
+  },
+  {
+    "path": "/flow/triage",
+    "app": "flow",
+    "title": "Triage",
+    "summary": "Tasks that still need a priority or a due date.",
+    "tasks": [
+      "Set a priority or due date on new work"
+    ],
+    "actions": [],
+    "keywords": [
+      "priority",
+      "sort",
+      "new work",
+      "unsorted"
+    ]
+  },
+  {
+    "path": "/flow/archive",
+    "app": "flow",
+    "title": "Archive",
+    "summary": "Archived work, kept out of the active lists.",
+    "tasks": [
+      "Find archived work"
+    ],
+    "actions": [],
+    "keywords": [
+      "archived",
+      "old tasks",
+      "closed",
+      "history"
+    ]
+  },
+  {
+    "path": "/flow/time",
+    "app": "flow",
+    "title": "Time",
+    "summary": "Log the hours you worked against your week.",
+    "tasks": [
+      "Log hours",
+      "See my week's time"
+    ],
+    "actions": [],
+    "keywords": [
+      "timesheet",
+      "hours",
+      "time tracking",
+      "log time"
+    ]
+  },
+  {
+    "path": "/flow/directory",
+    "app": "flow",
+    "title": "Directory",
+    "summary": "People in the business, for finding who to work with.",
+    "tasks": [
+      "Find a person in the business"
+    ],
+    "actions": [],
+    "keywords": [
+      "people",
+      "contacts",
+      "staff",
+      "who is who"
+    ]
+  },
+  {
+    "path": "/flow/timeline",
+    "app": "flow",
+    "title": "Timeline",
+    "summary": "Timeline view of project dates. This page is in preview.",
+    "tasks": [
+      "See project dates on a timeline"
+    ],
+    "actions": [],
+    "keywords": [
+      "gantt",
+      "schedule",
+      "preview",
+      "dates"
+    ]
+  },
+  {
+    "path": "/flow/roadmap",
+    "app": "flow",
+    "title": "Roadmap",
+    "summary": "High-level view of projects in flight. This page is in preview.",
+    "tasks": [
+      "See the roadmap of projects"
+    ],
+    "actions": [],
+    "keywords": [
+      "plan",
+      "projects",
+      "preview",
+      "big picture"
+    ]
+  },
+  {
+    "path": "/flow/insights",
+    "app": "flow",
+    "title": "Insights",
+    "summary": "Insights on Work tasks and projects. This page is in preview.",
+    "tasks": [
+      "Review Work insights"
+    ],
+    "actions": [],
+    "keywords": [
+      "analytics",
+      "reports",
+      "preview",
+      "stats"
+    ]
+  },
+  {
+    "path": "/flow/team",
+    "app": "flow",
+    "title": "Team",
+    "summary": "People with assigned work in Work. This page is in preview.",
+    "tasks": [
+      "See who has work assigned"
+    ],
+    "actions": [],
+    "keywords": [
+      "workload",
+      "people",
+      "assignments",
+      "preview"
+    ]
+  },
+  {
+    "path": "/crm",
+    "app": "crm",
+    "title": "Dashboard",
+    "summary": "CRM home with shortcuts to call leads, import leads and add a lead.",
+    "tasks": [
+      "Start calling leads",
+      "Import leads",
+      "Add a lead"
+    ],
+    "actions": [
+      "Start calling",
+      "Import leads",
+      "Add lead"
+    ],
+    "keywords": [
+      "home",
+      "overview",
+      "crm home",
+      "sales dashboard"
+    ]
+  },
+  {
+    "path": "/crm/sales/leads",
+    "app": "crm",
+    "title": "Leads",
+    "summary": "Prospects to qualify. Call, log the outcome, and convert the ones that fit.",
+    "tasks": [
+      "Add a lead",
+      "Import leads from a file",
+      "Start calling leads",
+      "Convert a lead to a customer"
+    ],
+    "actions": [
+      "Add lead",
+      "Import",
+      "Start calling"
+    ],
+    "keywords": [
+      "prospects",
+      "sales leads",
+      "cold calls",
+      "calls",
+      "potential customers"
+    ]
+  },
+  {
+    "path": "/crm/sales",
+    "app": "crm",
+    "title": "Deals",
+    "summary": "Sales deals on a pipeline board or in a list.",
+    "tasks": [
+      "See deals by stage",
+      "Add a deal",
+      "Edit the pipeline stages"
+    ],
+    "actions": [
+      "Add deal",
+      "Stages"
+    ],
+    "keywords": [
+      "pipeline",
+      "opportunities",
+      "sales board",
+      "kanban",
+      "stages"
+    ]
+  },
+  {
+    "path": "/crm/sales/tasks",
+    "app": "crm",
+    "title": "Tasks",
+    "summary": "Calls and follow-ups, by due date.",
+    "tasks": [
+      "See calls and follow-ups due",
+      "Work through my follow-ups"
+    ],
+    "actions": [],
+    "keywords": [
+      "follow ups",
+      "to do",
+      "calls",
+      "reminders"
+    ]
+  },
+  {
+    "path": "/crm/sales/contracts",
+    "app": "crm",
+    "title": "Contracts",
+    "summary": "Signed contracts for what won deals sold.",
+    "tasks": [
+      "Create a contract",
+      "Find a signed contract"
+    ],
+    "actions": [
+      "New contract"
+    ],
+    "keywords": [
+      "agreements",
+      "sales contracts",
+      "signed deals",
+      "paperwork"
+    ]
+  },
+  {
+    "path": "/crm/customers",
+    "app": "crm",
+    "title": "Customers",
+    "summary": "Customer records for the business, with import and merge tools.",
+    "tasks": [
+      "Add a customer",
+      "Import customers from a file",
+      "Merge duplicate customers",
+      "Export the customer list"
+    ],
+    "actions": [
+      "New customer",
+      "Import",
+      "Export CSV"
+    ],
+    "keywords": [
+      "contacts",
+      "clients",
+      "people",
+      "guests",
+      "customer list"
+    ]
+  },
+  {
+    "path": "/crm/loyalty",
+    "app": "crm",
+    "title": "Loyalty",
+    "summary": "Loyalty program with members, rewards and tiers.",
+    "tasks": [
+      "See loyalty members",
+      "Manage the rewards catalog",
+      "Set up loyalty tiers"
+    ],
+    "actions": [],
+    "keywords": [
+      "rewards",
+      "points",
+      "members",
+      "tiers",
+      "loyalty card"
+    ]
+  },
+  {
+    "path": "/crm/campaigns",
+    "app": "crm",
+    "title": "Campaigns",
+    "summary": "Email and SMS campaigns sent to customers.",
+    "tasks": [
+      "Create an email campaign",
+      "Create an SMS campaign",
+      "Review a campaign"
+    ],
+    "actions": [],
+    "keywords": [
+      "marketing",
+      "email blast",
+      "sms",
+      "newsletter",
+      "messages"
+    ]
+  },
+  {
+    "path": "/crm/segments",
+    "app": "crm",
+    "title": "Segments",
+    "summary": "Groups of customers picked by rules.",
+    "tasks": [
+      "Build a customer segment",
+      "See the customers in a segment"
+    ],
+    "actions": [
+      "View customers"
+    ],
+    "keywords": [
+      "audience",
+      "groups",
+      "filters",
+      "rules",
+      "customer groups"
+    ]
+  },
+  {
+    "path": "/crm/templates",
+    "app": "crm",
+    "title": "Templates",
+    "summary": "Reusable message templates you can duplicate and use in campaigns.",
+    "tasks": [
+      "Create a template",
+      "Duplicate a template"
+    ],
+    "actions": [
+      "New template"
+    ],
+    "keywords": [
+      "message templates",
+      "email templates",
+      "sms templates",
+      "library"
+    ]
+  },
+  {
+    "path": "/crm/feedback",
+    "app": "crm",
+    "title": "Feedback",
+    "summary": "Customer feedback and NPS scores.",
+    "tasks": [
+      "Review customer feedback",
+      "Check the NPS score"
+    ],
+    "actions": [],
+    "keywords": [
+      "nps",
+      "reviews",
+      "ratings",
+      "survey",
+      "satisfaction"
+    ]
+  },
+  {
+    "path": "/crm/customers/new",
+    "app": "crm",
+    "title": "New customer",
+    "summary": "Add a new customer record.",
+    "tasks": [
+      "Add a customer"
+    ],
+    "actions": [],
+    "keywords": [
+      "add customer",
+      "new contact",
+      "create customer"
+    ]
+  },
+  {
+    "path": "/crm/customers/import",
+    "app": "crm",
+    "title": "Import customers",
+    "summary": "Import customers from a CSV file.",
+    "tasks": [
+      "Import customers from a CSV file"
+    ],
+    "actions": [],
+    "keywords": [
+      "csv",
+      "upload customers",
+      "bulk import"
+    ]
+  },
+  {
+    "path": "/crm/campaigns/email",
+    "app": "crm",
+    "title": "New email campaign",
+    "summary": "Write and send an email campaign to customers.",
+    "tasks": [
+      "Create an email campaign",
+      "Preview an email before sending"
+    ],
+    "actions": [
+      "Preview"
+    ],
+    "keywords": [
+      "email blast",
+      "send email",
+      "newsletter",
+      "marketing email"
+    ]
+  },
+  {
+    "path": "/crm/campaigns/sms",
+    "app": "crm",
+    "title": "New SMS campaign",
+    "summary": "Write and send an SMS campaign to customers.",
+    "tasks": [
+      "Create an SMS campaign"
+    ],
+    "actions": [],
+    "keywords": [
+      "text message",
+      "sms blast",
+      "send sms",
+      "marketing sms"
+    ]
+  },
+  {
+    "path": "/crm/segments/new",
+    "app": "crm",
+    "title": "New segment",
+    "summary": "Build a new customer segment from rules.",
+    "tasks": [
+      "Build a customer segment from rules"
+    ],
+    "actions": [
+      "Add rule"
+    ],
+    "keywords": [
+      "audience",
+      "filter customers",
+      "new group",
+      "rules"
+    ]
+  },
+  {
+    "path": "/erp",
+    "app": "erp",
+    "title": "Dashboard",
+    "summary": "Operations overview for stock and products.",
+    "tasks": [
+      "See the stock overview",
+      "Add a product"
+    ],
+    "actions": [
+      "New Product"
+    ],
+    "keywords": [
+      "operations home",
+      "overview",
+      "stock home",
+      "inventory home"
+    ]
+  },
+  {
+    "path": "/erp/inventory",
+    "app": "erp",
+    "title": "Inventory",
+    "summary": "Stock levels for products across your warehouses.",
+    "tasks": [
+      "Check stock levels",
+      "Add a product"
+    ],
+    "actions": [
+      "Add Product"
+    ],
+    "keywords": [
+      "stock",
+      "products",
+      "items",
+      "stock levels",
+      "warehouse stock"
+    ]
+  },
+  {
+    "path": "/erp/categories",
+    "app": "erp",
+    "title": "Categories",
+    "summary": "Organize products into hierarchical categories.",
+    "tasks": [
+      "Add a category",
+      "Edit a category"
+    ],
+    "actions": [],
+    "keywords": [
+      "product groups",
+      "product types",
+      "catalog",
+      "sections"
+    ]
+  },
+  {
+    "path": "/erp/brands",
+    "app": "erp",
+    "title": "Brands",
+    "summary": "The brands used for products.",
+    "tasks": [
+      "Manage the brands used for products"
+    ],
+    "actions": [],
+    "keywords": [
+      "manufacturers",
+      "makers",
+      "labels",
+      "product brands"
+    ]
+  },
+  {
+    "path": "/erp/variants",
+    "app": "erp",
+    "title": "Variants",
+    "summary": "Individual SKUs for sizes, colors, flavors and more.",
+    "tasks": [
+      "See the variants of a product",
+      "Check stock for a variant"
+    ],
+    "actions": [],
+    "keywords": [
+      "sku",
+      "sizes",
+      "colors",
+      "flavors",
+      "options"
+    ]
+  },
+  {
+    "path": "/erp/price-lists",
+    "app": "erp",
+    "title": "Price Lists",
+    "summary": "Currency-based pricing strategies.",
+    "tasks": [
+      "Set prices for a currency",
+      "Create a price list"
+    ],
+    "actions": [],
+    "keywords": [
+      "pricing",
+      "prices",
+      "currency",
+      "rates"
+    ]
+  },
+  {
+    "path": "/erp/barcodes",
+    "app": "erp",
+    "title": "Barcodes",
+    "summary": "Select products, choose how many copies, and print labels.",
+    "tasks": [
+      "Print barcode labels for products"
+    ],
+    "actions": [],
+    "keywords": [
+      "barcode generator",
+      "labels",
+      "print labels",
+      "sticker",
+      "scan"
+    ]
+  },
+  {
+    "path": "/erp/warehouses",
+    "app": "erp",
+    "title": "Warehouses",
+    "summary": "The warehouses where stock is kept.",
+    "tasks": [
+      "Add a warehouse",
+      "Delete a warehouse"
+    ],
+    "actions": [
+      "New Warehouse"
+    ],
+    "keywords": [
+      "storage",
+      "locations",
+      "stores",
+      "branches",
+      "stock locations"
+    ]
+  },
+  {
+    "path": "/erp/transfers",
+    "app": "erp",
+    "title": "Stock Transfers",
+    "summary": "Move inventory between warehouses.",
+    "tasks": [
+      "Move stock between warehouses",
+      "Receive a stock transfer"
+    ],
+    "actions": [],
+    "keywords": [
+      "move stock",
+      "warehouse transfer",
+      "transfers",
+      "shipments"
+    ]
+  },
+  {
+    "path": "/erp/stock-takes",
+    "app": "erp",
+    "title": "Stock Takes",
+    "summary": "Periodic inventory counts and variance reports.",
+    "tasks": [
+      "Count stock",
+      "Complete a stock take"
+    ],
+    "actions": [
+      "Complete stock take"
+    ],
+    "keywords": [
+      "stocktake",
+      "inventory count",
+      "physical count",
+      "variance",
+      "audit stock"
+    ]
+  },
+  {
+    "path": "/erp/receiving",
+    "app": "erp",
+    "title": "Receiving",
+    "summary": "Receive items against open purchase orders.",
+    "tasks": [
+      "Receive items from a purchase order"
+    ],
+    "actions": [
+      "Mark Received"
+    ],
+    "keywords": [
+      "goods receipt",
+      "deliveries",
+      "incoming stock",
+      "goods receiving"
+    ]
+  },
+  {
+    "path": "/erp/expiry",
+    "app": "erp",
+    "title": "Expiry",
+    "summary": "Track products by expiry date.",
+    "tasks": [
+      "See items close to expiry"
+    ],
+    "actions": [],
+    "keywords": [
+      "expiration",
+      "best before",
+      "shelf life",
+      "expired stock"
+    ]
+  },
+  {
+    "path": "/erp/alerts",
+    "app": "erp",
+    "title": "Low Stock Alerts",
+    "summary": "Products that are running low on stock.",
+    "tasks": [
+      "See products running low"
+    ],
+    "actions": [],
+    "keywords": [
+      "low stock",
+      "alerts",
+      "running out",
+      "stock warning"
+    ]
+  },
+  {
+    "path": "/erp/reorder",
+    "app": "erp",
+    "title": "Reorder",
+    "summary": "Reorder suggestions based on sales velocity and lead times.",
+    "tasks": [
+      "See what to reorder"
+    ],
+    "actions": [],
+    "keywords": [
+      "restock",
+      "suggestions",
+      "reorder points",
+      "buy again"
+    ]
+  },
+  {
+    "path": "/erp/valuation",
+    "app": "erp",
+    "title": "Valuation",
+    "summary": "The value of inventory on hand.",
+    "tasks": [
+      "See what stock is worth"
+    ],
+    "actions": [],
+    "keywords": [
+      "stock value",
+      "inventory value",
+      "worth",
+      "cost of stock"
+    ]
+  },
+  {
+    "path": "/erp/purchasing",
+    "app": "erp",
+    "title": "Purchase Orders",
+    "summary": "Purchase orders for stock you buy from suppliers.",
+    "tasks": [
+      "Create a purchase order",
+      "Approve and send a purchase order"
+    ],
+    "actions": [
+      "New Order"
+    ],
+    "keywords": [
+      "POs",
+      "buying",
+      "procurement",
+      "orders to suppliers",
+      "purchasing"
+    ]
+  },
+  {
+    "path": "/erp/suppliers",
+    "app": "erp",
+    "title": "Suppliers",
+    "summary": "Suppliers you buy stock from.",
+    "tasks": [
+      "Add a supplier"
+    ],
+    "actions": [
+      "Add Supplier"
+    ],
+    "keywords": [
+      "vendors",
+      "providers",
+      "wholesalers",
+      "buy from"
+    ]
+  },
+  {
+    "path": "/finance",
+    "app": "finance",
+    "title": "Dashboard",
+    "summary": "Finance overview for the business.",
+    "tasks": [
+      "See the finance overview"
+    ],
+    "actions": [],
+    "keywords": [
+      "home",
+      "overview",
+      "summary",
+      "money"
+    ]
+  },
+  {
+    "path": "/finance/invoices",
+    "app": "finance",
+    "title": "Invoices",
+    "summary": "Invoices sent to customers, with their status and export to Xero.",
+    "tasks": [
+      "Create an invoice",
+      "Send an invoice",
+      "Export invoices to Xero"
+    ],
+    "actions": [
+      "New Invoice"
+    ],
+    "keywords": [
+      "billing",
+      "receivables",
+      "sales invoices",
+      "invoice list",
+      "bills to customers"
+    ]
+  },
+  {
+    "path": "/finance/invoices/recurring",
+    "app": "finance",
+    "title": "Recurring",
+    "summary": "Invoices that repeat on a schedule.",
+    "tasks": [
+      "Set up a recurring invoice"
+    ],
+    "actions": [
+      "New Recurring Invoice"
+    ],
+    "keywords": [
+      "repeat invoices",
+      "subscriptions",
+      "scheduled invoices",
+      "retainers"
+    ]
+  },
+  {
+    "path": "/finance/quotes",
+    "app": "finance",
+    "title": "Quotes",
+    "summary": "Quotes and estimates for customers.",
+    "tasks": [
+      "Create a quote",
+      "View a quote"
+    ],
+    "actions": [
+      "New Quote"
+    ],
+    "keywords": [
+      "estimates",
+      "proposals",
+      "offers",
+      "quotations"
+    ]
+  },
+  {
+    "path": "/finance/expenses",
+    "app": "finance",
+    "title": "Expenses",
+    "summary": "What the business spent, month by month.",
+    "tasks": [
+      "Record an expense",
+      "Review spending by month",
+      "Export expenses to CSV"
+    ],
+    "actions": [
+      "Add new expense",
+      "Export CSV"
+    ],
+    "keywords": [
+      "spending",
+      "costs",
+      "receipts",
+      "spend",
+      "outgoings"
+    ]
+  },
+  {
+    "path": "/finance/categories",
+    "app": "finance",
+    "title": "Categories",
+    "summary": "Expense categories used to tag spending.",
+    "tasks": [
+      "Add an expense category",
+      "Edit or delete a category"
+    ],
+    "actions": [
+      "New Category"
+    ],
+    "keywords": [
+      "expense types",
+      "tags",
+      "spend categories"
+    ]
+  },
+  {
+    "path": "/finance/bills",
+    "app": "finance",
+    "title": "Bills",
+    "summary": "Bills to pay to suppliers.",
+    "tasks": [
+      "Add a bill",
+      "Pay bills"
+    ],
+    "actions": [
+      "New Bill"
+    ],
+    "keywords": [
+      "supplier bills",
+      "payables",
+      "accounts payable",
+      "pay suppliers",
+      "to pay"
+    ]
+  },
+  {
+    "path": "/finance/bank",
+    "app": "finance",
+    "title": "Bank Feeds",
+    "summary": "Connected bank accounts for importing transactions.",
+    "tasks": [
+      "Connect a bank account"
+    ],
+    "actions": [
+      "Connect account"
+    ],
+    "keywords": [
+      "bank accounts",
+      "bank transactions",
+      "bank feed",
+      "connect bank"
+    ]
+  },
+  {
+    "path": "/finance/reconcile",
+    "app": "finance",
+    "title": "Reconcile",
+    "summary": "Match bank transactions to the records they belong to.",
+    "tasks": [
+      "Match a bank transaction to a record"
+    ],
+    "actions": [],
+    "keywords": [
+      "matching",
+      "reconciliation",
+      "bank match",
+      "balance check"
+    ]
+  },
+  {
+    "path": "/finance/pl",
+    "app": "finance",
+    "title": "Profit & Loss",
+    "summary": "Profit and loss report for a period.",
+    "tasks": [
+      "See profit or loss for a period",
+      "Export profit and loss as CSV"
+    ],
+    "actions": [],
+    "keywords": [
+      "p&l",
+      "income statement",
+      "profit",
+      "loss",
+      "earnings report"
+    ]
+  },
+  {
+    "path": "/finance/reports/balance-sheet",
+    "app": "finance",
+    "title": "Balance Sheet",
+    "summary": "What the business owns and owes, from the ledger.",
+    "tasks": [
+      "View the balance sheet"
+    ],
+    "actions": [],
+    "keywords": [
+      "assets",
+      "liabilities",
+      "equity",
+      "net worth",
+      "position"
+    ]
+  },
+  {
+    "path": "/finance/reports/cash-flow",
+    "app": "finance",
+    "title": "Cash Flow",
+    "summary": "Money in from paid invoices and out through approved expenses.",
+    "tasks": [
+      "See cash coming in and going out"
+    ],
+    "actions": [],
+    "keywords": [
+      "cash",
+      "money in",
+      "money out",
+      "liquidity"
+    ]
+  },
+  {
+    "path": "/finance/reports/tax",
+    "app": "finance",
+    "title": "Tax Summary",
+    "summary": "Tax collected on paid invoices and what is owed for the period.",
+    "tasks": [
+      "See tax collected and owed",
+      "Export the tax summary for the accountant"
+    ],
+    "actions": [
+      "Export tax summary for accountant"
+    ],
+    "keywords": [
+      "vat",
+      "gst",
+      "tax report",
+      "accountant",
+      "sales tax"
+    ]
+  },
+  {
+    "path": "/finance/journal",
+    "app": "finance",
+    "title": "Journal",
+    "summary": "Journal entries that post debits and credits to the ledger.",
+    "tasks": [
+      "Record a journal entry"
+    ],
+    "actions": [
+      "New entry"
+    ],
+    "keywords": [
+      "ledger entries",
+      "debits",
+      "credits",
+      "manual entries",
+      "double entry"
+    ]
+  },
+  {
+    "path": "/finance/accounts",
+    "app": "finance",
+    "title": "Accounts",
+    "summary": "The chart of accounts the business posts to.",
+    "tasks": [
+      "Add an account",
+      "Look up an account"
+    ],
+    "actions": [
+      "New Account"
+    ],
+    "keywords": [
+      "chart of accounts",
+      "ledger accounts",
+      "coa",
+      "gl"
+    ]
+  },
+  {
+    "path": "/finance/tax",
+    "app": "finance",
+    "title": "Tax Rates",
+    "summary": "Tax rates used when calculating tax on transactions.",
+    "tasks": [
+      "Add a tax rate",
+      "Change an existing tax rate"
+    ],
+    "actions": [
+      "Add tax rate"
+    ],
+    "keywords": [
+      "vat rates",
+      "sales tax",
+      "gst",
+      "tax setup",
+      "tax percentage"
+    ]
+  },
+  {
+    "path": "/finance/invoices/new",
+    "app": "finance",
+    "title": "New invoice",
+    "summary": "Create a new invoice for a customer.",
+    "tasks": [
+      "Create an invoice for a customer",
+      "Save an invoice as a draft",
+      "Send an invoice"
+    ],
+    "actions": [],
+    "keywords": [
+      "create invoice",
+      "bill customer",
+      "add invoice"
+    ]
+  },
+  {
+    "path": "/finance/expenses/new",
+    "app": "finance",
+    "title": "New expense",
+    "summary": "Record a new expense.",
+    "tasks": [
+      "Record a new expense"
+    ],
+    "actions": [],
+    "keywords": [
+      "add expense",
+      "submit expense",
+      "receipt",
+      "spend"
+    ]
+  },
+  {
+    "path": "/hr",
+    "app": "hr",
+    "title": "Dashboard",
+    "summary": "HR home for managing your team, schedules and payroll.",
+    "tasks": [
+      "See the HR overview",
+      "Go to staff, schedules or payroll"
+    ],
+    "actions": [],
+    "keywords": [
+      "home",
+      "overview",
+      "hr home",
+      "people overview"
+    ]
+  },
+  {
+    "path": "/hr/staff",
+    "app": "hr",
+    "title": "Staff",
+    "summary": "The staff list, with a profile for each person.",
+    "tasks": [
+      "Add an employee",
+      "Invite a new staff member",
+      "Open a staff profile"
+    ],
+    "actions": [
+      "Invite Staff"
+    ],
+    "keywords": [
+      "employees",
+      "people",
+      "team members",
+      "directory",
+      "hires",
+      "staff list"
+    ]
+  },
+  {
+    "path": "/hr/departments",
+    "app": "hr",
+    "title": "Departments",
+    "summary": "Departments that group staff in the business.",
+    "tasks": [
+      "Add a department"
+    ],
+    "actions": [
+      "Add Department"
+    ],
+    "keywords": [
+      "teams",
+      "divisions",
+      "units",
+      "groups",
+      "sections"
+    ]
+  },
+  {
+    "path": "/hr/org-chart",
+    "app": "hr",
+    "title": "Org Chart",
+    "summary": "Reporting hierarchy of the business, visualized.",
+    "tasks": [
+      "See who reports to whom"
+    ],
+    "actions": [],
+    "keywords": [
+      "hierarchy",
+      "reporting structure",
+      "organization chart",
+      "org"
+    ]
+  },
+  {
+    "path": "/hr/staff/reporting-lines",
+    "app": "hr",
+    "title": "Reporting lines",
+    "summary": "Set who each staff member reports to.",
+    "tasks": [
+      "Change who a staff member reports to"
+    ],
+    "actions": [],
+    "keywords": [
+      "manager",
+      "reports to",
+      "line manager",
+      "hierarchy"
+    ]
+  },
+  {
+    "path": "/hr/shifts",
+    "app": "hr",
+    "title": "Shifts",
+    "summary": "Shifts for the week, shown in a weekly view.",
+    "tasks": [
+      "See the shifts for the week",
+      "Move between weeks"
+    ],
+    "actions": [],
+    "keywords": [
+      "rota",
+      "roster",
+      "work shifts",
+      "weekly shifts"
+    ]
+  },
+  {
+    "path": "/hr/schedule",
+    "app": "hr",
+    "title": "Schedule",
+    "summary": "Weekly grid for scheduling shifts.",
+    "tasks": [
+      "Schedule shifts for a week",
+      "Save a shift"
+    ],
+    "actions": [
+      "Save shift"
+    ],
+    "keywords": [
+      "rota",
+      "timetable",
+      "planning",
+      "shift planner"
+    ]
+  },
+  {
+    "path": "/hr/shifts/roster",
+    "app": "hr",
+    "title": "Roster Builder",
+    "summary": "Build the weekly roster of shifts.",
+    "tasks": [
+      "Build the weekly roster"
+    ],
+    "actions": [],
+    "keywords": [
+      "rota builder",
+      "shift planning",
+      "roster",
+      "schedule builder"
+    ]
+  },
+  {
+    "path": "/hr/time",
+    "app": "hr",
+    "title": "Time Logging",
+    "summary": "Log the time you worked on tasks, by week.",
+    "tasks": [
+      "Log time",
+      "Start a timer"
+    ],
+    "actions": [
+      "Add Entry"
+    ],
+    "keywords": [
+      "timer",
+      "hours",
+      "clock",
+      "time tracking",
+      "time entries"
+    ]
+  },
+  {
+    "path": "/hr/timesheets",
+    "app": "hr",
+    "title": "Timesheets",
+    "summary": "Your timesheet periods, to view and submit.",
+    "tasks": [
+      "View my timesheet periods",
+      "Submit a timesheet"
+    ],
+    "actions": [],
+    "keywords": [
+      "hours",
+      "timesheet",
+      "submit hours",
+      "time periods"
+    ]
+  },
+  {
+    "path": "/hr/attendance",
+    "app": "hr",
+    "title": "Attendance",
+    "summary": "Your clock-in and clock-out times.",
+    "tasks": [
+      "Clock in",
+      "Clock out"
+    ],
+    "actions": [],
+    "keywords": [
+      "clock in",
+      "clock out",
+      "punch",
+      "check in",
+      "check out"
+    ]
+  },
+  {
+    "path": "/hr/timesheets/approvals",
+    "app": "hr",
+    "title": "Approvals",
+    "summary": "Timesheets that staff have submitted and that wait for your review.",
+    "tasks": [
+      "Approve a timesheet",
+      "Reject a timesheet"
+    ],
+    "actions": [
+      "Approve",
+      "Reject"
+    ],
+    "keywords": [
+      "approve hours",
+      "review timesheets",
+      "sign off",
+      "pending"
+    ]
+  },
+  {
+    "path": "/hr/time-off",
+    "app": "hr",
+    "title": "Time Off",
+    "summary": "Pending time off requests and approved absences.",
+    "tasks": [
+      "Request time off",
+      "Review pending requests"
+    ],
+    "actions": [
+      "New request"
+    ],
+    "keywords": [
+      "pto",
+      "vacation",
+      "holiday",
+      "absence",
+      "days off"
+    ]
+  },
+  {
+    "path": "/hr/leave",
+    "app": "hr",
+    "title": "Leave",
+    "summary": "Leave requests and leave balances.",
+    "tasks": [
+      "Request leave",
+      "Check leave balances"
+    ],
+    "actions": [
+      "New Request"
+    ],
+    "keywords": [
+      "leave requests",
+      "balances",
+      "sick leave",
+      "absence"
+    ]
+  },
+  {
+    "path": "/hr/overtime",
+    "app": "hr",
+    "title": "Overtime",
+    "summary": "Overtime requests.",
+    "tasks": [
+      "Request overtime pre-approval"
+    ],
+    "actions": [
+      "New Pre-Approval"
+    ],
+    "keywords": [
+      "extra hours",
+      "pre approval",
+      "overtime request"
+    ]
+  },
+  {
+    "path": "/hr/calendar",
+    "app": "hr",
+    "title": "Calendar",
+    "summary": "Team calendar of approved absences.",
+    "tasks": [
+      "See who is off and when"
+    ],
+    "actions": [],
+    "keywords": [
+      "absences",
+      "who is off",
+      "holidays",
+      "team calendar"
+    ]
+  },
+  {
+    "path": "/hr/reviews",
+    "app": "hr",
+    "title": "Reviews",
+    "summary": "Performance reviews for staff.",
+    "tasks": [
+      "Start a new review",
+      "Rate goals, values and skills"
+    ],
+    "actions": [
+      "New review"
+    ],
+    "keywords": [
+      "appraisals",
+      "evaluations",
+      "feedback",
+      "performance review"
+    ]
+  },
+  {
+    "path": "/hr/one-on-ones",
+    "app": "hr",
+    "title": "1-on-1s",
+    "summary": "Scheduled conversations between managers and their reports.",
+    "tasks": [
+      "Schedule a 1-on-1"
+    ],
+    "actions": [
+      "Schedule 1-on-1"
+    ],
+    "keywords": [
+      "one on one",
+      "check-ins",
+      "manager meetings",
+      "catch ups"
+    ]
+  },
+  {
+    "path": "/hr/performance",
+    "app": "hr",
+    "title": "Performance",
+    "summary": "Review cycles, goals and performance reviews.",
+    "tasks": [
+      "Start a review cycle",
+      "Open a review cycle"
+    ],
+    "actions": [
+      "New Cycle"
+    ],
+    "keywords": [
+      "review cycles",
+      "appraisal cycle",
+      "reviews",
+      "goals"
+    ]
+  },
+  {
+    "path": "/hr/performance/my-review",
+    "app": "hr",
+    "title": "My Review",
+    "summary": "Your own performance review.",
+    "tasks": [
+      "Complete my review",
+      "See my review"
+    ],
+    "actions": [],
+    "keywords": [
+      "self review",
+      "my appraisal",
+      "my performance",
+      "self assessment"
+    ]
+  },
+  {
+    "path": "/hr/performance/goals",
+    "app": "hr",
+    "title": "Goals",
+    "summary": "Your performance goals and their progress.",
+    "tasks": [
+      "Add a goal",
+      "Track goal progress"
+    ],
+    "actions": [
+      "Add Goal"
+    ],
+    "keywords": [
+      "objectives",
+      "okrs",
+      "targets",
+      "performance goals"
+    ]
+  },
+  {
+    "path": "/hr/onboarding",
+    "app": "hr",
+    "title": "Onboarding",
+    "summary": "New hire workflow checklists.",
+    "tasks": [
+      "Track new hire checklists",
+      "Manage onboarding templates"
+    ],
+    "actions": [
+      "Manage Templates"
+    ],
+    "keywords": [
+      "new hires",
+      "checklist",
+      "induction",
+      "starters",
+      "new starters"
+    ]
+  },
+  {
+    "path": "/hr/offboarding",
+    "app": "hr",
+    "title": "Offboarding",
+    "summary": "Exit checklists for departing employees.",
+    "tasks": [
+      "Track an exit checklist"
+    ],
+    "actions": [],
+    "keywords": [
+      "leavers",
+      "exit",
+      "departing staff",
+      "termination",
+      "leaving"
+    ]
+  },
+  {
+    "path": "/hr/training",
+    "app": "hr",
+    "title": "Training",
+    "summary": "Courses, completion tracking and certificates.",
+    "tasks": [
+      "See courses",
+      "Track training completion"
+    ],
+    "actions": [],
+    "keywords": [
+      "courses",
+      "certificates",
+      "learning",
+      "education",
+      "lessons"
+    ]
+  },
+  {
+    "path": "/hr/payroll",
+    "app": "hr",
+    "title": "Payroll",
+    "summary": "Payroll runs and employee compensation.",
+    "tasks": [
+      "Run payroll",
+      "Review a payroll run"
+    ],
+    "actions": [
+      "Trigger New Run"
+    ],
+    "keywords": [
+      "salary",
+      "wages",
+      "pay runs",
+      "compensation",
+      "paychecks"
+    ]
+  },
+  {
+    "path": "/hr/payroll/my-payslips",
+    "app": "hr",
+    "title": "My Pay Slips",
+    "summary": "Your own pay slips.",
+    "tasks": [
+      "View my pay slips"
+    ],
+    "actions": [],
+    "keywords": [
+      "payslips",
+      "salary slips",
+      "pay stubs",
+      "wages",
+      "my pay"
+    ]
+  },
+  {
+    "path": "/hr/benefits",
+    "app": "hr",
+    "title": "Benefits",
+    "summary": "Health, dental, wellness and extra perks.",
+    "tasks": [
+      "See the benefits on offer"
+    ],
+    "actions": [],
+    "keywords": [
+      "health insurance",
+      "perks",
+      "wellness",
+      "dental"
+    ]
+  },
+  {
+    "path": "/hr/equipment",
+    "app": "hr",
+    "title": "Equipment",
+    "summary": "Equipment requests and their approvals.",
+    "tasks": [
+      "Request equipment",
+      "Approve or reject equipment requests"
+    ],
+    "actions": [
+      "New Request"
+    ],
+    "keywords": [
+      "equipment requests",
+      "devices",
+      "gear",
+      "approvals"
+    ]
+  },
+  {
+    "path": "/hr/equipment/assets",
+    "app": "hr",
+    "title": "Asset Register",
+    "summary": "Company-wide equipment and asset inventory.",
+    "tasks": [
+      "See company equipment and assets"
+    ],
+    "actions": [],
+    "keywords": [
+      "assets",
+      "inventory",
+      "devices",
+      "equipment list"
+    ]
+  },
+  {
+    "path": "/hr/documents",
+    "app": "hr",
+    "title": "Documents",
+    "summary": "The employee document vault.",
+    "tasks": [
+      "Find an employee document"
+    ],
+    "actions": [],
+    "keywords": [
+      "files",
+      "vault",
+      "employee files",
+      "hr files"
+    ]
+  },
+  {
+    "path": "/hr/reports",
+    "app": "hr",
+    "title": "Reports",
+    "summary": "HR reports that you can generate and export.",
+    "tasks": [
+      "Generate an HR report",
+      "Export a report"
+    ],
+    "actions": [],
+    "keywords": [
+      "export",
+      "hr analytics",
+      "exports",
+      "data"
+    ]
+  },
+  {
+    "path": "/hr/operations",
+    "app": "hr",
+    "title": "Operations",
+    "summary": "Labor cost, shift swaps, availability, breaks and overtime.",
+    "tasks": [
+      "Review labor cost",
+      "Review shift swaps and breaks"
+    ],
+    "actions": [],
+    "keywords": [
+      "labour cost",
+      "breaks",
+      "shift swaps",
+      "availability",
+      "labor"
+    ]
+  },
+  {
+    "path": "/hr/time-off/new",
+    "app": "hr",
+    "title": "New time off request",
+    "summary": "Submit a new time off request for review.",
+    "tasks": [
+      "Request time off"
+    ],
+    "actions": [],
+    "keywords": [
+      "pto request",
+      "vacation request",
+      "holiday request",
+      "book leave"
+    ]
+  },
+  {
+    "path": "/hr/reviews/new",
+    "app": "hr",
+    "title": "New review",
+    "summary": "Start a new review that rates goals, values and skills.",
+    "tasks": [
+      "Start a new review"
+    ],
+    "actions": [],
+    "keywords": [
+      "appraisal",
+      "new appraisal",
+      "write review"
+    ]
+  },
+  {
+    "path": "/recruit/careers",
+    "app": "recruit",
+    "title": "Careers",
+    "summary": "Roles listed on your public careers page.",
+    "tasks": [
+      "Add a role",
+      "Edit a role"
+    ],
+    "actions": [
+      "New role"
+    ],
+    "keywords": [
+      "jobs",
+      "openings",
+      "vacancies",
+      "roles",
+      "hiring",
+      "job listings"
+    ]
+  },
+  {
+    "path": "/recruit/submissions",
+    "app": "recruit",
+    "title": "Submissions",
+    "summary": "Applications sent through your careers page.",
+    "tasks": [
+      "Review applications",
+      "Open a candidate's resume"
+    ],
+    "actions": [],
+    "keywords": [
+      "applications",
+      "candidates",
+      "applicants",
+      "resumes",
+      "applied"
+    ]
+  },
+  {
+    "path": "/recruit/sections",
+    "app": "recruit",
+    "title": "Page sections",
+    "summary": "Sections that make up your careers page.",
+    "tasks": [
+      "Add a section",
+      "Edit a section's content"
+    ],
+    "actions": [
+      "Add section",
+      "Save section"
+    ],
+    "keywords": [
+      "layout",
+      "content blocks",
+      "perks",
+      "careers page content",
+      "page layout"
+    ]
+  },
+  {
+    "path": "/automations",
+    "app": "automations",
+    "title": "Workflows",
+    "summary": "Automations that run actions for you, with a button to create a new one.",
+    "tasks": [
+      "Create an automation",
+      "Delete an automation"
+    ],
+    "actions": [
+      "New automation"
+    ],
+    "keywords": [
+      "automations",
+      "workflows",
+      "triggers",
+      "rules",
+      "automatic actions"
+    ]
+  },
+  {
+    "path": "/automations/new",
+    "app": "automations",
+    "title": "New automation",
+    "summary": "Builder page for a new automation.",
+    "tasks": [
+      "Build a new automation"
+    ],
+    "actions": [],
+    "keywords": [
+      "workflow builder",
+      "new workflow",
+      "create automation",
+      "triggers"
+    ]
+  },
+  {
+    "path": "/automations/webhooks",
+    "app": "automations",
+    "title": "Webhooks",
+    "summary": "Send workspace events to your own endpoints.",
+    "tasks": [
+      "Add a webhook endpoint",
+      "Create a webhook"
+    ],
+    "actions": [
+      "New webhook",
+      "Create webhook"
+    ],
+    "keywords": [
+      "endpoints",
+      "integrations",
+      "events",
+      "callbacks",
+      "http",
+      "webhook url"
+    ]
+  },
+  {
+    "path": "/settings",
+    "app": "settings",
+    "title": "Settings",
+    "summary": "Your account, business, and app preferences in one place.",
+    "tasks": [
+      "Find a setting",
+      "Open account, business or app settings"
+    ],
+    "actions": [],
+    "keywords": [
+      "preferences",
+      "configuration",
+      "options",
+      "account settings",
+      "setup"
+    ]
+  },
+  {
+    "path": "/settings/account",
+    "app": "settings",
+    "title": "Account",
+    "summary": "Manage your personal account information.",
+    "tasks": [
+      "Update my account details"
+    ],
+    "actions": [],
+    "keywords": [
+      "profile",
+      "personal details",
+      "my account",
+      "name",
+      "email"
+    ]
+  },
+  {
+    "path": "/security",
+    "app": "settings",
+    "title": "Security",
+    "summary": "Manage authentication, sessions and trusted devices.",
+    "tasks": [
+      "Set up multi-factor authentication",
+      "Review sessions and trusted devices"
+    ],
+    "actions": [],
+    "keywords": [
+      "password",
+      "mfa",
+      "two factor",
+      "2fa",
+      "sessions",
+      "login",
+      "devices"
+    ]
+  },
+  {
+    "path": "/settings/businesses",
+    "app": "settings",
+    "title": "Businesses",
+    "summary": "Manage the businesses connected to your account.",
+    "tasks": [
+      "Rename a business",
+      "Change a business logo",
+      "Switch between businesses"
+    ],
+    "actions": [
+      "Rename",
+      "Change logo"
+    ],
+    "keywords": [
+      "companies",
+      "business list",
+      "switch business",
+      "multiple businesses"
+    ]
+  },
+  {
+    "path": "/settings/general",
+    "app": "settings",
+    "title": "General",
+    "summary": "Manage your business details and contact information.",
+    "tasks": [
+      "Update business details",
+      "Update contact information"
+    ],
+    "actions": [],
+    "keywords": [
+      "business details",
+      "contact info",
+      "address",
+      "phone",
+      "business name"
+    ]
+  },
+  {
+    "path": "/settings/industry",
+    "app": "settings",
+    "title": "Industry",
+    "summary": "Choose the category that best describes your business.",
+    "tasks": [
+      "Set the business category"
+    ],
+    "actions": [
+      "Save changes"
+    ],
+    "keywords": [
+      "business type",
+      "category",
+      "sector",
+      "vertical"
+    ]
+  },
+  {
+    "path": "/settings/ai",
+    "app": "settings",
+    "title": "AI usage",
+    "summary": "Your monthly AI allowance and how it is allocated.",
+    "tasks": [
+      "See my monthly AI allowance"
+    ],
+    "actions": [],
+    "keywords": [
+      "ai quota",
+      "allowance",
+      "ai limits",
+      "usage"
+    ]
+  },
+  {
+    "path": "/settings/billing",
+    "app": "settings",
+    "title": "Billing",
+    "summary": "Manage plans, payment methods and invoices.",
+    "tasks": [
+      "Change plan",
+      "Update payment method",
+      "View billing invoices"
+    ],
+    "actions": [],
+    "keywords": [
+      "plan",
+      "subscription",
+      "payment method",
+      "card",
+      "invoices",
+      "pay"
+    ]
+  },
+  {
+    "path": "/api-keys",
+    "app": "settings",
+    "title": "API Keys",
+    "summary": "Manage programmatic access to your workspace data.",
+    "tasks": [
+      "Create an API key"
+    ],
+    "actions": [
+      "New key",
+      "Create key"
+    ],
+    "keywords": [
+      "tokens",
+      "developer",
+      "integrations",
+      "api access",
+      "keys"
+    ]
+  },
+  {
+    "path": "/settings/recruit",
+    "app": "settings",
+    "title": "Recruit",
+    "summary": "Branding and layout of your public careers page.",
+    "tasks": [
+      "Customize careers page branding",
+      "Reset the page to template defaults"
+    ],
+    "actions": [
+      "Reset to template defaults"
+    ],
+    "keywords": [
+      "careers page",
+      "branding",
+      "recruit settings",
+      "template",
+      "look"
+    ]
+  },
+  {
+    "path": "/settings/hr",
+    "app": "settings",
+    "title": "HR",
+    "summary": "HR settings for the business.",
+    "tasks": [
+      "Change HR settings"
+    ],
+    "actions": [],
+    "keywords": [
+      "human resources",
+      "hr setup",
+      "staff settings",
+      "hr configuration"
+    ]
+  },
+  {
+    "path": "/settings/hr/payroll-config",
+    "app": "settings",
+    "title": "HR payroll",
+    "summary": "Payroll setup, which is needed before payroll can run.",
+    "tasks": [
+      "Set up payroll configuration"
+    ],
+    "actions": [],
+    "keywords": [
+      "payroll setup",
+      "pay config",
+      "salary setup",
+      "payroll settings"
+    ]
+  },
+  {
+    "path": "/settings/hr/leave-policy",
+    "app": "settings",
+    "title": "HR leave policy",
+    "summary": "Create the leave types employees can request.",
+    "tasks": [
+      "Create a leave type",
+      "Change leave policies"
+    ],
+    "actions": [],
+    "keywords": [
+      "leave types",
+      "annual leave",
+      "policy",
+      "time off rules",
+      "leave setup"
+    ]
+  },
+  {
+    "path": "/settings/finance",
+    "app": "settings",
+    "title": "Finance",
+    "summary": "Finance settings for the business, including the logo.",
+    "tasks": [
+      "Upload a logo",
+      "Change finance settings"
+    ],
+    "actions": [
+      "Upload logo"
+    ],
+    "keywords": [
+      "invoice settings",
+      "finance preferences",
+      "logo",
+      "finance setup"
+    ]
+  },
+  {
+    "path": "/settings/erp",
+    "app": "settings",
+    "title": "Operations",
+    "summary": "Operations settings for inventory and stock.",
+    "tasks": [
+      "Change operations settings"
+    ],
+    "actions": [],
+    "keywords": [
+      "erp settings",
+      "inventory settings",
+      "stock settings",
+      "operations setup"
+    ]
+  },
+  {
+    "path": "/settings/crm",
+    "app": "settings",
+    "title": "CRM",
+    "summary": "CRM settings for the business.",
+    "tasks": [
+      "Change CRM settings"
+    ],
+    "actions": [
+      "Save changes"
+    ],
+    "keywords": [
+      "customer settings",
+      "crm setup",
+      "sales settings"
+    ]
+  },
+  {
+    "path": "/settings/flow",
+    "app": "settings",
+    "title": "Work",
+    "summary": "Work settings for notifications, time, appearance, sidebar, labels, shortcuts and the bin.",
+    "tasks": [
+      "Change Work notifications",
+      "Customize how Work looks",
+      "Manage Work labels",
+      "Set Work keyboard shortcuts"
+    ],
+    "actions": [],
+    "keywords": [
+      "tasks settings",
+      "projects settings",
+      "flow settings",
+      "labels",
+      "shortcuts",
+      "bin"
+    ]
+  },
+  {
+    "path": "/settings/insights",
+    "app": "settings",
+    "title": "Insights",
+    "summary": "Insights settings for the business.",
+    "tasks": [
+      "Change insights settings"
+    ],
+    "actions": [
+      "Save settings"
+    ],
+    "keywords": [
+      "analytics settings",
+      "reports settings",
+      "insights setup"
+    ]
+  },
+  {
+    "path": "/settings/domain",
+    "app": "settings",
+    "title": "Custom Domain",
+    "summary": "Connect a custom domain to your public menu.",
+    "tasks": [
+      "Connect a custom domain",
+      "Update the domain"
+    ],
+    "actions": [
+      "Update Domain"
+    ],
+    "keywords": [
+      "domain name",
+      "website address",
+      "url",
+      "public menu domain"
+    ]
+  },
+  {
+    "path": "/settings/email",
+    "app": "settings",
+    "title": "Email Settings",
+    "summary": "Configure how emails are sent to your customers.",
+    "tasks": [
+      "Set up how emails are sent",
+      "Test the email connection"
+    ],
+    "actions": [
+      "Save changes",
+      "Test Connection"
+    ],
+    "keywords": [
+      "smtp",
+      "sender",
+      "email marketing",
+      "customer emails",
+      "email setup"
+    ]
+  },
+  {
+    "path": "/caret",
+    "app": "caret",
+    "title": "Caret",
+    "summary": "The Caret AI assistant, with chat, routines and Caret settings and memory.",
+    "tasks": [
+      "Ask Caret a question",
+      "Set up a routine",
+      "Check Caret's settings and memory"
+    ],
+    "actions": [],
+    "keywords": [
+      "assistant",
+      "ai",
+      "chat",
+      "help",
+      "copilot",
+      "bot",
+      "ask"
+    ]
+  }
+]

@@ -453,6 +453,13 @@
         "grape": "Grape",
         "rose": "Rose"
       }
+    },
+    "pageCard": {
+      "open": "Open",
+      "openLabel": "Open {{page}} in {{app}}",
+      "press": "{{app}} · press {{action}}",
+      "noAccess": "No access",
+      "missing": "Not in rtylr"
     }
   }
 }

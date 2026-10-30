@@ -1,0 +1,15 @@
+package hub.portal.v1
+
+/// The signed-in person's arrangement of the Portal navigation: the order of
+/// the app bar and the workspace sidebar, and what they hid. Caret changes it
+/// through the same rules, so both stay in step.
+service PortalLayoutService {
+  base_path: "/"
+
+  getPortalLayout(GetPortalLayoutRequest) -> GetPortalLayoutResponse @get("/portal/layout")
+  /// Saves the arrangement of the areas sent; areas left out keep theirs.
+  savePortalLayout(SavePortalLayoutRequest) -> SavePortalLayoutResponse @put("/portal/layout")
+  /// Restores the default arrangement of one area, or of every area when
+  /// none is named.
+  resetPortalLayout(ResetPortalLayoutRequest) -> ResetPortalLayoutResponse @post("/portal/layout/reset")
+}

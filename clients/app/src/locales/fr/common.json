@@ -453,6 +453,13 @@
         "grape": "Raisin",
         "rose": "Rose"
       }
+    },
+    "pageCard": {
+      "open": "Ouvrir",
+      "openLabel": "Ouvrir {{page}} dans {{app}}",
+      "press": "{{app}} · appuyez sur {{action}}",
+      "noAccess": "Accès refusé",
+      "missing": "Introuvable dans rtylr"
     }
   }
 }

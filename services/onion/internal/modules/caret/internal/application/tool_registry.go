@@ -19,6 +19,9 @@ type ToolDef struct {
 	Freshness        string `json:"freshness,omitempty"`
 	SideEffect       string `json:"side_effect,omitempty"`
 	ApprovalReason   string `json:"approval_reason,omitempty"`
+	// Personal writes change only the caller's own view of the Portal, show
+	// at once and are undone the same way, so they run without approval.
+	Personal bool `json:"personal,omitempty"`
 }
 
 // CoreTools is every tool Caret can call: the business seed registry plus
@@ -46,6 +49,10 @@ var seedTools = []ToolDef{
 	{Name: "buddy.create_routine", Description: "Set up a recurring routine: Caret Buddy runs the instructions on a schedule on its own and posts the result in the person's Buddy chat (e.g. a nightly gym check-in, a morning summary of new tickets, a weekly unpaid-invoices nudge).", Module: "buddy", Scope: "write", RequiresApproval: true, InputHint: `{"name":"short title","instructions":"what to do and what to say each time","every_minutes":1440,"first_run_at":"2026-10-31T20:30:00+03:00"}`, OutputHint: "The new routine with its id and next run.", Freshness: "persistent", SideEffect: "starts a recurring background job", ApprovalReason: "This sets up something that runs on its own."},
 	{Name: "buddy.update_routine", Description: "Change one of the person's routines by id: pause or resume it (enabled), rename it, change its instructions, how often it runs, or when it runs next.", Module: "buddy", Scope: "write", RequiresApproval: true, InputHint: `{"id":12,"enabled":false,"name":"optional","instructions":"optional","every_minutes":1440,"next_run_at":"optional RFC3339 time"}`, OutputHint: "The routine after the change.", Freshness: "persistent", SideEffect: "changes a recurring background job", ApprovalReason: "This changes something that runs on its own."},
 	{Name: "buddy.delete_routine", Description: "Delete one of the person's routines by id so it never runs again.", Module: "buddy", Scope: "write", RequiresApproval: true, InputHint: `{"id":12}`, OutputHint: "The deleted routine's id.", Freshness: "persistent", SideEffect: "deletes a recurring background job", ApprovalReason: "This removes a routine."},
+	{Name: "portal.find_page", Description: "Find the rtylr Portal page for something the person wants to do or see (\"add team members\", \"unpaid invoices\", \"change my password\"). Returns matching pages with their path, what they are for, their main buttons, and a page_block to show the page as a card they can click.", Module: "portal", Scope: "read", InputHint: `{"query":"what they want to do, in English"}`, OutputHint: "Up to four pages with path, app, title, summary, tasks, buttons and page_block.", Freshness: "matches the current Portal", SideEffect: "read-only"},
+	{Name: "portal.layout", Description: "Read how the person has arranged their Portal: the app bar (the icon column on the far left: Home, Insights, Work, CRM, Operations, Finance, HR, POS, Automations, and Caret pinned at the bottom) and the workspace sidebar (Home, Team, Groups, Permissions, Audit Log, Menus, QR Codes, Design, Extensions), with item ids, order and what is hidden.", Module: "portal", Scope: "read", InputHint: `{}`, OutputHint: "Each area with its items (id, label, group, position, hidden) and whether it differs from the default.", Freshness: "live", SideEffect: "read-only"},
+	{Name: "portal.customize", Description: "Rearrange the person's own Portal: move items in the app bar (area rail) or the workspace sidebar (area workspace), hide them or show them again. Item ids: rail home, insights, flow (shown as Work), crm, erp (shown as Operations), finance, hr, pos, automations, caret (Caret is you); workspace dashboard, team, groups, roles, auditLog, menus, qrCodes, design, extensions. The rail has a top group and a bottom group; \"move yourself to the top\" is {\"area\":\"rail\",\"id\":\"caret\",\"group\":\"top\",\"position\":\"first\"}. Home can move but not be hidden. It changes only this person's view and applies at once.", Module: "portal", Scope: "write", Personal: true, InputHint: `{"area":"rail|workspace","moves":[{"id":"caret","group":"top|bottom","position":"first|last|before:<id>|after:<id>"}],"hide":["pos"],"show":["pos"]}`, OutputHint: "The area after the change, item by item.", Freshness: "applies immediately", SideEffect: "changes only how this person's Portal is arranged"},
+	{Name: "portal.restore_default", Description: "Put the person's Portal navigation back to the rtylr default: the app bar (rail), the workspace sidebar (workspace), or both (all).", Module: "portal", Scope: "write", Personal: true, InputHint: `{"area":"rail|workspace|all"}`, OutputHint: "The restored areas.", Freshness: "applies immediately", SideEffect: "changes only how this person's Portal is arranged"},
 	{Name: "memory.remember", Description: "Remember a user-approved business fact, preference, reporting default, or operating rule for future Caret answers.", Module: "memory", Scope: "write", RequiresApproval: true},
 	{Name: "analytics.query", Description: "Run a tenant-scoped, read-only analytics query over allowlisted business views.", Module: "analytics", Scope: "read"},
 	{Name: "documents.map_form_fields", Description: "Map values from a document (scanned form, invoice, onboarding sheet, intake note) onto form fields. Returns a per-field plan with fill, check, click, or skip decisions, values, confidence, and review flags.", Module: "documents", Scope: "read"},
@@ -213,6 +220,10 @@ var promptExecutableTools = map[string]struct{}{
 	"buddy.update_routine":                {},
 	"buddy.delete_routine":                {},
 	"memory.forget":                       {},
+	"portal.find_page":                    {},
+	"portal.layout":                       {},
+	"portal.customize":                    {},
+	"portal.restore_default":              {},
 	"chats.search":                        {},
 	"chats.read":                          {},
 	"analytics.query":                     {},
@@ -402,8 +413,11 @@ func ValidateToolRegistry() error {
 		if strings.TrimSpace(tool.Module) == "" {
 			return fmt.Errorf("tool %q has no module", name)
 		}
-		if tool.Scope == "write" && !tool.RequiresApproval {
+		if tool.Scope == "write" && !tool.RequiresApproval && !tool.Personal {
 			return fmt.Errorf("write tool %q must require approval", name)
+		}
+		if tool.Personal && (tool.Scope != "write" || tool.RequiresApproval || tool.Module != "portal") {
+			return fmt.Errorf("personal tool %q must be a portal write that runs without approval", name)
 		}
 	}
 	for name := range promptExecutableTools {

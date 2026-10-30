@@ -48,6 +48,8 @@ const loginHistoryState = vi.hoisted(() => ({
   refetch: vi.fn(),
 }));
 
+// The navigation card has its own tests and its own queries.
+vi.mock('./NavigationSettings', () => ({ default: () => null }));
 vi.mock('@tanstack/react-query', () => ({
   keepPreviousData: 'keepPreviousData',
   useQuery: () => loginHistoryState,

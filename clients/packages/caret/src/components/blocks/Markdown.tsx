@@ -1,10 +1,19 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Check, Copy } from 'lucide-react';
-import ReactMarkdown, { type Components, type UrlTransform } from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import '../../styles/markdown.css';
-import ChartBlock, { parseChartSpec, type ChartSpec } from './ChartBlock';
-import type { HighlightNode } from '../../lib/highlightCode';
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Check, Copy } from "lucide-react";
+import ReactMarkdown, {
+  type Components,
+  type UrlTransform,
+} from "react-markdown";
+import remarkGfm from "remark-gfm";
+import "../../styles/markdown.css";
+import ChartBlock, { parseChartSpec, type ChartSpec } from "./ChartBlock";
+import {
+  isAppPath,
+  parsePageSpec,
+  useCaretHost,
+  type CaretPageSpec,
+} from "../../host";
+import type { HighlightNode } from "../../lib/highlightCode";
 
 export interface MarkdownProps {
   source: string;
@@ -12,28 +21,87 @@ export interface MarkdownProps {
 
 function sanitizeMarkdownUrl(url: string): string {
   const trimmed = url.trim();
-  if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith('/')) return trimmed;
-  return '';
+  if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith("/")) return trimmed;
+  return "";
 }
 
 const safeUrlTransform: UrlTransform = (url) => sanitizeMarkdownUrl(url);
 
 function tableHasBodyRows(children: React.ReactNode): boolean {
   return React.Children.toArray(children).some((section) => {
-    if (!React.isValidElement<{ children?: React.ReactNode }>(section)) return false;
-    if (section.type !== 'tbody') return false;
-    return React.Children.toArray(section.props.children).some((row) => React.isValidElement(row));
+    if (!React.isValidElement<{ children?: React.ReactNode }>(section))
+      return false;
+    if (section.type !== "tbody") return false;
+    return React.Children.toArray(section.props.children).some((row) =>
+      React.isValidElement(row),
+    );
   });
 }
 
 /** A ```chart block whose JSON describes a usable chart. */
 function chartFromCode(children: React.ReactNode): ChartSpec | null {
   const code = React.Children.toArray(children)[0];
-  if (!React.isValidElement<{ className?: string; children?: React.ReactNode }>(code)) return null;
-  if (!/\blanguage-chart\b/.test(code.props.className ?? '')) return null;
-  const raw = React.Children.toArray(code.props.children).join('');
+  if (
+    !React.isValidElement<{ className?: string; children?: React.ReactNode }>(
+      code,
+    )
+  )
+    return null;
+  if (!/\blanguage-chart\b/.test(code.props.className ?? "")) return null;
+  const raw = React.Children.toArray(code.props.children).join("");
   return parseChartSpec(raw);
 }
+
+/** A ```page block naming a page of the app Caret is running in. */
+function pageFromCode(children: React.ReactNode): CaretPageSpec | null {
+  const code = React.Children.toArray(children)[0];
+  if (
+    !React.isValidElement<{ className?: string; children?: React.ReactNode }>(
+      code,
+    )
+  )
+    return null;
+  if (!/\blanguage-page\b/.test(code.props.className ?? "")) return null;
+  return parsePageSpec(React.Children.toArray(code.props.children).join(""));
+}
+
+const PageBlock: React.FC<{ spec: CaretPageSpec }> = ({ spec }) => {
+  const host = useCaretHost();
+  if (host.renderPage) return <>{host.renderPage(spec)}</>;
+  return (
+    <p className="caret-p">
+      <a href={spec.path} className="caret-link">
+        {spec.title ?? spec.path}
+      </a>
+    </p>
+  );
+};
+
+/** In-app links open through the host, so the chat stays where it is. */
+const AppLink: React.FC<
+  React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }
+> = ({ href, ...props }) => {
+  const { openPage } = useCaretHost();
+  return (
+    <a
+      {...props}
+      href={href}
+      className="caret-link"
+      onClick={(event) => {
+        if (
+          !openPage ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.button !== 0
+        )
+          return;
+        event.preventDefault();
+        openPage({ path: href });
+      }}
+    />
+  );
+};
 
 type Highlighter = (code: string, language: string) => HighlightNode[] | null;
 
@@ -43,7 +111,7 @@ let loadedHighlighter: Highlighter | null = null;
 let highlighterLoad: Promise<Highlighter> | null = null;
 
 function loadHighlighter(): Promise<Highlighter> {
-  highlighterLoad ??= import('../../lib/highlightCode').then((module) => {
+  highlighterLoad ??= import("../../lib/highlightCode").then((module) => {
     loadedHighlighter = module.highlightCode;
     return module.highlightCode;
   });
@@ -51,7 +119,9 @@ function loadHighlighter(): Promise<Highlighter> {
 }
 
 function useHighlighter(enabled: boolean): Highlighter | null {
-  const [highlighter, setHighlighter] = useState<Highlighter | null>(() => loadedHighlighter);
+  const [highlighter, setHighlighter] = useState<Highlighter | null>(
+    () => loadedHighlighter,
+  );
   useEffect(() => {
     if (!enabled || highlighter) return;
     let live = true;
@@ -69,10 +139,10 @@ function useHighlighter(enabled: boolean): Highlighter | null {
 
 function renderHighlight(nodes: HighlightNode[]): React.ReactNode {
   return nodes.map((node, index) =>
-    node.type === 'text' ? (
+    node.type === "text" ? (
       node.value
     ) : (
-      <span key={index} className={node.properties?.className?.join(' ')}>
+      <span key={index} className={node.properties?.className?.join(" ")}>
         {renderHighlight(node.children)}
       </span>
     ),
@@ -85,14 +155,16 @@ const CodeContent: React.FC<{
   className?: string;
   children?: React.ReactNode;
 }> = ({ language, className, children }) => {
-  const text = React.Children.toArray(children).join('');
+  const text = React.Children.toArray(children).join("");
   const highlighter = useHighlighter(true);
   const highlighted = useMemo(
     () => (highlighter ? highlighter(text, language) : null),
     [highlighter, text, language],
   );
   return (
-    <code className={['caret-inline-code', className].filter(Boolean).join(' ')}>
+    <code
+      className={["caret-inline-code", className].filter(Boolean).join(" ")}
+    >
       {highlighted ? renderHighlight(highlighted) : children}
     </code>
   );
@@ -110,7 +182,7 @@ const CodeBlockFrame: React.FC<{
   useEffect(() => (): void => clearTimeout(timer.current), []);
 
   const copy = async (): Promise<void> => {
-    const text = (preRef.current?.textContent ?? '').replace(/\n$/, '');
+    const text = (preRef.current?.textContent ?? "").replace(/\n$/, "");
     try {
       await navigator.clipboard.writeText(text);
     } catch {
@@ -123,16 +195,20 @@ const CodeBlockFrame: React.FC<{
   };
 
   return (
-    <div className={`caret-codeblock-frame${copied ? ' is-copied' : ''}`}>
+    <div className={`caret-codeblock-frame${copied ? " is-copied" : ""}`}>
       <button
         type="button"
         className="caret-codeblock-copy"
-        aria-label={copied ? 'Copied' : 'Copy code'}
-        title={copied ? 'Copied' : 'Copy code'}
+        aria-label={copied ? "Copied" : "Copy code"}
+        title={copied ? "Copied" : "Copy code"}
         onClick={() => void copy()}
       >
-        {copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
-        <span aria-live="polite">{copied ? 'Copied' : 'Copy'}</span>
+        {copied ? (
+          <Check size={14} aria-hidden="true" />
+        ) : (
+          <Copy size={14} aria-hidden="true" />
+        )}
+        <span aria-live="polite">{copied ? "Copied" : "Copy"}</span>
       </button>
       <pre ref={preRef} className="caret-codeblock" {...preProps}>
         {children}
@@ -151,11 +227,13 @@ const markdownComponents: Components = {
   p: ({ node: _node, ...props }) => <p className="caret-p" {...props} />,
   ul: ({ node: _node, ...props }) => <ul className="caret-list" {...props} />,
   ol: ({ node: _node, ...props }) => <ol className="caret-list" {...props} />,
-  blockquote: ({ node: _node, ...props }) => <blockquote className="caret-quote" {...props} />,
+  blockquote: ({ node: _node, ...props }) => (
+    <blockquote className="caret-quote" {...props} />
+  ),
   hr: ({ node: _node, ...props }) => <hr className="caret-hr" {...props} />,
   code: ({ node: _node, className, children, ...props }) => {
-    const language = /\blanguage-([\w+#-]+)/.exec(className ?? '')?.[1];
-    if (language && language !== 'chart') {
+    const language = /\blanguage-([\w+#-]+)/.exec(className ?? "")?.[1];
+    if (language && language !== "chart" && language !== "page") {
       return (
         <CodeContent language={language} className={className}>
           {children}
@@ -163,7 +241,10 @@ const markdownComponents: Components = {
       );
     }
     return (
-      <code className={['caret-inline-code', className].filter(Boolean).join(' ')} {...props}>
+      <code
+        className={["caret-inline-code", className].filter(Boolean).join(" ")}
+        {...props}
+      >
         {children}
       </code>
     );
@@ -171,6 +252,8 @@ const markdownComponents: Components = {
   pre: ({ node: _node, children, ...props }) => {
     const chart = chartFromCode(children);
     if (chart) return <ChartBlock spec={chart} />;
+    const page = pageFromCode(children);
+    if (page) return <PageBlock spec={page} />;
     return <CodeBlockFrame preProps={props}>{children}</CodeBlockFrame>;
   },
   table: ({ node: _node, children, ...props }) =>
@@ -184,16 +267,18 @@ const markdownComponents: Components = {
       <p className="caret-table-empty">No matching records.</p>
     ),
   a: ({ node: _node, href, ...props }) => {
-    const safeHref = href ? sanitizeMarkdownUrl(href) : '';
+    const safeHref = href ? sanitizeMarkdownUrl(href) : "";
     if (!safeHref) return <span>{props.children}</span>;
 
     const isExternal = /^https?:\/\//i.test(safeHref);
+    if (!isExternal && isAppPath(safeHref))
+      return <AppLink {...props} href={safeHref} />;
     return (
       <a
         {...props}
         href={safeHref}
-        target={isExternal ? '_blank' : undefined}
-        rel={isExternal ? 'noopener noreferrer' : undefined}
+        target={isExternal ? "_blank" : undefined}
+        rel={isExternal ? "noopener noreferrer" : undefined}
         className="caret-link"
       />
     );
