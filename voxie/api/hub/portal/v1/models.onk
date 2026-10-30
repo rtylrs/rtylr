@@ -1,0 +1,32 @@
+package hub.portal.v1
+
+/// One navigation area in display order. Hidden items keep their place so
+/// showing them again puts them back where they were.
+message PortalArrangement {
+  top: string[]
+  /// Items pinned to the bottom of the app bar; empty for the sidebar.
+  bottom: string[]
+  hidden: string[]
+  /// False while the area follows the rtylr default.
+  customized: bool
+}
+
+message PortalLayout {
+  rail: PortalArrangement
+  workspace: PortalArrangement
+}
+
+message GetPortalLayoutRequest {}
+message GetPortalLayoutResponse { layout: PortalLayout }
+
+message SavePortalLayoutRequest {
+  rail: PortalArrangement?
+  workspace: PortalArrangement?
+}
+message SavePortalLayoutResponse { layout: PortalLayout }
+
+message ResetPortalLayoutRequest {
+  /// "rail", "workspace", or empty for both.
+  area: string
+}
+message ResetPortalLayoutResponse { layout: PortalLayout }

@@ -1,0 +1,4 @@
+[
+  {"path": "/team", "app": "workspace", "title": "Team", "summary": "Everyone with access to the business, with their roles and groups.", "tasks": ["Invite a team member", "Change someone's role"], "actions": ["Invite member"], "keywords": ["staff", "users", "people", "members"]},
+  {"path": "/finance/invoices", "app": "finance", "title": "Invoices", "summary": "Customer invoices and what is still unpaid.", "tasks": ["Create an invoice", "See unpaid invoices"], "actions": ["New invoice"], "keywords": ["billing", "receivables"]}
+]

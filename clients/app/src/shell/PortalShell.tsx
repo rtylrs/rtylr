@@ -5,6 +5,7 @@ import { useHRConfigStore } from '../modules/hr/shared/stores/hrConfigStore';
 import '../modules/hr/hr.css';
 import {
   Fragment,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -14,9 +15,9 @@ import {
   type ReactNode,
   type CSSProperties,
 } from 'react';
-import { Link, useRouterState } from '@tanstack/react-router';
+import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { resolveApiBase, resolveAppUrl } from '@voxire/config';
+import { resolveApiBase } from '@voxire/config';
 import { ThemeScopeProvider } from '@voxire/ui';
 import {
   useMediaQuery,
@@ -28,18 +29,18 @@ import {
 } from '@voxire/utils';
 import { useThemeStore } from '../shared/stores/themeStore';
 import { PanelLeft, Search, Bell, Settings, Webhook, Plus, X } from 'lucide-react';
+import { AutomationsIcon } from '@voxire/ui';
 import {
-  AutomationsIcon,
-  HomeIcon,
-  InsightsIcon,
-  FlowIcon,
-  CrmIcon,
-  ErpIcon,
-  FinanceIcon,
-  HrIcon,
-  PosIcon,
-} from '@voxire/ui';
-import { CaretIcon, CaretPanel, useCaretStore, useCaretSettingsStore } from '@voxire/caret';
+  CaretHostProvider,
+  CaretIcon,
+  CaretPanel,
+  onCaretToolSuccess,
+  useCaretStore,
+  useCaretSettingsStore,
+  type CaretHost,
+  type CaretPageSpec,
+} from '@voxire/caret';
+import { useQueryClient } from '@tanstack/react-query';
 import { useUserStore } from '../shared/stores/userStore';
 import { useCommandPalette } from '../shared/stores/commandPaletteStore';
 import { useNotifications } from '../shared/hooks/queries/useNotifications';
@@ -62,6 +63,10 @@ import { useSettingsModalStore } from '../features/settings/settingsModalStore';
 import { PortalHeaderActionsProvider } from './PortalHeaderActions';
 import { SidebarCollapseProvider } from './SidebarCollapseContext';
 import { rawNavItems, rawMenuSubItems, PortalNavLink, routeKeys } from './navigation';
+import { arrangeItems, portalLayoutKey, usePortalLayout } from './portalLayout';
+import { RAIL_BOTTOM, railItems, type RailItem } from './railItems';
+import { spotlightControl } from './spotlight';
+import PortalPageCard from '../features/caret/PortalPageCard';
 import { useFlowStore } from '../modules/flow/shared/stores/flowStore';
 const FlowQuickCreate = lazy(() => import('../modules/flow/shared/components/QuickCreate'));
 import './portal.css';
@@ -70,6 +75,10 @@ import '../modules/crm/crm.css';
 import '../modules/erp/erp.css';
 import '../modules/finance/finance.css';
 import RtylrLogo from '../shared/components/RtylrLogo';
+
+interface RailEntry extends RailItem {
+  active: boolean;
+}
 
 // Keep in sync with the --app-* launcher colours in globals.css.
 const APP_ACCENTS: Partial<Record<string, string>> = {
@@ -167,6 +176,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
   const caretWidth = useCaretSettingsStore((state) => state.panelWidth);
   const { data: notifications = [] } = useNotifications();
   const { data: addons = [] } = useAddons();
+  const portalLayout = usePortalLayout(user?.id);
   const unreadCount = notifications.filter((notification) => !notification.read).length;
   const isInsights = pathname === '/insights' || pathname.startsWith('/insights/');
   const isAutomations = pathname === '/automations' || pathname.startsWith('/automations/');
@@ -178,7 +188,6 @@ export default function PortalShell({ children }: { children: ReactNode }) {
   const isErp = pathname === '/erp' || pathname.startsWith('/erp/');
   const isCrm = pathname === '/crm' || pathname.startsWith('/crm/');
   const isFlow = pathname === '/flow' || pathname.startsWith('/flow/');
-  const availableInsights = insightsNavItems.filter((item) => canAccessPortalPath(user, item.path));
   const insightsPage = insightsNavItems.find((item) => item.path === pathname);
   const pageKey =
     routeKeys[pathname] ||
@@ -249,9 +258,14 @@ export default function PortalShell({ children }: { children: ReactNode }) {
               ? [...erpNavItems]
               : isCrm
                 ? [...crmSidebarItems]
-                : [...rawNavItems, ...(isAddonEnabled(addons, 'menu') ? rawMenuSubItems : [])].sort(
-                    (a, b) => Number(a.key === 'extensions') - Number(b.key === 'extensions')
-                  )
+                : arrangeItems(
+                    [...rawNavItems, ...(isAddonEnabled(addons, 'menu') ? rawMenuSubItems : [])]
+                      .sort(
+                        (a, b) => Number(a.key === 'extensions') - Number(b.key === 'extensions')
+                      )
+                      .map((item) => ({ ...item, id: item.key ?? item.path })),
+                    portalLayout?.workspace
+                  ).top
   ).filter((item) => canAccessPortalPath(user, item.path));
   const apps = useMemo(
     () =>
@@ -346,6 +360,106 @@ export default function PortalShell({ children }: { children: ReactNode }) {
       </Link>
     </div>
   );
+  const isHomeApp =
+    !isInsights &&
+    !isFlow &&
+    !isCaret &&
+    !isAutomations &&
+    !isCrm &&
+    !isErp &&
+    !isFinance &&
+    !isHr &&
+    !isRecruit;
+  const activeRail = isInsights
+    ? 'insights'
+    : isFlow
+      ? 'flow'
+      : isCrm
+        ? 'crm'
+        : isErp
+          ? 'erp'
+          : isFinance
+            ? 'finance'
+            : isHr
+              ? 'hr'
+              : isAutomations
+                ? 'automations'
+                : isCaret
+                  ? 'caret'
+                  : isHomeApp
+                    ? 'home'
+                    : '';
+  const railEntries: RailEntry[] = railItems(user, t).map((item) => ({
+    ...item,
+    active: item.id === activeRail,
+  }));
+  const rail = arrangeItems(railEntries, portalLayout?.rail, RAIL_BOTTOM);
+  const railButton = (entry: RailEntry) => (
+    <Tooltip
+      key={entry.id}
+      content={entry.label}
+      side={i18n.dir() === 'rtl' ? 'left' : 'right'}
+      focusable={false}
+      contentClassName={`portal-rail-tooltip portal-rail-tooltip-${entry.id}`}
+    >
+      {entry.href ? (
+        <a href={entry.href} className="portal-rail-button" aria-label={entry.label}>
+          <entry.icon size={21} />
+        </a>
+      ) : (
+        <Link
+          to={entry.to}
+          className={`portal-rail-button${entry.active ? ' is-active' : ''}`}
+          aria-label={entry.label}
+          aria-current={entry.active ? 'page' : undefined}
+          onClick={() => setMobileOpen(false)}
+        >
+          <entry.icon size={21} />
+        </Link>
+      )}
+    </Tooltip>
+  );
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  // A page Caret points at opens with Caret still beside it; on a phone the
+  // panel would cover the page, so it steps aside.
+  const openPage = useCallback(
+    ({ path, action }: CaretPageSpec) => {
+      const caret = useCaretStore.getState();
+      if (isMobile) caret.close();
+      else if (!caret.isOpen) caret.open();
+      void navigate({ href: path });
+      if (action) spotlightControl(action);
+    },
+    [isMobile, navigate]
+  );
+  const railPreviewKey = [...rail.top, ...rail.bottom].map((entry) => entry.id).join(',');
+  const railPreview = useMemo(
+    () => ({ top: rail.top, bottom: rail.bottom }),
+    // The entries are rebuilt every render; only their order matters here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [railPreviewKey]
+  );
+  const caretHost = useMemo<CaretHost>(
+    () => ({
+      openPage,
+      renderPage: (spec) => <PortalPageCard spec={spec} rail={railPreview} onOpen={openPage} />,
+    }),
+    [openPage, railPreview]
+  );
+  // What Caret changes shows at once: its Portal tools refresh the layout,
+  // and an approved change refreshes whatever is on screen.
+  useEffect(
+    () =>
+      onCaretToolSuccess((event) => {
+        if (event.name.startsWith('portal.')) {
+          void queryClient.invalidateQueries({ queryKey: portalLayoutKey });
+        } else if (event.approved) {
+          void queryClient.invalidateQueries();
+        }
+      }),
+    [queryClient]
+  );
   const sidebar = (mobile = false) => (
     <>
       <div className="portal-sidebar-heading">
@@ -427,193 +541,16 @@ export default function PortalShell({ children }: { children: ReactNode }) {
         {t('common.skipToMainContent')}
       </a>
       <nav className="portal-rail" aria-label={t('common.portal.appNavigation')}>
-        <Tooltip
-          content={t('common.portal.home')}
-          side={i18n.dir() === 'rtl' ? 'left' : 'right'}
-          focusable={false}
-          contentClassName="portal-rail-tooltip portal-rail-tooltip-home"
-        >
-          <Link
-            to="/"
-            className={`portal-rail-button${!isInsights && !isFlow && !isCaret && !isAutomations && !isCrm && !isErp && !isFinance && !isHr && !isRecruit ? ' is-active' : ''}`}
-            aria-label={t('common.portal.home')}
-            aria-current={
-              !isInsights &&
-              !isFlow &&
-              !isCaret &&
-              !isAutomations &&
-              !isCrm &&
-              !isErp &&
-              !isFinance &&
-              !isHr &&
-              !isRecruit
-                ? 'page'
-                : undefined
-            }
-          >
-            <HomeIcon size={21} />
-          </Link>
-        </Tooltip>
-        {availableInsights[0] && (
-          <Tooltip
-            content={t('appNames.short.insights')}
-            side={i18n.dir() === 'rtl' ? 'left' : 'right'}
-            focusable={false}
-            contentClassName="portal-rail-tooltip portal-rail-tooltip-insights"
-          >
-            <Link
-              to={availableInsights[0].path}
-              className={`portal-rail-button${isInsights ? ' is-active' : ''}`}
-              aria-label={t('appNames.short.insights')}
-              aria-current={isInsights ? 'page' : undefined}
-            >
-              <InsightsIcon size={21} />
-            </Link>
-          </Tooltip>
-        )}
-        {canAccessPortalPath(user, '/flow') && (
-          <Tooltip
-            content={t('appNames.short.flow')}
-            side={i18n.dir() === 'rtl' ? 'left' : 'right'}
-            focusable={false}
-            contentClassName="portal-rail-tooltip portal-rail-tooltip-flow"
-          >
-            <Link
-              to="/flow"
-              className={`portal-rail-button${isFlow ? ' is-active' : ''}`}
-              aria-label={t('appNames.short.flow')}
-              aria-current={isFlow ? 'page' : undefined}
-            >
-              <FlowIcon size={21} />
-            </Link>
-          </Tooltip>
-        )}
-        {canAccessPortalPath(user, '/crm') && (
-          <Tooltip
-            content={t('appNames.short.crm')}
-            side={i18n.dir() === 'rtl' ? 'left' : 'right'}
-            focusable={false}
-            contentClassName="portal-rail-tooltip portal-rail-tooltip-crm"
-          >
-            <Link
-              to="/crm"
-              className={`portal-rail-button${isCrm ? ' is-active' : ''}`}
-              aria-label={t('appNames.short.crm')}
-              aria-current={isCrm ? 'page' : undefined}
-            >
-              <CrmIcon size={21} />
-            </Link>
-          </Tooltip>
-        )}
-        {canAccessPortalPath(user, '/erp') && (
-          <Tooltip
-            content={t('appNames.short.erp')}
-            side={i18n.dir() === 'rtl' ? 'left' : 'right'}
-            focusable={false}
-            contentClassName="portal-rail-tooltip portal-rail-tooltip-erp"
-          >
-            <Link
-              to="/erp"
-              className={`portal-rail-button${isErp ? ' is-active' : ''}`}
-              aria-label={t('appNames.short.erp')}
-              aria-current={isErp ? 'page' : undefined}
-            >
-              <ErpIcon size={21} />
-            </Link>
-          </Tooltip>
-        )}
-        {canAccessPortalPath(user, '/finance') && (
-          <Tooltip
-            content={t('appNames.short.finance')}
-            side={i18n.dir() === 'rtl' ? 'left' : 'right'}
-            focusable={false}
-            contentClassName="portal-rail-tooltip portal-rail-tooltip-finance"
-          >
-            <Link
-              to="/finance"
-              className={`portal-rail-button${isFinance ? ' is-active' : ''}`}
-              aria-label={t('appNames.short.finance')}
-              aria-current={isFinance ? 'page' : undefined}
-            >
-              <FinanceIcon size={21} />
-            </Link>
-          </Tooltip>
-        )}
-        {canAccessPortalPath(user, '/hr') && (
-          <Tooltip
-            content={t('appNames.short.hr')}
-            side={i18n.dir() === 'rtl' ? 'left' : 'right'}
-            focusable={false}
-            contentClassName="portal-rail-tooltip portal-rail-tooltip-hr"
-          >
-            <Link
-              to="/hr"
-              className={`portal-rail-button${isHr ? ' is-active' : ''}`}
-              aria-label={t('appNames.short.hr')}
-              aria-current={isHr ? 'page' : undefined}
-            >
-              <HrIcon size={21} />
-            </Link>
-          </Tooltip>
-        )}
-        {apps?.includes('pos') && (
-          <Tooltip
-            content={t('appNames.short.pos')}
-            side={i18n.dir() === 'rtl' ? 'left' : 'right'}
-            focusable={false}
-            contentClassName="portal-rail-tooltip portal-rail-tooltip-pos"
-          >
-            <a
-              href={resolveAppUrl('pos')}
-              className="portal-rail-button"
-              aria-label={t('appNames.short.pos')}
-            >
-              <PosIcon size={21} />
-            </a>
-          </Tooltip>
-        )}
-        {(canAccessPortalPath(user, '/automations') ||
-          canAccessPortalPath(user, '/automations/webhooks')) && (
-          <>
-            <div className="portal-rail-divider" role="separator" />
-            <Tooltip
-              content={t('common.nav.automations')}
-              side={i18n.dir() === 'rtl' ? 'left' : 'right'}
-              focusable={false}
-              contentClassName="portal-rail-tooltip portal-rail-tooltip-automations"
-            >
-              <Link
-                to={
-                  canAccessPortalPath(user, '/automations')
-                    ? '/automations'
-                    : '/automations/webhooks'
-                }
-                className={`portal-rail-button${isAutomations ? ' is-active' : ''}`}
-                aria-label={t('common.nav.automations')}
-                aria-current={isAutomations ? 'page' : undefined}
-                onClick={() => setMobileOpen(false)}
-              >
-                <AutomationsIcon size={21} />
-              </Link>
-            </Tooltip>
-          </>
-        )}
+        {rail.top.map((entry, index) => (
+          <Fragment key={entry.id}>
+            {entry.id === 'automations' && index > 0 && (
+              <div className="portal-rail-divider" role="separator" />
+            )}
+            {railButton(entry)}
+          </Fragment>
+        ))}
         <div className="portal-rail-spacer" />
-        <Tooltip
-          content={'Caret'}
-          side={i18n.dir() === 'rtl' ? 'left' : 'right'}
-          focusable={false}
-          contentClassName="portal-rail-tooltip"
-        >
-          <Link
-            to="/caret"
-            className={`portal-rail-button${isCaret ? ' is-active' : ''}`}
-            aria-label="Caret"
-            aria-current={isCaret ? 'page' : undefined}
-          >
-            <CaretIcon size={21} />
-          </Link>
-        </Tooltip>
+        {rail.bottom.map(railButton)}
         <Link
           data-tour="settings"
           to="/settings"
@@ -719,5 +656,9 @@ export default function PortalShell({ children }: { children: ReactNode }) {
       )}
     </div>
   );
-  return <ThemeScopeProvider style={appStyle}>{shell}</ThemeScopeProvider>;
+  return (
+    <ThemeScopeProvider style={appStyle}>
+      <CaretHostProvider value={caretHost}>{shell}</CaretHostProvider>
+    </ThemeScopeProvider>
+  );
 }

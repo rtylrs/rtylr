@@ -4,6 +4,7 @@ import ReactMarkdown, { type Components, type UrlTransform } from 'react-markdow
 import remarkGfm from 'remark-gfm';
 import '../../styles/markdown.css';
 import ChartBlock, { parseChartSpec, type ChartSpec } from './ChartBlock';
+import { isAppPath, parsePageSpec, useCaretHost, type CaretPageSpec } from '../../host';
 import type { HighlightNode } from '../../lib/highlightCode';
 
 export interface MarkdownProps {
@@ -34,6 +35,46 @@ function chartFromCode(children: React.ReactNode): ChartSpec | null {
   const raw = React.Children.toArray(code.props.children).join('');
   return parseChartSpec(raw);
 }
+
+/** A ```page block naming a page of the app Caret is running in. */
+function pageFromCode(children: React.ReactNode): CaretPageSpec | null {
+  const code = React.Children.toArray(children)[0];
+  if (!React.isValidElement<{ className?: string; children?: React.ReactNode }>(code)) return null;
+  if (!/\blanguage-page\b/.test(code.props.className ?? '')) return null;
+  return parsePageSpec(React.Children.toArray(code.props.children).join(''));
+}
+
+const PageBlock: React.FC<{ spec: CaretPageSpec }> = ({ spec }) => {
+  const host = useCaretHost();
+  if (host.renderPage) return <>{host.renderPage(spec)}</>;
+  return (
+    <p className="caret-p">
+      <a href={spec.path} className="caret-link">
+        {spec.title ?? spec.path}
+      </a>
+    </p>
+  );
+};
+
+/** In-app links open through the host, so the chat stays where it is. */
+const AppLink: React.FC<React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }> = ({
+  href,
+  ...props
+}) => {
+  const { openPage } = useCaretHost();
+  return (
+    <a
+      {...props}
+      href={href}
+      className="caret-link"
+      onClick={(event) => {
+        if (!openPage || event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+        event.preventDefault();
+        openPage({ path: href });
+      }}
+    />
+  );
+};
 
 type Highlighter = (code: string, language: string) => HighlightNode[] | null;
 
@@ -155,7 +196,7 @@ const markdownComponents: Components = {
   hr: ({ node: _node, ...props }) => <hr className="caret-hr" {...props} />,
   code: ({ node: _node, className, children, ...props }) => {
     const language = /\blanguage-([\w+#-]+)/.exec(className ?? '')?.[1];
-    if (language && language !== 'chart') {
+    if (language && language !== 'chart' && language !== 'page') {
       return (
         <CodeContent language={language} className={className}>
           {children}
@@ -171,6 +212,8 @@ const markdownComponents: Components = {
   pre: ({ node: _node, children, ...props }) => {
     const chart = chartFromCode(children);
     if (chart) return <ChartBlock spec={chart} />;
+    const page = pageFromCode(children);
+    if (page) return <PageBlock spec={page} />;
     return <CodeBlockFrame preProps={props}>{children}</CodeBlockFrame>;
   },
   table: ({ node: _node, children, ...props }) =>
@@ -188,6 +231,7 @@ const markdownComponents: Components = {
     if (!safeHref) return <span>{props.children}</span>;
 
     const isExternal = /^https?:\/\//i.test(safeHref);
+    if (!isExternal && isAppPath(safeHref)) return <AppLink {...props} href={safeHref} />;
     return (
       <a
         {...props}

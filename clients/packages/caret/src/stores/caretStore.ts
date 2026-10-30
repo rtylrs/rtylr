@@ -6,6 +6,7 @@ import type {
   ToolCallBlock,
 } from "../types/message";
 import { normalizeChatTitle, titleFromUserMessage } from "../lib/chatTitles";
+import { emitCaretToolSuccess } from "../lib/toolEvents";
 
 export type { CaretMessage } from "../types/message";
 
@@ -123,6 +124,20 @@ const initialState: CaretState = {
 
 function activeTabId(state: CaretState, tabId?: string): string {
   return tabId ?? state.activeTabId;
+}
+
+function findToolBlock(
+  state: CaretState,
+  blockId: string,
+  tabId: string | undefined,
+): ToolCallBlock | undefined {
+  const id = activeTabId(state, tabId);
+  for (const message of state.tabs.find((tab) => tab.id === id)?.messages ?? []) {
+    for (const block of message.blocks) {
+      if (block.id === blockId && block.type === "tool_call") return block;
+    }
+  }
+  return undefined;
 }
 
 function updateTab(
@@ -442,7 +457,8 @@ export const useCaretStore = create<CaretStore>()(
           updateTab(state, tabId, (tab) => ({ ...tab, isStreaming })),
         ),
 
-      setToolStatus: (blockId, status, extras, tabId) =>
+      setToolStatus: (blockId, status, extras, tabId) => {
+        const before = findToolBlock(get(), blockId, tabId);
         set((state) =>
           updateTab(state, tabId, (tab) => ({
             ...tab,
@@ -459,7 +475,11 @@ export const useCaretStore = create<CaretStore>()(
                   },
             ),
           })),
-        ),
+        );
+        if (status === "success" && before && before.status !== "success") {
+          emitCaretToolSuccess(before, extras?.output);
+        }
+      },
 
       reset: (tabId) =>
         set((state) =>

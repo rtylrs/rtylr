@@ -469,6 +469,13 @@
         "grape": "عنبي",
         "rose": "وردي"
       }
+    },
+    "pageCard": {
+      "open": "فتح",
+      "openLabel": "فتح {{page}} في {{app}}",
+      "press": "{{app}} · اضغط {{action}}",
+      "noAccess": "لا صلاحية",
+      "missing": "غير موجودة في rtylr"
     }
   }
 }

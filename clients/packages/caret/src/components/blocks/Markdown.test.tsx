@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import Markdown from './Markdown';
+import { CaretHostProvider, type CaretPageSpec } from '../../host';
 
 describe('Markdown tables', () => {
   it('replaces a header-only table with an empty result message', () => {
@@ -80,5 +81,42 @@ describe('Markdown code block copy button', () => {
   it('does not add a copy button to inline code', () => {
     render(<Markdown source="Call `summarize` first." />);
     expect(screen.queryByRole('button', { name: 'Copy code' })).toBeNull();
+  });
+});
+
+describe('Markdown page blocks', () => {
+  const block = '```page\n{"path":"/team","action":"Invite member"}\n```';
+
+  it('lets the host app render the page it names', () => {
+    const renderPage = vi.fn(({ path, action }: CaretPageSpec) => (
+      <span>
+        card {path} {action}
+      </span>
+    ));
+    render(
+      <CaretHostProvider value={{ renderPage }}>
+        <Markdown source={`Team members are added here:\n\n${block}`} />
+      </CaretHostProvider>
+    );
+    expect(screen.getByText('card /team Invite member')).toBeTruthy();
+    expect(document.querySelector('pre')).toBeNull();
+  });
+
+  it('falls back to a link without a host, and refuses other sites', () => {
+    render(<Markdown source={block} />);
+    expect(screen.getByRole('link', { name: '/team' }).getAttribute('href')).toBe('/team');
+    render(<Markdown source={'```page\n{"path":"//evil.example"}\n```'} />);
+    expect(screen.queryByRole('link', { name: '//evil.example' })).toBeNull();
+  });
+
+  it('opens in-app links through the host so the chat stays open', () => {
+    const openPage = vi.fn();
+    render(
+      <CaretHostProvider value={{ openPage }}>
+        <Markdown source="Go to [Team](/team)." />
+      </CaretHostProvider>
+    );
+    fireEvent.click(screen.getByRole('link', { name: 'Team' }));
+    expect(openPage).toHaveBeenCalledWith({ path: '/team' });
   });
 });

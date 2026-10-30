@@ -173,5 +173,21 @@
     "perPersonDescription": "Le quota est réparti équitablement entre les postes.",
     "loadFailed": "Impossible de charger l’utilisation de l’IA.",
     "loadAllocationFailed": "Impossible de charger les paramètres de répartition de l’IA."
+  },
+  "navigation": {
+    "title": "Navigation",
+    "description": "Organisez la barre des applications et la barre latérale de l’accueil. Vous pouvez aussi demander à Caret, par exemple « place-toi en haut » ou « rétablis la barre latérale par défaut ».",
+    "railTitle": "Barre des applications",
+    "railDescription": "Les icônes des applications tout à gauche.",
+    "workspaceTitle": "Barre latérale de l’accueil",
+    "workspaceDescription": "Les pages affichées à côté de la barre des applications sur l’accueil.",
+    "bottomGroup": "Bas de la barre",
+    "hiddenTag": "Masqué",
+    "moveUp": "Monter {{item}}",
+    "moveDown": "Descendre {{item}}",
+    "hide": "Masquer {{item}}",
+    "show": "Afficher {{item}}",
+    "restore": "Rétablir par défaut",
+    "saveFailed": "Impossible d’enregistrer la navigation. Réessayez."
   }
 }

@@ -11,7 +11,7 @@ import (
 const maxToolPreviewDetails = 5
 
 func buildToolActionPreview(tool ToolDef, input map[string]any) string {
-	if tool.Scope != "write" && !tool.RequiresApproval {
+	if (tool.Scope != "write" || tool.Personal) && !tool.RequiresApproval {
 		return ""
 	}
 

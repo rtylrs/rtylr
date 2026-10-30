@@ -102,6 +102,7 @@ import (
 	"github.com/voxire/onion/internal/modules/organization/subscriptions"
 	"github.com/voxire/onion/internal/modules/organization/team"
 	"github.com/voxire/onion/internal/modules/organization/user"
+	"github.com/voxire/onion/internal/modules/portal"
 	"github.com/voxire/onion/internal/modules/pos/audit"
 	"github.com/voxire/onion/internal/modules/pos/cashmovements"
 	"github.com/voxire/onion/internal/modules/pos/combos"
@@ -365,6 +366,7 @@ type apiModules struct {
 	Expenses              *expenses.Module
 	ERPSettings           *erpsettings.Module
 	Feedback              *feedback.Module
+	Portal                *portal.Module
 	FinanceBankFeeds      *financebankfeeds.Module
 	FinanceReconciliation *financereconciliation.Module
 	FinanceReports        *financereports.Module

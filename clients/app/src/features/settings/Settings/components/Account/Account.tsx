@@ -18,6 +18,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { EmptyState } from '../../../../../shared/components/dash/EmptyState';
+import NavigationSettings from './NavigationSettings';
 import { securityClient, userClient } from '../../../../../shared/lib/clients';
 import { useUserStore } from '../../../../../shared/stores/userStore';
 import { ConfirmDialog } from '../../../../../shared/components/dash';
@@ -334,6 +335,8 @@ const Account: React.FC = () => {
             </div>
           </CardContent>
         </Card>
+
+        <NavigationSettings />
 
         {/* Security */}
         <Card>

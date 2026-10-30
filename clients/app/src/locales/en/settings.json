@@ -173,5 +173,21 @@
     "perPersonDescription": "The allowance is split evenly across seats.",
     "loadFailed": "Unable to load AI usage.",
     "loadAllocationFailed": "Unable to load AI allocation settings."
+  },
+  "navigation": {
+    "title": "Navigation",
+    "description": "Arrange the app bar and the Home sidebar. You can also ask Caret, for example “move yourself to the top” or “restore the default sidebar”.",
+    "railTitle": "App bar",
+    "railDescription": "The app icons on the far left.",
+    "workspaceTitle": "Home sidebar",
+    "workspaceDescription": "The pages listed beside the app bar on Home.",
+    "bottomGroup": "Bottom of the bar",
+    "hiddenTag": "Hidden",
+    "moveUp": "Move {{item}} up",
+    "moveDown": "Move {{item}} down",
+    "hide": "Hide {{item}}",
+    "show": "Show {{item}}",
+    "restore": "Restore default",
+    "saveFailed": "Couldn’t save the navigation. Try again."
   }
 }
