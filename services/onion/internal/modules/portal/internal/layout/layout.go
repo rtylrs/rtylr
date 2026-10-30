@@ -59,7 +59,8 @@ type Move struct {
 	// or takes the group of the item named in Position.
 	Group string
 	// Position is "first", "last", "before:<id>", "after:<id>" or a slot
-	// number counted from 1 within the group; empty means first.
+	// number counted from 1 within the group; empty means first. "top" is
+	// first of the top group unless Group says otherwise.
 	Position string
 }
 
@@ -288,7 +289,14 @@ func (a Area) move(current Arrangement, move Move) (Arrangement, error) {
 			return current, fmt.Errorf("%s is in the %s group, not %s", other.Label, anchorGroup, group)
 		}
 		group = anchorGroup
-	} else if position == "" || position == "top" || position == "start" {
+	} else if position == "top" || position == "start" {
+		// "To the top" means the top of the bar, even for an item pinned at
+		// the bottom.
+		position = "first"
+		if group == "" {
+			group = "top"
+		}
+	} else if position == "" {
 		position = "first"
 	} else if position == "end" {
 		position = "last"

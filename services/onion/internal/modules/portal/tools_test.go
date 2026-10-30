@@ -268,3 +268,34 @@ func TestAnEmptyChangeIsRefused(t *testing.T) {
 		}
 	}
 }
+
+// The 2026-10-30 report: Profile went to the top, then "settings above
+// profile" kept Settings in the bottom group and still answered "Done".
+func TestAMoveThatChangesNothingFails(t *testing.T) {
+	m := &Module{store: newMemoryStore(), nav: catalog.Navigation()}
+	ctx := signedInAs(7)
+	if _, _, err := m.ExecuteCaretTool(ctx, "portal.customize", map[string]any{"id": "profile", "group": "top", "position": "first"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := m.ExecuteCaretTool(ctx, "portal.customize", map[string]any{"id": "caret", "position": "first"}); err == nil || !strings.Contains(err.Error(), "nothing changed") {
+		t.Fatalf("no-op move answered err = %v", err)
+	}
+	out, _, err := m.ExecuteCaretTool(ctx, "portal.customize", map[string]any{"id": "settings", "position": "before:profile"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := "App bar from the top: Settings, Profile, Home,"; !strings.HasPrefix(out["order"].(string), want) {
+		t.Fatalf("order = %q", out["order"])
+	}
+}
+
+func TestToTheTopMeansTheTopOfTheBar(t *testing.T) {
+	m := &Module{store: newMemoryStore(), nav: catalog.Navigation()}
+	out, _, err := m.ExecuteCaretTool(signedInAs(7), "portal.customize", map[string]any{"area": "rail", "id": "settings", "position": "top"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := "App bar from the top: Settings, Home,"; !strings.HasPrefix(out["order"].(string), want) {
+		t.Fatalf("order = %q", out["order"])
+	}
+}

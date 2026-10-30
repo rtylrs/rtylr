@@ -8,6 +8,8 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"slices"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/portal/internal/catalog"
 	"github.com/voxire/onion/internal/modules/portal/internal/infrastructure"
@@ -87,17 +89,25 @@ func (m *Module) changeAreas(ctx context.Context, userID int64, edits map[string
 		}
 	}
 	return m.store.UpdateLayout(ctx, userID, func(saved layout.Layout) (layout.Layout, error) {
+		changed, before := false, []string{}
 		for _, name := range areas {
 			change, ok := edits[name]
 			if !ok {
 				continue
 			}
 			area, _ := m.nav.Area(name)
-			next, err := area.Apply(area.Resolve(saved.Saved(name)), change)
+			current := area.Resolve(saved.Saved(name))
+			next, err := area.Apply(current, change)
 			if err != nil {
 				return saved, err
 			}
+			changed = changed || !sameArrangement(current, next)
+			before = append(before, describeOrder(area, current))
 			saved = saved.With(name, area.Stored(next))
+		}
+		if !changed {
+			// Answering "Done" here would report a move nobody can see.
+			return saved, fmt.Errorf("nothing changed, so nothing moved on screen. It still reads: %s Without a group, first, last and a slot stay in the item's own group; to move an item between the top and the bottom group give group top or bottom, or place it before:<id> or after:<id> an item in that group", strings.Join(before, " "))
 		}
 		return saved, nil
 	})
@@ -114,4 +124,8 @@ func (m *Module) reset(ctx context.Context, userID int64, name string) (layout.L
 		return area.Default(), nil
 	})
 	return saved, err
+}
+
+func sameArrangement(a, b layout.Arrangement) bool {
+	return slices.Equal(a.Top, b.Top) && slices.Equal(a.Bottom, b.Bottom) && slices.Equal(a.Hidden, b.Hidden)
 }
