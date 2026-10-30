@@ -438,7 +438,21 @@
       "saveFailed": "Unable to save Buddy settings.",
       "saved": "Settings saved.",
       "saving": "Saving…",
-      "loading": "Loading…"
+      "loading": "Loading…",
+      "starterCheckIn": "Check in with me every evening about my day",
+      "starterSupport": "Every morning at 9, tell me what needs attention in support",
+      "starterInvoices": "Every Friday afternoon, list unpaid invoices",
+      "starterWhat": "What can you do for me?",
+      "unread": "New message from Caret Buddy",
+      "look": "Look",
+      "colors": {
+        "ink": "Ink",
+        "tangerine": "Tangerine",
+        "sky": "Sky",
+        "mint": "Mint",
+        "grape": "Grape",
+        "rose": "Rose"
+      }
     }
   }
 }

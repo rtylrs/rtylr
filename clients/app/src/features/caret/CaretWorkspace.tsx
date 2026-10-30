@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Bot, CalendarClock, Download, PanelLeft, Settings } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { CalendarClock, Download, PanelLeft, Settings } from 'lucide-react';
 import { resolveApiBase } from '@voxire/config';
 import { HelmetContainer } from '@voxire/components';
 import { CaretIcon, CaretPanel, useCaretStore, useCaretUIStore } from '@voxire/caret';
@@ -12,6 +13,10 @@ import {
 import { usePortalHeaderActions } from '../../shell/PortalHeaderActions';
 import { useCaretInstall } from './useCaretInstall';
 import BuddyRoutines, { BUDDY_SYSTEM_CONTEXT, buddyClient } from './Buddy';
+import BuddyPerch from './BuddyPerch';
+import BuddySprite from './BuddySprite';
+import { useBuddyMood } from './useBuddyMood';
+import { BUDDY_COLORS, useBuddyColor } from './useBuddyColor';
 import './caret-workspace.css';
 
 export default function CaretWorkspace() {
@@ -25,6 +30,29 @@ export default function CaretWorkspace() {
     (state) => state.tabs.find((tab) => tab.id === state.activeTabId)?.sessionId
   );
   const buddyActive = Boolean(activeSessionId?.startsWith('buddy-'));
+  const buddyMood = useBuddyMood(buddyActive);
+  const buddyScope = `${user?.businessId}:${user?.id}`;
+  const seenKey = `caret-buddy-seen:${buddyScope}`;
+  const [buddyColorName] = useBuddyColor(buddyScope);
+  const buddyColor = BUDDY_COLORS[buddyColorName];
+  const thread = useQuery({
+    queryKey: ['caret-buddy', buddyScope, 'thread'],
+    queryFn: () => buddyClient.getBuddyThread({}),
+    refetchInterval: 60_000,
+    enabled: Boolean(user?.id),
+  });
+  const lastPostAt = thread.data?.lastPostAt ?? '';
+  const [seenAt, setSeenAt] = useState(() => localStorage.getItem(seenKey) ?? '');
+  useEffect(() => {
+    if (!buddyActive) return;
+    const now = new Date().toISOString();
+    localStorage.setItem(seenKey, now);
+    setSeenAt(now);
+  }, [buddyActive, lastPostAt, seenKey]);
+  const buddyUnread =
+    !buddyActive &&
+    lastPostAt !== '' &&
+    (seenAt === '' || Date.parse(lastPostAt) > Date.parse(seenAt));
   const setView = useCaretUIStore((state) => state.setView);
   const { canInstall, install } = useCaretInstall();
   const view = useCaretUIStore((state) => state.view);
@@ -128,6 +156,9 @@ export default function CaretWorkspace() {
         workspace={{
           sidebarOpen,
           pollSessionId: buddyActive ? (activeSessionId ?? undefined) : undefined,
+          composerAccessory: buddyActive ? (
+            <BuddyPerch mood={buddyMood} label={t('common.caret.buddy.title')} color={buddyColor} />
+          ) : undefined,
           onSelectChat: () => {
             setRoutinesOpen(false);
             if (window.matchMedia('(max-width: 700px)').matches) setSidebarOpen(false);
@@ -150,10 +181,20 @@ export default function CaretWorkspace() {
                 aria-current={buddyActive ? 'page' : undefined}
                 onClick={() => void openBuddy()}
               >
-                <span className="caret-bot-avatar">
-                  <Bot size={13} />
-                </span>
+                <BuddySprite
+                  size={22}
+                  color={buddyColor}
+                  mood={buddyActive ? buddyMood : buddyUnread ? 'alert' : 'idle'}
+                  track={false}
+                />
                 {t('common.caret.buddy.title')}
+                {buddyUnread && (
+                  <span
+                    className="caret-bot-unread"
+                    role="status"
+                    aria-label={t('common.caret.buddy.unread')}
+                  />
+                )}
               </button>
               {buddyError && (
                 <p role="alert" className="caret-bots-error">
@@ -167,9 +208,7 @@ export default function CaretWorkspace() {
               <div>
                 {!sidebarOpen && toggle('header')}
                 {buddyActive && (
-                  <span className="caret-bot-avatar">
-                    <Bot size={13} />
-                  </span>
+                  <BuddySprite size={24} mood={buddyMood} track={false} color={buddyColor} />
                 )}
                 <span>{buddyActive ? t('common.caret.buddy.title') : title || 'Caret'}</span>
               </div>
@@ -212,13 +251,33 @@ export default function CaretWorkspace() {
             </header>
           ),
           welcome: buddyActive ? (
-            <div className="caret-workspace-welcome">
-              <span className="caret-bot-avatar caret-bot-avatar-large">
-                <Bot size={22} />
-              </span>
-              <h1>{t('common.caret.buddy.welcome')}</h1>
-              <p>{t('common.caret.buddy.welcomeHint')}</p>
-            </div>
+            (send: (prompt: string) => void) => (
+              <div className="caret-workspace-welcome">
+                <BuddySprite
+                  size={96}
+                  color={buddyColor}
+                  mood={buddyMood}
+                  pokeable
+                  title={t('common.caret.buddy.title')}
+                  className="caret-buddy-hero"
+                />
+                <h1>{t('common.caret.buddy.welcome')}</h1>
+                <p>{t('common.caret.buddy.welcomeHint')}</p>
+                <div className="caret-buddy-starters">
+                  {(
+                    ['starterCheckIn', 'starterSupport', 'starterInvoices', 'starterWhat'] as const
+                  ).map((key) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => send(t(`common.caret.buddy.${key}`))}
+                    >
+                      {t(`common.caret.buddy.${key}`)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )
           ) : (
             <div className="caret-workspace-welcome">
               <CaretIcon size={38} />
@@ -282,8 +341,8 @@ export default function CaretWorkspace() {
       />
       {buddyActive && routinesOpen && (
         <BuddyRoutines
-          key={`${user?.businessId}:${user?.id}`}
-          scope={`${user?.businessId}:${user?.id}`}
+          key={buddyScope}
+          scope={buddyScope}
           isAdmin={isAdmin}
           onClose={() => setRoutinesOpen(false)}
         />

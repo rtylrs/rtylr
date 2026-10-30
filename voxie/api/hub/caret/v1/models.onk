@@ -158,7 +158,10 @@ message DecideBuddyActionRequest {
 message DecideBuddyActionResponse { action: BuddyAction }
 
 message GetBuddyThreadRequest {}
-message GetBuddyThreadResponse { session_id: string }
+message GetBuddyThreadResponse {
+  session_id: string
+  last_post_at: string
+}
 
 message BuddyRoutine {
   id: int64 @encode(number)

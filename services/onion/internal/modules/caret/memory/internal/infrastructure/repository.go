@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/domain"
 	sqlc "github.com/voxire/onion/internal/modules/caret/memory/internal/infrastructure/persistence/sqlc"
@@ -339,6 +340,19 @@ func (r *Repository) firstUserMessageTitle(ctx context.Context, sessionID string
 		return "", err
 	}
 	return titleFromFirstUserMessage(content), nil
+}
+
+// LatestAssistantAt is when the assistant last wrote in a chat; ok is false
+// when it never has.
+func (r *Repository) LatestAssistantAt(ctx context.Context, sessionID string) (time.Time, bool, error) {
+	at, err := r.queries.GetLatestAssistantMessageTime(ctx, sessionID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return time.Time{}, false, nil
+	}
+	if err != nil {
+		return time.Time{}, false, err
+	}
+	return at.Time, at.Valid, nil
 }
 
 func (r *Repository) GetSessionMessages(ctx context.Context, sessionID string) ([]domain.ConversationMessage, error) {

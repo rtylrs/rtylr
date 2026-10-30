@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/caret/buddy"
 	"github.com/voxire/onion/internal/modules/caret/internal/application"
@@ -18,6 +19,7 @@ const buddyThreadHistory = 30
 // person that routines read from and post into.
 type buddyThreads interface {
 	BuddyThread(ctx context.Context, businessID int64, userID int) (string, error)
+	BuddyLastPost(ctx context.Context, sessionID string, userID int) (time.Time, bool, error)
 	RecentMessages(ctx context.Context, sessionID string, userID, limit int) ([]memory.ThreadMessage, error)
 	StoreMessage(ctx context.Context, sessionID string, userID int, role, content string, tokens int) (any, error)
 }

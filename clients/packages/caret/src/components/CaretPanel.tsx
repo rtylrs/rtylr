@@ -45,7 +45,8 @@ export interface CaretWorkspaceOptions {
   sidebarHeader: React.ReactNode;
   sidebarContent?: React.ReactNode;
   mainContent?: React.ReactNode;
-  welcome: React.ReactNode;
+  /** Shown on an empty chat; a function gets a way to send a starter prompt. */
+  welcome: React.ReactNode | ((send: (prompt: string) => void) => React.ReactNode);
   historyLabels: ChatListLabels;
   projectLabels?: Partial<ProjectLabels>;
   composerPlaceholder: string;
@@ -53,6 +54,8 @@ export interface CaretWorkspaceOptions {
   onSelectChat: () => void;
   /** Reloads this chat now and then while it is open, for messages posted in the background. */
   pollSessionId?: string;
+  /** Sits on the composer's top edge once the chat has messages. */
+  composerAccessory?: React.ReactNode;
 }
 
 export interface CaretPanelProps {
@@ -829,7 +832,9 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
               }}
             >
               {isEmpty ? (
-                (workspace?.welcome ?? (
+                ((typeof workspace?.welcome === "function"
+                  ? workspace.welcome(sendPromptWithIntent)
+                  : workspace?.welcome) ?? (
                   <WelcomeHero
                     size={isBig ? "lg" : "sm"}
                     emptyState={emptyState}
@@ -856,9 +861,11 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
               className="caret-composer-wrap"
               style={{
                 ...composerWrapStyle,
+                position: "relative",
                 ...(workspace && isEmpty ? { paddingBottom: 0 } : {}),
               }}
             >
+              {!isEmpty && workspace?.composerAccessory}
               <Composer
                 key={activeTabId}
                 autoFocus={isOpen || isFullscreen}

@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/domain"
 )
@@ -39,4 +40,5 @@ type repository interface {
 	SetChatMetadataNumber(context.Context, string, int, string, int) error
 	SaveToolRoute(context.Context, int, string, string) error
 	ToolRoutes(context.Context, int) ([]string, error)
+	LatestAssistantAt(context.Context, string) (time.Time, bool, error)
 }
