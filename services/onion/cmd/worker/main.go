@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/voxire/onion/internal/modules/activity"
 	"github.com/voxire/onion/internal/modules/booking"
+	"github.com/voxire/onion/internal/modules/caret/buddy"
 	"github.com/voxire/onion/internal/modules/crm"
 	"github.com/voxire/onion/internal/modules/erp"
 	"github.com/voxire/onion/internal/modules/finance"
@@ -118,7 +119,7 @@ func main() {
 	platformjobs.AutoRegister(ctx, modules)
 	// Not a module, so it registers itself rather than through AutoRegister.
 	eventbus.RegisterJobs(platformjobs.DefaultRegistry(), eventbus.NewDispatcher(
-		dbclient.Pool(), modules.Automations, modules.Webhooks, modules.Customers, modules.CRMSales, modules.PosGiftCards, modules.Inventory, activity.NewModule(ctx, dbclient.Pool()).WithUserNameReader(scopes.NewReader(dbclient.Pool()).BusinessUserName),
+		dbclient.Pool(), modules.CaretBuddy, modules.Automations, modules.Webhooks, modules.Customers, modules.CRMSales, modules.PosGiftCards, modules.Inventory, activity.NewModule(ctx, dbclient.Pool()).WithUserNameReader(scopes.NewReader(dbclient.Pool()).BusinessUserName),
 	).WithSources(booking.Facts(dbclient.Pool()), crm.Facts(dbclient.Pool()), erp.Facts(dbclient.Pool()), finance.Facts(dbclient.Pool()), pos.Facts(dbclient.Pool()), store.Facts(dbclient.Pool()), support.Facts(dbclient.Pool()), team.Facts(dbclient.Pool())))
 	jobActivity := newWorkerJobActivity()
 	if err := trackWorkerJobs(platformjobs.DefaultRegistry(), jobActivity); err != nil {
@@ -271,6 +272,7 @@ func trackWorkerJobs(registry *platformjobs.Registry, activity *workerJobActivit
 }
 
 type jobModules struct {
+	CaretBuddy        *buddy.Module
 	Automations       *automations.Module
 	Customers         *customers.Module
 	CRMSales          *crmsales.Module
@@ -323,6 +325,7 @@ func initializeJobModules(ctx context.Context) *jobModules {
 	webhooksModule := webhooks.NewModule(ctx, db)
 	webhooksModule.SetNotificationContactResolver(teamModule.GetActiveMemberContact)
 	return &jobModules{
+		CaretBuddy:        buddy.NewModule(ctx, db),
 		Automations:       automations.NewModule(ctx, db, automationContacts),
 		Customers:         customersModule,
 		CRMSales:          crmsales.NewModule(ctx, db).WithMembershipReader(scopes.NewReader(db).IsBusinessUser),

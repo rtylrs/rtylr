@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/voxire/onion/internal/modules/caret/buddy"
 	"github.com/voxire/onion/internal/modules/caret/internal/api"
 	"github.com/voxire/onion/internal/modules/caret/internal/application"
 	"github.com/voxire/onion/internal/modules/caret/internal/handlers"
@@ -16,6 +17,7 @@ import (
 var aiStreamRateLimit = serverHttp.AIUserRateLimit(5, time.Minute)
 
 type Module struct {
+	buddies        *buddy.Module
 	snipsService   *application.Service
 	memoryService  application.MemoryService
 	quotaService   handlers.QuotaService
@@ -83,6 +85,11 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 		hubcaretv1.WithMux(mux),
 	); err != nil {
 		panic(fmt.Errorf("register caret runtime service: %w", err))
+	}
+	if m.buddies != nil {
+		if err := hubcaretv1.RegisterBuddyServiceServer(&handlers.BuddyAPI{Store: m.buddies, Executors: m.toolExecutors}, hubcaretv1.WithMux(mux)); err != nil {
+			panic(fmt.Errorf("register buddy service: %w", err))
+		}
 	}
 	// The reply stream is Server-Sent Events, which the JSON contract cannot
 	// carry, so it stays a raw handler behind the per-user AI rate limit.

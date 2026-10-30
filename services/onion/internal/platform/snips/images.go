@@ -61,5 +61,9 @@ func imagesFromContext(ctx context.Context) []ImageInput {
 	return images
 }
 func providerSupportsInput(ctx context.Context, p Provider) bool {
-	return len(imagesFromContext(ctx)) == 0 || p.Name() == "gemini"
+	if len(imagesFromContext(ctx)) == 0 || p.Name() == "gemini" {
+		return true
+	}
+	provider, ok := p.(*OpenAIProvider)
+	return ok && (provider.name == "deepseek" || provider.name == "opencode") && strings.HasPrefix(strings.ToLower(provider.model), "deepseek-v4.") && strings.Contains(strings.ToLower(provider.model), "flash")
 }

@@ -61,3 +61,6 @@ SET name = CASE WHEN ? <> '' THEN ? ELSE name END,
     total_tickets = total_tickets + 1,
     last_ticket_at = NOW()
 WHERE business_id = ? AND id = ?;
+
+-- name: GetTicketBusiness :one
+SELECT business_id FROM support_tickets WHERE id = ?;
