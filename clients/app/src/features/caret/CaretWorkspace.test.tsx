@@ -74,7 +74,7 @@ vi.mock('./useCaretInstall', () => ({
 const buddy = vi.hoisted(() => ({ getBuddyThread: vi.fn() }));
 vi.mock('./BuddyPerch', () => ({ default: () => null }));
 vi.mock('./Buddy', () => ({
-  BUDDY_SYSTEM_CONTEXT: 'You are Caret Buddy',
+  buddySystemContext: () => 'You are Caret Buddy',
   buddyClient: buddy,
   default: () => <div>Routines drawer</div>,
 }));

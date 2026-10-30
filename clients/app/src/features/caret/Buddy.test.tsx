@@ -90,3 +90,12 @@ describe('Buddy routines', () => {
     expect(onClose).toHaveBeenCalled();
   });
 });
+
+describe('buddySystemContext', () => {
+  it('tells Buddy the local time with its offset', async () => {
+    const { buddySystemContext } = await import('./Buddy');
+    const text = buddySystemContext(new Date('2026-10-30T17:30:00Z'));
+    expect(text).toContain('You are Caret Buddy');
+    expect(text).toMatch(/local time is 2026-10-30T\d\d:\d\d[+-]\d\d:\d\d/);
+  });
+});

@@ -12,7 +12,7 @@ import {
 } from '../../shared/lib/portalCaretContext';
 import { usePortalHeaderActions } from '../../shell/PortalHeaderActions';
 import { useCaretInstall } from './useCaretInstall';
-import BuddyRoutines, { BUDDY_SYSTEM_CONTEXT, buddyClient } from './Buddy';
+import BuddyRoutines, { buddyClient, buddySystemContext } from './Buddy';
 import BuddyPerch from './BuddyPerch';
 import BuddySprite from './BuddySprite';
 import { useBuddyMood } from './useBuddyMood';
@@ -149,7 +149,7 @@ export default function CaretWorkspace() {
         apiBaseUrl={resolveApiBase()}
         systemContext={
           buddyActive
-            ? `${buildPortalSystemContext(context)}\n\n${BUDDY_SYSTEM_CONTEXT}`
+            ? `${buildPortalSystemContext(context)}\n\n${buddySystemContext()}`
             : buildPortalSystemContext(context)
         }
         pageContext={buildPortalPageContext(context)}

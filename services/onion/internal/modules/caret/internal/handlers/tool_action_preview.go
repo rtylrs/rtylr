@@ -15,6 +15,9 @@ func buildToolActionPreview(tool ToolDef, input map[string]any) string {
 		return ""
 	}
 
+	if preview := buddyRoutinePreview(tool.Name, input); preview != "" {
+		return preview
+	}
 	action := friendlyToolAction(tool)
 	details := previewInputDetails(input)
 	if details == "" {
@@ -159,4 +162,64 @@ func quotePreviewValue(value string) string {
 		return ""
 	}
 	return fmt.Sprintf("%q", value)
+}
+
+// buddyRoutinePreview reads a routine change back in plain words, so the
+// approval says what will run and when rather than listing raw fields.
+func buddyRoutinePreview(name string, input map[string]any) string {
+	title, _ := input["name"].(string)
+	title = strings.TrimSpace(title)
+	every := everyMinutesText(input["every_minutes"])
+	switch name {
+	case "buddy.create_routine":
+		text := "I'll set up a routine"
+		if title != "" {
+			text += fmt.Sprintf(" called %q", title)
+		}
+		if every != "" {
+			text += ", " + every
+		}
+		if first, ok := input["first_run_at"].(string); ok && strings.TrimSpace(first) != "" {
+			text += ", starting " + strings.TrimSpace(first)
+		}
+		return text + ". It runs on its own and posts in your Buddy chat."
+	case "buddy.update_routine":
+		if enabled, ok := input["enabled"].(bool); ok && len(input) <= 2 {
+			if enabled {
+				return "I'll resume this routine."
+			}
+			return "I'll pause this routine. It won't run until you turn it back on."
+		}
+		if every != "" {
+			return fmt.Sprintf("I'll change this routine to run %s.", every)
+		}
+		return "I'll update this routine."
+	case "buddy.delete_routine":
+		return "I'll delete this routine. It won't run again."
+	}
+	return ""
+}
+
+func everyMinutesText(value any) string {
+	minutes, ok := value.(float64)
+	if !ok || minutes <= 0 {
+		return ""
+	}
+	n := int(minutes)
+	unit := func(count int, one, many string) string {
+		if count == 1 {
+			return "every " + one
+		}
+		return fmt.Sprintf("every %d %s", count, many)
+	}
+	switch {
+	case n%10080 == 0:
+		return unit(n/10080, "week", "weeks")
+	case n%1440 == 0:
+		return unit(n/1440, "day", "days")
+	case n%60 == 0:
+		return unit(n/60, "hour", "hours")
+	default:
+		return unit(n, "minute", "minutes")
+	}
 }
