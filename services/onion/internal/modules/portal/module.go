@@ -107,7 +107,7 @@ func (m *Module) changeAreas(ctx context.Context, userID int64, edits map[string
 		}
 		if !changed {
 			// Answering "Done" here would report a move nobody can see.
-			return saved, fmt.Errorf("nothing changed, so nothing moved on screen. It still reads: %s Without a group, first, last and a slot stay in the item's own group; to move an item between the top and the bottom group give group top or bottom, or place it before:<id> or after:<id> an item in that group", strings.Join(before, " "))
+			return saved, fmt.Errorf("nothing changed, so nothing moved on screen. It still reads: %s Without a group, first and last stay in the item's own group, and a slot counts the apps in the top group; to move an item between the top and the bottom group give group top or bottom, or place it before:<id> or after:<id> an item in that group", strings.Join(before, " "))
 		}
 		return saved, nil
 	})
@@ -126,6 +126,11 @@ func (m *Module) reset(ctx context.Context, userID int64, name string) (layout.L
 	return saved, err
 }
 
+// sameArrangement compares what the person sees: moving an item next to a
+// hidden one reorders the saved list but nothing on screen.
 func sameArrangement(a, b layout.Arrangement) bool {
-	return slices.Equal(a.Top, b.Top) && slices.Equal(a.Bottom, b.Bottom) && slices.Equal(a.Hidden, b.Hidden)
+	visible := func(arrangement layout.Arrangement, ids []string) []string {
+		return slices.DeleteFunc(slices.Clone(ids), func(id string) bool { return slices.Contains(arrangement.Hidden, id) })
+	}
+	return slices.Equal(visible(a, a.Top), visible(b, b.Top)) && slices.Equal(visible(a, a.Bottom), visible(b, b.Bottom)) && slices.Equal(slices.Sorted(slices.Values(a.Hidden)), slices.Sorted(slices.Values(b.Hidden)))
 }

@@ -299,3 +299,14 @@ func TestToTheTopMeansTheTopOfTheBar(t *testing.T) {
 		t.Fatalf("order = %q", out["order"])
 	}
 }
+
+func TestAMoveBesideAHiddenItemChangesNothingOnScreen(t *testing.T) {
+	m := &Module{store: newMemoryStore(), nav: catalog.Navigation()}
+	ctx := signedInAs(7)
+	if _, _, err := m.ExecuteCaretTool(ctx, "portal.customize", map[string]any{"area": "rail", "hide": []any{"insights"}}); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := m.ExecuteCaretTool(ctx, "portal.customize", map[string]any{"area": "rail", "id": "flow", "position": "before:insights"}); err == nil {
+		t.Fatal("a move nobody can see answered Done")
+	}
+}
