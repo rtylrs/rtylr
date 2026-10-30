@@ -8,6 +8,8 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"slices"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/portal/internal/catalog"
 	"github.com/voxire/onion/internal/modules/portal/internal/infrastructure"
@@ -87,17 +89,25 @@ func (m *Module) changeAreas(ctx context.Context, userID int64, edits map[string
 		}
 	}
 	return m.store.UpdateLayout(ctx, userID, func(saved layout.Layout) (layout.Layout, error) {
+		changed, before := false, []string{}
 		for _, name := range areas {
 			change, ok := edits[name]
 			if !ok {
 				continue
 			}
 			area, _ := m.nav.Area(name)
-			next, err := area.Apply(area.Resolve(saved.Saved(name)), change)
+			current := area.Resolve(saved.Saved(name))
+			next, err := area.Apply(current, change)
 			if err != nil {
 				return saved, err
 			}
+			changed = changed || !sameArrangement(current, next)
+			before = append(before, describeOrder(area, current))
 			saved = saved.With(name, area.Stored(next))
+		}
+		if !changed {
+			// Answering "Done" here would report a move nobody can see.
+			return saved, fmt.Errorf("nothing changed, so nothing moved on screen. It still reads: %s Without a group, first and last stay in the item's own group, and a slot counts the apps in the top group; to move an item between the top and the bottom group give group top or bottom, or place it before:<id> or after:<id> an item in that group. Slots count hidden items too, so to place an item among the ones on screen use before:<id> or after:<id> a visible item", strings.Join(before, " "))
 		}
 		return saved, nil
 	})
@@ -114,4 +124,13 @@ func (m *Module) reset(ctx context.Context, userID int64, name string) (layout.L
 		return area.Default(), nil
 	})
 	return saved, err
+}
+
+// sameArrangement compares what the person sees: moving an item next to a
+// hidden one reorders the saved list but nothing on screen.
+func sameArrangement(a, b layout.Arrangement) bool {
+	visible := func(arrangement layout.Arrangement, ids []string) []string {
+		return slices.DeleteFunc(slices.Clone(ids), func(id string) bool { return slices.Contains(arrangement.Hidden, id) })
+	}
+	return slices.Equal(visible(a, a.Top), visible(b, b.Top)) && slices.Equal(visible(a, a.Bottom), visible(b, b.Bottom)) && slices.Equal(slices.Sorted(slices.Values(a.Hidden)), slices.Sorted(slices.Values(b.Hidden)))
 }
