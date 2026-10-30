@@ -221,3 +221,47 @@ func TestOpenCodeConversationRouting(t *testing.T) {
 		t.Fatalf("conversation routing is not stable and isolated: %v", sessions)
 	}
 }
+
+func TestOpenCodeDeepSeekFlashImageInput(t *testing.T) {
+	image := ImageInput{DataURL: "data:image/png;base64,aGVsbG8="}
+	calls := 0
+	p := mockOpenCode(t, func(body map[string]any) (string, string) {
+		calls++
+		messages := body["messages"].([]any)
+		parts := messages[0].(map[string]any)["content"].([]any)
+		textPart := parts[0].(map[string]any)
+		imagePart := parts[1].(map[string]any)
+		if textPart["type"] != "text" || textPart["text"] != "describe" || imagePart["type"] != "image_url" || imagePart["image_url"].(map[string]any)["url"] != image.DataURL {
+			t.Errorf("unexpected content: %v", parts)
+		}
+		if body["stream"] == true {
+			return "text/event-stream", "data: {\"choices\":[{\"delta\":{\"content\":\"answer\"}}]}\n\ndata: [DONE]\n\n"
+		}
+		return "application/json", `{"choices":[{"message":{"content":"answer"}}]}`
+	})
+	ctx := WithImages(context.Background(), []ImageInput{image})
+	client := &Client{providers: []Provider{p}, primaryProvider: p}
+	if answer, err := client.CompleteText(ctx, "describe"); err != nil || answer != "answer" {
+		t.Fatalf("answer=%q err=%v", answer, err)
+	}
+	stream, err := client.CompleteTextStream(ctx, "describe")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for token := range stream {
+		if token.Error != "" {
+			t.Fatal(token.Error)
+		}
+	}
+	if calls != 2 {
+		t.Fatalf("calls=%d", calls)
+	}
+	p.model = "deepseek-chat"
+	if providerSupportsInput(ctx, p) {
+		t.Fatal("legacy text-only model accepted images")
+	}
+	p.model = "deepseek-v4.1-flash-1017"
+	if !providerSupportsInput(ctx, p) {
+		t.Fatal("versioned flash model rejected images")
+	}
+}

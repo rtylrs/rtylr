@@ -4,8 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/voxire/onion/internal/modules/support/internal/outbox"
 	"strings"
+
+	supportcontract "github.com/voxire/onion/internal/modules/support/contract"
+	"github.com/voxire/onion/internal/modules/support/internal/outbox"
 
 	crmcontract "github.com/voxire/onion/internal/contracts/crm"
 	"github.com/voxire/onion/internal/modules/support/tickets/internal/domain"
@@ -149,6 +151,9 @@ func (r *Repository) Create(ctx context.Context, input domain.TicketInput) (int6
 	}); err != nil {
 		return 0, err
 	}
+	if err = outbox.Publish(ctx, tx, eventbus.Event{BusinessID: input.BusinessID, Type: supportcontract.TicketCreated, SubjectType: "support_ticket", SubjectID: id}); err != nil {
+		return 0, err
+	}
 	if err = tx.Commit(); err != nil {
 		logger.Ctx(ctx).Error("Failed to commit support ticket transaction", logger.Error(err))
 		return 0, err
@@ -234,18 +239,37 @@ func (r *Repository) ListMessages(ctx context.Context, businessID, ticketID int6
 }
 
 func (r *Repository) CreateMessage(ctx context.Context, input domain.MessageInput) (int64, error) {
-	result, err := r.queries.CreateMessage(ctx, sqlc.CreateMessageParams{
-		TicketID:   input.TicketID,
-		SenderType: sqlc.SupportMessagesSenderType(input.SenderType),
-		SenderName: input.SenderName,
-		Body:       input.Body,
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer func() { _ = tx.Rollback() }()
+	q := r.queries.WithTx(tx)
+	businessID, err := q.GetTicketBusiness(ctx, input.TicketID)
+	if err != nil {
+		return 0, err
+	}
+	result, err := q.CreateMessage(ctx, sqlc.CreateMessageParams{
+		TicketID: input.TicketID, SenderType: sqlc.SupportMessagesSenderType(input.SenderType),
+		SenderName: input.SenderName, Body: input.Body,
 		IsInternal: sql.NullBool{Bool: input.IsInternal, Valid: true},
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to create support message", logger.Error(err))
 		return 0, err
 	}
-	return result.LastInsertId()
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	if input.SenderType == "customer" && !input.IsInternal {
+		if err := outbox.Publish(ctx, tx, eventbus.Event{BusinessID: businessID, Type: supportcontract.CustomerMessageCreated, SubjectType: "support_message", SubjectID: id, Payload: map[string]any{"ticket_id": input.TicketID}}); err != nil {
+			return 0, err
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 
 func ticketFromRow(row sqlc.SupportTicket) domain.Ticket {

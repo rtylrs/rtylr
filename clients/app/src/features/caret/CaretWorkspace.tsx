@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Download, PanelLeft, Settings } from 'lucide-react';
+import { Bot, Download, PanelLeft, Settings } from 'lucide-react';
 import { resolveApiBase } from '@voxire/config';
 import { HelmetContainer } from '@voxire/components';
 import { CaretIcon, CaretPanel, useCaretStore, useCaretUIStore } from '@voxire/caret';
@@ -11,6 +11,7 @@ import {
 } from '../../shared/lib/portalCaretContext';
 import { usePortalHeaderActions } from '../../shell/PortalHeaderActions';
 import { useCaretInstall } from './useCaretInstall';
+import Buddy from './Buddy';
 import './caret-workspace.css';
 
 export default function CaretWorkspace() {
@@ -23,6 +24,7 @@ export default function CaretWorkspace() {
   const setView = useCaretUIStore((state) => state.setView);
   const { canInstall, install } = useCaretInstall();
   const view = useCaretUIStore((state) => state.view);
+  const [buddyOpen, setBuddyOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(
     () => !window.matchMedia('(max-width: 700px)').matches
   );
@@ -90,6 +92,17 @@ export default function CaretWorkspace() {
     </button>
   );
 
+  if (buddyOpen)
+    return (
+      <div className="portal-caret-workspace">
+        <Buddy
+          key={`${user?.businessId}:${user?.id}`}
+          scope={`${user?.businessId}:${user?.id}`}
+          onBack={() => setBuddyOpen(false)}
+        />
+      </div>
+    );
+
   return (
     <div className="portal-caret-workspace portal-caret">
       <HelmetContainer title="Caret · rtylr" />
@@ -131,6 +144,17 @@ export default function CaretWorkspace() {
                     title={t('common.caret.installApp')}
                   >
                     <Download size={18} />
+                  </button>
+                )}
+                {(user?.effectiveAccess?.isOwner || user?.effectiveAccess?.isAdmin) && (
+                  <button
+                    type="button"
+                    className="portal-icon-button"
+                    onClick={() => setBuddyOpen(true)}
+                    aria-label={t('common.caret.buddy.title')}
+                    title={t('common.caret.buddy.title')}
+                  >
+                    <Bot size={18} />
                   </button>
                 )}
                 <button

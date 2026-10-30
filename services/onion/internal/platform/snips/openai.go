@@ -96,13 +96,20 @@ func NewOpenCodeProvider() (*OpenAIProvider, error) {
 func (c *OpenAIProvider) Name() string      { return c.name }
 func (c *OpenAIProvider) IsAvailable() bool { return c.available }
 
-func (c *OpenAIProvider) chatParams(prompt string, stream bool, opts CompletionOptions) openai.ChatCompletionNewParams {
+func (c *OpenAIProvider) chatParams(ctx context.Context, prompt string, stream bool, opts CompletionOptions) openai.ChatCompletionNewParams {
 	req := openai.ChatCompletionNewParams{
 		Model:     c.model,
 		MaxTokens: openai.Int(int64(config.AIMaxOutputTokens)),
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage(prompt),
 		},
+	}
+	if images := imagesFromContext(ctx); len(images) > 0 && providerSupportsInput(ctx, c) {
+		parts := []openai.ChatCompletionContentPartUnionParam{openai.TextContentPart(prompt)}
+		for _, img := range images {
+			parts = append(parts, openai.ImageContentPart(openai.ChatCompletionContentPartImageImageURLParam{URL: img.DataURL}))
+		}
+		req.Messages = []openai.ChatCompletionMessageParamUnion{openai.UserMessage(parts)}
 	}
 	if c.name == "opencode" {
 		req.SetExtraFields(map[string]any{"thinking": map[string]any{"type": "disabled"}})
@@ -164,7 +171,7 @@ func (c *OpenAIProvider) CompleteTextWithOptions(ctx context.Context, prompt str
 func (c *OpenAIProvider) completeTextOnce(ctx context.Context, prompt string, opts CompletionOptions) (*openai.ChatCompletion, error) {
 	callCtx, cancel := context.WithTimeout(ctx, config.AIRequestTimeout)
 	defer cancel()
-	return c.client.Chat.Completions.New(callCtx, c.chatParams(prompt, false, opts), c.requestOptions(ctx)...)
+	return c.client.Chat.Completions.New(callCtx, c.chatParams(ctx, prompt, false, opts), c.requestOptions(ctx)...)
 }
 
 // CompleteTextStream implements the Provider interface.
@@ -194,7 +201,7 @@ func (c *OpenAIProvider) processOpenAIStream(ctx context.Context, prompt string,
 	ctx, cancel := context.WithTimeout(ctx, config.AIRequestTimeout)
 	defer cancel()
 
-	stream := c.client.Chat.Completions.NewStreaming(ctx, c.chatParams(prompt, true, CompletionOptions{}), c.requestOptions(ctx)...)
+	stream := c.client.Chat.Completions.NewStreaming(ctx, c.chatParams(ctx, prompt, true, CompletionOptions{}), c.requestOptions(ctx)...)
 	if stream == nil {
 		c.sendErrorToken(ctx, tokenChan, "failed to create streaming response")
 		return

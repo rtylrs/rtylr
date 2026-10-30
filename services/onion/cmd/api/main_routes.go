@@ -4,6 +4,7 @@ import (
 	"context"
 	stdhttp "net/http"
 
+	"github.com/voxire/onion/internal/modules/caret/buddy"
 	"github.com/voxire/onion/internal/modules/organization/scopes"
 
 	hrdashboardstats "github.com/voxire/onion/internal/modules/hr/hr_dashboard/stats"
@@ -135,6 +136,7 @@ func setupRoutes(ctx context.Context, mux *stdhttp.ServeMux) []http.MiddlewareFu
 		}, nil
 	})
 	modules.Business.WithUserService(modules.User.Onboarding())
+	modules.Echo.StartBuddies(ctx, buddy.NewModule(ctx, dbclient.Pool()), teamSvc)
 	modules.Apps.SetAddonProvider(addons.NewHubAddonProvider(modules.Addons.GetService()))
 	modules.APIKeys.SetWebhooksProvider(webhooks.NewHubWebhooksProvider(modules.Webhooks.GetService()))
 

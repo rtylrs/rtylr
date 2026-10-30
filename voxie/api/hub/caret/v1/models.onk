@@ -103,3 +103,56 @@ message RateReplyRequest {
 message RateReplyResponse {
   saved: bool
 }
+
+message BuddySettings {
+  enabled: bool
+  instructions: string
+  interval_minutes: int32
+  daily_run_cap: int32
+  run_as_user_id: int64 @encode(number)
+}
+
+message GetBuddySettingsRequest {}
+message GetBuddySettingsResponse { settings: BuddySettings }
+message PutBuddySettingsRequest {
+  enabled: bool
+  instructions: string
+  interval_minutes: int32
+  daily_run_cap: int32
+}
+message PutBuddySettingsResponse { settings: BuddySettings }
+
+message BuddyRun {
+  id: int64 @encode(number)
+  trigger_kind: string
+  status: string
+  report: string
+  error: string
+  tool_calls: int32
+  tokens: int64 @encode(number)
+  created_at: string
+  started_at: string
+  finished_at: string
+}
+message ListBuddyRunsRequest {}
+message ListBuddyRunsResponse { runs: BuddyRun[] }
+
+message BuddyAction {
+  id: int64 @encode(number)
+  run_id: int64 @encode(number)
+  tool_name: string
+  input: json
+  status: string
+  decided_by: int64 @encode(number)
+  result: json
+  expires_at: string
+  created_at: string
+  decided_at: string
+}
+message ListBuddyActionsRequest { status: string @query("status") }
+message ListBuddyActionsResponse { actions: BuddyAction[] }
+message DecideBuddyActionRequest {
+  action_id: int64 @encode(number)
+  decision: string
+}
+message DecideBuddyActionResponse { action: BuddyAction }

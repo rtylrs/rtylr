@@ -39,6 +39,9 @@ rtylr/conversation_messages.sql	internal/modules/caret/sql/schema/rtylr/conversa
 rtylr/conversation_summaries.sql	internal/modules/caret/sql/schema/rtylr/conversation_summaries.sql
 rtylr/user_memory.sql	internal/modules/caret/sql/schema/rtylr/user_memory.sql
 rtylr/caret_reply_feedback.sql	internal/modules/caret/sql/schema/rtylr/caret_reply_feedback.sql
+rtylr/caret_buddies.sql	internal/modules/caret/sql/schema/rtylr/caret_buddies.sql
+rtylr/caret_buddy_runs.sql	internal/modules/caret/sql/schema/rtylr/caret_buddy_runs.sql
+rtylr/caret_buddy_actions.sql	internal/modules/caret/sql/schema/rtylr/caret_buddy_actions.sql
 voxire/career_applications.sql	internal/modules/recruit/sql/schema/voxire/career_applications.sql
 voxire/careers.sql	internal/modules/recruit/sql/schema/voxire/careers.sql
 voxire/clients.sql	internal/modules/crm/sql/schema/voxire/clients.sql
@@ -145,3 +148,4 @@ internal/modules/finance/expenses/sql/migration_20261020_expense_category_names_
 internal/modules/finance/bank_accounts/sql/migration_20261020_bank_account_columns.sql	internal/modules/finance/bank_accounts/sql/migration_20261020_bank_account_columns.sql
 internal/modules/crm/crm_sales/sql/migration_20261020_sales_redesign.sql	internal/modules/crm/crm_sales/sql/migration_20261020_sales_redesign.sql
 shared/zz_self_signup_provisioning.sql	internal/modules/organization/sql/schema/shared/zz_self_signup_provisioning.sql
+rtylr/caret_buddy_events.sql	internal/modules/caret/sql/schema/rtylr/caret_buddy_events.sql

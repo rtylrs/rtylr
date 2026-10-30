@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS `caret_buddy_runs` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `buddy_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL,
+  `trigger_kind` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'schedule',
+  `status` enum('queued','running','done','failed') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'queued',
+  `attempts` tinyint unsigned NOT NULL DEFAULT '0',
+  `lease_until` timestamp NULL DEFAULT NULL,
+  `report` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `error` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `tool_calls` int NOT NULL DEFAULT '0',
+  `tokens` bigint NOT NULL DEFAULT '0',
+  `started_at` timestamp NULL DEFAULT NULL,
+  `finished_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_caret_buddy_runs_claim` (`status`,`id`),
+  KEY `idx_caret_buddy_runs_lease` (`status`,`lease_until`),
+  KEY `idx_caret_buddy_runs_buddy` (`buddy_id`,`created_at`),
+  KEY `idx_caret_buddy_runs_business` (`business_id`,`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

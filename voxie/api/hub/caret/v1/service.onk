@@ -19,3 +19,12 @@ service CaretRuntimeService {
   /// verdicts and follows them in later replies.
   rateReply(RateReplyRequest) -> RateReplyResponse @post("/caret/feedback")
 }
+
+service BuddyService {
+  base_path: "/"
+  getBuddySettings(GetBuddySettingsRequest) -> GetBuddySettingsResponse @get("/caret/buddy/settings")
+  putBuddySettings(PutBuddySettingsRequest) -> PutBuddySettingsResponse @put("/caret/buddy/settings")
+  listBuddyRuns(ListBuddyRunsRequest) -> ListBuddyRunsResponse @get("/caret/buddy/runs")
+  listBuddyActions(ListBuddyActionsRequest) -> ListBuddyActionsResponse @get("/caret/buddy/actions")
+  decideBuddyAction(DecideBuddyActionRequest) -> DecideBuddyActionResponse @post("/caret/buddy/actions/decision")
+}
