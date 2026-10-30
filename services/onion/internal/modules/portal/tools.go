@@ -74,7 +74,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 			changed[0]["message"] = message
 			return changed[0], true, nil
 		}
-		return map[string]any{"areas": changed, "message": message}, true, nil
+		return map[string]any{"areas": changed, "order": strings.Join(orders, " "), "message": message}, true, nil
 	default:
 		area := areaName(input)
 		if area == "all" {

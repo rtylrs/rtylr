@@ -215,7 +215,7 @@ func TestOneRequestCanChangeBothAreas(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(out["areas"].([]map[string]any)) != 2 || !strings.Contains(out["message"].(string), "hidden: POS") || !strings.Contains(out["message"].(string), "hidden: Audit Log") {
+	if order, _ := out["order"].(string); len(out["areas"].([]map[string]any)) != 2 || !strings.Contains(order, "hidden: POS") || !strings.Contains(order, "hidden: Audit Log") {
 		t.Fatalf("got %v", out)
 	}
 	// "Home" names an item in both areas; its neighbour says which one.
