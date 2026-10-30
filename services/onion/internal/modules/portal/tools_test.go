@@ -241,3 +241,13 @@ func TestFractionalSlotsAreRefused(t *testing.T) {
 		t.Fatalf("slot 2: %v %v", out["order"], err)
 	}
 }
+
+func TestAnEmptyChangeIsRefused(t *testing.T) {
+	store := newMemoryStore()
+	m := &Module{store: store, nav: catalog.Navigation()}
+	for _, input := range []map[string]any{{}, {"area": "sidebar"}, {"area": "rail"}} {
+		if _, _, err := m.ExecuteCaretTool(signedInAs(7), "portal.customize", input); err == nil || !strings.Contains(err.Error(), "nothing to change") {
+			t.Errorf("%v: got %v", input, err)
+		}
+	}
+}

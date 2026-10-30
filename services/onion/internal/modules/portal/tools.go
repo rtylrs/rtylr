@@ -43,6 +43,10 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 		if err != nil {
 			return nil, true, err
 		}
+		if len(change.Moves) == 0 && len(change.Hide) == 0 && len(change.Show) == 0 {
+			// Answering "Done" here would claim a change that never happened.
+			return nil, true, errors.New("nothing to change: give moves, hide or show")
+		}
 		edits := map[string]layout.Change{}
 		if area := areaName(input); area == "all" {
 			// "The sidebar" spans both areas: each item goes to the area it
