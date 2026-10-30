@@ -40,6 +40,8 @@ var (
 	navigation layout.Navigation
 	pages      []Page
 	pageTerms  [][4]map[string]bool
+	// taskTerms holds each task and button of a page on its own.
+	taskTerms [][]map[string]bool
 )
 
 func init() {
@@ -73,6 +75,11 @@ func load() error {
 			return fmt.Errorf("pages.json: %s needs a title, a summary and a known app", page.Path)
 		}
 		seen[page.Path] = true
+		tasks := []map[string]bool{}
+		for _, task := range append(slices.Clone(page.Tasks), page.Actions...) {
+			tasks = append(tasks, terms(task))
+		}
+		taskTerms = append(taskTerms, tasks)
 		pageTerms = append(pageTerms, [4]map[string]bool{
 			terms(page.Title),
 			terms(strings.Join(page.Keywords, " ")),
@@ -105,17 +112,38 @@ func Search(query string, limit int) []Page {
 	}
 	var matches []scored
 	for i := range pages {
-		score := 0
+		score, matched, generic := 0, 0, 0
 		for word := range words {
+			hit := 0
 			for field, weight := range termWeights {
 				if pageTerms[i][field][word] {
-					score += weight
+					hit += weight
 				}
 			}
+			switch {
+			case hit == 0:
+			case genericWords[word]:
+				generic += hit
+			default:
+				score += hit
+				matched++
+			}
 		}
-		if score > 0 {
-			matches = append(matches, scored{i, score})
+		if score+generic == 0 {
+			continue
 		}
+		// A page that answers more of the words wins, and one whose whole
+		// title was asked for ("payroll") beats its settings page. Verbs like
+		// "add" only break ties: most pages add something.
+		score = score*matched + generic/3
+		if titled := pageTerms[i][0]; len(titled) > 0 && all(titled, words) {
+			score += 8
+		}
+		// One task or button says the whole request ("Add a product").
+		if len(words) > 1 && slices.ContainsFunc(taskTerms[i], func(task map[string]bool) bool { return all(words, task) }) {
+			score += 20
+		}
+		matches = append(matches, scored{i, score})
 	}
 	sort.SliceStable(matches, func(a, b int) bool { return matches[a].score > matches[b].score })
 	out := []Page{}
@@ -126,6 +154,21 @@ func Search(query string, limit int) []Page {
 		out = append(out, pages[match.index])
 	}
 	return out
+}
+
+func all(want, have map[string]bool) bool {
+	for word := range want {
+		if !have[word] {
+			return false
+		}
+	}
+	return true
+}
+
+var genericWords = map[string]bool{
+	"add": true, "new": true, "create": true, "change": true, "edit": true, "update": true,
+	"delete": true, "remove": true, "view": true, "manage": true, "set": true, "make": true,
+	"check": true, "list": true, "all": true,
 }
 
 var stopWords = map[string]bool{

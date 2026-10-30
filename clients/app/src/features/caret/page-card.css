@@ -38,7 +38,7 @@
 /* The sketch: app bar, the app's sidebar and the page. */
 .ppc-sketch {
   display: flex;
-  height: 132px;
+  height: 146px;
   background: var(--dash-bg, var(--dash-surface));
   border-bottom: 1px solid var(--dash-border);
   font-size: 9.5px;
@@ -49,9 +49,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 1px;
   width: 24px;
-  padding: 6px 0;
+  padding: 5px 0;
   border-inline-end: 1px solid var(--dash-border);
   overflow: hidden;
 }
@@ -61,10 +61,10 @@
 .ppc-rail-icon {
   display: grid;
   place-items: center;
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   flex-shrink: 0;
-  border-radius: 5px;
+  border-radius: 4px;
   color: var(--dash-text-dim);
 }
 .ppc-rail-icon.is-active {
@@ -99,10 +99,9 @@
   text-overflow: ellipsis;
 }
 .ppc-nav.is-active {
-  background: color-mix(in srgb, var(--ppc-accent) 16%, transparent);
+  background: color-mix(in srgb, var(--ppc-accent) 14%, transparent);
   color: var(--dash-text);
   font-weight: 600;
-  box-shadow: inset 2px 0 0 var(--ppc-accent);
 }
 .ppc-page {
   display: flex;
@@ -132,7 +131,7 @@
   padding: 3px 7px;
   border-radius: 6px;
   background: var(--ppc-accent);
-  color: #fff;
+  color: var(--ppc-on-accent);
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;

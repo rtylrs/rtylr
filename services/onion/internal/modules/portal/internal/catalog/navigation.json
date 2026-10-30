@@ -5,9 +5,9 @@
     "items": [
       { "id": "home", "label": "Home", "required": true },
       { "id": "insights", "label": "Insights" },
-      { "id": "flow", "label": "Flow" },
+      { "id": "flow", "label": "Work" },
       { "id": "crm", "label": "CRM" },
-      { "id": "erp", "label": "ERP" },
+      { "id": "erp", "label": "Operations" },
       { "id": "finance", "label": "Finance" },
       { "id": "hr", "label": "HR" },
       { "id": "pos", "label": "POS" },

@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { TFunction } from 'i18next';
-import { describe, expect, it } from 'vitest';
+import i18next, { type TFunction } from 'i18next';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { initTestI18nFrom } from '../../test/i18nTestInstance';
 import { createEffectiveAccess } from '../../test/effectiveAccess';
 import type { StoredUser } from '../shared/stores/userStore';
 import { router } from '../router';
@@ -19,8 +20,8 @@ const catalog = path.resolve(
 const read = <T>(file: string): T =>
   JSON.parse(fs.readFileSync(path.join(catalog, file), 'utf8')) as T;
 const navigation = read<{
-  rail: { items: { id: string; bottom?: boolean }[] };
-  workspace: { items: { id: string }[] };
+  rail: { items: { id: string; label: string; bottom?: boolean }[] };
+  workspace: { items: { id: string; label: string }[] };
 }>('navigation.json');
 const pages = read<{ path: string }[]>('pages.json');
 
@@ -33,10 +34,16 @@ const owner = {
   }),
 } as unknown as StoredUser;
 
+beforeAll(() => initTestI18nFrom(path.resolve(import.meta.dirname, '../locales')));
+
 describe('Portal map', () => {
   it('names the app bar items in the order the Portal shows them', () => {
     expect(railItems(owner, key).map((item) => item.id)).toEqual(
       navigation.rail.items.map((item) => item.id)
+    );
+    // Caret matches what the person says ("move Operations up") to these labels.
+    expect(railItems(owner, i18next.t).map((item) => item.label)).toEqual(
+      navigation.rail.items.map((item) => item.label)
     );
     expect(RAIL_BOTTOM).toEqual(
       navigation.rail.items.filter((item) => item.bottom).map((item) => item.id)
@@ -48,6 +55,9 @@ describe('Portal map', () => {
       .sort((a, b) => Number(a.key === 'extensions') - Number(b.key === 'extensions'))
       .map((item) => item.key);
     expect(shown).toEqual(navigation.workspace.items.map((item) => item.id));
+    expect(shown.map((id) => i18next.t(`common.nav.${id}`))).toEqual(
+      navigation.workspace.items.map((item) => item.label)
+    );
   });
 
   it('only lists pages the Portal has', () => {

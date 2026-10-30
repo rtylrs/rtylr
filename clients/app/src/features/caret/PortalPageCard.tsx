@@ -33,7 +33,18 @@ const RAIL_ID: Partial<Record<PortalApp, string>> = {
   caret: 'caret',
 };
 
+// Apps with their own colour; the rest use the text colour, inverted on buttons.
+const COLOURED = new Set<PortalApp>(['insights', 'flow', 'crm', 'erp', 'finance', 'hr', 'recruit']);
+
 const SKETCH_ROWS = ['92%', '78%', '85%', '64%'];
+
+/** At most `size` items, keeping the active one in view. */
+function fit(items: RailPreviewItem[], size: number, active: string | undefined) {
+  if (items.length <= size) return items;
+  const kept = items.slice(0, size);
+  const current = items.find((item) => item.id === active);
+  return current && !kept.includes(current) ? [...kept.slice(0, size - 1), current] : kept;
+}
 
 /** A page Caret points at: a sketch of where it is in the Portal and the
  *  button to press, opening it with Caret still beside it. */
@@ -69,7 +80,11 @@ export default function PortalPageCard({ spec, rail, onOpen }: PortalPageCardPro
       type="button"
       className="portal-page-card"
       data-app={place.app}
-      style={{ '--ppc-accent': `var(--app-${place.app}, var(--dash-text))` } as CSSProperties}
+      style={
+        (COLOURED.has(place.app)
+          ? { '--ppc-accent': `var(--app-${place.app})`, '--ppc-on-accent': '#fff' }
+          : { '--ppc-accent': 'var(--dash-text)', '--ppc-on-accent': 'var(--dash-surface)' }) as CSSProperties
+      }
       disabled={!allowed}
       onClick={() => onOpen(spec)}
       aria-label={
@@ -80,9 +95,9 @@ export default function PortalPageCard({ spec, rail, onOpen }: PortalPageCardPro
     >
       <span className="ppc-sketch" aria-hidden="true">
         <span className="ppc-rail">
-          {rail.top.map(railIcon)}
+          {fit(rail.top, 7, activeRail).map(railIcon)}
           <span className="ppc-rail-spacer" />
-          {rail.bottom.map(railIcon)}
+          {fit(rail.bottom, 2, activeRail).map(railIcon)}
         </span>
         {items.length > 0 && (
           <span className="ppc-sidebar">

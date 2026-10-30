@@ -184,6 +184,11 @@ function ArrangeList({
             </li>
           );
         })}
+        {hasBottom && !rows.some((row) => row.group === 'bottom') && (
+          <li>
+            <span className="nav-arrange-divider">{t('settings.navigation.bottomGroup')}</span>
+          </li>
+        )}
       </ol>
     </section>
   );
