@@ -111,91 +111,97 @@ export const TaskContextMenu: React.FC<{
     textAlign: 'left',
   };
 
+  // The menu is unmounted while the confirmation is open: it would otherwise
+  // float above the dialog, and with the menu gone useClickOutside has no
+  // element to compare against, so pressing the confirmation's buttons no
+  // longer counts as an outside click that closes everything mid-press.
   return createPortal(
     <>
-      <div
-        ref={ref}
-        style={menuStyle}
-        role="menu"
-        aria-label={t('flow.taskMenu.label')}
-        onKeyDown={onMenuKeyDown}
-      >
-        <button
-          type="button"
-          role="menuitem"
-          ref={(node) => {
-            itemRefs.current[0] = node;
-          }}
-          tabIndex={activeIndex === 0 ? 0 : -1}
-          style={itemStyle}
-          onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--flow-hover)')}
-          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-          onClick={() => {
-            openTask(String(menu.taskId));
-            onClose();
-          }}
+      {!confirmingDelete && (
+        <div
+          ref={ref}
+          style={menuStyle}
+          role="menu"
+          aria-label={t('flow.taskMenu.label')}
+          onKeyDown={onMenuKeyDown}
         >
-          <ExternalLink size={12} style={{ color: 'var(--flow-text-muted)', flexShrink: 0 }} />
-          {t('flow.taskMenu.openTask')}
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          ref={(node) => {
-            itemRefs.current[1] = node;
-          }}
-          tabIndex={activeIndex === 1 ? 0 : -1}
-          style={itemStyle}
-          onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--flow-hover)')}
-          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-          onClick={() => {
-            void navigator.clipboard.writeText(`${window.location.origin}/task/${menu.taskId}`);
-            toast.success(t('flowToasts.task.linkCopied'));
-            onClose();
-          }}
-        >
-          <Copy size={12} style={{ color: 'var(--flow-text-muted)', flexShrink: 0 }} />
-          {t('flow.taskMenu.copyLink')}
-        </button>
-        <div style={{ height: 1, background: 'var(--flow-border)', margin: '4px 0' }} />
-        <button
-          type="button"
-          role="menuitem"
-          ref={(node) => {
-            itemRefs.current[2] = node;
-          }}
-          tabIndex={activeIndex === 2 ? 0 : -1}
-          style={{
-            ...itemStyle,
-            color: canRemove ? 'var(--flow-danger-fg)' : 'var(--flow-text-dim)',
-            cursor: canRemove ? 'pointer' : 'not-allowed',
-          }}
-          // aria-disabled rather than disabled: a disabled button leaves the tab
-          // order, which would put a hole in the menu's arrow navigation, and its
-          // title tooltip stops showing. The click is guarded below instead.
-          aria-disabled={!canRemove}
-          title={!canRemove ? t('flowCommon.deleteRestricted') : undefined}
-          onMouseEnter={(e) => {
-            if (canRemove) e.currentTarget.style.background = 'rgba(239,68,68,0.08)';
-          }}
-          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-          onClick={() => {
-            if (!canRemove) return;
-            // Deleting a task is immediate and has no undo, so it confirms
-            // first, the way deleting a label or a board column already does.
-            setConfirmingDelete(true);
-          }}
-        >
-          <Trash2
-            size={12}
-            style={{
-              color: canRemove ? 'var(--flow-danger-fg)' : 'var(--flow-text-dim)',
-              flexShrink: 0,
+          <button
+            type="button"
+            role="menuitem"
+            ref={(node) => {
+              itemRefs.current[0] = node;
             }}
-          />
-          {t('flowCommon.delete')}
-        </button>
-      </div>
+            tabIndex={activeIndex === 0 ? 0 : -1}
+            style={itemStyle}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--flow-hover)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            onClick={() => {
+              openTask(String(menu.taskId));
+              onClose();
+            }}
+          >
+            <ExternalLink size={12} style={{ color: 'var(--flow-text-muted)', flexShrink: 0 }} />
+            {t('flow.taskMenu.openTask')}
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            ref={(node) => {
+              itemRefs.current[1] = node;
+            }}
+            tabIndex={activeIndex === 1 ? 0 : -1}
+            style={itemStyle}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--flow-hover)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            onClick={() => {
+              void navigator.clipboard.writeText(`${window.location.origin}/task/${menu.taskId}`);
+              toast.success(t('flowToasts.task.linkCopied'));
+              onClose();
+            }}
+          >
+            <Copy size={12} style={{ color: 'var(--flow-text-muted)', flexShrink: 0 }} />
+            {t('flow.taskMenu.copyLink')}
+          </button>
+          <div style={{ height: 1, background: 'var(--flow-border)', margin: '4px 0' }} />
+          <button
+            type="button"
+            role="menuitem"
+            ref={(node) => {
+              itemRefs.current[2] = node;
+            }}
+            tabIndex={activeIndex === 2 ? 0 : -1}
+            style={{
+              ...itemStyle,
+              color: canRemove ? 'var(--flow-danger-fg)' : 'var(--flow-text-dim)',
+              cursor: canRemove ? 'pointer' : 'not-allowed',
+            }}
+            // aria-disabled rather than disabled: a disabled button leaves the tab
+            // order, which would put a hole in the menu's arrow navigation, and its
+            // title tooltip stops showing. The click is guarded below instead.
+            aria-disabled={!canRemove}
+            title={!canRemove ? t('flowCommon.deleteRestricted') : undefined}
+            onMouseEnter={(e) => {
+              if (canRemove) e.currentTarget.style.background = 'rgba(239,68,68,0.08)';
+            }}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            onClick={() => {
+              if (!canRemove) return;
+              // Deleting a task is immediate and has no undo, so it confirms
+              // first, the way deleting a label or a board column already does.
+              setConfirmingDelete(true);
+            }}
+          >
+            <Trash2
+              size={12}
+              style={{
+                color: canRemove ? 'var(--flow-danger-fg)' : 'var(--flow-text-dim)',
+                flexShrink: 0,
+              }}
+            />
+            {t('flowCommon.delete')}
+          </button>
+        </div>
+      )}
       <ConfirmDialog
         open={confirmingDelete}
         onOpenChange={(open) => {

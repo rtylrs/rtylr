@@ -83,6 +83,19 @@ describe('ProjectList TaskRow more menu', () => {
     expect(call.to).toBe('.');
     expect(call.search({})).toEqual({ openTask: 't1' });
   });
+
+  // The menu is portalled, but React still bubbles its clicks through the
+  // component tree. Nested inside the row, Delete also opened the task, and the
+  // drawer covered the delete confirmation.
+  it('does not open the task when Delete is chosen', () => {
+    mockNavigate.mockClear();
+    renderRow();
+
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectList.moreOptions' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'flowCommon.delete' }));
+
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
 });
 
 describe('Status label consistency (issue #756)', () => {

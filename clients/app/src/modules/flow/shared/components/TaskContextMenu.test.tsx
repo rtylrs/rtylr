@@ -15,7 +15,6 @@ vi.mock('react-i18next', async (importOriginal) => ({
 
 vi.mock('@tanstack/react-router', () => ({ useNavigate: () => vi.fn() }));
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
-vi.mock('@voxire/utils', () => ({ useClickOutside: () => undefined }));
 
 vi.mock('../../features/tasks/useTasks', () => ({
   useDeleteTask: () => ({ mutate: deleteMutate, isPending: false }),
@@ -84,6 +83,32 @@ describe('TaskContextMenu deletion (#1056)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'confirm-delete' }));
 
     expect(deleteMutate).toHaveBeenCalledWith('998504', expect.any(Object));
+  });
+
+  // Parents unmount the menu on an outside click. The confirmation sits
+  // outside the menu, so pressing its button closed everything before the
+  // click landed and nothing was deleted.
+  it('deletes when the confirmation is pressed while the parent closes on outside clicks', () => {
+    function Host(): React.ReactElement | null {
+      const [open, setOpen] = React.useState(true);
+      return open ? <TaskContextMenu menu={menu} onClose={() => setOpen(false)} /> : null;
+    }
+    render(<Host />);
+
+    fireEvent.click(screen.getByRole('menuitem', { name: /flowCommon.delete/ }));
+    const confirm = screen.getByRole('button', { name: 'confirm-delete' });
+    fireEvent.mouseDown(confirm);
+    fireEvent.click(confirm);
+
+    expect(deleteMutate).toHaveBeenCalledWith('998504', expect.any(Object));
+  });
+
+  it('hides the menu while the confirmation is open', () => {
+    renderMenu();
+
+    fireEvent.click(screen.getByRole('menuitem', { name: /flowCommon.delete/ }));
+
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
   });
 
   it('offers no confirmation to someone who may not delete', () => {

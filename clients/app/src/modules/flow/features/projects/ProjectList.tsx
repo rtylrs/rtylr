@@ -81,103 +81,114 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
     setContextMenu({ x, y, taskId: task.id, projectId: task.projectId, taskTitle: task.title });
   };
 
+  // The menu renders beside the row, not inside it: it is portalled, but React
+  // bubbles its clicks through the component tree, so inside the row every menu
+  // item (and the delete confirmation) also opened the task.
   return (
-    <motion.div
-      role="button"
-      tabIndex={0}
-      aria-label={t('flowCommon.taskRow.openTask', {
-        identifier: task.identifier,
-        title: task.title,
-      })}
-      onClick={() => openTask(task.id)}
-      onKeyDown={(event) => {
-        if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) {
-          event.preventDefault();
-          openTask(task.id);
-        }
-      }}
-      layout
-      initial={{ opacity: 0, x: -6 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.15 }}
-      className="flex items-center gap-3 px-4 py-2.5 group hover:bg-[var(--flow-hover)] transition-colors cursor-pointer"
-      style={{
-        paddingLeft: depth > 0 ? `${16 + depth * 20}px` : undefined,
-        borderBottom: '1px solid var(--flow-border)',
-      }}
-    >
-      {/* Checkbox */}
-      <button
-        type="button"
-        disabled={!canEdit}
-        onClick={(event) => {
-          event.stopPropagation();
-          handleToggle();
+    <>
+      <motion.div
+        role="button"
+        tabIndex={0}
+        aria-label={t('flowCommon.taskRow.openTask', {
+          identifier: task.identifier,
+          title: task.title,
+        })}
+        onClick={() => openTask(task.id)}
+        onKeyDown={(event) => {
+          if (
+            event.target === event.currentTarget &&
+            (event.key === 'Enter' || event.key === ' ')
+          ) {
+            event.preventDefault();
+            openTask(task.id);
+          }
         }}
-        aria-label={t('flow.projectList.toggleDoneLabel')}
-        aria-pressed={checked}
-        className="h-4 w-4 rounded-sm shrink-0 flex items-center justify-center transition-colors border"
+        layout
+        initial={{ opacity: 0, x: -6 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.15 }}
+        className="flex items-center gap-3 px-4 py-2.5 group hover:bg-[var(--flow-hover)] transition-colors cursor-pointer"
         style={{
-          background: checked ? 'var(--accent)' : 'transparent',
-          borderColor: checked ? 'var(--accent)' : 'var(--flow-border)',
+          paddingLeft: depth > 0 ? `${16 + depth * 20}px` : undefined,
+          borderBottom: '1px solid var(--flow-border)',
         }}
       >
-        {checked && <Check size={10} strokeWidth={3} color="var(--dash-on-accent)" />}
-      </button>
+        {/* Checkbox */}
+        <button
+          type="button"
+          disabled={!canEdit}
+          onClick={(event) => {
+            event.stopPropagation();
+            handleToggle();
+          }}
+          aria-label={t('flow.projectList.toggleDoneLabel')}
+          aria-pressed={checked}
+          className="h-4 w-4 rounded-sm shrink-0 flex items-center justify-center transition-colors border"
+          style={{
+            background: checked ? 'var(--accent)' : 'transparent',
+            borderColor: checked ? 'var(--accent)' : 'var(--flow-border)',
+          }}
+        >
+          {checked && <Check size={10} strokeWidth={3} color="var(--dash-on-accent)" />}
+        </button>
 
-      <span className="shrink-0">
-        <PriorityIcon priority={task.priority} size={12} />
-      </span>
+        <span className="shrink-0">
+          <PriorityIcon priority={task.priority} size={12} />
+        </span>
 
-      {/* Title */}
-      <span
-        className={cn('flex-1 text-flow-body font-medium truncate', checked ? 'line-through' : '')}
-        style={{ color: checked ? 'var(--flow-text-dim)' : 'var(--flow-text)' }}
-      >
-        {task.title}
-      </span>
-
-      {/* Subtask indicator */}
-      {task.subtaskCount > 0 && (
+        {/* Title */}
         <span
-          className="text-flow-meta flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          className={cn(
+            'flex-1 text-flow-body font-medium truncate',
+            checked ? 'line-through' : ''
+          )}
+          style={{ color: checked ? 'var(--flow-text-dim)' : 'var(--flow-text)' }}
+        >
+          {task.title}
+        </span>
+
+        {/* Subtask indicator */}
+        {task.subtaskCount > 0 && (
+          <span
+            className="text-flow-meta flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ color: 'var(--flow-text-dim)' }}
+          >
+            <ChevronRight size={11} />
+            {task.subtaskCount} {t('flow.taskDetail.subtasks')}
+          </span>
+        )}
+
+        {/* Assignee */}
+        <span
+          className="h-5 w-5 rounded-full flex items-center justify-center text-flow-meta font-bold shrink-0"
+          style={{ background: 'var(--accent-muted)', color: 'var(--accent-on-muted)' }}
+        >
+          {task.assigneeInitials}
+        </span>
+
+        {/* Due date */}
+        <span
+          className="text-flow-meta flex items-center gap-1 w-[96px] justify-end"
           style={{ color: 'var(--flow-text-dim)' }}
         >
-          <ChevronRight size={11} />
-          {task.subtaskCount} {t('flow.taskDetail.subtasks')}
+          <Calendar size={11} />
+          {formatDueDate(task.dueDate, t)}
         </span>
-      )}
 
-      {/* Assignee */}
-      <span
-        className="h-5 w-5 rounded-full flex items-center justify-center text-flow-meta font-bold shrink-0"
-        style={{ background: 'var(--accent-muted)', color: 'var(--accent-on-muted)' }}
-      >
-        {task.assigneeInitials}
-      </span>
-
-      {/* Due date */}
-      <span
-        className="text-flow-meta flex items-center gap-1 w-[96px] justify-end"
-        style={{ color: 'var(--flow-text-dim)' }}
-      >
-        <Calendar size={11} />
-        {formatDueDate(task.dueDate, t)}
-      </span>
-
-      {/* More */}
-      <button
-        type="button"
-        onClick={handleMoreClick}
-        aria-label={t('flow.projectList.moreOptions')}
-        className="opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
-        style={{ color: 'var(--flow-text-dim)' }}
-      >
-        <MoreHorizontal size={13} />
-      </button>
+        {/* More */}
+        <button
+          type="button"
+          onClick={handleMoreClick}
+          aria-label={t('flow.projectList.moreOptions')}
+          className="opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
+          style={{ color: 'var(--flow-text-dim)' }}
+        >
+          <MoreHorizontal size={13} />
+        </button>
+      </motion.div>
 
       {contextMenu && <TaskContextMenu menu={contextMenu} onClose={() => setContextMenu(null)} />}
-    </motion.div>
+    </>
   );
 };
 
