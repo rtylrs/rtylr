@@ -22,7 +22,9 @@ describe('orderBoardTasks', () => {
     expect(orderBoardTasks(tasks).map((t) => t.id)).toEqual(['b', 'c', 'a']);
   });
 
-  it('puts unplaced cards above placed ones and keeps their relative order', () => {
+  // A new card lands at the bottom whether or not the column was ever
+  // arranged; the server lists tasks in the same order.
+  it('puts unplaced cards below placed ones and keeps their relative order', () => {
     const tasks = [
       { id: 'placed-2', sortOrder: 2 },
       { id: 'new-1', sortOrder: 0 },
@@ -30,10 +32,10 @@ describe('orderBoardTasks', () => {
       { id: 'new-2' },
     ];
     expect(orderBoardTasks(tasks).map((t) => t.id)).toEqual([
-      'new-1',
-      'new-2',
       'placed-1',
       'placed-2',
+      'new-1',
+      'new-2',
     ]);
   });
 

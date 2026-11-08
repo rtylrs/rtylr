@@ -22,13 +22,15 @@ export interface DropSlot {
  * Cards in the order the board shows them.
  *
  * `sortOrder` is 1-based once a column has been arranged by hand and 0 until
- * then. A card nobody has placed yet keeps the order the server sent (it sorts
- * by sort_order, then creation time) and sits above the placed ones, which is
- * also where a card created after an arrangement lands. Array#sort is stable,
- * so ties keep input order.
+ * then. Placed cards come first by position; a card nobody has placed yet sits
+ * below them in the order the server sent (creation time), so a new card lands
+ * at the bottom whether or not the column was arranged. The server lists tasks
+ * the same way. Array#sort is stable, so ties keep input order.
  */
 export function orderBoardTasks<T extends { sortOrder?: number }>(tasks: readonly T[]): T[] {
-  return [...tasks].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  const position = (task: T): number =>
+    task.sortOrder && task.sortOrder > 0 ? task.sortOrder : Number.MAX_SAFE_INTEGER;
+  return [...tasks].sort((a, b) => position(a) - position(b));
 }
 
 /**

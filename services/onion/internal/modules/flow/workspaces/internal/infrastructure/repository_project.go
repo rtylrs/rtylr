@@ -146,7 +146,7 @@ func (r *Repository) GetTasksByProject(ctx context.Context, filter domain.ListTa
 
 	builder := enrichedTaskSelectForList(filter.Compact).
 		Where(conds).
-		OrderBy("t.sort_order ASC", "t.created_at ASC").
+		OrderBy(taskListOrder...).
 		Limit(uint64(filter.Limit)).  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		Offset(uint64(filter.Offset)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 

@@ -28,6 +28,12 @@ func projectVisibilityExpr(callerID int64, includeAll bool) squirrel.Sqlizer {
 	)
 }
 
+// taskListOrder lists cards placed on the board (sort_order > 0) by position,
+// then unplaced ones by creation time, so a task created after a column was
+// arranged lands at the bottom like it does in an unarranged column. The board
+// orders cards the same way (orderBoardTasks).
+var taskListOrder = []string{"COALESCE(t.sort_order, 0) = 0", "t.sort_order ASC", "t.created_at ASC"}
+
 // GetTasksByBusinessV2 lists business-wide tasks under the visibility model.
 // With a ProjectID filter it behaves like the v1 project listing; without one
 // it spans every visible project in the business, replacing v1's
@@ -48,7 +54,7 @@ func (r *Repository) GetTasksByBusinessV2(ctx context.Context, filter domain.Lis
 
 	builder := enrichedTaskSelectForList(filter.Compact).
 		Where(conds).
-		OrderBy("t.sort_order ASC", "t.created_at ASC").
+		OrderBy(taskListOrder...).
 		Limit(uint64(filter.Limit)).  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		Offset(uint64(filter.Offset)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 

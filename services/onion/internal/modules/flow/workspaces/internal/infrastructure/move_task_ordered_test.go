@@ -17,6 +17,7 @@ type orderFixture struct {
 	db       *sql.DB
 	repo     *infrastructure.Repository
 	ctx      context.Context
+	projectA int64
 	colA     int64
 	colB     int64
 	tasksA   []int64 // three tasks in project A, all in column A
@@ -77,7 +78,7 @@ func newOrderFixture(t *testing.T) *orderFixture {
 
 	projectA := mkProject("ordered-move-a")
 	projectB := mkProject("ordered-move-b")
-	f := &orderFixture{db: db, repo: repo, ctx: ctx}
+	f := &orderFixture{db: db, repo: repo, ctx: ctx, projectA: projectA}
 	f.colA = mkColumn(projectA, "A1")
 	f.colB = mkColumn(projectA, "A2")
 	f.taskBCol = mkColumn(projectB, "B1")
@@ -230,6 +231,55 @@ func TestMoveTaskToColumnOrderedOnlyBumpsMovedTaskUpdatedAt(t *testing.T) {
 	for _, id := range []int64{a[1], a[2]} {
 		if got := updated(id); got.Sub(old) > time.Minute || old.Sub(got) > time.Minute {
 			t.Errorf("task %d updated_at = %v, want unchanged (%v)", id, got, old)
+		}
+	}
+}
+
+// A task created after a column was arranged has sort_order 0. It must list
+// after the arranged ones, the way it does in a column nobody has arranged,
+// rather than jumping to the top.
+func TestTaskListsPutUnplacedTasksAfterArrangedOnes(t *testing.T) {
+	f := newOrderFixture(t)
+	a := f.tasksA
+	arranged := []int64{a[2], a[0], a[1]}
+	if err := f.repo.MoveTaskToColumnOrdered(f.ctx, a[2], f.colA, testutil.OwnerID, arranged); err != nil {
+		t.Fatalf("MoveTaskToColumnOrdered: %v", err)
+	}
+	newest, err := f.repo.CreateTask(f.ctx, domain.TaskInput{
+		ProjectID: f.projectA, OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID,
+		Title: "t4", ReporterID: testutil.OwnerID,
+	})
+	if err != nil {
+		t.Fatalf("CreateTask: %v", err)
+	}
+	t.Cleanup(func() { _ = f.repo.DeleteTask(f.ctx, newest, testutil.BusinessID) })
+	if _, err := f.db.ExecContext(f.ctx, "UPDATE flow_tasks SET section_id = ? WHERE id = ?", f.colA, newest); err != nil {
+		t.Fatal(err)
+	}
+	want := append(append([]int64{}, arranged...), newest)
+
+	filter := domain.ListTasksFilter{ProjectID: f.projectA, BusinessID: testutil.BusinessID, Limit: 100}
+	byProject, _, err := f.repo.GetTasksByProject(f.ctx, filter)
+	if err != nil {
+		t.Fatalf("GetTasksByProject: %v", err)
+	}
+	byBusiness, _, err := f.repo.GetTasksByBusinessV2(f.ctx, filter, testutil.OwnerID, true)
+	if err != nil {
+		t.Fatalf("GetTasksByBusinessV2: %v", err)
+	}
+	for name, tasks := range map[string][]domain.Task{"GetTasksByProject": byProject, "GetTasksByBusinessV2": byBusiness} {
+		got := make([]int64, 0, len(tasks))
+		for _, task := range tasks {
+			got = append(got, task.ID)
+		}
+		if len(got) != len(want) {
+			t.Fatalf("%s returned %v, want %v", name, got, want)
+		}
+		for i := range want {
+			if got[i] != want[i] {
+				t.Errorf("%s order = %v, want %v", name, got, want)
+				break
+			}
 		}
 	}
 }
