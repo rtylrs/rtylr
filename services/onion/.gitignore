@@ -82,3 +82,6 @@ internal/**/sql/*.sql.go
 .worktrees/
 .codex-worktrees/
 
+# Rust workspace build output
+/target/
+

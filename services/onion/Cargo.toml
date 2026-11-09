@@ -1,0 +1,11 @@
+[workspace]
+resolver = "2"
+members = ["crates/core"]
+
+[profile.dev]
+debug = 0
+incremental = false
+
+[profile.test]
+debug = 0
+incremental = false

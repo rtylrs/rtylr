@@ -1,0 +1,64 @@
+name: Rust check
+
+# Formatting, lint and compile gates for the Onion Rust workspace. Check only:
+# no images, no pushes, no AWS. Path filter keeps Go-only PRs off this workflow.
+
+on:
+  pull_request:
+    paths:
+      - 'services/onion/**'
+      - '.github/workflows/rust-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rust-check
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Rust fmt, clippy and check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: services/onion
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Read the toolchain from rust-toolchain.toml
+        id: toolchain
+        run: |
+          set -euo pipefail
+          version="$(sed -n 's/^channel *= *"\([^"]*\)".*/\1/p' rust-toolchain.toml | head -n 1)"
+          if [ -z "$version" ]; then
+            echo "services/onion/rust-toolchain.toml has no channel" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ steps.toolchain.outputs.version }}
+          components: rustfmt, clippy
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: cargo-${{ runner.os }}-${{ steps.toolchain.outputs.version }}-${{ hashFiles('services/onion/**/Cargo.toml') }}
+
+      - name: Check formatting
+        run: cargo fmt --check
+
+      - name: Lint with Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Check the workspace
+        run: cargo check --workspace
