@@ -38,8 +38,28 @@ func (s *Service) UpdateProjectMemberRole(ctx context.Context, input domain.Upda
 	return s.repo.UpdateProjectMemberRole(ctx, input)
 }
 
+// TransferProjectOwnership hands a project over and moves the admin member
+// row with it: the new owner becomes an admin member and the previous owner
+// stays on as a member. Owners are listed as admins (CreateProject), so the
+// previous owner otherwise kept admin rights they used to lose with ownership.
+// The update only matches when the caller owns the project, so roles change
+// only when the transfer actually happened.
 func (s *Service) TransferProjectOwnership(ctx context.Context, input domain.TransferProjectOwnershipInput) error {
-	return s.repo.TransferProjectOwnership(ctx, input)
+	if err := s.repo.TransferProjectOwnership(ctx, input); err != nil {
+		return err
+	}
+	owner, _, err := s.repo.GetProjectOwnerWorkspace(ctx, input.ProjectID)
+	if err != nil || owner != input.NewOwnerID || input.CallerID == input.NewOwnerID {
+		return err
+	}
+	if err := s.repo.AddProjectMember(ctx, domain.AddProjectMemberInput{
+		ProjectID: input.ProjectID, UserID: input.NewOwnerID, Role: domain.FlowRoleAdmin, AddedBy: input.CallerID,
+	}); err != nil {
+		return err
+	}
+	return s.repo.UpdateProjectMemberRole(ctx, domain.UpdateProjectMemberRoleInput{
+		ProjectID: input.ProjectID, UserID: input.CallerID, Role: domain.FlowRoleMember,
+	})
 }
 
 func (s *Service) MoveProject(ctx context.Context, input domain.MoveProjectInput) error {

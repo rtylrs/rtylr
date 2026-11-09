@@ -254,3 +254,45 @@ func TestCreateProjectListsItsCreatorAsAdmin(t *testing.T) {
 		t.Errorf("MemberCount = %d, want 1", got.MemberCount)
 	}
 }
+
+// Creators are listed as admin members, so after handing a project over the
+// previous owner kept that admin row and with it admin rights they used to
+// lose with ownership.
+func TestTransferringOwnershipMovesTheAdminRow(t *testing.T) {
+	svc, ctx, _ := v2Svc(t)
+	p := createV2Project(ctx, t, svc, "transfer-owner", domain.VisibilityPrivate, v2UserA)
+
+	if err := svc.TransferProjectOwnership(ctx, domain.TransferProjectOwnershipInput{
+		ProjectID: p.ID, NewOwnerID: v2UserB, CallerID: v2UserA,
+	}); err != nil {
+		t.Fatalf("TransferProjectOwnership: %v", err)
+	}
+	members, _, err := svc.ListProjectMembers(ctx, p.ID, 10, 0)
+	if err != nil {
+		t.Fatalf("ListProjectMembers: %v", err)
+	}
+	roles := map[int64]string{}
+	for _, m := range members {
+		roles[m.UserID] = m.Role
+	}
+	if roles[v2UserB] != domain.FlowRoleAdmin || roles[v2UserA] != domain.FlowRoleMember {
+		t.Fatalf("roles after transfer = %v, want new owner admin and previous owner member", roles)
+	}
+}
+
+func TestATransferThatDidNotHappenChangesNoRoles(t *testing.T) {
+	svc, ctx, _ := v2Svc(t)
+	p := createV2Project(ctx, t, svc, "transfer-refused", domain.VisibilityPrivate, v2UserA)
+
+	// v2UserB does not own the project, so the transfer matches no row.
+	_ = svc.TransferProjectOwnership(ctx, domain.TransferProjectOwnershipInput{
+		ProjectID: p.ID, NewOwnerID: v2UserB, CallerID: v2UserB,
+	})
+	members, _, err := svc.ListProjectMembers(ctx, p.ID, 10, 0)
+	if err != nil {
+		t.Fatalf("ListProjectMembers: %v", err)
+	}
+	if len(members) != 1 || members[0].UserID != v2UserA || members[0].Role != domain.FlowRoleAdmin {
+		t.Fatalf("members = %+v, want only the owner as admin", members)
+	}
+}
