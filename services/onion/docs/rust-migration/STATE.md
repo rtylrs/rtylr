@@ -13,7 +13,7 @@ Status values: `todo`, `in-progress`, `blocked`, `done`. Put commit hashes and b
 | 0.3 `INVENTORY.md`: every non-contract surface (compat routes, `@http` raw routes, middleware, health/version, websockets, SSE, `go:embed`, env vars, jobs, event handlers); each item becomes a row below | done | INVENTORY.md (compat 9 pkgs/2631 LOC, 43 @http methods, middleware order, health/version/probe, wsbus, SSE, 9 embeds, 121 env keys, jobs/eventbus, 156 sql dirs) |
 | 0.4 `COUPLING.md`: module coupling graph (reuse `architecture_test.go` edge scan), strongly connected components, port order | done | 33 edges, SCCs {hr,organization} and {erp,pos}, full 25-module port order in COUPLING.md |
 | 0.5 Go route dump export and `tools/route-dump` | done | Go export kept via ROUTE_DUMP test (243 legacy rows, re-generated locally); tools/route-dump normalizes/sorts/diffs dumps (3 tests pass) |
-| 0.6 Spike: one `@http` raw route and one service trait implementation end to end | todo | |
+| 0.6 Spike: one `@http` raw route and one service trait implementation end to end | done | tools/spike: ActivityService::list_activity (stub empty page) + CRM unsubscribe GET/POST /crm/public/unsubscribe 1:1 (no delivery/DB); 3 in-process tests pass |
 | 0.7 media-engine Rust port with golden tests and benchmark | todo | |
 | 0.8 `tools/parity` skeleton (throwaway MySQL, run Go and Rust, replay, diff) | todo | |
 
