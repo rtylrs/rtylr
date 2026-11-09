@@ -72,3 +72,6 @@ jobs:
 
       - name: Check the workspace
         run: cargo check --workspace
+
+      - name: Architecture check
+        run: cargo run -q -p arch-check -- --root .
