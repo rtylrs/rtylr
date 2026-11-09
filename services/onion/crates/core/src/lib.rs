@@ -1,5 +1,10 @@
 //! Shared foundation for the Onion Rust backend.
 
+pub mod config;
+pub mod csvsafe;
+pub mod pagination;
+pub mod utils;
+
 /// Workspace crate version, surfaced in CI and version checks.
 pub const CRATE_VERSION: &str = env!("CARGO_PKG_VERSION");
 

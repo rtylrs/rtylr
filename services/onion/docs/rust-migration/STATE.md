@@ -21,7 +21,7 @@ Status values: `todo`, `in-progress`, `blocked`, `done`. Put commit hashes and b
 
 | Unit | Status | Notes |
 | --- | --- | --- |
-| 1.1 `core` and config/env parity | todo | |
+| 1.1 `core` and config/env parity | done | onion-core: full AppConfig + env/getters, money (cents, Go JSON shape), csvsafe, pagination, ids/utils; 15 tests pass, check_env_example green |
 | 1.2 `db` | todo | |
 | 1.3 `auth` (jwt, authorization, tenant, origins, securekey, emailcrypto) | todo | |
 | 1.4 `events` (eventbus, jobs, emailqueue) | todo | |
