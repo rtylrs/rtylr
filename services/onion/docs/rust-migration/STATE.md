@@ -37,7 +37,7 @@ Status values: `todo`, `in-progress`, `blocked`, `done`. Put commit hashes and b
 
 | Unit | Status | Notes |
 | --- | --- | --- |
-| 2.1 `tools/sqlc2sqlx` on one module | todo | |
+| 2.1 `tools/sqlc2sqlx` on one module | done | tools/sqlc2sqlx parses Go sqlc generated files (Consts + Params structs + function-body `arg.<Field>` bind order w/ repeats) and emits sqlx `queries.rs`; aiquota module crate converted (domain/service/repository over generated queries; 7 queries incl. `ReserveMonthlyTokens` conditional reservation with repeated estimate bind); 7 tests pass; DB round-trip runs in CI with throwaway MySQL (local compose pull fails; test skips without DATABASE_URL) |
 | 2.2 Convert all query packages | todo | |
 
 ## Phase 3 Modules (order provisional until 0.4 lands)

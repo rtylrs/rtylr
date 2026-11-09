@@ -47,6 +47,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "aiquota"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "chrono",
+ "db",
+ "sqlx",
+ "thiserror 1.0.69",
+ "tokio",
+]
+
+[[package]]
 name = "allocator-api2"
 version = "0.2.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3246,6 +3258,13 @@ checksum = "7ef958a98b9d5da290cfc78946e9f3e61e1e62a18db0d92cac0b83cc161491a9"
 dependencies = [
  "base64ct",
  "der 0.8.3",
+]
+
+[[package]]
+name = "sqlc2sqlx"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
 ]
 
 [[package]]

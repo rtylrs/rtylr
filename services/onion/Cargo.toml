@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["bins/api", "bins/worker", "crates/ai", "crates/core", "crates/contracts", "crates/auth", "crates/db", "crates/events", "crates/integrations", "crates/media-engine", "crates/realtime", "crates/server", "tools/arch-check", "tools/parity", "tools/route-dump", "tools/spike"]
+members = ["bins/api", "bins/worker", "crates/ai", "crates/core", "crates/contracts", "crates/auth", "crates/db", "crates/events", "crates/integrations", "crates/media-engine", "crates/modules/aiquota", "crates/realtime", "crates/server", "tools/arch-check", "tools/parity", "tools/route-dump", "tools/sqlc2sqlx", "tools/spike"]
 
 [profile.dev]
 debug = 0
