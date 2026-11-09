@@ -28,7 +28,7 @@ Status values: `todo`, `in-progress`, `blocked`, `done`. Put commit hashes and b
 | 1.3 `auth` (jwt, authorization, tenant, origins, securekey, emailcrypto) | done | crates/auth: HS256 JWT (iss+exp, expired vs invalid), EffectiveAccess predicates, tenant re-export, origin allowlist, securekey, AES-GCM emailcrypto; 18 tests pass |
 | 1.4 `events` (eventbus, jobs, emailqueue) | done | crates/events: encode/dispatcher (fan-out before mark), registry/scheduler with MySQL lock naming, email queue with fenced claim SQL, encryption wiring; 15 tests pass |
 | 1.5 `realtime` | done | crates/realtime: wsbus hub + authorizer cache TTL, topic scopes, fan-out with lazy unsubscribe, 256-drop publish cap, flattened wsbus-events backplane; 6 tests pass |
-| 1.6 `integrations` | todo | |
+| 1.6 `integrations` | done | crates/integrations: S3 (aws-sdk-s3, LoadDefaultConfig creds, Floci/path-style defaults, eu-west-1), CDN sign (HMAC path+"\n"+canonical query, 1h/30d), Resend (Retry-After → RateLimited 429/60s, 100ms outbound pacing), Slack chunk/batcher, Paddle (quantity 1, `Paddle-Idempotency-Key`, ts:body HMAC ±5m), Trino (TLS scheme, header auth, nextUri bound 10k, 120s timeout), Sheets (svc-acct RS256 → oauth → `Leads!A:J` USER_ENTERED/INSERT_ROWS), AI (opencode→gemini→deepseek→openai + AI_PRIMARY_PROVIDER front, Gemini native generateContent models 3.8/3.7); 10 tests pass |
 | 1.7 `ai` (classifier) | todo | |
 | 1.8 `server` (middleware chain, rate limit, Partials key bypass, health, version, error writer) | todo | |
 | 1.9 `AppState`, `bins/api` and `bins/worker` skeletons, `PROBE_PORT` | todo | |
