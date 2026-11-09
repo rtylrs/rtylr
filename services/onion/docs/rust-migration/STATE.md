@@ -26,7 +26,7 @@ Status values: `todo`, `in-progress`, `blocked`, `done`. Put commit hashes and b
 | 1.1 `core` and config/env parity | done | onion-core: full AppConfig + env/getters, money (cents, Go JSON shape), csvsafe, pagination, ids/utils; 15 tests pass, check_env_example green |
 | 1.2 `db` | done | crates/db: sqlx pool (25/10/30m/10m, 10s acq), DSN metadata + safety guards ported, tx helpers, TenantScope (explicit resolver), business scope conditions; 11 tests pass |
 | 1.3 `auth` (jwt, authorization, tenant, origins, securekey, emailcrypto) | done | crates/auth: HS256 JWT (iss+exp, expired vs invalid), EffectiveAccess predicates, tenant re-export, origin allowlist, securekey, AES-GCM emailcrypto; 18 tests pass |
-| 1.4 `events` (eventbus, jobs, emailqueue) | todo | |
+| 1.4 `events` (eventbus, jobs, emailqueue) | done | crates/events: encode/dispatcher (fan-out before mark), registry/scheduler with MySQL lock naming, email queue with fenced claim SQL, encryption wiring; 15 tests pass |
 | 1.5 `realtime` | todo | |
 | 1.6 `integrations` | todo | |
 | 1.7 `ai` (classifier) | todo | |
