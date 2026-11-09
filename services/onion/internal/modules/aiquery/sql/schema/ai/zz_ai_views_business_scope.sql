@@ -59,8 +59,5 @@ SELECT id, owner_id, business_id, first_name, last_name, email, department_id, l
        start_date, end_date, created_at, updated_at
 FROM hr_employees;
 
-CREATE OR REPLACE VIEW ai_tasks AS
-SELECT id, owner_id, business_id, project_id, workspace_id, title, status, priority,
-       assignee_id, due_date, start_date, completed_at,
-       estimated_hours, actual_hours, created_at, updated_at
-FROM flow_tasks;
+-- ai_tasks is published by Flow (flow/workspaces/sql/migration_20261109_ai_tasks_view.sql),
+-- which owns flow_tasks, with the same business-scoped columns.
