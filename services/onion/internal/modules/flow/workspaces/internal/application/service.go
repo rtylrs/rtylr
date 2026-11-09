@@ -290,6 +290,8 @@ func (s *Service) ResolveWorkspaceID(ctx context.Context, userID, businessID int
 }
 
 type repository interface {
+	AlignTaskStatusToColumn(ctx context.Context, taskID int64) (from, to string, changed bool, err error)
+	AlignTaskColumnToStatus(ctx context.Context, taskID int64) error
 	AddProjectMember(ctx context.Context, input domain.AddProjectMemberInput) error
 	AddTaskDependency(ctx context.Context, input domain.AddTaskDependencyInput) error
 	AddWorkspaceMember(ctx context.Context, input domain.AddWorkspaceMemberInput) error

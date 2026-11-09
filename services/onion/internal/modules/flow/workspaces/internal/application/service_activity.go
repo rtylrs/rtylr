@@ -259,6 +259,11 @@ func (s *Service) UpdateTaskStatus(ctx context.Context, input domain.UpdateTaskS
 	if updateErr := s.repo.UpdateTaskStatus(ctx, input); updateErr != nil {
 		return updateErr
 	}
+	if existing.Status != input.Status {
+		if alignErr := s.repo.AlignTaskColumnToStatus(ctx, input.ID); alignErr != nil {
+			return alignErr
+		}
+	}
 
 	if existing.Status != input.Status {
 		notificationTask := existing

@@ -74,6 +74,17 @@ func (r *Repository) CreateTask(ctx context.Context, input domain.TaskInput) (in
 		return 0, err
 	}
 
+	// A top-level task always lands in a column, and in one that agrees with
+	// its status (placeNewTask). Subtasks never sit on the board.
+	if input.ParentTaskID == nil && input.ProjectID != 0 {
+		section, status, placeErr := placeNewTask(ctx, tx, input.ProjectID, input.SectionID, input.Status)
+		if placeErr != nil {
+			logger.Ctx(ctx).Error("CreateTask placement failed", logger.Error(placeErr))
+			return 0, placeErr
+		}
+		input.SectionID, input.Status = section, status
+	}
+
 	res, err := r.queries.WithTx(tx).CreateTask(ctx, sqlc.CreateTaskParams{
 		ProjectID:      input.ProjectID,
 		WorkspaceID:    input.WorkspaceID,

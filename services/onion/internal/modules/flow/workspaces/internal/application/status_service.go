@@ -128,6 +128,9 @@ func (s *Service) SetTaskStatus(ctx context.Context, taskID, statusID, callerID,
 		return "", err
 	}
 	if task.Status != status.LegacyStatus {
+		if err := s.repo.AlignTaskColumnToStatus(ctx, taskID); err != nil {
+			return "", err
+		}
 		task.Status = status.LegacyStatus
 		s.announceStatusChange(ctx, task, callerID, status.LegacyStatus)
 	}

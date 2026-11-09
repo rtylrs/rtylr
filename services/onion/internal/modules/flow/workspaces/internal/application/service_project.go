@@ -290,6 +290,11 @@ func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, 
 	if updateErr := s.repo.UpdateTask(ctx, input); updateErr != nil {
 		return updateErr
 	}
+	if input.Status != "" && existing.Status != input.Status {
+		if alignErr := s.repo.AlignTaskColumnToStatus(ctx, input.ID); alignErr != nil {
+			return alignErr
+		}
+	}
 	if input.FocusPin != nil {
 		if pinErr := s.repo.SetTaskFocusPin(ctx, input.ID, userID, input.BusinessID, *input.FocusPin); pinErr != nil {
 			return pinErr

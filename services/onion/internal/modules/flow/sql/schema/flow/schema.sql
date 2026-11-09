@@ -249,10 +249,12 @@ CREATE TABLE IF NOT EXISTS `flow_project_columns` (
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `color` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '#6366f1',
   `sort_order` int DEFAULT '0',
+  `linked_status` enum('backlog','todo','in_progress','in_review','done','cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Status a card takes when dropped here, and the column a task moves to when it takes this status',
   `created_by` bigint NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_flow_columns_project_status` (`project_id`,`linked_status`),
   KEY `idx_flow_columns_project` (`project_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

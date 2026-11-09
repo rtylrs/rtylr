@@ -261,15 +261,18 @@ func (r *Repository) SeedDefaultColumns(ctx context.Context, projectID, workspac
 		return nil
 	}
 
+	// Each default column stands for a status, both ways: see
+	// AlignTaskStatusToColumn and AlignTaskColumnToStatus.
 	defaults := []struct {
 		name      string
 		color     string
 		sortOrder int
+		status    string
 	}{
-		{"To Do", "#9ca3af", 0},
-		{"In Progress", "#3b82f6", 1},
-		{"In Review", "#f59e0b", 2},
-		{"Done", "#22c55e", 3},
+		{"To Do", "#9ca3af", 0, domain.TaskStatusTodo},
+		{"In Progress", "#3b82f6", 1, domain.TaskStatusInProgress},
+		{"In Review", "#f59e0b", 2, domain.TaskStatusInReview},
+		{"Done", "#22c55e", 3, domain.TaskStatusDone},
 	}
 	for _, d := range defaults {
 		if _, err := r.queries.SeedDefaultColumn(ctx, sqlc.SeedDefaultColumnParams{
@@ -278,7 +281,10 @@ func (r *Repository) SeedDefaultColumns(ctx context.Context, projectID, workspac
 			Name:        d.name,
 			Color:       sql.NullString{String: d.color, Valid: true},
 			SortOrder:   sql.NullInt32{Int32: int32(d.sortOrder), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-			CreatedBy:   createdBy,
+			LinkedStatus: sqlc.NullFlowProjectColumnsLinkedStatus{
+				FlowProjectColumnsLinkedStatus: sqlc.FlowProjectColumnsLinkedStatus(d.status), Valid: true,
+			},
+			CreatedBy: createdBy,
 		}); err != nil {
 			return err
 		}

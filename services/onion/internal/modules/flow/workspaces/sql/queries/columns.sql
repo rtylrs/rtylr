@@ -94,5 +94,5 @@ WHERE flow_tasks.id = ?
   );
 
 -- name: SeedDefaultColumn :execresult
-INSERT INTO flow_project_columns (project_id, workspace_id, name, color, sort_order, created_by)
-VALUES (?, ?, ?, ?, ?, ?);
+INSERT INTO flow_project_columns (project_id, workspace_id, name, color, sort_order, linked_status, created_by)
+VALUES (?, ?, ?, ?, ?, ?, ?);

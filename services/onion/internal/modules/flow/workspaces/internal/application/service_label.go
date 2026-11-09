@@ -338,7 +338,27 @@ func (s *Service) MoveTaskToColumn(ctx context.Context, taskID, columnID, actorI
 		defer invalidateUserScope(ctx, assigneeID(existing.AssigneeID))
 	}
 
-	return s.repo.MoveTaskToColumn(ctx, taskID, columnID, actorID)
+	if err := s.repo.MoveTaskToColumn(ctx, taskID, columnID, actorID); err != nil {
+		return err
+	}
+	return s.takeColumnStatus(ctx, taskID, actorID)
+}
+
+// takeColumnStatus gives a moved card the status of the column it landed in,
+// when that column is linked to one, and records and announces the change the
+// way any other status change is.
+func (s *Service) takeColumnStatus(ctx context.Context, taskID, actorID int64) error {
+	from, to, changed, err := s.repo.AlignTaskStatusToColumn(ctx, taskID)
+	if err != nil || !changed {
+		return err
+	}
+	if actErr := s.repo.LogActivity(ctx, taskID, actorID, "status_changed", from, to); actErr != nil {
+		logger.Ctx(ctx).Error("takeColumnStatus: failed to log activity", logger.Error(actErr))
+	}
+	if task, getErr := s.repo.GetTaskByID(ctx, taskID); getErr == nil {
+		s.announceStatusChange(ctx, task, actorID, to)
+	}
+	return nil
 }
 
 // MoveTaskToColumnOrdered is MoveTaskToColumn plus the card's position: when
@@ -366,7 +386,10 @@ func (s *Service) MoveTaskToColumnOrdered(ctx context.Context, taskID, columnID,
 		defer invalidateUserScope(ctx, assigneeID(existing.AssigneeID))
 	}
 
-	return s.repo.MoveTaskToColumnOrdered(ctx, taskID, columnID, actorID, orderedTaskIDs)
+	if err := s.repo.MoveTaskToColumnOrdered(ctx, taskID, columnID, actorID, orderedTaskIDs); err != nil {
+		return err
+	}
+	return s.takeColumnStatus(ctx, taskID, actorID)
 }
 
 // GetColumnProject returns the project id of the given column, or 0 if
