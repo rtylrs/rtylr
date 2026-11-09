@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
+import { HelmetContainer } from '@voxire/components';
 import { Search, Plus, Lock, Globe, Archive, FolderOpen } from 'lucide-react';
 import { useAllProjects } from './useAllProjects';
 import type { Project } from '@voxire/voxie/flow/project/v2/types';
@@ -123,6 +124,7 @@ export const AllProjects: React.FC = () => {
 
   return (
     <div className="h-full overflow-y-auto">
+      <HelmetContainer title={`${t('flow.allProjects.title')} · rtylr`} />
       <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
         <header className="mb-6">
           <div className="flex items-center justify-between gap-3">

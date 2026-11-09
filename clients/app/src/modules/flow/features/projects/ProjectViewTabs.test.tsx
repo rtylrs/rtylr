@@ -62,9 +62,18 @@ function renderTabs(
   }
 ) {
   return render(
-    <ProjectViewTabs project={project} projectId="2" taskCount={3} onNewTask={vi.fn()} />
+    <ProjectViewTabs project={project} projectId="2" openTaskCount={3} onNewTask={vi.fn()} />
   );
 }
+
+// The header showed every task while the sidebar showed open ones, both as a
+// bare number, so the same project read 5 in one place and 4 in the other.
+describe('ProjectViewTabs task count', () => {
+  it('shows the open task count and says what it counts', () => {
+    renderTabs();
+    expect(screen.getByLabelText('3 open tasks')).toHaveTextContent('3');
+  });
+});
 
 describe('ProjectViewTabs preview-route gating', () => {
   it('hides Overview, Timeline and Dashboard tabs when the preview-routes flag is off', () => {

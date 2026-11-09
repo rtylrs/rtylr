@@ -1,5 +1,5 @@
 import { describe, expect, it, afterEach, vi } from 'vitest';
-import { laneKeyFor } from './ProjectBoard';
+import { buildLaneIndex, laneKeyFor } from './ProjectBoard';
 import type { Task } from '../../shared/stores/flowStore';
 
 const task = (dueDate: string): Task =>
@@ -46,5 +46,23 @@ describe('board due-date swimlanes', () => {
 
     expect(laneKeyFor(task('2026-05-02T18:30:00.000Z'), 'due')).toBe('Today');
     expect(laneKeyFor(task(''), 'due')).toBe('No due date');
+  });
+});
+
+// People's names are shown as they are, but the lane for tasks with nobody
+// on them showed its key, the English word "Unassigned", in every language.
+describe('board assignee swimlanes', () => {
+  it('translates the lane for unassigned tasks and keeps names as they are', () => {
+    const lanes = buildLaneIndex(
+      [
+        { id: '1', assignee: 'Sam Lee' },
+        { id: '2', assignee: '' },
+      ] as Task[],
+      'assignee'
+    );
+    expect(lanes).toEqual([
+      { key: 'Sam Lee', label: 'Sam Lee' },
+      { key: 'Unassigned', labelKey: 'flow.quickCreate.unassigned' },
+    ]);
   });
 });

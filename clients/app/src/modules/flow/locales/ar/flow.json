@@ -1030,6 +1030,12 @@
     "cancel": "إلغاء"
   },
   "project": {
+    "openTaskCount_zero": "لا توجد مهام مفتوحة",
+    "openTaskCount_one": "مهمة مفتوحة واحدة",
+    "openTaskCount_two": "مهمتان مفتوحتان",
+    "openTaskCount_few": "{{count}} مهام مفتوحة",
+    "openTaskCount_many": "{{count}} مهمة مفتوحة",
+    "openTaskCount_other": "{{count}} مهمة مفتوحة",
     "loading": "جارٍ تحميل المشروع…",
     "notFound": "لم يتم العثور على المشروع."
   },

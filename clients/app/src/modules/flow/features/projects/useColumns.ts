@@ -124,9 +124,14 @@ export function useMoveTaskToColumn() {
       context?.snapshot.forEach(([queryKey, data]) => qc.setQueryData(queryKey, data));
       toast.error(t('flowToasts.task.moveFailed'));
     },
+    // A column can carry a status, so a move can change the task's status
+    // too: refresh what shows status, not only the task lists.
     onSettled: (_data, _error, { taskId }) => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['task', taskId] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      qc.invalidateQueries({ queryKey: ['projects-v2'] });
     },
   });
 }

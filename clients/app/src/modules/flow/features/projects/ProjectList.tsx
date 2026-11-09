@@ -19,6 +19,7 @@ import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { useOpenTask } from '../../shared/lib/useOpenTask';
 import { useCanEditTask, useCanCreateTask } from '../../shared/lib/currentUser';
 import ProjectViewTabs from './ProjectViewTabs';
+import { countOpenTasks } from '../../shared/lib/taskCounts';
 
 interface StatusGroupDef {
   id: Task['status'];
@@ -349,7 +350,7 @@ const ProjectList: React.FC = () => {
       <ProjectViewTabs
         project={project}
         projectId={projectId}
-        taskCount={projectTasks.length}
+        openTaskCount={countOpenTasks(projectTasks)}
         onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
       />
 

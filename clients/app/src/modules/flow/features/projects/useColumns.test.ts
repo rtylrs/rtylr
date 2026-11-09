@@ -1,12 +1,13 @@
 // @vitest-environment happy-dom
 import React from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 vi.mock('../../shared/services/flowApi', () => ({
   flowApi: {
     getProjectColumns: vi.fn(),
+    moveTaskToColumn: vi.fn(async () => ({ message: 'Task moved' })),
   },
 }));
 
@@ -23,7 +24,7 @@ vi.mock('sonner', () => ({
 }));
 
 import { flowApi } from '../../shared/services/flowApi';
-import { useProjectColumns } from './useColumns';
+import { useMoveTaskToColumn, useProjectColumns } from './useColumns';
 
 function wrapper({ children }: { children: React.ReactNode }) {
   return React.createElement(
@@ -59,5 +60,26 @@ describe('useProjectColumns', () => {
       page: 2,
       limit: 500,
     });
+  });
+});
+
+// Dropping a card on a column tied to a status changes the task's status on
+// the server, so everything that shows status has to refetch, not only the
+// task lists: My tasks and Today, and the projects' done counts.
+describe('useMoveTaskToColumn', () => {
+  it('refreshes every view a status change shows up in', async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const spy = vi.spyOn(client, 'invalidateQueries');
+    const { result } = renderHook(() => useMoveTaskToColumn(), {
+      wrapper: ({ children }: { children: React.ReactNode }) =>
+        React.createElement(QueryClientProvider, { client }, children),
+    });
+    await act(async () => {
+      await result.current.mutateAsync({ taskId: '7', columnId: '3' });
+    });
+    const keys = spy.mock.calls.map((call) => JSON.stringify(call[0]?.queryKey));
+    for (const key of [['tasks'], ['task', '7'], ['my-tasks'], ['projects'], ['projects-v2']]) {
+      expect(keys).toContain(JSON.stringify(key));
+    }
   });
 });

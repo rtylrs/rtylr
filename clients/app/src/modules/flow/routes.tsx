@@ -93,13 +93,18 @@ export function createFlowRoutes<TParent extends AnyRoute>(parent: TParent) {
     ),
   });
 
+  // Named so it is a component to React and to the hook rules; as an inline
+  // arrow it called useUserStore from a function the linter can't tell apart
+  // from a plain callback.
+  function FlowIndexRedirect(): React.ReactElement {
+    const user = useUserStore((state) => state.user);
+    return <Navigate to={getFlowHomePath(user)} replace search={rootRoute.useSearch()} />;
+  }
+
   const indexRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/',
-    component: () => {
-      const user = useUserStore((state) => state.user);
-      return <Navigate to={getFlowHomePath(user)} replace search={rootRoute.useSearch()} />;
-    },
+    component: FlowIndexRedirect,
   });
 
   const startRoute = createRoute({

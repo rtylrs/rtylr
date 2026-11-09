@@ -24,6 +24,14 @@ const listState = vi.hoisted(() => ({
   },
 }));
 
+const titles = vi.hoisted(() => [] as string[]);
+vi.mock('@voxire/components', () => ({
+  HelmetContainer: ({ title }: { title: string }) => {
+    titles.push(title);
+    return null;
+  },
+}));
+
 vi.mock('./useAllProjects', () => ({
   useAllProjects: () => listState.value,
 }));
@@ -32,6 +40,15 @@ import AllProjects from './AllProjects';
 
 beforeEach(() => {
   listState.value = { data: { projects: [], total: 0 }, isLoading: false };
+});
+
+// The page set no title, so its tab fell back to the portal's "Portal · rtylr".
+describe('AllProjects tab title', () => {
+  it('names the page in the tab like every other Flow page', () => {
+    titles.length = 0;
+    render(<AllProjects />);
+    expect(titles).toContain('flow.allProjects.title · rtylr');
+  });
 });
 
 describe('AllProjects filters', () => {

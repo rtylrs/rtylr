@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
-import { useFlowStore, type Project, type Milestone } from '../../shared/stores/flowStore';
+import { useFlowStore, type Project } from '../../shared/stores/flowStore';
 import { useProjects } from '../projects/useProjects';
 import { useMilestones } from '../milestones/useMilestones';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';

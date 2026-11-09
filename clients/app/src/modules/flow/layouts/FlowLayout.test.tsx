@@ -1,5 +1,5 @@
 import React from 'react';
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createEffectiveAccess } from '../../../../test/effectiveAccess';
 import { initTestI18n } from '../shared/testing/i18n';

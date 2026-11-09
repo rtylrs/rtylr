@@ -10,6 +10,7 @@ import { STATUS_COLORS, useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import ProjectViewTabs from './ProjectViewTabs';
+import { countOpenTasks } from '../../shared/lib/taskCounts';
 import { useCurrentProject } from './useCurrentProject';
 import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
@@ -135,7 +136,7 @@ const ProjectCalendar: React.FC = () => {
       <ProjectViewTabs
         project={project}
         projectId={projectId}
-        taskCount={apiTasks.length}
+        openTaskCount={countOpenTasks(apiTasks)}
         onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
       />
 

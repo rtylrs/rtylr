@@ -311,4 +311,11 @@ describe('Board drag between swimlanes', () => {
     expect(update.mutate).not.toHaveBeenCalled();
     expect(mutation.mutate).not.toHaveBeenCalled();
   });
+
+  // On a phone the "Group:" word is replaced by an icon; it must still be
+  // part of the control's name.
+  it('keeps "Group" in the group picker’s name', () => {
+    renderBoard();
+    expect(screen.getByRole('button', { name: /^Group:/ })).toBeInTheDocument();
+  });
 });

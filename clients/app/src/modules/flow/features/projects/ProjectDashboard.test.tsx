@@ -143,4 +143,13 @@ describe('ProjectDashboard: no tasks yet', () => {
     const emptyTitles = screen.getAllByText('flow.projectDashboard.noTasksYet');
     expect(emptyTitles.length).toBe(2);
   });
+
+  // The by-assignee card printed "Unassigned" in English on every language.
+  it('labels unassigned work in the reader’s language', () => {
+    tasksState.data = [{ id: '1', title: 'Nobody yet', status: 'todo' } as ApiTask];
+    render(<ProjectDashboard />);
+
+    expect(screen.getByText('flow.quickCreate.unassigned')).toBeInTheDocument();
+    expect(screen.queryByText('Unassigned')).not.toBeInTheDocument();
+  });
 });

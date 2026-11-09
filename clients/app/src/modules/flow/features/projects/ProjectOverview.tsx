@@ -85,7 +85,7 @@ const ProjectOverview: React.FC = () => {
       <ProjectViewTabs
         project={project}
         projectId={projectId}
-        taskCount={stats.total}
+        openTaskCount={stats.total - stats.done}
         onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
         rightSlot={
           <span

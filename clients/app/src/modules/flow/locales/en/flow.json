@@ -982,6 +982,8 @@
     "cancel": "Cancel"
   },
   "project": {
+    "openTaskCount_one": "{{count}} open task",
+    "openTaskCount_other": "{{count}} open tasks",
     "loading": "Loading project…",
     "notFound": "Project not found."
   },

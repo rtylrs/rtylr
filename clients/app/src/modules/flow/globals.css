@@ -336,6 +336,13 @@
     background: rgb(0 0 0 / 30%);
   }
 }
+/* On a phone the portal's app bar sits at the bottom, not beside the menu. */
+@media (max-width: 600px) {
+  .portal-flow-mobile-nav {
+    margin-inline: 12px auto;
+    width: min(300px, calc(100vw - 24px));
+  }
+}
 
 .portal-flow-task-drawer {
   display: flex;

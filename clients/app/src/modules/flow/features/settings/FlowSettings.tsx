@@ -1,6 +1,5 @@
 import { EmptyState } from '../../../../shared/components/dash/EmptyState';
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'motion/react';
 import { Tag, Trash2 } from 'lucide-react';
 import { getFlowSettingsSections } from '../../settingsNavigation';
 import { HelmetContainer } from '@voxire/components';
@@ -19,11 +18,9 @@ import { useUserStore as useAuthUserStore } from '../../../../shared/stores/user
 import { getRouteApi } from '@tanstack/react-router';
 import { useLabels, useCreateLabel, useDeleteLabel } from '../tasks/useLabels';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
-import GateNotice from '../../shared/components/GateNotice';
 import TimeSection from './sections/TimeSection';
 import BinSection from './sections/BinSection';
 import SidebarSettingsSection from './sections/SidebarSettingsSection';
-import { canFlowPermission } from '../../shared/lib/roleUtils';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 

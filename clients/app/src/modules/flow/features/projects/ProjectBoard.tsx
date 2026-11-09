@@ -7,7 +7,15 @@ import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, GripVertical, ListChecks, Plus, Settings2, Trash2 } from 'lucide-react';
+import {
+  ChevronDown,
+  GripVertical,
+  ListChecks,
+  Plus,
+  Rows3,
+  Settings2,
+  Trash2,
+} from 'lucide-react';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks, useUpdateTask } from '../tasks/useTasks';
 import {
@@ -24,6 +32,7 @@ import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import TaskCard from '../../shared/components/TaskCard';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import ProjectViewTabs from './ProjectViewTabs';
+import { countOpenTasks } from '../../shared/lib/taskCounts';
 import MoveToColumnMenu, { type MoveTarget } from './components/MoveToColumnMenu';
 import {
   columnIdAtPoint,
@@ -216,7 +225,7 @@ export function laneKeyFor(t: Task, groupBy: GroupKey): string {
  * column shows the same swimlanes in the same order. Without this, empty
  * columns would skip lanes and rows would misalign.
  */
-function buildLaneIndex(
+export function buildLaneIndex(
   tasks: Task[],
   groupBy: GroupKey
 ): { key: string; label?: string; labelKey?: string }[] {
@@ -240,13 +249,16 @@ function buildLaneIndex(
   }
 
   // assignee - build from data, keep stable order by first-seen. These labels
-  // are people's names, so they carry `label` and are never translated.
+  // are people's names, so they carry `label` and are never translated; the
+  // lane for nobody is the one exception and is.
   const seen = new Map<string, string>();
   for (const t of tasks) {
     const k = laneKeyFor(t, groupBy);
     if (!seen.has(k)) seen.set(k, k);
   }
-  return Array.from(seen.values()).map((k) => ({ key: k, label: k }));
+  return Array.from(seen.values()).map((k) =>
+    k === 'Unassigned' ? { key: k, labelKey: 'flow.quickCreate.unassigned' } : { key: k, label: k }
+  );
 }
 
 function loadGroupBy(projectId: string): GroupKey {
@@ -626,7 +638,7 @@ const ProjectBoard: React.FC = () => {
         <ProjectViewTabs
           project={project}
           projectId={projectId}
-          taskCount={tasks.length}
+          openTaskCount={countOpenTasks(tasks)}
           onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
         />
         <div className="flex-1 flex items-center justify-center">
@@ -644,7 +656,7 @@ const ProjectBoard: React.FC = () => {
       <ProjectViewTabs
         project={project}
         projectId={projectId}
-        taskCount={tasks.length}
+        openTaskCount={countOpenTasks(tasks)}
         onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
         rightSlot={
           <div className="flex items-center gap-1.5">
@@ -1183,7 +1195,17 @@ const GroupByPicker: React.FC<{
           color: 'var(--flow-text-muted)',
         }}
       >
-        <span style={{ color: 'var(--flow-text-dim)' }}>{t('flow.board.groupByLabel')}</span>
+        {/* On a phone the word gives way to an icon so the toolbar fits one
+            row; screen readers still hear "Group:" before the value. */}
+        <Rows3
+          size={12}
+          aria-hidden="true"
+          className="sm:hidden"
+          style={{ color: 'var(--flow-text-dim)' }}
+        />
+        <span className="sr-only sm:not-sr-only" style={{ color: 'var(--flow-text-dim)' }}>
+          {t('flow.board.groupByLabel')}
+        </span>
         <span style={{ color: 'var(--flow-text)' }}>{t(current.labelKey)}</span>
         <ChevronDown size={11} />
       </button>

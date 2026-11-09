@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { apiProjectToProject } from './projectMapper';
 import { ACCENT_DEFAULT } from './colorUtils';
-import type { ApiProject, ApiWorkspace } from '../services/flowApi';
+import type { ApiProject } from '../services/flowApi';
 
 function baseProject(overrides: Partial<ApiProject> = {}): ApiProject {
   return {

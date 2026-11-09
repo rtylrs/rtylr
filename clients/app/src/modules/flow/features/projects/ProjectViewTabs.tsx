@@ -18,7 +18,8 @@ import { useCanAdministerProject, useCanCreateTask } from '../../shared/lib/curr
 interface ProjectViewTabsProps {
   project: { name: string; color: string; icon?: string };
   projectId: string;
-  taskCount: number;
+  /** Tasks not yet done, counted the way the sidebar counts them (countOpenTasks). */
+  openTaskCount: number;
   onNewTask: () => void;
   rightSlot?: React.ReactNode;
 }
@@ -103,7 +104,7 @@ const VIEWS: ViewDef[] = [
 const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
   project,
   projectId,
-  taskCount,
+  openTaskCount,
   onNewTask,
   rightSlot,
 }) => {
@@ -133,10 +134,12 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
           {project.name}
         </h1>
         <span
+          aria-label={t('flow.project.openTaskCount', { count: openTaskCount })}
+          title={t('flow.project.openTaskCount', { count: openTaskCount })}
           className="text-flow-meta px-1.5 py-0.5 rounded-full font-semibold shrink-0"
           style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-dim)' }}
         >
-          {taskCount}
+          {openTaskCount}
         </span>
       </div>
 

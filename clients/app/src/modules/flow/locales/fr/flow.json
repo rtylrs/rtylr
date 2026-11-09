@@ -991,6 +991,9 @@
     "cancel": "Annuler"
   },
   "project": {
+    "openTaskCount_one": "{{count}} tâche ouverte",
+    "openTaskCount_many": "{{count}} tâches ouvertes",
+    "openTaskCount_other": "{{count}} tâches ouvertes",
     "loading": "Chargement du projet…",
     "notFound": "Projet introuvable."
   },

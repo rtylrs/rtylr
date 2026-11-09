@@ -11,6 +11,7 @@ import { STATUS_LABEL_KEYS } from '../../shared/lib/constantsFlow';
 import { isOverdue } from '../../shared/lib/dateUtils';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import ProjectViewTabs from './ProjectViewTabs';
+import { countOpenTasks } from '../../shared/lib/taskCounts';
 import { useCurrentProject } from './useCurrentProject';
 import { useProjectLabourCost } from '../../shared/hooks/queries/useProjectLabourCost';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
@@ -69,7 +70,8 @@ const ProjectDashboard: React.FC = () => {
 
     const assigneeTally = new Map<string, { name: string; count: number }>();
     apiTasks.forEach((t) => {
-      const name = t.assignee || 'Unassigned';
+      // '' is the unassigned row; its label is translated where it is shown.
+      const name = t.assignee || '';
       const prev = assigneeTally.get(name) ?? { name, count: 0 };
       prev.count += 1;
       assigneeTally.set(name, prev);
@@ -125,7 +127,7 @@ const ProjectDashboard: React.FC = () => {
       <ProjectViewTabs
         project={project}
         projectId={projectId}
-        taskCount={apiTasks.length}
+        openTaskCount={countOpenTasks(apiTasks)}
         onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
       />
 
@@ -247,7 +249,7 @@ const ProjectDashboard: React.FC = () => {
                     className="text-flow-meta w-[128px] truncate"
                     style={{ color: 'var(--flow-text-muted)' }}
                   >
-                    {a.name}
+                    {a.name || t('flow.quickCreate.unassigned')}
                   </span>
                   <div
                     className="flex-1 h-1.5 rounded-full overflow-hidden"
