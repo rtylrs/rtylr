@@ -11,6 +11,9 @@ out = "gen/go"
 [generate.ts-client]
 out = "gen/ts"
 
+[generate.rust-server]
+out = "gen/rust"
+
 [generate.openapi]
 out = "gen/openapi"
 title = "Voxie API"

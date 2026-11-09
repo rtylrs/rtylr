@@ -14,10 +14,13 @@ export PATH := $(GOBIN_DIR):$(PATH)
 # Go/OpenAPI stay next to the contracts; the TypeScript half belongs to the
 # clients workspace package that publishes it.
 CONTRACTS_DIR := ../clients/packages/contracts
+# Rust server output is copied into the Onion contracts crate (gitignored,
+# like gen/ts), so the Rust backend builds from the same truck sources.
+RUST_CONTRACTS_DIR := ../services/onion/crates/contracts/src/generated
 
 # Clean generated code
 clean:
-	rm -rf gen $(CONTRACTS_DIR)/src
+	rm -rf gen $(CONTRACTS_DIR)/src $(RUST_CONTRACTS_DIR)
 
 # Install the onek CLI used to generate Go/TypeScript from api/*.onk contracts,
 # unless that version is already on PATH (Pages deploys use the release binary,
@@ -34,13 +37,16 @@ install-onek:
 # generated import paths mirror the schema path exactly (gen/go/hub/business/v1,
 # no "api/" prefix) - matching what every consumer already imports.
 # onek requires output inside this project, so the TypeScript half is copied
-# into the clients workspace package that exposes it.
+# into the clients workspace package that exposes it, and the Rust server
+# half into the Onion contracts crate (both gitignored).
 generate: install-onek
-	rm -rf gen $(CONTRACTS_DIR)/src
+	rm -rf gen $(CONTRACTS_DIR)/src $(RUST_CONTRACTS_DIR)
 	python3 scripts/generate_validation_metadata.py --proto-root api --out-dir gen/ts/validation
 	onek build .
 	mkdir -p $(CONTRACTS_DIR)/src
 	cp -R gen/ts/. $(CONTRACTS_DIR)/src/
+	mkdir -p $(RUST_CONTRACTS_DIR)
+	cp -R gen/rust/. $(RUST_CONTRACTS_DIR)/
 
 # Typecheck the generated TypeScript through its workspace package.
 typecheck:
