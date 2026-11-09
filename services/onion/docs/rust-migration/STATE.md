@@ -16,6 +16,7 @@ Status values: `todo`, `in-progress`, `blocked`, `done`. Put commit hashes and b
 | 0.6 Spike: one `@http` raw route and one service trait implementation end to end | done | tools/spike: ActivityService::list_activity (stub empty page) + CRM unsubscribe GET/POST /crm/public/unsubscribe 1:1 (no delivery/DB); 3 in-process tests pass |
 | 0.7 media-engine Rust port with golden tests and benchmark | done | crates/media-engine: --serve framing codec + vips-free primitives (Size/Box, FitMode, Gravity, Color, numeric), 5 golden tests vs C++ *_test.cpp, perf example |
 | 0.8 `tools/parity` skeleton (throwaway MySQL, run Go and Rust, replay, diff) | done | tools/parity: JSONL corpus/run parse, canonicalize, diff (4 tests); diff clean exit 0, replay validates corpus; live seed/replay wires in Phases 3-4 |
+| 0.9 `tools/arch-check`: port every rule in `architecture_test.go` (ports and adapters layering, module edges, table and migration ownership), reuse `docs/architecture-exceptions.json`, port the scanner self-test cases as fixtures, run in CI | todo | |
 
 ## Phase 1 Platform crates
 
@@ -89,7 +90,7 @@ Status values: `todo`, `in-progress`, `blocked`, `done`. Put commit hashes and b
 | Unit | Status | Notes |
 | --- | --- | --- |
 | 6.1 Delete Go code, `go.mod`/`go.sum`, sqlc configs, Go-only scripts and workflows | todo | |
-| 6.2 Rust architecture check replaces `architecture_test.go`; update `AGENTS.md`, `CLAUDE.md`, docs | todo | |
+| 6.2 Delete `architecture_test.go` (arch-check already enforces); update `AGENTS.md`, `CLAUDE.md`, docs | todo | |
 | 6.3 Final verification pass, mark PR ready for review | todo | |
 
 ## Human action required

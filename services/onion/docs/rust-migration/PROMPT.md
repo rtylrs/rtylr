@@ -20,7 +20,7 @@ Plan and state:
 Backend entrypoints and wiring (read when a unit touches them):
 4. `services/onion/cmd/api/main.go`, `main_modules.go`, `main_routes.go`, `module_registrars.go`, `compat_routes.go`, `route_dump_test.go`, `compat_parity_test.go`
 5. `services/onion/cmd/worker/main.go`
-6. `services/onion/architecture_test.go` (import-edge scan, reuse for the coupling graph)
+6. `services/onion/architecture_test.go` and `services/onion/docs/architecture-exceptions.json` (the ports and adapters rules to port into `tools/arch-check`; also the import-edge scan for the coupling graph), plus `services/onion/docs/platform-patterns.md` and a sample module such as `internal/modules/webhooks/`
 7. `services/onion/internal/platform/server/http/web_server.go` (middleware chain, rate limit, Partials key bypass, origins)
 8. `services/onion/internal/platform/config/config.go`, `config_part2.go`, `services/onion/.env.example`
 9. `services/onion/internal/platform/jobs/` (`registry.go`, `scheduler.go`, `mysql_locker.go`) and `internal/platform/eventbus/`
@@ -60,6 +60,7 @@ If this is the very first run and no PR exists, open it as a DRAFT with `gh pr c
 - Do not change Go behavior except where a unit says so. Do not refactor Go. Go stays working until unit 6.1 deletes it.
 - Do not move SQL files. `internal/modules/*/sql` and `internal/platform/*/sql` stay exactly where they are; the migrate image and migration workflows read them.
 - Do not invent behavior. If Go is ambiguous, port what it does and note it in `STATE.md`. Environment variable names and semantics stay identical to Go. Port ownership columns exactly as Go does (e.g. `hr_time_entries.owner_id` is the business ID).
+- Keep the Go module structure: ports and adapters per `ARCHITECTURE.md` section 6. Ports are traits in `application`, adapters live in `infrastructure`, `domain` stays pure, modules talk to each other only through their `api`. Everything except `api` is `pub(crate)`. Run `tools/arch-check` for every module and never add an exception to `docs/architecture-exceptions.json` to make it pass.
 - Do not use `unwrap`/`expect`/`panic` outside tests and startup. No `f64` for money. No global singletons. Comments only where needed, a few lines at most. Do not add dependencies outside the table in `ARCHITECTURE.md` section 5 without a one-line reason in the commit message.
 - Do not spawn subagents or run anything in parallel. One thread, one unit at a time.
 

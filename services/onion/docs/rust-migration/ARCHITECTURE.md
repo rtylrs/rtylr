@@ -53,11 +53,11 @@ services/onion/
     media-engine/   binary: same --serve protocol as the C++ engine
     modules/<name>/ one crate per Go module (25) plus compat, layered domain/application/infrastructure/jobs
   bins/api, bins/worker
-  tools/            sqlc2sqlx, route-dump, parity
+  tools/            sqlc2sqlx, route-dump, parity, arch-check
   internal/modules/*/sql, internal/platform/*/sql        stay exactly where they are
 ```
 
-One crate per module gives parallel and incremental compiles. At Phase 6, delete `*.go`, `go.mod`, `go.sum`, `sqlc.yaml` files, Go-only scripts, and `architecture_test.go` (replace the latter with a Rust check). Keep SQL, `scripts/migrate.sh`, `Dockerfile.migrate`, and anything the migration pipeline reads.
+One crate per module gives parallel and incremental compiles. At Phase 6, delete `*.go`, `go.mod`, `go.sum`, `sqlc.yaml` files, Go-only scripts, and `architecture_test.go` (already replaced by `tools/arch-check`, built in Phase 0). Keep SQL, `scripts/migrate.sh`, `Dockerfile.migrate`, and anything the migration pipeline reads.
 
 ## 5. Technology mapping
 
@@ -84,7 +84,32 @@ One crate per module gives parallel and incremental compiles. At Phase 6, delete
 
 Rules: no global singletons (Go `wsbus.SetDefault` becomes a field on `AppState`); `AppState` holds `Arc`'d services built once in `bins/api`. `thiserror` enums per crate mapped to the generated per-method error enums at the handler edge. Money is a decimal type, never `f64`. No `unwrap`/`expect`/`panic` outside tests and startup. `clippy -D warnings`. Same environment variable names and semantics as Go (`.env.example`, `check_env_example.py`).
 
-## 6. Module recipe
+## 6. Module architecture and recipe
+
+### Same model as Go: ports and adapters, enforced
+
+Each module crate mirrors `internal/modules/<m>/internal/{domain,application,infrastructure,jobs}`:
+
+```
+crates/modules/<m>/src/
+  lib.rs            pub mod api; mod domain; mod application; mod infrastructure; mod jobs;
+  api.rs            the only public surface: registration, published ports and facts
+  domain/           entities, value objects, invariants; pure, no I/O, no framework types
+  application/      use cases and the PORTS (traits) they need
+  infrastructure/   ADAPTERS: sqlx repositories, the `XService` transport impls, external clients
+  queries/          sqlx query files converted from the module's sql/
+  jobs/             job handlers that call application services
+```
+
+- Dependencies point inward: transport adapter (`XService` impl) to application to domain; infrastructure implements application ports. `application` never imports `infrastructure`; `domain` imports nothing from the other layers.
+- Ports are traits owned by the consumer, declared in `application` and `pub(crate)`, like Go's unexported `deliveryRepository`. Services hold their ports through generics (static dispatch) wired at the module's composition point; use `Arc<dyn Port>` with `#[async_trait]` only where a trait object is unavoidable.
+- Domain types carry no `sqlx`, `serde`, `validator`, or axum derives. Row and wire shapes are mapped in the adapters. The documented exceptions in `docs/architecture-exceptions.json` (e.g. durable JSON facts) carry over unchanged.
+- Cross-module access goes only through the other module's `api` (published traits and facts), never its `infrastructure` or `queries`. This replaces Go's `Set*` wiring and `internal/contracts`; published facts keep their JSON wire shape. Cargo forbids dependency cycles, so Go's `module-cycle` rule becomes a compile error; if two modules need each other, extract a port or merge.
+- `pub(crate)` everywhere except `api` makes most of Go's `foreign-persistence-import` violations compile errors.
+
+`tools/arch-check` (unit 0.9, run in CI from Phase 0) ports every rule in `architecture_test.go`: `platform-import`, `foreign-persistence-import`, `domain-import`, `application-adapter-import`, `read-authority`, `transport-tag`, `persistence-tag`, `module-cycle`, `cross-module-transaction`, `foreign-table-access`, `table-owner`, `migration-owner`, `generated-public-api`, with the same exceptions file and the same scanner self-tests (`TestArchitectureScanner` cases become fixtures). A module is not done until arch-check passes for it.
+
+### Recipe
 
 1. Contract: confirm the module's services generate; implement each `XService` on a `ModuleService` that delegates to application services.
 2. Domain: port types and invariants 1:1 from `internal/domain`.
@@ -129,7 +154,7 @@ CI uses free GitHub-hosted runners and Actions cache only: `cargo fmt --check`, 
 
 | Phase | Work | Gate |
 | --- | --- | --- |
-| 0 Foundations | Workspace + caps + CI gates; contracts crate from `onek` `rust-server`; non-contract inventory; coupling graph and port order; Go route dump and `tools/route-dump`; spike (one raw route, one service trait); media-engine port; parity harness skeleton | Workspace builds in CI; INVENTORY.md and COUPLING.md committed; route-dump works; media-engine golden tests pass |
+| 0 Foundations | Workspace + caps + CI gates; contracts crate from `onek` `rust-server`; non-contract inventory; coupling graph and port order; Go route dump and `tools/route-dump`; spike (one raw route, one service trait); media-engine port; parity harness skeleton; `tools/arch-check` porting every Go architecture rule | Workspace builds in CI; INVENTORY.md and COUPLING.md committed; route-dump works; media-engine golden tests pass; arch-check passes its ported scanner fixtures and runs in CI |
 | 1 Platform | `core`, `db`, `auth`, `events`, `realtime`, `integrations`, `ai`, `server`, config/env parity, `AppState` and bin skeletons with `/health`, `/version`, `PROBE_PORT` | Ported tests green; jobs and eventbus pass locker and outbox tests on throwaway MySQL |
 | 2 Query layer | `tools/sqlc2sqlx` converts all query packages | Converted queries compile with offline data; schema drift check passes |
 | 3 Modules | Port in the order from COUPLING.md; leaf modules first (webhooks, notifications, cacheops, emailtest, aiquota, aiquery, activity, hub_menu, websitelead, automations, integrations, insights, portal), then caret, booking, support, recruit, store, flow, crm, then foundational and heavy ones as the graph dictates (organization, finance, erp, pos, hr), plus `compat` | Per module: recipe steps 1-8 done, one commit per module |
