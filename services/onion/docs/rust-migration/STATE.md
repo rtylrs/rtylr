@@ -10,7 +10,7 @@ Status values: `todo`, `in-progress`, `blocked`, `done`. Put commit hashes and b
 | --- | --- | --- |
 | 0.1 Cargo workspace, toolchain pin, `.cargo/config.toml` caps, CI gates (fmt, clippy, check) on free runners | done | Workspace at services/onion (core only), 1.97.1 pin, jobs=2, debug=0, incremental=false; new .github/workflows/rust-check.yml (PR-only, no deploy) |
 | 0.2 `contracts` crate fed by onek `rust-server` (output gitignored, wired into `make generate`) | done | contracts crate + rust-server in onekit.toml, copy to src/generated (gitignored) in voxie/Makefile; 729 files, rust-check generates before clippy/check |
-| 0.3 `INVENTORY.md`: every non-contract surface (compat routes, `@http` raw routes, middleware, health/version, websockets, SSE, `go:embed`, env vars, jobs, event handlers); each item becomes a row below | todo | |
+| 0.3 `INVENTORY.md`: every non-contract surface (compat routes, `@http` raw routes, middleware, health/version, websockets, SSE, `go:embed`, env vars, jobs, event handlers); each item becomes a row below | done | INVENTORY.md (compat 9 pkgs/2631 LOC, 43 @http methods, middleware order, health/version/probe, wsbus, SSE, 9 embeds, 121 env keys, jobs/eventbus, 156 sql dirs) |
 | 0.4 `COUPLING.md`: module coupling graph (reuse `architecture_test.go` edge scan), strongly connected components, port order | todo | |
 | 0.5 Go route dump export and `tools/route-dump` | todo | |
 | 0.6 Spike: one `@http` raw route and one service trait implementation end to end | todo | |
