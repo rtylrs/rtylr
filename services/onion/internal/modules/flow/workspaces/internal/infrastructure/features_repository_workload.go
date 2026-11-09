@@ -29,7 +29,7 @@ func mapWorkloadMemberTasks(rows []sqlc.GetTeamWorkloadMemberTasksRow) []domain.
 			Archived:    row.Archived.Bool,
 			CreatedAt:   row.CreatedAt.Time,
 			UpdatedAt:   row.UpdatedAt.Time,
-			Identifier:  "T-" + strconv.FormatInt(row.ID, 10),
+			Identifier:  taskIdentifier(row.TaskNumber),
 		}
 		if row.ParentTaskID.Valid {
 			t.ParentTaskID = &row.ParentTaskID.Int64

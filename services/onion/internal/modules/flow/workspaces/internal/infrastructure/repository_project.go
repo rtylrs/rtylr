@@ -61,11 +61,25 @@ func (r *Repository) CreateTask(ctx context.Context, input domain.TaskInput) (in
 		effortMinutes = sql.NullInt32{Int32: *input.EffortMinutes, Valid: true}
 	}
 
-	res, err := r.queries.CreateTask(ctx, sqlc.CreateTaskParams{
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("CreateTask begin failed", logger.Error(err))
+		return 0, err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	number, err := nextTaskNumber(ctx, tx, input.BusinessID)
+	if err != nil {
+		logger.Ctx(ctx).Error("CreateTask number failed", logger.Error(err))
+		return 0, err
+	}
+
+	res, err := r.queries.WithTx(tx).CreateTask(ctx, sqlc.CreateTaskParams{
 		ProjectID:      input.ProjectID,
 		WorkspaceID:    input.WorkspaceID,
 		OwnerID:        input.OwnerID,
 		BusinessID:     input.BusinessID,
+		Number:         sql.NullInt64{Int64: number, Valid: true},
 		ParentTaskID:   nullInt64Ptr(input.ParentTaskID),
 		Title:          input.Title,
 		Description:    sql.NullString{String: input.Description, Valid: input.Description != ""},
@@ -85,7 +99,58 @@ func (r *Repository) CreateTask(ctx context.Context, input domain.TaskInput) (in
 		logger.Ctx(ctx).Error("CreateTask failed", logger.Error(err))
 		return 0, err
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	if err := tx.Commit(); err != nil {
+		logger.Ctx(ctx).Error("CreateTask commit failed", logger.Error(err))
+		return 0, err
+	}
+	return id, nil
+}
+
+// nextTaskNumber reserves the business's next task number (shown as T-n).
+//
+// The upsert takes the sequence row's exclusive lock in one step and holds it
+// until tx ends, so concurrent creates in a business queue there. Reading the
+// row first and locking it after deadlocked two creates against each other.
+// Every read after the upsert is a plain consistent read and takes no lock.
+//
+// A task inserted without a number (by a server older than the counter) shows
+// T-<id>, so the count also stays above those ids to never repeat a label.
+func nextTaskNumber(ctx context.Context, tx *sql.Tx, businessID int64) (int64, error) {
+	if _, err := tx.ExecContext(ctx,
+		`INSERT INTO flow_task_sequences (business_id, last_number) VALUES (?, 1)
+		 ON DUPLICATE KEY UPDATE last_number = last_number + 1`, businessID); err != nil {
+		return 0, err
+	}
+	var reserved, floor int64
+	if err := tx.QueryRowContext(ctx,
+		"SELECT last_number FROM flow_task_sequences WHERE business_id = ?", businessID).Scan(&reserved); err != nil {
+		return 0, err
+	}
+	if err := tx.QueryRowContext(ctx,
+		`SELECT GREATEST(
+		   COALESCE((SELECT MAX(number) FROM flow_tasks WHERE business_id = ?), 0),
+		   COALESCE((SELECT MAX(id) FROM flow_tasks WHERE business_id = ? AND number IS NULL), 0))`,
+		businessID, businessID).Scan(&floor); err != nil {
+		return 0, err
+	}
+	if reserved > floor {
+		return reserved, nil
+	}
+	if _, err := tx.ExecContext(ctx,
+		"UPDATE flow_task_sequences SET last_number = ? WHERE business_id = ?", floor+1, businessID); err != nil {
+		return 0, err
+	}
+	return floor + 1, nil
+}
+
+// taskIdentifier is the label a task is shown with. number is the task's
+// per-business number, or its id for a row that has none.
+func taskIdentifier(number int64) string {
+	return "T-" + strconv.FormatInt(number, 10)
 }
 
 // taskListConditions builds the shared WHERE conditions for a scoped task

@@ -219,7 +219,7 @@ SELECT
     title, description, status, priority,
     assignee_id, reporter_id, due_date, start_date, completed_at,
     estimated_hours, actual_hours, sort_order, labels, archived,
-    created_at, updated_at
+    created_at, updated_at, COALESCE(number, id) AS task_number
 FROM flow_tasks
 WHERE workspace_id = ? AND assignee_id = ? AND status NOT IN ('done', 'cancelled') AND parent_task_id IS NULL
 ORDER BY priority DESC, due_date ASC

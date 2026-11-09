@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/domain"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 // IsWorkspaceMember reports whether userID is on the workspace's member
@@ -259,6 +260,16 @@ func (s *Service) CreateProject(ctx context.Context, input domain.ProjectInput) 
 
 	// Seed default columns for every new project
 	_ = s.repo.SeedDefaultColumns(ctx, id, input.WorkspaceID, input.CreatedBy)
+
+	// The creator already has access through created_by; the member row is what
+	// puts them in the member list and count, which otherwise read "0 members".
+	if input.CreatedBy != 0 && !input.IsPersonal {
+		if err := s.repo.AddProjectMember(ctx, domain.AddProjectMemberInput{
+			ProjectID: id, UserID: input.CreatedBy, Role: domain.FlowRoleAdmin, AddedBy: input.CreatedBy,
+		}); err != nil {
+			logger.Ctx(ctx).Warn("add project creator as member failed", logger.Error(err))
+		}
+	}
 
 	return domain.Project{
 		ID:          id,

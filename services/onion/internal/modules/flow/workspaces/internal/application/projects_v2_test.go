@@ -232,3 +232,25 @@ func TestArchiveRestorePurgeLifecycle(t *testing.T) {
 		t.Errorf("%d tasks survived the cascade", count)
 	}
 }
+
+// The creator had access through created_by but no member row, so a new
+// project's member list was empty and it showed "0 members".
+func TestCreateProjectListsItsCreatorAsAdmin(t *testing.T) {
+	svc, ctx, _ := v2Svc(t)
+	p := createV2Project(ctx, t, svc, "creator-member", domain.VisibilityPrivate, v2UserA)
+
+	members, total, err := svc.ListProjectMembers(ctx, p.ID, 10, 0)
+	if err != nil {
+		t.Fatalf("ListProjectMembers: %v", err)
+	}
+	if total != 1 || len(members) != 1 || members[0].UserID != v2UserA || members[0].Role != domain.FlowRoleAdmin {
+		t.Fatalf("members = %+v (total %d), want only the creator as admin", members, total)
+	}
+	got, err := svc.GetProjectV2(ctx, p.ID, v2UserA, v2Business)
+	if err != nil {
+		t.Fatalf("GetProjectV2: %v", err)
+	}
+	if got.MemberCount != 1 {
+		t.Errorf("MemberCount = %d, want 1", got.MemberCount)
+	}
+}

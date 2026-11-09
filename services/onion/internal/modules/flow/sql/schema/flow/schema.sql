@@ -80,6 +80,7 @@ CREATE TABLE IF NOT EXISTS `flow_tasks` (
   `workspace_id` bigint NOT NULL,
   `owner_id` bigint NOT NULL,
   `business_id` bigint NOT NULL DEFAULT '0',
+  `number` bigint DEFAULT NULL COMMENT 'Shown as T-<number>; counted per business by flow_task_sequences',
   `parent_task_id` bigint DEFAULT NULL,
   `title` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
@@ -103,6 +104,7 @@ CREATE TABLE IF NOT EXISTS `flow_tasks` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_flow_tasks_business_number` (`business_id`,`number`),
   KEY `idx_flow_tasks_project_status` (`project_id`,`status`),
   KEY `idx_flow_tasks_project_status_id` (`project_id`,`status_id`),
   KEY `idx_flow_tasks_workspace_updated` (`workspace_id`,`archived`,`updated_at`),
@@ -118,6 +120,12 @@ CREATE TABLE IF NOT EXISTS `flow_tasks` (
   KEY `idx_flow_tasks_parent` (`parent_task_id`),
   KEY `idx_flow_tasks_owner_status` (`owner_id`,`status`),
   FULLTEXT KEY `idx_flow_tasks_search` (`title`,`description`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `flow_task_sequences` (
+  `business_id` bigint NOT NULL,
+  `last_number` bigint NOT NULL DEFAULT '0',
+  PRIMARY KEY (`business_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `flow_task_comments` (

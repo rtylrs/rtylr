@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"strconv"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -96,6 +95,7 @@ func enrichedTaskColumns(includeDescription bool) []string {
 		"t.status_id", "COALESCE(t.waiting_on, '')", "COALESCE(t.decision_note, '')",
 		"COALESCE(fs.name, '') AS status_name",
 		"COALESCE(fs.color, '') AS status_color",
+		"COALESCE(t.number, t.id) AS task_number",
 	}
 }
 
@@ -186,6 +186,7 @@ func scanEnrichedTask(ctx context.Context, rows *sql.Rows) (domain.Task, error) 
 	var estHours, actHours sql.NullFloat64
 	var effortMinutes sql.NullInt64
 	var labelsRaw []byte
+	var number int64
 
 	err := rows.Scan(
 		&t.ID, &t.ProjectID, &t.WorkspaceID, &t.OwnerID, &t.BusinessID, &parentID, &sectionID,
@@ -197,6 +198,7 @@ func scanEnrichedTask(ctx context.Context, rows *sql.Rows) (domain.Task, error) 
 		&t.ProjectName, &t.ProjectColor, &t.AssigneeName, &t.SubtaskCount,
 		&t.CompletedSubtasks, &t.CommentCount, &t.AttachmentCount,
 		&statusID, &t.WaitingOn, &t.DecisionNote, &t.StatusName, &t.StatusColor,
+		&number,
 	)
 	if err != nil {
 		logger.Ctx(ctx).Error("scanEnrichedTask row scan failed", logger.Error(err))
@@ -241,9 +243,7 @@ func scanEnrichedTask(ctx context.Context, rows *sql.Rows) (domain.Task, error) 
 		}
 	}
 	t.AssigneeInitials = initialsOf(t.AssigneeName)
-	if t.Identifier == "" {
-		t.Identifier = "T-" + strconv.FormatInt(t.ID, 10)
-	}
+	t.Identifier = taskIdentifier(number)
 	return t, nil
 }
 
@@ -281,6 +281,7 @@ func scanTasksRaw(ctx context.Context, rows *sql.Rows) ([]domain.Task, error) {
 		var dueDate, startDate, completedAt sql.NullTime
 		var estHours, actHours sql.NullFloat64
 		var labelsRaw []byte
+		var number int64
 
 		err := rows.Scan(
 			&t.ID, &t.ProjectID, &t.WorkspaceID, &t.OwnerID, &parentID, &sectionID,
@@ -288,7 +289,7 @@ func scanTasksRaw(ctx context.Context, rows *sql.Rows) ([]domain.Task, error) {
 			&assigneeID, &t.ReporterID,
 			&dueDate, &startDate, &completedAt,
 			&estHours, &actHours, &t.SortOrder, &labelsRaw, &t.Archived,
-			&t.CreatedAt, &t.UpdatedAt,
+			&t.CreatedAt, &t.UpdatedAt, &number,
 		)
 		if err != nil {
 			logger.Ctx(ctx).Error("scanTasksRaw row scan failed", logger.Error(err))
@@ -325,7 +326,7 @@ func scanTasksRaw(ctx context.Context, rows *sql.Rows) ([]domain.Task, error) {
 				logger.Ctx(ctx).Warn("failed to unmarshal task labels", logger.Error(unErr))
 			}
 		}
-		t.Identifier = "T-" + strconv.FormatInt(t.ID, 10)
+		t.Identifier = taskIdentifier(number)
 		tasks = append(tasks, t)
 	}
 	return tasks, rows.Err()

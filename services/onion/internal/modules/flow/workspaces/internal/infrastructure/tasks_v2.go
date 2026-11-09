@@ -104,7 +104,7 @@ func (r *Repository) SearchTasksV2(ctx context.Context, businessID, callerID int
 	query := `SELECT id, project_id, workspace_id, owner_id, parent_task_id, section_id, title, description,
 	           status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
 	           estimated_hours, actual_hours, sort_order, labels, COALESCE(archived, FALSE) AS archived,
-	           created_at, updated_at
+	           created_at, updated_at, COALESCE(number, id) AS task_number
 	          FROM flow_tasks
 	          WHERE business_id = ?
 	            AND archived = FALSE
