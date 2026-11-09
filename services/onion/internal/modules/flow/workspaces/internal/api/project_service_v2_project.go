@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 	"net/http"
 
@@ -144,6 +145,7 @@ func (a *ProjectAPIV2) RemoveProjectMember(ctx context.Context, req *flowproject
 	}); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to remove project member")
 	}
+	recheckRealtimeAccess(fmt.Sprintf("user:%d", req.GetUserId()))
 	return &flowprojectv2.RemoveProjectMemberResponse{Message: "Member removed"}, nil
 }
 

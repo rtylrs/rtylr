@@ -265,6 +265,7 @@ func (a *ProjectAPI) RemoveProjectMember(ctx context.Context, req *flowprojectv1
 	}); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to remove project member")
 	}
+	recheckRealtimeAccess(fmt.Sprintf("user:%d", req.GetUserId()))
 	return &flowprojectv1.RemoveProjectMemberResponse{Message: "Member removed"}, nil
 }
 

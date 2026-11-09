@@ -45,6 +45,12 @@ func resolveBusinessIDV2(ctx context.Context) (int64, *authPkg.AuthUser, error) 
 	return businessID, authUser, nil
 }
 
+// recheckRealtimeAccess asks every realtime hub to re-run its access check
+// for scope now ("user:<id>" or a topic), so a change that takes access away
+// ends the affected live subscriptions at once rather than when the hub's
+// cached decision expires. A variable so the tests can record the calls.
+var recheckRealtimeAccess = wsbus.RecheckAccess
+
 // publishBusinessEvent fans lifecycle events to the business-wide realtime
 // topic introduced by the workspace removal, alongside the per-project topic
 // subscribers already listen to.
@@ -315,5 +321,8 @@ func (a *ProjectAPIV2) SetProjectVisibility(ctx context.Context, req *flowprojec
 	}
 
 	publishBusinessEvent("project.updated", businessID, req.GetId(), authUser.UserID)
+	if project.Visibility == domain.VisibilityPrivate {
+		recheckRealtimeAccess(fmt.Sprintf("project:%d", req.GetId()))
+	}
 	return &flowprojectv2.SetProjectVisibilityResponse{Project: toProjectV2(project)}, nil
 }

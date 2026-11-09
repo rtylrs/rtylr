@@ -275,7 +275,7 @@ func (h *Hub) Run(ctx context.Context) {
 			h.mu.Unlock()
 
 		case e := <-h.publish:
-			h.fanout(ctx, e)
+			h.handle(ctx, e)
 		}
 	}
 }
