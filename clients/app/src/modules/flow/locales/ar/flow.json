@@ -626,7 +626,6 @@
     "groupByLabel": "تجميع:",
     "addTask": "إضافة مهمة",
     "emptyColumn": "لا شيء هنا بعد.",
-    "emptyLane": "لا شيء",
     "deleteColumn": "حذف العمود"
   },
   "views": {
@@ -778,7 +777,12 @@
     "createFirst": "إنشاء أول دورة",
     "project": "المشروع",
     "noProjects": "لا توجد مشاريع بعد",
-    "newCycleGate": "الدورة تنتمي إلى مشروع، ولا يوجد أي مشروع في هذا النشاط بعد. أنشئ مشروعاً أولاً."
+    "newCycleGate": "الدورة تنتمي إلى مشروع، ولا يوجد أي مشروع في هذا النشاط بعد. أنشئ مشروعاً أولاً.",
+    "status": {
+      "active": "نشط",
+      "upcoming": "قادم",
+      "completed": "مكتمل"
+    }
   },
   "myIssues": {
     "buckets": {
@@ -1067,7 +1071,7 @@
   },
   "projectSelect": {
     "placeholder": "اختر مشروعًا",
-    "personal": "المهام الشخصية"
+    "personal": "مهامي"
   },
   "start": {
     "title": "إنشاء في Flow",

@@ -317,6 +317,9 @@
   .portal-flow-mobile-trigger {
     display: inline-flex;
   }
+  .portal-flow-project-new-task {
+    display: none;
+  }
   .portal-flow-mobile-nav {
     border: 1px solid var(--dash-border);
     border-radius: 16px;

@@ -128,7 +128,7 @@ const Views: React.FC = () => {
 
   return (
     <div className="flex h-full">
-      <HelmetContainer title={`${t('flow.views.heading')} · Flow`} />
+      <HelmetContainer title={`${t('flow.views.heading')} · rtylr`} />
       <aside
         className="w-[256px] shrink-0 px-3 py-4"
         style={{

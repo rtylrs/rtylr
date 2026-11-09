@@ -247,30 +247,31 @@ export default function FlowLayout({ children }: { children: ReactNode }) {
                 <PanelLeft size={19} />
               </button>
             )}
+            {/* Phone only: in the header rather than a row of their own under it. */}
+            <div className="portal-flow-mobile-trigger gap-1">
+              <button
+                type="button"
+                className="portal-icon-button"
+                onClick={() => setMobileOpen(true)}
+                aria-label={t('flow.shell.openMenu')}
+              >
+                <Menu size={19} />
+              </button>
+              {canCreateTask && (
+                <button
+                  type="button"
+                  className="portal-icon-button"
+                  onClick={() => setQuickCreateOpen(true)}
+                  aria-label={t('flow.shell.newTask')}
+                >
+                  <Plus size={19} />
+                </button>
+              )}
+            </div>
             <span>{t('appNames.short.flow')}</span>
           </div>
           {headerActions}
         </header>
-        <div className="portal-flow-mobile-trigger px-3 py-2">
-          <button
-            type="button"
-            className="portal-icon-button"
-            onClick={() => setMobileOpen(true)}
-            aria-label={t('flow.shell.openMenu')}
-          >
-            <Menu size={19} />
-          </button>
-          {canCreateTask && (
-            <button
-              type="button"
-              className="portal-icon-button"
-              onClick={() => setQuickCreateOpen(true)}
-              aria-label={t('flow.shell.newTask')}
-            >
-              <Plus size={19} />
-            </button>
-          )}
-        </div>
         <TrialBanner />
         {isQuietNow(lifePrefs.quietStart, lifePrefs.quietEnd) && (
           <p

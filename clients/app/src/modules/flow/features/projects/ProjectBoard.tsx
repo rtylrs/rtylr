@@ -9,7 +9,7 @@ import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, GripVertical, ListChecks, Plus, Settings2, Trash2 } from 'lucide-react';
 import { useFlowStore } from '../../shared/stores/flowStore';
-import { useTasks } from '../tasks/useTasks';
+import { useTasks, useUpdateTask } from '../tasks/useTasks';
 import {
   useProjectColumns,
   useCreateColumn,
@@ -28,6 +28,8 @@ import MoveToColumnMenu, { type MoveTarget } from './components/MoveToColumnMenu
 import {
   columnIdAtPoint,
   exceedsDragThreshold,
+  laneKeyAt,
+  lanePatch,
   resolveDropTarget,
   type ColumnRect,
 } from './boardDrag';
@@ -47,7 +49,7 @@ import {
 } from '../../shared/lib/currentUser';
 import BoardSettingsPanel from './components/BoardSettingsPanel';
 import StatusSettingsPanel from './components/StatusSettingsPanel';
-import type { ApiProjectColumn } from '../../shared/services/flowApi';
+import type { ApiProjectColumn, ApiTask } from '../../shared/services/flowApi';
 import type { Task } from '../../shared/stores/flowStore';
 import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
@@ -279,6 +281,7 @@ const ProjectBoard: React.FC = () => {
     refetch: refetchProjectMetadata,
   } = useCurrentProject(projectId);
   const moveTask = useMoveTaskToColumn();
+  const updateTask = useUpdateTask();
   const canEdit = useCanEditTask(projectId);
   const canCreate = useCanCreateTask(projectId);
   // "Manage project" for board setup. A viewer still opens the panel and sees
@@ -448,6 +451,16 @@ const ProjectBoard: React.FC = () => {
       // Swimlanes: a card changes column but has no single place to take.
       const target = resolveDropTarget(slot.columnId, drag.source.columnId);
       if (target !== null) moveTask.mutate({ taskId: drag.taskId, columnId: target });
+      // The lane it lands in is a priority or a person, and the task takes it.
+      const lanes = Array.from(
+        listRefs.current.get(slot.columnId)?.querySelectorAll<HTMLElement>('[data-board-lane]') ??
+          []
+      ).map((el) => ({ key: el.dataset.boardLane ?? '', top: el.getBoundingClientRect().top }));
+      const laneKey = laneKeyAt(lanes, drag.y);
+      if (laneKey !== null && laneKey !== laneKeyFor(drag.task, groupBy)) {
+        const patch = lanePatch(groupBy, laneKey, tasks);
+        if (patch) updateTask.mutate({ id: drag.taskId, data: patch as Partial<ApiTask> });
+      }
       return;
     }
     if (isSamePlace(drag.source, slot)) return;
@@ -1081,7 +1094,7 @@ const KanbanColumn: React.FC<{
           // Lanes are rendered in the same order across every column so
           // rows line up horizontally.
           lanes.map((lane) => (
-            <div key={lane.key} className="flex flex-col gap-1">
+            <div key={lane.key} data-board-lane={lane.key} className="flex flex-col gap-1">
               <div
                 className="flex items-center gap-1.5 px-1 pt-1.5 pb-0.5 text-flow-meta font-semibold uppercase tracking-wider"
                 style={{ color: 'var(--flow-text-dim)' }}
@@ -1106,15 +1119,13 @@ const KanbanColumn: React.FC<{
                   />
                 ))}
                 {lane.tasks.length === 0 && (
-                  <p
-                    className="flex min-h-[28px] items-center justify-center rounded-md text-flow-meta"
-                    style={{
-                      color: 'var(--flow-text-muted)',
-                      border: '1px dashed var(--flow-border)',
-                    }}
-                  >
-                    {t('flow.board.emptyLane')}
-                  </p>
+                  // A drop area, not a value: the lane header already names
+                  // the lane, and "None" here read as the priority None.
+                  <div
+                    aria-hidden="true"
+                    className="min-h-[28px] rounded-md"
+                    style={{ border: '1px dashed var(--flow-border)' }}
+                  />
                 )}
               </div>
             </div>

@@ -46,18 +46,21 @@ const MyIssues: React.FC = () => {
     });
   };
 
+  // The page lists open work only, so its count does too, matching the sidebar.
+  const openTasks = useMemo(
+    () => tasks.filter((task) => task.status !== 'done' && task.status !== 'cancelled'),
+    [tasks]
+  );
+
   const byBucket = useMemo(() => {
     const map = new Map<string, typeof tasks>(MY_TASK_BUCKET_ORDER.map((b) => [b, []]));
-    for (const task of tasks) {
-      if (task.status === 'done' || task.status === 'cancelled') continue;
-      map.get(bucketForMyTask(task))?.push(task);
-    }
+    for (const task of openTasks) map.get(bucketForMyTask(task))?.push(task);
     return map;
-  }, [tasks]);
+  }, [openTasks]);
 
   return (
     <div className="flex flex-col h-full">
-      <HelmetContainer title={`${t('flow.shell.myTasks')} · Flow`} />
+      <HelmetContainer title={`${t('flow.shell.myTasks')} · rtylr`} />
       <div
         className="portal-flow-page-header flex items-center justify-between gap-4 px-6 py-5 shrink-0"
         style={{ borderBottom: '1px solid var(--flow-border)' }}
@@ -70,7 +73,7 @@ const MyIssues: React.FC = () => {
             <p className="text-flow-meta" style={{ color: 'var(--flow-text-dim)' }}>
               {isLoading
                 ? t('flow.myIssues.loading')
-                : t('flow.myIssues.taskCount', { count: tasks.length })}
+                : t('flow.myIssues.taskCount', { count: openTasks.length })}
             </p>
           )}
         </div>
@@ -145,7 +148,7 @@ const MyIssues: React.FC = () => {
           </div>
         )}
 
-        {tasks.length === 0 && !isLoading && !loadFailed && (
+        {openTasks.length === 0 && !isLoading && !loadFailed && (
           <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center p-4">
             <div
               className="portal-flow-empty pointer-events-auto w-full max-w-md px-6 py-7 text-center"

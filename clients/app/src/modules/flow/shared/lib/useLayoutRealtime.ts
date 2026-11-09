@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { RealtimeEvent } from '@voxire/api';
 
 import { getCurrentUserId } from './currentUser';
+import { isOwnEcho } from './ownEcho';
 import { useRealtime } from './realtime';
 
 export function useLayoutRealtime(
@@ -20,7 +21,7 @@ export function useLayoutRealtime(
         qc.invalidateQueries({ queryKey: ['flow-notifications'] });
         return;
       }
-      if (e.actor_id && currentUserId && String(e.actor_id) === currentUserId) {
+      if (isOwnEcho(qc, e, currentUserId)) {
         return;
       }
       if (e.type.startsWith('project.')) {

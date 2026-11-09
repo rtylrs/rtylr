@@ -51,7 +51,7 @@ const Timeline: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <HelmetContainer title={`${t('flow.shell.timeline')} · Flow`} />
+      <HelmetContainer title={`${t('flow.shell.timeline')} · rtylr`} />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <Breadcrumbs items={[{ label: t('flow.shell.timeline') }]} />
         <h1 className="text-flow-title font-semibold mt-1" style={{ color: 'var(--flow-text)' }}>

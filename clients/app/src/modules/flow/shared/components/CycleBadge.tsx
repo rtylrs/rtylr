@@ -1,5 +1,6 @@
 import React from 'react';
 import { Timer } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Cycle } from '../stores/flowStore';
 import { withAlpha } from '../lib/colorUtils';
 
@@ -14,7 +15,9 @@ const STATUS_COLORS: Record<Cycle['status'], string> = {
   completed: 'var(--flow-neutral-fg)',
 };
 
+// The badge says where the cycle stands; its name is already printed beside it.
 export const CycleBadge: React.FC<CycleBadgeProps> = ({ cycle, compact }) => {
+  const { t } = useTranslation();
   const pct = cycle.scope > 0 ? Math.round((cycle.completed / cycle.scope) * 100) : 0;
   const color = STATUS_COLORS[cycle.status];
   return (
@@ -32,7 +35,7 @@ export const CycleBadge: React.FC<CycleBadgeProps> = ({ cycle, compact }) => {
       }}
     >
       <Timer size={compact ? 10 : 12} />
-      <span className="font-semibold">{cycle.name}</span>
+      <span className="font-semibold">{t(`flow.cycles.status.${cycle.status}`)}</span>
       {!compact && (
         <>
           <span style={{ opacity: 0.5 }}>·</span>

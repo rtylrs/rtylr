@@ -71,7 +71,7 @@ const PresenceScreen = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title={`${t('flow.presence.heading')} · Flow`} />
+      <HelmetContainer title={`${t('flow.presence.heading')} · rtylr`} />
       <div className="mx-auto max-w-2xl p-4 sm:p-6">
         <h1 className="mb-4 text-lg font-semibold" style={{ color: 'var(--flow-text)' }}>
           {t('flow.presence.heading')}

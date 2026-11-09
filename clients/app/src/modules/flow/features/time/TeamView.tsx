@@ -3,7 +3,7 @@ import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Users } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
-import { DatePicker } from '@voxire/ui';
+import FlowDatePicker from '../../shared/components/FlowDatePicker';
 import { useNavigate } from '@tanstack/react-router';
 import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
 import GateNotice from '../../shared/components/GateNotice';
@@ -44,7 +44,7 @@ const TeamView = (): React.JSX.Element => {
 
   return (
     <div className="h-full overflow-y-auto">
-      <HelmetContainer title={`${t('flow.time.team')} · Flow`} />
+      <HelmetContainer title={`${t('flow.time.team')} · rtylr`} />
       <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
         <header className="mb-6">
           <h1 className="text-flow-screen font-bold" style={{ color: 'var(--flow-text)' }}>
@@ -53,7 +53,7 @@ const TeamView = (): React.JSX.Element => {
           <label htmlFor="team-view-date" className="sr-only">
             {t('flow.time.date')}
           </label>
-          <DatePicker
+          <FlowDatePicker
             id="team-view-date"
             value={date}
             onChange={setDate}

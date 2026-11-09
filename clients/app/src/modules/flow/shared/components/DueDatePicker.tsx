@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Calendar as CalendarGrid, todayISODate } from '@voxire/ui';
 import { formatShortDate } from '../lib/utils';
 import { toLocalIso } from '../lib/dateUtils';
+import { useTimeSettingsStore } from '../stores/timeSettingsStore';
 
 interface DueDatePickerProps {
   value?: string;
@@ -19,6 +20,7 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, d
   const direction = i18n.dir();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const popupRef = useRef<HTMLDivElement>(null);
+  const weekStart = useTimeSettingsStore((s) => s.weekStart);
   const close = () => {
     setOpen(false);
     triggerRef.current?.focus();
@@ -179,7 +181,7 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, d
             }}
             minDate={todayISODate()}
             locale={i18n.language}
-            weekStartsOn={1}
+            weekStartsOn={weekStart === 'sunday' ? 0 : 1}
             labels={{
               previousMonth: t('flowCommon.datePicker.previousMonth'),
               nextMonth: t('flowCommon.datePicker.nextMonth'),

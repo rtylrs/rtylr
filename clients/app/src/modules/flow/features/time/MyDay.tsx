@@ -4,7 +4,7 @@ import { ClipboardList, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getRouteApi } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
-import { DatePicker } from '@voxire/ui';
+import FlowDatePicker from '../../shared/components/FlowDatePicker';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import {
   addDays,
@@ -72,7 +72,7 @@ const MyDay = (): React.JSX.Element => {
 
   return (
     <div className="h-full overflow-y-auto">
-      <HelmetContainer title={`${t('flow.time.myDay')} · Flow`} />
+      <HelmetContainer title={`${t('flow.time.myDay')} · rtylr`} />
       <div className="mx-auto max-w-[1180px] px-4 py-6 sm:px-6">
         <header className="mb-6">
           <h1 className="text-flow-screen font-bold" style={{ color: 'var(--flow-text)' }}>
@@ -100,7 +100,7 @@ const MyDay = (): React.JSX.Element => {
           <label htmlFor="work-day-date" className="sr-only">
             {t('flow.time.date')}
           </label>
-          <DatePicker
+          <FlowDatePicker
             id="work-day-date"
             value={date}
             onChange={setDate}

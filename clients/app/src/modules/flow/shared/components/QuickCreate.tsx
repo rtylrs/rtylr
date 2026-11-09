@@ -3,7 +3,8 @@ import { useOpenTask } from '../lib/useOpenTask';
 import { toast } from 'sonner';
 import { Calendar, User, CircleUser, FolderInput, Flag, Gauge, Tag } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { DatePicker, Dialog, DialogContent, DialogTitle, DialogDescription } from '@voxire/ui';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@voxire/ui';
+import FlowDatePicker from './FlowDatePicker';
 import { useParams, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useProjects } from '../../features/projects/useProjects';
 import { apiProjectToProject } from '../lib/projectMapper';
@@ -115,13 +116,16 @@ export const QuickCreate: React.FC = () => {
       });
       const task = res.task;
       const taskId = String(task.id);
-      toast.success(t('flowToasts.task.createdWithId', { id: task.identifier ?? taskId }), {
-        description: task.title,
-      });
       setQuickCreateOpen(false);
+      // The task opening is the confirmation. A toast on top of the drawer
+      // covered its timer, so it only shows when the task is not opened.
       if (canFlowPermission('flow:tasks:view', user?.effectiveAccess)) {
         if (pathname.startsWith('/flow/')) openTask(taskId);
         else void navigate({ to: '/flow/my-issues', search: { openTask: taskId } });
+      } else {
+        toast.success(t('flowToasts.task.createdWithId', { id: task.identifier ?? taskId }), {
+          description: task.title,
+        });
       }
     } catch {
       // error toast handled by mutation onError
@@ -277,7 +281,7 @@ export const QuickCreate: React.FC = () => {
             </FieldRow>
 
             <FieldRow label={t('flowCommon.dueDate')} icon={Calendar}>
-              <DatePicker
+              <FlowDatePicker
                 value={dueDate}
                 onChange={setDueDate}
                 locale={i18n.language}

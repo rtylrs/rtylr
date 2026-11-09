@@ -31,7 +31,7 @@ const Team: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full overflow-auto">
-      <HelmetContainer title={`${t('flow.shell.team')} · Flow`} />
+      <HelmetContainer title={`${t('flow.shell.team')} · rtylr`} />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <div className="flex items-center gap-2">
           <Users size={14} style={{ color: 'var(--flow-text-muted)' }} />

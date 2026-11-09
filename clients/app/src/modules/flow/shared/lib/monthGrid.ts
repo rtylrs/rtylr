@@ -29,17 +29,18 @@ export interface MonthCell {
 }
 
 /**
- * The cells of a month grid, padded to whole Sunday-first weeks.
+ * The cells of a month grid, padded to whole weeks that start on `weekStart`.
  *
  * `padOutside` controls what the padding is: the global calendar shows the
  * neighbouring days dimmed, the project calendar leaves them blank. Passing
  * `false` still returns the cells, so the caller keeps a fixed 7-column grid,
  * and marks them `inMonth: false`.
  */
-export function monthCells(cursor: Date): MonthCell[] {
+export function monthCells(cursor: Date, weekStart: 'monday' | 'sunday' = 'sunday'): MonthCell[] {
   const year = cursor.getFullYear();
   const month = cursor.getMonth();
-  const startDay = new Date(year, month, 1).getDay();
+  const firstWeekday = weekStart === 'monday' ? 1 : 0;
+  const startDay = (new Date(year, month, 1).getDay() - firstWeekday + 7) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   const cell = (date: Date, inMonth: boolean): MonthCell => ({

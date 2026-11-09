@@ -7,6 +7,7 @@ import { initTestI18n } from '../testing/i18n';
 import { useUserStore } from '../stores/userStore';
 import { useFlowStore } from '../stores/flowStore';
 import QuickCreate from './QuickCreate';
+import { toast } from 'sonner';
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
@@ -169,5 +170,28 @@ describe('Quick task creation in Portal', () => {
     create();
     await waitFor(() => expect(useFlowStore.getState().quickCreateOpen).toBe(false));
     expect(mocks.navigate).not.toHaveBeenCalled();
+  });
+
+  // The new task opens in the drawer, which is the confirmation; a success
+  // toast on top of it covered the drawer's timer button.
+  it('opens the new task without a toast over the drawer', async () => {
+    render(<QuickCreate />);
+    fillTitle();
+    create();
+    await waitFor(() => expect(useFlowStore.getState().quickCreateOpen).toBe(false));
+    expect(toast.success).not.toHaveBeenCalled();
+  });
+
+  it('confirms with a toast when the new task is not opened', async () => {
+    useUserStore.setState({
+      user: {
+        id: 7,
+        effectiveAccess: createEffectiveAccess('flow', { permissions: ['flow:tasks:create'] }),
+      },
+    });
+    render(<QuickCreate />);
+    fillTitle();
+    create();
+    await waitFor(() => expect(toast.success).toHaveBeenCalled());
   });
 });

@@ -128,7 +128,7 @@
       "description": "Honest ritual, not app opens. Tap once after you finish your weekly close-out."
     },
     "myTasks": {
-      "title": "My Tasks",
+      "title": "My tasks",
       "activeCount": "{{count}} active"
     },
     "projects": {

@@ -3,6 +3,8 @@ import {
   DRAG_THRESHOLD_PX,
   columnIdAtPoint,
   exceedsDragThreshold,
+  laneKeyAt,
+  lanePatch,
   resolveDropTarget,
   type ColumnRect,
 } from './boardDrag';
@@ -77,5 +79,57 @@ describe('resolveDropTarget', () => {
 
   it('still moves a task whose source column is unknown', () => {
     expect(resolveDropTarget('b', null)).toBe('b');
+  });
+});
+
+describe('laneKeyAt', () => {
+  const lanes = [
+    { key: 'urgent', top: 100 },
+    { key: 'high', top: 200 },
+    { key: 'low', top: 300 },
+  ];
+
+  it('picks the lane whose band the pointer is in', () => {
+    expect(laneKeyAt(lanes, 250)).toBe('high');
+    expect(laneKeyAt(lanes, 300)).toBe('low');
+  });
+
+  it('treats a pointer above the first lane as the first lane', () => {
+    expect(laneKeyAt(lanes, 40)).toBe('urgent');
+  });
+
+  it('has no lane to offer when the column has none', () => {
+    expect(laneKeyAt([], 40)).toBeNull();
+  });
+});
+
+// Dropping a card into another swimlane did nothing at all: the lane is a
+// priority or a person, so the drop has to change that on the task.
+describe('lanePatch', () => {
+  const tasks = [
+    { assignee: 'Sam Lee', assigneeId: '7' },
+    { assignee: '', assigneeId: '' },
+  ];
+
+  it('sets the priority of a priority lane', () => {
+    expect(lanePatch('priority', 'high', tasks)).toEqual({ priority: 'high' });
+  });
+
+  it('assigns the person of an assignee lane', () => {
+    expect(lanePatch('assignee', 'Sam Lee', tasks)).toEqual({ assigneeId: '7' });
+  });
+
+  it('unassigns on the Unassigned lane', () => {
+    expect(lanePatch('assignee', 'Unassigned', tasks)).toEqual({ assigneeId: '' });
+  });
+
+  it('changes nothing for an assignee lane it cannot resolve', () => {
+    expect(lanePatch('assignee', 'Nobody Known', tasks)).toBeNull();
+  });
+
+  // "This week" or "Later" is a range, not a date, so there is nothing
+  // honest to set; those lanes keep moving the card between columns only.
+  it('changes nothing for due-date lanes', () => {
+    expect(lanePatch('due', 'Today', tasks)).toBeNull();
   });
 });

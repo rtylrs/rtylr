@@ -7,6 +7,7 @@ import { initTestI18n } from '../../shared/testing/i18n';
 
 const access = vi.hoisted(() => ({ open: vi.fn() }));
 const mutation = vi.hoisted(() => ({ mutate: vi.fn(), isPending: false }));
+const update = vi.hoisted(() => ({ mutate: vi.fn(), isPending: false }));
 vi.mock('@tanstack/react-router', () => ({
   useParams: () => ({ projectId: '2' }),
   useLocation: () => ({ pathname: '/flow/p/2' }),
@@ -54,6 +55,7 @@ const task = (id: string, title: string, sectionId: string, sortOrder?: number) 
 const taskData = vi.hoisted(() => ({ rows: [] as unknown[] }));
 vi.mock('../tasks/useTasks', () => ({
   useTasks: () => ({ isLoading: false, isError: false, data: taskData.rows }),
+  useUpdateTask: () => update,
 }));
 vi.mock('../tasks/useLabels', () => ({ useLabels: () => ({ data: [] }) }));
 vi.mock('./useColumns', () => ({
@@ -101,6 +103,11 @@ function stubGeometry(): () => void {
     const x = COLUMN_X[column?.dataset.boardColumn ?? ''] ?? 0;
     if (this.dataset.boardColumn) return rect(x, 0, 300, 800);
     if (this.hasAttribute('data-board-list')) return rect(x, 100, 300, 600);
+    // Swimlanes are 200px bands from the top of the list.
+    if (this.dataset.boardLane) {
+      const lanes = [...(this.parentElement?.querySelectorAll('[data-board-lane]') ?? [])];
+      return rect(x, 100 + lanes.indexOf(this) * 200, 300, 190);
+    }
     if (this.dataset.boardCard) {
       const siblings = [...(this.parentElement?.querySelectorAll('[data-board-card]') ?? [])];
       const visible = siblings.filter((el) => (el as HTMLElement).style.position !== 'absolute');
@@ -274,5 +281,34 @@ describe('Board live card drag', () => {
     ];
     renderBoard();
     expect(orderIn('9')).toEqual(['2', '3', '1']);
+  });
+});
+
+describe('Board drag between swimlanes', () => {
+  beforeEach(() => {
+    localStorage.setItem('flow:board:groupBy:2', 'priority');
+  });
+  afterEach(() => {
+    localStorage.removeItem('flow:board:groupBy:2');
+  });
+
+  // Lanes run urgent, high, medium, low, none, 200px apart from y=100, so
+  // y=350 is inside the high lane while every task starts in medium.
+  it('gives the card the priority of the lane it is dropped in', () => {
+    renderBoard();
+    down(card('Task one'), 50, 520);
+    move(60, 400);
+    up(60, 350);
+    expect(update.mutate).toHaveBeenCalledWith({ id: '1', data: { priority: 'high' } });
+    expect(mutation.mutate).not.toHaveBeenCalled();
+  });
+
+  it('changes nothing when the card stays in its own lane and column', () => {
+    renderBoard();
+    down(card('Task one'), 50, 520);
+    move(60, 560);
+    up(60, 560);
+    expect(update.mutate).not.toHaveBeenCalled();
+    expect(mutation.mutate).not.toHaveBeenCalled();
   });
 });

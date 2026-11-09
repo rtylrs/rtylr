@@ -1,5 +1,5 @@
 import React from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createEffectiveAccess } from '../../../../test/effectiveAccess';
 import { initTestI18n } from '../shared/testing/i18n';
@@ -142,6 +142,19 @@ describe('Flow module layout', () => {
     );
     expect(useFlowStore.getState().projects).toEqual([]);
   });
+  // On a phone the menu and new-task buttons sat on a row of their own under
+  // the header, one of the rows that pushed the board half way down the screen.
+  it('keeps the phone menu and new-task buttons in the header', () => {
+    render(
+      <FlowLayout>
+        <p>Flow page</p>
+      </FlowLayout>
+    );
+    const header = within(screen.getByRole('banner'));
+    expect(header.getByRole('button', { name: 'Open menu' })).toBeInTheDocument();
+    expect(header.getByRole('button', { name: 'New task' })).toBeInTheDocument();
+  });
+
   it('hides creation controls for a read-only member', () => {
     useUserStore.setState({
       user: {

@@ -11,6 +11,8 @@ import { useBusinessFavicon } from '../hooks/useBusinessFavicon';
 import { canAccessPortalPath } from './canAccessPortalPath';
 import PortalShell from '../../shell/PortalShell';
 import { Link } from '@tanstack/react-router';
+import { Button } from '../components/ui/button';
+import '../../shell/portal.css';
 
 const getCookieToken = (): string | null => {
   const raw = document.cookie
@@ -185,13 +187,17 @@ function BusinessRoute(): React.JSX.Element | null {
 
   if (authLoadFailed || !user) {
     return (
-      <main role="alert" style={{ maxWidth: 480, margin: '15vh auto', padding: 24 }}>
-        <h1>{t('common.accountLoad.title')}</h1>
-        <p>{t('common.accountLoad.description')}</p>
-        <button type="button" onClick={() => setReloadCount((count) => count + 1)}>
-          {t('common.refresh')}
-        </button>
-      </main>
+      // Shown before the shell mounts, so it brings the page background and
+      // type itself rather than rendering as unstyled browser defaults.
+      <div className="portal-account-error">
+        <main role="alert" className="portal-access-denied">
+          <h1>{t('common.accountLoad.title')}</h1>
+          <p>{t('common.accountLoad.description')}</p>
+          <Button type="button" onClick={() => setReloadCount((count) => count + 1)}>
+            {t('common.refresh')}
+          </Button>
+        </main>
+      </div>
     );
   }
 

@@ -62,3 +62,38 @@ export function resolveDropTarget(
   if (targetColumnId === sourceColumnId) return null;
   return targetColumnId;
 }
+
+/** A swimlane's top edge in viewport px, measured at drop time. */
+export interface LaneTop {
+  key: string;
+  top: number;
+}
+
+/**
+ * The swimlane a pointer is in: the last lane that starts at or above it, or
+ * the first lane when the pointer is above them all. Null without lanes.
+ */
+export function laneKeyAt(lanes: readonly LaneTop[], y: number): string | null {
+  let key = lanes[0]?.key ?? null;
+  for (const lane of lanes) {
+    if (lane.top <= y) key = lane.key;
+  }
+  return key;
+}
+
+/**
+ * What a drop into another swimlane changes on the task: the lane's priority,
+ * or the lane's person (found on a task already assigned to them). Due-date
+ * lanes are ranges, not dates, so they change nothing.
+ */
+export function lanePatch(
+  groupBy: string,
+  laneKey: string,
+  tasks: readonly { assignee: string; assigneeId: string }[]
+): { priority: string } | { assigneeId: string } | null {
+  if (groupBy === 'priority') return { priority: laneKey };
+  if (groupBy !== 'assignee') return null;
+  if (laneKey === 'Unassigned') return { assigneeId: '' };
+  const assigned = tasks.find((task) => task.assignee === laneKey && task.assigneeId);
+  return assigned ? { assigneeId: assigned.assigneeId } : null;
+}

@@ -322,6 +322,7 @@
     "accessDeniedDescription": "اطلب من مالك المؤسسة أو المسؤول تحديث صلاحياتك.",
     "backHome": "العودة إلى الرئيسية",
     "welcome": "مرحباً بعودتك، {{name}}",
+    "welcomeFirst": "مرحباً، {{name}}",
     "welcomeDescription": "مؤسستك في مكان واحد.",
     "search": "ابحث عن التطبيقات والصفحات والإجراءات…",
     "shortcuts": "اختصارات",

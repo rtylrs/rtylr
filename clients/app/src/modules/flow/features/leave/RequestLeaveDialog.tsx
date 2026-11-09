@@ -1,13 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  DatePicker,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@voxire/ui';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@voxire/ui';
+import FlowDatePicker from '../../shared/components/FlowDatePicker';
 import GateNotice from '../../shared/components/GateNotice';
 import type { LeaveTypePayload } from './useLeave';
 import { useCreateLeaveRequest } from './useLeave';
@@ -159,7 +153,7 @@ const RequestLeaveDialog: React.FC<RequestLeaveDialogProps> = ({
               >
                 {t('flow.leave.startDate')}
               </label>
-              <DatePicker
+              <FlowDatePicker
                 id="leave-start-date"
                 value={startDate}
                 onChange={setStartDate}
@@ -179,7 +173,7 @@ const RequestLeaveDialog: React.FC<RequestLeaveDialogProps> = ({
               >
                 {t('flow.leave.endDate')}
               </label>
-              <DatePicker
+              <FlowDatePicker
                 id="leave-end-date"
                 value={endDate}
                 onChange={setEndDate}

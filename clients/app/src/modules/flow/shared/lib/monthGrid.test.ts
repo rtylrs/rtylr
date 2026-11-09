@@ -23,6 +23,16 @@ describe('monthCells', () => {
     expect(cells[cells.length - 1].date.getDay()).toBe(6);
   });
 
+  // The date pickers start the week on the user's chosen day; the calendar
+  // views used to start on Sunday whatever that setting said.
+  it('pads to whole Monday-first weeks when the week starts on Monday', () => {
+    const cells = monthCells(new Date(2026, 8, 15), 'monday'); // September 2026
+    expect(cells[0].date.getDay()).toBe(1);
+    expect(cells[0].iso).toBe('2026-08-31');
+    expect(cells.length % 7).toBe(0);
+    expect(cells[cells.length - 1].date.getDay()).toBe(0);
+  });
+
   it('marks the padding days as outside the month', () => {
     // 1 September 2026 is a Tuesday, so two leading days belong to August.
     const cells = monthCells(new Date(2026, 8, 1));

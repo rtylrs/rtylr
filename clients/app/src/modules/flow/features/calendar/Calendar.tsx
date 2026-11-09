@@ -13,6 +13,7 @@ import PriorityIcon from '../../shared/components/PriorityIcon';
 import type { ApiTask } from '../../shared/services/flowApi';
 import { toLocalIso, todayIso } from '../../shared/lib/dateUtils';
 import { monthCells, tasksByLocalDay, agendaDays } from '../../shared/lib/monthGrid';
+import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
 import { CalendarAgenda } from '../../shared/components/CalendarAgenda';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
@@ -58,12 +59,13 @@ const Calendar: React.FC = () => {
     if (!newLabelId && labels.length > 0) setNewLabelId(String(labels[0].id));
   }, [labels, newLabelId]);
 
+  const weekStart = useTimeSettingsStore((s) => s.weekStart);
   const { days, monthLabel } = useMemo(
     () => ({
-      days: monthCells(cursor),
+      days: monthCells(cursor, weekStart),
       monthLabel: cursor.toLocaleString(i18n.language, { month: 'long', year: 'numeric' }),
     }),
-    [cursor, i18n.language]
+    [cursor, i18n.language, weekStart]
   );
 
   // One lookup for the whole grid rather than a find() per pill per cell.
@@ -122,7 +124,7 @@ const Calendar: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <HelmetContainer title={`${t('flow.calendar.heading')} · Flow`} />
+      <HelmetContainer title={`${t('flow.calendar.heading')} · rtylr`} />
       <div
         className="flex items-center justify-between px-6 py-4 shrink-0"
         style={{ borderBottom: '1px solid var(--flow-border)' }}

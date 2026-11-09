@@ -143,6 +143,43 @@ describe('Task detail persistence controls', () => {
     expect(update).toHaveBeenCalledWith({ id: '1', data: { waitingOn: '' } });
   });
 
+  // Effort is picked as "1h" or "30m", and the estimate it fills in showed as a
+  // bare "1" or "0.5" with nothing to say what the number counts.
+  it('shows the estimate with its unit', () => {
+    renderDetail();
+    const estimate = screen.getByDisplayValue('1');
+    expect(estimate).toHaveAccessibleDescription(flow.taskDetail.hours);
+    expect(screen.getByText(flow.taskDetail.hours)).toBeVisible();
+  });
+
+  // On a phone the properties panel follows the whole main column, so Status,
+  // Priority and Assignee sat below every comment.
+  it('puts status, priority and assignee right under the title on a phone', () => {
+    const original = window.matchMedia;
+    window.matchMedia = ((query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+    })) as unknown as typeof window.matchMedia;
+    try {
+      renderDetail();
+      const description = screen.getByPlaceholderText(flow.taskDetail.descriptionPlaceholder);
+      for (const name of [
+        flow.taskDetail.status,
+        flow.taskDetail.priority,
+        flow.taskDetail.assignee,
+      ]) {
+        const field = screen.getByRole('button', { name: new RegExp(`^${name}`) });
+        expect(
+          field.compareDocumentPosition(description) & Node.DOCUMENT_POSITION_FOLLOWING
+        ).toBeTruthy();
+      }
+    } finally {
+      window.matchMedia = original;
+    }
+  });
+
   it('sends explicit zero when clearing effort', () => {
     renderDetail();
     fireEvent.click(screen.getByRole('button', { name: flow.quickCreate.noEffort }));

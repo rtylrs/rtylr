@@ -610,7 +610,6 @@
     "groupByLabel": "Group:",
     "addTask": "Add task",
     "emptyColumn": "Nothing here yet.",
-    "emptyLane": "None",
     "deleteColumn": "Delete column"
   },
   "views": {
@@ -711,7 +710,7 @@
     "subtitle_other": "{{count}} tasks need attention",
     "emptyTitle": "Inbox zero",
     "emptyDescription": "Nothing stuck without a priority or due date. New work lands in capture first-keep triage lean so planned work stays trustworthy.",
-    "emptyCta": "Go to My Tasks",
+    "emptyCta": "Go to My tasks",
     "explanation": "Anything without a priority or a due date, or still in the backlog, shows up here."
   },
   "team": {
@@ -746,7 +745,12 @@
     "createFirst": "Create first cycle",
     "project": "Project",
     "noProjects": "No projects yet",
-    "newCycleGate": "A cycle belongs to a project, and this business has none yet. Create a project first."
+    "newCycleGate": "A cycle belongs to a project, and this business has none yet. Create a project first.",
+    "status": {
+      "active": "Active",
+      "upcoming": "Upcoming",
+      "completed": "Completed"
+    }
   },
   "myIssues": {
     "buckets": {
@@ -872,7 +876,7 @@
     "transferring": "Transferring…",
     "visibility": "Visibility",
     "visibilityGateReason": "Only a project admin can change visibility.",
-    "visibilityPersonalGate": "Your My Tasks project is always private.",
+    "visibilityPersonalGate": "Your My tasks list is always private.",
     "visibilitySaved": "Visibility updated",
     "integrations": {
       "slack": "Post project updates to #flow-updates",
@@ -1015,7 +1019,7 @@
   },
   "projectSelect": {
     "placeholder": "Select project",
-    "personal": "Personal tasks"
+    "personal": "My tasks"
   },
   "start": {
     "title": "Create in Work",

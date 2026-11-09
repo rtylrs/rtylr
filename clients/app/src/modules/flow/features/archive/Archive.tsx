@@ -33,7 +33,7 @@ const Archive: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <HelmetContainer title={`${t('flowArchive.title')} · Flow`} />
+      <HelmetContainer title={`${t('flowArchive.title')} · rtylr`} />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <h1 className="text-flow-title font-semibold" style={{ color: 'var(--flow-text)' }}>
           {t('flowArchive.title')}

@@ -56,6 +56,7 @@ vi.mock('../tasks/useTasks', () => ({
       },
     ],
   }),
+  useUpdateTask: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 vi.mock('../tasks/useLabels', () => ({ useLabels: () => ({ data: [] }) }));
 vi.mock('./useColumns', () => ({

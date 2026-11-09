@@ -54,7 +54,7 @@ const LeaveScreen = (): React.JSX.Element => {
 
   return (
     <>
-      <HelmetContainer title={`${t('flow.leave.heading')} · Flow`} />
+      <HelmetContainer title={`${t('flow.leave.heading')} · rtylr`} />
       <div className="mx-auto max-w-2xl p-4 sm:p-6">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-lg font-semibold" style={{ color: 'var(--flow-text)' }}>

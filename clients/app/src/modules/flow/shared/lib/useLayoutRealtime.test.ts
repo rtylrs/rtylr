@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MutationObserver, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import type { RealtimeEvent } from '@voxire/api';
 
@@ -28,8 +28,17 @@ import { getCurrentUserId } from './currentUser';
 // businessId is NOT defaulted: a default parameter fires on an explicit
 // `undefined`, so a caller trying to assert the no-id case would silently get
 // the default back. That cost a confusing red test.
-function mount(businessId: string | undefined, userId: string | undefined = '42', enabled = true) {
+function mount(
+  businessId: string | undefined,
+  userId: string | undefined = '42',
+  enabled = true,
+  changedHere = false
+) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  if (changedHere) {
+    // A change of this tab's own, still in flight, so its echo is expected.
+    void new MutationObserver(client, { mutationFn: () => new Promise(() => {}) }).mutate();
+  }
   const spy = vi.spyOn(client, 'invalidateQueries');
   renderHook(() => useLayoutRealtime(businessId, userId, enabled), {
     wrapper: ({ children }: { children: React.ReactNode }) =>
@@ -101,9 +110,9 @@ describe('useLayoutRealtime', () => {
   // useTaskRealtime and useProjectRealtime.
   describe('self-authored events', () => {
     it.each(['project.created', 'project.updated'])(
-      'ignores %s when the current user is the actor',
+      'ignores %s in the tab where the current user made it',
       (type) => {
-        const spy = mount('1');
+        const spy = mount('1', '42', true, true);
         handler?.(event({ type, actor_id: 42 }));
         expect(spy).not.toHaveBeenCalled();
       }
@@ -118,9 +127,15 @@ describe('useLayoutRealtime', () => {
     // actor_id arrives numeric from the server while the store holds a string.
     it('compares actor_id and user id as strings', () => {
       vi.mocked(getCurrentUserId).mockReturnValue('7');
-      const spy = mount('1', '7');
+      const spy = mount('1', '7', true, true);
       handler?.(event({ actor_id: 7 }));
       expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('applies the current user’s project event in their other tabs', () => {
+      const spy = mount('1');
+      handler?.(event({ actor_id: 42 }));
+      expect(keys(spy)).toContain(JSON.stringify(['projects']));
     });
 
     it('still handles a teammate event when the actor is someone else', () => {

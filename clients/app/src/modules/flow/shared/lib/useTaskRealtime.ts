@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { RealtimeEvent } from '@voxire/api';
 
 import { getCurrentUserId } from './currentUser';
+import { isOwnEcho } from './ownEcho';
 import { useRealtime } from './realtime';
 
 /**
@@ -11,9 +12,9 @@ import { useRealtime } from './realtime';
  * whenever someone else on the team edits it - without polling and
  * without subscribing to the whole project firehose.
  *
- * Self-authored events are ignored (the mutation's onSuccess already
- * invalidated), which avoids the flicker that would otherwise happen
- * when optimistic UI is in flight.
+ * This tab's own changes coming back are ignored (isOwnEcho; the
+ * mutation's onSuccess already invalidated), which avoids the flicker
+ * that would otherwise happen when optimistic UI is in flight.
  *
  * Pass an empty string (or no taskId) to disable - the hook becomes a
  * no-op. Safer than forcing callers to branch.
@@ -24,7 +25,7 @@ export function useTaskRealtime(taskId: string | undefined): void {
 
   const onEvent = useCallback(
     (e: RealtimeEvent) => {
-      if (e.actor_id && currentUserId && String(e.actor_id) === currentUserId) {
+      if (isOwnEcho(qc, e, currentUserId)) {
         return;
       }
       if (e.type.startsWith('task.')) {

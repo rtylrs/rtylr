@@ -7,6 +7,7 @@ import { APP_URLS, PORTAL_URL, resolvePortalReturn } from '@voxire/config';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useLogin } from '../../shared/hooks/useAuth';
 import { startGoogleLogin } from '../../shared/lib/social';
+import { authPageLink } from '../../shared/lib/authRedirect';
 import notify from '../../shared/lib/notify/notify';
 import { createOneKitClient } from '@voxire/api';
 import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
@@ -136,11 +137,7 @@ const Login: React.FC = (): React.JSX.Element => {
             <button
               type="button"
               className={authLinkClass}
-              onClick={() =>
-                navigate({
-                  to: redirectParam ? `/register?redirect=${redirectParam}` : '/register',
-                })
-              }
+              onClick={() => navigate({ to: authPageLink('/register', window.location.search) })}
             >
               {t('auth.login.createOne')}
             </button>

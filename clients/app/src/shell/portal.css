@@ -406,6 +406,13 @@
 .portal-skip-link:focus {
   transform: none;
 }
+.portal-account-error {
+  min-height: 100dvh;
+  padding: 24px;
+  background: var(--dash-bg);
+  color: var(--dash-text);
+  font-family: Inter, system-ui, sans-serif;
+}
 .portal-access-denied {
   max-width: 460px;
   margin: 12vh auto;

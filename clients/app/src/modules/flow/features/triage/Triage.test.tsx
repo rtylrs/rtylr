@@ -60,6 +60,13 @@ beforeEach(() => {
 });
 
 describe('Triage does not claim inbox zero before the query ran (#1084)', () => {
+  // Triage ran edge to edge with no right padding beside Today and Inbox,
+  // which sit in a centred column.
+  it('sits in the same centred column as Today and Inbox', () => {
+    const { container } = render(<Triage />);
+    expect(container.firstElementChild).toHaveClass('max-w-3xl', 'mx-auto');
+  });
+
   it('says nothing about the count while loading', () => {
     // The reported defect: apiTasks is undefined until the query resolves, so
     // needsTriage was empty and the screen said "Inbox zero" and "0 tasks

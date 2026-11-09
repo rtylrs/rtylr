@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, getRouteApi } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { CircleAlert } from 'lucide-react';
-import { DatePicker } from '@voxire/ui';
+import FlowDatePicker from '../../shared/components/FlowDatePicker';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import {
   dayKeyForDate,
@@ -384,7 +384,7 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
             >
               {t('flow.time.date')}
             </label>
-            <DatePicker
+            <FlowDatePicker
               id="add-hours-date"
               value={date}
               readOnly={locked}

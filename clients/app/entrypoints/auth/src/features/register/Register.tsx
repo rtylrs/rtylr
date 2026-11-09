@@ -2,12 +2,12 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import { FaGoogle } from 'react-icons/fa';
-import { APP_CONFIG, APP_URLS, PORTAL_URL } from '@voxire/config';
 
 import notify from '../../shared/lib/notify/notify';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useRegisterRestaurant, checkEmailExists } from '../../shared/hooks/useAuth';
 import { startGoogleLogin } from '../../shared/lib/social';
+import { authPageLink, signedInDestination } from '../../shared/lib/authRedirect';
 import { Button, HelmetContainer } from '@voxire/components';
 import AuthShell from '../../shared/components/AuthShell';
 import {
@@ -24,19 +24,6 @@ import { getCookie } from '@voxire/auth';
 import { getEmailError, getPasswordMatchError } from '../../shared/lib/validation';
 
 const DEFAULT_SIGNUP_PLAN_SLUG = 'free';
-
-type RedirectableAppId = keyof typeof APP_CONFIG;
-
-function getRedirectAppId(value: string | null): RedirectableAppId | null {
-  if (value && Object.prototype.hasOwnProperty.call(APP_CONFIG, value)) {
-    return value as RedirectableAppId;
-  }
-  return null;
-}
-
-function getRedirectUrl(appId: RedirectableAppId | null): string {
-  return appId ? (APP_URLS[appId] as string) : PORTAL_URL;
-}
 
 // ── Register ────────────────────────────────────────────────────────────────
 
@@ -75,9 +62,9 @@ const Register: React.FC = (): React.JSX.Element => {
   const { isAuthenticated, loading, error, clearError } = useUserStore();
   const registerMutation = useRegisterRestaurant();
 
-  const redirectParam = useMemo((): RedirectableAppId | null => {
+  const { redirectParam, returnTo } = useMemo(() => {
     const params = new URLSearchParams(window.location.search);
-    return getRedirectAppId(params.get('redirect'));
+    return { redirectParam: params.get('redirect'), returnTo: params.get('returnTo') };
   }, []);
 
   const handleRegister = (): void => {
@@ -95,7 +82,7 @@ const Register: React.FC = (): React.JSX.Element => {
       },
       {
         onSuccess: () => {
-          window.location.href = getRedirectUrl(redirectParam);
+          window.location.href = signedInDestination(redirectParam, returnTo);
         },
       }
     );
@@ -107,7 +94,7 @@ const Register: React.FC = (): React.JSX.Element => {
       return;
     }
     try {
-      await startGoogleLogin(redirectParam, businessName.trim());
+      await startGoogleLogin(redirectParam, businessName.trim(), returnTo);
     } catch {
       notify.error('Social sign-in is currently unavailable');
     }
@@ -119,9 +106,9 @@ const Register: React.FC = (): React.JSX.Element => {
 
   useEffect((): void => {
     if (isAuthenticated && getCookie('token')) {
-      window.location.href = getRedirectUrl(redirectParam);
+      window.location.href = signedInDestination(redirectParam, returnTo);
     }
-  }, [isAuthenticated, redirectParam]);
+  }, [isAuthenticated, redirectParam, returnTo]);
 
   const errorMessage =
     error &&
@@ -141,7 +128,7 @@ const Register: React.FC = (): React.JSX.Element => {
             <button
               type="button"
               className={authLinkClass}
-              onClick={() => navigate({ to: redirectParam ? `/?redirect=${redirectParam}` : '/' })}
+              onClick={() => navigate({ to: authPageLink('/', window.location.search) })}
             >
               {t('auth.common.signIn')}
             </button>

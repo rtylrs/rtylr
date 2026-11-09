@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { RealtimeEvent } from '@voxire/api';
 
 import { getCurrentUserId } from './currentUser';
+import { isOwnEcho } from './ownEcho';
 import { useRealtime } from './realtime';
 
 /**
@@ -13,9 +14,9 @@ import { useRealtime } from './realtime';
  * logic here keeps us from reinventing it per screen and keeps the
  * invalidation set in sync.
  *
- * Events the current user caused are skipped - react-query's mutation
- * onSuccess has already invalidated, refetching twice is wasteful and
- * produces flicker when an optimistic UI is in flight.
+ * This tab's own changes coming back are skipped (isOwnEcho) - the
+ * mutation's onSuccess has already invalidated, and refetching twice
+ * flickers an optimistic update in flight.
  *
  * Pass an empty string (or no projectId) to disable - the hook becomes
  * a no-op. This is safer than requiring callers to branch.
@@ -26,7 +27,7 @@ export function useProjectRealtime(projectId: string | undefined): void {
 
   const onEvent = useCallback(
     (e: RealtimeEvent) => {
-      if (e.actor_id && currentUserId && String(e.actor_id) === currentUserId) {
+      if (isOwnEcho(qc, e, currentUserId)) {
         return;
       }
       // Invalidation is keyed by prefix - react-query invalidates every

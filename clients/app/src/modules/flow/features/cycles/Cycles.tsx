@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Timer, ArrowRight, Plus } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
-import { DatePicker } from '@voxire/ui';
+import FlowDatePicker from '../../shared/components/FlowDatePicker';
 import { useCycles, useCreateCycle } from './useCycles';
 import { type ApiCycle } from '../../shared/services/flowApi';
 import { formatShortDate } from '../../shared/lib/utils';
@@ -64,7 +64,7 @@ const Cycles: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full overflow-auto">
-      <HelmetContainer title={`${t('flow.shell.cycles')} · Flow`} />
+      <HelmetContainer title={`${t('flow.shell.cycles')} · rtylr`} />
       <div
         className="flex items-center justify-between px-6 py-4 shrink-0"
         style={{ borderBottom: '1px solid var(--flow-border)' }}
@@ -154,7 +154,7 @@ const Cycles: React.FC = () => {
             autoFocus
           />
           <div className="flex gap-2">
-            <DatePicker
+            <FlowDatePicker
               value={newStart}
               onChange={setNewStart}
               locale={i18n.language}
@@ -166,7 +166,7 @@ const Cycles: React.FC = () => {
               }}
               className="text-flow-meta"
             />
-            <DatePicker
+            <FlowDatePicker
               value={newEnd}
               onChange={setNewEnd}
               minDate={newStart || undefined}

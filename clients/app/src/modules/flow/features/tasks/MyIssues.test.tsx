@@ -5,7 +5,10 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({
+    t: (key: string, options?: { count?: number }) =>
+      options?.count === undefined ? key : `${key}:${options.count}`,
+  }),
 }));
 
 vi.mock('@voxire/components', () => ({
@@ -95,6 +98,19 @@ describe('MyIssues empty state', () => {
     expect(
       screen.queryByRole('button', { name: 'flow.board.addTaskLabel' })
     ).not.toBeInTheDocument();
+  });
+
+  // The header counted the completed task the page does not list, so it said
+  // 5 above a list of 4 while the sidebar said 4.
+  it('counts only the open tasks it lists', () => {
+    myIssuesData.data = [
+      { id: '1', title: 'Open one', status: 'todo' },
+      { id: '2', title: 'Open two', status: 'in_progress' },
+      { id: '3', title: 'Finished', status: 'done' },
+      { id: '4', title: 'Dropped', status: 'cancelled' },
+    ];
+    render(<MyIssues />);
+    expect(screen.getByText('flow.myIssues.taskCount:2')).toBeInTheDocument();
   });
 
   it('does not render the old inline quick-add field', () => {

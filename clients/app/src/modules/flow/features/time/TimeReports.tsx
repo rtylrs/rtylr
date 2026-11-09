@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BarChart3 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
-import { DatePicker } from '@voxire/ui';
+import FlowDatePicker from '../../shared/components/FlowDatePicker';
 import { useNavigate } from '@tanstack/react-router';
 import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
 import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
@@ -71,7 +71,7 @@ const TimeReports = (): React.JSX.Element => {
 
   return (
     <div className="h-full overflow-y-auto">
-      <HelmetContainer title={`${t('flow.time.reports')} · Flow`} />
+      <HelmetContainer title={`${t('flow.time.reports')} · rtylr`} />
       <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
         <header className="mb-6">
           <h1 className="text-flow-screen font-bold" style={{ color: 'var(--flow-text)' }}>
@@ -81,7 +81,7 @@ const TimeReports = (): React.JSX.Element => {
             <label htmlFor="reports-from" className="sr-only">
               {t('flow.time.reportsFrom')}
             </label>
-            <DatePicker
+            <FlowDatePicker
               id="reports-from"
               value={from}
               onChange={setFrom}
@@ -99,7 +99,7 @@ const TimeReports = (): React.JSX.Element => {
             <label htmlFor="reports-to" className="sr-only">
               {t('flow.time.reportsTo')}
             </label>
-            <DatePicker
+            <FlowDatePicker
               id="reports-to"
               value={to}
               onChange={setTo}

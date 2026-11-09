@@ -117,6 +117,29 @@ describe('Register Feature Component', () => {
     });
   });
 
+  it('returns a new account to the portal page it came from', async () => {
+    const assigned = captureRedirectLocation('?redirect=dash&returnTo=%2Fflow%2Fp%2F5');
+    render(<Register />);
+    fireEvent.change(screen.getByPlaceholderText(/jane doe/i), { target: { value: 'Alex Smith' } });
+    fireEvent.change(screen.getByPlaceholderText(/my coffee shop/i), {
+      target: { value: 'Acme Coffee' },
+    });
+    fireEvent.change(screen.getByPlaceholderText(/you@company.com/i), {
+      target: { value: 'alex@acme.com' },
+    });
+    const passwordInputs = screen.getAllByPlaceholderText(/characters/i);
+    fireEvent.change(passwordInputs[0], { target: { value: 'SecurePass123' } });
+    fireEvent.change(screen.getByPlaceholderText(/repeat password/i), {
+      target: { value: 'SecurePass123' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    await waitFor(() => expect(mockMutate).toHaveBeenCalledOnce());
+    (mockMutate.mock.calls[0][1] as { onSuccess: () => void }).onSuccess();
+
+    expect(assigned).toEqual(['http://localhost:5175/flow/p/5']);
+  });
+
   it.each(['constructor', 'api'])(
     'falls back to Dash for an invalid redirect app id: %s',
     async (redirect) => {

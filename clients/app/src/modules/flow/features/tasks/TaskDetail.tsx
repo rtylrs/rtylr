@@ -1,5 +1,6 @@
 import { EmptyState } from '../../../../shared/components/dash/EmptyState';
 import React, { useEffect, useRef, useState } from 'react';
+import { useMediaQuery } from '@voxire/utils';
 import { useOpenTask } from '../../shared/lib/useOpenTask';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { motion } from 'motion/react';
@@ -239,6 +240,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const { data: milestones = [] } = milestonesQuery;
   const { data: projectSections = [] } = useProjectColumns(taskProjectId ?? '');
   const { members, projects } = useFlowStore();
+  const isWide = useMediaQuery('(min-width: 1024px)');
 
   const [labelPickerOpen, setLabelPickerOpen] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -375,6 +377,114 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
     setLabelPickerOpen(false);
   };
 
+  // Status, Priority and Assignee lead the side panel on wide screens. Below
+  // lg the panel follows the whole main column, comments included, so they
+  // move up under the title instead.
+  const keyFields = (
+    <>
+      <DetailField icon={CircleDot} label={t('flow.taskDetail.status')}>
+        <FlowSelect
+          label={t('flow.taskDetail.status')}
+          value={task.status}
+          options={statuses.map((s) => ({ value: s, label: t(STATUS_LABEL_KEYS[s]) }))}
+          onChange={(value) => {
+            const next = value as Task['status'];
+            // The celebration belongs on the mutation's success path. Firing
+            // it here showed "Nice work!" next to "Failed to update task"
+            // while the status reverted and nothing was saved.
+            const justCompleted = next === 'done' && task.status !== 'done';
+            updateTask(
+              task.id,
+              { status: next },
+              justCompleted
+                ? {
+                    onSuccess: () =>
+                      toast.success(t('flowToasts.task.niceWork'), {
+                        description: t('flow.taskDetail.taskMarkedComplete'),
+                        icon: <PartyPopper size={16} />,
+                      }),
+                  }
+                : undefined
+            );
+          }}
+          disabled={!canEdit}
+        />
+
+        {/* One STATUS row, with the project's own statuses inside it.
+            These were two adjacent rows reading `STATUS: In Progress` and
+            `STATUSES: No custom status`, which is one concept presented as
+            two and a label that differed from its neighbour by a letter
+            (rtylr#1079, S-12).
+
+            Still two controls, because they are two fields with two
+            mutations: the built-in status drives the board column, the
+            project's own is a label on top of it. Each keeps its own
+            accessible name, so a screen reader announces which is which
+            rather than hearing one group called "status" twice. */}
+        {projectStatuses.length > 0 && (
+          <div className="mt-1.5">
+            <FlowSelect
+              label={t('flow.status.settingsTitle')}
+              value={task.statusId ?? ''}
+              options={[
+                { value: '', label: t('flow.status.none') },
+                ...projectStatuses.map((s) => ({ value: String(s.id), label: s.name })),
+              ]}
+              onChange={(value) => {
+                setTaskStatus.mutate({ taskId: task.id, statusId: value || '0' });
+              }}
+              disabled={!canEdit}
+              muted
+            />
+          </div>
+        )}
+      </DetailField>
+
+      <DetailField icon={Flag} label={t('flow.taskDetail.priority')}>
+        <FlowSelect
+          label={t('flow.taskDetail.priority')}
+          value={task.priority}
+          options={priorities.map((p) => ({
+            value: p,
+            label: p === 'no_priority' ? t('flow.taskDetail.noPriority') : t(`flowPriority.${p}`),
+            icon: (
+              <span aria-hidden="true">
+                <PriorityIcon priority={p} />
+              </span>
+            ),
+          }))}
+          onChange={(value) => updateTask(task.id, { priority: value as Task['priority'] })}
+          disabled={!canEdit}
+        />
+      </DetailField>
+
+      <DetailField icon={UserIcon} label={t('flow.taskDetail.assignee')}>
+        <FlowSelect
+          label={t('flow.taskDetail.assignee')}
+          value={task.assigneeId ? String(task.assigneeId) : ''}
+          leading={<AssigneeAvatar name={assignee} initials={assigneeInitials} size={18} />}
+          options={[
+            { value: '', label: t('flow.quickCreate.unassigned') },
+            ...(task.assigneeId &&
+            !members.some((member) => String(member.id) === String(task.assigneeId))
+              ? [{ value: String(task.assigneeId), label: assignee }]
+              : []),
+            ...members.map((m) => ({ value: String(m.id), label: m.name })),
+          ]}
+          onChange={(value) => {
+            const m = members.find((m) => String(m.id) === value);
+            updateTask(task.id, {
+              assigneeId: m?.id ?? '',
+              assignee: m?.name ?? '',
+              assigneeInitials: m?.initials ?? '',
+            });
+          }}
+          disabled={!canEdit}
+        />
+      </DetailField>
+    </>
+  );
+
   return (
     <div className="flow-task-detail flex h-full min-h-0 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
       <HelmetContainer title={task.title} />
@@ -493,6 +603,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
                 color: 'var(--flow-text)',
               }}
             />
+            {!isWide && <div className="mb-6">{keyFields}</div>}
             {/* Description */}
             <TaskTextField
               key={`${task.id}-description`}
@@ -625,106 +736,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           background: 'var(--flow-surface)',
         }}
       >
-        <DetailField icon={CircleDot} label={t('flow.taskDetail.status')}>
-          <FlowSelect
-            label={t('flow.taskDetail.status')}
-            value={task.status}
-            options={statuses.map((s) => ({ value: s, label: t(STATUS_LABEL_KEYS[s]) }))}
-            onChange={(value) => {
-              const next = value as Task['status'];
-              // The celebration belongs on the mutation's success path. Firing
-              // it here showed "Nice work!" next to "Failed to update task"
-              // while the status reverted and nothing was saved.
-              const justCompleted = next === 'done' && task.status !== 'done';
-              updateTask(
-                task.id,
-                { status: next },
-                justCompleted
-                  ? {
-                      onSuccess: () =>
-                        toast.success(t('flowToasts.task.niceWork'), {
-                          description: t('flow.taskDetail.taskMarkedComplete'),
-                          icon: <PartyPopper size={16} />,
-                        }),
-                    }
-                  : undefined
-              );
-            }}
-            disabled={!canEdit}
-          />
-
-          {/* One STATUS row, with the project's own statuses inside it.
-              These were two adjacent rows reading `STATUS: In Progress` and
-              `STATUSES: No custom status`, which is one concept presented as
-              two and a label that differed from its neighbour by a letter
-              (rtylr#1079, S-12).
-
-              Still two controls, because they are two fields with two
-              mutations: the built-in status drives the board column, the
-              project's own is a label on top of it. Each keeps its own
-              accessible name, so a screen reader announces which is which
-              rather than hearing one group called "status" twice. */}
-          {projectStatuses.length > 0 && (
-            <div className="mt-1.5">
-              <FlowSelect
-                label={t('flow.status.settingsTitle')}
-                value={task.statusId ?? ''}
-                options={[
-                  { value: '', label: t('flow.status.none') },
-                  ...projectStatuses.map((s) => ({ value: String(s.id), label: s.name })),
-                ]}
-                onChange={(value) => {
-                  setTaskStatus.mutate({ taskId: task.id, statusId: value || '0' });
-                }}
-                disabled={!canEdit}
-                muted
-              />
-            </div>
-          )}
-        </DetailField>
-
-        <DetailField icon={Flag} label={t('flow.taskDetail.priority')}>
-          <FlowSelect
-            label={t('flow.taskDetail.priority')}
-            value={task.priority}
-            options={priorities.map((p) => ({
-              value: p,
-              label: p === 'no_priority' ? t('flow.taskDetail.noPriority') : t(`flowPriority.${p}`),
-              icon: (
-                <span aria-hidden="true">
-                  <PriorityIcon priority={p} />
-                </span>
-              ),
-            }))}
-            onChange={(value) => updateTask(task.id, { priority: value as Task['priority'] })}
-            disabled={!canEdit}
-          />
-        </DetailField>
-
-        <DetailField icon={UserIcon} label={t('flow.taskDetail.assignee')}>
-          <FlowSelect
-            label={t('flow.taskDetail.assignee')}
-            value={task.assigneeId ? String(task.assigneeId) : ''}
-            leading={<AssigneeAvatar name={assignee} initials={assigneeInitials} size={18} />}
-            options={[
-              { value: '', label: t('flow.quickCreate.unassigned') },
-              ...(task.assigneeId &&
-              !members.some((member) => String(member.id) === String(task.assigneeId))
-                ? [{ value: String(task.assigneeId), label: assignee }]
-                : []),
-              ...members.map((m) => ({ value: String(m.id), label: m.name })),
-            ]}
-            onChange={(value) => {
-              const m = members.find((m) => String(m.id) === value);
-              updateTask(task.id, {
-                assigneeId: m?.id ?? '',
-                assignee: m?.name ?? '',
-                assigneeInitials: m?.initials ?? '',
-              });
-            }}
-            disabled={!canEdit}
-          />
-        </DetailField>
+        {isWide && keyFields}
 
         {overlappingLeave && overlappingLeave.length > 0 && (
           <div
@@ -757,20 +769,32 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
         </DetailField>
 
         <DetailField icon={Clock} label={t('flow.taskDetail.estimate')}>
-          <TaskTextField
-            type="number"
-            min={0}
-            step="any"
-            value={estimatedHours == null ? '' : String(estimatedHours)}
-            onSave={(value) => {
-              const estimate = Number(value);
-              if (Number.isFinite(estimate) && estimate >= 0) updateTask(task.id, { estimate });
-            }}
-            placeholder={t('flow.taskDetail.hours')}
-            disabled={!canEdit}
-            className="bg-transparent text-flow-meta w-full disabled:opacity-70"
-            style={{ color: 'var(--flow-text)' }}
-          />
+          {/* The unit stays beside the number: effort is picked as "30m" and
+              the estimate it fills in otherwise read as a bare "0.5". */}
+          <div className="flex w-full items-center gap-1.5">
+            <TaskTextField
+              type="number"
+              min={0}
+              step="any"
+              value={estimatedHours == null ? '' : String(estimatedHours)}
+              onSave={(value) => {
+                const estimate = Number(value);
+                if (Number.isFinite(estimate) && estimate >= 0) updateTask(task.id, { estimate });
+              }}
+              aria-label={t('flow.taskDetail.estimate')}
+              aria-describedby={`${task.id}-estimate-unit`}
+              disabled={!canEdit}
+              className="bg-transparent text-flow-meta w-16 disabled:opacity-70"
+              style={{ color: 'var(--flow-text)' }}
+            />
+            <span
+              id={`${task.id}-estimate-unit`}
+              className="text-flow-meta"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              {t('flow.taskDetail.hours')}
+            </span>
+          </div>
         </DetailField>
 
         <TimePanel
@@ -1116,6 +1140,7 @@ function TaskTextField({
   className?: string;
   style?: React.CSSProperties;
   'aria-label'?: string;
+  'aria-describedby'?: string;
 }) {
   const [draft, setDraft] = useState(value);
   const focused = useRef(false);

@@ -116,7 +116,7 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
 
   return (
     <div
-      className="flex flex-col gap-2 px-4 py-2.5 shrink-0 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-3"
+      className="flex flex-col gap-2 px-4 py-2.5 shrink-0 sm:px-5 sm:py-3 lg:flex-row lg:items-center lg:justify-between"
       style={{ borderBottom: '1px solid var(--flow-border)' }}
     >
       <div className="flex min-w-0 items-center gap-2.5">
@@ -189,11 +189,12 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
           </Link>
         )}
 
+        {/* Hidden where Flow's header carries its own + (900px and below). */}
         {canCreate && (
           <button
             type="button"
             onClick={onNewTask}
-            className="flex items-center gap-1.5 h-7 px-2.5 rounded-sm text-flow-meta font-semibold transition-opacity hover:opacity-90"
+            className="portal-flow-project-new-task flex items-center gap-1.5 h-7 px-2.5 rounded-sm text-flow-meta font-semibold transition-opacity hover:opacity-90"
             style={{ background: 'var(--flow-action-bg)', color: 'var(--flow-on-accent)' }}
           >
             <Plus size={12} strokeWidth={2.5} /> {t('flow.shell.newTask')}

@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Milestone as MilestoneIcon, Plus } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
-import { DatePicker } from '@voxire/ui';
+import FlowDatePicker from '../../shared/components/FlowDatePicker';
 import { useUserStore as useAuthUserStore } from '../../../../shared/stores/userStore';
 import { useMilestones, useCreateMilestone } from './useMilestones';
 import { canFlowPermission } from '../../shared/lib/roleUtils';
@@ -123,7 +123,7 @@ const Milestones: React.FC = () => {
   if (milestones.length === 0 && !showCreate) {
     return (
       <div className="flex flex-col h-full">
-        <HelmetContainer title={`${t('flow.milestones.heading')} · Flow`} />
+        <HelmetContainer title={`${t('flow.milestones.heading')} · rtylr`} />
         <div
           className="flex items-center justify-between px-6 py-4 shrink-0"
           style={{ borderBottom: '1px solid var(--flow-border)' }}
@@ -162,7 +162,7 @@ const Milestones: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <HelmetContainer title={`${t('flow.milestones.heading')} · Flow`} />
+      <HelmetContainer title={`${t('flow.milestones.heading')} · rtylr`} />
       <div
         className="flex items-center justify-between px-6 py-4 shrink-0"
         style={{ borderBottom: '1px solid var(--flow-border)' }}
@@ -332,7 +332,7 @@ const Milestones: React.FC = () => {
               </button>
             </div>
           )}
-          <DatePicker
+          <FlowDatePicker
             value={newDate}
             onChange={setNewDate}
             locale={i18n.language}

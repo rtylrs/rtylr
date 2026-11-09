@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MutationObserver, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import type { RealtimeEvent } from '@voxire/api';
 
@@ -22,8 +22,12 @@ vi.mock('./currentUser', () => ({
 import { useProjectRealtime } from './useProjectRealtime';
 import { getCurrentUserId } from './currentUser';
 
-function mount(projectId = 'p-1') {
+function mount(projectId = 'p-1', changedHere = false) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  if (changedHere) {
+    // A change of this tab's own, still in flight, so its echo is expected.
+    void new MutationObserver(client, { mutationFn: () => new Promise(() => {}) }).mutate();
+  }
   const spy = vi.spyOn(client, 'invalidateQueries');
   renderHook(() => useProjectRealtime(projectId), {
     wrapper: ({ children }: { children: React.ReactNode }) =>
@@ -94,10 +98,16 @@ describe('useProjectRealtime', () => {
 
   // The mutation's own onSuccess already invalidated; refetching again would
   // clobber an in-flight optimistic update.
-  it('ignores a task event the current user caused', () => {
-    const spy = mount();
+  it('ignores the current user’s event in the tab that made the change', () => {
+    const spy = mount('p-1', true);
     handler?.(event({ actor_id: 42 }));
     expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('applies the current user’s event in their other tabs', () => {
+    const spy = mount();
+    handler?.(event({ actor_id: 42 }));
+    expect(keys(spy)).toContain(JSON.stringify(['tasks']));
   });
 
   it('does not invalidate my-tasks for project-only events', () => {

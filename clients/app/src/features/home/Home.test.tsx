@@ -18,6 +18,23 @@ describe('Portal Home', () => {
   beforeEach(() => {
     useUserStore.setState({ user: null });
     useCommandPalette.setState({ open: false });
+    localStorage.clear();
+    // These users have been here before; the first-visit greeting has its own tests.
+    localStorage.setItem('portal:greeted:1', '1');
+    localStorage.setItem('portal:greeted:2', '1');
+  });
+
+  // A brand-new account was greeted with "Welcome back" on its first visit.
+  it('welcomes a user who has not been greeted here before, then welcomes them back', () => {
+    useUserStore.setState({
+      user: { id: 7, fullName: 'Robin New', effectiveAccess: createEffectiveAccess('flow') },
+    });
+    const first = render(<Home />);
+    expect(screen.getByRole('heading', { name: 'Welcome, Robin' })).toBeVisible();
+    first.unmount();
+
+    render(<Home />);
+    expect(screen.getByRole('heading', { name: 'Welcome back, Robin' })).toBeVisible();
   });
   it.each([{ isOwner: true }, { isAdmin: true }])(
     'offers team and groups to a manager %j',

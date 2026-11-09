@@ -315,6 +315,7 @@
     "accessDeniedDescription": "Ask your business owner or an admin to update your permissions.",
     "backHome": "Back to Home",
     "welcome": "Welcome back, {{name}}",
+    "welcomeFirst": "Welcome, {{name}}",
     "welcomeDescription": "Your business, in one place.",
     "search": "Search apps, pages and actions…",
     "shortcuts": "Shortcuts",

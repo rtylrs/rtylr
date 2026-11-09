@@ -36,7 +36,7 @@ if (rootElement) {
         <CookiesProvider>
           <Suspense fallback={<FullScreenLoader />}>
             <I18nextProvider i18n={i18next}>
-              <HelmetContainer title="Portal - RTYLR" favicon="/favicon.ico" />
+              <HelmetContainer title="Portal · rtylr" favicon="/favicon.ico" />
               <CookieBanner />
               <RouterProvider router={router} />
               <Toaster expand={false} richColors />

@@ -318,6 +318,7 @@
     "accessDeniedDescription": "Demandez au propriétaire ou à un administrateur de modifier vos autorisations.",
     "backHome": "Retour à l’accueil",
     "welcome": "Bon retour, {{name}}",
+    "welcomeFirst": "Bienvenue, {{name}}",
     "welcomeDescription": "Votre entreprise, au même endroit.",
     "search": "Rechercher des applications, des pages et des actions…",
     "shortcuts": "Raccourcis",

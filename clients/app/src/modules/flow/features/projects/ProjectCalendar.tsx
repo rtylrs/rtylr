@@ -14,6 +14,7 @@ import { useCurrentProject } from './useCurrentProject';
 import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { monthCells, tasksByLocalDay, agendaDays } from '../../shared/lib/monthGrid';
+import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
 import { CalendarAgenda } from '../../shared/components/CalendarAgenda';
 import { todayIso } from '../../shared/lib/dateUtils';
 
@@ -64,8 +65,9 @@ const ProjectCalendar: React.FC = () => {
     return d;
   });
 
+  const weekStart = useTimeSettingsStore((s) => s.weekStart);
   const { cells, weekCount, monthLabel } = useMemo(() => {
-    const all = monthCells(cursor);
+    const all = monthCells(cursor, weekStart);
     return {
       cells: all,
       weekCount: all.length / 7,
@@ -77,23 +79,23 @@ const ProjectCalendar: React.FC = () => {
         year: 'numeric',
       }),
     };
-  }, [cursor, i18n.language]);
+  }, [cursor, i18n.language, weekStart]);
 
   const tasksByDay = useMemo(() => tasksByLocalDay(apiTasks), [apiTasks]);
 
   const agenda = useMemo(() => agendaDays(cells, tasksByDay), [cells, tasksByDay]);
 
-  // Built from Intl rather than hardcoded English. The grid's first column is
-  // Sunday, so the names are generated from a known Sunday; which day the week
-  // starts on is unchanged, only the language of the labels. Declared here,
-  // above the early returns below, because a hook has to run on every render.
+  // Built from Intl rather than hardcoded English, starting from a known Sunday
+  // (4 Jan 2026) or the Monday after it to match the grid's first column.
+  // Declared here, above the early returns below, because a hook has to run on
+  // every render.
   const weekdays = useMemo(() => {
     const formatter = new Intl.DateTimeFormat(i18n.language, { weekday: 'short' });
-    const knownSunday = new Date(2026, 0, 4);
+    const first = weekStart === 'monday' ? 5 : 4;
     return Array.from({ length: 7 }, (_, offset) =>
-      formatter.format(new Date(2026, 0, knownSunday.getDate() + offset))
+      formatter.format(new Date(2026, 0, first + offset))
     );
-  }, [i18n.language]);
+  }, [i18n.language, weekStart]);
 
   if (projectLoading && !project) {
     return (

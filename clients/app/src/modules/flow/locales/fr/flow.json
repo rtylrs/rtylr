@@ -614,7 +614,6 @@
     "groupByLabel": "Grouper :",
     "addTask": "Ajouter une tâche",
     "emptyColumn": "Rien ici pour le moment.",
-    "emptyLane": "Aucune",
     "deleteColumn": "Supprimer la colonne"
   },
   "views": {
@@ -754,7 +753,12 @@
     "createFirst": "Créer le premier cycle",
     "project": "Projet",
     "noProjects": "Aucun projet pour le moment",
-    "newCycleGate": "Un cycle appartient à un projet, et cette entreprise n'en a encore aucun. Créez d'abord un projet."
+    "newCycleGate": "Un cycle appartient à un projet, et cette entreprise n'en a encore aucun. Créez d'abord un projet.",
+    "status": {
+      "active": "En cours",
+      "upcoming": "À venir",
+      "completed": "Terminé"
+    }
   },
   "myIssues": {
     "buckets": {
@@ -1025,7 +1029,7 @@
   },
   "projectSelect": {
     "placeholder": "Choisir un projet",
-    "personal": "Tâches personnelles"
+    "personal": "Mes tâches"
   },
   "start": {
     "title": "Créer dans Work",

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { resolveAppUrl } from '@voxire/config';
 import { useTranslation } from 'react-i18next';
@@ -17,9 +18,31 @@ const shortcuts = [
   { path: '/settings/account', key: 'account', description: 'accountDescription', icon: Settings },
 ] as const;
 
+/** Remembers, per browser, that a user has seen Home, so only the first visit says "Welcome". */
+const greetedKey = (userId: unknown): string => `portal:greeted:${String(userId)}`;
+
+function hasBeenGreeted(userId: unknown): boolean {
+  if (userId === undefined || userId === null) return true;
+  try {
+    return localStorage.getItem(greetedKey(userId)) !== null;
+  } catch {
+    return true;
+  }
+}
+
 export default function Home() {
   const { t } = useTranslation();
   const { user } = useUserStore();
+  // Read once, before this visit marks the user greeted below.
+  const [firstVisit] = useState(() => !hasBeenGreeted(user?.id));
+  useEffect(() => {
+    if (user?.id === undefined || user?.id === null) return;
+    try {
+      localStorage.setItem(greetedKey(user.id), '1');
+    } catch {
+      // Without storage every visit is a return visit, which is the old greeting.
+    }
+  }, [user?.id]);
   const setPaletteOpen = useCommandPalette((state) => state.setOpen);
   const visibleApps = WORKSPACE_APP_IDS.filter((id) =>
     user?.effectiveAccess?.apps.some((app) => app.appId === id && app.licensed && app.hasAccess)
@@ -29,7 +52,7 @@ export default function Home() {
       <div className="portal-home-intro">
         <p>{user?.businessName}</p>
         <h1>
-          {t('common.portal.welcome', {
+          {t(firstVisit ? 'common.portal.welcomeFirst' : 'common.portal.welcome', {
             name: user?.fullName?.split(' ')[0] || t('common.portal.home'),
           })}
         </h1>

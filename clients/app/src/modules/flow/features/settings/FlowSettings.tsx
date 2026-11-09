@@ -576,7 +576,7 @@ const FlowSettings: React.FC = () => {
 
   return (
     <div className="portal-flow-settings portal-app-settings">
-      <HelmetContainer title={`${t('flowNav.settings')} · Flow`} />
+      <HelmetContainer title={`${t('flowNav.settings')} · rtylr`} />
       <div className="max-w-2xl">
         <ActiveComponent />
       </div>
