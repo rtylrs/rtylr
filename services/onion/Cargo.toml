@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/core", "crates/contracts", "tools/route-dump", "tools/spike"]
+members = ["crates/core", "crates/contracts", "crates/media-engine", "tools/route-dump", "tools/spike"]
 
 [profile.dev]
 debug = 0
