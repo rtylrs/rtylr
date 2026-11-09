@@ -1,0 +1,16 @@
+[package]
+name = "api"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "api"
+path = "src/main.rs"
+
+[dependencies]
+axum = "0.8"
+base64 = "0.22"
+onion-core = { package = "onion-core", path = "../../crates/core" }
+serde_json = "1"
+server = { path = "../../crates/server" }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time", "signal"] }

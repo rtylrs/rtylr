@@ -62,6 +62,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "api"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "base64 0.22.1",
+ "onion-core",
+ "serde_json",
+ "server",
+ "tokio",
+]
+
+[[package]]
 name = "arc-swap"
 version = "1.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3046,7 +3058,10 @@ name = "server"
 version = "0.1.0"
 dependencies = [
  "auth",
+ "axum",
+ "db",
  "onion-core",
+ "realtime",
  "serde",
  "serde_json",
  "thiserror 1.0.69",
@@ -4202,6 +4217,17 @@ dependencies = [
  "group",
  "hybrid-array",
  "primefield",
+]
+
+[[package]]
+name = "worker"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "db",
+ "onion-core",
+ "server",
+ "tokio",
 ]
 
 [[package]]

@@ -41,6 +41,15 @@ pub struct SecurityRateLimiter {
     requests: Mutex<HashMap<String, Vec<Instant>>>,
 }
 
+impl std::fmt::Debug for SecurityRateLimiter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("SecurityRateLimiter")
+            .field("limit", &self.limit)
+            .field("window", &self.window)
+            .finish()
+    }
+}
+
 impl SecurityRateLimiter {
     pub fn new(limit: usize, window: Duration) -> Self {
         Self {

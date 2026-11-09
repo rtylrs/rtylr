@@ -22,6 +22,17 @@ impl BuildInfo {
             build_time: "unknown".to_string(),
         }
     }
+
+    /// Read build identity from compile-time env (`option_env!`,
+    /// matching Go's `-ldflags` injection; Docker build args set
+    /// `VERSION`, `COMMIT`, `BUILD_TIME` for the build).
+    pub fn from_build_env() -> Self {
+        Self {
+            version: option_env!("VERSION").unwrap_or("dev").to_string(),
+            commit: option_env!("COMMIT").unwrap_or("unknown").to_string(),
+            build_time: option_env!("BUILD_TIME").unwrap_or("unknown").to_string(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

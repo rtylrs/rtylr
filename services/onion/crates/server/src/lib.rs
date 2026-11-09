@@ -10,7 +10,9 @@ pub mod errorwriter;
 pub mod headers;
 pub mod limits;
 pub mod partials;
+pub mod probe;
 pub mod ratelimit;
+pub mod state;
 pub mod version;
 
 /// Workspace crate version, surfaced in CI and version checks.
