@@ -2,6 +2,8 @@ module github.com/voxire/onion
 
 go 1.26.0
 
+toolchain go1.27.3
+
 require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/allegro/bigcache/v3 v3.1.0

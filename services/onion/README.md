@@ -13,7 +13,7 @@ Onion is a full-featured backend framework that provides everything you need to 
 
 ## 📋 Prerequisites
 
-- **Go 1.26+**
+- **Go 1.26+**. `go.mod` pins the 1.27 toolchain the Docker image uses, and `go` fetches it on first build; the generated contracts need its `encoding/json/v2`.
 - **MySQL-compatible database**. Local dev uses Percona Server 5.7.23 to match the current HostGator database.
 - **Docker** for the optional local development environment.
 - `mysql` and `mysqladmin` available locally if you run database scripts from your machine.
@@ -45,7 +45,9 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@v2.1.6
 make local-env-up
 
 # Copy .env.example to .env if needed. The local Docker environment
-# matches the DB_* defaults in .env.example.
+# matches the DB_* defaults in .env.example. If another MySQL already holds
+# port 3306, run `ONION_DB_HOST_PORT=3307 make local-env-up` and set
+# DB_PORT=3307 in .env (and ONION_TEST_DB_PORT=3307 for `make test-db`).
 # Set FLOCI_ENABLED=true to route object storage through Floci.
 
 # Validate database connectivity and run local setup checks

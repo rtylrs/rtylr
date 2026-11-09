@@ -17,7 +17,9 @@ services:
       timeout: 20s
       retries: 60
     ports:
-      - "3306:3306"
+      # Another MySQL on 3306? Start with ONION_DB_HOST_PORT=3307 and set
+      # DB_PORT=3307 (and ONION_TEST_DB_PORT=3307 for make test-db) to match.
+      - "${ONION_DB_HOST_PORT:-3306}:3306"
     volumes:
       - onion_mysql:/var/lib/mysql
 
