@@ -289,7 +289,7 @@ const Calendar = ({
           type="button"
           onClick={() => goToMonth(-1)}
           aria-label={labels?.previousMonth ?? "Previous month"}
-          className="flex h-8 w-8 items-center justify-center rounded-md text-muted hover:bg-muted/15 hover:text-inherit"
+          className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/15 hover:text-inherit"
         >
           <ChevronLeft size={16} className="rtl:rotate-180" />
         </button>
@@ -298,14 +298,17 @@ const Calendar = ({
           type="button"
           onClick={() => goToMonth(1)}
           aria-label={labels?.nextMonth ?? "Next month"}
-          className="flex h-8 w-8 items-center justify-center rounded-md text-muted hover:bg-muted/15 hover:text-inherit"
+          className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/15 hover:text-inherit"
         >
           <ChevronRight size={16} className="rtl:rotate-180" />
         </button>
       </div>
       <div className="grid grid-cols-7 gap-y-0.5 text-center">
         {weekdays.map((label, i) => (
-          <span key={i} className="py-1 text-[11px] font-medium text-muted">
+          <span
+            key={i}
+            className="py-1 text-[11px] font-medium text-muted-foreground"
+          >
             {label}
           </span>
         ))}
