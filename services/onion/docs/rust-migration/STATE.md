@@ -50,7 +50,7 @@ Status values: `todo`, `in-progress`, `blocked`, `done`. Put commit hashes and b
 | emailtest | | todo | |
 | aiquota | | todo | |
 | aiquery | | todo | |
-| activity | | todo | |
+| activity | | done | crates/modules/activity: domain ActivityLog/ActivityPage; Service.list_activity (cache key `activity:<b>:<app>:<limit>:<offset>`, 1min TTL); facts validation (`entity_mutated` only, id/business/subject identity, auditApps {erp,pos,hub} + non-empty action, nullableJSON null→NULL); queries from sqlc; 7 tests pass |
 | hub_menu | | todo | |
 | websitelead | | todo | |
 | automations | | todo | |
