@@ -1,0 +1,5 @@
+//!! Converted by `tools/sqlc2sqlx` from `internal/modules/erp/inventory/internal/pos_stock/infrastructure/persistence/sqlc`.
+//!! Queries are the exact Go persistence SQL; application/domain
+//!! layers land in Phase 3 module order.
+
+pub mod queries;

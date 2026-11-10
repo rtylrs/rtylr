@@ -3,6 +3,14 @@
 version = 4
 
 [[package]]
+name = "activity"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
 name = "aead"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -171,6 +179,14 @@ name = "autocfg"
 version = "1.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
+
+[[package]]
+name = "automations"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
 
 [[package]]
 name = "aws-config"
@@ -760,6 +776,70 @@ dependencies = [
 ]
 
 [[package]]
+name = "booking"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "booking_appointments"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "booking_calendar"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "booking_dashboard"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "booking_reminders"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "booking_resources"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "booking_services"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "booking_waitlist"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.20.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -785,6 +865,22 @@ checksum = "7dafe3a8757b027e2be6e4e5601ed563c55989fcf1546e933c66c8eb3a058d35"
 dependencies = [
  "bytes",
  "either",
+]
+
+[[package]]
+name = "caret_buddy"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "caret_memory"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
 ]
 
 [[package]]
@@ -980,6 +1076,78 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5f97d3416d5337d15c4b0d78c8c91df922ca143f57ec20e2d1c188333047ef04"
 dependencies = [
  "cfg-if",
+]
+
+[[package]]
+name = "crm"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "crm_campaigns"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "crm_crm_sales"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "crm_crm_settings"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "crm_customers"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "crm_feedback"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "crm_loyalty"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "crm_segments"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "crm_templates"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
 ]
 
 [[package]]
@@ -1237,6 +1405,158 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "00d174d5400e5e8fd687ad1049e2f578285fa914201b1af7e8b112a4546bd826"
 
 [[package]]
+name = "erp"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "erp_2"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "erp_brands"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "erp_categories"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "erp_erp_settings"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "erp_inventory"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "erp_inventory_2"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "erp_onlineorders"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "erp_price_lists"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "erp_products"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "erp_products_internal_catalog"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "erp_purchase_orders"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "erp_stock_takes"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "erp_stock_transfers"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "erp_store_categories"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "erp_store_products"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "erp_suppliers"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "erp_variants"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "erp_warehouses"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
 name = "errno"
 version = "0.3.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1300,10 +1620,146 @@ dependencies = [
 ]
 
 [[package]]
+name = "finance"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "finance_accounts"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "finance_bank_accounts"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "finance_bills"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "finance_expenses"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "finance_finance_bank_feeds"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "finance_finance_reconciliation"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "finance_finance_reports"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "finance_internal_invoicenumber_persistence_sqlc"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "finance_invoices"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "finance_journal"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "finance_quotes"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "finance_recurring_invoices"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "finance_tax"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
 name = "find-msvc-tools"
 version = "0.1.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1c66915cc5391097de7a2b0b972e8505aa33c0df401fd3a6811dbdb32881ba48"
+
+[[package]]
+name = "flow_insights"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "flow_references_internal_persistence_sqlc"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "flow_workspaces"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
 
 [[package]]
 name = "flume"
@@ -1628,6 +2084,198 @@ dependencies = [
 ]
 
 [[package]]
+name = "hr_benefits"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_departments"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_documents"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_hr_attendance"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_hr_core"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_hr_dashboard"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_hr_documents"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_hr_equipment"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_hr_leave"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_hr_onboarding"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_hr_overtime"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_hr_payroll"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_hr_performance"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_hr_reports"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_hr_setup"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_hr_shifts"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_hr_time"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_one_on_ones"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_payroll"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_reviews"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_staff"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_time_off"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_timesheets"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "hr_training"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
 name = "http"
 version = "0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1693,6 +2341,14 @@ name = "httpdate"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df3b46402a9d5adb4c86a0cf463f42e19994e3ee891101b1841f30a545cb49a9"
+
+[[package]]
+name = "hub_menu"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
 
 [[package]]
 name = "hybrid-array"
@@ -1972,6 +2628,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "insights"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
 name = "integrations"
 version = "0.1.0"
 dependencies = [
@@ -2179,6 +2843,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "module_integrations"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
 name = "nom"
 version = "7.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2186,6 +2858,14 @@ checksum = "d273983c5a657a70a3e8f2a01329822f3b8c8172b73826411a55751e404a0a4a"
 dependencies = [
  "memchr",
  "minimal-lexical",
+]
+
+[[package]]
+name = "notifications"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
 ]
 
 [[package]]
@@ -2286,6 +2966,126 @@ name = "openssl-probe"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7e036b411754132fd6b74e94b74e9a13c5cf606fa93d1885c35860d3060820b1"
+
+[[package]]
+name = "organization_addons"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "organization_api_keys"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "organization_apps"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "organization_business"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "organization_config"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "organization_console"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "organization_custom_domains"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "organization_featuresupport"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "organization_oauth"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "organization_scopes_internal_persistence_sqlc"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "organization_security"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "organization_subscriptions"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "organization_team"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "organization_team_2"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "organization_user"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
 
 [[package]]
 name = "outref"
@@ -2437,6 +3237,182 @@ dependencies = [
  "cpufeatures 0.2.17",
  "opaque-debug",
  "universal-hash",
+]
+
+[[package]]
+name = "portal"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "pos"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "pos_audit"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "pos_cashmovements"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "pos_combos"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "pos_daysummary"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "pos_floors"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "pos_giftcards"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "pos_kds"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "pos_locations"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "pos_loyalty"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "pos_manager"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "pos_memberlocations"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "pos_modifiers"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "pos_orders"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "pos_receipts"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "pos_references_internal_persistence_sqlc"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "pos_sessions"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "pos_settings"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "pos_tables"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "pos_terminals"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "pos_users"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
 ]
 
 [[package]]
@@ -2635,6 +3611,22 @@ dependencies = [
  "serde_json",
  "thiserror 1.0.69",
  "tokio",
+]
+
+[[package]]
+name = "recruit_careers"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "recruit_voxhire"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
 ]
 
 [[package]]
@@ -3468,6 +4460,54 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
 
 [[package]]
+name = "store"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "store_checkout"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "store_payments"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "store_shipping"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "store_storefronts"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "store_themes"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
 name = "stringprep"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3483,6 +4523,62 @@ name = "subtle"
 version = "2.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
+
+[[package]]
+name = "support"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "support_canned"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "support_customers"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "support_inbox"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "support_knowledge"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "support_settings"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
+name = "support_tickets"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
 
 [[package]]
 name = "syn"
@@ -3992,6 +5088,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "webhooks"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
+]
+
+[[package]]
 name = "webpki-roots"
 version = "0.26.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4007,6 +5111,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f5f280bbb2b287bc8e7de7e3852945a0ff50d1bbcb5ed42b6c7a568c546df171"
 dependencies = [
  "rustls-pki-types",
+]
+
+[[package]]
+name = "websitelead"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sqlx",
 ]
 
 [[package]]

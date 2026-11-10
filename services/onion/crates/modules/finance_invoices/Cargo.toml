@@ -1,0 +1,8 @@
+[package]
+name = "finance_invoices"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+chrono = { version = "0.4", features = ["serde"] }
+sqlx = { version = "0.8", features = ["mysql", "runtime-tokio-rustls", "tls-rustls", "chrono"] }

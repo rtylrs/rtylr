@@ -62,24 +62,43 @@ fn read(path: &Path) -> Result<String, String> {
     std::fs::read_to_string(path).map_err(|e| format!("read {}: {e}", path.display()))
 }
 
-/// Extract `const name = \`...\`` SQL blocks from one Go file.
+/// Extract `const name = \`...\`` SQL blocks from one Go file,
+/// including string-concat quoting: `...` + "`" + `...` + "`" + ...
+/// expressions.
 fn extract_consts(source: &str) -> Vec<(String, String)> {
     let mut out = Vec::new();
     let mut rest = source;
     while let Some(start) = rest.find("const ") {
         let after = &rest[start + 6..];
-        let Some((name, _)) = after.split_once('=') else {
+        let Some(eq) = after.find('=') else { break };
+        let name = after[..eq].trim();
+        if name.is_empty() || !name.chars().all(|c| c.is_alphanumeric() || c == '_') {
             break;
-        };
-        let name = name.trim();
-        let tail = after.split_once('=').map(|(_, tail)| tail).unwrap_or("");
-        let Some((sql, _)) = tail
-            .split_once("`")
-            .and_then(|(_, tail)| tail.split_once('`'))
-        else {
+        }
+        let mut tail = after[eq + 1..].trim_start();
+        let mut sql = String::new();
+        loop {
+            if let Some(stripped) = tail.strip_prefix('`') {
+                let Some(end) = stripped.find('`') else { break };
+                sql.push_str(&stripped[..end]);
+                tail = stripped[end + 1..].trim_start();
+            } else if let Some(stripped) = tail.strip_prefix('"') {
+                let Some(end) = stripped.find('"') else { break };
+                sql.push_str(&stripped[..end]);
+                tail = stripped[end + 1..].trim_start();
+            } else {
+                break;
+            }
+            if let Some(next) = tail.strip_prefix('+') {
+                tail = next.trim_start();
+            } else {
+                break;
+            }
+        }
+        if sql.is_empty() {
             break;
-        };
-        out.push((name.to_string(), sql.to_string()));
+        }
+        out.push((name.to_string(), sql));
         rest = tail;
     }
     out
@@ -162,7 +181,24 @@ fn rust_type(go_type: &str) -> String {
         "bool" => "bool".into(),
         "string" => "String".into(),
         "time.Time" => "chrono::NaiveDate".into(),
-        "float64" => "f64".into(),
+        "float64" | "float32" => "f64".into(),
+        // `interface {}` is resolved per-field below (context, not
+        // blindly boolean).
+        "interface {}" | "any" | "interface{}" => "String".into(),
+        "sql.NullBool" => "Option<bool>".into(),
+        "sql.NullString" => "Option<String>".into(),
+        "sql.NullInt64" | "sql.NullInt" => "Option<i64>".into(),
+        "sql.NullInt32" => "Option<i32>".into(),
+        "sql.NullInt16" => "Option<i16>".into(),
+        "sql.NullFloat" | "sql.NullFloat64" => "Option<f64>".into(),
+        "sql.NullTime" => "Option<chrono::DateTime<chrono::Utc>>".into(),
+        "uint64" => "u64".into(),
+        "uint8" => "u8".into(),
+        "int8" => "i8".into(),
+        "json.RawMessage" => "String".into(),
+        other if other.starts_with("[]") => {
+            format!("Vec<{}>", rust_type(&other[2..]))
+        }
         _ => "String".into(),
     }
 }
@@ -178,27 +214,42 @@ fn rust_type_for(field: &Field) -> String {
     }
 }
 
+/// `/*SLICE:name*/?` markers in SQL → the field names used as slices.
+/// (`IN` list expansion: the count varies at runtime.)
+fn slice_fields(sql: &str) -> Vec<String> {
+    let mut out = Vec::new();
+    let mut rest = sql;
+    while let Some(start) = rest.find("/*SLICE:") {
+        let tail = &rest[start + "/*SLICE:".len()..];
+        let Some(end) = tail.find('*') else { break };
+        out.push(tail[..end].to_string());
+        rest = &tail[end..];
+    }
+    out
+}
+
 /// `QueryRowContext(...)` / `ExecContext(...)` calls with bare
 /// identifiers (Go scalar-arg queries with no Params struct, e.g.
-/// `QueryRowContext(ctx, getQuotaMode, businessID)`).
+/// `QueryRowContext(ctx, getQuotaMode, businessID)`). The first arg
+/// after `ctx` is always the SQL const text; everything after that is
+/// a parameter.
 fn body_bare_params(source: &str, name: &str) -> Vec<Field> {
     let marker = format!("func (q *Queries) {name}(");
     let Some(start) = source.find(&marker) else {
         return Vec::new();
     };
-    let mut depth = 0usize;
+    let Some(open) = source[start..].find("{\n") else {
+        return Vec::new();
+    };
+    let mut depth = 1usize;
     let mut end = source.len();
-    let mut opened = false;
-    for (i, ch) in source[start..].char_indices() {
+    for (i, ch) in source[start + open + 1..].char_indices() {
         match ch {
-            '{' => {
-                depth += 1;
-                opened = true;
-            }
+            '{' => depth += 1,
             '}' => {
                 depth -= 1;
-                if opened && depth == 0 {
-                    end = start + i;
+                if depth == 0 {
+                    end = start + open + 1 + i;
                     break;
                 }
             }
@@ -213,19 +264,20 @@ fn body_bare_params(source: &str, name: &str) -> Vec<Field> {
             let tail = &rest[idx + prefix.len()..];
             let Some(paren) = tail.find(')') else { break };
             let args_text = &tail[..paren];
-            // Drop `ctx, <constName>, ` preamble.
+            // Drop `ctx, <constName>` preamble: ctx first, then the SQL
+            // const. The remaining identifiers are parameters.
             let args_text = args_text.strip_prefix("ctx, ").unwrap_or(args_text);
             let args_text = args_text
                 .split_once(',')
                 .map(|(_, tail)| tail)
-                .unwrap_or(args_text);
+                .unwrap_or("");
             for arg in args_text.split(',') {
                 let arg = arg.trim();
-                if arg.starts_with("arg.") || !arg.chars().all(|c| c.is_alphanumeric() || c == '_')
-                {
+                if arg.is_empty() {
                     continue;
                 }
-                if arg.is_empty() {
+                if arg.starts_with("arg.") || !arg.chars().all(|c| c.is_alphanumeric() || c == '_')
+                {
                     continue;
                 }
                 // Only single-name params (no struct) land here.
@@ -237,6 +289,41 @@ fn body_bare_params(source: &str, name: &str) -> Vec<Field> {
             }
             rest = &tail[paren..];
         }
+    }
+    out
+}
+
+/// Signature params: `func (q *Queries) Name(ctx context.Context,
+/// arg1 T1, arg2 T2) ...` without the receiver, ctx, or returns.
+fn signature_params(source: &str, name: &str) -> Vec<Field> {
+    let marker = format!("func (q *Queries) {name}(");
+    let Some(start) = source.find(&marker) else {
+        return Vec::new();
+    };
+    let head = &source[start + marker.len()..];
+    let Some(close) = head.find(')') else {
+        return Vec::new();
+    };
+    let head = &head[..close];
+    let mut out = Vec::new();
+    for part in head.split(',') {
+        let part = part.trim();
+        if part.starts_with("ctx") {
+            continue;
+        }
+        let mut pieces = part.split_whitespace();
+        let Some(param) = pieces.next() else { continue };
+        let Some(go_type) = pieces.next() else {
+            continue;
+        };
+        if param == "arg" {
+            continue;
+        }
+        out.push(Field {
+            name: param.to_string(),
+            go_type: go_type.to_string(),
+            db: snake(param),
+        });
     }
     out
 }
@@ -274,7 +361,21 @@ fn snake(name: &str) -> String {
             out.push(ch);
         }
     }
-    out
+    rust_ident(&out)
+}
+
+/// Escape Rust strict keywords (`type` is common in POS/EAN fields).
+fn rust_ident(name: &str) -> String {
+    match name {
+        "type" | "move" | "ref" | "self" | "Self" | "super" | "crate" | "struct" | "enum"
+        | "fn" | "let" | "mut" | "const" | "static" | "trait" | "impl" | "where" | "loop"
+        | "async" | "await" | "use" | "pub" | "mod" | "if" | "else" | "match" | "for" | "while"
+        | "return" | "break" | "continue" | "in" | "become" | "box" | "do" | "final" | "macro"
+        | "override" | "priv" | "typeof" | "unsized" | "virtual" | "yield" | "try" | "abstract" => {
+            format!("r#{name}")
+        }
+        _ => name.to_string(),
+    }
 }
 
 /// Strip leading `-- name: ...` comment lines from converted SQL.
@@ -287,7 +388,19 @@ fn strip_query_name(sql: &str) -> String {
 }
 
 fn convert(module_dir: &Path) -> Result<BTreeMap<String, Query>, String> {
-    let sqlc_dir = module_dir.join("internal/infrastructure/persistence/sqlc");
+    // Accept either a module dir (suffix appended) or a path that
+    // already ends in a sqlc package directory.
+    let sqlc_dir = if module_dir.ends_with("sqlc")
+        || module_dir
+            .components()
+            .next_back()
+            .map(|c| c.as_os_str() == "sqlc")
+            .unwrap_or(false)
+    {
+        module_dir.to_path_buf()
+    } else {
+        module_dir.join("internal/infrastructure/persistence/sqlc")
+    };
     let mut queries = BTreeMap::new();
     let mut files = Vec::new();
     for entry in
@@ -325,6 +438,11 @@ fn convert(module_dir: &Path) -> Result<BTreeMap<String, Query>, String> {
                     .collect()
             };
             if fields.is_empty() {
+                // No Params struct and no per-field binds: the function
+                // signature carries exact Go types.
+                fields = signature_params(&source, &name);
+            }
+            if fields.is_empty() {
                 // Scalar-arg query (QueryRowContext with no Params
                 // struct): bind the bare identifier as a param.
                 let bare = body_bare_params(&source, &name);
@@ -354,19 +472,22 @@ fn body_binds(source: &str, name: &str) -> Vec<String> {
     let Some(start) = source.find(&marker) else {
         return Vec::new();
     };
-    let mut depth = 0usize;
+    let rest = &source[start..];
+    let Some(open) = rest.find(
+        "{
+",
+    ) else {
+        return Vec::new();
+    };
+    let mut depth = 1usize;
     let mut end = source.len();
-    let mut opened = false;
-    for (i, ch) in source[start..].char_indices() {
+    for (i, ch) in rest[open + 2..].char_indices() {
         match ch {
-            '{' => {
-                depth += 1;
-                opened = true;
-            }
+            '{' => depth += 1,
             '}' => {
                 depth -= 1;
-                if opened && depth == 0 {
-                    end = start + i;
+                if depth == 0 {
+                    end = start + open + 2 + i;
                     break;
                 }
             }
@@ -423,19 +544,76 @@ fn emit(queries: &BTreeMap<String, Query>) -> String {
             }
             out.push_str("}\n\n");
         }
-        let cleaned = strip_query_name(&query.sql)
-            .replace("sqlc.arg('", "?")
-            .replace("')", "");
+        let mut cleaned = strip_query_name(&query.sql);
+        // Replace whole `sqlc.arg('name')` tokens with `?` (never every
+        // `')` in the statement).
+        let mut sql_buf = String::with_capacity(cleaned.len());
+        while let Some(start) = cleaned.find("sqlc.arg('") {
+            sql_buf.push_str(&cleaned[..start]);
+            let tail = &cleaned[start + "sqlc.arg('".len()..];
+            let Some(end) = tail.find("')") else {
+                sql_buf.push_str(tail);
+                cleaned = String::new();
+                break;
+            };
+            sql_buf.push('?');
+            cleaned = tail[end + 2..].to_string();
+        }
+        sql_buf.push_str(&cleaned);
+        let cleaned = sql_buf;
         let sql_json = serde_json::to_string(&cleaned).unwrap_or_else(|_| "\"\"".into());
-        // `fields` are already stored in bind order by `convert`
-        // (function-body `arg.<Field>` occurrences, repeats included).
+        // Overrides for slice expansion queries (`/*SLICE:name*/?`).
+        let slices = slice_fields(cleaned.as_str());
+        let sql_template = slices.iter().fold(cleaned.clone(), |acc, slice| {
+            let marker = format!("{{SLICE:{slice}}}");
+            let token = format!("/*SLICE:{slice}*/?");
+            acc.replace(&token, &marker)
+        });
+        let sql_template_literal = format!("{:?}", sql_template);
+        let slice_call = if slices.is_empty() {
+            String::new()
+        } else {
+            // Each slice expands to `?` per element (Go sqlc
+            // semantics; empty slice → `NULL`).
+            let mut expansion = String::new();
+            for slice in &slices {
+                let snake_name = snake(slice);
+                let marker = format!("{{SLICE:{slice}}}");
+                expansion.push_str(&format!(
+                    "
+                if params.{snake_name}.is_empty() {{ sql_template = sql_template.replace(\"{marker}\", \"NULL\"); }} else {{ sql_template = sql_template.replace(\"{marker}\", &std::iter::repeat_n(\"?\", params.{snake_name}.len()).collect::<Vec<_>>().join(\",\")); }}",
+                    snake_name = snake_name,
+                    marker = marker
+                ));
+            }
+            format!(
+                "let mut sql_template: String = {sql_template_literal}.to_string();
+                {expansion}
+                let query = sqlx::query(&sql_template);"
+            )
+        };
         let bind_chain = query
             .fields
             .iter()
+            .filter(|field| !slices.contains(&snake(&field.name)))
             .map(|field| {
                 // Copy types bind by value; the rest by ref.
                 let access = match rust_type_for(field).as_str() {
-                    "i64" | "i32" | "bool" | "chrono::NaiveDate" => {
+                    "i64"
+                    | "i32"
+                    | "bool"
+                    | "f64"
+                    | "chrono::NaiveDate"
+                    | "chrono::DateTime<chrono::Utc>"
+                    | "Option<i64>"
+                    | "Option<f64>"
+                    | "Option<bool>"
+                    | "Option<chrono::DateTime<chrono::Utc>>"
+                    | "Option<i32>"
+                    | "Option<i16>"
+                    | "u64"
+                    | "u8"
+                    | "i8" => {
                         format!("params.{}", snake(&field.name))
                     }
                     _ => format!("&params.{}", snake(&field.name)),
@@ -465,7 +643,7 @@ fn emit(queries: &BTreeMap<String, Query>) -> String {
 }}"
                 ),
             }
-        } else {
+        } else if slices.is_empty() {
             match kind {
                 "one" => format!(
                     "pub async fn {fn_name}<'e, E: sqlx::Executor<'e, Database = MySql>>(
@@ -492,8 +670,70 @@ fn emit(queries: &BTreeMap<String, Query>) -> String {
                     name = query.name
                 ),
             }
+        } else {
+            // Slice expansion: placeholders are built at runtime.
+            let fetch = match kind {
+                "one" => ".fetch_optional(exec)",
+                _ => ".execute(exec)",
+            };
+            let ret_ty = match kind {
+                "one" => "Result<Option<sqlx::mysql::MySqlRow>, sqlx::Error>",
+                _ => "Result<sqlx::mysql::MySqlQueryResult, sqlx::Error>",
+            };
+            let mut slice_loops = String::new();
+            for slice in &slices {
+                slice_loops.push_str(&format!(
+                    "
+        for value in &params.{snake} {{ query = query.bind(value); }}",
+                    snake = snake(slice),
+                ));
+            }
+            let slice_loops = slice_loops.trim();
+            let bind_suffix = if bind_chain.is_empty() {
+                String::new()
+            } else {
+                format!("\n        {bind_chain}")
+            };
+            let slice_block = if slice_loops.is_empty() {
+                String::new()
+            } else {
+                format!("\n        {slice_loops}")
+            };
+            let decl = if slice_loops.is_empty() {
+                "let query"
+            } else {
+                "let mut query"
+            };
+            let decl = if slice_loops.is_empty() && bind_chain.is_empty() {
+                "let query"
+            } else {
+                decl
+            };
+            let mut replacement = format!(
+                "pub async fn {fn_name}<'e, E: sqlx::Executor<'e, Database = MySql>>(
+    exec: E,
+    params: &{name}Params,
+) -> {ret_ty} {{
+    {slice_call}
+    {decl} = query{bind_suffix};{slice_block}
+    query{fetch}
+        .await
+}}",
+                name = query.name
+            );
+            // Ensure the expansion's join uses repeat_n (clippy
+            // manual_repeat_n) everywhere.
+            replacement = replacement.replace(
+                "std::iter::repeat(\"?\").take(",
+                "std::iter::repeat_n(\"?\", ",
+            );
+            replacement
         };
         out.push_str(&format!("/// `{}`: `{}`.\n{body}\n\n", query.name, kind));
+    }
+    // One trailing newline (rustfmt ends files with a single \n).
+    if !out.ends_with('\n') {
+        out.push('\n');
     }
     out
 }
