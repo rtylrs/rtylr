@@ -54,7 +54,7 @@ Status values: `todo`, `in-progress`, `blocked`, `done`. Put commit hashes and b
 | hub_menu | | todo | |
 | websitelead | | todo | |
 | automations | | todo | |
-| integrations | | todo | |
+| integrations | | done | crates/modules/module_integrations: domain (providers {stripe}, statuses, sentinels), Service list/connect (provider allowlist, 8KiB config cap, JSON-object check, empty→{}), disconnect (id required), redaction (secret-key fragments secret/token/key/password/passwd/credential/authorization/private, recursive, {} fallback), list redaction view + cache key/scope; queries from sqlc; 8 tests pass |
 | insights | ~7.5k | todo | |
 | portal | | todo | |
 | caret | ~23k | todo | |
