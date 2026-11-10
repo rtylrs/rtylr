@@ -52,7 +52,7 @@ Status values: `todo`, `in-progress`, `blocked`, `done`. Put commit hashes and b
 | aiquery | | todo | |
 | activity | | done | crates/modules/activity: domain ActivityLog/ActivityPage; Service.list_activity (cache key `activity:<b>:<app>:<limit>:<offset>`, 1min TTL); facts validation (`entity_mutated` only, id/business/subject identity, auditApps {erp,pos,hub} + non-empty action, nullableJSON null→NULL); queries from sqlc; 7 tests pass |
 | hub_menu | | done | crates/modules/hub_menu: domain Banner/BannerInput + sentinels; Service banners CRUD + menu-item Update (≥1, none null); normalizeBannerInput (trim, title required, caps 255/2000/2048, zero-time = year-1 IsZero, ends_at ≥ starts_at); queries from sqlc; 6 tests pass |
-| websitelead | | todo | |
+| websitelead | | done | crates/modules/websitelead: domain Lead/LeadInput/SubscriberInput + source allowlist {intel_drop,report_banner,article_pdf_mid,article_pdf_end} + languages {en,ar}; budget tier (comma/K figures, largest wins, ≥15k HOT, ≥5k WARM, bare digits ignored); Service submit/subscribe validation (name/email/service, source/language), 10s detached-task budget; queries from sqlc; 7 tests pass |
 | automations | | todo | |
 | integrations | | done | crates/modules/module_integrations: domain (providers {stripe}, statuses, sentinels), Service list/connect (provider allowlist, 8KiB config cap, JSON-object check, empty→{}), disconnect (id required), redaction (secret-key fragments secret/token/key/password/passwd/credential/authorization/private, recursive, {} fallback), list redaction view + cache key/scope; queries from sqlc; 8 tests pass |
 | insights | ~7.5k | todo | |
