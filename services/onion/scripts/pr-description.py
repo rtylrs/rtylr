@@ -20,16 +20,21 @@ def read_state() -> str:
 
 
 def unit_stats() -> tuple[int, int]:
-    """done/total unit rows across every phase table in STATE.md."""
+    """done/total across every phase table in STATE.md (including the
+    Phase 3 module table, whose rows are `| module | LOC | Status |`)."""
+    state = read_state()
     rows = re.findall(
         r"^\| ((?:[0-9]+(?:\.[0-9]+)?[a-z]?)\b[^|]*) \| (done|todo|blocked) \|",
-        read_state(),
+        state,
         re.M,
     )
-    # Phase 3's module table uses a different shape (Module | LOC | Status |
-    # Notes) and is counted in phase_rows, not here.
-    total = len(rows)
-    done = sum(1 for r in rows if r[1] == "done")
+    modules = re.findall(
+        r"^\| [a-z_]+ \|[^|]*\| (done|todo|blocked) \|", state, re.M
+    )
+    total = len(rows) + len(modules)
+    done = sum(1 for r in rows if r[1] == "done") + sum(
+        1 for status in modules if status == "done"
+    )
     return done, total
 
 
