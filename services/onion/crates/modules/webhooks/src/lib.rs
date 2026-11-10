@@ -1,5 +1,20 @@
-//!! Converted by `tools/sqlc2sqlx` from `internal/modules/webhooks/internal/infrastructure/persistence/sqlc`.
-//!! Queries are the exact Go persistence SQL; application/domain
-//!! layers land in Phase 3 module order.
+//! Webhook module: registration, delivery fanout, signed sender with
+//! SSRF guards, and dead-delivery notifications. Mirrors
+//! `internal/modules/webhooks`.
 
+pub mod application;
+pub mod domain;
 pub mod queries;
+
+/// Workspace crate version, surfaced in CI and version checks.
+pub const CRATE_VERSION: &str = env!("CARGO_PKG_VERSION");
+
+#[cfg(test)]
+mod tests {
+    use super::CRATE_VERSION;
+
+    #[test]
+    fn crate_version_is_nonempty() {
+        assert!(!CRATE_VERSION.is_empty());
+    }
+}

@@ -44,7 +44,7 @@ Status values: `todo`, `in-progress`, `blocked`, `done`. Put commit hashes and b
 
 | Module | Go LOC (non-test) | Status | Notes |
 | --- | --- | --- | --- |
-| webhooks | ~2.6k | todo | |
+| webhooks | ~2.6k | done | crates/modules/webhooks: domain (webhooks/deliveries/registrations/notifications), application ports (Repository/DeliveryRepository/EventReader/NotificationRepository/NotificationQueue/contact resolver), registration validation (URL scheme/host/credentials/internal-host, supported events dedupe), transport (HMAC `t=…,v1=…` over `ts.body`, destination checks, internal-IP/CIDR refusal markers, no-redirect rule), sender state machine (claim → attempt → delivered/dead/reschedule, 60s→3600s backoff, 15m abandoned recovery, 25-batch, 10s timeout), notifier (24h window, daily dedupe key, HTML/text templates with URL escaping); 15 tests pass |
 | notifications | ~2.2k | todo | |
 | cacheops | | todo | |
 | emailtest | | todo | |
