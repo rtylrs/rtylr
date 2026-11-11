@@ -135,7 +135,7 @@ func (a *SubscriptionAPI) CreateCheckout(ctx context.Context, req *hubsubscripti
 		return nil, onekiterrors.New(http.StatusBadRequest, "plan_slug is required")
 	}
 
-	checkoutURL, err := a.Service.CreateCheckout(ctx, authUser.BusinessID, planSlug, req.GetEmail(), req.GetRegion())
+	checkoutURL, err := a.Service.CreateCheckout(ctx, authUser.BusinessID, planSlug, req.GetEmail(), checkoutRegion(ctx, req.GetRegion()))
 	if err != nil {
 		if errors.Is(err, domain.ErrPlanNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Plan not found")
@@ -148,6 +148,17 @@ func (a *SubscriptionAPI) CreateCheckout(ctx context.Context, req *hubsubscripti
 	}
 
 	return &hubsubscriptionv1.CreateCheckoutResponse{CheckoutUrl: checkoutURL}, nil
+}
+
+// checkoutRegion is the price list to charge: the one the client says it was
+// shown, else the one Cloudflare's country for the request implies. Without
+// the fallback, a visitor shown a regional price by the website would be
+// charged the default price by a client that does not carry the region along.
+func checkoutRegion(ctx context.Context, requested string) string {
+	if strings.TrimSpace(requested) != "" {
+		return requested
+	}
+	return authPkg.DeviceCtx(ctx).Country
 }
 
 // billingUser gates subscription mutations using resolved tenant permissions.
