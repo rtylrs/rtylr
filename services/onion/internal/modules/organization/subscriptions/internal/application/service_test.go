@@ -33,6 +33,9 @@ type mockRepo struct {
 	regionPrices        []domain.RegionPrice
 	regionPricesErr     error
 	regionAsked         string
+	regionPrice         *domain.RegionPrice
+	regionPriceErr      error
+	regionPricePlanID   int64
 	planBySlugErr       error
 	getSubErr           error
 	upsertSubErr        error
@@ -56,6 +59,18 @@ func (m *mockRepo) ListPlans(_ context.Context) ([]domain.Plan, error) {
 func (m *mockRepo) ListRegionPrices(_ context.Context, region string) ([]domain.RegionPrice, error) {
 	m.regionAsked = region
 	return m.regionPrices, m.regionPricesErr
+}
+
+func (m *mockRepo) GetRegionPrice(_ context.Context, planID int64, region string) (*domain.RegionPrice, error) {
+	m.regionAsked = region
+	m.regionPricePlanID = planID
+	if m.regionPriceErr != nil {
+		return nil, m.regionPriceErr
+	}
+	if m.regionPrice == nil {
+		return nil, domain.ErrRegionPriceNotFound
+	}
+	return m.regionPrice, nil
 }
 
 func (m *mockRepo) GetPlanBySlug(_ context.Context, slug string) (*domain.Plan, error) {
@@ -305,6 +320,45 @@ func TestListPlansForRegion_PropagatesRegionLookupError(t *testing.T) {
 	s := &Service{repo: &mockRepo{plans: []domain.Plan{{ID: 1}}, regionPricesErr: want}}
 	if _, err := s.ListPlansForRegion(context.Background(), "CA"); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestCheckoutPriceID(t *testing.T) {
+	plan := &domain.Plan{ID: 7, Slug: "pro", PaddlePriceID: "pri_usd"}
+	cad := &domain.RegionPrice{PlanID: 7, Region: "CA", Currency: "CAD", PaddlePriceID: "pri_cad"}
+
+	tests := []struct {
+		name       string
+		region     string
+		repo       *mockRepo
+		want       string
+		wantErr    bool
+		wantAsked  string
+		wantLookup bool
+	}{
+		{name: "no region charges the plan price", region: "", repo: &mockRepo{regionPrice: cad}, want: "pri_usd"},
+		{name: "junk region charges the plan price without a lookup", region: "CAN;--", repo: &mockRepo{regionPrice: cad}, want: "pri_usd"},
+		{name: "a region with a price charges it", region: " ca ", repo: &mockRepo{regionPrice: cad}, want: "pri_cad", wantAsked: "CA", wantLookup: true},
+		{name: "a region with no chargeable price falls back", region: "FR", repo: &mockRepo{}, want: "pri_usd", wantAsked: "FR", wantLookup: true},
+		{name: "a lookup failure is an error, not a silent fallback", region: "CA", repo: &mockRepo{regionPriceErr: errors.New("db down")}, wantErr: true, wantAsked: "CA", wantLookup: true},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			s := &Service{repo: tc.repo}
+			got, err := s.checkoutPriceID(context.Background(), plan, tc.region)
+			if (err != nil) != tc.wantErr {
+				t.Fatalf("err = %v, wantErr %v", err, tc.wantErr)
+			}
+			if got != tc.want {
+				t.Errorf("price = %q, want %q", got, tc.want)
+			}
+			if tc.repo.regionAsked != tc.wantAsked {
+				t.Errorf("looked up region %q, want %q", tc.repo.regionAsked, tc.wantAsked)
+			}
+			if tc.wantLookup && tc.repo.regionPricePlanID != plan.ID {
+				t.Errorf("looked up plan %d, want %d", tc.repo.regionPricePlanID, plan.ID)
+			}
+		})
 	}
 }
 

@@ -147,3 +147,39 @@ func TestGetLanguageFromDevice_DefaultsToEn(t *testing.T) {
 		t.Errorf("anonymous default should be 'en', got %q", got)
 	}
 }
+
+func TestExtractCountry(t *testing.T) {
+	t.Setenv("TRUSTED_PROXY_CIDRS", "203.0.113.0/24")
+
+	req := func(remote, country string) *http.Request {
+		r := httptest.NewRequest(http.MethodGet, "/", nil)
+		r.RemoteAddr = remote
+		if country != "" {
+			r.Header.Set("Cf-Ipcountry", country)
+		}
+		return r
+	}
+
+	if got := extractCountry(req("203.0.113.10:443", "ca")); got != "CA" {
+		t.Errorf("trusted proxy country = %q, want CA", got)
+	}
+	// A direct caller can send any header; only the proxy's word counts.
+	if got := extractCountry(req("198.51.100.10:443", "CA")); got != "" {
+		t.Errorf("untrusted peer country = %q, want empty", got)
+	}
+	for _, v := range []string{"XX", "T1", "", "CAN", "C1", " "} {
+		if got := extractCountry(req("203.0.113.10:443", v)); got != "" {
+			t.Errorf("country %q = %q, want empty", v, got)
+		}
+	}
+}
+
+func TestExtractDeviceInfoCarriesCountry(t *testing.T) {
+	t.Setenv("TRUSTED_PROXY_CIDRS", "203.0.113.0/24")
+	r := httptest.NewRequest(http.MethodGet, "/", nil)
+	r.RemoteAddr = "203.0.113.10:443"
+	r.Header.Set("Cf-Ipcountry", "CA")
+	if got := ExtractDeviceInfo(r).Country; got != "CA" {
+		t.Errorf("device country = %q, want CA", got)
+	}
+}

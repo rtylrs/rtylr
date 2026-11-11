@@ -17,10 +17,15 @@ var desktopAppVersionRegex = regexp.MustCompile(`anghami/([0-9.]+).*electron`)
 type deviceCtxKey struct{}
 
 type Device struct {
-	User                   *AuthUser
-	Language               string
-	IsAnonymous            bool
-	IP                     string
+	User        *AuthUser
+	Language    string
+	IsAnonymous bool
+	IP          string
+	// Country is the visitor's ISO 3166-1 alpha-2 country as Cloudflare
+	// reports it, or "" when unknown or when the request did not come through
+	// a trusted proxy. It is a hint for things like regional prices, never an
+	// authorization input.
+	Country                string
 	UserAgent              string
 	DeviceInfo             string
 	Platform               string
@@ -77,9 +82,30 @@ func extractIP(r *http.Request) string {
 	return strings.Trim(r.RemoteAddr, "[]")
 }
 
+// extractCountry reads the country Cloudflare resolved for the client. Like
+// the client IP, it is accepted only when the socket peer is a configured
+// proxy: a direct caller could otherwise claim any country. Cloudflare sends
+// XX when it does not know and T1 for Tor, neither of which is a country.
+func extractCountry(r *http.Request) string {
+	if !config.IsTrustedProxyIP(r.RemoteAddr) {
+		return ""
+	}
+	country := strings.ToUpper(strings.TrimSpace(r.Header.Get("Cf-Ipcountry")))
+	if len(country) != 2 || country == "XX" || country == "T1" {
+		return ""
+	}
+	for i := 0; i < len(country); i++ {
+		if country[i] < 'A' || country[i] > 'Z' {
+			return ""
+		}
+	}
+	return country
+}
+
 func ExtractDeviceInfo(r *http.Request) Device {
 	device := Device{
 		IP:         extractIP(r),
+		Country:    extractCountry(r),
 		UserAgent:  r.UserAgent(),
 		Language:   extractLanguage(r),
 		DeviceInfo: extractDeviceInfo(r),

@@ -120,9 +120,17 @@ VALUES (?, ?, ?);
 -- name: MaxPaddleEventOccurredAt :one
 SELECT MAX(occurred_at) AS last_occurred FROM paddle_webhook_events WHERE paddle_subscription_id = ?;
 
+-- A regional price is only quoted if checkout can charge it, so rows without a
+-- Paddle price are invisible here and to GetActivePlanRegionPrice.
 -- name: ListActivePlanRegionPrices :many
 SELECT plan_id, region, currency, price_per_seat_cents, annual_price_per_seat_cents,
        COALESCE(paddle_price_id, '') AS paddle_price_id
 FROM plan_region_prices
-WHERE region = ? AND is_active = TRUE
+WHERE region = ? AND is_active = TRUE AND COALESCE(paddle_price_id, '') <> ''
 LIMIT 200;
+
+-- name: GetActivePlanRegionPrice :one
+SELECT plan_id, region, currency, price_per_seat_cents, annual_price_per_seat_cents,
+       COALESCE(paddle_price_id, '') AS paddle_price_id
+FROM plan_region_prices
+WHERE plan_id = ? AND region = ? AND is_active = TRUE AND COALESCE(paddle_price_id, '') <> '';

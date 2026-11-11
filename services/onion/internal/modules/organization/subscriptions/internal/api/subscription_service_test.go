@@ -124,3 +124,23 @@ func TestBillingReadsRequireBillingAccess(t *testing.T) {
 		})
 	}
 }
+
+func TestCheckoutRegion(t *testing.T) {
+	device := authPkg.Device{Country: "CA"}
+	fromCloudflare := device.Ctx(context.Background())
+
+	// What the client says it was shown wins.
+	if got := checkoutRegion(fromCloudflare, "fr"); got != "fr" {
+		t.Errorf("requested region = %q, want fr", got)
+	}
+	// Otherwise the country Cloudflare resolved for the request.
+	for _, requested := range []string{"", "  "} {
+		if got := checkoutRegion(fromCloudflare, requested); got != "CA" {
+			t.Errorf("requested %q: region = %q, want CA", requested, got)
+		}
+	}
+	// No device context and no request: the plan's own price.
+	if got := checkoutRegion(context.Background(), ""); got != "" {
+		t.Errorf("no region = %q, want empty", got)
+	}
+}
