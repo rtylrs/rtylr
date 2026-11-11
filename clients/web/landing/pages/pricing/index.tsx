@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
@@ -15,6 +15,8 @@ import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import { SplitWords } from '../../components/motion/SplitWords';
 import PricingCards from '../../components/pricing/PricingCards';
+import { useRegionalPrices } from '../../hooks/useRegionalPrices';
+import { regionName } from '../../lib/regionalPricing';
 import type { Plan } from '../../components/pricing/pricingData';
 import styles from './pricing.module.scss';
 
@@ -80,7 +82,11 @@ const FeatureCell = ({
 
 const PricingPage = (): React.JSX.Element => {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const regional = useRegionalPrices();
+  // A visitor can look at the standard page even when their region has prices.
+  const [showStandard, setShowStandard] = useState(false);
+  const regionLabel = regional.region ? regionName(regional.region, i18n.language) : '';
 
   const compareRows = t('pricing.compare.rows', { returnObjects: true }) as unknown as string[];
   const cellLabels = {
@@ -138,7 +144,21 @@ const PricingPage = (): React.JSX.Element => {
               {/* The plan names inside PricingCards are h3. Without an h2
                   here the page jumped h1 to h3. */}
               <h2 className={styles.plansTitle}>{t('pricing.plans.title')}</h2>
-              <PricingCards onCta={handleCta} />
+              <PricingCards onCta={handleCta} prices={showStandard ? undefined : regional.prices} />
+              {regional.region && (
+                <p className={styles.regionNote} data-testid="regional-pricing-note">
+                  {!showStandard && `${t('pricing.regional.banner', { region: regionLabel })} `}
+                  <button
+                    type="button"
+                    className={styles.regionLink}
+                    onClick={() => setShowStandard((value) => !value)}
+                  >
+                    {showStandard
+                      ? t('pricing.regional.showRegional', { region: regionLabel })
+                      : t('pricing.regional.showStandard')}
+                  </button>
+                </p>
+              )}
             </div>
           </section>
 

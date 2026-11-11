@@ -375,6 +375,15 @@
     "bottom": {
       "title": "Start on Free. Move up when you outgrow it.",
       "subtitle": "10 seats and the rtylr suite are yours from day one, with no card. Book a demo if you would rather see it running on your own numbers first."
+    },
+    "regional": {
+      "perSeatMonth": "per seat / month",
+      "annualNote": "{{price}} per seat / month, billed annually",
+      "free": "Free",
+      "banner": "Showing prices for {{region}}.",
+      "showStandard": "See standard pricing",
+      "showRegional": "Show prices for {{region}}",
+      "quoted": "Quoted for your team"
     }
   },
   "home": {

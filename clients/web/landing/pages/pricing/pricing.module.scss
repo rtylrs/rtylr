@@ -384,3 +384,26 @@ $text-mid: rgba(19, 19, 19, 0.7);
     font-size: 2rem;
   }
 }
+
+.regionNote {
+  margin: 28px 0 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: rgba(19, 19, 19, 0.6);
+}
+
+.regionLink {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration-thickness: 2px;
+  }
+}

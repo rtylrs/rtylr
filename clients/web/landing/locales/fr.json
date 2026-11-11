@@ -182,6 +182,15 @@
     "bottom": {
       "title": "Commencez sur Free. Montez de forfait quand vous l’aurez dépassé.",
       "subtitle": "10 utilisateurs et la suite rtylr sont à vous dès le premier jour, sans carte. Réservez une démo si vous préférez d’abord le voir tourner sur vos propres chiffres."
+    },
+    "regional": {
+      "perSeatMonth": "par siège / mois",
+      "annualNote": "{{price}} par siège / mois, facturé annuellement",
+      "free": "Gratuit",
+      "banner": "Prix affichés pour : {{region}}.",
+      "showStandard": "Voir les tarifs standard",
+      "showRegional": "Afficher les prix pour : {{region}}",
+      "quoted": "Sur devis, selon votre équipe"
     }
   },
   "contact": {
