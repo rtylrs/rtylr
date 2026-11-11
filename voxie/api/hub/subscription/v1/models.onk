@@ -95,7 +95,7 @@ message GetMySubscriptionResponse {
 message ListPlansRequest {
   /// ISO 3166-1 alpha-2 region to price for, e.g. "CA". Unknown or unpriced
   /// regions get the default prices.
-  region: string? @query("region") @len(0, 8)
+  region: string? @query("region")
 }
 
 message ListPlansResponse {

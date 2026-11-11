@@ -6,6 +6,9 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/text/currency"
+	"golang.org/x/text/language"
+
 	"github.com/voxire/onion/internal/platform/money"
 )
 
@@ -17,26 +20,44 @@ func (s *Service) UpdatePlan(ctx context.Context, id int64, name string, pricePe
 // code, or a negative price.
 var ErrInvalidRegionPrice = errors.New("invalid region price")
 
-func isUpperAlpha(s string, n int) bool {
-	if len(s) != n {
-		return false
+// normalizeRegion returns the upper-case ISO 3166-1 alpha-2 code, or "" when
+// region is not an assigned country or territory. The syntactic check comes
+// first because language.ParseRegion also accepts three-letter and numeric
+// forms, and the public lookup only ever matches the two-letter code.
+func normalizeRegion(region string) string {
+	region = strings.ToUpper(strings.TrimSpace(region))
+	if len(region) != 2 {
+		return ""
 	}
-	for i := 0; i < len(s); i++ {
-		if s[i] < 'A' || s[i] > 'Z' {
-			return false
-		}
+	r, err := language.ParseRegion(region)
+	if err != nil || !r.IsCountry() || r.String() != region {
+		return ""
 	}
-	return true
+	return region
 }
 
-// normalizeRegionPrice upper-cases and validates the codes. The database does
-// not check them, and the public lookup only ever matches an upper-case region.
+// normalizeCurrency returns the upper-case ISO 4217 code, or "" when currency
+// is not one. XXX (no currency) and XTS (testing) parse but are not billable.
+func normalizeCurrency(code string) string {
+	code = strings.ToUpper(strings.TrimSpace(code))
+	if len(code) != 3 || code == "XXX" || code == "XTS" {
+		return ""
+	}
+	u, err := currency.ParseISO(code)
+	if err != nil || u.String() != code {
+		return ""
+	}
+	return code
+}
+
+// normalizeRegionPrice upper-cases and validates the codes against the ISO
+// sets. The database does not check them, and the public endpoint returns the
+// stored currency as is, so nothing else would catch a typo like "CD" for "CA".
 func normalizeRegionPrice(row PlanRegionPriceRow) (PlanRegionPriceRow, error) {
-	row.Region = strings.ToUpper(strings.TrimSpace(row.Region))
-	row.Currency = strings.ToUpper(strings.TrimSpace(row.Currency))
+	row.Region = normalizeRegion(row.Region)
+	row.Currency = normalizeCurrency(row.Currency)
 	row.PaddlePriceID = strings.TrimSpace(row.PaddlePriceID)
-	if !isUpperAlpha(row.Region, 2) || !isUpperAlpha(row.Currency, 3) ||
-		row.PricePerSeatCents < 0 || row.AnnualPricePerSeatCents < 0 {
+	if row.Region == "" || row.Currency == "" || row.PricePerSeatCents < 0 || row.AnnualPricePerSeatCents < 0 {
 		return row, ErrInvalidRegionPrice
 	}
 	return row, nil
@@ -56,8 +77,8 @@ func (s *Service) UpsertPlanRegionPrice(ctx context.Context, row PlanRegionPrice
 
 // DeletePlanRegionPrice reports whether a price existed to delete.
 func (s *Service) DeletePlanRegionPrice(ctx context.Context, planID int64, region string) (bool, error) {
-	region = strings.ToUpper(strings.TrimSpace(region))
-	if !isUpperAlpha(region, 2) {
+	region = normalizeRegion(region)
+	if region == "" {
 		return false, ErrInvalidRegionPrice
 	}
 	return s.repo.DeletePlanRegionPrice(ctx, planID, region)
