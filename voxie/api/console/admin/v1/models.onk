@@ -269,3 +269,46 @@ message UpdatePlanRequest {
 message UpdatePlanResponse {
   message: string
 }
+
+/// A plan's price in one region. Visitors from the region see these prices
+/// instead of the plan's own, and checkout charges the paddle_price_id.
+message PlanRegionPrice {
+  plan_id: int64 @encode(number)
+  /// ISO 3166-1 alpha-2, upper case.
+  region: string
+  /// ISO 4217, upper case.
+  currency: string
+  price_per_seat_cents: int32
+  annual_price_per_seat_cents: int32
+  paddle_price_id: string
+  is_active: bool
+}
+
+message ListPlanRegionPricesRequest {}
+
+message ListPlanRegionPricesResponse {
+  prices: PlanRegionPrice[]
+}
+
+message UpsertPlanRegionPriceRequest {
+  plan_id: int64 @gt(0) @encode(number)
+  region: string @len(2, 2)
+  currency: string @len(3, 3)
+  price_per_seat_cents: int32 @gte(0)
+  annual_price_per_seat_cents: int32 @gte(0)
+  paddle_price_id: string? @len(0, 100)
+  is_active: bool?
+}
+
+message UpsertPlanRegionPriceResponse {
+  message: string
+}
+
+message DeletePlanRegionPriceRequest {
+  plan_id: int64 @gt(0) @encode(number)
+  region: string @len(2, 2)
+}
+
+message DeletePlanRegionPriceResponse {
+  message: string
+}

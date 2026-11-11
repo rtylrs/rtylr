@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/organization/subscriptions/internal/domain"
@@ -37,6 +38,45 @@ func NewService(_ context.Context, repo domain.Repository) *Service {
 
 func (s *Service) ListPlans(ctx context.Context) ([]domain.Plan, error) {
 	return s.repo.ListPlans(ctx)
+}
+
+// ListPlansForRegion lists the active plans, quoted at the region's price
+// override where one exists. region is an ISO 3166-1 alpha-2 code in any case;
+// anything else, or a region with no overrides, yields the default prices. Only
+// the displayed price changes: the plan a customer buys is the same row.
+func (s *Service) ListPlansForRegion(ctx context.Context, region string) ([]domain.Plan, error) {
+	plans, err := s.repo.ListPlans(ctx)
+	if err != nil {
+		return nil, err
+	}
+	region = NormalizeRegion(region)
+	if region == "" {
+		return plans, nil
+	}
+	prices, err := s.repo.ListRegionPrices(ctx, region)
+	if err != nil {
+		return nil, err
+	}
+	byPlan := make(map[int64]domain.RegionPrice, len(prices))
+	for _, rp := range prices {
+		byPlan[rp.PlanID] = rp
+	}
+	for i, p := range plans {
+		if rp, ok := byPlan[p.ID]; ok {
+			plans[i] = p.WithRegionPrice(rp)
+		}
+	}
+	return plans, nil
+}
+
+// NormalizeRegion upper-cases a two-letter region code and returns "" for
+// anything that is not one, so junk never reaches the query.
+func NormalizeRegion(region string) string {
+	region = strings.ToUpper(strings.TrimSpace(region))
+	if len(region) != 2 || region[0] < 'A' || region[0] > 'Z' || region[1] < 'A' || region[1] > 'Z' {
+		return ""
+	}
+	return region
 }
 
 // GetMySubscription is a pure read. Everything that changes subscription or

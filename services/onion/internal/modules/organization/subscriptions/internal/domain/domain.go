@@ -13,6 +13,9 @@ var (
 
 const FreeIncludedSeatLimit = 10
 
+// DefaultCurrency is what the plans table's own prices are quoted in.
+const DefaultCurrency = "USD"
+
 type Plan struct {
 	ID                      int64
 	Name                    string
@@ -32,6 +35,32 @@ type Plan struct {
 	IsFeatured              bool
 	IsActive                bool
 	CreatedAt               time.Time
+	// Currency and Region describe the prices above. They are USD and empty
+	// unless a regional price replaced them (see WithRegionPrice).
+	Currency string
+	Region   string
+}
+
+// RegionPrice is a plan's price override for one region.
+type RegionPrice struct {
+	PlanID                  int64
+	Region                  string
+	Currency                string
+	PricePerSeatCents       int
+	AnnualPricePerSeatCents int
+	PaddlePriceID           string
+}
+
+// WithRegionPrice returns the plan quoted at the regional price.
+func (p Plan) WithRegionPrice(rp RegionPrice) Plan {
+	p.PricePerSeatCents = rp.PricePerSeatCents
+	p.AnnualPricePerSeatCents = rp.AnnualPricePerSeatCents
+	if rp.PaddlePriceID != "" {
+		p.PaddlePriceID = rp.PaddlePriceID
+	}
+	p.Currency = rp.Currency
+	p.Region = rp.Region
+	return p
 }
 
 type Subscription struct {
@@ -135,6 +164,7 @@ type BillingHistoryMonth struct {
 
 type Repository interface {
 	ListPlans(ctx context.Context) ([]Plan, error)
+	ListRegionPrices(ctx context.Context, region string) ([]RegionPrice, error)
 	GetPlanBySlug(ctx context.Context, slug string) (*Plan, error)
 	GetPlanByID(ctx context.Context, id int64) (*Plan, error)
 	GetSubscription(ctx context.Context, businessID int64) (*Subscription, error)

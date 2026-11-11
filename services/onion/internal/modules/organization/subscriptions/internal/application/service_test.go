@@ -30,6 +30,9 @@ type mockRepo struct {
 	upsertSeatCount     int
 	activeSeats         int
 	listPlansErr        error
+	regionPrices        []domain.RegionPrice
+	regionPricesErr     error
+	regionAsked         string
 	planBySlugErr       error
 	getSubErr           error
 	upsertSubErr        error
@@ -48,6 +51,11 @@ type mockRepo struct {
 
 func (m *mockRepo) ListPlans(_ context.Context) ([]domain.Plan, error) {
 	return m.plans, m.listPlansErr
+}
+
+func (m *mockRepo) ListRegionPrices(_ context.Context, region string) ([]domain.RegionPrice, error) {
+	m.regionAsked = region
+	return m.regionPrices, m.regionPricesErr
 }
 
 func (m *mockRepo) GetPlanBySlug(_ context.Context, slug string) (*domain.Plan, error) {
@@ -251,6 +259,52 @@ func TestListPlans_Delegates(t *testing.T) {
 	got, err := s.ListPlans(context.Background())
 	if err != nil || len(got) != 2 {
 		t.Errorf("got %v err %v", got, err)
+	}
+}
+
+func TestListPlansForRegion_OverlaysRegionalPrice(t *testing.T) {
+	repo := &mockRepo{
+		plans: []domain.Plan{
+			{ID: 1, Slug: "free", Currency: "USD"},
+			{ID: 2, Slug: "pro", PricePerSeatCents: 699, AnnualPricePerSeatCents: 499, PaddlePriceID: "pri_usd", Currency: "USD"},
+		},
+		regionPrices: []domain.RegionPrice{
+			{PlanID: 2, Region: "CA", Currency: "CAD", PricePerSeatCents: 899, AnnualPricePerSeatCents: 649, PaddlePriceID: "pri_cad"},
+		},
+	}
+	s := &Service{repo: repo}
+	got, err := s.ListPlansForRegion(context.Background(), " ca ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if repo.regionAsked != "CA" {
+		t.Errorf("queried region %q, want CA", repo.regionAsked)
+	}
+	if got[0].Currency != "USD" || got[0].Region != "" {
+		t.Errorf("plan without an override changed: %+v", got[0])
+	}
+	pro := got[1]
+	if pro.Currency != "CAD" || pro.Region != "CA" || pro.PricePerSeatCents != 899 || pro.AnnualPricePerSeatCents != 649 || pro.PaddlePriceID != "pri_cad" {
+		t.Errorf("regional price not applied: %+v", pro)
+	}
+}
+
+func TestListPlansForRegion_InvalidRegionSkipsLookup(t *testing.T) {
+	for _, region := range []string{"", "CAN", "1A", "C", "ca;--"} {
+		repo := &mockRepo{plans: []domain.Plan{{ID: 1, PricePerSeatCents: 699, Currency: "USD"}}, regionPricesErr: errors.New("must not be called")}
+		s := &Service{repo: repo}
+		got, err := s.ListPlansForRegion(context.Background(), region)
+		if err != nil || got[0].PricePerSeatCents != 699 || repo.regionAsked != "" {
+			t.Errorf("region %q: got %+v err %v asked %q", region, got, err, repo.regionAsked)
+		}
+	}
+}
+
+func TestListPlansForRegion_PropagatesRegionLookupError(t *testing.T) {
+	want := errors.New("db fail")
+	s := &Service{repo: &mockRepo{plans: []domain.Plan{{ID: 1}}, regionPricesErr: want}}
+	if _, err := s.ListPlansForRegion(context.Background(), "CA"); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
 	}
 }
 

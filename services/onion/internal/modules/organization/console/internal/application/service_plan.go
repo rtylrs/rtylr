@@ -2,13 +2,86 @@ package application
 
 import (
 	"context"
+	"errors"
+	"strings"
 	"time"
+
+	"golang.org/x/text/currency"
+	"golang.org/x/text/language"
 
 	"github.com/voxire/onion/internal/platform/money"
 )
 
 func (s *Service) UpdatePlan(ctx context.Context, id int64, name string, pricePerSeatCents, annualPricePerSeatCents int, isActive bool) error {
 	return s.repo.UpdatePlan(ctx, id, name, pricePerSeatCents, annualPricePerSeatCents, isActive)
+}
+
+// ErrInvalidRegionPrice is returned for a region or currency that is not an ISO
+// code, or a negative price.
+var ErrInvalidRegionPrice = errors.New("invalid region price")
+
+// normalizeRegion returns the upper-case ISO 3166-1 alpha-2 code, or "" when
+// region is not an assigned country or territory. The syntactic check comes
+// first because language.ParseRegion also accepts three-letter and numeric
+// forms, and the public lookup only ever matches the two-letter code.
+func normalizeRegion(region string) string {
+	region = strings.ToUpper(strings.TrimSpace(region))
+	if len(region) != 2 {
+		return ""
+	}
+	r, err := language.ParseRegion(region)
+	if err != nil || !r.IsCountry() || r.String() != region {
+		return ""
+	}
+	return region
+}
+
+// normalizeCurrency returns the upper-case ISO 4217 code, or "" when currency
+// is not one. XXX (no currency) and XTS (testing) parse but are not billable.
+func normalizeCurrency(code string) string {
+	code = strings.ToUpper(strings.TrimSpace(code))
+	if len(code) != 3 || code == "XXX" || code == "XTS" {
+		return ""
+	}
+	u, err := currency.ParseISO(code)
+	if err != nil || u.String() != code {
+		return ""
+	}
+	return code
+}
+
+// normalizeRegionPrice upper-cases and validates the codes against the ISO
+// sets. The database does not check them, and the public endpoint returns the
+// stored currency as is, so nothing else would catch a typo like "CD" for "CA".
+func normalizeRegionPrice(row PlanRegionPriceRow) (PlanRegionPriceRow, error) {
+	row.Region = normalizeRegion(row.Region)
+	row.Currency = normalizeCurrency(row.Currency)
+	row.PaddlePriceID = strings.TrimSpace(row.PaddlePriceID)
+	if row.Region == "" || row.Currency == "" || row.PricePerSeatCents < 0 || row.AnnualPricePerSeatCents < 0 {
+		return row, ErrInvalidRegionPrice
+	}
+	return row, nil
+}
+
+func (s *Service) ListPlanRegionPrices(ctx context.Context) ([]PlanRegionPriceRow, error) {
+	return s.repo.ListPlanRegionPrices(ctx)
+}
+
+func (s *Service) UpsertPlanRegionPrice(ctx context.Context, row PlanRegionPriceRow) error {
+	row, err := normalizeRegionPrice(row)
+	if err != nil {
+		return err
+	}
+	return s.repo.UpsertPlanRegionPrice(ctx, row)
+}
+
+// DeletePlanRegionPrice reports whether a price existed to delete.
+func (s *Service) DeletePlanRegionPrice(ctx context.Context, planID int64, region string) (bool, error) {
+	region = normalizeRegion(region)
+	if region == "" {
+		return false, ErrInvalidRegionPrice
+	}
+	return s.repo.DeletePlanRegionPrice(ctx, planID, region)
 }
 
 // ── Grants ────────────────────────────────────────────────────────────────────

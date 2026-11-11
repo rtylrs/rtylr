@@ -88,6 +88,7 @@ func planFromFields(
 	p.Tagline = tagline
 	p.AICreditsPerMonth = int(aiCreditsPerMonth)
 	p.TierOrder = int(tierOrder)
+	p.Currency = domain.DefaultCurrency
 	p.IsSolo = isSolo
 	p.IsFeatured = isFeatured
 	if isActive.Valid {
@@ -118,6 +119,25 @@ func (r *Repository) ListPlans(ctx context.Context) ([]domain.Plan, error) {
 		plans = append(plans, planFromListRow(row))
 	}
 	return plans, nil
+}
+
+func (r *Repository) ListRegionPrices(ctx context.Context, region string) ([]domain.RegionPrice, error) {
+	rows, err := r.queries.ListActivePlanRegionPrices(ctx, region)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]domain.RegionPrice, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, domain.RegionPrice{
+			PlanID:                  row.PlanID,
+			Region:                  row.Region,
+			Currency:                row.Currency,
+			PricePerSeatCents:       int(row.PricePerSeatCents),
+			AnnualPricePerSeatCents: int(row.AnnualPricePerSeatCents),
+			PaddlePriceID:           row.PaddlePriceID,
+		})
+	}
+	return out, nil
 }
 
 func (r *Repository) GetPlanBySlug(ctx context.Context, slug string) (*domain.Plan, error) {

@@ -327,3 +327,14 @@ type DeletedUser struct {
 	// SeatBusinessIDs are active businesses where the user held a seat.
 	SeatBusinessIDs []int64
 }
+
+// PlanRegionPriceRow is a plan's price override for one region.
+type PlanRegionPriceRow struct {
+	PlanID                  int64
+	Region                  string
+	Currency                string
+	PricePerSeatCents       int
+	AnnualPricePerSeatCents int
+	PaddlePriceID           string
+	IsActive                bool
+}

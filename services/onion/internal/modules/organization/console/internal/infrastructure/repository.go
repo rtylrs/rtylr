@@ -20,6 +20,7 @@ type CreateBusinessOwnerRow = application.CreateBusinessOwnerRow
 type SubscriptionRow = application.SubscriptionRow
 type SubscriptionWriteParams = application.SubscriptionWriteParams
 type PlanRow = application.PlanRow
+type PlanRegionPriceRow = application.PlanRegionPriceRow
 type GrantRow = application.GrantRow
 type AddonCatalogRow = application.AddonCatalogRow
 type AddonGrantRow = application.AddonGrantRow
