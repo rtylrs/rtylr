@@ -315,7 +315,8 @@
     },
     "directAnswer": {
       "label": "What do rtylr plans include?",
-      "body": "Every rtylr plan gives your team one connected suite for sales, inventory, people, customers, finance and operations. Plans differ by scale rather than by feature, so what changes is how many people and locations you run and the controls a larger team needs. Free covers 10 people at one location and needs no card. rtylr has not published prices for Pro and Scale yet, so those are quoted."
+      "body": "Every rtylr plan gives your team one connected suite for sales, inventory, people, customers, finance and operations. Plans differ by scale rather than by feature, so what changes is how many people and locations you run and the controls a larger team needs. Free covers 10 people at one location and needs no card. rtylr has not published prices for Pro and Scale yet, so those are quoted.",
+      "bodyRegional": "Every rtylr plan gives your team one connected suite for sales, inventory, people, customers, finance and operations. Plans differ by scale rather than by feature, so what changes is how many people and locations you run and the controls a larger team needs. Free covers 10 people at one location and needs no card. The prices on this page are for {{region}}; a plan with no price shown is quoted."
     },
     "plans": {
       "title": "What is in each plan?",
@@ -375,6 +376,15 @@
     "bottom": {
       "title": "Start on Free. Move up when you outgrow it.",
       "subtitle": "10 seats and the rtylr suite are yours from day one, with no card. Book a demo if you would rather see it running on your own numbers first."
+    },
+    "regional": {
+      "perSeatMonth": "per seat / month",
+      "annualNote": "{{price}} per seat / month, billed annually",
+      "free": "Free",
+      "banner": "Showing prices for {{region}}.",
+      "showStandard": "See standard pricing",
+      "showRegional": "Show prices for {{region}}",
+      "quoted": "Quoted for your team"
     }
   },
   "home": {

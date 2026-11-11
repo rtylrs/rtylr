@@ -5,10 +5,16 @@ import { HiCheck } from 'react-icons/hi';
 import { useTranslation } from 'react-i18next';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import { PLANS, type Plan } from './pricingData';
+import { formatRegionalPrice, type RegionalPrices } from '../../lib/regionalPricing';
 import styles from './PricingCards.module.scss';
 
 interface PricingCardsProps {
   onCta: (action: Plan['ctaAction']) => void;
+  /**
+   * Prices to show, by plan, when the visitor's region has any. Without them
+   * the cards carry no price at all, which is what every other visitor sees.
+   */
+  prices?: RegionalPrices;
 }
 
 // No price block. The cards carry the tier name, who it is for, and what it
@@ -19,8 +25,9 @@ interface PricingCardsProps {
 // comes back as an array via returnObjects, so the locale file holds a real
 // list: a translator translates a list, and reordering it cannot silently
 // reassign one tier's feature to another the way numbered keys could.
-const PricingCards = ({ onCta }: PricingCardsProps): React.JSX.Element => {
-  const { t } = useTranslation();
+const PricingCards = ({ onCta, prices }: PricingCardsProps): React.JSX.Element => {
+  const { t, i18n } = useTranslation();
+  const showPrices = Object.keys(prices ?? {}).length > 0;
 
   return (
     <motion.div
@@ -34,6 +41,7 @@ const PricingCards = ({ onCta }: PricingCardsProps): React.JSX.Element => {
         const features = t(`pricing.plans.${plan.id}.features`, {
           returnObjects: true,
         }) as unknown as string[];
+        const price = prices?.[plan.id];
 
         return (
           <motion.div
@@ -50,6 +58,38 @@ const PricingCards = ({ onCta }: PricingCardsProps): React.JSX.Element => {
                 {t(`pricing.plans.${plan.id}.description`)}
               </p>
             </div>
+            {showPrices && (
+              <div className={styles.priceBlock} data-testid={`price-${plan.id}`}>
+                {price && price.monthlyCents > 0 ? (
+                  <>
+                    <p className={styles.price}>
+                      <span className={styles.priceAmount}>
+                        {formatRegionalPrice(price.monthlyCents, price, i18n.language)}
+                      </span>{' '}
+                      <span className={styles.priceUnit}>{t('pricing.regional.perSeatMonth')}</span>
+                    </p>
+                    {price.annualCents > 0 && price.annualCents < price.monthlyCents && (
+                      <p className={styles.priceNote}>
+                        {t('pricing.regional.annualNote', {
+                          price: formatRegionalPrice(price.annualCents, price, i18n.language),
+                        })}
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  // Free is free in every region. Any other plan without a
+                  // regional price stays what the page says it is everywhere:
+                  // quoted.
+                  <p className={styles.price}>
+                    {plan.id === 'free' ? (
+                      <span className={styles.priceAmount}>{t('pricing.regional.free')}</span>
+                    ) : (
+                      <span className={styles.priceQuoted}>{t('pricing.regional.quoted')}</span>
+                    )}
+                  </p>
+                )}
+              </div>
+            )}
             <ul className={styles.featuresList}>
               {features.map((feature) => (
                 <li key={feature} className={styles.featureItem}>

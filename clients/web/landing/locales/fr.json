@@ -122,7 +122,8 @@
     },
     "directAnswer": {
       "label": "Que comprennent les forfaits rtylr ?",
-      "body": "Chaque forfait rtylr donne à votre équipe une suite connectée pour les ventes, les stocks, les équipes, les clients, la finance et les opérations. Les forfaits diffèrent par l’échelle et non par les fonctionnalités : ce qui change, c’est le nombre de personnes et d’établissements que vous gérez, ainsi que les contrôles dont une équipe plus grande a besoin. Free couvre 10 personnes sur un établissement et ne demande aucune carte. rtylr n’a pas encore publié de prix pour Pro et Scale : ces deux forfaits sont sur devis."
+      "body": "Chaque forfait rtylr donne à votre équipe une suite connectée pour les ventes, les stocks, les équipes, les clients, la finance et les opérations. Les forfaits diffèrent par l’échelle et non par les fonctionnalités : ce qui change, c’est le nombre de personnes et d’établissements que vous gérez, ainsi que les contrôles dont une équipe plus grande a besoin. Free couvre 10 personnes sur un établissement et ne demande aucune carte. rtylr n’a pas encore publié de prix pour Pro et Scale : ces deux forfaits sont sur devis.",
+      "bodyRegional": "Chaque forfait rtylr donne à votre équipe une suite connectée pour les ventes, les stocks, les équipes, les clients, la finance et les opérations. Les forfaits diffèrent par l’échelle et non par les fonctionnalités : ce qui change, c’est le nombre de personnes et d’établissements que vous gérez, ainsi que les contrôles dont une équipe plus grande a besoin. Free couvre 10 personnes sur un établissement et ne demande aucune carte. Les prix de cette page sont ceux de : {{region}}. Un forfait sans prix affiché est sur devis."
     },
     "plans": {
       "title": "Que contient chaque forfait ?",
@@ -182,6 +183,15 @@
     "bottom": {
       "title": "Commencez sur Free. Montez de forfait quand vous l’aurez dépassé.",
       "subtitle": "10 utilisateurs et la suite rtylr sont à vous dès le premier jour, sans carte. Réservez une démo si vous préférez d’abord le voir tourner sur vos propres chiffres."
+    },
+    "regional": {
+      "perSeatMonth": "par siège / mois",
+      "annualNote": "{{price}} par siège / mois, facturé annuellement",
+      "free": "Gratuit",
+      "banner": "Prix affichés pour : {{region}}.",
+      "showStandard": "Voir les tarifs standard",
+      "showRegional": "Afficher les prix pour : {{region}}",
+      "quoted": "Sur devis, selon votre équipe"
     }
   },
   "contact": {

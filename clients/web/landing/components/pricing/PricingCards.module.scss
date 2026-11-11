@@ -74,6 +74,45 @@
   line-height: 1.5;
 }
 
+.priceBlock {
+  margin: -8px 0 24px 0;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--hairline);
+  // The same height on every card, so the feature lists line up whether a
+  // plan shows a price with an annual note, a price alone, or "Quoted".
+  min-height: 92px;
+}
+
+.price {
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.priceAmount {
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.priceUnit {
+  font-size: 0.9rem;
+  color: rgba(19, 19, 19, 0.6);
+}
+
+.priceQuoted {
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.priceNote {
+  margin: 8px 0 0 0;
+  font-size: 0.85rem;
+  color: rgba(19, 19, 19, 0.6);
+  line-height: 1.4;
+}
+
 .featuresList {
   list-style: none;
   padding: 0;
