@@ -30,6 +30,7 @@ shared/zz_platform_event_delivery.sql	internal/platform/eventbus/sql/schema/shar
 shared/zz_webhook_dead_delivery_notices.sql	internal/modules/webhooks/sql/schema/shared/dead_delivery_notices.sql
 shared/zz_remove_self_host_and_social_login.sql	internal/modules/organization/sql/schema/shared/zz_remove_self_host_and_social_login.sql
 shared/zz_subscriptions_paddle_events.sql	internal/modules/organization/sql/schema/shared/zz_subscriptions_paddle_events.sql
+shared/zz_plan_region_prices.sql	internal/modules/organization/sql/schema/shared/zz_plan_region_prices.sql
 cdn/cdn_files.sql	internal/platform/cdn/sql/schema/cdn/cdn_files.sql
 cdn/cdn_transformations.sql	internal/platform/cdn/sql/schema/cdn/cdn_transformations.sql
 cdn/zz_cdn_files_tenant_scope.sql	internal/platform/cdn/sql/schema/cdn/zz_cdn_files_tenant_scope.sql

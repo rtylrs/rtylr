@@ -2,6 +2,8 @@ package application
 
 import (
 	"context"
+	"errors"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/money"
@@ -9,6 +11,56 @@ import (
 
 func (s *Service) UpdatePlan(ctx context.Context, id int64, name string, pricePerSeatCents, annualPricePerSeatCents int, isActive bool) error {
 	return s.repo.UpdatePlan(ctx, id, name, pricePerSeatCents, annualPricePerSeatCents, isActive)
+}
+
+// ErrInvalidRegionPrice is returned for a region or currency that is not an ISO
+// code, or a negative price.
+var ErrInvalidRegionPrice = errors.New("invalid region price")
+
+func isUpperAlpha(s string, n int) bool {
+	if len(s) != n {
+		return false
+	}
+	for i := 0; i < len(s); i++ {
+		if s[i] < 'A' || s[i] > 'Z' {
+			return false
+		}
+	}
+	return true
+}
+
+// normalizeRegionPrice upper-cases and validates the codes. The database does
+// not check them, and the public lookup only ever matches an upper-case region.
+func normalizeRegionPrice(row PlanRegionPriceRow) (PlanRegionPriceRow, error) {
+	row.Region = strings.ToUpper(strings.TrimSpace(row.Region))
+	row.Currency = strings.ToUpper(strings.TrimSpace(row.Currency))
+	row.PaddlePriceID = strings.TrimSpace(row.PaddlePriceID)
+	if !isUpperAlpha(row.Region, 2) || !isUpperAlpha(row.Currency, 3) ||
+		row.PricePerSeatCents < 0 || row.AnnualPricePerSeatCents < 0 {
+		return row, ErrInvalidRegionPrice
+	}
+	return row, nil
+}
+
+func (s *Service) ListPlanRegionPrices(ctx context.Context) ([]PlanRegionPriceRow, error) {
+	return s.repo.ListPlanRegionPrices(ctx)
+}
+
+func (s *Service) UpsertPlanRegionPrice(ctx context.Context, row PlanRegionPriceRow) error {
+	row, err := normalizeRegionPrice(row)
+	if err != nil {
+		return err
+	}
+	return s.repo.UpsertPlanRegionPrice(ctx, row)
+}
+
+// DeletePlanRegionPrice reports whether a price existed to delete.
+func (s *Service) DeletePlanRegionPrice(ctx context.Context, planID int64, region string) (bool, error) {
+	region = strings.ToUpper(strings.TrimSpace(region))
+	if !isUpperAlpha(region, 2) {
+		return false, ErrInvalidRegionPrice
+	}
+	return s.repo.DeletePlanRegionPrice(ctx, planID, region)
 }
 
 // ── Grants ────────────────────────────────────────────────────────────────────

@@ -49,8 +49,8 @@ func (a *SubscriptionAPI) GetMySubscription(ctx context.Context, _ *hubsubscript
 	return &hubsubscriptionv1.GetMySubscriptionResponse{Subscription: payload}, nil
 }
 
-func (a *SubscriptionAPI) ListPlans(ctx context.Context, _ *hubsubscriptionv1.ListPlansRequest) (*hubsubscriptionv1.ListPlansResponse, error) {
-	plans, err := a.Service.ListPlans(ctx)
+func (a *SubscriptionAPI) ListPlans(ctx context.Context, req *hubsubscriptionv1.ListPlansRequest) (*hubsubscriptionv1.ListPlansResponse, error) {
+	plans, err := a.Service.ListPlansForRegion(ctx, req.GetRegion())
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list plans")
 	}
@@ -220,6 +220,8 @@ func toProtoPlan(p domain.Plan) *hubsubscriptionv1.Plan {
 		IsSolo:                  p.IsSolo,
 		IsFeatured:              p.IsFeatured,
 		IsActive:                p.IsActive,
+		Currency:                p.Currency,
+		Region:                  p.Region,
 	}
 	if p.MaxSeats != nil {
 		v := int32(*p.MaxSeats) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.

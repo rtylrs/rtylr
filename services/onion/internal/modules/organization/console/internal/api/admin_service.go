@@ -410,6 +410,78 @@ func (a *ConsoleAdminAPI) UpdatePlan(ctx context.Context, req *consoleadminv1.Up
 	return &consoleadminv1.UpdatePlanResponse{Message: "Plan updated"}, nil
 }
 
+func (a *ConsoleAdminAPI) ListPlanRegionPrices(ctx context.Context, _ *consoleadminv1.ListPlanRegionPricesRequest) (*consoleadminv1.ListPlanRegionPricesResponse, error) {
+	if err := requireConsoleAdmin(ctx); err != nil {
+		return nil, err
+	}
+	rows, err := a.service.ListPlanRegionPrices(ctx)
+	if err != nil {
+		return nil, internalError("Failed to list regional prices")
+	}
+	items := make([]*consoleadminv1.PlanRegionPrice, 0, len(rows))
+	for _, r := range rows {
+		items = append(items, &consoleadminv1.PlanRegionPrice{
+			PlanId: r.PlanID, Region: r.Region, Currency: r.Currency,
+			PricePerSeatCents: int32(r.PricePerSeatCents), AnnualPricePerSeatCents: int32(r.AnnualPricePerSeatCents), // #nosec G115 -- Reviewed width conversion uses the established database field width.
+			PaddlePriceId: r.PaddlePriceID, IsActive: r.IsActive,
+		})
+	}
+	return &consoleadminv1.ListPlanRegionPricesResponse{Prices: items}, nil
+}
+
+func (a *ConsoleAdminAPI) UpsertPlanRegionPrice(ctx context.Context, req *consoleadminv1.UpsertPlanRegionPriceRequest) (*consoleadminv1.UpsertPlanRegionPriceResponse, error) {
+	if err := requireConsoleAdmin(ctx); err != nil {
+		return nil, err
+	}
+	plans, err := a.service.ListPlans(ctx)
+	if err != nil {
+		return nil, internalError("Failed to get plan")
+	}
+	found := false
+	for i := range plans {
+		if plans[i].ID == req.GetPlanId() {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return nil, onekiterrors.New(http.StatusNotFound, "Plan not found")
+	}
+	active := true
+	if req.IsActive != nil {
+		active = req.GetIsActive()
+	}
+	err = a.service.UpsertPlanRegionPrice(ctx, application.PlanRegionPriceRow{
+		PlanID: req.GetPlanId(), Region: req.GetRegion(), Currency: req.GetCurrency(),
+		PricePerSeatCents: int(req.GetPricePerSeatCents()), AnnualPricePerSeatCents: int(req.GetAnnualPricePerSeatCents()),
+		PaddlePriceID: req.GetPaddlePriceId(), IsActive: active,
+	})
+	if errors.Is(err, application.ErrInvalidRegionPrice) {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Region and currency must be ISO codes and prices cannot be negative")
+	}
+	if err != nil {
+		return nil, internalError("Failed to save regional price")
+	}
+	return &consoleadminv1.UpsertPlanRegionPriceResponse{Message: "Regional price saved"}, nil
+}
+
+func (a *ConsoleAdminAPI) DeletePlanRegionPrice(ctx context.Context, req *consoleadminv1.DeletePlanRegionPriceRequest) (*consoleadminv1.DeletePlanRegionPriceResponse, error) {
+	if err := requireConsoleAdmin(ctx); err != nil {
+		return nil, err
+	}
+	deleted, err := a.service.DeletePlanRegionPrice(ctx, req.GetPlanId(), req.GetRegion())
+	if errors.Is(err, application.ErrInvalidRegionPrice) {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Region must be an ISO 3166-1 alpha-2 code")
+	}
+	if err != nil {
+		return nil, internalError("Failed to delete regional price")
+	}
+	if !deleted {
+		return nil, onekiterrors.New(http.StatusNotFound, "Regional price not found")
+	}
+	return &consoleadminv1.DeletePlanRegionPriceResponse{Message: "Regional price deleted"}, nil
+}
+
 func userPayload(value *application.UserDTO) *consoleadminv1.User {
 	return &consoleadminv1.User{Id: value.ID, Email: value.Email, FullName: value.FullName, BusinessId: value.BusinessID, IsConsoleAdmin: value.IsConsoleAdmin, IsBanned: value.IsBanned, BanReason: value.BanReason, BannedAt: value.BannedAt, CreatedAt: value.CreatedAt}
 }

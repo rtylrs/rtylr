@@ -38,6 +38,9 @@ type repository interface {
 	DeleteSubscription(ctx context.Context, id int64) error
 	ListPlans(ctx context.Context) ([]PlanRow, error)
 	UpdatePlan(ctx context.Context, id int64, name string, pricePerSeatCents, annualPricePerSeatCents int, isActive bool) error
+	ListPlanRegionPrices(ctx context.Context) ([]PlanRegionPriceRow, error)
+	UpsertPlanRegionPrice(ctx context.Context, row PlanRegionPriceRow) error
+	DeletePlanRegionPrice(ctx context.Context, planID int64, region string) (bool, error)
 	ListGrants(ctx context.Context, limit, offset int) ([]GrantRow, int64, error)
 	CreateGrant(ctx context.Context, businessID, planID, grantedBy int64, note string, expiresAt *time.Time) (int64, error)
 	CreateGrantAndActivateSubscription(ctx context.Context, businessID, planID, grantedBy int64, note string, expiresAt *time.Time, sub SubscriptionWriteParams) (int64, error)

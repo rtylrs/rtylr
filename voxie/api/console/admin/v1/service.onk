@@ -42,4 +42,10 @@ service ConsoleAdminService {
   listPlans(ListPlansRequest) -> ListPlansResponse @get("/console/plans")
 
   updatePlan(UpdatePlanRequest) -> UpdatePlanResponse @put("/console/plans/{id}")
+
+  listPlanRegionPrices(ListPlanRegionPricesRequest) -> ListPlanRegionPricesResponse @get("/console/plan-region-prices")
+
+  upsertPlanRegionPrice(UpsertPlanRegionPriceRequest) -> UpsertPlanRegionPriceResponse @put("/console/plans/{plan_id}/region-prices/{region}")
+
+  deletePlanRegionPrice(DeletePlanRegionPriceRequest) -> DeletePlanRegionPriceResponse @delete("/console/plans/{plan_id}/region-prices/{region}")
 }

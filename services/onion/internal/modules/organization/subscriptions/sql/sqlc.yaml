@@ -5,6 +5,7 @@ sql:
     schema:
       - "../../sql/schema/shared/subscriptions.sql"
       - "../../sql/schema/shared/zz_subscriptions_paddle_events.sql"
+      - "../../sql/schema/shared/zz_plan_region_prices.sql"
       - "../../sql/schema/shared/users.sql"
       - "../../sql/schema/shared/businesses.sql"
       - "../../sql/schema/shared/user_groups.sql"

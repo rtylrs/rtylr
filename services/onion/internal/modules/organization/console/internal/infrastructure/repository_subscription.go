@@ -101,6 +101,36 @@ func (r *Repository) UpdatePlan(ctx context.Context, id int64, name string, pric
 	return err
 }
 
+func (r *Repository) ListPlanRegionPrices(ctx context.Context) ([]PlanRegionPriceRow, error) {
+	rows, err := r.queries.ListPlanRegionPrices(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]PlanRegionPriceRow, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, PlanRegionPriceRow{
+			PlanID: row.PlanID, Region: row.Region, Currency: row.Currency,
+			PricePerSeatCents: int(row.PricePerSeatCents), AnnualPricePerSeatCents: int(row.AnnualPricePerSeatCents),
+			PaddlePriceID: row.PaddlePriceID, IsActive: row.IsActive,
+		})
+	}
+	return out, nil
+}
+
+func (r *Repository) UpsertPlanRegionPrice(ctx context.Context, row PlanRegionPriceRow) error {
+	return r.queries.UpsertPlanRegionPrice(ctx, sqlc.UpsertPlanRegionPriceParams{
+		PlanID: row.PlanID, Region: row.Region, Currency: row.Currency,
+		PricePerSeatCents: int32(row.PricePerSeatCents), AnnualPricePerSeatCents: int32(row.AnnualPricePerSeatCents), // #nosec G115 -- validated non-negative cents within the column's int width.
+		PaddlePriceID: sql.NullString{String: row.PaddlePriceID, Valid: row.PaddlePriceID != ""},
+		IsActive:      row.IsActive,
+	})
+}
+
+func (r *Repository) DeletePlanRegionPrice(ctx context.Context, planID int64, region string) (bool, error) {
+	n, err := r.queries.DeletePlanRegionPrice(ctx, sqlc.DeletePlanRegionPriceParams{PlanID: planID, Region: region})
+	return n > 0, err
+}
+
 // ── Manual Access Grants CRUD ─────────────────────────────────────────────────
 
 // dynamic-query: squirrel

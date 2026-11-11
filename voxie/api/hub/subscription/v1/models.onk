@@ -35,6 +35,10 @@ message Plan {
   is_solo: bool
   is_featured: bool
   is_active: bool
+  /// ISO 4217 code the prices are quoted in. USD unless a regional price applied.
+  currency: string
+  /// Upper-case ISO 3166-1 region whose price override was applied, or "" for the default price.
+  region: string
 }
 
 message BillingLineItem {
@@ -88,7 +92,11 @@ message GetMySubscriptionResponse {
   subscription: Subscription
 }
 
-message ListPlansRequest {}
+message ListPlansRequest {
+  /// ISO 3166-1 alpha-2 region to price for, e.g. "CA". Unknown or unpriced
+  /// regions get the default prices.
+  region: string? @query("region") @len(0, 8)
+}
 
 message ListPlansResponse {
   plans: Plan[]

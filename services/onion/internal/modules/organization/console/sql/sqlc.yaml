@@ -27,6 +27,7 @@ sql:
       - "../../sql/schema/shared/zz_custom_domains.sql"
       - "../../sql/schema/shared/zz_mfa_optional_by_default.sql"
       - "../../sql/schema/shared/zz_remove_self_host_and_social_login.sql"
+      - "../../sql/schema/shared/zz_plan_region_prices.sql"
       - "../../sql/schema/shared/zz_subscriptions_paddle_events.sql"
       - "../../sql/schema/voxire/vox_permission_group_permissions.sql"
       - "../../sql/schema/voxire/vox_permission_groups.sql"
