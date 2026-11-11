@@ -140,6 +140,24 @@ func (r *Repository) ListRegionPrices(ctx context.Context, region string) ([]dom
 	return out, nil
 }
 
+func (r *Repository) GetRegionPrice(ctx context.Context, planID int64, region string) (*domain.RegionPrice, error) {
+	row, err := r.queries.GetActivePlanRegionPrice(ctx, sqlc.GetActivePlanRegionPriceParams{PlanID: planID, Region: region})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrRegionPriceNotFound
+		}
+		return nil, err
+	}
+	return &domain.RegionPrice{
+		PlanID:                  row.PlanID,
+		Region:                  row.Region,
+		Currency:                row.Currency,
+		PricePerSeatCents:       int(row.PricePerSeatCents),
+		AnnualPricePerSeatCents: int(row.AnnualPricePerSeatCents),
+		PaddlePriceID:           row.PaddlePriceID,
+	}, nil
+}
+
 func (r *Repository) GetPlanBySlug(ctx context.Context, slug string) (*domain.Plan, error) {
 	row, err := r.queries.GetPlanBySlug(ctx, slug)
 	if err != nil {

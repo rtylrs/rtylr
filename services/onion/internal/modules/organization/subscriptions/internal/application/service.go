@@ -453,17 +453,42 @@ func splitSeats(seatCount, includedLimit int) (int, int) {
 // ── Paddle ─────────────────────────────────────────────────────────────────────
 
 // CreateCheckout creates a Paddle transaction for the given plan and returns the checkout URL.
-func (s *Service) CreateCheckout(ctx context.Context, businessID int64, planSlug, customerEmail string) (string, error) {
+//
+// region is the price list the customer was shown (ISO 3166-1 alpha-2, any
+// case, or empty). When that region has a chargeable price for the plan, that
+// Paddle price is the one charged, so the number on the page is the number on
+// the invoice. Anything else is the plan's own price.
+func (s *Service) CreateCheckout(ctx context.Context, businessID int64, planSlug, customerEmail, region string) (string, error) {
 	plan, err := s.repo.GetPlanBySlug(ctx, planSlug)
 	if err != nil {
 		return "", err
 	}
 
-	if plan.PaddlePriceID == "" {
+	priceID, err := s.checkoutPriceID(ctx, plan, region)
+	if err != nil {
+		return "", err
+	}
+	if priceID == "" {
 		return "", fmt.Errorf("plan %s has no Paddle price configured", planSlug)
 	}
 
-	return paddlePkg.CreateTransaction(ctx, businessID, plan.PaddlePriceID, customerEmail)
+	return paddlePkg.CreateTransaction(ctx, businessID, priceID, customerEmail)
+}
+
+// checkoutPriceID picks the Paddle price to charge for the plan in the region.
+func (s *Service) checkoutPriceID(ctx context.Context, plan *domain.Plan, region string) (string, error) {
+	region = NormalizeRegion(region)
+	if region == "" {
+		return plan.PaddlePriceID, nil
+	}
+	rp, err := s.repo.GetRegionPrice(ctx, plan.ID, region)
+	if errors.Is(err, domain.ErrRegionPriceNotFound) {
+		return plan.PaddlePriceID, nil
+	}
+	if err != nil {
+		return "", err
+	}
+	return rp.PaddlePriceID, nil
 }
 
 // HandlePaddleWebhook processes a verified Paddle webhook event.

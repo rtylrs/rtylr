@@ -128,6 +128,9 @@ message CreateCheckoutRequest {
   billing_cycle: string?
   seat_count: int32?
   addons: string[]
+  /// ISO 3166-1 alpha-2 price list the customer was shown. A region with no
+  /// chargeable price for the plan is charged the plan's own price.
+  region: string?
 }
 
 message CreateCheckoutResponse {

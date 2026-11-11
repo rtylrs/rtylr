@@ -135,7 +135,7 @@ func (a *SubscriptionAPI) CreateCheckout(ctx context.Context, req *hubsubscripti
 		return nil, onekiterrors.New(http.StatusBadRequest, "plan_slug is required")
 	}
 
-	checkoutURL, err := a.Service.CreateCheckout(ctx, authUser.BusinessID, planSlug, req.GetEmail())
+	checkoutURL, err := a.Service.CreateCheckout(ctx, authUser.BusinessID, planSlug, req.GetEmail(), req.GetRegion())
 	if err != nil {
 		if errors.Is(err, domain.ErrPlanNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Plan not found")

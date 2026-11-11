@@ -41,6 +41,10 @@ func (r *statefulRepo) ListRegionPrices(context.Context, string) ([]domain.Regio
 	return nil, nil
 }
 
+func (r *statefulRepo) GetRegionPrice(context.Context, int64, string) (*domain.RegionPrice, error) {
+	return nil, domain.ErrRegionPriceNotFound
+}
+
 func (r *statefulRepo) GetPlanBySlug(_ context.Context, slug string) (*domain.Plan, error) {
 	for _, p := range []*domain.Plan{r.plan, r.freePlan} {
 		if p != nil && p.Slug == slug {

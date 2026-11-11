@@ -8,6 +8,7 @@ import (
 
 var (
 	ErrPlanNotFound         = errors.New("plan not found")
+	ErrRegionPriceNotFound  = errors.New("no chargeable regional price")
 	ErrSubscriptionNotFound = errors.New("subscription not found")
 )
 
@@ -165,6 +166,7 @@ type BillingHistoryMonth struct {
 type Repository interface {
 	ListPlans(ctx context.Context) ([]Plan, error)
 	ListRegionPrices(ctx context.Context, region string) ([]RegionPrice, error)
+	GetRegionPrice(ctx context.Context, planID int64, region string) (*RegionPrice, error)
 	GetPlanBySlug(ctx context.Context, slug string) (*Plan, error)
 	GetPlanByID(ctx context.Context, id int64) (*Plan, error)
 	GetSubscription(ctx context.Context, businessID int64) (*Subscription, error)
