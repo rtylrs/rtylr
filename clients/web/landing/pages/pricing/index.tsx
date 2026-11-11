@@ -87,6 +87,7 @@ const PricingPage = (): React.JSX.Element => {
   // A visitor can look at the standard page even when their region has prices.
   const [showStandard, setShowStandard] = useState(false);
   const regionLabel = regional.region ? regionName(regional.region, i18n.language) : '';
+  const showingRegionalPrices = regional.region !== null && !showStandard;
 
   const compareRows = t('pricing.compare.rows', { returnObjects: true }) as unknown as string[];
   const cellLabels = {
@@ -135,7 +136,11 @@ const PricingPage = (): React.JSX.Element => {
           </motion.section>
 
           <DirectAnswer label={t('pricing.directAnswer.label')}>
-            {t('pricing.directAnswer.body')}
+            {/* The standard explanation says no prices are published. Say so
+                only while the cards below show none. */}
+            {showingRegionalPrices
+              ? t('pricing.directAnswer.bodyRegional', { region: regionLabel })
+              : t('pricing.directAnswer.body')}
           </DirectAnswer>
 
           {/* Plan cards */}

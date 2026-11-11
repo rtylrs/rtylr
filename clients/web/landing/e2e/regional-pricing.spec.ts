@@ -66,6 +66,19 @@ test.describe('Regional pricing', () => {
     await expect(page.getByTestId('regional-pricing-note')).toContainText('Canada');
   });
 
+  test('the explanation matches the prices on show', async ({ page }) => {
+    await stubGeo(page, 'CA');
+    await page.goto(`${LANDING_URL}/pricing`);
+    const answer = page.getByText(/every rtylr plan gives your team/i);
+    await expect(page.getByTestId('price-pro')).toBeVisible();
+    // Never claims no price is published while a price is on the page.
+    await expect(answer).not.toContainText(/has not published prices/i);
+    await expect(answer).toContainText(/prices on this page are for Canada/i);
+
+    await page.getByRole('button', { name: /see standard pricing/i }).click();
+    await expect(answer).toContainText(/has not published prices/i);
+  });
+
   test('the visitor can switch to the standard page and back', async ({ page }) => {
     await stubGeo(page, 'CA');
     await page.goto(`${LANDING_URL}/pricing`);
@@ -113,5 +126,21 @@ test.describe('Regional pricing', () => {
     await expect(page.getByRole('heading', { level: 1, name: /one rtylr suite/i })).toBeVisible();
     await expect(page.getByTestId('price-pro')).toHaveCount(0);
     expect(asked).toEqual([]);
+  });
+
+  test('a client-side move between ?region= values is looked up again', async ({ page }) => {
+    const asked = await stubGeo(page, 'LB');
+    await page.goto(`${LANDING_URL}/pricing?region=default`);
+    await expect(page.getByRole('heading', { level: 1, name: /one rtylr suite/i })).toBeVisible();
+    await expect(page.getByTestId('price-pro')).toHaveCount(0);
+
+    // Same page, new query, no reload: the first answer must not be reused.
+    await page.evaluate(() =>
+      (window as unknown as { next: { router: { push: (url: string) => void } } }).next.router.push(
+        '/pricing/?region=CA'
+      )
+    );
+    await expect(page.getByTestId('price-pro')).toContainText('$8.99');
+    expect(asked).toEqual(['CA']);
   });
 });
