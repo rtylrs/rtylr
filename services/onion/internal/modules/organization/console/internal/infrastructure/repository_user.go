@@ -97,6 +97,21 @@ WHERE id = ?`,
 		return nil, err
 	}
 
+	// cross-schema write to user_provisioning_states (team module) — /users/me
+	// refuses an account without this row, so an owner created here could sign
+	// in and then never load the portal. The operator vouches for the address
+	// they typed, so the account starts active and email-verified rather than
+	// being sent to a verification code it may not be able to receive.
+	if _, err = tx.ExecContext(ctx, `
+INSERT INTO user_provisioning_states (user_id, business_id, mode, state, email_verified, password_change_required)
+VALUES (?, ?, 'direct_credentials', 'active', TRUE, FALSE)`,
+		ownerID,
+		businessID,
+	); err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+
 	result := &CreateBusinessOwnerRow{
 		OwnerID:    ownerID,
 		BusinessID: businessID,
@@ -160,6 +175,9 @@ func (r *Repository) DeleteCreatedBusinessOwner(ctx context.Context, ownerID, bu
 		return cause
 	}
 	if _, err := tx.ExecContext(ctx, "DELETE FROM subscriptions WHERE business_id = ?", businessID); err != nil {
+		return rollback(err)
+	}
+	if _, err := tx.ExecContext(ctx, "DELETE FROM user_provisioning_states WHERE user_id = ?", ownerID); err != nil {
 		return rollback(err)
 	}
 	if _, err := tx.ExecContext(ctx, "DELETE FROM businesses WHERE id = ? AND owner_id = ?", businessID, ownerID); err != nil {

@@ -153,3 +153,4 @@ rtylr/caret_buddy_events.sql	internal/modules/caret/sql/schema/rtylr/caret_buddy
 rtylr/caret_buddy_routines.sql	internal/modules/caret/sql/schema/rtylr/caret_buddy_routines.sql
 internal/modules/caret/sql/migration_20261030_buddy_run_routine.sql	internal/modules/caret/sql/migration_20261030_buddy_run_routine.sql
 rtylr/portal_preferences.sql	internal/modules/portal/sql/schema/rtylr/portal_preferences.sql
+shared/zz_console_owner_provisioning.sql	internal/modules/organization/sql/schema/shared/zz_console_owner_provisioning.sql

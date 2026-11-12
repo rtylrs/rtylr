@@ -326,3 +326,38 @@ func TestUpdateUser_ChangesEmail(t *testing.T) {
 		t.Errorf("expected email=%q, got %q", newEmail, user.Email)
 	}
 }
+
+// /users/me refuses an account with no provisioning row, so an owner created
+// from the console has to get an active, verified one in the same transaction.
+func TestCreateBusinessOwner_WritesActiveProvisioningRow(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	created, err := repo.CreateBusinessOwner(ctx, infrastructure.CreateBusinessOwnerParams{
+		Email:        "test-owner-provisioning@example.com",
+		PasswordHash: "hash",
+		FullName:     "Owner Provisioning",
+		BusinessName: "Owner Provisioning Test Business",
+		Timezone:     "UTC",
+		Currency:     "USD",
+	})
+	if err != nil {
+		t.Fatalf("CreateBusinessOwner: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteCreatedBusinessOwner(ctx, created.OwnerID, created.BusinessID) })
+
+	var mode, state string
+	var verified bool
+	var businessID int64
+	err = db.QueryRowContext(ctx,
+		`SELECT mode, state, email_verified, business_id FROM user_provisioning_states WHERE user_id = ?`,
+		created.OwnerID).Scan(&mode, &state, &verified, &businessID)
+	if err != nil {
+		t.Fatalf("no provisioning row for the new owner: %v", err)
+	}
+	if state != "active" || !verified || businessID != created.BusinessID {
+		t.Errorf("provisioning row = mode %q state %q verified %v business %d, want active/verified/business %d",
+			mode, state, verified, businessID, created.BusinessID)
+	}
+}
