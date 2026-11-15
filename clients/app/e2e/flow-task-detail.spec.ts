@@ -252,9 +252,10 @@ test.describe('Flow - Task Detail', () => {
 
     // Asserted before capturing, so a blank or redirected page cannot pass as a
     // successful shot.
-    // The title is an editable input, so its value is not text content: the
-    // existing test above matches on the attribute for the same reason.
-    await expect(page.locator('input[value="Implement SSO Auth Flow"]')).toBeVisible();
+    // The title is an editable field, so it is matched on its value.
+    await expect(page.getByLabel(enFlow.taskDetail.taskTitle)).toHaveValue(
+      'Implement SSO Auth Flow'
+    );
 
     // One STATUS row, not two. These were adjacent rows reading `STATUS` and
     // `STATUSES`, one concept as two, with labels a letter apart (rtylr#1079).
@@ -274,7 +275,9 @@ test.describe('Flow - Task Detail', () => {
     await page.goto(`${FLOW_URL}/task/101`);
     await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('input[value="Implement SSO Auth Flow"]')).toBeVisible();
+    await expect(page.getByLabel(enFlow.taskDetail.taskTitle)).toHaveValue(
+      'Implement SSO Auth Flow'
+    );
     await expect(page.getByText('Initial comment on SSO implementation.')).toBeVisible();
     await expect(page.getByText('Configure OAuth callback')).toBeVisible();
   });
