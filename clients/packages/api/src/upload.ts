@@ -87,6 +87,13 @@ export interface SignedAssetUrl {
 export interface SignAssetUrlOptions {
   /** Link lifetime in seconds. The CDN defaults to an hour and caps at 30 days. */
   expiresIn?: number;
+  /**
+   * Fixed expiry in Unix seconds, used instead of `expiresIn`. Signing every
+   * view to the same expiry yields the same link, which the browser can cache.
+   */
+  expiresAt?: number;
+  /** Image options covered by the signature, such as `{ w: '160' }`. */
+  params?: Record<string, string>;
   cdnBaseUrl?: string;
   signal?: AbortSignal;
 }
@@ -114,7 +121,13 @@ export const signAssetUrl = async (
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ url, expires_in: options.expiresIn ?? 3600 }),
+    body: JSON.stringify({
+      url,
+      ...(options.expiresAt
+        ? { expires_at: options.expiresAt }
+        : { expires_in: options.expiresIn ?? 3600 }),
+      ...(options.params ? { params: options.params } : {}),
+    }),
     credentials: 'include',
     signal: options.signal,
   });

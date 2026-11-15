@@ -75,3 +75,25 @@ describe('signAssetUrl', () => {
     await expect(signAssetUrl('https://cdn.example/files/x')).rejects.toThrow('file not found');
   });
 });
+
+describe('signAssetUrl options', () => {
+  it('sends a fixed expiry and image options when given', async () => {
+    document.cookie = `token=${JWT}`;
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ url: 'https://cdn.example/images/x?w=160&sig=s', expires_at: 7200 }),
+      text: async () => '',
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await signAssetUrl('/images/x', { expiresAt: 7200, params: { w: '160' } });
+
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(JSON.parse(init.body as string)).toEqual({
+      url: '/images/x',
+      expires_at: 7200,
+      params: { w: '160' },
+    });
+  });
+});
