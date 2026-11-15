@@ -58,6 +58,7 @@ import { useTaskActivity } from './useTaskActivity';
 import { useTaskRealtime } from '../../shared/lib/useTaskRealtime';
 import { useCurrentProject } from '../projects/useCurrentProject';
 import { useApprovedLeaveInRange } from '../../shared/hooks/queries/useApprovedLeaveInRange';
+import DescriptionEditor from './components/DescriptionEditor';
 import TimePanel from './components/TimePanel';
 import { useFlowStore, Attachment, Task } from '../../shared/stores/flowStore';
 import type { ApiTask, ApiTaskDetail, ApiTaskActivity } from '../../shared/services/flowApi';
@@ -509,28 +510,25 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
             <TaskTextField
               aria-label={t('flow.taskDetail.taskTitle')}
               key={`${task.id}-title`}
+              wrap
               value={task.title}
               required
               onSave={(title) => updateTask(task.id, { title })}
               disabled={!canEdit}
               // 20px at every width. S-12 asks for 20px; `sm:text-2xl` took it
               // to 24 on desktop, and the review measured 30px before that.
-              className="w-full bg-transparent font-bold mb-4 text-xl disabled:opacity-70"
+              className="w-full bg-transparent font-bold mb-4 text-xl resize-none disabled:opacity-70"
               style={{
                 color: 'var(--flow-text)',
               }}
             />
             {/* Description */}
-            <TaskTextField
+            <DescriptionEditor
               key={`${task.id}-description`}
-              multiline
               value={displayDescription(task.description)}
               onSave={(description) => updateTask(task.id, { description })}
               placeholder={t('flow.taskDetail.descriptionPlaceholder')}
-              rows={3}
               disabled={!canEdit}
-              className="w-full bg-transparent text-flow-body leading-relaxed mb-6 resize-none disabled:opacity-70"
-              style={{ color: 'var(--flow-text-muted)' }}
             />
 
             {/* Subtasks */}
@@ -1141,11 +1139,14 @@ function TaskTextField({
   value,
   onSave,
   multiline,
+  wrap,
   ...props
 }: {
   value: string;
   onSave: (value: string) => void;
   multiline?: boolean;
+  /** One logical line that wraps instead of being cut off. */
+  wrap?: boolean;
   type?: React.HTMLInputTypeAttribute;
   min?: number;
   step?: string;
@@ -1178,6 +1179,33 @@ function TaskTextField({
       }
     },
   };
+  if (wrap) {
+    // The hidden copy shares the textarea's grid cell and sets its height, so
+    // the field is always as tall as its wrapped text.
+    return (
+      <div className="grid grid-cols-1">
+        <div
+          aria-hidden
+          className={`${props.className ?? ''} flow-wrap-mirror invisible col-start-1 row-start-1 whitespace-pre-wrap break-words`}
+        >
+          {draft}{' '}
+        </div>
+        <textarea
+          {...props}
+          {...handlers}
+          rows={1}
+          onChange={(event) => setDraft(event.target.value.replace(/\s*\n\s*/g, ' '))}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              event.currentTarget.blur();
+            }
+          }}
+          className={`${props.className ?? ''} col-start-1 row-start-1 overflow-hidden`}
+        />
+      </div>
+    );
+  }
   return multiline ? <textarea {...props} {...handlers} /> : <input {...props} {...handlers} />;
 }
 

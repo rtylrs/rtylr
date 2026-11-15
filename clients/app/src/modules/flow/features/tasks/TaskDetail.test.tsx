@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { chooseFlowOption, flowSelectTrigger } from '../../../../../test/flowSelect';
 import { STATUS_LABEL_KEYS } from '../../shared/lib/constantsFlow';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -98,6 +98,27 @@ vi.mock('../projects/useCurrentProject', () => ({
   useCurrentProject: useCurrentProjectSpy,
 }));
 
+// The real editor is a contenteditable the DOM shim cannot type into; its own
+// behaviour is covered in DescriptionEditor.test.tsx.
+vi.mock('./components/DescriptionEditor', () => ({
+  default: ({
+    value,
+    onSave,
+    placeholder,
+  }: {
+    value: string;
+    onSave: (markdown: string) => void;
+    placeholder: string;
+  }) => (
+    <textarea
+      placeholder={placeholder}
+      defaultValue={value}
+      onBlur={(event) => {
+        if (event.target.value !== value) onSave(event.target.value);
+      }}
+    />
+  ),
+}));
 vi.mock('./components/TimePanel', () => ({
   default: () => null,
 }));
@@ -472,7 +493,7 @@ describe('TaskDetail deletion confirmation (#1056)', () => {
 
     fireEvent.click(deleteButton());
 
-    expect(screen.getByText('SENTINEL PROBE')).toBeInTheDocument();
+    expect(within(screen.getByRole('dialog')).getByText('SENTINEL PROBE')).toBeInTheDocument();
   });
 
   it('deletes once confirmed', () => {

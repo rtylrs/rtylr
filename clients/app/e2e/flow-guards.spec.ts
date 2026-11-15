@@ -161,7 +161,7 @@ test.describe('Flow - Auth & Guard Verification', () => {
     await page.goto(`${FLOW_URL}/task/101`);
     await page.waitForLoadState('networkidle');
 
-    const titleInput = page.locator('input[value*="SSO"]').first();
+    const titleInput = page.getByRole('textbox', { name: 'Task title' });
     await expect(titleInput).toBeEnabled();
   });
 
