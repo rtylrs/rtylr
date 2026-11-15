@@ -90,6 +90,11 @@ const FORMAT_ACTIONS: FormatAction[] = [
   },
 ];
 
+// A list is followed by an empty paragraph to click into; it is not content.
+function toMarkdown(editor: Editor): string {
+  return editor.getMarkdown().trimEnd();
+}
+
 const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
   value,
   onSave,
@@ -102,14 +107,18 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
     onSaveRef.current = onSave;
   }, [onSave]);
 
-  // What the server is known to hold, and an edit not yet sent to it.
-  const saved = useRef(value);
+  // `loaded` is the value last taken from or sent to the server. `baseline` is
+  // the editor's own Markdown for it: a plain-text description serializes
+  // differently from how it was typed, and that difference is not an edit.
+  const loaded = useRef(value);
+  const baseline = useRef<string | null>(null);
   const pending = useRef<string | null>(null);
   const flush = useCallback(() => {
     const markdown = pending.current;
     pending.current = null;
-    if (markdown === null || markdown === saved.current) return;
-    saved.current = markdown;
+    if (markdown === null || markdown === baseline.current) return;
+    baseline.current = markdown;
+    loaded.current = markdown;
     onSaveRef.current(markdown);
   }, []);
 
@@ -136,8 +145,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
       },
     },
     onUpdate: ({ editor: current }) => {
-      // A list is followed by an empty paragraph to click into; it is not content.
-      pending.current = current.getMarkdown().trimEnd();
+      pending.current = toMarkdown(current);
       // Ticking a checklist item changes the text without focusing the editor,
       // so no blur will follow to save it.
       if (!current.isFocused) flush();
@@ -147,15 +155,21 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
 
   useEffect(() => flush, [flush]);
 
+  // Tiptap reports its own creation a tick late, after a click could land.
+  useEffect(() => {
+    if (editor && baseline.current === null) baseline.current = toMarkdown(editor);
+  }, [editor]);
+
   useEffect(() => {
     editor?.setEditable(!disabled, false);
   }, [editor, disabled]);
 
   useEffect(() => {
-    if (!editor || editor.isFocused || value === saved.current) return;
-    saved.current = value;
+    if (!editor || editor.isFocused || value === loaded.current) return;
+    loaded.current = value;
     pending.current = null;
     editor.commands.setContent(value, { contentType: 'markdown', emitUpdate: false });
+    baseline.current = toMarkdown(editor);
   }, [editor, value]);
 
   const active = useEditorState({
