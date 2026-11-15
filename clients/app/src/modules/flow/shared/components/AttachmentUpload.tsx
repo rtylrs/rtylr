@@ -5,7 +5,11 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@voxire/u
 import { ExternalLink, Upload, FileText, Image as ImageIcon, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Attachment, useFlowStore } from '../stores/flowStore';
-import { useResolveAssetUrl, useSignedAssetUrl } from '../hooks/queries/useSignedAssetUrl';
+import {
+  useResolveAssetUrl,
+  useSignedAssetUrl,
+  type AssetVariant,
+} from '../hooks/queries/useSignedAssetUrl';
 
 interface AttachmentUploadProps {
   attachments: Attachment[];
@@ -43,54 +47,89 @@ export function safeAttachmentUrl(url: string | undefined): string | null {
 const THUMB_FRAME =
   'h-12 w-16 shrink-0 rounded-md overflow-hidden flex items-center justify-center';
 
-const AttachmentThumb: React.FC<{ url: string; name: string }> = ({ url, name }) => {
-  const signed = useSignedAssetUrl(url);
+/**
+ * An attachment image loaded through a signed link. It asks for a resized copy
+ * first and falls back to the original if the CDN cannot resize this file, then
+ * to the placeholder if neither loads.
+ */
+const SignedImage: React.FC<{
+  url: string;
+  name: string;
+  variant: Exclude<AssetVariant, 'original'>;
+  className: string;
+  style?: React.CSSProperties;
+  loading?: 'lazy' | 'eager';
+  placeholder: React.ReactNode;
+}> = ({ url, name, variant, className, style, loading, placeholder }) => {
+  const [useOriginal, setUseOriginal] = useState(false);
+  const resized = useSignedAssetUrl(useOriginal ? null : url, variant);
+  const original = useSignedAssetUrl(useOriginal ? url : null, 'original');
+  const signed = useOriginal ? original : resized;
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
-  const failed = signed.url !== null && failedSrc === signed.url;
+  if (!signed.url) return signed.loading ? null : <>{placeholder}</>;
+  if (failedSrc === signed.url) return <>{placeholder}</>;
   return (
-    <span
-      className={THUMB_FRAME}
-      style={{ border: '1px solid var(--flow-border)', background: 'var(--flow-card)' }}
-    >
-      {signed.url && !failed ? (
-        <img
-          src={signed.url}
-          alt={name}
-          loading="lazy"
-          onError={() => setFailedSrc(signed.url)}
-          className="h-full w-full object-contain"
-        />
-      ) : signed.loading ? null : (
-        <ImageIcon size={16} style={{ color: 'var(--flow-text-muted)' }} />
-      )}
-    </span>
+    <img
+      src={signed.url}
+      alt={name}
+      loading={loading}
+      decoding="async"
+      onError={() => {
+        if (!useOriginal) setUseOriginal(true);
+        else setFailedSrc(signed.url);
+      }}
+      className={className}
+      style={style}
+    />
   );
 };
 
+const AttachmentThumb: React.FC<{ url: string; name: string }> = ({ url, name }) => (
+  <span
+    className={THUMB_FRAME}
+    style={{ border: '1px solid var(--flow-border)', background: 'var(--flow-card)' }}
+  >
+    <SignedImage
+      url={url}
+      name={name}
+      variant="thumbnail"
+      loading="lazy"
+      className="h-full w-full object-contain"
+      placeholder={<ImageIcon size={16} style={{ color: 'var(--flow-text-muted)' }} />}
+    />
+  </span>
+);
+
 const PreviewBody: React.FC<{ url: string; name: string }> = ({ url, name }) => {
   const { t } = useTranslation();
-  const signed = useSignedAssetUrl(url);
-  if (!signed.url) {
-    return <div className="h-[40vh] rounded-md" style={{ background: 'var(--flow-hover)' }} />;
-  }
+  // "Open original" is the untouched upload; the dialog shows a copy capped
+  // at a screen-sized width, which loads much faster for large screenshots.
+  const original = useSignedAssetUrl(url, 'original');
   return (
     <>
-      <img
-        src={signed.url}
-        alt={name}
+      <SignedImage
+        url={url}
+        name={name}
+        variant="preview"
+        loading="eager"
         className="max-h-[75vh] w-full rounded-md object-contain"
         style={{ background: 'var(--flow-hover)' }}
+        placeholder={
+          <div className="h-[40vh] rounded-md" style={{ background: 'var(--flow-hover)' }} />
+        }
       />
-      <a
-        href={signed.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 text-flow-meta font-medium hover:underline"
-        style={{ color: 'var(--flow-text-muted)' }}
-      >
-        <ExternalLink size={12} />
-        {t('flow.taskDetail.openOriginal')}
-      </a>
+      {original.url && (
+        <a
+          href={original.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-flow-meta font-medium hover:underline"
+          style={{ color: 'var(--flow-text-muted)' }}
+        >
+          <ExternalLink size={12} />
+          {t('flow.taskDetail.openOriginal')}
+        </a>
+      )}
     </>
   );
 };

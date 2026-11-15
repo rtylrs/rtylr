@@ -252,10 +252,24 @@ func (c *CDN) validateSignedDelivery(w http.ResponseWriter, r *http.Request) (re
 }
 
 func deliveryCacheControl(r *http.Request) string {
-	if strings.TrimSpace(r.URL.Query().Get("sig")) != "" || strings.TrimSpace(r.URL.Query().Get("expires")) != "" {
-		return "private, no-store"
+	query := r.URL.Query()
+	sig := strings.TrimSpace(query.Get("sig"))
+	expires := strings.TrimSpace(query.Get("expires"))
+	if sig == "" && expires == "" {
+		return immutableCacheControl
 	}
-	return immutableCacheControl
+	// A signed link names immutable bytes and stops working at `expires`, so
+	// the viewer's browser may keep the response until then. It stays
+	// private: a shared cache must not hand a private file to someone else.
+	// Without this every page view downloaded every attachment again.
+	if sig != "" {
+		if exp, err := strconv.ParseInt(expires, 10, 64); err == nil {
+			if remaining := exp - time.Now().Unix(); remaining > 0 {
+				return fmt.Sprintf("private, max-age=%d", remaining)
+			}
+		}
+	}
+	return "private, no-store"
 }
 
 func (c *CDN) signingSecret() string {

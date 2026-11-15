@@ -35,6 +35,7 @@ function renderWithQuery(ui: ReactElement) {
 
 describe('image attachments', () => {
   beforeEach(() => {
+    sessionStorage.clear();
     signAssetUrl.mockReset();
     signAssetUrl.mockResolvedValue({ url: SIGNED, expiresAt: 1 });
   });
@@ -46,8 +47,13 @@ describe('image attachments', () => {
 
     const thumb = await screen.findByRole('img', { name: image.name });
     expect(thumb).toHaveAttribute('src', SIGNED);
-    // Signed by path, so a file stored under an earlier CDN host still signs.
-    expect(signAssetUrl).toHaveBeenCalledWith(new URL(CDN_FILE).pathname, expect.anything());
+    // The thumbnail is a resized copy, signed by path so a file stored under
+    // an earlier CDN host still signs.
+    const id = new URL(CDN_FILE).pathname.split('/').pop();
+    expect(signAssetUrl).toHaveBeenCalledWith(
+      `/images/${id}`,
+      expect.objectContaining({ params: { w: '160' } })
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'flow.taskDetail.openAttachment' }));
 
@@ -103,5 +109,28 @@ describe('removing attachments', () => {
     expect(
       screen.getAllByRole('button', { name: 'flow.taskDetail.removeAttachmentLabel' })
     ).toHaveLength(1);
+  });
+});
+
+describe('thumbnail fallback', () => {
+  beforeEach(() => {
+    sessionStorage.clear();
+    signAssetUrl.mockReset();
+    signAssetUrl.mockImplementation(async (path: string) => ({
+      url: `https://api.voxire.com${path}?sig=s`,
+      expiresAt: Math.floor(Date.now() / 1000) + 3600,
+    }));
+  });
+
+  it('loads the original when the resized copy fails', async () => {
+    renderWithQuery(<AttachmentUpload attachments={[image] as never} />);
+    const thumb = await screen.findByRole('img', { name: image.name });
+    expect(thumb.getAttribute('src')).toContain('/images/');
+
+    fireEvent.error(thumb);
+
+    await waitFor(() =>
+      expect(screen.getByRole('img', { name: image.name }).getAttribute('src')).toContain('/files/')
+    );
   });
 });
