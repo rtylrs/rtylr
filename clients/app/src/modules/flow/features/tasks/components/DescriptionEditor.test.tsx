@@ -26,11 +26,14 @@ describe('DescriptionEditor', () => {
     expect(box.querySelectorAll('ul > li')).toHaveLength(2);
   });
 
-  it('does not rewrite a description that was opened but not edited', () => {
-    const { box, onSave } = renderEditor('USER STORY\nAs an owner');
+  it('does not rewrite a plain-text description that was clicked into but not edited', () => {
+    // Placing the caret makes the editor add its trailing paragraph after the
+    // list, which is a document change without being an edit.
+    const { editor, onSave } = renderEditor('USER STORY\nAs an owner\n\n- one\n- two');
 
-    fireEvent.focus(box);
-    fireEvent.blur(box);
+    act(() => {
+      editor.commands.setTextSelection(2);
+    });
 
     expect(onSave).not.toHaveBeenCalled();
   });
