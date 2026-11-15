@@ -1,43 +1,107 @@
-import { describe, it, expect, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { ReactElement } from 'react';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }),
 }));
-vi.mock('@voxire/api', () => ({ uploadAsset: vi.fn() }));
+const signAssetUrl = vi.hoisted(() => vi.fn());
+vi.mock('@voxire/api', () => ({ uploadAsset: vi.fn(), signAssetUrl }));
+vi.mock('@voxire/config', () => ({ getCdnBaseUrl: () => 'https://api.voxire.com' }));
 vi.mock('../stores/flowStore', () => ({
   useFlowStore: (selector: (s: { members: [] }) => unknown) => selector({ members: [] }),
 }));
 
 import AttachmentUpload from './AttachmentUpload';
 
+const CDN_FILE = 'https://api.voxire.com/files/0f1e2d3c-4b5a-4678-9abc-def012345678';
+const SIGNED = `${CDN_FILE}?expires=1&sig=abc`;
+
 const image = {
   id: 'a1',
   name: 'statement-en-phone.png',
   size: 641741,
   uploadedBy: '18',
-  url: 'https://cdn.example.test/statement-en-phone.png',
+  url: CDN_FILE,
   mime: 'image/*',
   createdAt: '2026-11-15T00:00:00Z',
 };
 
-describe('image attachments', () => {
-  it('shows the image and opens it full size', () => {
-    render(<AttachmentUpload attachments={[image] as never} />);
+function renderWithQuery(ui: ReactElement) {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+}
 
-    const thumb = screen.getByRole('img', { name: image.name });
-    expect(thumb).toHaveAttribute('src', image.url);
+describe('image attachments', () => {
+  beforeEach(() => {
+    signAssetUrl.mockReset();
+    signAssetUrl.mockResolvedValue({ url: SIGNED, expiresAt: 1 });
+  });
+
+  it('loads a CDN upload through a signed link and opens it full size', async () => {
+    // Uploads are private, so the stored address alone answers 404 to an
+    // <img>, and every thumbnail fell back to the placeholder icon.
+    renderWithQuery(<AttachmentUpload attachments={[image] as never} />);
+
+    const thumb = await screen.findByRole('img', { name: image.name });
+    expect(thumb).toHaveAttribute('src', SIGNED);
+    // Signed by path, so a file stored under an earlier CDN host still signs.
+    expect(signAssetUrl).toHaveBeenCalledWith(new URL(CDN_FILE).pathname, expect.anything());
 
     fireEvent.click(screen.getByRole('button', { name: 'flow.taskDetail.openAttachment' }));
 
-    const dialog = screen.getByRole('dialog');
-    expect(dialog.querySelector(`img[src="${image.url}"]`)).not.toBeNull();
+    const dialog = await screen.findByRole('dialog');
+    await waitFor(() => expect(dialog.querySelector(`img[src="${SIGNED}"]`)).not.toBeNull());
+  });
+
+  it('uses an external link as stored, without signing it', async () => {
+    const external = { ...image, url: 'https://example.test/shot.png' };
+    renderWithQuery(<AttachmentUpload attachments={[external] as never} />);
+
+    expect(await screen.findByRole('img', { name: image.name })).toHaveAttribute(
+      'src',
+      external.url
+    );
+    expect(signAssetUrl).not.toHaveBeenCalled();
+  });
+
+  it('falls back to the stored address when signing fails', async () => {
+    signAssetUrl.mockRejectedValue(new Error('signing is not configured'));
+    renderWithQuery(<AttachmentUpload attachments={[image] as never} />);
+
+    // The hook retries signing once before falling back.
+    expect(await screen.findByRole('img', { name: image.name }, { timeout: 4000 })).toHaveAttribute(
+      'src',
+      CDN_FILE
+    );
   });
 
   it('does not load or link an address that is not http(s)', () => {
-    render(<AttachmentUpload attachments={[{ ...image, url: 'javascript:alert(1)' }] as never} />);
+    renderWithQuery(
+      <AttachmentUpload attachments={[{ ...image, url: 'javascript:alert(1)' }] as never} />
+    );
 
     expect(screen.queryByRole('img', { name: image.name })).toBeNull();
     expect(screen.getByRole('button', { name: image.name })).toBeDisabled();
+  });
+});
+
+describe('removing attachments', () => {
+  it('offers remove only on attachments the viewer may delete', () => {
+    // The server lets the uploader remove their own; the button used to show
+    // on every attachment and fail with "Failed to remove attachment".
+    signAssetUrl.mockResolvedValue({ url: SIGNED, expiresAt: 1 });
+    renderWithQuery(
+      <AttachmentUpload
+        attachments={[image, { ...image, id: 'a2', uploadedBy: '20' }] as never}
+        onRemove={() => {}}
+        canRemove={(attachment) => attachment.uploadedBy === '18'}
+      />
+    );
+
+    expect(
+      screen.getAllByRole('button', { name: 'flow.taskDetail.removeAttachmentLabel' })
+    ).toHaveLength(1);
   });
 });

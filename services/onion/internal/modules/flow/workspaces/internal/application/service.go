@@ -329,6 +329,7 @@ type repository interface {
 	DeleteWorkspace(ctx context.Context, id, businessID int64) error
 	GetActivityByTask(ctx context.Context, taskID int64, limit int) ([]domain.TaskActivity, error)
 	GetAttachmentTaskID(ctx context.Context, attachmentID int64) (int64, error)
+	GetAttachmentUploader(ctx context.Context, attachmentID int64) (int64, int64, error)
 	GetAttachmentsByTask(ctx context.Context, taskID int64) ([]domain.TaskAttachment, error)
 	GetColumnProject(ctx context.Context, columnID int64) int64
 	GetColumnsByProject(ctx context.Context, projectID, limit, offset int64) ([]domain.ProjectColumn, int64, error)

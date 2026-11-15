@@ -17,7 +17,7 @@ func (a *TaskAPI) DeleteAttachment(ctx context.Context, req *flowtaskv1.DeleteAt
 		return nil, err
 	}
 
-	if roleErr := a.Service.RequireAttachmentRole(ctx, req.GetId(), authUser.UserID, businessID, domain.FlowRoleAdmin); roleErr != nil {
+	if roleErr := a.Service.RequireAttachmentDelete(ctx, req.GetId(), authUser.UserID, businessID); roleErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 

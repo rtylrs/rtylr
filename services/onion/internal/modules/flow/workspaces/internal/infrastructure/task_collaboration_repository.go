@@ -122,6 +122,16 @@ func (r *Repository) GetCommentTaskID(ctx context.Context, commentID int64) (int
 	return r.queries.GetCommentTaskID(ctx, commentID)
 }
 
+// GetAttachmentUploader returns the task an attachment hangs off and who
+// uploaded it, so a delete can let the uploader remove their own file.
+func (r *Repository) GetAttachmentUploader(ctx context.Context, attachmentID int64) (int64, int64, error) {
+	row, err := r.queries.GetAttachmentUploader(ctx, attachmentID)
+	if err != nil {
+		return 0, 0, err
+	}
+	return row.TaskID, row.UploadedBy, nil
+}
+
 // GetAttachmentTaskID returns the task an attachment hangs off, so a delete can
 // be authorized against that task's project.
 func (r *Repository) GetAttachmentTaskID(ctx context.Context, attachmentID int64) (int64, error) {

@@ -77,3 +77,52 @@ export const uploadAsset = async (
 
   return (await response.json()) as UploadedAsset;
 };
+
+export interface SignedAssetUrl {
+  url: string;
+  /** Unix seconds after which the link stops working. */
+  expiresAt: number;
+}
+
+export interface SignAssetUrlOptions {
+  /** Link lifetime in seconds. The CDN defaults to an hour and caps at 30 days. */
+  expiresIn?: number;
+  cdnBaseUrl?: string;
+  signal?: AbortSignal;
+}
+
+/**
+ * Returns a time-limited link to one of the caller's own CDN files.
+ *
+ * Uploads are private by default, and the CDN serves a private file only to a
+ * request that carries the user's token in an Authorization header, which an
+ * `<img>` tag or a new tab cannot send. A signed link carries its own
+ * credential, so it can be used directly as an image source or opened in a tab.
+ */
+export const signAssetUrl = async (
+  url: string,
+  options: SignAssetUrlOptions = {}
+): Promise<SignedAssetUrl> => {
+  const token = getToken();
+  if (!token) {
+    throw new Error('You need to sign in before opening files.');
+  }
+
+  const response = await fetch(`${getCdnBaseUrl(options.cdnBaseUrl)}/sign`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ url, expires_in: options.expiresIn ?? 3600 }),
+    credentials: 'include',
+    signal: options.signal,
+  });
+
+  if (!response.ok) {
+    throw new Error(await uploadErrorMessage(response));
+  }
+
+  const body = (await response.json()) as { url: string; expires_at: number };
+  return { url: body.url, expiresAt: body.expires_at };
+};

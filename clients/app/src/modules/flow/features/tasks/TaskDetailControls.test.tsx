@@ -50,6 +50,7 @@ vi.mock('../projects/useStatuses', () => ({
 vi.mock('../projects/useCurrentProject', () => ({
   useCurrentProject: () => ({ project: undefined }),
 }));
+vi.mock('../../shared/components/AttachmentUpload', () => ({ default: () => null }));
 vi.mock('../projects/useProjectMembers', () => ({ useProjectMembers: () => ({ data: [] }) }));
 vi.mock('../projects/useColumns', () => ({
   useProjectColumns: () => ({ data: [{ id: '6', name: 'Review', sortOrder: 0 }] }),

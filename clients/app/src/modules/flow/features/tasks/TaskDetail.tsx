@@ -560,6 +560,11 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
               <AttachmentUpload
                 attachments={taskAttachments}
                 peopleNames={peopleNames}
+                // Matches the server: your own uploads, or anyone's as a
+                // project admin.
+                canRemove={(attachment) =>
+                  canRemove || String(attachment.uploadedBy) === currentUserId
+                }
                 onAdd={(name, size, mime, url) =>
                   addAttachmentMut.mutate({ taskId: task.id, name, size, mime, url })
                 }
