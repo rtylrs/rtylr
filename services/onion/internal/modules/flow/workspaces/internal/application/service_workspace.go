@@ -222,6 +222,23 @@ func (s *Service) RequireAttachmentRole(ctx context.Context, attachmentID, userI
 	return s.RequireTaskRole(ctx, taskID, userID, businessID, minRole)
 }
 
+// RequireAttachmentDelete authorizes removing an attachment. The person who
+// uploaded it may remove it with the member access it took to attach it;
+// removing anyone else's needs admin on the project. Before this, only admins
+// could remove any attachment, so a member's own upload showed a remove
+// button the server always refused.
+func (s *Service) RequireAttachmentDelete(ctx context.Context, attachmentID, userID, businessID int64) error {
+	taskID, uploadedBy, err := s.repo.GetAttachmentUploader(ctx, attachmentID)
+	if err != nil {
+		return domain.ErrUnauthorized
+	}
+	minRole := domain.FlowRoleAdmin
+	if uploadedBy == userID {
+		minRole = domain.FlowRoleMember
+	}
+	return s.RequireTaskRole(ctx, taskID, userID, businessID, minRole)
+}
+
 // RequireTimeLogRole authorizes against the project owning a time log's task.
 func (s *Service) RequireTimeLogRole(ctx context.Context, timeLogID, userID, businessID int64, minRole string) error {
 	taskID, err := s.repo.GetTimeLogTaskID(ctx, timeLogID)

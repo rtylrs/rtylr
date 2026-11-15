@@ -10,6 +10,12 @@ FROM flow_time_logs
 WHERE id = ?
 LIMIT 1;
 
+-- name: GetAttachmentUploader :one
+SELECT task_id, uploaded_by
+FROM flow_task_attachments
+WHERE id = ?
+LIMIT 1;
+
 -- name: GetAttachmentTaskID :one
 SELECT task_id
 FROM flow_task_attachments

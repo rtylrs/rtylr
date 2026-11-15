@@ -52,7 +52,7 @@ func (a *TaskAPIV2) DeleteAttachment(ctx context.Context, req *flowtaskv2.Delete
 	if err != nil {
 		return nil, err
 	}
-	if roleErr := a.Service.RequireAttachmentRole(ctx, req.GetId(), caller.UserID, businessID, domain.FlowRoleAdmin); roleErr != nil {
+	if roleErr := a.Service.RequireAttachmentDelete(ctx, req.GetId(), caller.UserID, businessID); roleErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 	if err := a.Service.DeleteAttachment(ctx, req.GetId(), businessID); err != nil {

@@ -1,14 +1,22 @@
 import React, { useRef, useState } from 'react';
 import { uploadAsset } from '@voxire/api';
+import { getCdnBaseUrl } from '@voxire/config';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@voxire/ui';
 import { ExternalLink, Upload, FileText, Image as ImageIcon, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Attachment, useFlowStore } from '../stores/flowStore';
+import { useResolveAssetUrl, useSignedAssetUrl } from '../hooks/queries/useSignedAssetUrl';
 
 interface AttachmentUploadProps {
   attachments: Attachment[];
   onAdd?: (name: string, size: number, mime: string, url: string) => void;
   onRemove?: (id: string) => void;
+  /**
+   * Whether the viewer may remove this attachment. The server lets the uploader
+   * remove their own and project admins remove any, so the button is offered
+   * only where the delete will succeed. Defaults to every attachment.
+   */
+  canRemove?: (attachment: Attachment) => boolean;
   disabled?: boolean;
   /** Names by user id, for people the business team list does not cover. */
   peopleNames?: Record<string, string>;
@@ -22,7 +30,8 @@ interface AttachmentUploadProps {
 export function safeAttachmentUrl(url: string | undefined): string | null {
   if (!url) return null;
   try {
-    const parsed = new URL(url, window.location.origin);
+    // A relative address is a path on the CDN, which is where uploads live.
+    const parsed = new URL(url, `${getCdnBaseUrl()}/`);
     return parsed.protocol === 'https:' || parsed.protocol === 'http:' ? parsed.href : null;
   } catch {
     return null;
@@ -34,25 +43,55 @@ export function safeAttachmentUrl(url: string | undefined): string | null {
 const THUMB_FRAME =
   'h-12 w-16 shrink-0 rounded-md overflow-hidden flex items-center justify-center';
 
-const AttachmentThumb: React.FC<{ src: string; name: string }> = ({ src, name }) => {
-  const [failed, setFailed] = useState(false);
+const AttachmentThumb: React.FC<{ url: string; name: string }> = ({ url, name }) => {
+  const signed = useSignedAssetUrl(url);
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const failed = signed.url !== null && failedSrc === signed.url;
   return (
     <span
       className={THUMB_FRAME}
       style={{ border: '1px solid var(--flow-border)', background: 'var(--flow-card)' }}
     >
-      {failed ? (
-        <ImageIcon size={16} style={{ color: 'var(--flow-text-muted)' }} />
-      ) : (
+      {signed.url && !failed ? (
         <img
-          src={src}
+          src={signed.url}
           alt={name}
           loading="lazy"
-          onError={() => setFailed(true)}
+          onError={() => setFailedSrc(signed.url)}
           className="h-full w-full object-contain"
         />
+      ) : signed.loading ? null : (
+        <ImageIcon size={16} style={{ color: 'var(--flow-text-muted)' }} />
       )}
     </span>
+  );
+};
+
+const PreviewBody: React.FC<{ url: string; name: string }> = ({ url, name }) => {
+  const { t } = useTranslation();
+  const signed = useSignedAssetUrl(url);
+  if (!signed.url) {
+    return <div className="h-[40vh] rounded-md" style={{ background: 'var(--flow-hover)' }} />;
+  }
+  return (
+    <>
+      <img
+        src={signed.url}
+        alt={name}
+        className="max-h-[75vh] w-full rounded-md object-contain"
+        style={{ background: 'var(--flow-hover)' }}
+      />
+      <a
+        href={signed.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 text-flow-meta font-medium hover:underline"
+        style={{ color: 'var(--flow-text-muted)' }}
+      >
+        <ExternalLink size={12} />
+        {t('flow.taskDetail.openOriginal')}
+      </a>
+    </>
   );
 };
 
@@ -66,12 +105,14 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
   attachments,
   onAdd,
   onRemove,
+  canRemove,
   disabled,
   peopleNames,
 }) => {
   const { t } = useTranslation();
   const members = useFlowStore((state) => state.members);
-  const [preview, setPreview] = useState<{ name: string; src: string } | null>(null);
+  const resolveUrl = useResolveAssetUrl();
+  const [preview, setPreview] = useState<{ name: string; url: string } | null>(null);
   const uploaderName = (id: string): string =>
     members.find((member) => String(member.id) === String(id))?.name ??
     peopleNames?.[String(id)] ??
@@ -105,8 +146,21 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
           const href = safeAttachmentUrl(a.url);
           const open = () => {
             if (!href) return;
-            if (isImage) setPreview({ name: a.name, src: href });
-            else window.open(href, '_blank', 'noopener,noreferrer');
+            if (isImage) {
+              setPreview({ name: a.name, url: href });
+              return;
+            }
+            // Open the tab inside the click, so it is not blocked as a popup,
+            // then point it at the signed link once that arrives.
+            const tab = window.open('about:blank', '_blank');
+            void resolveUrl(href).then((link) => {
+              if (tab) {
+                tab.opener = null;
+                tab.location.href = link;
+              } else {
+                window.open(link, '_blank', 'noopener,noreferrer');
+              }
+            });
           };
           return (
             <div
@@ -125,7 +179,7 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
                 aria-label={href ? t('flow.taskDetail.openAttachment', { name: a.name }) : a.name}
               >
                 {isImage && href ? (
-                  <AttachmentThumb src={href} name={a.name} />
+                  <AttachmentThumb url={href} name={a.name} />
                 ) : (
                   <Icon
                     size={14}
@@ -154,7 +208,7 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
                   </span>
                 </span>
               </button>
-              {onRemove && !disabled && (
+              {onRemove && !disabled && (canRemove?.(a) ?? true) && (
                 <button
                   type="button"
                   onClick={() => onRemove(a.id)}
@@ -197,26 +251,7 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
           <DialogDescription className="sr-only">
             {t('flow.taskDetail.attachmentPreview')}
           </DialogDescription>
-          {preview && (
-            <>
-              <img
-                src={preview.src}
-                alt={preview.name}
-                className="max-h-[75vh] w-full rounded-md object-contain"
-                style={{ background: 'var(--flow-hover)' }}
-              />
-              <a
-                href={preview.src}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-flow-meta font-medium hover:underline"
-                style={{ color: 'var(--flow-text-muted)' }}
-              >
-                <ExternalLink size={12} />
-                {t('flow.taskDetail.openOriginal')}
-              </a>
-            </>
-          )}
+          {preview && <PreviewBody url={preview.url} name={preview.name} />}
         </DialogContent>
       </Dialog>
       <input

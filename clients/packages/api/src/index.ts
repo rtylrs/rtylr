@@ -17,6 +17,11 @@ export { setSessionRefresh } from './session';
 export type { SessionRefresh } from './session';
 export { RealtimeClient, getRealtimeClient } from './realtime';
 export type { RealtimeEvent, RealtimeStatus, RealtimeDiagnosticEvent } from './realtime';
-export { uploadAsset } from './upload';
-export type { UploadedAsset, UploadAssetOptions } from './upload';
+export { uploadAsset, signAssetUrl } from './upload';
+export type {
+  UploadedAsset,
+  UploadAssetOptions,
+  SignedAssetUrl,
+  SignAssetUrlOptions,
+} from './upload';
 export { safeRatio, toFiniteNumber, toOptionalFiniteNumber } from './wire';

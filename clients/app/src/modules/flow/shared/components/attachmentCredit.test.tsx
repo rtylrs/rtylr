@@ -6,6 +6,10 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }),
 }));
 vi.mock('@voxire/api', () => ({ uploadAsset: vi.fn() }));
+vi.mock('../hooks/queries/useSignedAssetUrl', () => ({
+  useSignedAssetUrl: (url: string | null) => ({ url, loading: false }),
+  useResolveAssetUrl: () => async (url: string) => url,
+}));
 
 const storeState = vi.hoisted(() => ({
   members: [] as { id: string; name: string }[],

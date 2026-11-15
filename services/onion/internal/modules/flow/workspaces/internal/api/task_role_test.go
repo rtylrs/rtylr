@@ -16,6 +16,7 @@ import (
 	"github.com/voxire/onion/internal/testutil"
 	flowlabelv1 "github.com/voxire/voxie/gen/go/flow/label/v1"
 	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
+	flowtaskv2 "github.com/voxire/voxie/gen/go/flow/task/v2"
 )
 
 // Distinct from the shared fixture tenant so these rows cannot collide with
@@ -529,3 +530,52 @@ func TestTaskRole_WorkspaceMemberCanUpdateTask(t *testing.T) {
 // svc exposes the fixture's service so a test can build another handler against
 // the same seeded workspace, project and role rows.
 func (f *roleFixture) svc() *application.Service { return f.service }
+
+// A member could attach a file but not remove it: delete required project
+// admin, while the task view offered every editor a remove button, so removing
+// your own upload always failed with "Failed to remove attachment".
+func TestTaskRole_AttachmentDeleteFollowsUploader(t *testing.T) {
+	f := newRoleFixture(t)
+	ctx := context.Background()
+	taskID := f.newTask(t)
+	v2 := api.NewTaskAPIV2(f.service)
+
+	attach := func(uploader int64, name string) int64 {
+		t.Helper()
+		id, err := f.repo.CreateAttachment(ctx, domain.TaskAttachmentInput{
+			TaskID: taskID, OwnerID: roleOwnerID, BusinessID: testutil.BusinessID,
+			Name: name, URL: "https://example.invalid/" + name, UploadedBy: uploader,
+		})
+		if err != nil {
+			t.Fatalf("CreateAttachment %s: %v", name, err)
+		}
+		return id
+	}
+	exists := func(id int64) bool {
+		t.Helper()
+		_, err := f.repo.GetAttachmentTaskID(ctx, id)
+		return err == nil
+	}
+
+	own := attach(roleMemberID, "mine.png")
+	if _, err := v2.DeleteAttachment(ctxAs(roleMemberID), &flowtaskv2.DeleteAttachmentRequest{Id: own}); err != nil {
+		t.Fatalf("member deleting their own attachment: %v", err)
+	}
+	if exists(own) {
+		t.Error("the member's own attachment survived their delete")
+	}
+
+	others := attach(roleOwnerID, "theirs.png")
+	_, err := v2.DeleteAttachment(ctxAs(roleMemberID), &flowtaskv2.DeleteAttachmentRequest{Id: others})
+	assertPermissionDenied(t, err, "member deleting someone else's attachment")
+	if !exists(others) {
+		t.Fatal("a member removed an attachment someone else uploaded")
+	}
+
+	if _, err := v2.DeleteAttachment(ctxAs(roleManagerID), &flowtaskv2.DeleteAttachmentRequest{Id: others}); err != nil {
+		t.Fatalf("project admin deleting another person's attachment: %v", err)
+	}
+	if exists(others) {
+		t.Error("the admin's delete left the attachment in place")
+	}
+}

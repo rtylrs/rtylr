@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, vi, afterEach } from 'vitest';
-import { uploadAsset } from './upload';
+import { signAssetUrl, uploadAsset } from './upload';
 
 /**
  * rtylr#952 defect 2. uploadAsset's private getToken called
@@ -38,5 +38,40 @@ describe('uploadAsset token parsing', () => {
     document.cookie = `token=${JWT}`;
     const file = new File(['x'], 'a.png', { type: 'image/png' });
     await expect(uploadAsset(file)).resolves.toBeTruthy();
+  });
+});
+
+describe('signAssetUrl', () => {
+  it('asks the CDN to sign the file with the user token and returns the link', async () => {
+    document.cookie = `token=${JWT}`;
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ url: 'https://cdn.example/files/x?sig=s', expires_at: 99 }),
+      text: async () => '',
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      signAssetUrl('https://cdn.example/files/x', { cdnBaseUrl: 'https://cdn.example/' })
+    ).resolves.toEqual({ url: 'https://cdn.example/files/x?sig=s', expiresAt: 99 });
+
+    const [endpoint, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(endpoint).toBe('https://cdn.example/sign');
+    expect((init.headers as Record<string, string>).Authorization).toBe(`Bearer ${JWT}`);
+    expect(JSON.parse(init.body as string)).toEqual({
+      url: 'https://cdn.example/files/x',
+      expires_in: 3600,
+    });
+  });
+
+  it('reports a refused signature as an error', async () => {
+    document.cookie = `token=${JWT}`;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: false, status: 404, text: async () => 'file not found' }))
+    );
+
+    await expect(signAssetUrl('https://cdn.example/files/x')).rejects.toThrow('file not found');
   });
 });
