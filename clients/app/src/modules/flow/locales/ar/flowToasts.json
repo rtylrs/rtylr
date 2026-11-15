@@ -35,7 +35,8 @@
     "createdWithId": "تم إنشاء {{id}}"
   },
   "comment": {
-    "postFailed": "تعذّر نشر التعليق"
+    "postFailed": "تعذّر نشر التعليق",
+    "editFailed": "تعذّر حفظ تعديل تعليقك"
   },
   "subtask": {
     "addFailed": "تعذّر إضافة المهمة الفرعية",

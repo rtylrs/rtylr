@@ -417,6 +417,9 @@ export interface ApiTaskComment {
   id: string;
   taskId: string;
   userId: string;
+  /** Display name resolved server-side from the author's profile. */
+  actorName?: string;
+  actorInitials?: string;
   content: string;
   isEdited: boolean;
   createdAt: string;
@@ -780,6 +783,11 @@ export const flowApi = {
 
   deleteComment: (id: string) =>
     flowResult<{ message: string }>(() => taskV2.deleteComment({ id })),
+
+  updateComment: (data: { id: string; content: string }) =>
+    flowResult<{ comment: ApiTaskComment }>(() =>
+      taskV2.updateComment({ id: data.id, content: data.content })
+    ),
 
   // -- Task Activity ------------------------------------------------------
 

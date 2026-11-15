@@ -59,3 +59,22 @@ describe('who an attachment is credited to', () => {
     expect(screen.getByText(/9403/)).toBeInTheDocument();
   });
 });
+
+describe('when the team list does not cover the uploader', () => {
+  beforeEach(() => {
+    storeState.members = [];
+  });
+
+  it('names them from the project’s people instead of printing their id', () => {
+    // Without the team-view permission the team list is empty, and the row
+    // read "859.3 KB · 18".
+    render(
+      <AttachmentUpload
+        attachments={[{ ...attachment, uploadedBy: '18' }] as never}
+        peopleNames={{ '18': 'Ahmad Homsi' }}
+      />
+    );
+
+    expect(screen.getByText(/Ahmad Homsi/)).toBeInTheDocument();
+  });
+});

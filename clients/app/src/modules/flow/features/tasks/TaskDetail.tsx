@@ -40,6 +40,7 @@ import {
   useUpdateTask,
   useDeleteTask,
   useAddComment,
+  useUpdateComment,
   useAddSubtask,
   useToggleSubtask,
   useTaskAttachments,
@@ -64,7 +65,8 @@ import { useUserStore } from '../../shared/stores/userStore';
 import { useCanEditTask, useCanDeleteResource } from '../../shared/lib/currentUser';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
 import CommentList from '../../shared/components/CommentList';
-import CommentInput from '../../shared/components/CommentInput';
+import CommentInput, { type MentionCandidate } from '../../shared/components/CommentInput';
+import { useProjectMembers } from '../projects/useProjectMembers';
 import SubtaskList from '../../shared/components/SubtaskList';
 import AttachmentUpload from '../../shared/components/AttachmentUpload';
 import AssigneeAvatar from '../../shared/components/AssigneeAvatar';
@@ -218,6 +220,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const updateTaskMut = useUpdateTask();
   const deleteTaskMut = useDeleteTask();
   const addCommentMut = useAddComment();
+  const updateCommentMut = useUpdateComment();
   const addSubtaskMut = useAddSubtask();
   const toggleSubtaskMut = useToggleSubtask();
   const setTaskLabelsMut = useSetTaskLabels();
@@ -231,6 +234,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
 
   const taskProjectId = detail?.task?.projectId;
   const { project: taskProject } = useCurrentProject(taskProjectId);
+  const { data: projectMembers = [] } = useProjectMembers(taskProjectId);
   const { data: allLabels = [] } = useLabels();
   const tasksQuery = useTasks({});
   const allTasks = (tasksQuery.data ?? []).map(apiTaskToTask).filter((task) => !task.archived);
@@ -281,17 +285,39 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   }
 
   const task = detail?.task;
+  // Names by user id. The business team list needs the team-view permission,
+  // so the project's own member list fills in for everyone else; without it a
+  // comment read "Unknown" and an attachment named its uploader by raw id.
+  const peopleNames: Record<string, string> = {};
+  for (const member of projectMembers) {
+    if (member.name) peopleNames[String(member.userId)] = member.name;
+  }
+  for (const member of members) {
+    if (member.name) peopleNames[String(member.id)] = member.name;
+  }
+  const currentUserId = user?.id === undefined ? undefined : String(user.id);
+  // The people a comment here can mention: the project's members, who are the
+  // ones the server notifies when their name follows an "@".
+  const mentionCandidates: MentionCandidate[] = projectMembers
+    .filter((member) => member.name && String(member.userId) !== currentUserId)
+    .map((member) => ({
+      id: String(member.userId),
+      name: member.name,
+      initials: getInitials(member.name),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
   const taskComments = (detail?.comments ?? []).map((c) => {
-    const author = members.find((member) => String(member.id) === String(c.userId));
-    const authorName = author?.name || t('flow.time.unknownAuthor');
+    const authorName =
+      c.actorName?.trim() || peopleNames[String(c.userId)] || t('flow.time.unknownAuthor');
     return {
       id: c.id,
       taskId: c.taskId,
       authorId: c.userId,
       author: authorName,
-      authorInitials: author?.initials || getInitials(authorName),
+      authorInitials: c.actorInitials || getInitials(authorName),
       body: c.content,
       createdAt: c.createdAt,
+      edited: c.isEdited,
     };
   });
 
@@ -535,6 +561,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
               </h3>
               <AttachmentUpload
                 attachments={taskAttachments}
+                peopleNames={peopleNames}
                 onAdd={(name, size, mime, url) =>
                   addAttachmentMut.mutate({ taskId: task.id, name, size, mime, url })
                 }
@@ -583,9 +610,21 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
             {tab === 'comments' && (
               <div>
                 <div className="mb-4">
-                  <CommentList comments={taskComments} />
+                  <CommentList
+                    comments={taskComments}
+                    currentUserId={currentUserId}
+                    mentionCandidates={mentionCandidates}
+                    mentionNames={Object.values(peopleNames)}
+                    onEdit={
+                      canEdit
+                        ? (commentId, body) =>
+                            updateCommentMut.mutate({ id: commentId, content: body })
+                        : undefined
+                    }
+                  />
                 </div>
                 <CommentInput
+                  mentionCandidates={mentionCandidates}
                   onSubmit={(body) =>
                     addComment(
                       task.id,

@@ -81,6 +81,7 @@ export interface Comment {
   body: string;
   createdAt: string;
   mentions?: string[];
+  edited?: boolean;
 }
 
 export interface ActivityEntry {

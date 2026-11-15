@@ -127,6 +127,16 @@ func (s *Service) DeleteComment(ctx context.Context, commentID, userID int64) er
 	return s.repo.DeleteComment(ctx, commentID, userID)
 }
 
+// UpdateComment rewords a comment its author wrote. Someone else's comment
+// reports domain.ErrUnauthorized. Editing does not notify again: the people
+// the comment concerns were told when it was posted.
+func (s *Service) UpdateComment(ctx context.Context, commentID, userID int64, content string) (domain.TaskComment, error) {
+	if err := s.repo.UpdateComment(ctx, commentID, userID, content); err != nil {
+		return domain.TaskComment{}, err
+	}
+	return s.repo.GetCommentByID(ctx, commentID)
+}
+
 // GetCommentTaskID returns the task a comment belongs to. Handlers call
 // this before DeleteComment so the realtime event can route to the
 // right topic after the row is gone.

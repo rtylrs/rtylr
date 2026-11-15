@@ -345,6 +345,19 @@ export function useAddComment() {
   });
 }
 
+export function useUpdateComment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { id: string; content: string }) => {
+      return unwrap(flowApi.updateComment(data)).then(() => {});
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['task'] });
+    },
+    onError: () => toast.error(t('flowToasts.comment.editFailed')),
+  });
+}
+
 export function useAddSubtask() {
   const qc = useQueryClient();
   return useMutation({

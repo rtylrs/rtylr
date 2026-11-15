@@ -161,7 +161,17 @@
     "waitingOn": "Waiting on",
     "waitingPlaceholder": "Person, team, approval…",
     "you": "You",
-    "drawerLabel": "Task detail"
+    "drawerLabel": "Task detail",
+    "editComment": "Edit",
+    "editCommentLabel": "Edit your comment",
+    "saveComment": "Save",
+    "cancelEdit": "Cancel",
+    "edited": "(edited)",
+    "noMentionMatches": "No one on this project matches",
+    "noOneToMention": "No one else is on this project yet",
+    "openAttachment": "Open {{name}}",
+    "attachmentPreview": "Full-size preview of the attached image",
+    "openOriginal": "Open original"
   },
   "time": {
     "add": {

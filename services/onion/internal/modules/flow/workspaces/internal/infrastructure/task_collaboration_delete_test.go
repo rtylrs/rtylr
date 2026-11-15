@@ -107,3 +107,40 @@ func TestDeleteTimeLogRefusesWhenCallerIsNotTheAuthor(t *testing.T) {
 		}
 	}
 }
+
+// Editing is author-only, like the delete: someone else's comment must stay as
+// written and report a denial, while the author's edit lands and is marked.
+func TestUpdateCommentIsAuthorOnly(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := testsupport.NewRepository(db)
+	ctx := context.Background()
+
+	taskID, _ := seedArchivedTestTask(t, db, repo, "UpdateCommentGuard")
+
+	commentID, err := repo.CreateComment(ctx, taskID, testutil.OwnerID, "first wording")
+	if err != nil {
+		t.Fatalf("CreateComment: %v", err)
+	}
+
+	if err := repo.UpdateComment(ctx, commentID, testutil.OtherOwnerID, "hijacked"); !errors.Is(err, domain.ErrUnauthorized) {
+		t.Fatalf("UpdateComment as a non-author = %v, want ErrUnauthorized", err)
+	}
+	stored, err := repo.GetCommentByID(ctx, commentID)
+	if err != nil {
+		t.Fatalf("GetCommentByID: %v", err)
+	}
+	if stored.Content != "first wording" || stored.IsEdited {
+		t.Fatalf("a non-author changed the comment: content=%q edited=%v", stored.Content, stored.IsEdited)
+	}
+
+	if err := repo.UpdateComment(ctx, commentID, testutil.OwnerID, "second wording"); err != nil {
+		t.Fatalf("UpdateComment as the author: %v", err)
+	}
+	stored, err = repo.GetCommentByID(ctx, commentID)
+	if err != nil {
+		t.Fatalf("GetCommentByID after edit: %v", err)
+	}
+	if stored.Content != "second wording" || !stored.IsEdited {
+		t.Fatalf("author edit = content %q edited %v, want %q and edited", stored.Content, stored.IsEdited, "second wording")
+	}
+}

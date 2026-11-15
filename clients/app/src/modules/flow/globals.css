@@ -307,6 +307,22 @@
   background: var(--flow-input-bg);
   outline: none !important;
 }
+/* The comment box shows focus on its own rounded frame. The Flow-wide focus
+   outline would otherwise sit 2px outside the square textarea inside it, with
+   corners that do not match the frame. */
+.flow-comment-box {
+  border: 1px solid var(--flow-border-control);
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.flow-comment-box:focus-within {
+  border-color: color-mix(in srgb, var(--dash-text) 40%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--dash-text) 8%, transparent);
+}
+.flow-comment-box textarea:focus-visible {
+  outline: none !important;
+}
 @media (max-width: 900px) {
   .portal-flow-show-sidebar {
     display: none;

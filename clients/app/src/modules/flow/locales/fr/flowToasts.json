@@ -29,7 +29,8 @@
     "createdWithId": "Créé {{id}}"
   },
   "comment": {
-    "postFailed": "Impossible de publier le commentaire"
+    "postFailed": "Impossible de publier le commentaire",
+    "editFailed": "Impossible d’enregistrer la modification du commentaire"
   },
   "subtask": {
     "addFailed": "Impossible d'ajouter la sous-tâche",

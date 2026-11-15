@@ -60,6 +60,7 @@ vi.mock('./useTasks', () => ({
   useUpdateTask: () => ({ mutate: updateTaskMutate, isPending: false }),
   useDeleteTask: () => ({ mutate: deleteTaskMutate, isPending: false }),
   useAddComment: () => ({ mutate: vi.fn(), isPending: false }),
+  useUpdateComment: () => ({ mutate: vi.fn(), isPending: false }),
   useAddSubtask: () => ({ mutate: vi.fn(), isPending: false }),
   useToggleSubtask: () => ({ mutate: vi.fn(), isPending: false }),
   useTaskAttachments: () => ({ data: [] }),
@@ -70,6 +71,7 @@ vi.mock('./useTasks', () => ({
 vi.mock('../cycles/useCycles', () => ({ useCycles: () => ({ data: [] }) }));
 vi.mock('../milestones/useMilestones', () => ({ useMilestones: () => ({ data: [] }) }));
 vi.mock('../projects/useColumns', () => ({ useProjectColumns: () => ({ data: [] }) }));
+vi.mock('../projects/useProjectMembers', () => ({ useProjectMembers: () => ({ data: [] }) }));
 
 const useLabelsSpy = vi.hoisted(() => vi.fn(() => ({ data: [] })));
 vi.mock('./useLabels', () => ({

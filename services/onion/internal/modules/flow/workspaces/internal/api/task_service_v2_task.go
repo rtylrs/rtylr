@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/domain"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
@@ -183,6 +184,33 @@ func (a *TaskAPIV2) DeleteComment(ctx context.Context, req *flowtaskv2.DeleteCom
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete comment")
 	}
 	return &flowtaskv2.DeleteCommentResponse{Message: "Comment deleted successfully"}, nil
+}
+
+func (a *TaskAPIV2) UpdateComment(ctx context.Context, req *flowtaskv2.UpdateCommentRequest) (*flowtaskv2.UpdateCommentResponse, error) {
+	caller, businessID, err := a.resolveAuth(ctx)
+	if err != nil {
+		return nil, err
+	}
+	content := strings.TrimSpace(req.GetContent())
+	if content == "" {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Comment cannot be empty")
+	}
+	// Same gate as posting: someone who has since lost member access to the
+	// project cannot keep rewording what they wrote there.
+	if roleErr := a.Service.RequireCommentRole(ctx, req.GetId(), caller.UserID, businessID, domain.FlowRoleMember); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	comment, err := a.Service.UpdateComment(ctx, req.GetId(), caller.UserID, content)
+	if err != nil {
+		// The write is scoped to the author, so another person's comment is a
+		// permission answer rather than an outage.
+		if errors.Is(err, domain.ErrUnauthorized) {
+			return nil, onekiterrors.PermissionDenied()
+		}
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update comment")
+	}
+	publishCommentEvent("comment.updated", comment.TaskID, caller.UserID)
+	return &flowtaskv2.UpdateCommentResponse{Comment: toCommentV2(comment)}, nil
 }
 
 func (a *TaskAPIV2) GetTaskActivity(ctx context.Context, req *flowtaskv2.GetTaskActivityRequest) (*flowtaskv2.GetTaskActivityResponse, error) {
