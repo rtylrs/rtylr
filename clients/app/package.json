@@ -34,6 +34,12 @@
   "dependencies": {
     "@tanstack/react-query": "^5.99.2",
     "@tanstack/react-router": "^1.170.8",
+    "@tiptap/extension-list": "^3.34.0",
+    "@tiptap/extensions": "^3.34.0",
+    "@tiptap/markdown": "^3.34.0",
+    "@tiptap/pm": "^3.34.0",
+    "@tiptap/react": "^3.34.0",
+    "@tiptap/starter-kit": "^3.34.0",
     "@voxire/api": "workspace:*",
     "@voxire/auth": "workspace:*",
     "@voxire/caret": "workspace:*",
