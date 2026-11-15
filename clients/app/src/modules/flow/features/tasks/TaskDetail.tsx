@@ -1186,7 +1186,7 @@ function TaskTextField({
       <div className="grid grid-cols-1">
         <div
           aria-hidden
-          className={`${props.className ?? ''} invisible col-start-1 row-start-1 whitespace-pre-wrap break-words`}
+          className={`${props.className ?? ''} flow-wrap-mirror invisible col-start-1 row-start-1 whitespace-pre-wrap break-words`}
         >
           {draft}{' '}
         </div>

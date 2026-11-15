@@ -520,15 +520,18 @@
   background: var(--flow-hover);
 }
 .flow-description[data-editable='true']:focus-within {
-  border-color: var(--flow-border);
-  background: var(--flow-input-bg);
+  border-color: color-mix(in srgb, var(--dash-text) 40%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--dash-text) 8%, transparent);
+}
+/* The wrapper carries the focus indicator; a ring hugging the text is noise. */
+.flow-description .flow-description-content:focus-visible {
+  outline: none !important;
 }
 .flow-description[data-editable='false'] {
   opacity: 0.7;
 }
 .flow-description .flow-description-content {
   min-height: 4.5em;
-  outline: none;
   overflow-wrap: anywhere;
 }
 .flow-description .flow-description-content > * + * {
@@ -647,4 +650,12 @@
 .flow-description-toolbar button[aria-pressed='true'] {
   background: var(--flow-hover);
   color: var(--flow-text);
+}
+/* The app-wide iOS zoom guard forces form controls to 16px below 640px. The
+   description follows it, and the title's sizing copy has to match the title. */
+@media (max-width: 640px) {
+  .flow-description,
+  .flow-wrap-mirror {
+    font-size: 16px !important;
+  }
 }
