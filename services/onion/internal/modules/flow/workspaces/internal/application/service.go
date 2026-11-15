@@ -421,6 +421,7 @@ type repository interface {
 	SumWorkDayLineMinutesByDayIDs(ctx context.Context, businessID int64, workDayIDs []int64) (map[int64]int32, error)
 	TransferProjectOwnership(ctx context.Context, input domain.TransferProjectOwnershipInput) error
 	UpdateColumn(ctx context.Context, input domain.UpdateProjectColumnInput) error
+	UpdateComment(ctx context.Context, commentID, userID int64, content string) error
 	UpdateCycle(ctx context.Context, input domain.UpdateCycleInput) error
 	UpdateLabel(ctx context.Context, id, actorID, businessID int64, input domain.LabelInput) error
 	UpdateMilestone(ctx context.Context, input domain.UpdateMilestoneInput) error

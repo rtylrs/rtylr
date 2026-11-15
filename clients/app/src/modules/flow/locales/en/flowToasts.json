@@ -27,7 +27,8 @@
     "createdWithId": "Created {{id}}"
   },
   "comment": {
-    "postFailed": "Failed to post comment"
+    "postFailed": "Failed to post comment",
+    "editFailed": "Failed to save your comment edit"
   },
   "subtask": {
     "addFailed": "Failed to add subtask",

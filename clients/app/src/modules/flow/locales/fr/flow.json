@@ -162,7 +162,17 @@
     "waitingOn": "En attente de",
     "waitingPlaceholder": "Personne, équipe, approbation…",
     "you": "Vous",
-    "drawerLabel": "Détail de la tâche"
+    "drawerLabel": "Détail de la tâche",
+    "editComment": "Modifier",
+    "editCommentLabel": "Modifier votre commentaire",
+    "saveComment": "Enregistrer",
+    "cancelEdit": "Annuler",
+    "edited": "(modifié)",
+    "noMentionMatches": "Personne sur ce projet ne correspond",
+    "noOneToMention": "Personne d’autre n’est encore sur ce projet",
+    "openAttachment": "Ouvrir {{name}}",
+    "attachmentPreview": "Aperçu en taille réelle de l’image jointe",
+    "openOriginal": "Ouvrir l’original"
   },
   "time": {
     "add": {

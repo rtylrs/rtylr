@@ -471,6 +471,18 @@ message DeleteCommentResponse {
   message: string
 }
 
+message UpdateCommentRequest {
+  /// id is the comment being reworded; only its author may change it.
+  id: int64 @gt(0)
+  /// content is the comment's new text.
+  content: string @required
+}
+
+message UpdateCommentResponse {
+  /// comment is the stored comment after the edit.
+  comment: TaskComment
+}
+
 message GetTaskActivityRequest {
   /// task_id is the task id value for this contract.
   task_id: int64 @gt(0)

@@ -27,6 +27,8 @@ service TaskService {
 
   deleteComment(DeleteCommentRequest) -> DeleteCommentResponse @delete("/tasks/comments/{id}")
 
+  updateComment(UpdateCommentRequest) -> UpdateCommentResponse @put("/tasks/comments/{id}")
+
   getTaskActivity(GetTaskActivityRequest) -> GetTaskActivityResponse @get("/tasks/{task_id}/activity")
 
   createAttachment(CreateAttachmentRequest) -> CreateAttachmentResponse @post("/tasks/attachments")

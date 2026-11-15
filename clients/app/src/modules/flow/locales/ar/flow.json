@@ -165,7 +165,17 @@
     "waitingOn": "بانتظار",
     "waitingPlaceholder": "شخص، فريق، موافقة…",
     "you": "أنت",
-    "drawerLabel": "تفاصيل المهمة"
+    "drawerLabel": "تفاصيل المهمة",
+    "editComment": "تعديل",
+    "editCommentLabel": "تعديل تعليقك",
+    "saveComment": "حفظ",
+    "cancelEdit": "إلغاء",
+    "edited": "(معدّل)",
+    "noMentionMatches": "لا يوجد عضو في هذا المشروع بهذا الاسم",
+    "noOneToMention": "لا يوجد أعضاء آخرون في هذا المشروع بعد",
+    "openAttachment": "فتح {{name}}",
+    "attachmentPreview": "معاينة الصورة المرفقة بالحجم الكامل",
+    "openOriginal": "فتح الأصل"
   },
   "time": {
     "add": {

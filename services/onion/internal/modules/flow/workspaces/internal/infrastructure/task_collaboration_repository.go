@@ -100,6 +100,21 @@ func (r *Repository) DeleteComment(ctx context.Context, commentID, userID int64)
 	return requireAffected(res)
 }
 
+// UpdateComment rewrites the content of a comment the caller wrote and marks it
+// edited. A comment by anyone else matches no row and reports ErrUnauthorized.
+func (r *Repository) UpdateComment(ctx context.Context, commentID, userID int64, content string) error {
+	res, err := r.queries.UpdateComment(ctx, sqlc.UpdateCommentParams{
+		Content: content,
+		ID:      commentID,
+		UserID:  userID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("UpdateComment failed", logger.Error(err))
+		return err
+	}
+	return requireAffected(res)
+}
+
 // GetCommentTaskID returns the task a comment belongs to. Used by the
 // comment handlers to route realtime events to the correct task topic
 // before the row disappears.

@@ -135,6 +135,11 @@ WHERE c.task_id = ? ORDER BY c.created_at ASC, c.id ASC LIMIT 500;
 -- name: DeleteComment :execresult
 DELETE FROM flow_task_comments WHERE id = ? AND user_id = ?;
 
+-- Author-only, like the delete: a comment can be reworded only by the person
+-- who wrote it, so someone else's id matches no row and reports the denial.
+-- name: UpdateComment :execresult
+UPDATE flow_task_comments SET content = ?, is_edited = TRUE WHERE id = ? AND user_id = ?;
+
 -- name: LogActivity :exec
 INSERT INTO flow_task_activity (task_id, user_id, action, old_value, new_value) VALUES (?, ?, ?, ?, ?);
 

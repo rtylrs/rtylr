@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -193,6 +195,15 @@ func (s *Service) announceCommentNotifications(ctx context.Context, task domain.
 		commentNotification, commentNotificationTitle, content,
 		func(settings domain.UserSettings) bool { return settings.TaskComments })
 
+	recipients := make([]int64, 0)
+	seen := make(map[int64]struct{})
+	addRecipient := func(recipientID int64) {
+		if _, found := seen[recipientID]; found {
+			return
+		}
+		seen[recipientID] = struct{}{}
+		recipients = append(recipients, recipientID)
+	}
 	for _, username := range mentionedUsernames(content) {
 		recipientID, found, err := s.repo.LookupUserByUsername(ctx, username, task.BusinessID)
 		if err != nil {
@@ -203,13 +214,73 @@ func (s *Service) announceCommentNotifications(ctx context.Context, task domain.
 				logger.Error(err))
 			continue
 		}
-		if !found {
-			continue
+		if found {
+			addRecipient(recipientID)
 		}
+	}
+	for _, recipientID := range s.mentionedProjectMembers(ctx, task, content) {
+		addRecipient(recipientID)
+	}
+	for _, recipientID := range recipients {
 		s.notifyTaskRecipient(ctx, task, recipientID, actorID,
 			mentionNotification, mentionNotificationTitle, content,
 			func(settings domain.UserSettings) bool { return settings.Mentions })
 	}
+}
+
+// mentionProjectMemberLimit bounds the member read a comment's mentions are
+// matched against. It matches the largest page the project member list serves.
+const mentionProjectMemberLimit = 500
+
+// mentionedProjectMembers returns the project members a comment names as
+// "@Full Name". The comment box suggests people by their display name, and
+// most accounts have no username, so a mention written from the suggestions
+// would otherwise reach nobody.
+func (s *Service) mentionedProjectMembers(ctx context.Context, task domain.Task, content string) []int64 {
+	if task.ProjectID == 0 || !strings.Contains(content, "@") {
+		return nil
+	}
+	members, _, err := s.repo.ListProjectMembers(ctx, task.ProjectID, mentionProjectMemberLimit, 0)
+	if err != nil {
+		logger.Ctx(ctx).Error("announceCommentNotifications: failed to list project members",
+			logger.Int("task_id", int(task.ID)),
+			logger.Error(err))
+		return nil
+	}
+	lowered := strings.ToLower(content)
+	ids := make([]int64, 0)
+	for _, member := range members {
+		if containsNameMention(lowered, strings.ToLower(strings.TrimSpace(member.Name))) {
+			ids = append(ids, member.UserID)
+		}
+	}
+	return ids
+}
+
+// containsNameMention reports whether content holds "@name" as a whole mention:
+// not glued to a word before the "@" (an email address) and not running on into
+// a longer word after the name ("@Sam" does not mention "Samira").
+func containsNameMention(content, name string) bool {
+	if name == "" {
+		return false
+	}
+	token := "@" + name
+	for offset := 0; offset < len(content); {
+		index := strings.Index(content[offset:], token)
+		if index < 0 {
+			return false
+		}
+		start := offset + index
+		end := start + len(token)
+		before := start == 0 || !isMentionPrefixChar(content[start-1])
+		next, _ := utf8.DecodeRuneInString(content[end:])
+		after := end == len(content) || !(unicode.IsLetter(next) || unicode.IsDigit(next))
+		if before && after {
+			return true
+		}
+		offset = start + 1
+	}
+	return false
 }
 
 func (s *Service) announceStatusChange(ctx context.Context, task domain.Task, actorID int64, status string) {
