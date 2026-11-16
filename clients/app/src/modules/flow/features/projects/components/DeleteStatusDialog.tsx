@@ -46,7 +46,10 @@ const DeleteStatusDialog = ({
     ? apiTasks.filter((task) => String(task.statusId || task.sectionId || '') === status.id).length
     : 0;
   const protectedDone = status ? isOnlyDoneStatus(status, statuses) : false;
-  const needsTarget = taskCount > 0;
+  // The board loads open tasks only, so a done or cancelled status may hold
+  // tasks the count cannot see: always ask where they go.
+  const countKnown = status ? status.bucket === 'backlog' || status.bucket === 'active' : true;
+  const needsTarget = taskCount > 0 || !countKnown;
 
   const confirm = (): void => {
     if (!status || protectedDone || (needsTarget && !target)) return;
@@ -67,9 +70,11 @@ const DeleteStatusDialog = ({
           <DialogDescription className="text-flow-meta">
             {protectedDone
               ? t('flow.status.lastDoneProtected')
-              : needsTarget
+              : taskCount > 0
                 ? t('flow.status.deleteWithTasks', { count: taskCount })
-                : t('flow.status.deleteEmpty')}
+                : needsTarget
+                  ? t('flow.status.deleteChooseTarget')
+                  : t('flow.status.deleteEmpty')}
           </DialogDescription>
         </DialogHeader>
 
