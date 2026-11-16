@@ -76,6 +76,17 @@ func TestToRoadmapProjects_EmptyInputIsEmptySlice(t *testing.T) {
 	}
 }
 
+func TestPublicRoadmapProjects_DropsPrivateProjects(t *testing.T) {
+	got := publicRoadmapProjects([]FlowRoadmapProject{
+		{ID: 1, Name: "Client site", Visibility: "public"},
+		{ID: 2, Name: "Salary review", Visibility: "private"},
+		{ID: 3, Name: "My Tasks", Visibility: "private"},
+	})
+	if len(got) != 1 || got[0].ID != 1 {
+		t.Fatalf("got %+v, want only the public project", got)
+	}
+}
+
 // velocity_change is the only computed field on this response: Flow reports both
 // weeks, the contract wants the delta.
 func TestToInsightsResponse_VelocityChangeIsTheWeekDelta(t *testing.T) {
