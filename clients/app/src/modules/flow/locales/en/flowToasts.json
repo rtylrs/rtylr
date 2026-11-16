@@ -58,10 +58,7 @@
     "savePreferencesFailed": "Failed to save notification preferences"
   },
   "column": {
-    "createFailed": "Failed to create column",
-    "updateFailed": "Failed to update column",
-    "deleteFailed": "Failed to delete column",
-    "nameRequired": "Column name is required"
+    "nameRequired": "Status name is required"
   },
   "projectMember": {
     "removeFailed": "Failed to remove member",
@@ -153,9 +150,12 @@
     "createFailed": "Failed to create status",
     "updateFailed": "Failed to update status",
     "deleted": "Status deleted",
-    "deletedWithReassignment": "Status deleted. {{count}} task(s) fell back to their built-in status.",
     "deleteFailed": "Failed to delete status",
-    "setFailed": "Failed to set task status"
+    "setFailed": "Failed to set task status",
+    "deletedWithMove_one": "Status deleted. {{count}} task moved.",
+    "deletedWithMove_other": "Status deleted. {{count}} tasks moved.",
+    "templateSaved": "Status template saved",
+    "templateSaveFailed": "Could not save the status template"
   },
   "attachment": {
     "addFailed": "Failed to add attachment",
