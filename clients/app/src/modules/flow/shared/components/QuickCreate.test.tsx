@@ -7,12 +7,15 @@ import { initTestI18n } from '../testing/i18n';
 import { useUserStore } from '../stores/userStore';
 import { useFlowStore } from '../stores/flowStore';
 import QuickCreate from './QuickCreate';
+import { chooseFlowOption, flowSelectTrigger } from '../../../../../test/flowSelect';
+import type { ApiStatus } from '../services/flowApi';
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   create: vi.fn(),
   currentProjectId: undefined as string | undefined,
   labels: [] as Array<{ id: number; name: string }>,
+  statuses: [] as ApiStatus[],
 }));
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => mocks.navigate,
@@ -31,12 +34,28 @@ vi.mock('../../features/tasks/useTasks', () => ({
   useCreateTask: () => ({ mutateAsync: mocks.create, isPending: false }),
 }));
 vi.mock('../../features/tasks/useLabels', () => ({ useLabels: () => ({ data: mocks.labels }) }));
+vi.mock('../../features/projects/useStatuses', () => ({
+  useProjectStatuses: (projectId: string) => ({ data: projectId ? mocks.statuses : undefined }),
+}));
+
+const status = (id: string, name: string, sortOrder: number, isDefault = false): ApiStatus => ({
+  id,
+  projectId: '12',
+  name,
+  bucket: 'active',
+  legacyStatus: 'in_progress',
+  color: '#8b5cf6',
+  sortOrder,
+  isDefault,
+  createdAt: '',
+});
 
 beforeEach(async () => {
   vi.clearAllMocks();
   await initTestI18n();
   mocks.currentProjectId = undefined;
   mocks.labels = [];
+  mocks.statuses = [status('3', 'To Do', 10, true), status('4', 'Doing', 20)];
   mocks.create.mockResolvedValue({
     task: { id: '101', identifier: 'FLOW-101', title: 'Ship the thing' },
   });
@@ -48,7 +67,7 @@ beforeEach(async () => {
       effectiveAccess: createEffectiveAccess('flow', { isOwner: true }),
     },
   });
-  useFlowStore.setState({ quickCreateOpen: true, projects: [] });
+  useFlowStore.setState({ quickCreateOpen: true, quickCreateColumnId: undefined, projects: [] });
 });
 function fillTitle() {
   fireEvent.change(screen.getByPlaceholderText('Task name'), {
@@ -169,5 +188,33 @@ describe('Quick task creation in Portal', () => {
     create();
     await waitFor(() => expect(useFlowStore.getState().quickCreateOpen).toBe(false));
     expect(mocks.navigate).not.toHaveBeenCalled();
+  });
+  it('starts on the project default status and sends the chosen one as the column', async () => {
+    mocks.currentProjectId = '12';
+    render(<QuickCreate />);
+    expect(flowSelectTrigger('Status')).toHaveAccessibleName('Status: To Do');
+    await chooseFlowOption('Status', 'Doing');
+    fillTitle();
+    create();
+    await waitFor(() =>
+      expect(mocks.create).toHaveBeenCalledWith(
+        expect.objectContaining({ projectId: '12', sectionId: '4' })
+      )
+    );
+  });
+  it('lands a task created from a board column in that column', async () => {
+    mocks.currentProjectId = '12';
+    useFlowStore.setState({ quickCreateColumnId: '4' });
+    render(<QuickCreate />);
+    expect(flowSelectTrigger('Status')).toHaveAccessibleName('Status: Doing');
+    fillTitle();
+    create();
+    await waitFor(() =>
+      expect(mocks.create).toHaveBeenCalledWith(expect.objectContaining({ sectionId: '4' }))
+    );
+  });
+  it('shows no status field for a personal task', () => {
+    render(<QuickCreate />);
+    expect(screen.queryByRole('button', { name: /^Status/ })).toBeNull();
   });
 });

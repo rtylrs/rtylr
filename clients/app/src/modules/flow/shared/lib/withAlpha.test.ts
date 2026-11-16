@@ -85,7 +85,7 @@ describe('Flow assigns tones from tokens, not raw hex', () => {
   // belongs to a token that can hold a per-mode value.
   const PALETTES = [
     'features/settings/FlowSettings.tsx',
-    'features/projects/components/StatusSettingsPanel.tsx',
+    'features/projects/statusUtils.ts',
     'shared/lib/colorUtils.ts',
   ];
 

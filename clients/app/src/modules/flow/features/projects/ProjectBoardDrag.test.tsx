@@ -7,6 +7,17 @@ import { initTestI18n } from '../../shared/testing/i18n';
 
 const access = vi.hoisted(() => ({ open: vi.fn() }));
 const mutation = vi.hoisted(() => ({ mutate: vi.fn(), isPending: false }));
+const status = vi.hoisted(() => (id: string, name: string, sortOrder: number) => ({
+  id,
+  projectId: '2',
+  name,
+  bucket: 'active',
+  legacyStatus: 'todo',
+  color: '#6366f1',
+  sortOrder,
+  isDefault: sortOrder === 0,
+  createdAt: '',
+}));
 vi.mock('@tanstack/react-router', () => ({
   useParams: () => ({ projectId: '2' }),
   useLocation: () => ({ pathname: '/flow/p/2' }),
@@ -56,24 +67,16 @@ vi.mock('../tasks/useTasks', () => ({
   useTasks: () => ({ isLoading: false, isError: false, data: taskData.rows }),
 }));
 vi.mock('../tasks/useLabels', () => ({ useLabels: () => ({ data: [] }) }));
-vi.mock('./useColumns', () => ({
-  useProjectColumns: () => ({
-    isLoading: false,
-    isError: false,
-    data: [
-      { id: '9', name: 'To do', color: '#6366f1', sortOrder: 0 },
-      { id: '10', name: 'Doing', color: '#f59e0b', sortOrder: 1 },
-    ],
-  }),
-  useCreateColumn: () => mutation,
-  useUpdateColumn: () => mutation,
-  useDeleteColumn: () => mutation,
-  useMoveTaskToColumn: () => mutation,
-}));
+vi.mock('./useColumns', () => ({ useMoveTaskToColumn: () => mutation }));
 vi.mock('./useStatuses', () => ({
-  useProjectStatuses: () => ({ data: [], isPending: false, isError: false }),
+  useProjectStatuses: () => ({
+    isPending: false,
+    isError: false,
+    data: [status('9', 'To do', 0), status('10', 'Doing', 1)],
+  }),
   useCreateStatus: () => mutation,
   useUpdateStatus: () => mutation,
+  useReorderStatuses: () => mutation,
   useDeleteStatus: () => mutation,
 }));
 

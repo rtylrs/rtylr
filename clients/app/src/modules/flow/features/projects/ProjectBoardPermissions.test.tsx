@@ -7,6 +7,17 @@ import { initTestI18n } from '../../shared/testing/i18n';
 
 const access = vi.hoisted(() => ({ create: false, edit: false, manage: false, open: vi.fn() }));
 const mutation = vi.hoisted(() => ({ mutate: vi.fn(), isPending: false }));
+const status = vi.hoisted(() => (id: string, name: string, sortOrder: number) => ({
+  id,
+  projectId: '2',
+  name,
+  bucket: 'active',
+  legacyStatus: 'todo',
+  color: '#6366f1',
+  sortOrder,
+  isDefault: sortOrder === 0,
+  createdAt: '',
+}));
 vi.mock('@tanstack/react-router', () => ({
   useParams: () => ({ projectId: '2' }),
   useLocation: () => ({ pathname: '/flow/p/2' }),
@@ -58,21 +69,16 @@ vi.mock('../tasks/useTasks', () => ({
   }),
 }));
 vi.mock('../tasks/useLabels', () => ({ useLabels: () => ({ data: [] }) }));
-vi.mock('./useColumns', () => ({
-  useProjectColumns: () => ({
-    isLoading: false,
-    isError: false,
-    data: [{ id: '9', name: 'Release review', color: '#6366f1', sortOrder: 0 }],
-  }),
-  useCreateColumn: () => mutation,
-  useUpdateColumn: () => mutation,
-  useDeleteColumn: () => mutation,
-  useMoveTaskToColumn: () => mutation,
-}));
+vi.mock('./useColumns', () => ({ useMoveTaskToColumn: () => mutation }));
 vi.mock('./useStatuses', () => ({
-  useProjectStatuses: () => ({ data: [], isPending: false, isError: false }),
+  useProjectStatuses: () => ({
+    isPending: false,
+    isError: false,
+    data: [status('9', 'Release review', 0)],
+  }),
   useCreateStatus: () => mutation,
   useUpdateStatus: () => mutation,
+  useReorderStatuses: () => mutation,
   useDeleteStatus: () => mutation,
 }));
 
@@ -91,7 +97,13 @@ beforeEach(async () => {
 describe('Project board permissions', () => {
   it('lets a viewer open tasks without offering task or board mutations', () => {
     renderBoard();
-    for (const name of ['New task', 'Add task', 'Add column', 'Delete column', 'Statuses']) {
+    for (const name of [
+      'New task',
+      'Add task',
+      'Add status',
+      'Actions for Release review',
+      'Statuses',
+    ]) {
       expect(screen.queryByRole('button', { name, exact: true })).not.toBeInTheDocument();
     }
     expect(screen.getByRole('button', { name: 'Release review' })).toBeDisabled();
@@ -103,7 +115,13 @@ describe('Project board permissions', () => {
   it('offers task and board mutations to an authorized project administrator', () => {
     access.create = access.edit = access.manage = true;
     renderBoard();
-    for (const name of ['New task', 'Add task', 'Add column', 'Delete column', 'Statuses']) {
+    for (const name of [
+      'New task',
+      'Add task',
+      'Add status',
+      'Actions for Release review',
+      'Statuses',
+    ]) {
       expect(screen.getByRole('button', { name, exact: true })).toBeEnabled();
     }
     expect(screen.getByRole('button', { name: 'Release review' })).toBeEnabled();
