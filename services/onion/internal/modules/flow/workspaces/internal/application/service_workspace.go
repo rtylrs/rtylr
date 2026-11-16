@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/domain"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 // IsWorkspaceMember reports whether userID is on the workspace's member
@@ -272,6 +273,17 @@ func (s *Service) CreateProject(ctx context.Context, input domain.ProjectInput) 
 	id, err := s.repo.CreateProject(ctx, input)
 	if err != nil {
 		return domain.Project{}, err
+	}
+
+	// The owner keeps access through the ownership fallback either way, so a
+	// failed insert only costs the Members list its first row.
+	if err := s.repo.AddProjectMember(ctx, domain.AddProjectMemberInput{
+		ProjectID: id,
+		UserID:    input.OwnerID,
+		Role:      domain.FlowRoleAdmin,
+		AddedBy:   input.CreatedBy,
+	}); err != nil {
+		logger.Ctx(ctx).Warn("add project owner as member failed", logger.Error(err))
 	}
 
 	// Seed default columns for every new project
