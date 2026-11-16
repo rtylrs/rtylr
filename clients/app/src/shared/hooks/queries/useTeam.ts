@@ -213,6 +213,9 @@ export const useUpdateMember = () => {
       qc.setQueryData<TeamMember | undefined>(['team', id], (old) =>
         old ? applyMemberPatch(old, patch) : old
       );
+      // Effective access is computed by the server from apps, profiles and
+      // groups, so the patch above cannot update it. Refetch to show what saved.
+      void qc.invalidateQueries({ queryKey: ['team'] });
     },
     onError: (error) =>
       toast.error(

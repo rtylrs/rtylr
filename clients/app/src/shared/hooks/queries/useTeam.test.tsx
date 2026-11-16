@@ -414,9 +414,35 @@ describe('useUpdateMember', () => {
   });
 
   it('updates cached list and detail data after save', async () => {
-    mockMembersClient.listTeam.mockResolvedValueOnce({
-      users: [
-        {
+    const savedUser = {
+      id: '42',
+      fullName: 'New Name',
+      email: 'member@test.com',
+      memberType: 'admin',
+      licensedAppIds: ['erp', 'flow'],
+      permissionProfileAssignments: [],
+      isActive: true,
+      createdAt: '',
+    };
+    mockMembersClient.listTeam
+      .mockResolvedValueOnce({
+        users: [
+          {
+            id: '42',
+            fullName: 'Old Name',
+            email: 'member@test.com',
+            memberType: 'member',
+            licensedAppIds: ['pos'],
+            permissionProfileAssignments: [],
+            isActive: true,
+            createdAt: '',
+          },
+        ],
+      })
+      .mockResolvedValue({ users: [savedUser] });
+    mockMembersClient.getMember
+      .mockResolvedValueOnce({
+        user: {
           id: '42',
           fullName: 'Old Name',
           email: 'member@test.com',
@@ -425,22 +451,10 @@ describe('useUpdateMember', () => {
           permissionProfileAssignments: [],
           isActive: true,
           createdAt: '',
+          groups: [],
         },
-      ],
-    });
-    mockMembersClient.getMember.mockResolvedValueOnce({
-      user: {
-        id: '42',
-        fullName: 'Old Name',
-        email: 'member@test.com',
-        memberType: 'member',
-        licensedAppIds: ['pos'],
-        permissionProfileAssignments: [],
-        isActive: true,
-        createdAt: '',
-        groups: [],
-      },
-    });
+      })
+      .mockResolvedValue({ user: { ...savedUser, groups: [] } });
     mockPermissionsClient.updatePermissions.mockResolvedValue({});
 
     const wrapper = createWrapper();
@@ -490,5 +504,42 @@ describe('useUpdateMember', () => {
         licensedAppIds: ['erp', 'flow'],
       })
     );
+  });
+
+  it('refetches the member after save so server-computed access is current', async () => {
+    const user = {
+      id: '7',
+      fullName: 'Dana',
+      email: 'dana@test.com',
+      memberType: 'member',
+      licensedAppIds: ['pos'],
+      permissionProfileAssignments: [],
+      isActive: true,
+      createdAt: '',
+      groups: [],
+    };
+    // The server grants an app the patch never mentioned (for example through a
+    // group), which only a refetch can reveal.
+    mockMembersClient.getMember
+      .mockResolvedValueOnce({ user })
+      .mockResolvedValue({ user: { ...user, licensedAppIds: ['pos', 'flow', 'hr'] } });
+    mockPermissionsClient.updatePermissions.mockResolvedValue({});
+
+    const wrapper = createWrapper();
+    const member = renderHook(() => useMember('7'), { wrapper });
+    await waitFor(() => expect(member.result.current.data?.licensedAppIds).toEqual(['pos']));
+
+    const update = renderHook(() => useUpdateMember(), { wrapper });
+    await act(async () => {
+      await update.result.current.mutateAsync({
+        id: '7',
+        patch: { licensedAppIds: ['pos', 'flow'] },
+      });
+    });
+
+    await waitFor(() =>
+      expect(member.result.current.data?.licensedAppIds).toEqual(['pos', 'flow', 'hr'])
+    );
+    expect(mockMembersClient.getMember).toHaveBeenCalledTimes(2);
   });
 });
