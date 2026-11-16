@@ -1,5 +1,5 @@
 import { describe, expect, it, afterEach, vi } from 'vitest';
-import { laneKeyFor } from './ProjectBoard';
+import { laneKeyFor } from './taskGroups';
 import type { Task } from '../../shared/stores/flowStore';
 
 const task = (dueDate: string): Task =>

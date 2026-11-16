@@ -1,5 +1,5 @@
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useClickOutside } from '@voxire/utils';
 import { createPortal } from 'react-dom';
@@ -7,22 +7,51 @@ import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, GripVertical, ListChecks, Plus, Settings2, Trash2 } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  ChevronDown,
+  GripVertical,
+  ListChecks,
+  MoreHorizontal,
+  Pencil,
+  Plus,
+  Settings2,
+  Trash2,
+} from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@voxire/ui';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
+import { useMoveTaskToColumn } from './useColumns';
 import {
-  useProjectColumns,
-  useCreateColumn,
-  useUpdateColumn,
-  useDeleteColumn,
-  useMoveTaskToColumn,
-} from './useColumns';
+  useCreateStatus,
+  useProjectStatuses,
+  useReorderStatuses,
+  useUpdateStatus,
+} from './useStatuses';
+import {
+  STATUS_COLORS,
+  closedRecently,
+  insertionPlan,
+  isClosedBucket,
+  isOnlyDoneStatus,
+  reorderUpdates,
+  sortStatuses,
+  statusIdOf,
+} from './statusUtils';
+import { DUE_LANES, PRIORITY_LABEL_KEY, PRIORITY_ORDER, laneKeyFor } from './taskGroups';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
-import { addDays, todayIso } from '../../shared/lib/dateUtils';
 import type { BoardGroupKey } from '../../shared/lib/boardUtils';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import TaskCard from '../../shared/components/TaskCard';
-import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import ProjectViewTabs from './ProjectViewTabs';
 import MoveToColumnMenu, { type MoveTarget } from './components/MoveToColumnMenu';
 import {
@@ -47,7 +76,9 @@ import {
 } from '../../shared/lib/currentUser';
 import BoardSettingsPanel from './components/BoardSettingsPanel';
 import StatusSettingsPanel from './components/StatusSettingsPanel';
-import type { ApiProjectColumn } from '../../shared/services/flowApi';
+import DeleteStatusDialog from './components/DeleteStatusDialog';
+import NewStatusDialog from './components/NewStatusDialog';
+import type { ApiStatus } from '../../shared/services/flowApi';
 import type { Task } from '../../shared/stores/flowStore';
 import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
@@ -137,16 +168,6 @@ const GROUP_OPTIONS: { key: GroupKey; labelKey: string }[] = [
   { key: 'due', labelKey: 'flow.board.groupBy.due' },
 ];
 
-const PRIORITY_ORDER: Task['priority'][] = ['urgent', 'high', 'medium', 'low', 'no_priority'];
-
-const PRIORITY_LABEL_KEY: Record<Task['priority'], string> = {
-  urgent: 'flowPriority.urgent',
-  high: 'flowPriority.high',
-  medium: 'flowPriority.medium',
-  low: 'flowPriority.low',
-  no_priority: 'flowPriority.noPriority',
-};
-
 interface Lane {
   key: string;
   /** A person's name, for assignee lanes. Never translated. */
@@ -184,31 +205,6 @@ function buildLanes(
   }));
 }
 
-// Exported for the lane-key regression test: the due-date lanes are the only
-// place a board swimlane can silently mislabel a task, and the comparison is
-// not visible from the rendered output alone.
-export function laneKeyFor(t: Task, groupBy: GroupKey): string {
-  if (groupBy === 'assignee') return t.assignee || 'Unassigned';
-  if (groupBy === 'priority') return t.priority;
-  if (groupBy === 'due') {
-    if (!t.dueDate) return 'No due date';
-    // A due date is a calendar day, not an instant. The previous
-    // `Math.round((new Date(due) - new Date()) / msPerDay)` parsed the bare
-    // date as UTC midnight and rounded against a local `now`, so a task due
-    // today slid into "Overdue" for the last third of the working day
-    // (rtylr#1077). Compare the day strings instead, as bucketForMyTask does.
-    const due = t.dueDate.split('T')[0] ?? '';
-    if (due === '') return 'No due date';
-    const today = todayIso();
-    if (due < today) return 'Overdue';
-    if (due === today) return 'Today';
-    if (due <= addDays(today, 7)) return 'This week';
-    if (due <= addDays(today, 30)) return 'This month';
-    return 'Later';
-  }
-  return '_all';
-}
-
 /**
  * Derive the deterministic ordered lane list across ALL tasks so every
  * column shows the same swimlanes in the same order. Without this, empty
@@ -224,18 +220,7 @@ function buildLaneIndex(
     return PRIORITY_ORDER.map((p) => ({ key: p, labelKey: PRIORITY_LABEL_KEY[p] }));
   }
 
-  if (groupBy === 'due') {
-    // The keys stay as they are: they are lane identities used for bucketing,
-    // not text, and translating them would break the grouping.
-    return [
-      { key: 'Overdue', labelKey: 'flow.board.dueLane.overdue' },
-      { key: 'Today', labelKey: 'flow.board.dueLane.today' },
-      { key: 'This week', labelKey: 'flow.board.dueLane.thisWeek' },
-      { key: 'This month', labelKey: 'flow.board.dueLane.thisMonth' },
-      { key: 'Later', labelKey: 'flow.board.dueLane.later' },
-      { key: 'No due date', labelKey: 'flow.board.dueLane.noDueDate' },
-    ];
-  }
+  if (groupBy === 'due') return DUE_LANES;
 
   // assignee - build from data, keep stable order by first-seen. These labels
   // are people's names, so they carry `label` and are never translated.
@@ -296,11 +281,12 @@ const ProjectBoard: React.FC = () => {
     void refetchProjectMetadata();
     void tasksQuery.refetch();
   };
-  const columnsQuery = useProjectColumns(projectId);
-  const { data: columns = [] } = columnsQuery;
-  const createColumn = useCreateColumn(projectId);
-  const updateColumn = useUpdateColumn(projectId);
-  const deleteColumn = useDeleteColumn(projectId);
+  // The project's statuses are its columns; this is the board's one source.
+  const columnsQuery = useProjectStatuses(projectId);
+  const columns = useMemo(() => sortStatuses(columnsQuery.data ?? []), [columnsQuery.data]);
+  const createStatus = useCreateStatus(projectId);
+  const updateStatus = useUpdateStatus(projectId);
+  const reorderStatuses = useReorderStatuses(projectId);
 
   // The live drag preview. `source` is where the card started; `slot` is where
   // the pointer says it would land now, or null while it is outside every
@@ -312,7 +298,11 @@ const ProjectBoard: React.FC = () => {
   const [addingColumn, setAddingColumn] = useState(false);
   const [newColumnName, setNewColumnName] = useState('');
   const [groupBy, setGroupByState] = useState<GroupKey>('none');
-  const [pendingDeleteColumn, setPendingDeleteColumn] = useState<ApiProjectColumn | null>(null);
+  const [pendingDeleteColumn, setPendingDeleteColumn] = useState<ApiStatus | null>(null);
+  // Where a status named in the dialog is inserted; null while it is closed.
+  const [insertAt, setInsertAt] = useState<number | null>(null);
+  // Done and cancelled columns whose older cards the user asked to see.
+  const [showOlder, setShowOlder] = useState<ReadonlySet<string>>(new Set());
   const [boardSettingsOpen, setBoardSettingsOpen] = useState(false);
   const [statusSettingsOpen, setStatusSettingsOpen] = useState(false);
 
@@ -383,20 +373,29 @@ const ProjectBoard: React.FC = () => {
     );
   }
 
-  // Bucket tasks by column. Tasks with no sectionId go into first column.
-  function tasksForColumn(col: ApiProjectColumn, colIndex: number): Task[] {
-    // `Task.sectionId` is a stringified column id (see apiTaskToTask), so the
-    // board keys buckets on `String(col.id)`. Comparing against the raw number
-    // matched `"5"` against `5` - always false - and made moved tasks vanish.
-    const colKey = String(col.id);
+  const knownStatusIds = new Set(columns.map((c) => c.id));
+  const now = Date.now();
+
+  /** Every card on a column, in board order. A task whose status is not a column here sits in the first. */
+  function allTasksForColumn(col: ApiStatus, colIndex: number): Task[] {
     return orderBoardTasks(
       tasks.filter((t) => {
-        if (t.sectionId && String(t.sectionId) === colKey) return true;
-        // Unsectioned tasks go into first column.
-        if (colIndex === 0 && !t.sectionId) return true;
-        return false;
+        const own = statusIdOf(t);
+        if (own === col.id) return true;
+        return colIndex === 0 && (!own || !knownStatusIds.has(own));
       })
     );
+  }
+
+  /** The cards a closed column hides until "Show older" is chosen. */
+  function olderTasksForColumn(col: ApiStatus, colIndex: number): Task[] {
+    if (!isClosedBucket(col.bucket) || showOlder.has(col.id)) return [];
+    return allTasksForColumn(col, colIndex).filter((t) => !closedRecently(t, col.bucket, now));
+  }
+
+  function tasksForColumn(col: ApiStatus, colIndex: number): Task[] {
+    const hidden = new Set(olderTasksForColumn(col, colIndex).map((t) => t.id));
+    return allTasksForColumn(col, colIndex).filter((t) => !hidden.has(t.id));
   }
 
   // Pointer-based card drag (B1). HTML5 drag-and-drop never fired on touch, so
@@ -453,14 +452,21 @@ const ProjectBoard: React.FC = () => {
       return;
     }
     if (isSamePlace(drag.source, slot)) return;
+    // Hidden older cards keep their place after the visible ones.
+    const colIndex = columns.findIndex((c) => c.id === slot.columnId);
+    const hiddenIds =
+      colIndex < 0
+        ? []
+        : olderTasksForColumn(columns[colIndex], colIndex)
+            .map((t) => t.id)
+            .filter((id) => id !== drag.taskId);
     moveTask.mutate({
       taskId: drag.taskId,
       columnId: slot.columnId,
-      orderedTaskIds: orderedIdsAfterDrop(
-        drag.columnIds.get(slot.columnId) ?? [],
-        drag.taskId,
-        slot.index
-      ),
+      orderedTaskIds: [
+        ...orderedIdsAfterDrop(drag.columnIds.get(slot.columnId) ?? [], drag.taskId, slot.index),
+        ...hiddenIds,
+      ],
     });
   };
 
@@ -597,14 +603,36 @@ const ProjectBoard: React.FC = () => {
       toast.error(t('flowToasts.column.nameRequired'));
       return;
     }
-    createColumn.mutate({
+    const { sortOrder, updates } = insertionPlan(columns, columns.length);
+    createStatus.mutate({
       name,
-      color: 'var(--flow-neutral-fg)',
-      sortOrder: columns.length,
+      bucket: 'active',
+      color: STATUS_COLORS[4],
+      sortOrder,
+      makeRoom: updates,
     });
     setNewColumnName('');
     setAddingColumn(false);
   };
+
+  const insertStatus = (name: string): void => {
+    if (insertAt === null) return;
+    const { sortOrder, updates } = insertionPlan(columns, insertAt);
+    createStatus.mutate(
+      { name, bucket: 'active', color: STATUS_COLORS[4], sortOrder, makeRoom: updates },
+      { onSuccess: () => setInsertAt(null) }
+    );
+  };
+
+  const writeStatus = (col: ApiStatus, patch: Partial<Pick<ApiStatus, 'name' | 'color'>>) =>
+    updateStatus.mutate({
+      id: col.id,
+      name: patch.name ?? col.name,
+      bucket: col.bucket,
+      color: patch.color ?? col.color,
+      sortOrder: col.sortOrder,
+      isDefault: col.isDefault,
+    });
 
   if (
     (columnsQuery.isPending && !hasQueryFailed(columnsQuery)) ||
@@ -665,11 +693,14 @@ const ProjectBoard: React.FC = () => {
       <BoardSettingsPanel
         open={boardSettingsOpen}
         onClose={() => setBoardSettingsOpen(false)}
-        projectId={projectId}
         columns={columns}
         canManage={canManageBoard}
         groupBy={groupBy}
         onGroupByChange={setGroupBy}
+        onManageStatuses={() => {
+          setBoardSettingsOpen(false);
+          setStatusSettingsOpen(true);
+        }}
       />
 
       <StatusSettingsPanel
@@ -706,14 +737,19 @@ const ProjectBoard: React.FC = () => {
               onDragPointerEnd={endCardPointer}
               onSelect={toggleSelectTask}
               onAddTask={() => useFlowStore.getState().setQuickCreateOpen(true, String(col.id))}
-              onRename={(name) =>
-                updateColumn.mutate({
-                  id: String(col.id),
-                  name,
-                  color: col.color,
-                  sortOrder: col.sortOrder,
-                })
+              hiddenCount={olderTasksForColumn(col, i).length}
+              onShowOlder={() => setShowOlder((prev) => new Set(prev).add(col.id))}
+              onRename={(name) => writeStatus(col, { name })}
+              onRecolor={(color) => writeStatus(col, { color })}
+              onInsert={(side) => setInsertAt(side === 'before' ? i : i + 1)}
+              canMoveBefore={i > 0}
+              canMoveAfter={i < columns.length - 1}
+              onMove={(side) =>
+                reorderStatuses.mutate(
+                  reorderUpdates(columns, i, side === 'before' ? i - 1 : i + 1)
+                )
               }
+              deleteBlocked={isOnlyDoneStatus(col, columns)}
               onDelete={() => setPendingDeleteColumn(col)}
             />
           ))}
@@ -742,7 +778,7 @@ const ProjectBoard: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleAddColumn}
-                      disabled={!newColumnName.trim() || createColumn.isPending}
+                      disabled={!newColumnName.trim() || createStatus.isPending}
                       className="h-6 px-2.5 rounded-sm text-flow-meta font-semibold disabled:opacity-40"
                       style={{
                         background: 'var(--flow-action-bg)',
@@ -779,26 +815,17 @@ const ProjectBoard: React.FC = () => {
           )}
         </div>
       </div>
-      <ConfirmDialog
-        open={pendingDeleteColumn !== null}
-        onOpenChange={(o) => {
-          if (!o) setPendingDeleteColumn(null);
-        }}
-        title={t('flow.board.deleteColumnLabel')}
-        description={
-          <>
-            Delete the <strong>{pendingDeleteColumn?.name}</strong> column? Tasks in this column
-            will need to be moved manually first or they will become orphaned.
-          </>
-        }
-        confirmLabel={t('flow.board.deleteColumn')}
-        pending={deleteColumn.isPending}
-        onConfirm={() => {
-          if (!pendingDeleteColumn) return;
-          deleteColumn.mutate(String(pendingDeleteColumn.id), {
-            onSettled: () => setPendingDeleteColumn(null),
-          });
-        }}
+      <DeleteStatusDialog
+        projectId={projectId}
+        status={pendingDeleteColumn}
+        statuses={columns}
+        onClose={() => setPendingDeleteColumn(null)}
+      />
+      <NewStatusDialog
+        open={insertAt !== null}
+        onOpenChange={(open) => !open && setInsertAt(null)}
+        onCreate={insertStatus}
+        pending={createStatus.isPending}
       />
       {ghost &&
         createPortal(
@@ -831,8 +858,10 @@ const ProjectBoard: React.FC = () => {
 
 // ── Column component ────────────────────────────────────────────────────────
 
+type Side = 'before' | 'after';
+
 const KanbanColumn: React.FC<{
-  col: ApiProjectColumn;
+  col: ApiStatus;
   lanes: Lane[];
   groupBy: GroupKey;
   isOver: boolean;
@@ -853,7 +882,17 @@ const KanbanColumn: React.FC<{
   onDragPointerEnd: (e: React.PointerEvent) => boolean;
   onSelect: (id: string) => void;
   onAddTask: () => void;
+  /** Older cards a closed column is hiding. */
+  hiddenCount: number;
+  onShowOlder: () => void;
   onRename: (name: string) => void;
+  onRecolor: (color: string) => void;
+  onInsert: (side: Side) => void;
+  canMoveBefore: boolean;
+  canMoveAfter: boolean;
+  onMove: (side: Side) => void;
+  /** The project's only done status, which cannot be deleted. */
+  deleteBlocked: boolean;
   onDelete: () => void;
 }> = ({
   col,
@@ -875,7 +914,15 @@ const KanbanColumn: React.FC<{
   onDragPointerEnd,
   onSelect,
   onAddTask,
+  hiddenCount,
+  onShowOlder,
   onRename,
+  onRecolor,
+  onInsert,
+  canMoveBefore,
+  canMoveAfter,
+  onMove,
+  deleteBlocked,
   onDelete,
 }) => {
   const { t } = useTranslation();
@@ -1015,23 +1062,21 @@ const KanbanColumn: React.FC<{
           {colTaskCount}
         </span>
 
-        {/* Actions (visible on header hover). Add is not among them any more: it
-            lives in the persistent row below, because a hover-only control is
-            unreachable on a touch screen and this one was 20px besides. */}
         {canManage && (
-          <div className="flex items-center gap-0.5 opacity-0 group-hover/header:opacity-100 transition-opacity shrink-0">
-            <button
-              type="button"
-              onClick={onDelete}
-              // hover:text-red-400 was a Tailwind palette colour on a screen whose
-              // every other colour is a token, and it does not follow the theme.
-              className="flow-focus flex h-11 w-11 items-center justify-center rounded-sm text-[var(--flow-text-dim)] hover:bg-[var(--flow-hover)] hover:text-[var(--flow-danger-fg)] md:h-6 md:w-6"
-              title={t('flow.board.deleteColumnLabel')}
-              aria-label={t('flow.board.deleteColumnLabel')}
-            >
-              <Trash2 size={11} />
-            </button>
-          </div>
+          <ColumnMenu
+            col={col}
+            onRename={() => {
+              setEditName(col.name);
+              setEditing(true);
+            }}
+            onRecolor={onRecolor}
+            onInsert={onInsert}
+            canMoveBefore={canMoveBefore}
+            canMoveAfter={canMoveAfter}
+            onMove={onMove}
+            deleteBlocked={deleteBlocked}
+            onDelete={onDelete}
+          />
         )}
       </div>
 
@@ -1063,7 +1108,7 @@ const KanbanColumn: React.FC<{
         {groupBy === 'none' ? (
           <>
             {renderCards(lanes[0]?.tasks ?? [])}
-            {colTaskCount === 0 && !placeholder && (
+            {colTaskCount === 0 && !placeholder && hiddenCount === 0 && (
               // A sentence, not a second add control: the row above the cards is
               // already the way in, and this said "Add task" in hardcoded
               // English on a screen that ships in Arabic and French.
@@ -1122,8 +1167,162 @@ const KanbanColumn: React.FC<{
             </div>
           ))
         )}
+        {hiddenCount > 0 && (
+          <button
+            type="button"
+            onClick={onShowOlder}
+            className="flow-focus mt-1 min-h-11 rounded-md px-1.5 text-start text-flow-meta font-medium underline-offset-2 hover:underline md:min-h-8"
+            style={{ color: 'var(--flow-text-muted)' }}
+          >
+            {t('flow.board.showOlder', { count: hiddenCount })}
+          </button>
+        )}
       </div>
     </div>
+  );
+};
+
+// ── Column menu ─────────────────────────────────────────────────────────────
+
+/**
+ * Every change to a column, behind one labelled button. Delete sits last and
+ * opens a dialog, so it can no longer fire from a stray hover click.
+ */
+const ColumnMenu: React.FC<{
+  col: ApiStatus;
+  onRename: () => void;
+  onRecolor: (color: string) => void;
+  onInsert: (side: Side) => void;
+  canMoveBefore: boolean;
+  canMoveAfter: boolean;
+  onMove: (side: Side) => void;
+  deleteBlocked: boolean;
+  onDelete: () => void;
+}> = ({
+  col,
+  onRename,
+  onRecolor,
+  onInsert,
+  canMoveBefore,
+  canMoveAfter,
+  onMove,
+  deleteBlocked,
+  onDelete,
+}) => {
+  const { t } = useTranslation();
+  const blockedReasonId = useId();
+  // Rename, insert and delete move focus (an input, a dialog), so they run
+  // after the menu has closed instead of racing its focus return.
+  const afterClose = useRef<(() => void) | null>(null);
+  const deferred = (run: () => void) => () => {
+    afterClose.current = run;
+  };
+  const itemClass = 'text-flow-meta';
+  const itemStyle = { color: 'var(--flow-text)' };
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label={t('flow.board.columnMenu', { name: col.name })}
+        className="flow-focus flex h-11 w-11 shrink-0 items-center justify-center rounded-sm text-[var(--flow-text-dim)] hover:bg-[var(--flow-hover)] md:h-6 md:w-6"
+      >
+        <MoreHorizontal size={13} aria-hidden="true" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        onCloseAutoFocus={(event) => {
+          const run = afterClose.current;
+          if (!run) return;
+          afterClose.current = null;
+          event.preventDefault();
+          run();
+        }}
+        align="end"
+        className="min-w-[200px]"
+        style={{
+          background: 'var(--flow-card)',
+          border: '1px solid var(--flow-border)',
+          boxShadow: 'var(--flow-shadow)',
+        }}
+      >
+        <DropdownMenuItem className={itemClass} style={itemStyle} onSelect={deferred(onRename)}>
+          <Pencil size={13} aria-hidden="true" />
+          {t('flow.board.renameStatus')}
+        </DropdownMenuItem>
+        <DropdownMenuLabel className="text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>
+          {t('flow.board.statusColor')}
+        </DropdownMenuLabel>
+        <DropdownMenuGroup className="flex flex-wrap gap-1 px-2 pb-1.5">
+          {STATUS_COLORS.map((c) => (
+            <DropdownMenuItem
+              key={c}
+              onSelect={() => onRecolor(c)}
+              aria-label={t('flow.status.chooseColorLabel', { color: c })}
+              aria-current={col.color === c ? 'true' : undefined}
+              className="h-6 w-6 justify-center rounded-full p-0"
+              style={{
+                background: c,
+                outline: col.color === c ? `2px solid ${c}` : 'none',
+                outlineOffset: 2,
+              }}
+            />
+          ))}
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className={itemClass}
+          style={itemStyle}
+          onSelect={deferred(() => onInsert('before'))}
+        >
+          <Plus size={13} aria-hidden="true" />
+          {t('flow.board.addStatusBefore')}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className={itemClass}
+          style={itemStyle}
+          onSelect={deferred(() => onInsert('after'))}
+        >
+          <Plus size={13} aria-hidden="true" />
+          {t('flow.board.addStatusAfter')}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className={itemClass}
+          style={itemStyle}
+          disabled={!canMoveBefore}
+          onSelect={() => onMove('before')}
+        >
+          <ArrowLeft size={13} aria-hidden="true" className="rtl:rotate-180" />
+          {t('flow.board.moveStatusBefore')}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className={itemClass}
+          style={itemStyle}
+          disabled={!canMoveAfter}
+          onSelect={() => onMove('after')}
+        >
+          <ArrowRight size={13} aria-hidden="true" className="rtl:rotate-180" />
+          {t('flow.board.moveStatusAfter')}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className={itemClass}
+          style={{ color: 'var(--flow-danger-fg)' }}
+          disabled={deleteBlocked}
+          aria-describedby={deleteBlocked ? blockedReasonId : undefined}
+          onSelect={deferred(onDelete)}
+        >
+          <Trash2 size={13} aria-hidden="true" />
+          {t('flow.board.deleteStatus')}
+        </DropdownMenuItem>
+        {deleteBlocked && (
+          <p
+            id={blockedReasonId}
+            className="max-w-[220px] px-2 pb-1.5 text-flow-meta"
+            style={{ color: 'var(--flow-text-muted)' }}
+          >
+            {t('flow.status.lastDoneProtected')}
+          </p>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
