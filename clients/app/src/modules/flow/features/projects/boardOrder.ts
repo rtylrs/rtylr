@@ -97,7 +97,11 @@ export function applyBoardMove<T extends { id: string | number; sortOrder?: unkn
     if (!isMoved && order === undefined) return task;
     changed = true;
     const patch: Record<string, unknown> = {};
-    if (isMoved) patch.sectionId = move.columnId;
+    if (isMoved) {
+      // A column id is a status id, and the board reads statusId first.
+      patch.sectionId = move.columnId;
+      patch.statusId = move.columnId;
+    }
     if (order !== undefined) patch.sortOrder = order;
     return { ...task, ...patch };
   });
