@@ -127,6 +127,9 @@ message UpdateStatusResponse {
 message DeleteStatusRequest {
   /// id is the status identifier.
   id: int64 @gt(0)
+  /// move_to_status_id is the status in the same project that receives the
+  /// deleted status's tasks. Required when the status still has tasks.
+  move_to_status_id: int64 @query("move_to_status_id")
 }
 
 message DeleteStatusResponse {
@@ -158,4 +161,34 @@ message SetTaskStatusResponse {
   /// status is the resulting built-in string status the task now carries, so a
   /// caller does not need a second request to keep its cached task correct.
   status: string
+}
+
+message StatusTemplateItem {
+  /// name is the status name.
+  name: string @required
+  /// bucket is one of backlog, active, done, cancelled.
+  bucket: string @required
+  /// legacy_status is the built-in status the entry maps to; derived from the bucket when empty.
+  legacy_status: string
+  /// color is a hex colour.
+  color: string
+  /// sort_order is the position in the template.
+  sort_order: int32
+}
+
+message GetStatusTemplateRequest {}
+
+message GetStatusTemplateResponse {
+  /// statuses is the template in sort order; the built-in default set when never saved.
+  statuses: StatusTemplateItem[]
+}
+
+message SaveStatusTemplateRequest {
+  /// statuses is the full replacement template.
+  statuses: StatusTemplateItem[] @required
+}
+
+message SaveStatusTemplateResponse {
+  /// statuses is the saved template in sort order.
+  statuses: StatusTemplateItem[]
 }
