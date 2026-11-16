@@ -63,6 +63,7 @@ export interface Project {
   lead: string;
   archived?: boolean;
   icon?: string;
+  ownerId?: string;
   /**
    * True when the caller sees this project only because they manage someone
    * involved in it (the dept-manager proxy). A per-caller projection from the
