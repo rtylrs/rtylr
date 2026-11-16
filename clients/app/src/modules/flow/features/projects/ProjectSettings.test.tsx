@@ -75,7 +75,7 @@ vi.mock('../../shared/lib/currentUser', () => ({
 import ProjectSettings from './ProjectSettings';
 import { useFlowStore } from '../../shared/stores/flowStore';
 
-function renderProjectSettings(description = 'Existing description') {
+function renderProjectSettings(description = 'Existing description', ownerId?: string) {
   useFlowStore.setState({
     projects: [
       {
@@ -93,6 +93,7 @@ function renderProjectSettings(description = 'Existing description') {
         targetDate: '2026-06-01',
         lead: 'u1',
         icon: 'briefcase',
+        ownerId,
       },
     ],
     workspaces: [{ id: 'w1', name: 'Workspace', color: '#000' }],
@@ -281,6 +282,25 @@ describe('ProjectSettings role gating (#793)', () => {
       screen.getByRole('button', { name: 'flow.projectSettings.removeMemberLabel' })
     ).toBeEnabled();
     expect(screen.getByRole('button', { name: /Add/ })).toBeInTheDocument();
+  });
+
+  it('labels the project owner as Owner with no role select or remove button', () => {
+    canManageProjectMock.mockReturnValue(true);
+    projectMembersData.data = [
+      { id: 'pm0', userId: '5', name: 'Abed Owner', email: 'owner@example.com', role: 'admin' },
+      { id: 'pm1', userId: '7', name: 'Ada Lovelace', email: 'ada@example.com', role: 'viewer' },
+    ];
+    renderProjectSettings('Existing description', '5');
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.tabs.members' }));
+
+    expect(screen.getByText('flowCommon.roles.owner')).toBeInTheDocument();
+    // Only Ada's row keeps the role select and remove button.
+    expect(
+      screen.getAllByRole('combobox', { name: 'flow.projectSettings.roleSelectLabel' })
+    ).toHaveLength(1);
+    expect(
+      screen.getAllByRole('button', { name: 'flow.projectSettings.removeMemberLabel' })
+    ).toHaveLength(1);
   });
 
   it('a project admin can change a member role', () => {
