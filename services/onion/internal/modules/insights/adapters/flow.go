@@ -53,6 +53,7 @@ func (a flowInsightsAdapter) FlowRoadmap(ctx context.Context, businessID int64) 
 			ID:             project.ID,
 			Name:           project.Name,
 			Status:         project.Status,
+			Visibility:     project.Visibility,
 			StartDate:      project.StartDate,
 			DueDate:        project.DueDate,
 			Progress:       project.Progress,
