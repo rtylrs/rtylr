@@ -8,39 +8,119 @@ import { HelmetContainer } from '@voxire/components';
 import { useFlowStore, Task } from '../../shared/stores/flowStore';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import { cn, formatDueDate } from '../../shared/lib/utils';
-import { useTasks, useUpdateTaskStatus } from '../tasks/useTasks';
+import { useTasks } from '../tasks/useTasks';
+import { useToggleDone } from '../tasks/useToggleDone';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import { useCurrentProject } from './useCurrentProject';
-import { useProjectColumns } from './useColumns';
-import { useStatusLabels } from '../../shared/hooks/useStatusLabels';
+import { useProjectStatuses } from './useStatuses';
+import { defaultStatus, sortStatuses, statusIdOf } from './statusUtils';
+import { DUE_LANES, PRIORITY_LABEL_KEY, PRIORITY_ORDER, laneKeyFor } from './taskGroups';
 import { TaskContextMenu, ContextMenuState } from '../../shared/components/TaskContextMenu';
 import PriorityIcon from '../../shared/components/PriorityIcon';
+import FlowSelect from '../../shared/components/FlowSelect';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { useOpenTask } from '../../shared/lib/useOpenTask';
 import { useCanEditTask, useCanCreateTask } from '../../shared/lib/currentUser';
 import ProjectViewTabs from './ProjectViewTabs';
+import type { ApiStatus } from '../../shared/services/flowApi';
 import type { RowProps } from '../../../../shared/hooks/useVirtualRows';
 import { VirtualList } from '../../../../shared/components/VirtualList';
 
-interface StatusGroupDef {
-  id: Task['status'];
-  label: string;
-  color: string;
-  alwaysShown: boolean;
+export type ListGroupKey = 'status' | 'assignee' | 'priority' | 'due' | 'none';
+
+const LIST_GROUP_KEYS: ListGroupKey[] = ['status', 'assignee', 'priority', 'due', 'none'];
+
+const listGroupStorageKey = (projectId: string): string => `flow:list:groupBy:${projectId}`;
+
+export function loadListGroupBy(projectId: string): ListGroupKey {
+  try {
+    const raw = localStorage.getItem(listGroupStorageKey(projectId));
+    if (LIST_GROUP_KEYS.some((key) => key === raw)) return raw as ListGroupKey;
+  } catch {
+    // Storage unavailable (private mode, blocked site data): use the default.
+  }
+  return 'status';
 }
 
-export const STATUS_GROUP_COLORS: { id: Task['status']; color: string; alwaysShown: boolean }[] = [
-  { id: 'backlog', color: 'var(--flow-neutral-fg)', alwaysShown: false },
-  { id: 'todo', color: 'var(--flow-neutral-fg)', alwaysShown: true },
-  { id: 'in_progress', color: 'var(--flow-info-fg)', alwaysShown: true },
-  { id: 'in_review', color: 'var(--flow-warn-fg)', alwaysShown: true },
-  { id: 'done', color: 'var(--flow-status-approved)', alwaysShown: true },
-  { id: 'cancelled', color: 'var(--flow-neutral-fg)', alwaysShown: false },
-];
+function saveListGroupBy(projectId: string, key: ListGroupKey): void {
+  try {
+    localStorage.setItem(listGroupStorageKey(projectId), key);
+  } catch {
+    // A preference that cannot be stored still applies for this visit.
+  }
+}
 
-/** Whether a group earns a header: one of the four the list always shows, or non-empty. */
-export function groupIsVisible(group: { alwaysShown: boolean }, taskCount: number): boolean {
-  return group.alwaysShown || taskCount > 0;
+export interface ListGroup {
+  id: string;
+  label: string;
+  color: string;
+  tasks: Task[];
+  /** The status a task added from this group starts on. */
+  statusId?: string;
+}
+
+/**
+ * Splits the list into groups. Only groups holding tasks are returned, and a
+ * task whose status is not in the project's set joins the status with the same
+ * built-in value (else the default) rather than an "Other" bucket.
+ */
+export function buildListGroups(
+  tasks: Task[],
+  statuses: readonly ApiStatus[],
+  groupBy: ListGroupKey,
+  t: (key: string) => string
+): ListGroup[] {
+  const muted = 'var(--flow-text-muted)';
+  if (groupBy === 'none') {
+    return tasks.length ? [{ id: '_all', label: '', color: muted, tasks }] : [];
+  }
+  if (groupBy === 'status') {
+    const ordered = sortStatuses(statuses);
+    const ids = new Set(ordered.map((s) => s.id));
+    const fallback = defaultStatus(ordered);
+    const homeOf = (task: Task): string | undefined => {
+      const own = statusIdOf(task);
+      if (own && ids.has(own)) return own;
+      return (ordered.find((s) => s.legacyStatus === task.status) ?? fallback)?.id;
+    };
+    return ordered
+      .map((s) => ({
+        id: s.id,
+        label: s.name,
+        color: s.color,
+        statusId: s.id,
+        tasks: tasks.filter((task) => homeOf(task) === s.id),
+      }))
+      .filter((group) => group.tasks.length > 0);
+  }
+  if (groupBy === 'priority') {
+    return PRIORITY_ORDER.map((p) => ({
+      id: p,
+      label: t(PRIORITY_LABEL_KEY[p]),
+      color: muted,
+      tasks: tasks.filter((task) => task.priority === p),
+    })).filter((group) => group.tasks.length > 0);
+  }
+  if (groupBy === 'due') {
+    return DUE_LANES.map((lane) => ({
+      id: lane.key,
+      label: t(lane.labelKey),
+      color: muted,
+      tasks: tasks.filter((task) => laneKeyFor(task, 'due') === lane.key),
+    })).filter((group) => group.tasks.length > 0);
+  }
+  // Assignee: people in first-seen order, names never translated.
+  const byAssignee = new Map<string, Task[]>();
+  for (const task of tasks) {
+    const name = task.assignee || '';
+    byAssignee.set(name, [...(byAssignee.get(name) ?? []), task]);
+  }
+  return [...byAssignee.entries()].map(([name, groupTasks]) => ({
+    id: name || '_unassigned',
+    label: name || t('flow.quickCreate.unassigned'),
+    color: muted,
+    tasks: groupTasks,
+  }));
 }
 
 interface TaskRowProps {
@@ -57,7 +137,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0, rowProps }) =
   const { t } = useTranslation();
   const [checked, setChecked] = useState(task.status === 'done');
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
-  const updateTaskStatus = useUpdateTaskStatus();
+  const toggleDone = useToggleDone(task);
   const openTask = useOpenTask();
   const canEdit = useCanEditTask(task.projectId);
 
@@ -68,13 +148,9 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0, rowProps }) =
   const handleToggle = () => {
     const newChecked = !checked;
     setChecked(newChecked);
-    const newStatus = newChecked ? 'done' : 'todo';
-    updateTaskStatus.mutate(
-      { id: task.id, status: newStatus },
-      {
-        onError: () => setChecked(!newChecked),
-      }
-    );
+    const revert = () => setChecked(!newChecked);
+    if (newChecked) toggleDone.complete(revert);
+    else toggleDone.reopen(revert);
   };
 
   const handleMoreClick = (e: React.MouseEvent) => {
@@ -110,14 +186,14 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0, rowProps }) =
       transition={{ duration: 0.15 }}
       className="flex items-center gap-3 px-4 py-2.5 group hover:bg-[var(--flow-hover)] transition-colors cursor-pointer"
       style={{
-        paddingLeft: depth > 0 ? `${16 + depth * 20}px` : undefined,
+        paddingInlineStart: depth > 0 ? `${16 + depth * 20}px` : undefined,
         borderBottom: '1px solid var(--flow-border)',
       }}
     >
       {/* Checkbox */}
       <button
         type="button"
-        disabled={!canEdit}
+        disabled={!canEdit || !toggleDone.ready}
         onClick={(event) => {
           event.stopPropagation();
           handleToggle();
@@ -151,7 +227,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0, rowProps }) =
           className="text-flow-meta flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
           style={{ color: 'var(--flow-text-dim)' }}
         >
-          <ChevronRight size={11} />
+          <ChevronRight size={11} className="rtl:rotate-180" />
           {task.subtaskCount} {t('flow.taskDetail.subtasks')}
         </span>
       )}
@@ -189,45 +265,46 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0, rowProps }) =
   );
 };
 
-export const StatusGroup: React.FC<{
-  group: StatusGroupDef;
-  tasks: Task[];
-  showCount?: boolean;
-}> = ({ group, tasks, showCount = true }) => {
+export const TaskGroup: React.FC<{
+  group: ListGroup;
+  /** False for the ungrouped list, which has no header. */
+  showHeader?: boolean;
+}> = ({ group, showHeader = true }) => {
   const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const { projectId } = useParams({ strict: false });
   const canCreate = useCanCreateTask(projectId);
+  const open = !showHeader || !collapsed;
 
   return (
     <div className="mb-2">
-      {/* Group header */}
-      <button
-        type="button"
-        onClick={() => setCollapsed((c) => !c)}
-        className="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-[var(--flow-hover)] transition-colors"
-      >
-        <ChevronDown
-          size={13}
-          className={cn('transition-transform', collapsed ? '-rotate-90' : '')}
-          style={{ color: 'var(--flow-text-dim)' }}
-        />
-        <span className="h-2 w-2 rounded-full" style={{ background: group.color }} />
-        <span className="text-flow-meta font-semibold" style={{ color: group.color }}>
-          {group.label}
-        </span>
-        {showCount && (
+      {showHeader && (
+        <button
+          type="button"
+          onClick={() => setCollapsed((c) => !c)}
+          aria-expanded={!collapsed}
+          className="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-[var(--flow-hover)] transition-colors"
+        >
+          <ChevronDown
+            size={13}
+            className={cn('transition-transform', collapsed ? '-rotate-90 rtl:rotate-90' : '')}
+            style={{ color: 'var(--flow-text-dim)' }}
+          />
+          <span className="h-2 w-2 rounded-full" style={{ background: group.color }} />
+          <span className="text-flow-meta font-semibold" style={{ color: 'var(--flow-text)' }}>
+            {group.label}
+          </span>
           <span
-            className="text-flow-meta ml-1 tabular-nums"
+            className="text-flow-meta ms-1 tabular-nums"
             style={{ color: 'var(--flow-text-dim)' }}
           >
-            {tasks.length}
+            {group.tasks.length}
           </span>
-        )}
-      </button>
+        </button>
+      )}
 
-      <AnimatePresence>
-        {!collapsed && (
+      <AnimatePresence initial={false}>
+        {open && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
@@ -236,22 +313,26 @@ export const StatusGroup: React.FC<{
             style={{ overflow: 'hidden' }}
           >
             <VirtualList
-              count={tasks.length}
+              count={group.tasks.length}
               estimateSize={41}
               renderRow={(index, rowProps) => (
-                <TaskRow key={tasks[index].id} rowProps={rowProps} task={tasks[index]} />
+                <TaskRow
+                  key={group.tasks[index].id}
+                  rowProps={rowProps}
+                  task={group.tasks[index]}
+                />
               )}
             />
 
             {canCreate && (
               <button
                 type="button"
-                className="w-full flex items-center gap-3 px-4 py-2 hover:bg-[var(--flow-hover)] transition-colors text-left"
+                className="w-full flex items-center gap-3 px-4 py-2 hover:bg-[var(--flow-hover)] transition-colors text-start"
                 style={{
                   borderBottom: '1px solid var(--flow-border)',
                   color: 'var(--flow-text-muted)',
                 }}
-                onClick={() => useFlowStore.getState().setQuickCreateOpen(true)}
+                onClick={() => useFlowStore.getState().setQuickCreateOpen(true, group.statusId)}
               >
                 <Plus size={14} />
                 <span className="text-flow-body">{t('flow.shell.newTask')}</span>
@@ -267,12 +348,16 @@ export const StatusGroup: React.FC<{
 const ProjectList: React.FC = () => {
   const { t } = useTranslation();
   const { projectId = '' } = useParams({ strict: false });
-  const statusLabels = useStatusLabels();
-  const canCreate = useCanCreateTask(projectId);
-  const STATUS_GROUPS: StatusGroupDef[] = useMemo(
-    () => STATUS_GROUP_COLORS.map((def) => ({ ...def, label: statusLabels[def.id] })),
-    [statusLabels]
-  );
+  const [groupBy, setGroupByState] = useState<ListGroupKey>('status');
+
+  useEffect(() => {
+    if (projectId) setGroupByState(loadListGroupBy(projectId));
+  }, [projectId]);
+
+  const setGroupBy = (key: ListGroupKey): void => {
+    setGroupByState(key);
+    if (projectId) saveListGroupBy(projectId, key);
+  };
 
   useProjectRealtime(projectId);
 
@@ -284,44 +369,28 @@ const ProjectList: React.FC = () => {
   } = useCurrentProject(projectId);
   const tasksQuery = useTasks({ projectId, activeOnly: true, compact: true });
   const { data: apiTasks } = tasksQuery;
-  const columnsQuery = useProjectColumns(projectId);
+  const statusesQuery = useProjectStatuses(projectId);
   const projectLoadFailed =
-    projectMetadataFailed || hasQueryFailed(tasksQuery) || hasQueryFailed(columnsQuery);
+    projectMetadataFailed || hasQueryFailed(tasksQuery) || hasQueryFailed(statusesQuery);
   const refetchProjects = () => {
     void refetchProjectMetadata();
     void tasksQuery.refetch();
-    void columnsQuery.refetch();
+    void statusesQuery.refetch();
   };
 
-  const projectTasks = (apiTasks ?? []).map(apiTaskToTask).filter((task) => !task.archived);
-  const projectSections = useMemo(
-    () => [...(columnsQuery.data ?? [])].sort((a, b) => a.sortOrder - b.sortOrder),
-    [columnsQuery.data]
+  const projectTasks = useMemo(
+    () => (apiTasks ?? []).map(apiTaskToTask).filter((task) => !task.archived),
+    [apiTasks]
   );
-
-  const sectionBlocks = useMemo(() => {
-    if (projectSections.length === 0) return null;
-    // `Task.sectionId` is a stringified column id (see apiTaskToTask), so both
-    // sides of these comparisons must be coerced. Comparing the raw number
-    // matched `"5"` against `5` - always false - so every task fell into
-    // "Other" while its own column rendered empty. The block id is
-    // stringified too, because quick-create takes the section id as a string.
-    const blocks: { id: string; title: string; tasks: Task[] }[] = projectSections.map((sec) => ({
-      id: String(sec.id),
-      title: sec.name,
-      tasks: projectTasks.filter((task) => task.sectionId === String(sec.id)),
-    }));
-    const inSection = new Set(projectSections.map((s) => String(s.id)));
-    const loose = projectTasks.filter((task) => !task.sectionId || !inSection.has(task.sectionId));
-    if (loose.length)
-      blocks.push({ id: '_unsectioned', title: t('flow.projectList.otherSection'), tasks: loose });
-    return blocks;
-  }, [projectSections, projectTasks, t]);
+  const groups = useMemo(
+    () => buildListGroups(projectTasks, statusesQuery.data ?? [], groupBy, t),
+    [projectTasks, statusesQuery.data, groupBy, t]
+  );
 
   if (
     (projectLoading && !project) ||
     (tasksQuery.isPending && !hasQueryFailed(tasksQuery)) ||
-    (columnsQuery.isPending && !hasQueryFailed(columnsQuery))
+    (statusesQuery.isPending && !hasQueryFailed(statusesQuery))
   ) {
     return (
       <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
@@ -352,6 +421,19 @@ const ProjectList: React.FC = () => {
         projectId={projectId}
         taskCount={projectTasks.length}
         onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
+        rightSlot={
+          <div className="w-[180px]">
+            <FlowSelect
+              label={t('flow.projectList.groupBy')}
+              value={groupBy}
+              options={LIST_GROUP_KEYS.map((key) => ({
+                value: key,
+                label: t(`flow.projectList.groupByOption.${key}`),
+              }))}
+              onChange={(value) => setGroupBy(value as ListGroupKey)}
+            />
+          </div>
+        }
       />
 
       {/* Column headers */}
@@ -367,67 +449,19 @@ const ProjectList: React.FC = () => {
         <div className="w-2" />
         <div className="flex-1">{t('flow.projectList.columnTitle')}</div>
         <div className="w-5" />
-        <div className="w-[96px] text-right">{t('flowCommon.dueDate')}</div>
+        <div className="w-[96px] text-end">{t('flowCommon.dueDate')}</div>
         <div className="w-5" />
       </div>
 
-      {/* Sections + status groups */}
       <div className="flex-1 overflow-y-auto">
-        {sectionBlocks
-          ? sectionBlocks.map((block) => (
-              <div key={block.id} className="mb-4">
-                <div
-                  className="px-4 py-2 text-flow-meta font-semibold uppercase tracking-wider sticky top-0 z-[1]"
-                  style={{
-                    background: 'var(--flow-bg)',
-                    borderBottom: '1px solid var(--flow-border)',
-                    color: 'var(--flow-text-muted)',
-                  }}
-                >
-                  {block.title}
-                  <span
-                    className="ml-2 font-normal tabular-nums"
-                    style={{ color: 'var(--flow-text-dim)' }}
-                  >
-                    {block.tasks.length}
-                  </span>
-                </div>
-                <VirtualList
-                  count={block.tasks.length}
-                  estimateSize={41}
-                  renderRow={(index, rowProps) => (
-                    <TaskRow
-                      key={block.tasks[index].id}
-                      rowProps={rowProps}
-                      task={block.tasks[index]}
-                    />
-                  )}
-                />
-                {canCreate && (
-                  <button
-                    type="button"
-                    className="w-full flex items-center gap-3 px-4 py-2 hover:bg-[var(--flow-hover)] transition-colors text-left"
-                    style={{ color: 'var(--flow-text-muted)' }}
-                    onClick={() =>
-                      useFlowStore
-                        .getState()
-                        .setQuickCreateOpen(
-                          true,
-                          block.id === '_unsectioned' ? undefined : block.id
-                        )
-                    }
-                  >
-                    <Plus size={14} />
-                    <span className="text-flow-body">{t('flow.shell.newTask')}</span>
-                  </button>
-                )}
-              </div>
-            ))
-          : STATUS_GROUPS.map((group) => {
-              const groupTasks = projectTasks.filter((t) => t.status === group.id);
-              if (!groupIsVisible(group, groupTasks.length)) return null;
-              return <StatusGroup key={group.id} group={group} tasks={groupTasks} />;
-            })}
+        {groups.map((group) => (
+          <TaskGroup key={`${groupBy}:${group.id}`} group={group} showHeader={groupBy !== 'none'} />
+        ))}
+        {groups.length === 0 && (
+          <p className="px-4 py-6 text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>
+            {t('flow.projectList.empty')}
+          </p>
+        )}
       </div>
     </div>
   );
