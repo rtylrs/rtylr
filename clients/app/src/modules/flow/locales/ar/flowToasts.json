@@ -66,10 +66,7 @@
     "savePreferencesFailed": "فشل حفظ تفضيلات الإشعارات"
   },
   "column": {
-    "createFailed": "فشل إنشاء العمود",
-    "updateFailed": "فشل تحديث العمود",
-    "deleteFailed": "فشل حذف العمود",
-    "nameRequired": "اسم العمود مطلوب"
+    "nameRequired": "اسم الحالة مطلوب"
   },
   "projectMember": {
     "removeFailed": "فشل إزالة العضو",
@@ -169,9 +166,16 @@
     "createFailed": "تعذّر إنشاء الحالة",
     "updateFailed": "فشل تحديث الحالة",
     "deleted": "تم حذف الحالة",
-    "deletedWithReassignment": "تم حذف الحالة. عادت {{count}} مهمة إلى حالتها المدمجة.",
     "deleteFailed": "تعذّر حذف الحالة",
-    "setFailed": "فشل تعيين حالة المهمة"
+    "setFailed": "فشل تعيين حالة المهمة",
+    "deletedWithMove_zero": "تم حذف الحالة.",
+    "deletedWithMove_one": "تم حذف الحالة ونقل مهمة واحدة.",
+    "deletedWithMove_two": "تم حذف الحالة ونقل مهمتين.",
+    "deletedWithMove_few": "تم حذف الحالة ونقل {{count}} مهام.",
+    "deletedWithMove_many": "تم حذف الحالة ونقل {{count}} مهمة.",
+    "deletedWithMove_other": "تم حذف الحالة ونقل {{count}} مهمة.",
+    "templateSaved": "تم حفظ قالب الحالات",
+    "templateSaveFailed": "تعذّر حفظ قالب الحالات"
   },
   "attachment": {
     "addFailed": "تعذّر إضافة المرفق",
