@@ -172,7 +172,7 @@ func TestGetStatusByID_IsScopedToTheBusiness(t *testing.T) {
 	}
 }
 
-func TestDeleteStatus_MovesItsTasksBackToTheStringStatus(t *testing.T) {
+func TestDeleteStatus_MovesItsTasksToTheChosenStatus(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := testsupport.NewRepository(db)
 	ctx := context.Background()
@@ -212,7 +212,20 @@ func TestDeleteStatus_MovesItsTasksBackToTheStringStatus(t *testing.T) {
 		t.Fatalf("string status = %q, want in_review from the custom status", task.Status)
 	}
 
-	moved, err := repo.DeleteStatus(ctx, status.ID, testutil.BusinessID)
+	// A status with tasks cannot be deleted without saying where they go.
+	if _, err := repo.DeleteStatus(ctx, status.ID, testutil.BusinessID, 0); !errors.Is(err, domain.ErrStatusInUse) {
+		t.Fatalf("delete without target: err = %v, want ErrStatusInUse", err)
+	}
+
+	doneIn, _ := domain.NormalizeStatusInput(domain.StatusInput{
+		ProjectID: projID, Name: "Shipped", Bucket: domain.StatusBucketDone,
+	})
+	done, err := repo.CreateStatus(ctx, testutil.BusinessID, owner, doneIn)
+	if err != nil {
+		t.Fatalf("CreateStatus done: %v", err)
+	}
+
+	moved, err := repo.DeleteStatus(ctx, status.ID, testutil.BusinessID, done.ID)
 	if err != nil {
 		t.Fatalf("DeleteStatus: %v", err)
 	}
@@ -220,16 +233,24 @@ func TestDeleteStatus_MovesItsTasksBackToTheStringStatus(t *testing.T) {
 		t.Errorf("moved = %d, want 1", moved)
 	}
 
-	// The task survives, and keeps the status the user last saw.
+	// The task survives and lands on the target, all three columns together.
 	after, err := repo.GetTaskByID(ctx, taskID)
 	if err != nil {
 		t.Fatalf("deleting a status must not delete its tasks: %v", err)
 	}
-	if after.Status != domain.TaskStatusInReview {
-		t.Errorf("after delete, string status = %q, want it unchanged at in_review", after.Status)
+	if after.Status != domain.TaskStatusDone || after.StatusID == nil || *after.StatusID != done.ID {
+		t.Errorf("after delete: status = %q status_id = %v, want done on %d", after.Status, after.StatusID, done.ID)
+	}
+	if after.SectionID == nil || *after.SectionID != done.ID {
+		t.Errorf("after delete: section_id = %v, want it to mirror status_id %d", after.SectionID, done.ID)
 	}
 	if _, err := repo.GetStatusByID(ctx, status.ID, testutil.BusinessID); !errors.Is(err, domain.ErrStatusNotFound) {
 		t.Errorf("status should be gone, got err = %v", err)
+	}
+
+	// The project's only done status cannot go.
+	if _, err := repo.DeleteStatus(ctx, done.ID, testutil.BusinessID, 0); !errors.Is(err, domain.ErrLastDoneStatus) {
+		t.Errorf("deleting the last done status: err = %v, want ErrLastDoneStatus", err)
 	}
 }
 
