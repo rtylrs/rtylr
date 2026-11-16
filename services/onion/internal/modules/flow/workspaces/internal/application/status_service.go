@@ -16,11 +16,18 @@ import (
 
 // ListProjectStatuses returns a project's status set.
 //
-// Read access only, so the gate is viewer. An empty set is the normal answer for
-// a project that has not configured any, and means "use the built-ins".
+// Read access only, so the gate is viewer. Statuses are the project's columns,
+// so a project that somehow has none is seeded from the template first.
 func (s *Service) ListProjectStatuses(ctx context.Context, projectID, callerID, businessID int64) ([]domain.Status, error) {
 	if err := s.RequireProjectRole(ctx, projectID, callerID, businessID, domain.FlowRoleViewer); err != nil {
 		return nil, domain.ErrUnauthorized
+	}
+	statuses, err := s.repo.ListStatusesByProject(ctx, businessID, projectID)
+	if err != nil || len(statuses) > 0 {
+		return statuses, err
+	}
+	if seedErr := s.repo.SeedDefaultColumns(ctx, projectID, 0, callerID); seedErr != nil {
+		return nil, seedErr
 	}
 	return s.repo.ListStatusesByProject(ctx, businessID, projectID)
 }
