@@ -184,6 +184,8 @@ export interface Task {
   archived?: boolean;
   createdAt: string;
   updatedAt: string;
+  /** When the task entered a done status; absent while it is open. */
+  completedAt?: string;
   identifier: string; // e.g. FLOW-123
   sectionId?: string;
   /** Position within a board column once arranged by hand (1-based); 0 or absent until then. */

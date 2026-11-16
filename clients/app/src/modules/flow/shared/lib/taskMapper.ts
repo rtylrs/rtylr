@@ -70,6 +70,7 @@ export function apiTaskToTask(t: ApiTask): Task {
     identifier: t.identifier ?? id,
     createdAt: t.createdAt ?? new Date().toISOString(),
     updatedAt: t.updatedAt ?? new Date().toISOString(),
+    completedAt: t.completedAt || undefined,
     estimate: t.estimatedHours ?? t.estimate,
     cycleId: t.cycleId != null ? String(t.cycleId) : undefined,
     milestoneId: t.milestoneId != null ? String(t.milestoneId) : undefined,
