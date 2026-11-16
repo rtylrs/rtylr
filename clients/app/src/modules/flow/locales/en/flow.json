@@ -1002,6 +1002,7 @@
     "deleteWithTasks_one": "{{count}} task is in this status. Choose the status it moves to.",
     "deleteWithTasks_other": "{{count}} tasks are in this status. Choose the status they move to.",
     "deleteEmpty": "No tasks are in this status. Deleting it removes the column from the board.",
+    "deleteChooseTarget": "Any tasks in this status move to the status you choose.",
     "moveTasksTo": "Move tasks to",
     "chooseTarget": "Choose a status",
     "deleteConfirm": "Delete status",
