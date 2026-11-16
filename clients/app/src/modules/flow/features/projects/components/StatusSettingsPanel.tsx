@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { ChevronDown, ChevronUp, Plus, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -10,24 +9,19 @@ import {
   useProjectStatuses,
   useCreateStatus,
   useUpdateStatus,
-  useDeleteStatus,
+  useReorderStatuses,
 } from '../useStatuses';
 import type { ApiStatus } from '../../../shared/services/flowApi';
 import { useDialogBehavior } from '../../../shared/lib/useDialogBehavior';
-
-const STATUS_COLORS = [
-  '#ef4444',
-  '#f97316',
-  '#eab308',
-  '#22c55e',
-  '#3b82f6',
-  '#8b5cf6',
-  '#ec4899',
-  '#64C5B9',
-];
-
-const BUCKETS = ['backlog', 'active', 'done', 'cancelled'] as const;
-type Bucket = (typeof BUCKETS)[number];
+import {
+  STATUS_BUCKETS as BUCKETS,
+  STATUS_COLORS,
+  isOnlyDoneStatus,
+  reorderUpdates,
+  sortStatuses,
+  type StatusBucket as Bucket,
+} from '../statusUtils';
+import DeleteStatusDialog from './DeleteStatusDialog';
 
 interface StatusSettingsPanelProps {
   open: boolean;
@@ -40,14 +34,8 @@ interface StatusSettingsPanelProps {
 }
 
 /**
- * Per-project custom status configuration (F-A). Reorder is up/down buttons
- * plus Alt+Arrow, matching BoardSettingsPanel's columns list rather than
- * drag - same reason: the board's drag handling has no touch support, and
- * buttons serve pointer, touch and keyboard from one implementation.
- *
- * An empty set is the normal, unconfigured case, not an error state: the
- * project falls back to the six built-in string statuses. The empty state
- * says this explicitly rather than reading as broken.
+ * A project's statuses, which are also its board columns. Reorder is up/down
+ * buttons plus Alt+Arrow so pointer, touch and keyboard share one path.
  */
 const StatusSettingsPanel = ({
   open,
@@ -65,27 +53,17 @@ const StatusSettingsPanel = ({
   } = statusesQuery;
   const statusesLoadFailed = hasQueryFailed(statusesQuery);
   const statusesReady = !statusesPending && !statusesLoadFailed && statusesQuery.data !== undefined;
-  const queryClient = useQueryClient();
   const createStatus = useCreateStatus(projectId);
   const updateStatus = useUpdateStatus(projectId);
-  const deleteStatus = useDeleteStatus(projectId);
-
-  const invalidateStatusViews = (): void => {
-    queryClient.invalidateQueries({ queryKey: ['tasks'] });
-    queryClient.invalidateQueries({ queryKey: ['my-tasks'] });
-    queryClient.invalidateQueries({ queryKey: ['task'] });
-  };
+  const reorderStatuses = useReorderStatuses(projectId);
 
   const [newName, setNewName] = useState('');
-  const [newBucket, setNewBucket] = useState<Bucket>('backlog');
+  const [newBucket, setNewBucket] = useState<Bucket>('active');
   const [newColor, setNewColor] = useState(STATUS_COLORS[0]);
-  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<ApiStatus | null>(null);
   const [announcement, setAnnouncement] = useState('');
 
-  const ordered = useMemo(
-    () => [...statuses].sort((a, b) => a.sortOrder - b.sortOrder),
-    [statuses]
-  );
+  const ordered = useMemo(() => sortStatuses(statuses), [statuses]);
 
   if (!open) return null;
 
@@ -96,100 +74,66 @@ const StatusSettingsPanel = ({
       return;
     }
     if (name === status.name) return;
-    updateStatus.mutate(
-      {
-        id: status.id,
-        name,
-        bucket: status.bucket,
-        color: status.color,
-        sortOrder: status.sortOrder,
-        isDefault: status.isDefault,
-      },
-      { onSuccess: invalidateStatusViews }
-    );
+    updateStatus.mutate({
+      id: status.id,
+      name,
+      bucket: status.bucket,
+      color: status.color,
+      sortOrder: status.sortOrder,
+      isDefault: status.isDefault,
+    });
   };
 
   const recolor = (status: ApiStatus, color: string, nameOverride?: string): void => {
     const name = nameOverride === undefined ? status.name : nameOverride.trim();
     if (!name) return;
-    updateStatus.mutate(
-      {
-        id: status.id,
-        name,
-        bucket: status.bucket,
-        color,
-        sortOrder: status.sortOrder,
-        isDefault: status.isDefault,
-      },
-      { onSuccess: invalidateStatusViews }
-    );
+    updateStatus.mutate({
+      id: status.id,
+      name,
+      bucket: status.bucket,
+      color,
+      sortOrder: status.sortOrder,
+      isDefault: status.isDefault,
+    });
   };
 
   const rebucket = (status: ApiStatus, bucket: Bucket, nameOverride?: string): void => {
     const name = nameOverride === undefined ? status.name : nameOverride.trim();
     if (!name) return;
-    updateStatus.mutate(
-      {
-        id: status.id,
-        name,
-        bucket,
-        color: status.color,
-        sortOrder: status.sortOrder,
-        isDefault: status.isDefault,
-      },
-      { onSuccess: invalidateStatusViews }
-    );
+    updateStatus.mutate({
+      id: status.id,
+      name,
+      bucket,
+      color: status.color,
+      sortOrder: status.sortOrder,
+      isDefault: status.isDefault,
+    });
   };
 
   const makeDefault = (status: ApiStatus, nameOverride?: string): void => {
     const name = nameOverride === undefined ? status.name : nameOverride.trim();
     if (!name) return;
-    updateStatus.mutate(
-      {
-        id: status.id,
-        name,
-        bucket: status.bucket,
-        color: status.color,
-        sortOrder: status.sortOrder,
-        isDefault: true,
-      },
-      { onSuccess: invalidateStatusViews }
-    );
+    updateStatus.mutate({
+      id: status.id,
+      name,
+      bucket: status.bucket,
+      color: status.color,
+      sortOrder: status.sortOrder,
+      isDefault: true,
+    });
   };
 
-  /** Two independent PUTs, no bulk reorder on the contract - same pattern as
-   * BoardSettingsPanel.move: if the second fails, the invalidated query pulls
-   * the server's real order back rather than leaving the local list lying. The
-   * current row draft is carried into the first replacement update. */
+  /** The row's unsaved name draft is carried into the moved status's write. */
   const move = (index: number, direction: -1 | 1, nameOverride?: string): void => {
     const target = index + direction;
     if (target < 0 || target >= ordered.length) return;
     const a = ordered[index];
-    const b = ordered[target];
     const aName = nameOverride === undefined ? a.name : nameOverride.trim();
     if (!aName) return;
-    updateStatus.mutate(
-      {
-        id: a.id,
-        name: aName,
-        bucket: a.bucket,
-        color: a.color,
-        sortOrder: b.sortOrder,
-        isDefault: a.isDefault,
-      },
-      { onSuccess: invalidateStatusViews }
+    const updates = reorderUpdates(ordered, index, target).map((u) =>
+      u.status.id === a.id ? { ...u, status: { ...u.status, name: aName } } : u
     );
-    updateStatus.mutate(
-      {
-        id: b.id,
-        name: b.name,
-        bucket: b.bucket,
-        color: b.color,
-        sortOrder: a.sortOrder,
-        isDefault: b.isDefault,
-      },
-      { onSuccess: invalidateStatusViews }
-    );
+    reorderStatuses.mutate(updates);
     setAnnouncement(
       t('flow.status.movedAnnouncement', {
         name: aName,
@@ -211,7 +155,7 @@ const StatusSettingsPanel = ({
       {
         onSuccess: () => {
           setNewName('');
-          setNewBucket('backlog');
+          setNewBucket('active');
           setNewColor(STATUS_COLORS[0]);
           toast.success(t('flowToasts.status.created'));
         },
@@ -280,15 +224,6 @@ const StatusSettingsPanel = ({
           </p>
         ) : (
           <>
-            {ordered.length === 0 && (
-              <p
-                className="mb-4 text-flow-meta leading-snug"
-                style={{ color: 'var(--flow-text-muted)' }}
-              >
-                {t('flow.status.emptyExplainer')}
-              </p>
-            )}
-
             <ul className="space-y-1.5">
               {ordered.map((status, index) => (
                 <StatusRow
@@ -297,18 +232,13 @@ const StatusSettingsPanel = ({
                   index={index}
                   total={ordered.length}
                   canManage={canManage}
-                  pendingDelete={pendingDelete === status.id}
+                  deleteBlocked={isOnlyDoneStatus(status, ordered)}
                   onRename={rename}
                   onRecolor={recolor}
                   onRebucket={rebucket}
                   onMakeDefault={makeDefault}
                   onMove={move}
-                  onRequestDelete={() => setPendingDelete(status.id)}
-                  onCancelDelete={() => setPendingDelete(null)}
-                  onConfirmDelete={() => {
-                    deleteStatus.mutate(status.id, { onSuccess: invalidateStatusViews });
-                    setPendingDelete(null);
-                  }}
+                  onRequestDelete={() => setPendingDelete(status)}
                 />
               ))}
             </ul>
@@ -389,6 +319,12 @@ const StatusSettingsPanel = ({
           </div>
         )}
       </div>
+      <DeleteStatusDialog
+        projectId={projectId}
+        status={pendingDelete}
+        statuses={ordered}
+        onClose={() => setPendingDelete(null)}
+      />
     </div>
   );
 };
@@ -398,15 +334,14 @@ interface StatusRowProps {
   index: number;
   total: number;
   canManage: boolean;
-  pendingDelete: boolean;
+  /** The project's only done status, which the server will not delete. */
+  deleteBlocked: boolean;
   onRename: (status: ApiStatus, raw: string, restore: () => void) => void;
   onRecolor: (status: ApiStatus, color: string, name?: string) => void;
   onRebucket: (status: ApiStatus, bucket: Bucket, name?: string) => void;
   onMakeDefault: (status: ApiStatus, name?: string) => void;
   onMove: (index: number, direction: -1 | 1, name?: string) => void;
   onRequestDelete: () => void;
-  onCancelDelete: () => void;
-  onConfirmDelete: () => void;
 }
 
 const StatusRow = ({
@@ -414,15 +349,13 @@ const StatusRow = ({
   index,
   total,
   canManage,
-  pendingDelete,
+  deleteBlocked,
   onRename,
   onRecolor,
   onRebucket,
   onMakeDefault,
   onMove,
   onRequestDelete,
-  onCancelDelete,
-  onConfirmDelete,
 }: StatusRowProps): React.JSX.Element => {
   const { t } = useTranslation();
   const [draft, setDraft] = useState(status.name);
@@ -510,7 +443,7 @@ const StatusRow = ({
         <button
           type="button"
           onClick={onRequestDelete}
-          disabled={!canManage}
+          disabled={!canManage || deleteBlocked}
           aria-label={t('flow.status.removeStatusLabel', { name: status.name })}
           className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm disabled:opacity-30 md:h-8 md:w-8"
           style={{ color: 'var(--flow-text-muted)' }}
@@ -521,16 +454,7 @@ const StatusRow = ({
 
       <div className="mt-2 flex items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-1.5">
-          {[
-            '#ef4444',
-            '#f97316',
-            '#eab308',
-            '#22c55e',
-            '#3b82f6',
-            '#8b5cf6',
-            '#ec4899',
-            '#64C5B9',
-          ].map((c) => (
+          {STATUS_COLORS.map((c) => (
             <button
               key={c}
               type="button"
@@ -571,34 +495,10 @@ const StatusRow = ({
         </label>
       </div>
 
-      {pendingDelete && (
-        <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
-          <p className="text-flow-meta leading-snug" style={{ color: 'var(--flow-text)' }}>
-            {t('flow.status.removeStatusConfirm', { name: status.name })}
-          </p>
-          <div className="flex gap-1.5">
-            <button
-              type="button"
-              onClick={onConfirmDelete}
-              className="flow-focus min-h-[44px] rounded-sm px-3 text-flow-meta font-semibold md:min-h-0 md:py-1"
-              style={{
-                background: 'var(--flow-status-rejected-bg)',
-                border: '1px solid var(--flow-status-rejected-border)',
-                color: 'var(--flow-status-rejected)',
-              }}
-            >
-              {t('flow.status.confirmRemoveStatus')}
-            </button>
-            <button
-              type="button"
-              onClick={onCancelDelete}
-              className="flow-focus min-h-[44px] rounded-sm px-3 text-flow-meta md:min-h-0 md:py-1"
-              style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
-            >
-              {t('flow.status.cancel')}
-            </button>
-          </div>
-        </div>
+      {canManage && deleteBlocked && (
+        <p className="mt-2 text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>
+          {t('flow.status.lastDoneProtected')}
+        </p>
       )}
     </li>
   );
