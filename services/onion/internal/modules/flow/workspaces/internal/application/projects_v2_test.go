@@ -41,6 +41,7 @@ func v2Svc(t *testing.T) (*Service, context.Context, *sql.DB) {
 		"DELETE FROM flow_tasks WHERE business_id = ?",
 		"DELETE FROM flow_project_columns WHERE workspace_id IN (SELECT id FROM flow_workspaces WHERE business_id = ?)",
 		"DELETE pm FROM flow_project_members pm JOIN flow_projects p ON p.id = pm.project_id WHERE p.business_id = ?",
+		"DELETE FROM flow_statuses WHERE business_id = ?",
 		"DELETE FROM flow_projects WHERE business_id = ?",
 		"DELETE FROM flow_workspaces WHERE business_id = ?",
 	} {
@@ -248,5 +249,22 @@ func TestArchiveRestorePurgeLifecycle(t *testing.T) {
 	}
 	if count != 0 {
 		t.Errorf("%d tasks survived the cascade", count)
+	}
+}
+
+func TestListProjectStatusesSeedsAProjectWithNone(t *testing.T) {
+	svc, ctx, db := v2Svc(t)
+
+	p := createV2Project(ctx, t, svc, "statuses-reseeded", "", v2UserA)
+	if _, err := db.Exec("DELETE FROM flow_statuses WHERE project_id = ?", p.ID); err != nil {
+		t.Fatalf("clear statuses: %v", err)
+	}
+
+	statuses, err := svc.ListProjectStatuses(ctx, p.ID, v2UserA, v2Business)
+	if err != nil {
+		t.Fatalf("ListProjectStatuses: %v", err)
+	}
+	if len(statuses) != 6 {
+		t.Fatalf("got %d statuses, want the 6 defaults", len(statuses))
 	}
 }
