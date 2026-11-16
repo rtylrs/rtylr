@@ -16,7 +16,16 @@
     "emptyTitle": "No KPI data yet",
     "emptyDescription": "Metrics will appear here once your business starts generating activity.",
     "vsPrior": "مقابل السابق",
-    "metaTitle": "لوحة المعلومات · rtylr"
+    "metaTitle": "لوحة المعلومات · rtylr",
+    "service": {
+      "title": "المشاريع والفواتير",
+      "tasksDone": "المهام المنجزة",
+      "tasksDoneValue": "{{done}} من {{total}}",
+      "overdueTasks": "المهام المتأخرة",
+      "unpaidInvoices": "الفواتير غير المدفوعة",
+      "overdueInvoices": "الفواتير المتأخرة",
+      "projectsTitle": "تقدّم المشاريع"
+    }
   },
   "revenue": {
     "title": "Revenue",

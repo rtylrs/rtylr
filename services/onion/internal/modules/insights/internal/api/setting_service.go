@@ -117,6 +117,7 @@ type FlowRoadmapProject struct {
 	ID             int64
 	Name           string
 	Status         string
+	Visibility     string
 	StartDate      string
 	DueDate        string
 	Progress       float64
@@ -200,7 +201,20 @@ func (a *DashboardAPI) GetRoadmap(ctx context.Context, _ *insightsdashboardv1.Ge
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load Flow roadmap")
 	}
 
-	return &insightsdashboardv1.GetRoadmapResponse{Projects: toRoadmapProjects(projectsIn)}, nil
+	return &insightsdashboardv1.GetRoadmapResponse{Projects: toRoadmapProjects(publicRoadmapProjects(projectsIn))}, nil
+}
+
+// publicRoadmapProjects keeps only public projects. Insights viewers are not
+// necessarily members of every project, so private projects (including each
+// person's My Tasks) stay out of this business-wide view.
+func publicRoadmapProjects(in []FlowRoadmapProject) []FlowRoadmapProject {
+	out := make([]FlowRoadmapProject, 0, len(in))
+	for _, p := range in {
+		if p.Visibility == "public" {
+			out = append(out, p)
+		}
+	}
+	return out
 }
 
 // GetWorkload reports per-person Flow load.

@@ -1,7 +1,7 @@
 import { createOneKitClient, toFiniteNumber } from '@voxire/api';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { DashboardServiceClient } from '@voxire/voxie/insights/dashboard/v1/client';
-import type { InsightsDashboardResponse } from './types';
+import type { InsightsDashboardResponse, WorkSummaryResponse } from './types';
 
 const dashboardClient = createOneKitClient(DashboardServiceClient, 'insights');
 
@@ -28,6 +28,35 @@ export const useInsightsDashboard = (): UseQueryResult<InsightsDashboardResponse
           value: toFiniteNumber(res.margin?.value),
           deltaPct: toFiniteNumber(res.margin?.deltaPct),
         },
+      };
+    },
+  });
+};
+
+// Business-wide Work (Flow) totals and per-project progress, so a service
+// business sees its delivery on the overview, not only POS and invoice cards.
+export const useWorkSummary = (): UseQueryResult<WorkSummaryResponse> => {
+  return useQuery<WorkSummaryResponse>({
+    queryKey: ['insights-dashboard-work'],
+    refetchInterval: 60000,
+    queryFn: async (): Promise<WorkSummaryResponse> => {
+      const [stats, roadmap] = await Promise.all([
+        dashboardClient.getInsights({}),
+        dashboardClient.getRoadmap({}),
+      ]);
+      return {
+        totalTasks: toFiniteNumber(stats.totalTasks),
+        completedTasks: toFiniteNumber(stats.completedTasks),
+        overdueTasks: toFiniteNumber(stats.overdueTasks),
+        projects: (roadmap.projects ?? [])
+          .map((p) => ({
+            id: p.projectId ?? '',
+            name: p.projectName ?? '',
+            totalTasks: toFiniteNumber(p.totalTasks),
+            completedTasks: toFiniteNumber(p.completedTasks),
+            progressPct: toFiniteNumber(p.progressPercent),
+          }))
+          .filter((p) => p.totalTasks > 0),
       };
     },
   });

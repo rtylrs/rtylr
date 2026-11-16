@@ -16,7 +16,16 @@
     "emptyTitle": "No KPI data yet",
     "emptyDescription": "Metrics will appear here once your business starts generating activity.",
     "vsPrior": "vs prior",
-    "metaTitle": "Dashboard · rtylr"
+    "metaTitle": "Dashboard · rtylr",
+    "service": {
+      "title": "Projects and invoices",
+      "tasksDone": "Tasks done",
+      "tasksDoneValue": "{{done}} of {{total}}",
+      "overdueTasks": "Overdue tasks",
+      "unpaidInvoices": "Unpaid invoices",
+      "overdueInvoices": "Overdue invoices",
+      "projectsTitle": "Project progress"
+    }
   },
   "revenue": {
     "title": "Revenue",

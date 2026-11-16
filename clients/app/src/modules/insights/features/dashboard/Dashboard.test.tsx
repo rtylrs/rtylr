@@ -10,6 +10,8 @@ const mocks = vi.hoisted(() => ({
   useInsightsDashboard: vi.fn(),
   useRevenueSeries: vi.fn(),
   useInsightsSettings: vi.fn(),
+  useWorkSummary: vi.fn(),
+  useInvoiceAging: vi.fn(),
 }));
 
 vi.mock('@voxire/components', () => ({
@@ -18,6 +20,11 @@ vi.mock('@voxire/components', () => ({
 
 vi.mock('../../shared/hooks/queries/useInsightsDashboard', () => ({
   useInsightsDashboard: mocks.useInsightsDashboard,
+  useWorkSummary: mocks.useWorkSummary,
+}));
+
+vi.mock('../../shared/hooks/queries/useInsightsFinancial', () => ({
+  useInvoiceAging: mocks.useInvoiceAging,
 }));
 
 vi.mock('../../shared/hooks/queries/useRevenue', () => ({
@@ -33,6 +40,8 @@ describe('Dashboard empty state', () => {
     vi.clearAllMocks();
     mocks.useRevenueSeries.mockReturnValue({ data: { series: [] } });
     mocks.useInsightsSettings.mockReturnValue({ data: { defaultCurrency: 'USD' } });
+    mocks.useWorkSummary.mockReturnValue({ data: undefined });
+    mocks.useInvoiceAging.mockReturnValue({ data: undefined });
   });
 
   it('shows the illustration, real title/description and a refresh action when every KPI is zero', () => {
@@ -73,8 +82,70 @@ describe('Dashboard empty state', () => {
       refetch: vi.fn(),
     });
 
+    mocks.useWorkSummary.mockReturnValue({
+      data: { totalTasks: 0, completedTasks: 0, overdueTasks: 0, projects: [] },
+    });
+    mocks.useInvoiceAging.mockReturnValue({ data: { buckets: [] } });
+
     render(<Dashboard />);
 
     expect(screen.queryByText('No KPI data yet')).not.toBeInTheDocument();
+    // A business without Work tasks or unpaid invoices gets no empty cards.
+    expect(screen.queryByText('Tasks done')).not.toBeInTheDocument();
+    expect(screen.queryByText('Unpaid invoices')).not.toBeInTheDocument();
+  });
+
+  it('shows Work and invoice figures for a business with no POS activity', () => {
+    mocks.useInsightsDashboard.mockReturnValue({
+      data: {
+        revenue: { value: 0, deltaPct: 0 },
+        customers: { value: 0, deltaPct: 0 },
+        orders: { value: 0, deltaPct: 0 },
+        margin: { value: 0, deltaPct: 0 },
+      },
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+    mocks.useWorkSummary.mockReturnValue({
+      data: {
+        totalTasks: 61,
+        completedTasks: 12,
+        overdueTasks: 4,
+        projects: [
+          {
+            id: '9',
+            name: 'Investment Hub',
+            totalTasks: 61,
+            completedTasks: 12,
+            progressPct: 19.7,
+          },
+        ],
+      },
+    });
+    mocks.useInvoiceAging.mockReturnValue({
+      data: {
+        buckets: [
+          { bucket: 'current', invoiceCount: 1, amountMinorUnits: 150000 },
+          { bucket: '1-30', invoiceCount: 1, amountMinorUnits: 50000 },
+        ],
+      },
+    });
+
+    render(<Dashboard />);
+
+    expect(screen.queryByText('No KPI data yet')).not.toBeInTheDocument();
+    expect(screen.getByText('12 of 61', { selector: 'p' })).toBeInTheDocument();
+    expect(screen.getByText('Overdue tasks').closest('div')?.parentElement).toHaveTextContent('4');
+    expect(screen.getByText('Unpaid invoices').closest('div')?.parentElement).toHaveTextContent(
+      '2,000'
+    );
+    expect(screen.getByText('Overdue invoices').closest('div')?.parentElement).toHaveTextContent(
+      '500'
+    );
+    expect(screen.getByRole('progressbar', { name: 'Investment Hub' })).toHaveAttribute(
+      'aria-valuenow',
+      '20'
+    );
   });
 });

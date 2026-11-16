@@ -64,6 +64,7 @@ type FlowRoadmapProject struct {
 	ID             int64
 	Name           string
 	Status         string
+	Visibility     string
 	StartDate      string
 	DueDate        string
 	Progress       float64
@@ -126,6 +127,7 @@ func (m *Module) FlowRoadmap(ctx context.Context, businessID int64) ([]FlowRoadm
 			ID:             p.ID,
 			Name:           p.Name,
 			Status:         p.Status,
+			Visibility:     p.Visibility,
 			StartDate:      p.StartDate,
 			DueDate:        p.DueDate,
 			Progress:       p.Progress,

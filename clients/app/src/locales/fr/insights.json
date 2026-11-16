@@ -16,7 +16,16 @@
     "emptyTitle": "No KPI data yet",
     "emptyDescription": "Metrics will appear here once your business starts generating activity.",
     "vsPrior": "vs période précédente",
-    "metaTitle": "Tableau de bord · rtylr"
+    "metaTitle": "Tableau de bord · rtylr",
+    "service": {
+      "title": "Projets et factures",
+      "tasksDone": "Tâches terminées",
+      "tasksDoneValue": "{{done}} sur {{total}}",
+      "overdueTasks": "Tâches en retard",
+      "unpaidInvoices": "Factures impayées",
+      "overdueInvoices": "Factures en retard",
+      "projectsTitle": "Avancement des projets"
+    }
   },
   "revenue": {
     "title": "Revenue",

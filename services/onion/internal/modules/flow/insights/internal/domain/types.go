@@ -46,6 +46,7 @@ type RoadmapProject struct {
 	ID             int64
 	Name           string
 	Status         string
+	Visibility     string
 	StartDate      string
 	DueDate        string
 	Progress       float64

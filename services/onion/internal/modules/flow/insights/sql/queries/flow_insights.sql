@@ -54,6 +54,7 @@ SELECT
     fp.id,
     fp.name,
     fp.status,
+    fp.visibility,
     COALESCE(DATE_FORMAT(fp.start_date, '%Y-%m-%d'), '') AS start_date,
     COALESCE(DATE_FORMAT(fp.due_date, '%Y-%m-%d'), '') AS due_date,
     COUNT(ft.id) AS total_tasks,
@@ -63,7 +64,7 @@ LEFT JOIN flow_tasks ft ON ft.project_id = fp.id
  AND ft.parent_task_id IS NULL
  AND ft.created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
 WHERE fp.business_id = ? AND fp.status != 'archived'
-GROUP BY fp.id, fp.name, fp.status, fp.start_date, fp.due_date
+GROUP BY fp.id, fp.name, fp.status, fp.visibility, fp.start_date, fp.due_date
 ORDER BY fp.created_at ASC;
 
 -- name: GetMilestonesByProjectIDs :many

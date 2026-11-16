@@ -119,6 +119,7 @@ func (r *Repository) GetRoadmap(ctx context.Context, businessID int64) (domain.R
 			ID:             row.ID,
 			Name:           row.Name,
 			Status:         nullProjectStatus(row.Status),
+			Visibility:     string(row.Visibility),
 			StartDate:      interfaceToString(row.StartDate),
 			DueDate:        interfaceToString(row.DueDate),
 			TotalTasks:     row.TotalTasks,
