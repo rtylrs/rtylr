@@ -23,6 +23,7 @@ import GateNotice from '../../shared/components/GateNotice';
 import TimeSection from './sections/TimeSection';
 import BinSection from './sections/BinSection';
 import SidebarSettingsSection from './sections/SidebarSettingsSection';
+import StatusTemplateSection from './sections/StatusTemplateSection';
 import { canFlowPermission } from '../../shared/lib/roleUtils';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
@@ -558,6 +559,7 @@ const SECTION_CONTENT: Record<string, React.FC> = {
   notifications: NotificationsSection,
   appearance: AppearanceSection,
   labels: LabelsSection,
+  statuses: StatusTemplateSection,
   time: TimeSection,
   life: LifeRhythmSection,
   shortcuts: ShortcutsSection,

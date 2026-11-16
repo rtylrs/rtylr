@@ -14,6 +14,7 @@ const SETTINGS_SECTION_IDS = [
   'time',
   'appearance',
   'labels',
+  'statuses',
   'life',
   'shortcuts',
   'sidebar',
