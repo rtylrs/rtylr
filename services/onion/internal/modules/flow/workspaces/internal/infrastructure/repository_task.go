@@ -153,7 +153,12 @@ func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInpu
 		logger.Ctx(ctx).Error("UpdateTask failed", logger.Error(err))
 		return err
 	}
-	return nil
+	// A column pick (section) wins over a status string sent alongside it,
+	// because only the column says which of several same-string statuses.
+	if input.SectionID != nil && *input.SectionID != 0 {
+		return syncTaskFromSection(ctx, r.pool, input.ID)
+	}
+	return syncTaskFromLegacy(ctx, r.pool, input.ID)
 }
 
 // GetFocusPins returns the caller's pins for the supplied tasks. The task
@@ -301,7 +306,7 @@ func (r *Repository) UpdateTaskStatus(ctx context.Context, input domain.UpdateTa
 		logger.Ctx(ctx).Error("UpdateTaskStatus failed", logger.Error(err))
 		return err
 	}
-	return nil
+	return syncTaskFromLegacy(ctx, r.pool, input.ID)
 }
 
 func (r *Repository) DeleteTask(ctx context.Context, taskID, businessID int64) error {

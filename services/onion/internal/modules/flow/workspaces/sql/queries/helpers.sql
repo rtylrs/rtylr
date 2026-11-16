@@ -86,9 +86,10 @@ FROM flow_projects
 WHERE id = ?
 LIMIT 1;
 
+-- A column is a project status (see v12_status_columns.sql).
 -- name: GetColumnProject :one
 SELECT project_id
-FROM flow_project_columns
+FROM flow_statuses
 WHERE id = ?
 LIMIT 1;
 

@@ -23,10 +23,7 @@ func (a *ProjectAPIV2) DeleteProjectColumn(ctx context.Context, req *flowproject
 
 	projectID := a.Service.GetColumnProject(ctx, req.GetId())
 	if err := a.Service.DeleteColumn(ctx, req.GetId(), authUser.UserID); err != nil {
-		if errors.Is(err, domain.ErrUnauthorized) {
-			return nil, onekiterrors.PermissionDenied()
-		}
-		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete column")
+		return nil, statusError(err, "Failed to delete column")
 	}
 	businessID, _, bizErr := a.resolveBusinessID(ctx)
 	if bizErr == nil {

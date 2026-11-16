@@ -320,7 +320,9 @@ type repository interface {
 	DeleteColumn(ctx context.Context, id, actorID int64) error
 	DeleteComment(ctx context.Context, commentID, userID int64) error
 	DeleteLabel(ctx context.Context, id, actorID, businessID int64) error
-	DeleteStatus(ctx context.Context, id, businessID int64) (int64, error)
+	DeleteStatus(ctx context.Context, id, businessID, moveToID int64) (int64, error)
+	GetStatusTemplate(ctx context.Context, businessID int64) ([]domain.StatusTemplateItem, error)
+	SaveStatusTemplate(ctx context.Context, businessID int64, items []domain.StatusTemplateItem) error
 	DeleteTask(ctx context.Context, taskID, businessID int64) error
 	DeleteTimeLog(ctx context.Context, id, userID int64) error
 	DeleteView(ctx context.Context, id, actorID, businessID int64) error

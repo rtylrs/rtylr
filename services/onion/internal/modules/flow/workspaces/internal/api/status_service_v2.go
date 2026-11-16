@@ -71,6 +71,16 @@ func statusError(err error, fallback string) error {
 		return onekiterrors.New(http.StatusBadRequest, "legacy_status must be one of backlog, todo, in_progress, in_review, done, cancelled")
 	case errors.Is(err, domain.ErrStatusNameRequired):
 		return onekiterrors.New(http.StatusBadRequest, "Status name is required")
+	case errors.Is(err, domain.ErrStatusInUse):
+		return onekiterrors.New(http.StatusConflict, "This status still has tasks. Choose a status to move them to.")
+	case errors.Is(err, domain.ErrLastDoneStatus):
+		return onekiterrors.New(http.StatusConflict, "A project needs at least one done status")
+	case errors.Is(err, domain.ErrStatusMoveTarget):
+		return onekiterrors.New(http.StatusBadRequest, "Move tasks to another status in the same project")
+	case errors.Is(err, domain.ErrStatusTemplateDone):
+		return onekiterrors.New(http.StatusBadRequest, "The template needs at least one done status")
+	case errors.Is(err, domain.ErrStatusTemplateSize):
+		return onekiterrors.New(http.StatusBadRequest, "The template needs between 1 and 30 statuses")
 	}
 	return onekiterrors.New(http.StatusInternalServerError, fallback)
 }
@@ -152,7 +162,7 @@ func (a *StatusAPIV2) DeleteStatus(ctx context.Context, req *flowstatusv2.Delete
 	if err != nil {
 		return nil, statusError(err, "Failed to delete status")
 	}
-	moved, err := a.Service.DeleteProjectStatus(ctx, req.GetId(), caller.UserID, businessID)
+	moved, err := a.Service.DeleteProjectStatus(ctx, req.GetId(), req.GetMoveToStatusId(), caller.UserID, businessID)
 	if err != nil {
 		return nil, statusError(err, "Failed to delete status")
 	}
@@ -173,4 +183,60 @@ func (a *StatusAPIV2) SetTaskStatus(ctx context.Context, req *flowstatusv2.SetTa
 		return nil, statusError(err, "Failed to set task status")
 	}
 	return &flowstatusv2.SetTaskStatusResponse{Message: "Status set", Status: resulting}, nil
+}
+
+func templateFromPayload(in []*flowstatusv2.StatusTemplateItem) []domain.StatusTemplateItem {
+	out := make([]domain.StatusTemplateItem, 0, len(in))
+	for _, item := range in {
+		out = append(out, domain.StatusTemplateItem{
+			Name: item.GetName(), Bucket: item.GetBucket(), LegacyStatus: item.GetLegacyStatus(),
+			Color: item.GetColor(), SortOrder: item.GetSortOrder(),
+		})
+	}
+	return out
+}
+
+func templateToPayload(in []domain.StatusTemplateItem) []*flowstatusv2.StatusTemplateItem {
+	out := make([]*flowstatusv2.StatusTemplateItem, 0, len(in))
+	for _, item := range in {
+		out = append(out, &flowstatusv2.StatusTemplateItem{
+			Name: item.Name, Bucket: item.Bucket, LegacyStatus: item.LegacyStatus,
+			Color: item.Color, SortOrder: item.SortOrder,
+		})
+	}
+	return out
+}
+
+// GetStatusTemplate returns the business's template. Anyone who can see
+// projects can read it, since it only describes how new projects start.
+func (a *StatusAPIV2) GetStatusTemplate(ctx context.Context, _ *flowstatusv2.GetStatusTemplateRequest) (*flowstatusv2.GetStatusTemplateResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:view"); err != nil {
+		return nil, err
+	}
+	_, businessID, err := resolveV2(ctx)
+	if err != nil {
+		return nil, err
+	}
+	items, err := a.Service.GetStatusTemplate(ctx, businessID)
+	if err != nil {
+		return nil, statusError(err, "Failed to load the status template")
+	}
+	return &flowstatusv2.GetStatusTemplateResponse{Statuses: templateToPayload(items)}, nil
+}
+
+// SaveStatusTemplate replaces the template. Workspace-level configuration, so
+// it takes the same permission as managing the Work team.
+func (a *StatusAPIV2) SaveStatusTemplate(ctx context.Context, req *flowstatusv2.SaveStatusTemplateRequest) (*flowstatusv2.SaveStatusTemplateResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:team:manage"); err != nil {
+		return nil, err
+	}
+	_, businessID, err := resolveV2(ctx)
+	if err != nil {
+		return nil, err
+	}
+	items, err := a.Service.SaveStatusTemplate(ctx, businessID, templateFromPayload(req.GetStatuses()))
+	if err != nil {
+		return nil, statusError(err, "Failed to save the status template")
+	}
+	return &flowstatusv2.SaveStatusTemplateResponse{Statuses: templateToPayload(items)}, nil
 }

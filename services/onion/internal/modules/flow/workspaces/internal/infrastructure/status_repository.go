@@ -199,42 +199,27 @@ func (r *Repository) UpdateStatus(ctx context.Context, id, businessID, projectID
 	return r.GetStatusByID(ctx, id, businessID)
 }
 
-// DeleteStatus removes a status and moves its tasks back to their built-in
-// string status. Returns how many tasks moved.
-//
-// Never blocks on the tasks and never deletes them: the string status they
-// already carry keeps them exactly where the user left them.
-func (r *Repository) DeleteStatus(ctx context.Context, id, businessID int64) (int64, error) {
+// DeleteStatus removes a status. Its tasks move to moveToID, which is required
+// when it has any, and a project's last done status cannot be deleted. Returns
+// how many tasks moved.
+func (r *Repository) DeleteStatus(ctx context.Context, id, businessID, moveToID int64) (int64, error) {
+	existing, err := r.GetStatusByID(ctx, id, businessID)
+	if err != nil {
+		return 0, err
+	}
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return 0, err
 	}
 	defer func() { _ = tx.Rollback() }()
-	q := r.queries.WithTx(tx)
-
-	cleared, err := q.ClearTasksOfStatus(ctx, sqlc.ClearTasksOfStatusParams{
-		BusinessID: businessID, StatusID: sql.NullInt64{Int64: id, Valid: true},
+	moved, err := deleteStatusTx(ctx, tx, existing, moveToID, func(target int64) (domain.Status, error) {
+		return r.GetStatusByID(ctx, target, businessID)
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("ClearTasksOfStatus failed", logger.Error(err))
+		if !errors.Is(err, domain.ErrStatusInUse) && !errors.Is(err, domain.ErrLastDoneStatus) && !errors.Is(err, domain.ErrStatusMoveTarget) {
+			logger.Ctx(ctx).Error("DeleteStatus failed", logger.Error(err))
+		}
 		return 0, err
-	}
-	moved, err := cleared.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-
-	res, err := q.DeleteStatus(ctx, sqlc.DeleteStatusParams{ID: id, BusinessID: businessID})
-	if err != nil {
-		logger.Ctx(ctx).Error("DeleteStatus failed", logger.Error(err))
-		return 0, err
-	}
-	affected, err := res.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-	if affected == 0 {
-		return 0, domain.ErrStatusNotFound
 	}
 	if err := tx.Commit(); err != nil {
 		return 0, err
@@ -267,5 +252,15 @@ func (r *Repository) SetTaskStatusID(ctx context.Context, taskID, businessID, st
 	if affected == 0 {
 		return domain.ErrStatusNotFound
 	}
-	return nil
+	// Clearing a custom status re-picks the project status that matches the
+	// built-in one; either way section_id and completed_at follow.
+	if statusID == 0 {
+		return syncTaskFromLegacy(ctx, r.pool, taskID)
+	}
+	_, err = r.pool.ExecContext(ctx, `UPDATE flow_tasks t
+SET t.section_id = t.status_id,
+    t.completed_at = CASE WHEN t.status = 'done' AND t.completed_at IS NULL THEN NOW()
+                          WHEN t.status <> 'done' THEN NULL ELSE t.completed_at END
+WHERE t.id = ? AND t.business_id = ?`, taskID, businessID)
+	return err
 }

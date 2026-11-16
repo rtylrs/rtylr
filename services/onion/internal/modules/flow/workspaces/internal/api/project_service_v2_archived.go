@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/domain"
@@ -177,7 +176,7 @@ func (a *ProjectAPIV2) CreateProjectColumn(ctx context.Context, req *flowproject
 		CreatedBy:   authUser.UserID,
 	})
 	if err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create column")
+		return nil, statusError(err, "Failed to create column")
 	}
 	publishColumnEvent("column.created", col.ProjectID, col.ID, authUser.UserID)
 	publishBusinessEvent("column.created", businessID, col.ProjectID, authUser.UserID)
@@ -201,10 +200,7 @@ func (a *ProjectAPIV2) UpdateProjectColumn(ctx context.Context, req *flowproject
 		SortOrder: int(req.GetSortOrder()),
 	})
 	if err != nil {
-		if errors.Is(err, domain.ErrUnauthorized) {
-			return nil, onekiterrors.PermissionDenied()
-		}
-		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update column")
+		return nil, statusError(err, "Failed to update column")
 	}
 	projectID := a.Service.GetColumnProject(ctx, req.GetId())
 	businessID, _, bizErr := a.resolveBusinessID(ctx)
