@@ -18,6 +18,21 @@ export interface PctCard {
   deltaPct: number;
 }
 
+export interface WorkProjectProgress {
+  id: string;
+  name: string;
+  totalTasks: number;
+  completedTasks: number;
+  progressPct: number;
+}
+
+export interface WorkSummaryResponse {
+  totalTasks: number;
+  completedTasks: number;
+  overdueTasks: number;
+  projects: WorkProjectProgress[];
+}
+
 export interface InsightsDashboardResponse {
   revenue: MoneyCard;
   customers: CountCard;
