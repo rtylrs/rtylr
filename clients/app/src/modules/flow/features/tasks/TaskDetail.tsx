@@ -20,7 +20,7 @@ import {
   Trash2,
   Archive,
   GitBranch,
-  LayoutList,
+  Plus,
   Link2,
   Gauge,
   Hourglass,
@@ -49,11 +49,12 @@ import {
 } from './useTasks';
 import { useCycles } from '../cycles/useCycles';
 import { useMilestones } from '../milestones/useMilestones';
-import { useProjectColumns } from '../projects/useColumns';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import { useLabels, useSetTaskLabels } from './useLabels';
-import { useProjectStatuses, useSetTaskStatus } from '../projects/useStatuses';
+import { useCreateStatus, useProjectStatuses, useSetTaskStatus } from '../projects/useStatuses';
+import { insertionPlan, sortStatuses } from '../projects/statusUtils';
+import NewStatusDialog from '../projects/components/NewStatusDialog';
 import { useTaskActivity } from './useTaskActivity';
 import { useTaskRealtime } from '../../shared/lib/useTaskRealtime';
 import { useCurrentProject } from '../projects/useCurrentProject';
@@ -204,11 +205,13 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   // hooks, so they have to run on every render, and they need the task's project.
   const detail = taskData as ApiTaskDetail | undefined;
   const canEdit = useCanEditTask(detail?.task?.projectId);
-  // F-A: empty means the project has not configured any custom statuses, the
-  // normal case - the picker below stays hidden rather than showing an
-  // empty dropdown.
-  const { data: projectStatuses = [] } = useProjectStatuses(detail?.task?.projectId ?? '');
+  // The project's statuses are its board columns; while they load (or for a
+  // task whose project has none) the built-in statuses stand in.
+  const { data: rawProjectStatuses = [] } = useProjectStatuses(detail?.task?.projectId ?? '');
+  const projectStatuses = sortStatuses(rawProjectStatuses);
   const setTaskStatus = useSetTaskStatus();
+  const createStatus = useCreateStatus(detail?.task?.projectId ?? '');
+  const [newStatusOpen, setNewStatusOpen] = useState(false);
   // HR->FLOW-02 (#838): warn before assigning work into approved leave.
   // Window is today through the task's due date (or two weeks out when
   // undated). Hidden entirely when HR is absent or unreachable; assignment
@@ -242,7 +245,6 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const { data: cycles = [] } = useCycles(taskProjectId);
   const milestonesQuery = useMilestones(taskProjectId ?? '');
   const { data: milestones = [] } = milestonesQuery;
-  const { data: projectSections = [] } = useProjectColumns(taskProjectId ?? '');
   const members = useFlowStore((state) => state.members);
   const projects = useFlowStore((state) => state.projects);
 
@@ -392,6 +394,26 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
 
   const priorities: Task['priority'][] = ['urgent', 'high', 'medium', 'low', 'no_priority'];
   const statuses = TASK_STATUSES;
+  const currentStatusId = String(task.statusId || task.sectionId || '');
+  const celebrate = (): void => {
+    toast.success(t('flowToasts.task.niceWork'), {
+      description: t('flow.taskDetail.taskMarkedComplete'),
+      icon: <PartyPopper size={16} />,
+    });
+  };
+  // A status made from the task panel is an in-flight state, appended at the end.
+  const createAndApplyStatus = (name: string): void => {
+    const { sortOrder, updates } = insertionPlan(projectStatuses, projectStatuses.length);
+    createStatus.mutate(
+      { name, bucket: 'active', sortOrder, makeRoom: updates },
+      {
+        onSuccess: (created) => {
+          setNewStatusOpen(false);
+          if (created?.id) setTaskStatus.mutate({ taskId: task.id, statusId: String(created.id) });
+        },
+      }
+    );
+  };
 
   // Handle set labels via new API
   const handleToggleLabel = (labelId: number) => {
@@ -669,60 +691,61 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
         }}
       >
         <DetailField icon={CircleDot} label={t('flow.taskDetail.status')}>
-          <FlowSelect
-            label={t('flow.taskDetail.status')}
-            value={task.status}
-            options={statuses.map((s) => ({ value: s, label: t(STATUS_LABEL_KEYS[s]) }))}
-            onChange={(value) => {
-              const next = value as Task['status'];
-              // The celebration belongs on the mutation's success path. Firing
-              // it here showed "Nice work!" next to "Failed to update task"
-              // while the status reverted and nothing was saved.
-              const justCompleted = next === 'done' && task.status !== 'done';
-              updateTask(
-                task.id,
-                { status: next },
-                justCompleted
+          {projectStatuses.length > 0 ? (
+            <FlowSelect
+              label={t('flow.taskDetail.status')}
+              value={currentStatusId}
+              options={projectStatuses.map((s) => ({
+                value: s.id,
+                label: s.name,
+                icon: (
+                  <span
+                    aria-hidden="true"
+                    className="h-2 w-2 shrink-0 rounded-full"
+                    style={{ background: s.color }}
+                  />
+                ),
+              }))}
+              onChange={(value) => {
+                const next = projectStatuses.find((s) => s.id === value);
+                const current = projectStatuses.find((s) => s.id === currentStatusId);
+                // Celebrate only once the server has the change; see below.
+                const justCompleted = next?.bucket === 'done' && current?.bucket !== 'done';
+                setTaskStatus.mutate(
+                  { taskId: task.id, statusId: value },
+                  justCompleted ? { onSuccess: celebrate } : undefined
+                );
+              }}
+              disabled={!canEdit}
+              action={
+                canEdit && canRemove
                   ? {
-                      onSuccess: () =>
-                        toast.success(t('flowToasts.task.niceWork'), {
-                          description: t('flow.taskDetail.taskMarkedComplete'),
-                          icon: <PartyPopper size={16} />,
-                        }),
+                      label: t('flow.status.newStatusAction'),
+                      icon: <Plus size={13} aria-hidden="true" className="shrink-0" />,
+                      onSelect: () => setNewStatusOpen(true),
                     }
                   : undefined
-              );
-            }}
-            disabled={!canEdit}
-          />
-
-          {/* One STATUS row, with the project's own statuses inside it.
-              These were two adjacent rows reading `STATUS: In Progress` and
-              `STATUSES: No custom status`, which is one concept presented as
-              two and a label that differed from its neighbour by a letter
-              (rtylr#1079, S-12).
-
-              Still two controls, because they are two fields with two
-              mutations: the built-in status drives the board column, the
-              project's own is a label on top of it. Each keeps its own
-              accessible name, so a screen reader announces which is which
-              rather than hearing one group called "status" twice. */}
-          {projectStatuses.length > 0 && (
-            <div className="mt-1.5">
-              <FlowSelect
-                label={t('flow.status.settingsTitle')}
-                value={task.statusId ?? ''}
-                options={[
-                  { value: '', label: t('flow.status.none') },
-                  ...projectStatuses.map((s) => ({ value: String(s.id), label: s.name })),
-                ]}
-                onChange={(value) => {
-                  setTaskStatus.mutate({ taskId: task.id, statusId: value || '0' });
-                }}
-                disabled={!canEdit}
-                muted
-              />
-            </div>
+              }
+            />
+          ) : (
+            <FlowSelect
+              label={t('flow.taskDetail.status')}
+              value={task.status}
+              options={statuses.map((s) => ({ value: s, label: t(STATUS_LABEL_KEYS[s]) }))}
+              onChange={(value) => {
+                const next = value as Task['status'];
+                // The celebration belongs on the mutation's success path. Firing
+                // it here showed "Nice work!" next to "Failed to update task"
+                // while the status reverted and nothing was saved.
+                const justCompleted = next === 'done' && task.status !== 'done';
+                updateTask(
+                  task.id,
+                  { status: next },
+                  justCompleted ? { onSuccess: celebrate } : undefined
+                );
+              }}
+              disabled={!canEdit}
+            />
           )}
         </DetailField>
 
@@ -940,21 +963,6 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           )
         )}
 
-        {projectSections.length > 0 && (
-          <DetailField icon={LayoutList} label={t('flow.taskDetail.section')}>
-            <FlowSelect
-              label={t('flow.taskDetail.section')}
-              value={task.sectionId ? String(task.sectionId) : ''}
-              options={[
-                { value: '', label: t('flow.taskDetail.noSection') },
-                ...projectSections.map((s) => ({ value: String(s.id), label: s.name })),
-              ]}
-              onChange={(value) => updateTask(task.id, { sectionId: value })}
-              disabled={!canEdit}
-            />
-          </DetailField>
-        )}
-
         <DetailField icon={Link2} label={t('flow.taskDetail.dependencies')}>
           <div className="space-y-1.5">
             {hasQueryFailed(tasksQuery) && (
@@ -1109,6 +1117,12 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           </div>
         </DetailField>
       </aside>
+      <NewStatusDialog
+        open={newStatusOpen}
+        onOpenChange={setNewStatusOpen}
+        onCreate={createAndApplyStatus}
+        pending={createStatus.isPending}
+      />
       <ConfirmDialog
         open={confirmingDelete}
         onOpenChange={setConfirmingDelete}

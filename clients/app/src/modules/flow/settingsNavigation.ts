@@ -1,4 +1,14 @@
-import { Bell, Palette, Keyboard, Sparkles, Tag, Trash2, Clock, PanelLeft } from 'lucide-react';
+import {
+  Bell,
+  Palette,
+  Keyboard,
+  Sparkles,
+  Tag,
+  Trash2,
+  Clock,
+  PanelLeft,
+  ListChecks,
+} from 'lucide-react';
 import type { EffectiveAccess } from '@voxire/types';
 import type { SettingsSectionId } from './shared/schemas/settings';
 import { canFlowPermission } from './shared/lib/roleUtils';
@@ -12,6 +22,7 @@ export function getFlowSettingsSections(
     { id: 'appearance', labelKey: 'flowCommon.settings.appearance', icon: Palette },
     { id: 'sidebar', labelKey: 'flow.sidebar.settingsSection', icon: PanelLeft },
     { id: 'labels', labelKey: 'flowCommon.settings.labels', icon: Tag },
+    { id: 'statuses', labelKey: 'flow.settings.statuses.section', icon: ListChecks },
     { id: 'life', labelKey: 'flowCommon.settings.life', icon: Sparkles },
     { id: 'shortcuts', labelKey: 'flowCommon.settings.shortcuts', icon: Keyboard },
     ...(canFlowPermission('flow:projects:edit', access)

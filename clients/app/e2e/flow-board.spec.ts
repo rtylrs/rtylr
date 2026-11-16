@@ -1,6 +1,7 @@
 import { flowAuthFields } from './support/flow-auth';
 import { test, expect, type Route } from './fixtures';
 import { captureResponsivePair } from './support/screenshot';
+import { stubStatuses, type WireStatus } from './support/flow-statuses';
 
 /**
  * Flow Project Board & Project List Specs
@@ -31,6 +32,40 @@ const FAKE_COLUMNS = [
   { id: '1', name: 'Todo', color: '#6366f1', sortOrder: 0 },
   { id: '2', name: 'In Progress', color: '#3b82f6', sortOrder: 1 },
   { id: '3', name: 'Done', color: '#22c55e', sortOrder: 2 },
+];
+
+// Board columns are statuses; these mirror FAKE_COLUMNS.
+const FAKE_STATUSES: WireStatus[] = [
+  {
+    id: '1',
+    project_id: '1',
+    name: 'Todo',
+    bucket: 'backlog',
+    legacy_status: 'todo',
+    color: '#6366f1',
+    sort_order: 0,
+    is_default: true,
+  },
+  {
+    id: '2',
+    project_id: '1',
+    name: 'In Progress',
+    bucket: 'active',
+    legacy_status: 'in_progress',
+    color: '#3b82f6',
+    sort_order: 1,
+    is_default: false,
+  },
+  {
+    id: '3',
+    project_id: '1',
+    name: 'Done',
+    bucket: 'done',
+    legacy_status: 'done',
+    color: '#22c55e',
+    sort_order: 2,
+    is_default: false,
+  },
 ];
 
 const FAKE_TASKS = [
@@ -106,6 +141,8 @@ test.describe('Flow - Project Board', () => {
         body: JSON.stringify({ project: FAKE_PROJECT }),
       })
     );
+
+    await stubStatuses(page, () => FAKE_STATUSES);
 
     await page.route(/localhost:9999\/flow\/project\/v2\/projects\/1\/columns/, (route: Route) =>
       route.fulfill({

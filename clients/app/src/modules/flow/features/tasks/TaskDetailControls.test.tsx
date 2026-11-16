@@ -6,14 +6,17 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import flow from '../../locales/en/flow.json';
 import { chooseFlowOption, flowSelectTrigger } from '../../../../../test/flowSelect';
 import flowCommon from '../../locales/en/flowCommon.json';
-import type { ApiTask, ApiTaskDetail } from '../../shared/services/flowApi';
+import type { ApiStatus, ApiTask, ApiTaskDetail } from '../../shared/services/flowApi';
 import { useFlowStore } from '../../shared/stores/flowStore';
 
 const state = vi.hoisted(() => ({
   detail: undefined as ApiTaskDetail | undefined,
   tasks: [] as ApiTask[],
+  statuses: [] as ApiStatus[],
   canEdit: true,
 }));
+const setStatus = vi.hoisted(() => vi.fn());
+const createStatus = vi.hoisted(() => vi.fn());
 const update = vi.hoisted(() => vi.fn());
 const addDependency = vi.hoisted(() => vi.fn());
 const removeDependency = vi.hoisted(() => vi.fn());
@@ -44,17 +47,15 @@ vi.mock('./useLabels', () => ({
 }));
 vi.mock('./useTaskActivity', () => ({ useTaskActivity: () => ({ data: [] }) }));
 vi.mock('../projects/useStatuses', () => ({
-  useProjectStatuses: () => ({ data: [] }),
-  useSetTaskStatus: () => ({ mutate: vi.fn() }),
+  useProjectStatuses: () => ({ data: state.statuses }),
+  useSetTaskStatus: () => ({ mutate: setStatus }),
+  useCreateStatus: () => ({ mutate: createStatus, isPending: false }),
 }));
 vi.mock('../projects/useCurrentProject', () => ({
   useCurrentProject: () => ({ project: undefined }),
 }));
 vi.mock('../../shared/components/AttachmentUpload', () => ({ default: () => null }));
 vi.mock('../projects/useProjectMembers', () => ({ useProjectMembers: () => ({ data: [] }) }));
-vi.mock('../projects/useColumns', () => ({
-  useProjectColumns: () => ({ data: [{ id: '6', name: 'Review', sortOrder: 0 }] }),
-}));
 vi.mock('../cycles/useCycles', () => ({ useCycles: () => ({ data: [] }) }));
 vi.mock('../milestones/useMilestones', () => ({ useMilestones: () => ({ data: [] }) }));
 vi.mock('../../shared/hooks/queries/useApprovedLeaveInRange', () => ({
@@ -110,6 +111,19 @@ beforeEach(() => {
     activity: [],
   };
   state.tasks = [task('1', 'Initial title'), task('2', 'Remote blocker')];
+  state.statuses = [];
+});
+
+const status = (id: string, name: string, bucket: ApiStatus['bucket'], sortOrder: number) => ({
+  id,
+  projectId: '2',
+  name,
+  bucket,
+  legacyStatus: bucket === 'done' ? 'done' : 'in_review',
+  color: '#8b5cf6',
+  sortOrder,
+  isDefault: false,
+  createdAt: '',
 });
 
 describe('Task detail persistence controls', () => {
@@ -171,13 +185,42 @@ describe('Task detail persistence controls', () => {
     expect(removeDependency).toHaveBeenCalledWith({ taskId: '1', dependsOnTaskId: '2' });
   });
 
-  it('loads the project columns and can remove the selected column', async () => {
+  it('picks the status from the project statuses and has no separate section field', async () => {
+    state.statuses = [status('6', 'Review', 'active', 30), status('7', 'Shipped', 'done', 900)];
+    state.detail!.task.statusId = '6';
     state.detail!.task.sectionId = '6';
     renderDetail();
-    expect(flowSelectTrigger(flow.taskDetail.section)).toHaveAccessibleName(
-      new RegExp(`^${flow.taskDetail.section}: .+`)
+    expect(flowSelectTrigger(flow.taskDetail.status)).toHaveAccessibleName(
+      `${flow.taskDetail.status}: Review`
     );
-    await chooseFlowOption(flow.taskDetail.section, flow.taskDetail.noSection);
-    expect(update).toHaveBeenCalledWith({ id: '1', data: { sectionId: '' } });
+    expect(screen.queryByText('Section')).not.toBeInTheDocument();
+    await chooseFlowOption(flow.taskDetail.status, 'Shipped');
+    expect(setStatus).toHaveBeenCalledWith({ taskId: '1', statusId: '7' }, expect.any(Object));
+  });
+
+  it('creates a status from the status menu and applies it to the task', async () => {
+    state.statuses = [status('6', 'Review', 'active', 30), status('7', 'Shipped', 'done', 900)];
+    state.detail!.task.statusId = '6';
+    createStatus.mockImplementation((_vars, options?: { onSuccess?: (s: ApiStatus) => void }) =>
+      options?.onSuccess?.(status('9', 'Blocked', 'active', 910))
+    );
+    renderDetail();
+    await chooseFlowOption(flow.taskDetail.status, flow.status.newStatusAction);
+    fireEvent.change(await screen.findByLabelText(flow.status.statusName), {
+      target: { value: 'Blocked' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: flow.status.addStatus }));
+    expect(createStatus).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Blocked', bucket: 'active', sortOrder: 910 }),
+      expect.any(Object)
+    );
+    expect(setStatus).toHaveBeenCalledWith({ taskId: '1', statusId: '9' });
+  });
+
+  it('offers no new-status action to someone who cannot manage the project', async () => {
+    state.canEdit = false;
+    state.statuses = [status('6', 'Review', 'active', 30), status('7', 'Shipped', 'done', 900)];
+    renderDetail();
+    expect(flowSelectTrigger(flow.taskDetail.status)).toBeDisabled();
   });
 });

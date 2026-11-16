@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Check, ChevronDown } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@voxire/ui';
 
@@ -28,6 +29,8 @@ interface FlowSelectProps {
   /** Muted text colour for secondary controls. */
   muted?: boolean;
   className?: string;
+  /** A command after the options, such as creating a new one. */
+  action?: { label: string; icon?: React.ReactNode; onSelect: () => void };
 }
 
 /**
@@ -48,8 +51,12 @@ export const FlowSelect: React.FC<FlowSelectProps> = ({
   leading,
   muted = false,
   className,
+  action,
 }) => {
   const selected = options.find((option) => option.value === value);
+  // The action runs once the menu has closed and given focus back, so a
+  // dialog it opens does not fight the menu's focus trap.
+  const actionChosen = useRef(false);
   const text = selected?.label ?? placeholder ?? '';
 
   return (
@@ -73,6 +80,12 @@ export const FlowSelect: React.FC<FlowSelectProps> = ({
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent
+        onCloseAutoFocus={(event) => {
+          if (!actionChosen.current || !action) return;
+          actionChosen.current = false;
+          event.preventDefault();
+          action.onSelect();
+        }}
         align="start"
         className="max-h-[260px] min-w-[var(--radix-dropdown-menu-trigger-width)] overflow-y-auto"
         style={{
@@ -99,6 +112,21 @@ export const FlowSelect: React.FC<FlowSelectProps> = ({
             </DropdownMenuItem>
           );
         })}
+        {action && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onSelect={() => {
+                actionChosen.current = true;
+              }}
+              className="text-flow-meta"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              {action.icon}
+              <span className="min-w-0 flex-1 truncate">{action.label}</span>
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -134,6 +134,7 @@ export interface ApiTask {
   identifier?: string;
   createdAt?: string;
   updatedAt?: string;
+  completedAt?: ContractTask['completedAt'];
   labels?: string[];
   dependencies?: string[];
   sectionId?: string;
@@ -164,6 +165,15 @@ export interface ApiStatus {
   sortOrder: number;
   isDefault: boolean;
   createdAt: string;
+}
+
+/** One entry of the workspace status template that new projects copy. */
+export interface ApiStatusTemplateItem {
+  name: string;
+  bucket: ApiStatus['bucket'];
+  legacyStatus?: string;
+  color?: string;
+  sortOrder?: number;
 }
 
 export interface ApiMilestone {
@@ -900,9 +910,7 @@ export const flowApi = {
 
   // -- Statuses (F-A) -------------------------------------------------------
 
-  // Empty means "use the six built-in string statuses", never "not configured
-  // yet" - the panel and board both read it that way, so nothing here needs a
-  // separate has-custom-statuses flag.
+  // A project's statuses are its board columns, in sort order.
   listStatuses: (projectId: string) =>
     flowResult<{ statuses: ApiStatus[] }>(() => statusClient.listStatuses({ projectId })),
 
@@ -950,11 +958,19 @@ export const flowApi = {
       })
     ),
 
-  // Never blocks on the status's tasks: they fall back to the built-in string
-  // status they already carry rather than being deleted or held hostage.
-  deleteStatus: (id: string) =>
+  // A status that still has tasks needs moveToStatusId (409 otherwise), and a
+  // project's last done status cannot be deleted (409).
+  deleteStatus: (id: string, moveToStatusId?: string) =>
     flowResult<{ message: string; reassignedTaskCount: number }>(() =>
-      statusClient.deleteStatus({ id })
+      statusClient.deleteStatus({ id, moveToStatusId })
+    ),
+
+  getStatusTemplate: () =>
+    flowResult<{ statuses: ApiStatusTemplateItem[] }>(() => statusClient.getStatusTemplate({})),
+
+  saveStatusTemplate: (statuses: ApiStatusTemplateItem[]) =>
+    flowResult<{ statuses: ApiStatusTemplateItem[] }>(() =>
+      statusClient.saveStatusTemplate({ statuses })
     ),
 
   // status_id 0 clears a task's custom status, putting it back on its

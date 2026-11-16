@@ -120,7 +120,11 @@ describe('applyBoardMove', () => {
       columnId: '20',
       orderedTaskIds: ['3', '1'],
     });
-    expect(next.find((t) => t.id === '1')).toMatchObject({ sectionId: '20', sortOrder: 2 });
+    expect(next.find((t) => t.id === '1')).toMatchObject({
+      sectionId: '20',
+      statusId: '20',
+      sortOrder: 2,
+    });
     expect(next.find((t) => t.id === '3')).toMatchObject({ sectionId: '20', sortOrder: 1 });
   });
 

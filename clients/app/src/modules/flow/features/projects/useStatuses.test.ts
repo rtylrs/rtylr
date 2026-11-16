@@ -68,9 +68,10 @@ describe('status mutation cache invalidation', () => {
     const spy = vi.spyOn(client, 'invalidateQueries');
     const { result } = renderHook(() => useDeleteStatus('p-1'), { wrapper });
 
-    await act(() => result.current.mutateAsync('s-1'));
+    await act(() => result.current.mutateAsync({ id: 's-1', moveToStatusId: 's-2' }));
 
     expect(spy).toHaveBeenCalledWith({ queryKey: ['my-tasks'] });
     expect(spy).toHaveBeenCalledWith({ queryKey: ['task'] });
+    expect(flowApi.deleteStatus).toHaveBeenCalledWith('s-1', 's-2');
   });
 });

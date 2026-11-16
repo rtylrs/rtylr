@@ -2,9 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
-import { TaskRow, StatusGroup, STATUS_GROUP_COLORS, groupIsVisible } from './ProjectList';
-import StatusIcon from '../../shared/components/StatusIcon';
-import { STATUS_LABEL_KEYS } from '../../shared/lib/constantsFlow';
+import { TaskRow, TaskGroup, buildListGroups, loadListGroupBy } from './ProjectList';
+import type { ApiStatus } from '../../shared/services/flowApi';
 import type { Task } from '../../shared/stores/flowStore';
 
 const mockNavigate = vi.fn();
@@ -21,6 +20,11 @@ vi.mock('@tanstack/react-router', () => ({
 // the same status, not the literal English string. Keep the rest of the
 // module real (via importOriginal) - `initReactI18next` is still needed by
 // the real i18next instance that useTasks.ts imports as a side effect.
+vi.mock('./useStatuses', () => ({
+  useProjectStatuses: () => ({ data: [] }),
+  useSetTaskStatus: () => ({ mutate: vi.fn() }),
+}));
+
 vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>();
   return {
@@ -85,118 +89,130 @@ describe('ProjectList TaskRow more menu', () => {
   });
 });
 
-describe('Status label consistency (issue #756)', () => {
-  // The project List view (StatusGroup) and any other view that shows a task
-  // status (StatusIcon, the task detail status picker) must render the exact
-  // same text for the same status. Previously the List view hardcoded its
-  // own "Todo" while the rest of the app used "To Do" via i18n. Both now
-  // resolve through the single STATUS_LABEL_KEYS map, so this asserts they
-  // stay identical rather than re-hardcoding a string that could drift again.
-  it('renders the same "todo" label in the List view group header and StatusIcon', () => {
-    const todoLabel = STATUS_LABEL_KEYS.todo;
+const status = (
+  id: string,
+  name: string,
+  bucket: ApiStatus['bucket'],
+  sortOrder: number,
+  legacyStatus = 'todo'
+): ApiStatus => ({
+  id,
+  projectId: 'p-web',
+  name,
+  bucket,
+  legacyStatus,
+  color: '#6366f1',
+  sortOrder,
+  isDefault: false,
+  createdAt: '',
+});
+const identity = (key: string): string => key;
 
-    const { container: groupContainer } = render(
-      <QueryClientProvider client={new QueryClient()}>
-        <StatusGroup group={{ id: 'todo', label: todoLabel, color: '#6b7280' }} tasks={[]} />
-      </QueryClientProvider>
-    );
-    const { container: iconContainer } = render(<StatusIcon status="todo" showLabel />);
-
-    expect(groupContainer.textContent).toContain(todoLabel);
-    expect(iconContainer.textContent).toContain(todoLabel);
+describe('buildListGroups', () => {
+  const statuses = [
+    status('3', 'Done', 'done', 900, 'done'),
+    status('1', 'To Do', 'backlog', 10),
+    status('2', 'Doing', 'active', 20, 'in_progress'),
+  ];
+  const on = (id: string, statusId: string | undefined, extra: Partial<Task> = {}): Task => ({
+    ...task,
+    id,
+    statusId,
+    sectionId: statusId,
+    ...extra,
   });
 
-  it('has a distinct label key for every status shown in the List view', () => {
-    const listStatuses: Task['status'][] = ['todo', 'in_progress', 'in_review', 'done'];
-    const keys = listStatuses.map((status) => STATUS_LABEL_KEYS[status]);
+  it('orders status groups by sort order and leaves empty statuses out', () => {
+    const groups = buildListGroups([on('a', '3'), on('b', '1')], statuses, 'status', identity);
+    expect(groups.map((g) => g.label)).toEqual(['To Do', 'Done']);
+    expect(groups[0].statusId).toBe('1');
+  });
 
-    expect(new Set(keys).size).toBe(listStatuses.length);
+  it('never makes an Other group: a stray task joins the status matching its built-in value', () => {
+    const groups = buildListGroups(
+      [on('a', '99', { status: 'in_progress' }), on('b', undefined, { status: 'cancelled' })],
+      statuses,
+      'status',
+      identity
+    );
+    expect(groups.map((g) => g.label)).toEqual(['To Do', 'Doing']);
+    expect(groups.flatMap((g) => g.tasks.map((t) => t.id)).sort()).toEqual(['a', 'b']);
+  });
+
+  it('groups by priority in priority order with translated labels', () => {
+    const groups = buildListGroups(
+      [on('a', '1', { priority: 'low' }), on('b', '1', { priority: 'urgent' })],
+      statuses,
+      'priority',
+      identity
+    );
+    expect(groups.map((g) => g.label)).toEqual(['flowPriority.urgent', 'flowPriority.low']);
+  });
+
+  it('groups by assignee and names the unassigned group', () => {
+    const groups = buildListGroups(
+      [on('a', '1'), on('b', '1', { assignee: '' })],
+      statuses,
+      'assignee',
+      identity
+    );
+    expect(groups.map((g) => g.label)).toEqual(['Ada Lovelace', 'flow.quickCreate.unassigned']);
+  });
+
+  it('returns one headerless group when grouping is off', () => {
+    const groups = buildListGroups([on('a', '1'), on('b', '3')], statuses, 'none', identity);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].tasks).toHaveLength(2);
   });
 });
 
-describe('ProjectList status groups (#1049: a backlog task had no home)', () => {
-  const byId = (id: Task['status']) => STATUS_GROUP_COLORS.find((g) => g.id === id);
-
-  it('has a group for every value of the status enum', () => {
-    // The list offered four groups against a six-value enum, so a task in
-    // backlog or cancelled matched no group and rendered nowhere, while the
-    // board showed it in its first column.
-    expect(STATUS_GROUP_COLORS.map((g) => g.id)).toEqual([
-      'backlog',
-      'todo',
-      'in_progress',
-      'in_review',
-      'done',
-      'cancelled',
-    ]);
+describe('List group-by preference', () => {
+  it('defaults to status and ignores unknown stored values', () => {
+    localStorage.removeItem('flow:list:groupBy:p1');
+    expect(loadListGroupBy('p1')).toBe('status');
+    localStorage.setItem('flow:list:groupBy:p1', 'colour');
+    expect(loadListGroupBy('p1')).toBe('status');
+    localStorage.setItem('flow:list:groupBy:p1', 'due');
+    expect(loadListGroupBy('p1')).toBe('due');
   });
 
-  it('covers every status the label map knows about', () => {
-    // STATUS_LABEL_KEYS is the app's single source of status vocabulary, so
-    // any status it names has to be groupable here.
-    expect(STATUS_GROUP_COLORS.map((g) => g.id).sort()).toEqual(
-      Object.keys(STATUS_LABEL_KEYS).sort()
-    );
-  });
-
-  it('shows a backlog or cancelled group only once it holds something', () => {
-    expect(groupIsVisible(byId('backlog')!, 0)).toBe(false);
-    expect(groupIsVisible(byId('backlog')!, 1)).toBe(true);
-    expect(groupIsVisible(byId('cancelled')!, 0)).toBe(false);
-    expect(groupIsVisible(byId('cancelled')!, 3)).toBe(true);
-  });
-
-  it('keeps the four familiar groups on screen when they are empty', () => {
-    // A project that has neither backlog nor cancelled work must look exactly
-    // as it did before, four headers and no more.
-    for (const id of ['todo', 'in_progress', 'in_review', 'done'] as Task['status'][]) {
-      expect(groupIsVisible(byId(id)!, 0)).toBe(true);
-    }
-  });
-
-  it('puts backlog before todo and cancelled last', () => {
-    const order = STATUS_GROUP_COLORS.map((g) => g.id);
-    expect(order.indexOf('backlog')).toBeLessThan(order.indexOf('todo'));
-    expect(order.indexOf('cancelled')).toBe(order.length - 1);
+  it('falls back to status when storage throws', () => {
+    const spy = vi.spyOn(localStorage, 'getItem').mockImplementation(() => {
+      throw new Error('blocked');
+    });
+    expect(loadListGroupBy('p1')).toBe('status');
+    spy.mockRestore();
   });
 });
 
-describe('StatusGroup count scope (#1166)', () => {
-  const tasks = [
-    { id: 't1', title: 'One', status: 'todo' },
-    { id: 't2', title: 'Two', status: 'todo' },
-  ] as unknown as Parameters<typeof StatusGroup>[0]['tasks'];
-
-  const group = { id: 'todo', color: '#9ca3af', label: 'To Do' } as unknown as Parameters<
-    typeof StatusGroup
-  >[0]['group'];
-
-  const renderGroup = (showCount?: boolean): void => {
-    const queryClient = new QueryClient();
-    render(
-      <QueryClientProvider client={queryClient}>
-        <StatusGroup group={group} tasks={tasks} showCount={showCount} />
-      </QueryClientProvider>
-    );
+describe('TaskGroup', () => {
+  const group = {
+    id: '2',
+    label: 'Doing',
+    color: '#6366f1',
+    statusId: '2',
+    tasks: [
+      { ...task, id: 't1', title: 'One' },
+      { ...task, id: 't2', title: 'Two' },
+    ],
   };
 
-  it('shows the count when the list is not split into sections', () => {
-    // Here the group count and the board's count are the same number, so there
-    // is nothing to confuse and the number is worth keeping.
-    renderGroup();
+  it('shows the label and count, and adds a task into that status', () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <TaskGroup group={group} />
+      </QueryClientProvider>
+    );
+    expect(screen.getByText('Doing')).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
   });
 
-  it('hides the count when the list is sectioned', () => {
-    // The section total one line above already gives the number, and this one
-    // counts only the section while the board's identical label counts the
-    // whole project.
-    renderGroup(false);
-    expect(screen.queryByText('2')).not.toBeInTheDocument();
-  });
-
-  it('still renders the status label either way', () => {
-    renderGroup(false);
-    expect(screen.getByText('To Do')).toBeInTheDocument();
+  it('renders no header when grouping is off', () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <TaskGroup group={group} showHeader={false} />
+      </QueryClientProvider>
+    );
+    expect(screen.queryByText('Doing')).not.toBeInTheDocument();
   });
 });

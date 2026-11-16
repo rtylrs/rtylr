@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useOpenTask } from '../lib/useOpenTask';
 import { toast } from 'sonner';
-import { Calendar, User, CircleUser, FolderInput, Flag, Gauge, Tag } from 'lucide-react';
+import { Calendar, User, CircleUser, FolderInput, Flag, Gauge, Tag, CircleDot } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { DatePicker, Dialog, DialogContent, DialogTitle, DialogDescription } from '@voxire/ui';
 import { useParams, useNavigate, useRouterState } from '@tanstack/react-router';
@@ -20,6 +20,9 @@ import { displayUserName } from '../lib/userDisplay';
 import { EFFORT_PRESETS, formatEffortMinutes } from '../lib/effortPresets';
 import { useCreateTask } from '../../features/tasks/useTasks';
 import { useLabels } from '../../features/tasks/useLabels';
+import { useProjectStatuses } from '../../features/projects/useStatuses';
+import { defaultStatus, sortStatuses } from '../../features/projects/statusUtils';
+import FlowSelect from './FlowSelect';
 import { withAlpha } from '../lib/colorUtils';
 
 function FieldRow({
@@ -77,6 +80,9 @@ export const QuickCreate: React.FC = () => {
   const [assignToMe, setAssignToMe] = useState(true);
   const [effortMinutes, setEffortMinutes] = useState<number | undefined>(30);
   const [labelId, setLabelId] = useState('');
+  const [statusId, setStatusId] = useState('');
+  const { data: rawStatuses } = useProjectStatuses(quickCreateOpen ? projectId : '');
+  const statuses = rawStatuses ? sortStatuses(rawStatuses) : [];
 
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
@@ -94,6 +100,20 @@ export const QuickCreate: React.FC = () => {
     }
   }, [quickCreateOpen, currentProjectId]);
 
+  // The status follows the project: a board column's own status when the
+  // dialog was opened from that column, otherwise the project's default.
+  useEffect(() => {
+    if (!quickCreateOpen || !rawStatuses) return;
+    setStatusId((current) => {
+      if (rawStatuses.some((s) => s.id === current)) return current;
+      const fromColumn =
+        projectId === currentProjectId && quickCreateColumnId
+          ? rawStatuses.find((s) => s.id === quickCreateColumnId)
+          : undefined;
+      return (fromColumn ?? defaultStatus(rawStatuses))?.id ?? '';
+    });
+  }, [quickCreateOpen, rawStatuses, projectId, currentProjectId, quickCreateColumnId]);
+
   const submit = async () => {
     if (!title.trim()) {
       toast.error(t('flowToasts.task.titleRequired'));
@@ -107,7 +127,8 @@ export const QuickCreate: React.FC = () => {
       const res = await createTaskMutation.mutateAsync({
         title: title.trim(),
         projectId: projectId || undefined,
-        sectionId: projectId === currentProjectId ? quickCreateColumnId : undefined,
+        // A task's column is its status, so section_id carries the pick.
+        sectionId: statuses.some((s) => s.id === statusId) ? statusId : undefined,
         priority,
         description: description.trim() || undefined,
         dueDate: dueDate || undefined,
@@ -299,6 +320,29 @@ export const QuickCreate: React.FC = () => {
                 <ProjectSelect value={projectId} onChange={setProjectId} allowPersonal />
               </div>
             </FieldRow>
+
+            {statuses.length > 0 && (
+              <FieldRow label={t('flow.taskDetail.status')} icon={CircleDot}>
+                <div className="max-w-[240px]">
+                  <FlowSelect
+                    label={t('flow.taskDetail.status')}
+                    value={statusId}
+                    options={statuses.map((s) => ({
+                      value: s.id,
+                      label: s.name,
+                      icon: (
+                        <span
+                          aria-hidden="true"
+                          className="h-2 w-2 shrink-0 rounded-full"
+                          style={{ background: s.color }}
+                        />
+                      ),
+                    }))}
+                    onChange={setStatusId}
+                  />
+                </div>
+              </FieldRow>
+            )}
 
             <FieldRow label={t('flowCommon.priority')} icon={Flag}>
               <div className="flex items-center gap-1 flex-wrap">
