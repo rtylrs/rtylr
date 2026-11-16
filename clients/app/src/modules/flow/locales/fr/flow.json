@@ -1012,6 +1012,7 @@
     "deleteWithTasks_many": "{{count}} tâches sont dans ce statut. Choisissez le statut vers lequel les déplacer.",
     "deleteWithTasks_other": "{{count}} tâches sont dans ce statut. Choisissez le statut vers lequel les déplacer.",
     "deleteEmpty": "Aucune tâche n'est dans ce statut. Le supprimer retire la colonne du tableau.",
+    "deleteChooseTarget": "Les tâches de ce statut seront déplacées vers le statut choisi.",
     "moveTasksTo": "Déplacer les tâches vers",
     "chooseTarget": "Choisir un statut",
     "deleteConfirm": "Supprimer le statut",
