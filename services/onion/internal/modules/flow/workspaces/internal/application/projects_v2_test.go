@@ -83,6 +83,24 @@ func TestCreateProjectV2VisibilityDefaults(t *testing.T) {
 	}
 }
 
+func TestCreateProjectListsCreatorAsAdminMember(t *testing.T) {
+	svc, ctx, _ := v2Svc(t)
+
+	p := createV2Project(ctx, t, svc, "creator-is-member", "", v2UserA)
+
+	members, total, err := svc.ListProjectMembers(ctx, p.ID, 50, 0)
+	if err != nil {
+		t.Fatalf("ListProjectMembers: %v", err)
+	}
+	if total != 1 || len(members) != 1 {
+		t.Fatalf("members total=%d len=%d, want 1", total, len(members))
+	}
+	if members[0].UserID != v2UserA || members[0].Role != domain.FlowRoleAdmin {
+		t.Errorf("member = user %d role %q, want user %d role %q",
+			members[0].UserID, members[0].Role, v2UserA, domain.FlowRoleAdmin)
+	}
+}
+
 func TestListProjectsV2CurationAndBucketExclusion(t *testing.T) {
 	svc, ctx, _ := v2Svc(t)
 

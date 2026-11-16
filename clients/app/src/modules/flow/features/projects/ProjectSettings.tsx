@@ -317,6 +317,9 @@ const ProjectSettings: React.FC = () => {
               <div className="space-y-2">
                 {members.map((m) => {
                   const roleMeta = ROLE_META[m.role] ?? ROLE_META.member;
+                  // Ownership lives on the project, not the member row, and is
+                  // changed only through Transfer ownership below.
+                  const isOwner = !!project.ownerId && String(m.userId) === project.ownerId;
                   const initials = m.name
                     ? m.name
                         .split(' ')
@@ -359,60 +362,75 @@ const ProjectSettings: React.FC = () => {
                           </p>
                         )}
                       </div>
-                      <div className="flex items-center gap-1" style={{ color: roleMeta.color }}>
-                        {roleMeta.icon}
-                        <select
-                          value={m.role}
-                          disabled={!canManageProject}
-                          aria-label={t('flow.projectSettings.roleSelectLabel', {
-                            name: m.name || m.email,
-                          })}
-                          onChange={(e) => {
+                      {isOwner ? (
+                        <span
+                          className="flex items-center gap-1 text-flow-meta"
+                          style={{ color: ROLE_META.admin.color }}
+                        >
+                          {ROLE_META.admin.icon}
+                          {t('flowCommon.roles.owner')}
+                        </span>
+                      ) : (
+                        <div className="flex items-center gap-1" style={{ color: roleMeta.color }}>
+                          {roleMeta.icon}
+                          <select
+                            value={m.role}
+                            disabled={!canManageProject}
+                            aria-label={t('flow.projectSettings.roleSelectLabel', {
+                              name: m.name || m.email,
+                            })}
+                            onChange={(e) => {
+                              if (!canManageProject) return;
+                              updateRole.mutate(
+                                {
+                                  project_id: Number(projectId),
+                                  user_id: Number(m.userId),
+                                  role: e.target.value,
+                                },
+                                {
+                                  onSuccess: () =>
+                                    toast.success(t('flowToasts.projectMember.roleUpdated')),
+                                }
+                              );
+                            }}
+                            className="text-flow-meta bg-transparent cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                            style={{ color: roleMeta.color }}
+                          >
+                            <option value="admin">{t('flowCommon.roles.admin')}</option>
+                            <option value="member">{t('flowCommon.roles.member')}</option>
+                            <option value="viewer">{t('flowCommon.roles.viewer')}</option>
+                          </select>
+                        </div>
+                      )}
+                      {!isOwner && (
+                        <button
+                          type="button"
+                          onClick={() => {
                             if (!canManageProject) return;
-                            updateRole.mutate(
-                              {
-                                project_id: Number(projectId),
-                                user_id: Number(m.userId),
-                                role: e.target.value,
-                              },
+                            removeMember.mutate(
+                              { project_id: Number(projectId), user_id: Number(m.userId) },
                               {
                                 onSuccess: () =>
-                                  toast.success(t('flowToasts.projectMember.roleUpdated')),
+                                  toast.success(t('flowToasts.projectMember.removed')),
                               }
                             );
                           }}
-                          className="text-flow-meta bg-transparent cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
-                          style={{ color: roleMeta.color }}
+                          disabled={!canManageProject}
+                          className="h-6 w-6 rounded-sm flex items-center justify-center shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+                          style={{ color: 'var(--flow-text-dim)' }}
+                          onMouseEnter={(e) => {
+                            if (canManageProject)
+                              e.currentTarget.style.color = 'var(--flow-danger-fg)';
+                          }}
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.color = 'var(--flow-text-dim)')
+                          }
+                          title={t('flow.projectSettings.removeMemberLabel')}
+                          aria-label={t('flow.projectSettings.removeMemberLabel')}
                         >
-                          <option value="admin">{t('flowCommon.roles.admin')}</option>
-                          <option value="member">{t('flowCommon.roles.member')}</option>
-                          <option value="viewer">{t('flowCommon.roles.viewer')}</option>
-                        </select>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (!canManageProject) return;
-                          removeMember.mutate(
-                            { project_id: Number(projectId), user_id: Number(m.userId) },
-                            {
-                              onSuccess: () => toast.success(t('flowToasts.projectMember.removed')),
-                            }
-                          );
-                        }}
-                        disabled={!canManageProject}
-                        className="h-6 w-6 rounded-sm flex items-center justify-center shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
-                        style={{ color: 'var(--flow-text-dim)' }}
-                        onMouseEnter={(e) => {
-                          if (canManageProject)
-                            e.currentTarget.style.color = 'var(--flow-danger-fg)';
-                        }}
-                        onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--flow-text-dim)')}
-                        title={t('flow.projectSettings.removeMemberLabel')}
-                        aria-label={t('flow.projectSettings.removeMemberLabel')}
-                      >
-                        <Trash2 size={10} />
-                      </button>
+                          <Trash2 size={10} />
+                        </button>
+                      )}
                     </div>
                   );
                 })}

@@ -60,6 +60,7 @@ export interface ApiProject {
   taskCount: number;
   completedCount: number;
   memberAvatars: string[];
+  ownerId?: string;
   // Per-caller projection from flow.project.v2: set only when the caller sees
   // the project through the dept-manager proxy rather than as creator, owner or
   // member. Optional because the v1 shape has no such field.

@@ -30,6 +30,7 @@ export function apiProjectToProject(p: ApiProject): Project {
     targetDate: p.dueDate ?? '',
     lead: '',
     icon: p.icon,
+    ownerId: p.ownerId ? String(p.ownerId) : undefined,
     visibleViaReport: p.visibleViaReport ?? false,
   };
 }
