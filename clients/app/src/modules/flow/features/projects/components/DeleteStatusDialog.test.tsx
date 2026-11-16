@@ -92,4 +92,31 @@ describe('DeleteStatusDialog', () => {
     ).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Delete status' })).not.toBeInTheDocument();
   });
+
+  it('asks for a target for a done status even when no open task is loaded on it', () => {
+    // The board loads open tasks only, so finished tasks on a done status are
+    // invisible here; deleting it must never silently reopen them.
+    const shipped = status('4', 'Shipped', 'done', 950);
+    render(
+      <DeleteStatusDialog
+        projectId="2"
+        status={shipped}
+        statuses={[...STATUSES, shipped]}
+        onClose={vi.fn()}
+      />
+    );
+
+    expect(
+      screen.getByText('Any tasks in this status move to the status you choose.')
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Delete status' })).toBeDisabled();
+    fireEvent.change(screen.getByRole('combobox', { name: 'Move tasks to' }), {
+      target: { value: '3' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Delete status' }));
+    expect(remote.remove).toHaveBeenCalledWith(
+      { id: '4', moveToStatusId: '3' },
+      expect.any(Object)
+    );
+  });
 });
