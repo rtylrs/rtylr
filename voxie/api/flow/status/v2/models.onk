@@ -8,9 +8,8 @@ package flow.status.v2
 /// generations when it is the only one that exists. Nothing here has a v1
 /// history to be compatible with.
 ///
-/// A project with no statuses is the normal case, not an unconfigured one. It
-/// falls back to the six built-in string statuses, which is what makes the whole
-/// feature additive.
+/// A project's statuses are its board columns. Every project has a set: it is
+/// copied from the business's status template when the project is created.
 message Status {
   /// id is the unique identifier for the resource.
   id: int64
@@ -59,9 +58,8 @@ message ListStatusesRequest {
 }
 
 message ListStatusesResponse {
-  /// statuses is the project's set in `sort_order`, and is EMPTY for a project
-  /// that has not configured any. Empty means "use the built-ins", never
-  /// "this project has no statuses".
+  /// statuses is the project's set in `sort_order`, which is also its board
+  /// column order. A project without statuses is seeded on first read.
   statuses: Status[]
 }
 
@@ -127,17 +125,16 @@ message UpdateStatusResponse {
 message DeleteStatusRequest {
   /// id is the status identifier.
   id: int64 @gt(0)
+  /// move_to_status_id is the status in the same project that receives the
+  /// deleted status's tasks. Required when the status still has tasks.
+  move_to_status_id: int64 @query("move_to_status_id")
 }
 
 message DeleteStatusResponse {
   /// message is a human-readable result message.
   message: string
-  /// reassigned_task_count is how many tasks fell back to their built-in string
-  /// status because they were on the deleted one.
-  ///
-  /// Deleting a status never blocks on its tasks and never deletes them. The
-  /// server clears their status_id, and the string status they already carry
-  /// keeps them where the user left them.
+  /// reassigned_task_count is how many tasks moved to move_to_status_id because
+  /// they were on the deleted status. Tasks are never deleted with a status.
   reassigned_task_count: int32
 }
 
@@ -158,4 +155,34 @@ message SetTaskStatusResponse {
   /// status is the resulting built-in string status the task now carries, so a
   /// caller does not need a second request to keep its cached task correct.
   status: string
+}
+
+message StatusTemplateItem {
+  /// name is the status name.
+  name: string @required
+  /// bucket is one of backlog, active, done, cancelled.
+  bucket: string @required
+  /// legacy_status is the built-in status the entry maps to; derived from the bucket when empty.
+  legacy_status: string
+  /// color is a hex colour.
+  color: string
+  /// sort_order is the position in the template.
+  sort_order: int32
+}
+
+message GetStatusTemplateRequest {}
+
+message GetStatusTemplateResponse {
+  /// statuses is the template in sort order; the built-in default set when never saved.
+  statuses: StatusTemplateItem[]
+}
+
+message SaveStatusTemplateRequest {
+  /// statuses is the full replacement template.
+  statuses: StatusTemplateItem[] @required
+}
+
+message SaveStatusTemplateResponse {
+  /// statuses is the saved template in sort order.
+  statuses: StatusTemplateItem[]
 }

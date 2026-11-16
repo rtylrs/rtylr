@@ -32,7 +32,9 @@ func TestTaskV2CreationPersistsSelectedFields(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, task := range []*taskv2.FlowTask{response.Task, detail.Task} {
-		if task.GetStatus() != "done" || task.CompletedAt == nil || task.GetEffortMinutes() != 60 || task.GetEstimatedHours() != 1 || task.GetSectionId() != col.Column.Id || task.GetDueDate() != "2026-10-05" || task.CreatedAt == "" {
+		// The column is a status: a task created in "Verification" (an
+		// in-progress column) takes that status, whatever string came along.
+		if task.GetStatus() != "in_progress" || task.CompletedAt != nil || task.GetStatusId() != col.Column.Id || task.GetEffortMinutes() != 60 || task.GetEstimatedHours() != 1 || task.GetSectionId() != col.Column.Id || task.GetDueDate() != "2026-10-05" || task.CreatedAt == "" {
 			t.Fatalf("creation lost selected fields: %+v", task)
 		}
 	}
@@ -111,7 +113,7 @@ func TestViewV2CreatesUpdatesAndDeletesWithoutWorkspace(t *testing.T) {
 	}
 }
 
-func TestTaskV2ReassignmentGrantsAccessAndColumnCanClear(t *testing.T) {
+func TestTaskV2ReassignmentGrantsAccessAndColumnClearFallsBack(t *testing.T) {
 	f := newRoleFixture(t)
 	id := f.newTask(t)
 	handler := api.NewTaskAPIV2(f.service)
@@ -138,8 +140,10 @@ func TestTaskV2ReassignmentGrantsAccessAndColumnCanClear(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if detail.Task.SectionId != nil {
-		t.Fatal("column clear did not persist")
+	// Every task sits in its status's column, so clearing the column leaves
+	// the task on the column of the status it has, never on none.
+	if detail.Task.SectionId == nil || detail.Task.GetSectionId() != detail.Task.GetStatusId() {
+		t.Fatalf("cleared column should fall back to the status column, got section=%v status_id=%v", detail.Task.SectionId, detail.Task.StatusId)
 	}
 }
 

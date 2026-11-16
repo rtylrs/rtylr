@@ -102,6 +102,7 @@ finance/zz_payroll_account_mappings.sql	internal/modules/finance/sql/schema/fina
 flow/schema.sql	internal/modules/flow/sql/schema/flow/schema.sql
 flow/v10_task_personal_state.sql	internal/modules/flow/sql/schema/flow/v10_task_personal_state.sql
 flow/v11_project_owner_members.sql	internal/modules/flow/sql/schema/flow/v11_project_owner_members.sql
+flow/v12_status_columns.sql	internal/modules/flow/sql/schema/flow/v12_status_columns.sql
 flow/v8_time_tracking.sql	internal/modules/flow/sql/schema/flow/v8_time_tracking.sql
 flow/v9_workspace_removal_prep.sql	internal/modules/flow/sql/schema/flow/v9_workspace_removal_prep.sql
 pos/schema.sql	internal/modules/pos/sql/schema/pos/schema.sql

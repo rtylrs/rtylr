@@ -4,58 +4,78 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/domain"
-	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/searchutil"
 )
 
+// Columns are the project's statuses (see status_columns.go). The column API
+// keeps its shape so existing clients work unchanged; a column id is a status
+// id.
+
+// projectWriteGuard is the column write guard the column endpoints always had:
+// project member, owner or creator. %s is the project_id expression.
+const projectWriteGuard = `(
+    EXISTS (SELECT 1 FROM flow_project_members pm WHERE pm.project_id = %[1]s AND pm.user_id = ?)
+    OR EXISTS (SELECT 1 FROM flow_projects p WHERE p.id = %[1]s AND (p.owner_id = ? OR p.created_by = ?))
+  )`
+
 func (r *Repository) GetColumnsByProject(ctx context.Context, projectID, limit, offset int64) ([]domain.ProjectColumn, int64, error) {
-	total, err := r.queries.CountProjectColumns(ctx, projectID)
-	if err != nil {
-		logger.Ctx(ctx).Error("CountProjectColumns failed", logger.Error(err))
-		return nil, 0, err
+	var ownerID int64
+	if err := r.pool.QueryRowContext(ctx, "SELECT owner_id FROM flow_projects WHERE id = ?", projectID).Scan(&ownerID); err == nil {
+		if seedErr := r.seedProjectStatuses(ctx, projectID, ownerID); seedErr != nil {
+			logger.Ctx(ctx).Error("GetColumnsByProject: seeding statuses failed", logger.Error(seedErr))
+		}
 	}
 
-	rows, err := r.queries.GetColumnsByProject(ctx, sqlc.GetColumnsByProjectParams{
-		ProjectID: projectID,
-		Limit:     int32(limit),  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-		Offset:    int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-	})
+	var total int64
+	if err := r.pool.QueryRowContext(ctx, "SELECT COUNT(*) FROM flow_statuses WHERE project_id = ?", projectID).Scan(&total); err != nil {
+		logger.Ctx(ctx).Error("GetColumnsByProject count failed", logger.Error(err))
+		return nil, 0, err
+	}
+	rows, err := r.pool.QueryContext(ctx, `SELECT id, project_id, name, color, sort_order, created_by, created_at, updated_at
+FROM flow_statuses WHERE project_id = ? ORDER BY sort_order, id LIMIT ? OFFSET ?`, projectID, limit, offset)
 	if err != nil {
 		logger.Ctx(ctx).Error("GetColumnsByProject failed", logger.Error(err))
 		return nil, 0, err
 	}
+	defer func() { _ = rows.Close() }()
 
-	cols := make([]domain.ProjectColumn, 0, len(rows))
-	for _, row := range rows {
-		cols = append(cols, domain.ProjectColumn{
-			ID:          row.ID,
-			ProjectID:   row.ProjectID,
-			WorkspaceID: row.WorkspaceID,
-			Name:        row.Name,
-			Color:       row.Color.String,
-			SortOrder:   int(row.SortOrder.Int32),
-			CreatedBy:   row.CreatedBy,
-			CreatedAt:   row.CreatedAt.Time,
-			UpdatedAt:   row.UpdatedAt.Time,
-		})
+	cols := make([]domain.ProjectColumn, 0)
+	for rows.Next() {
+		var c domain.ProjectColumn
+		var createdAt, updatedAt sql.NullTime
+		if err := rows.Scan(&c.ID, &c.ProjectID, &c.Name, &c.Color, &c.SortOrder, &c.CreatedBy, &createdAt, &updatedAt); err != nil {
+			return nil, 0, err
+		}
+		c.CreatedAt, c.UpdatedAt = createdAt.Time, updatedAt.Time
+		cols = append(cols, c)
 	}
-	return cols, total, nil
+	return cols, total, rows.Err()
 }
 
+// CreateColumn adds an in-progress-type status, which is what a new board
+// column means. The bucket can be changed afterwards in the status settings.
 func (r *Repository) CreateColumn(ctx context.Context, input domain.ProjectColumnInput) (int64, error) {
-	res, err := r.queries.CreateColumn(ctx, sqlc.CreateColumnParams{
-		ProjectID:   input.ProjectID,
-		WorkspaceID: input.WorkspaceID,
-		Name:        input.Name,
-		Color:       sql.NullString{String: input.Color, Valid: input.Color != ""},
-		SortOrder:   sql.NullInt32{Int32: int32(input.SortOrder), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-		CreatedBy:   input.CreatedBy,
-	})
+	businessID, err := projectBusinessID(ctx, r.pool, input.ProjectID)
 	if err != nil {
+		return 0, err
+	}
+	color := input.Color
+	if color == "" {
+		color = domain.DefaultStatusColor
+	}
+	res, err := r.pool.ExecContext(ctx, `INSERT INTO flow_statuses
+(business_id, project_id, name, bucket, legacy_status, color, sort_order, is_default, created_by)
+VALUES (?, ?, ?, 'active', 'in_progress', ?, ?, FALSE, ?)`,
+		businessID, input.ProjectID, strings.TrimSpace(input.Name), color, input.SortOrder, input.CreatedBy)
+	if err != nil {
+		if isDuplicateKey(err) {
+			return 0, domain.ErrStatusNameTaken
+		}
 		logger.Ctx(ctx).Error("CreateColumn failed", logger.Error(err))
 		return 0, err
 	}
@@ -63,54 +83,46 @@ func (r *Repository) CreateColumn(ctx context.Context, input domain.ProjectColum
 }
 
 func (r *Repository) UpdateColumn(ctx context.Context, input domain.UpdateProjectColumnInput) error {
-	res, err := r.queries.UpdateColumn(ctx, sqlc.UpdateColumnParams{
-		Name:      input.Name,
-		Color:     sql.NullString{String: input.Color, Valid: input.Color != ""},
-		SortOrder: sql.NullInt32{Int32: int32(input.SortOrder), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-		ID:        input.ID,
-		// One actor across every branch, matching DeleteColumn: project member,
-		// project owner, project creator, then the two legacy workspace branches.
-		UserID:    input.ActorID,
-		OwnerID:   input.ActorID,
-		CreatedBy: input.ActorID,
-		OwnerID_2: input.ActorID,
-		UserID_2:  input.ActorID,
-	})
+	res, err := r.pool.ExecContext(ctx, `UPDATE flow_statuses
+SET name = ?, color = COALESCE(NULLIF(?, ''), color), sort_order = ?
+WHERE flow_statuses.id = ? AND `+fmt.Sprintf(projectWriteGuard, "flow_statuses.project_id"),
+		strings.TrimSpace(input.Name), input.Color, input.SortOrder, input.ID, input.ActorID, input.ActorID, input.ActorID)
 	if err != nil {
+		if isDuplicateKey(err) {
+			return domain.ErrStatusNameTaken
+		}
 		logger.Ctx(ctx).Error("UpdateColumn failed", logger.Error(err))
 		return err
 	}
-	return requireAffected(res)
+	if affected, _ := res.RowsAffected(); affected == 0 {
+		// Zero rows is either "no access" or "nothing changed"; only the first
+		// is an error.
+		var one int
+		err := r.pool.QueryRowContext(ctx, "SELECT 1 FROM flow_statuses WHERE flow_statuses.id = ? AND "+
+			fmt.Sprintf(projectWriteGuard, "flow_statuses.project_id"), input.ID, input.ActorID, input.ActorID, input.ActorID).Scan(&one)
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.ErrUnauthorized
+		}
+		return err
+	}
+	return nil
 }
 
+// DeleteColumn deletes an empty status. The column endpoint has no way to say
+// where tasks should go, so a status with tasks is refused here; the status
+// endpoint takes a move target.
 func (r *Repository) DeleteColumn(ctx context.Context, id, actorID int64) error {
-	// One actor across every branch, the same shape MoveTaskToColumn uses:
-	// project member, project owner, project creator, then the two legacy
-	// workspace branches.
-	if err := r.queries.ClearTasksSectionID(ctx, sqlc.ClearTasksSectionIDParams{
-		SectionID: sql.NullInt64{Int64: id, Valid: true},
-		UserID:    actorID,
-		OwnerID:   actorID,
-		CreatedBy: actorID,
-		OwnerID_2: actorID,
-		UserID_2:  actorID,
-	}); err != nil {
-		return err
+	var businessID int64
+	err := r.pool.QueryRowContext(ctx, "SELECT business_id FROM flow_statuses WHERE flow_statuses.id = ? AND "+
+		fmt.Sprintf(projectWriteGuard, "flow_statuses.project_id"), id, actorID, actorID, actorID).Scan(&businessID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.ErrUnauthorized
 	}
-
-	res, err := r.queries.DeleteColumn(ctx, sqlc.DeleteColumnParams{
-		ID:        id,
-		UserID:    actorID,
-		OwnerID:   actorID,
-		CreatedBy: actorID,
-		OwnerID_2: actorID,
-		UserID_2:  actorID,
-	})
 	if err != nil {
-		logger.Ctx(ctx).Error("DeleteColumn failed", logger.Error(err))
 		return err
 	}
-	return requireAffected(res)
+	_, err = r.DeleteStatus(ctx, id, businessID, 0)
+	return err
 }
 
 const moveTaskToColumnSQL = `UPDATE flow_tasks
@@ -128,15 +140,8 @@ WHERE flow_tasks.id = ?
   AND (
     ? = 0
     OR EXISTS (
-      SELECT 1 FROM flow_project_columns c
-      WHERE c.id = ?
-        AND (
-          c.project_id = flow_tasks.project_id
-          OR (
-            flow_tasks.workspace_id <> 0
-            AND c.workspace_id = flow_tasks.workspace_id
-          )
-        )
+      SELECT 1 FROM flow_statuses c
+      WHERE c.id = ? AND c.project_id = flow_tasks.project_id
     )
   )`
 
@@ -146,7 +151,10 @@ func (r *Repository) MoveTaskToColumn(ctx context.Context, taskID, columnID, act
 		logger.Ctx(ctx).Error("MoveTaskToColumn failed", logger.Error(err))
 		return err
 	}
-	return requireAffected(res)
+	if err := requireAffected(res); err != nil {
+		return err
+	}
+	return syncTaskFromSection(ctx, r.pool, taskID)
 }
 
 // moveTaskAccessSQL is moveTaskToColumnSQL's WHERE clause as a SELECT, taking
@@ -246,44 +254,10 @@ func (r *Repository) MoveTaskToColumnOrdered(ctx context.Context, taskID, column
 		logger.Ctx(ctx).Error("MoveTaskToColumnOrdered: reorder failed", logger.Error(err))
 		return err
 	}
-	return tx.Commit()
-}
-
-func (r *Repository) SeedDefaultColumns(ctx context.Context, projectID, workspaceID, createdBy int64) error {
-	// Idempotent: never seed a project that already has columns. Two create
-	// paths call this and (until deployed) there's no unique constraint behind
-	// it, so without this guard a re-run produces duplicate columns.
-	existing, err := r.queries.CountProjectColumns(ctx, projectID)
-	if err != nil {
+	if err := syncTaskFromSection(ctx, tx, taskID); err != nil {
 		return err
 	}
-	if existing > 0 {
-		return nil
-	}
-
-	defaults := []struct {
-		name      string
-		color     string
-		sortOrder int
-	}{
-		{"To Do", "#9ca3af", 0},
-		{"In Progress", "#3b82f6", 1},
-		{"In Review", "#f59e0b", 2},
-		{"Done", "#22c55e", 3},
-	}
-	for _, d := range defaults {
-		if _, err := r.queries.SeedDefaultColumn(ctx, sqlc.SeedDefaultColumnParams{
-			ProjectID:   projectID,
-			WorkspaceID: workspaceID,
-			Name:        d.name,
-			Color:       sql.NullString{String: d.color, Valid: true},
-			SortOrder:   sql.NullInt32{Int32: int32(d.sortOrder), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-			CreatedBy:   createdBy,
-		}); err != nil {
-			return err
-		}
-	}
-	return nil
+	return tx.Commit()
 }
 
 // ─────────────────────────────────────────────

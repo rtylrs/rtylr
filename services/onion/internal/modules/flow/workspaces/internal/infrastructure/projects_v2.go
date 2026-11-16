@@ -305,6 +305,7 @@ func (r *Repository) PurgeProjectCascade(ctx context.Context, id, businessID int
 		`UPDATE flow_tasks SET parent_task_id = NULL WHERE parent_task_id IN (SELECT id FROM (SELECT id FROM flow_tasks WHERE project_id = ? AND business_id = ?) x)`,
 		`DELETE FROM flow_tasks WHERE project_id = ? AND business_id = ?`,
 		`DELETE FROM flow_project_columns WHERE project_id = ?`,
+		`DELETE FROM flow_statuses WHERE project_id = ? AND business_id = ?`,
 		`DELETE FROM flow_milestones WHERE project_id = ? AND business_id = ?`,
 		`DELETE FROM flow_cycles WHERE project_id = ? AND business_id = ?`,
 		`DELETE FROM flow_projects WHERE id = ? AND business_id = ?`,

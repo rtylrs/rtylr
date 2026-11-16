@@ -16,11 +16,18 @@ import (
 
 // ListProjectStatuses returns a project's status set.
 //
-// Read access only, so the gate is viewer. An empty set is the normal answer for
-// a project that has not configured any, and means "use the built-ins".
+// Read access only, so the gate is viewer. Statuses are the project's columns,
+// so a project that somehow has none is seeded from the template first.
 func (s *Service) ListProjectStatuses(ctx context.Context, projectID, callerID, businessID int64) ([]domain.Status, error) {
 	if err := s.RequireProjectRole(ctx, projectID, callerID, businessID, domain.FlowRoleViewer); err != nil {
 		return nil, domain.ErrUnauthorized
+	}
+	statuses, err := s.repo.ListStatusesByProject(ctx, businessID, projectID)
+	if err != nil || len(statuses) > 0 {
+		return statuses, err
+	}
+	if seedErr := s.repo.SeedDefaultColumns(ctx, projectID, 0, callerID); seedErr != nil {
+		return nil, seedErr
 	}
 	return s.repo.ListStatusesByProject(ctx, businessID, projectID)
 }
@@ -70,9 +77,10 @@ func (s *Service) UpdateProjectStatus(ctx context.Context, id, callerID, busines
 	return s.repo.UpdateStatus(ctx, id, businessID, existing.ProjectID, normalized)
 }
 
-// DeleteProjectStatus removes a status, returning how many tasks fell back to
-// their built-in string status.
-func (s *Service) DeleteProjectStatus(ctx context.Context, id, callerID, businessID int64) (int64, error) {
+// DeleteProjectStatus removes a status, moving its tasks to moveToID, and
+// returns how many moved. A status with tasks needs a target; the project's
+// last done status cannot be deleted.
+func (s *Service) DeleteProjectStatus(ctx context.Context, id, moveToID, callerID, businessID int64) (int64, error) {
 	existing, err := s.repo.GetStatusByID(ctx, id, businessID)
 	if err != nil {
 		return 0, err
@@ -80,7 +88,7 @@ func (s *Service) DeleteProjectStatus(ctx context.Context, id, callerID, busines
 	if roleErr := s.RequireProjectRole(ctx, existing.ProjectID, callerID, businessID, domain.FlowRoleAdmin); roleErr != nil {
 		return 0, domain.ErrUnauthorized
 	}
-	return s.repo.DeleteStatus(ctx, id, businessID)
+	return s.repo.DeleteStatus(ctx, id, businessID, moveToID)
 }
 
 // SetTaskStatus applies a custom status to a task, or clears it when statusID is
@@ -132,4 +140,22 @@ func (s *Service) SetTaskStatus(ctx context.Context, taskID, statusID, callerID,
 		s.announceStatusChange(ctx, task, callerID, status.LegacyStatus)
 	}
 	return status.LegacyStatus, nil
+}
+
+// GetStatusTemplate returns the set new projects in this business copy.
+func (s *Service) GetStatusTemplate(ctx context.Context, businessID int64) ([]domain.StatusTemplateItem, error) {
+	return s.repo.GetStatusTemplate(ctx, businessID)
+}
+
+// SaveStatusTemplate validates and replaces the template. Existing projects
+// keep their own statuses. The caller's permission is checked by the API.
+func (s *Service) SaveStatusTemplate(ctx context.Context, businessID int64, items []domain.StatusTemplateItem) ([]domain.StatusTemplateItem, error) {
+	normalized, err := domain.NormalizeStatusTemplate(items)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.repo.SaveStatusTemplate(ctx, businessID, normalized); err != nil {
+		return nil, err
+	}
+	return normalized, nil
 }

@@ -338,7 +338,28 @@ func (s *Service) MoveTaskToColumn(ctx context.Context, taskID, columnID, actorI
 		defer invalidateUserScope(ctx, assigneeID(existing.AssigneeID))
 	}
 
-	return s.repo.MoveTaskToColumn(ctx, taskID, columnID, actorID)
+	if err := s.repo.MoveTaskToColumn(ctx, taskID, columnID, actorID); err != nil {
+		return err
+	}
+	s.recordColumnStatusChange(ctx, existing, err, actorID)
+	return nil
+}
+
+// recordColumnStatusChange logs and announces the status change a board move
+// causes now that a column is a status. existingErr is the error from reading
+// the task before the move; without that read there is nothing to compare.
+func (s *Service) recordColumnStatusChange(ctx context.Context, existing domain.Task, existingErr error, actorID int64) {
+	if existingErr != nil {
+		return
+	}
+	moved, err := s.repo.GetTaskByID(ctx, existing.ID)
+	if err != nil || moved.Status == existing.Status {
+		return
+	}
+	if actErr := s.repo.LogActivity(ctx, existing.ID, actorID, "status_changed", existing.Status, moved.Status); actErr != nil {
+		logger.Ctx(ctx).Error("MoveTaskToColumn: failed to log activity", logger.Error(actErr))
+	}
+	s.announceStatusChange(ctx, moved, actorID, moved.Status)
 }
 
 // MoveTaskToColumnOrdered is MoveTaskToColumn plus the card's position: when
@@ -366,7 +387,11 @@ func (s *Service) MoveTaskToColumnOrdered(ctx context.Context, taskID, columnID,
 		defer invalidateUserScope(ctx, assigneeID(existing.AssigneeID))
 	}
 
-	return s.repo.MoveTaskToColumnOrdered(ctx, taskID, columnID, actorID, orderedTaskIDs)
+	if err := s.repo.MoveTaskToColumnOrdered(ctx, taskID, columnID, actorID, orderedTaskIDs); err != nil {
+		return err
+	}
+	s.recordColumnStatusChange(ctx, existing, err, actorID)
+	return nil
 }
 
 // GetColumnProject returns the project id of the given column, or 0 if

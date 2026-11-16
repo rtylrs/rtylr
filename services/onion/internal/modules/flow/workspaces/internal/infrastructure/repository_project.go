@@ -85,7 +85,18 @@ func (r *Repository) CreateTask(ctx context.Context, input domain.TaskInput) (in
 		logger.Ctx(ctx).Error("CreateTask failed", logger.Error(err))
 		return 0, err
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	// A task created inside a board column takes that column's status;
+	// otherwise its string status picks the project's matching status.
+	if input.SectionID != nil && *input.SectionID != 0 {
+		err = syncTaskFromSection(ctx, r.pool, id)
+	} else {
+		err = syncTaskFromLegacy(ctx, r.pool, id)
+	}
+	return id, err
 }
 
 // taskListConditions builds the shared WHERE conditions for a scoped task
