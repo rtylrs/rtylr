@@ -1,4 +1,5 @@
 import { flowAuthFields } from './support/flow-auth';
+import { stubStatuses } from './support/flow-statuses';
 import { test, expect, type Page, type Route } from './fixtures';
 
 /**
@@ -383,6 +384,9 @@ async function installFlowStubs(
     })
   );
 
+  // Board columns and list groups are the project's statuses.
+  await stubStatuses(page);
+
   await page.route(/localhost:9999\/flow\/task\/v2\/tasks\/my(\?.*)?$/, (route: Route) =>
     route.fulfill({
       status: 200,
@@ -540,8 +544,8 @@ test.describe('Flow - task board', () => {
     // The list view shows the project name in the header.
     await expect(page.getByText('Alpha Project').first()).toBeAttached({ timeout: 15_000 });
 
-    // Status group headers should be present (the component hard-codes these labels).
-    await expect(page.getByText('Todo').first()).toBeAttached({ timeout: 10_000 });
+    // Groups are the project's statuses, named as the project names them.
+    await expect(page.getByText('To Do').first()).toBeAttached({ timeout: 10_000 });
     await expect(page.getByText('Done').first()).toBeAttached({ timeout: 10_000 });
   });
 });
