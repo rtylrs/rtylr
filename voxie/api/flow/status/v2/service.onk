@@ -14,6 +14,13 @@ service StatusService {
   /// Replaces a status.
   updateStatus(UpdateStatusRequest) -> UpdateStatusResponse @put("/statuses/{id}") @body("body")
 
+  /// Sets the order of a project's whole status set in one write.
+  ///
+  /// Reordering through updateStatus took one request per status, so a failure
+  /// part way through left the board half reordered. This either applies the
+  /// full order or nothing.
+  reorderStatuses(ReorderStatusesRequest) -> ReorderStatusesResponse @put("/statuses/order")
+
   /// Deletes a status. A status that still has tasks needs move_to_status_id,
   /// and a project's last done status cannot be deleted.
   deleteStatus(DeleteStatusRequest) -> DeleteStatusResponse @delete("/statuses/{id}")

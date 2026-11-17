@@ -122,6 +122,22 @@ message UpdateStatusResponse {
   status: Status
 }
 
+message ReorderStatusesRequest {
+  /// project_id is the project whose set is reordered.
+  project_id: int64? @required @gt(0)
+  /// status_ids is every status in the project, in the new order. It must be
+  /// exactly the project's current set: a missing, extra, repeated or foreign
+  /// id is rejected with 400 rather than guessed at, because a partial list
+  /// has no single correct place for the statuses it leaves out.
+  status_ids: int64[] @required
+}
+
+message ReorderStatusesResponse {
+  /// statuses is the project's set in its new order, with the rewritten
+  /// sort_order values.
+  statuses: Status[]
+}
+
 message DeleteStatusRequest {
   /// id is the status identifier.
   id: int64 @gt(0)

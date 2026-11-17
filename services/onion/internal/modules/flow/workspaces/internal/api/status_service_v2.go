@@ -81,6 +81,8 @@ func statusError(err error, fallback string) error {
 		return onekiterrors.New(http.StatusBadRequest, "The template needs at least one done status")
 	case errors.Is(err, domain.ErrStatusTemplateSize):
 		return onekiterrors.New(http.StatusBadRequest, "The template needs between 1 and 30 statuses")
+	case errors.Is(err, domain.ErrStatusOrderMismatch):
+		return onekiterrors.New(http.StatusBadRequest, "The new order must list every status in this project exactly once. Reload the board and try again.")
 	}
 	return onekiterrors.New(http.StatusInternalServerError, fallback)
 }
@@ -151,6 +153,27 @@ func (a *StatusAPIV2) UpdateStatus(ctx context.Context, req *flowstatusv2.Update
 	}
 	publishStatusEvent("status.updated", status.ProjectID, status.ID, caller.UserID)
 	return &flowstatusv2.UpdateStatusResponse{Status: toStatusPayload(status)}, nil
+}
+
+func (a *StatusAPIV2) ReorderStatuses(ctx context.Context, req *flowstatusv2.ReorderStatusesRequest) (*flowstatusv2.ReorderStatusesResponse, error) {
+	caller, businessID, err := resolveV2(ctx)
+	if err != nil {
+		return nil, err
+	}
+	statuses, err := a.Service.ReorderProjectStatuses(ctx, req.GetProjectId(), caller.UserID, businessID, req.GetStatusIds())
+	if err != nil {
+		return nil, statusError(err, "Failed to reorder statuses")
+	}
+	out := make([]*flowstatusv2.Status, 0, len(statuses))
+	for _, s := range statuses {
+		out = append(out, toStatusPayload(s))
+	}
+	// One event for the whole set. A listener refetches the project's set
+	// rather than patching one status, so an event per status adds nothing.
+	if len(statuses) > 0 {
+		publishStatusEvent("status.updated", req.GetProjectId(), statuses[0].ID, caller.UserID)
+	}
+	return &flowstatusv2.ReorderStatusesResponse{Statuses: out}, nil
 }
 
 func (a *StatusAPIV2) DeleteStatus(ctx context.Context, req *flowstatusv2.DeleteStatusRequest) (*flowstatusv2.DeleteStatusResponse, error) {
