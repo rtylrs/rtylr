@@ -6,7 +6,7 @@ import {
   firstDoneStatus,
   insertionPlan,
   isOnlyDoneStatus,
-  reorderUpdates,
+  movedStatusIds,
 } from './statusUtils';
 
 const status = (
@@ -71,21 +71,23 @@ describe('status picks', () => {
   });
 });
 
-describe('reorderUpdates', () => {
-  it('swaps neighbours with two writes', () => {
-    const ordered = [status('1', 0), status('2', 10), status('3', 20)];
-    expect(reorderUpdates(ordered, 2, 1).map((u) => [u.status.id, u.sortOrder])).toEqual([
-      ['3', 10],
-      ['2', 20],
-    ]);
+describe('movedStatusIds', () => {
+  const ordered = [status('1', 0), status('2', 10), status('3', 20)];
+
+  it('returns the whole set in its new order', () => {
+    expect(movedStatusIds(ordered, 2, 1)).toEqual(['1', '3', '2']);
+    expect(movedStatusIds(ordered, 0, 2)).toEqual(['2', '3', '1']);
   });
 
-  it('renumbers tied sort orders so the move takes effect', () => {
-    const ordered = [status('1', 0), status('2', 0), status('3', 0)];
-    expect(reorderUpdates(ordered, 0, 1).map((u) => [u.status.id, u.sortOrder])).toEqual([
-      ['1', 10],
-      ['3', 20],
-    ]);
+  it('moves tied sort orders too, since the server rewrites every position', () => {
+    const tied = [status('1', 0), status('2', 0), status('3', 0)];
+    expect(movedStatusIds(tied, 0, 1)).toEqual(['2', '1', '3']);
+  });
+
+  it('returns null when nothing would move', () => {
+    expect(movedStatusIds(ordered, 1, 1)).toBeNull();
+    expect(movedStatusIds(ordered, 0, -1)).toBeNull();
+    expect(movedStatusIds(ordered, 2, 3)).toBeNull();
   });
 });
 
@@ -93,20 +95,14 @@ describe('insertionPlan', () => {
   const ordered = [status('1', 0), status('2', 10), status('3', 900)];
 
   it('uses the gap between neighbours', () => {
-    expect(insertionPlan(ordered, 2)).toEqual({ sortOrder: 455, updates: [] });
+    expect(insertionPlan(ordered, 2)).toEqual({ sortOrder: 455 });
   });
 
   it('appends after the last status', () => {
-    expect(insertionPlan(ordered, 3)).toEqual({ sortOrder: 910, updates: [] });
+    expect(insertionPlan(ordered, 3)).toEqual({ sortOrder: 910 });
   });
 
-  it('renumbers when there is no room before the first status', () => {
-    const plan = insertionPlan(ordered, 0);
-    expect(plan.sortOrder).toBe(0);
-    expect(plan.updates.map((u) => [u.status.id, u.sortOrder])).toEqual([
-      ['1', 10],
-      ['2', 20],
-      ['3', 30],
-    ]);
+  it('places with one reorder when there is no room before the first status', () => {
+    expect(insertionPlan(ordered, 0)).toEqual({ placeAmong: { ids: ['1', '2', '3'], index: 0 } });
   });
 });
