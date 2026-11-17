@@ -76,6 +76,9 @@ export interface ProjectOverdueTask {
   dueDate: string;
   // Empty when the task is unassigned.
   assigneeId: string;
+  // The name Work's task list shows for the assignee. Empty when the task is
+  // unassigned or the name is unknown.
+  assigneeName: string;
 }
 
 // Invoices tagged with the project, in minor units of the insights default
