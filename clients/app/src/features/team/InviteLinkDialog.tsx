@@ -18,6 +18,8 @@ interface InviteLinkDialogProps {
   /** The activation link the server returned, or null when the dialog is closed. */
   link: string | null;
   email: string;
+  /** Whether an invitation email is on its way. False means the link is the only way in. */
+  emailQueued: boolean;
   onClose: () => void;
 }
 
@@ -29,6 +31,7 @@ interface InviteLinkDialogProps {
 export function InviteLinkDialog({
   link,
   email,
+  emailQueued,
   onClose,
 }: InviteLinkDialogProps): React.JSX.Element {
   const { t } = useTranslation();
@@ -49,7 +52,12 @@ export function InviteLinkDialog({
         <DialogHeader>
           <DialogTitle>{t('team.inviteUser.inviteLinkTitle')}</DialogTitle>
           <DialogDescription>
-            {t('team.inviteUser.inviteLinkDescription', { email })}
+            {t(
+              emailQueued
+                ? 'team.inviteUser.inviteLinkDescription'
+                : 'team.inviteUser.inviteLinkEmailNotSent',
+              { email }
+            )}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-2 px-6">
