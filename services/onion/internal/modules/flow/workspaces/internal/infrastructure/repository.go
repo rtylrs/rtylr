@@ -200,13 +200,15 @@ func (r *Repository) CreateProject(ctx context.Context, input domain.ProjectInpu
 		BusinessID:  input.BusinessID,
 		Visibility:  sqlc.FlowProjectsVisibility(visibility),
 		IsPersonal:  input.IsPersonal,
-		Name:        input.Name,
-		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
-		Icon:        sql.NullString{String: icon, Valid: true},
-		Color:       sql.NullString{String: color, Valid: true},
-		StartDate:   nullTimePtrToSql(input.StartDate),
-		DueDate:     nullTimePtrToSql(input.DueDate),
-		CreatedBy:   input.CreatedBy,
+		// The My Tasks bucket is never a software project.
+		DeveloperMode: input.DeveloperMode && !input.IsPersonal,
+		Name:          input.Name,
+		Description:   sql.NullString{String: input.Description, Valid: input.Description != ""},
+		Icon:          sql.NullString{String: icon, Valid: true},
+		Color:         sql.NullString{String: color, Valid: true},
+		StartDate:     nullTimePtrToSql(input.StartDate),
+		DueDate:       nullTimePtrToSql(input.DueDate),
+		CreatedBy:     input.CreatedBy,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("CreateProject failed", logger.Error(err))

@@ -29,6 +29,10 @@ message Project {
   /// bucket is hidden from shared lists and exempt from manager-visibility
   /// policies unless its owner explicitly shares it.
   is_personal: bool
+  /// developer_mode marks a software project. When true, clients show the
+  /// developer features (code links, Development section, dev fields); when
+  /// false they are hidden but any data they hold is kept.
+  developer_mode: bool
   /// start_date is the start date value for this contract.
   start_date: string
   /// due_date is the due date value for this contract.
@@ -122,6 +126,18 @@ message SetProjectVisibilityResponse {
   project: Project
 }
 
+message SetProjectDeveloperModeRequest {
+  /// id is the unique identifier for the resource.
+  id: int64 @gt(0)
+  /// enabled turns developer features on (true) or off (false).
+  enabled: bool
+}
+
+message SetProjectDeveloperModeResponse {
+  /// project is the updated project.
+  project: Project
+}
+
 message ListProjectsRequest {
   /// status filters by lifecycle state ("active", "archived", "completed").
   /// Empty returns active projects only, matching the sidebar's default view.
@@ -164,6 +180,8 @@ message CreateProjectRequest {
   start_date: string
   /// due_date is an optional due date; an empty value leaves it unset.
   due_date: string
+  /// developer_mode creates the project as a software project. Defaults to false.
+  developer_mode: bool
 }
 
 message CreateProjectResponse {

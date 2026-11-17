@@ -27,6 +27,7 @@ type projectV2Row struct {
 	Status      string
 	Visibility  string
 	IsPersonal  bool
+	DevMode     bool
 	StartDate   sql.NullTime
 	DueDate     sql.NullTime
 	CreatedBy   int64
@@ -52,6 +53,7 @@ func mapProjectV2(r projectV2Row) domain.Project {
 		Status:         r.Status,
 		Visibility:     r.Visibility,
 		IsPersonal:     r.IsPersonal,
+		DeveloperMode:  r.DevMode,
 		CreatedBy:      r.CreatedBy,
 		TaskCount:      int32(countIfaceToInt64(r.TaskCount)),   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		CompletedCount: int32(countIfaceToInt64(r.DoneCount)),   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
@@ -91,7 +93,7 @@ func (r *Repository) GetProjectV2ByID(ctx context.Context, id, businessID int64)
 		ID: row.ID, WorkspaceID: row.WorkspaceID, OwnerID: row.OwnerID,
 		BusinessID: row.BusinessID, Name: row.Name, Description: row.Description,
 		Icon: row.Icon, Color: row.Color, Status: string(row.Status), Visibility: string(row.Visibility),
-		IsPersonal: row.IsPersonal, StartDate: row.StartDate, DueDate: row.DueDate,
+		IsPersonal: row.IsPersonal, DevMode: row.DeveloperMode, StartDate: row.StartDate, DueDate: row.DueDate,
 		CreatedBy: row.CreatedBy, CreatedAt: row.CreatedAt, UpdatedAt: row.UpdatedAt,
 		ArchivedAt: row.ArchivedAt, PurgeAt: row.PurgeAt,
 		TaskCount: row.TaskCount, DoneCount: row.CompletedCount, MemberCount: row.MemberCount,
@@ -168,7 +170,7 @@ func (r *Repository) ListProjectsV2(ctx context.Context, businessID, callerID in
 			ID: row.ID, WorkspaceID: row.WorkspaceID, OwnerID: row.OwnerID,
 			BusinessID: row.BusinessID, Name: row.Name, Description: row.Description,
 			Icon: row.Icon, Color: row.Color, Status: string(row.Status), Visibility: string(row.Visibility),
-			IsPersonal: row.IsPersonal, StartDate: row.StartDate, DueDate: row.DueDate,
+			IsPersonal: row.IsPersonal, DevMode: row.DeveloperMode, StartDate: row.StartDate, DueDate: row.DueDate,
 			CreatedBy: row.CreatedBy, CreatedAt: row.CreatedAt, UpdatedAt: row.UpdatedAt,
 			ArchivedAt: row.ArchivedAt, PurgeAt: row.PurgeAt,
 			TaskCount: row.TaskCount, DoneCount: row.CompletedCount, MemberCount: row.MemberCount,
@@ -214,13 +216,24 @@ func (r *Repository) ListArchivedProjectsV2(ctx context.Context, businessID, cal
 			ID: row.ID, WorkspaceID: row.WorkspaceID, OwnerID: row.OwnerID,
 			BusinessID: row.BusinessID, Name: row.Name, Description: row.Description,
 			Icon: row.Icon, Color: row.Color, Status: string(row.Status), Visibility: string(row.Visibility),
-			IsPersonal: row.IsPersonal, StartDate: row.StartDate, DueDate: row.DueDate,
+			IsPersonal: row.IsPersonal, DevMode: row.DeveloperMode, StartDate: row.StartDate, DueDate: row.DueDate,
 			CreatedBy: row.CreatedBy, CreatedAt: row.CreatedAt, UpdatedAt: row.UpdatedAt,
 			ArchivedAt: row.ArchivedAt, PurgeAt: row.PurgeAt,
 			TaskCount: row.TaskCount, DoneCount: row.CompletedCount, MemberCount: row.MemberCount,
 		}))
 	}
 	return projects, total, nil
+}
+
+// UpdateProjectDeveloperMode turns developer features on or off for one
+// business project.
+func (r *Repository) UpdateProjectDeveloperMode(ctx context.Context, id, businessID int64, enabled bool) error {
+	_, err := r.queries.UpdateProjectDeveloperMode(ctx, sqlc.UpdateProjectDeveloperModeParams{
+		DeveloperMode: enabled,
+		ID:            id,
+		BusinessID:    businessID,
+	})
+	return err
 }
 
 // UpdateProjectVisibility flips private/public on one business project.

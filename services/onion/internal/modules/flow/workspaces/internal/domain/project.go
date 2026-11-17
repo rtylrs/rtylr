@@ -26,11 +26,13 @@ type Project struct {
 	Status      string
 	Visibility  string
 	IsPersonal  bool
-	StartDate   *time.Time
-	DueDate     *time.Time
-	CreatedBy   int64
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	// DeveloperMode marks a software project; developer features check it.
+	DeveloperMode bool
+	StartDate     *time.Time
+	DueDate       *time.Time
+	CreatedBy     int64
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 
 	// Recycle-bin timestamps. ArchivedAt set means the project sits in the bin;
 	// PurgeAt is the permanent-deletion deadline stamped from the business's
@@ -78,9 +80,11 @@ type ProjectInput struct {
 	Color       string
 	Visibility  string // empty means VisibilityPrivate; validated by the service
 	IsPersonal  bool   // true only for the auto-provisioned My Tasks bucket
-	StartDate   *time.Time
-	DueDate     *time.Time
-	CreatedBy   int64
+	// DeveloperMode creates a software project; ignored for My Tasks.
+	DeveloperMode bool
+	StartDate     *time.Time
+	DueDate       *time.Time
+	CreatedBy     int64
 }
 
 type UpdateProjectInput struct {

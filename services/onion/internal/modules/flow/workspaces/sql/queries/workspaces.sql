@@ -27,8 +27,8 @@ ON DUPLICATE KEY UPDATE role = VALUES(role);
 DELETE FROM flow_workspace_members WHERE workspace_id = ? AND user_id = ?;
 
 -- name: CreateProject :execresult
-INSERT INTO flow_projects (workspace_id, owner_id, business_id, name, description, icon, color, visibility, is_personal, start_date, due_date, created_by)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO flow_projects (workspace_id, owner_id, business_id, name, description, icon, color, visibility, is_personal, developer_mode, start_date, due_date, created_by)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: CountProjectsByWorkspace :one
 SELECT COUNT(*) FROM flow_projects WHERE workspace_id = ? AND business_id = ?;
