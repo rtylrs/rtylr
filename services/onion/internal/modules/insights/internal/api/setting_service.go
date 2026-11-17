@@ -94,7 +94,13 @@ type FlowReader interface {
 	FlowInsights(ctx context.Context, businessID int64) (FlowDelivery, error)
 	FlowTeamWorkload(ctx context.Context, businessID int64) ([]FlowWorkloadMember, error)
 	FlowRoadmap(ctx context.Context, businessID int64) ([]FlowRoadmapProject, error)
+	FlowLoggedTime(ctx context.Context, businessID int64, from, to time.Time) (FlowLoggedTime, error)
 }
+
+type (
+	FlowLoggedTime  = domain.FlowLoggedTime
+	FlowProjectTime = domain.FlowProjectTime
+)
 
 type FlowDelivery struct {
 	TotalTasks        int64

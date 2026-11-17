@@ -46,6 +46,39 @@ type SalesSummary struct {
 	ActiveContracts   int64
 }
 
+// FlowLoggedTime is the time logged in Work (Flow) over a window, in minutes:
+// the business total and its split per project, as Flow reports it.
+type FlowLoggedTime struct {
+	TotalMinutes int64
+	Projects     []FlowProjectTime
+}
+
+// FlowProjectTime is one project's share of FlowLoggedTime. Visibility and
+// Status decide whether the overview may name it.
+type FlowProjectTime struct {
+	ProjectID  int64
+	Name       string
+	Visibility string
+	Status     string
+	Minutes    int64
+}
+
+// HoursSummary is the Work time card on the overview: minutes logged this
+// month to date against the same span last month, and the public projects
+// that time went to. Private projects count in the total but are not named.
+type HoursSummary struct {
+	Logged       CountCard
+	PriorMinutes int64
+	Projects     []ProjectHours
+}
+
+// ProjectHours is the time logged on one public project this month to date.
+type ProjectHours struct {
+	ProjectID int64
+	Name      string
+	Minutes   int64
+}
+
 // RevenuePoint is a single daily revenue sample in minor units.
 type RevenuePoint struct {
 	Date             string
