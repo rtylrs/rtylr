@@ -11,9 +11,11 @@ import { signTarget, useSignedAssetUrl, windowExpiry } from './useSignedAssetUrl
 
 const FILE = 'https://cdn.voxire.com/files/0f1e2d3c-4b5a-4678-9abc-def012345678';
 
-function wrapper({ children }: { children: ReactNode }) {
+function makeWrapper() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  return function Wrapper({ children }: { children: ReactNode }) {
+    return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  };
 }
 
 describe('windowExpiry', () => {
@@ -42,11 +44,13 @@ describe('signTarget', () => {
 describe('useSignedAssetUrl', () => {
   beforeEach(() => {
     sessionStorage.clear();
+    localStorage.clear();
     signAssetUrl.mockReset();
   });
 
-  it('reuses a link signed earlier in the tab instead of waiting on another request', async () => {
+  it('reuses a link signed earlier in the session instead of waiting on another request', async () => {
     // Reopening a task waited on a signing request before any image could load.
+    const wrapper = makeWrapper();
     const expiresAt = Math.floor(Date.now() / 1000) + 3600;
     signAssetUrl.mockResolvedValue({ url: `${FILE}?sig=first`, expiresAt });
     const first = renderHook(() => useSignedAssetUrl(FILE), { wrapper });
@@ -58,19 +62,36 @@ describe('useSignedAssetUrl', () => {
     expect(signAssetUrl).toHaveBeenCalledTimes(1);
   });
 
-  it('signs again when the stored link is about to expire', async () => {
-    const soon = Math.floor(Date.now() / 1000) + 60;
-    sessionStorage.setItem(
-      `flow-signed-asset:original:${FILE}`,
-      JSON.stringify({ url: `${FILE}?sig=old`, expiresAt: soon })
-    );
+  it('never writes a signed link to web storage', async () => {
+    // A signed link is a bearer credential. In web storage any same-origin
+    // script could read it, and it would outlive a logout or business switch.
     signAssetUrl.mockResolvedValue({
+      url: `${FILE}?sig=secret`,
+      expiresAt: Math.floor(Date.now() / 1000) + 3600,
+    });
+    const { result } = renderHook(() => useSignedAssetUrl(FILE), { wrapper: makeWrapper() });
+    await waitFor(() => expect(result.current.url).toBe(`${FILE}?sig=secret`));
+
+    expect(sessionStorage.length).toBe(0);
+    expect(localStorage.length).toBe(0);
+  });
+
+  it('signs again in a fresh session instead of reusing an earlier link', async () => {
+    // Logout and business switch reload the page, which starts a new query cache.
+    signAssetUrl.mockResolvedValueOnce({
+      url: `${FILE}?sig=old`,
+      expiresAt: Math.floor(Date.now() / 1000) + 3600,
+    });
+    const before = renderHook(() => useSignedAssetUrl(FILE), { wrapper: makeWrapper() });
+    await waitFor(() => expect(before.result.current.url).toBe(`${FILE}?sig=old`));
+
+    signAssetUrl.mockResolvedValueOnce({
       url: `${FILE}?sig=new`,
       expiresAt: Math.floor(Date.now() / 1000) + 3600,
     });
-
-    const { result } = renderHook(() => useSignedAssetUrl(FILE), { wrapper });
-
-    await waitFor(() => expect(result.current.url).toBe(`${FILE}?sig=new`));
+    const after = renderHook(() => useSignedAssetUrl(FILE), { wrapper: makeWrapper() });
+    expect(after.result.current.url).toBeNull();
+    await waitFor(() => expect(after.result.current.url).toBe(`${FILE}?sig=new`));
+    expect(signAssetUrl).toHaveBeenCalledTimes(2);
   });
 });
