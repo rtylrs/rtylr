@@ -44,7 +44,7 @@ func (s *Service) readSalesSummary(ctx context.Context, businessID int64, now ti
 	if err != nil {
 		return domain.SalesSummary{}, fmt.Errorf("read recent won deal count: %w", err)
 	}
-	contracts, mrr, mrrAtMonthStart, err := sales.RecurringRevenue(ctx, businessID, thisFrom)
+	contracts, mrr, mrrAtMonthStart, err := sales.RecurringRevenue(ctx, businessID, thisFrom, thisTo)
 	if err != nil {
 		return domain.SalesSummary{}, fmt.Errorf("read recurring revenue: %w", err)
 	}

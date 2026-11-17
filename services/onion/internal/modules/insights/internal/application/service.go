@@ -32,7 +32,7 @@ type CRMDashboardReader interface {
 type CRMSalesDashboardReader interface {
 	OpenDealPipeline(context.Context, int64) (int64, int64, error)
 	WonDealsBetween(context.Context, int64, time.Time, time.Time) (int64, int64, error)
-	RecurringRevenue(ctx context.Context, businessID int64, monthStart time.Time) (contracts, mrr, mrrAtMonthStart int64, err error)
+	RecurringRevenue(ctx context.Context, businessID int64, monthStart, now time.Time) (contracts, mrr, mrrAtMonthStart int64, err error)
 }
 
 type DashboardReaders struct {

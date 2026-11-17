@@ -36,7 +36,7 @@ type DashboardSnapshot struct {
 // stands now and the value won this month to date. RecentWonDeals counts wins
 // since the start of last month so the client can tell "no CRM use" apart
 // from a quiet month. MRR compares recurring revenue now with the start of
-// the month; ActiveContracts counts the won recurring deals behind it.
+// the month; ActiveContracts counts the signed recurring CRM contracts behind it.
 type SalesSummary struct {
 	OpenPipelineValue int64
 	OpenDeals         int64
