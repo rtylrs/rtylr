@@ -33,5 +33,7 @@ export const invoiceSchema = z.object({
   tax: z.number().optional().nullable(),
   subtotal: z.number().optional().nullable(),
   number: z.string().optional().nullable(),
+  // Work project the invoice bills. Absent on the wire when untagged.
+  projectId: z.string().optional().nullable(),
   history: z.array(historyEntrySchema).optional().nullable(),
 });
