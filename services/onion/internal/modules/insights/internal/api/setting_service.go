@@ -191,6 +191,11 @@ func toSalesSummaryResponse(summary domain.SalesSummary) *insightsdashboardv1.Ge
 			DeltaPct: summary.Won.DeltaPct,
 		},
 		RecentWonDealCount: summary.RecentWonDeals,
+		Mrr: &insightsdashboardv1.InsightsMetricCard{
+			Value:    summary.MRR.Value,
+			DeltaPct: summary.MRR.DeltaPct,
+		},
+		ActiveContractCount: summary.ActiveContracts,
 	}
 }
 
