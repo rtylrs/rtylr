@@ -50,7 +50,7 @@ type Module struct {
 func NewModule(ctx context.Context, db *sql.DB) *Module {
 	repository := moduleinfra.NewRepository(db)
 	return &Module{
-		service:    application.NewService(ctx, repository).WithAuditRecorder(outbox.NewRecorder(db)),
+		service:    application.NewService(ctx, repository).WithAuditRecorder(outbox.NewRecorder(db)).WithLinkPreviewer(moduleinfra.NewLinkPreviewer()),
 		repository: repository,
 	}
 }
