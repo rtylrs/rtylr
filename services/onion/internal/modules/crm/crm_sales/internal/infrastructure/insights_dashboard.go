@@ -18,6 +18,18 @@ func (r *Repository) OpenDealPipeline(ctx context.Context, businessID int64) (in
 	return row.Deals, amount(row.Amount), nil
 }
 
+// RecurringRevenue counts the won monthly and yearly deals and reports their
+// MRR now and as it stood at monthStart.
+func (r *Repository) RecurringRevenue(ctx context.Context, businessID int64, monthStart time.Time) (int64, money.Amount, money.Amount, error) {
+	row, err := r.queries.RecurringRevenue(ctx, sqlc.RecurringRevenueParams{
+		BusinessID: businessID, MonthStart: someTime(monthStart),
+	})
+	if err != nil {
+		return 0, 0, 0, err
+	}
+	return row.Contracts, amount(row.Mrr), amount(row.MrrAtMonthStart), nil
+}
+
 // WonDealsBetween counts deals won with closed_at in [from, to] and sums
 // their first-year value.
 func (r *Repository) WonDealsBetween(ctx context.Context, businessID int64, from, to time.Time) (int64, money.Amount, error) {
