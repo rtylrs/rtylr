@@ -1,6 +1,5 @@
 import { PageHeader } from '../../shared/components/dash/PageHeader';
 import { PermissionProfilePicker } from './PermissionProfilePicker';
-import { InviteLinkDialog } from './InviteLinkDialog';
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
@@ -130,9 +129,6 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   const { data: customRoles = [] } = usePermissionProfiles();
 
   const [tab, setTab] = useState<'single' | 'bulk'>('single');
-  // The activation link for an invitation, shown once so the inviter can share
-  // it when the email does not arrive. Kept in memory only.
-  const [inviteLink, setInviteLink] = useState<string | null>(null);
 
   // Single tab state
   const [name, setName] = useState('');
@@ -264,10 +260,6 @@ const InviteUser: React.FC = (): React.JSX.Element => {
       if (memberType === 'member' && posSelectedSingle) {
         const userId = Number(res.userId || 0);
         await assignLocations(userId, selectedLocations);
-      }
-      if (res.inviteLink) {
-        setInviteLink(res.inviteLink);
-        return;
       }
       navigate({ to: '/team' });
     } catch {
@@ -541,14 +533,6 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   return (
     <>
       <HelmetContainer title={`${t('common.nav.addMember')} · rtylr`} />
-      <InviteLinkDialog
-        link={inviteLink}
-        email={email}
-        onClose={() => {
-          setInviteLink(null);
-          navigate({ to: '/team' });
-        }}
-      />
       <div className="portal-management-page space-y-6 max-w-3xl">
         <PageHeader title={t('common.nav.addMember')} description={t('team.inviteUser.subtitle')} />
 

@@ -46,63 +46,6 @@ vi.mock('./PermissionProfilePicker', () => ({
 
 import InviteUser from './InviteUser';
 
-const LINK = 'https://auth.rtylr.com/invite/one-time-token';
-
-async function sendSingleInvite(): Promise<void> {
-  fireEvent.change(screen.getByLabelText('team.inviteUser.fullNameLabel'), {
-    target: { value: 'Jane Doe' },
-  });
-  fireEvent.change(screen.getByLabelText('team.inviteUser.emailLabel'), {
-    target: { value: 'jane@example.com' },
-  });
-  fireEvent.click(screen.getByRole('button', { name: 'team.inviteUser.nextButton' }));
-  fireEvent.click(screen.getByRole('button', { name: 'team.inviteUser.nextButton' }));
-  await screen.findByText('team.inviteUser.reviewTitle');
-  fireEvent.click(screen.getByRole('button', { name: 'team.inviteUser.sendInvitation' }));
-}
-
-describe('InviteUser activation link', () => {
-  beforeEach(() => {
-    inviteMock.mockReset();
-    navigateMock.mockReset();
-    sessionStorage.clear();
-    localStorage.clear();
-  });
-
-  it('shows the activation link before leaving, so it can be shared if the email never arrives', async () => {
-    // With no outbound email an invited member could never be activated.
-    inviteMock.mockResolvedValue({ userId: '1', inviteLink: LINK });
-    const writeText = vi.fn().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
-    render(<InviteUser />);
-
-    await sendSingleInvite();
-
-    const field = await screen.findByLabelText('team.inviteUser.inviteLinkLabel');
-    expect(field).toHaveValue(LINK);
-    expect(navigateMock).not.toHaveBeenCalled();
-
-    fireEvent.click(screen.getByRole('button', { name: 'team.inviteUser.copyInviteLink' }));
-    await waitFor(() => expect(writeText).toHaveBeenCalledWith(LINK));
-    // The link is a one-time credential and is never written to web storage.
-    expect(sessionStorage.length).toBe(0);
-    expect(localStorage.length).toBe(0);
-
-    fireEvent.click(screen.getByRole('button', { name: 'team.inviteUser.inviteLinkDone' }));
-    expect(navigateMock).toHaveBeenCalledWith({ to: '/team' });
-  });
-
-  it('goes straight back to the team when there is no link to share', async () => {
-    inviteMock.mockResolvedValue({ userId: '1' });
-    render(<InviteUser />);
-
-    await sendSingleInvite();
-
-    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith({ to: '/team' }));
-    expect(screen.queryByLabelText('team.inviteUser.inviteLinkLabel')).toBeNull();
-  });
-});
-
 describe('InviteUser single-member wizard', () => {
   beforeEach(() => {
     inviteMock.mockReset().mockResolvedValue({ userId: '1' });
