@@ -189,6 +189,48 @@ func (r *Repository) UpdateInvoiceStatus(ctx context.Context, businessID, invoic
 	return err
 }
 
+// SetInvoiceProject re-tags one invoice with a Work project, or clears the tag
+// when projectID is nil. The row is locked before the status check so a
+// concurrent cancel or void cannot land between the check and the write. Only
+// project_id and updated_at change; totals, status and items stay as they are.
+func (r *Repository) SetInvoiceProject(ctx context.Context, businessID, invoiceID int64, projectID *int64) (err error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin invoice project transaction", logger.Error(err))
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	qtx := r.queries.WithTx(tx)
+	status, err := qtx.GetInvoiceStatusForUpdate(ctx, sqlc.GetInvoiceStatusForUpdateParams{
+		ID:         invoiceID,
+		BusinessID: businessID,
+	})
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.ErrInvoiceNotFound
+	}
+	if err != nil {
+		return err
+	}
+	if err = domain.CanChangeInvoiceProject(string(status.FinanceInvoicesStatus)); err != nil {
+		return err
+	}
+
+	if err = qtx.SetInvoiceProject(ctx, sqlc.SetInvoiceProjectParams{
+		ProjectID:  nullableInt64FromPtr(projectID),
+		ID:         invoiceID,
+		BusinessID: businessID,
+	}); err != nil {
+		logger.Ctx(ctx).Error("Failed to set invoice project", logger.Error(err))
+		return err
+	}
+	if err = tx.Commit(); err != nil {
+		logger.Ctx(ctx).Error("Failed to commit invoice project transaction", logger.Error(err))
+		return err
+	}
+	return nil
+}
+
 func (r *Repository) UpdateInvoicePaymentTotals(ctx context.Context, businessID, invoiceID int64, amountPaid, amountDue float64, status string, paidDate *time.Time) error {
 	if paidDate != nil {
 		err := r.queries.UpdateInvoicePaymentTotalsWithPaidDate(ctx, sqlc.UpdateInvoicePaymentTotalsWithPaidDateParams{
