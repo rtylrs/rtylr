@@ -70,6 +70,7 @@
     "overdueListTitle": "Overdue tasks",
     "nothingOverdue": "Nothing is overdue.",
     "dueOn": "Due {{date}}",
+    "unassigned": "Unassigned",
     "moreOverdue_one": "and {{formatted}} more overdue task",
     "moreOverdue_other": "and {{formatted}} more overdue tasks"
   },
