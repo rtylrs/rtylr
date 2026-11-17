@@ -285,6 +285,9 @@ func initializeModules(ctx context.Context) *apiModules {
 	// customers module and snapshot its name/email/address onto the invoice.
 	// Port lives in invoices; customers implements it; no package imports.
 	invoicesModule.SetCustomerSnapshotProvider(customersModule.SnapshotProvider())
+	// Invoices can be tagged with the Work project they bill; the tag is
+	// verified against the business through flow's reference reader.
+	invoicesModule.SetProjectReferenceReader(flowReferenceReader)
 
 	storeCategoriesModule := store_categories.NewModule(ctx, dbclient.Pool())
 	storeOrdersModule := onlineorders.NewModule(ctx, dbclient.Pool())
