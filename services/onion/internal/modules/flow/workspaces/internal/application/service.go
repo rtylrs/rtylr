@@ -108,6 +108,10 @@ type Service struct {
 	// audit records project changes in the business activity log. Optional:
 	// nil skips the record and never blocks the change.
 	audit auditRecorder
+
+	// linkPreviewer fetches pasted links' titles. Optional: nil stores the
+	// URL label only.
+	linkPreviewer LinkPreviewer
 }
 
 // SetWorkdayRosterSource wires the owner-owned HR and organization directory
@@ -337,6 +341,11 @@ type repository interface {
 	GetAttachmentTaskID(ctx context.Context, attachmentID int64) (int64, error)
 	GetAttachmentUploader(ctx context.Context, attachmentID int64) (int64, int64, error)
 	GetAttachmentsByTask(ctx context.Context, taskID int64) ([]domain.TaskAttachment, error)
+	CreateTaskLink(ctx context.Context, link domain.TaskLink) (int64, error)
+	GetTaskLink(ctx context.Context, id, businessID int64) (domain.TaskLink, error)
+	FindTaskLinkByURL(ctx context.Context, taskID, businessID int64, url string) (domain.TaskLink, bool, error)
+	ListTaskLinks(ctx context.Context, taskID, businessID int64) ([]domain.TaskLink, error)
+	DeleteTaskLink(ctx context.Context, id, businessID int64) error
 	GetColumnProject(ctx context.Context, columnID int64) int64
 	GetColumnsByProject(ctx context.Context, projectID, limit, offset int64) ([]domain.ProjectColumn, int64, error)
 	GetCommentByID(ctx context.Context, commentID int64) (domain.TaskComment, error)

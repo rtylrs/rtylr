@@ -86,6 +86,7 @@ import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import DevelopmentSection from './components/DevelopmentSection';
 import { useIsDeveloperProject } from '../projects-v2/useDeveloperMode';
+import LinksSection from './components/LinksSection';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -134,6 +135,13 @@ function describeActivity(a: ApiTaskActivity, t: TFunction): React.ReactNode {
   const action = a.action;
   const oldVal = humanizeValue(action, a.oldValue);
   const newVal = humanizeValue(action, a.newValue);
+
+  if (action === 'link_added') {
+    return t('flow.taskDetail.linkAdded', { value: a.newValue });
+  }
+  if (action === 'link_removed') {
+    return t('flow.taskDetail.linkRemoved', { value: a.oldValue });
+  }
 
   if (action === 'status_changed' || action === 'status_change') {
     return t('flow.taskDetail.statusChanged', { from: oldVal, to: newVal });
@@ -574,7 +582,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
               />
             </section>
 
-            {isDeveloperProject && <DevelopmentSection />}
+            {isDeveloperProject && <DevelopmentSection taskId={task.id} />}
 
             <section className="mb-8">
               <h3
@@ -600,6 +608,8 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
                 disabled={!canEdit}
               />
             </section>
+
+            <LinksSection taskId={task.id} canEdit={canEdit} peopleNames={peopleNames} />
 
             {/* Tabs */}
             <div

@@ -1,15 +1,28 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Code2 } from 'lucide-react';
+import { useTaskLinks } from '../useTaskLinks';
+
+// Link kinds that describe code, builds or runtime errors for this task.
+const CODE_LINK_KINDS = new Set([
+  'github_pr',
+  'github_issue',
+  'gitlab_mr',
+  'gitlab_issue',
+  'vercel',
+  'netlify',
+  'sentry',
+]);
 
 /**
  * Development section of the task panel, shown only on developer projects.
- * Branches, pull requests, deploys and the dev fields are filled in by the
- * Git integration and dev-planning work that follows; until then the section
- * shows where they will appear.
+ * Lists the task's code links; the dev fields are filled in by the
+ * dev-planning work that follows.
  */
-const DevelopmentSection = (): React.JSX.Element => {
+const DevelopmentSection = ({ taskId }: { taskId: string }): React.JSX.Element => {
   const { t } = useTranslation();
+  const { data: links = [] } = useTaskLinks(taskId);
+  const codeLinks = links.filter((link) => CODE_LINK_KINDS.has(link.kind ?? ''));
   const fields = [
     { key: 'type', label: t('flow.taskDetail.devType') },
     { key: 'points', label: t('flow.taskDetail.devPoints') },
@@ -52,9 +65,37 @@ const DevelopmentSection = (): React.JSX.Element => {
           </div>
         ))}
       </dl>
-      <p className="text-flow-meta" style={{ color: 'var(--flow-text-dim)' }}>
-        {t('flow.taskDetail.developmentEmpty')}
-      </p>
+      {codeLinks.length > 0 ? (
+        <ul className="space-y-1">
+          {codeLinks.map((link) => (
+            <li key={link.id} className="flex items-baseline gap-2 text-flow-meta">
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="min-w-0 truncate font-medium hover:underline"
+                style={{ color: 'var(--flow-text)' }}
+              >
+                {link.title || link.ref || link.url}
+              </a>
+              {link.title && link.ref && (
+                <span className="shrink-0" style={{ color: 'var(--flow-text-dim)' }}>
+                  {link.ref}
+                </span>
+              )}
+              {link.state && (
+                <span className="shrink-0" style={{ color: 'var(--flow-text-dim)' }}>
+                  {t(`flow.taskDetail.linkState.${link.state}`, { defaultValue: link.state })}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-flow-meta" style={{ color: 'var(--flow-text-dim)' }}>
+          {t('flow.taskDetail.developmentEmpty')}
+        </p>
+      )}
     </section>
   );
 };

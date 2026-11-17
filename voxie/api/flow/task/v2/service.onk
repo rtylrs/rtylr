@@ -37,6 +37,15 @@ service TaskService {
 
   deleteAttachment(DeleteAttachmentRequest) -> DeleteAttachmentResponse @delete("/tasks/attachments/{id}")
 
+  /// createTaskLink adds a pasted URL (PR, issue, design, preview, error) to a
+  /// task. The server recognises the link type and, for public pages, fetches
+  /// the title once. Adding a URL the task already has returns that link.
+  createTaskLink(CreateTaskLinkRequest) -> CreateTaskLinkResponse @post("/tasks/links")
+
+  listTaskLinks(ListTaskLinksRequest) -> ListTaskLinksResponse @get("/tasks/{task_id}/links")
+
+  deleteTaskLink(DeleteTaskLinkRequest) -> DeleteTaskLinkResponse @delete("/tasks/links/{id}")
+
   createTimeLog(CreateTimeLogRequest) -> CreateTimeLogResponse @post("/tasks/{task_id}/time-logs")
 
   getTimeLogs(GetTimeLogsRequest) -> GetTimeLogsResponse @get("/tasks/{task_id}/time-logs")

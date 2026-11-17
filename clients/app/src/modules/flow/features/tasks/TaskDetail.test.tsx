@@ -98,6 +98,8 @@ const developerProjectMock = vi.hoisted(() => vi.fn(() => false));
 vi.mock('../projects-v2/useDeveloperMode', () => ({
   useIsDeveloperProject: () => developerProjectMock(),
 }));
+vi.mock('./components/LinksSection', () => ({ default: () => null }));
+vi.mock('./useTaskLinks', () => ({ useTaskLinks: () => ({ data: [] }) }));
 vi.mock('../projects/useCurrentProject', () => ({
   useCurrentProject: useCurrentProjectSpy,
 }));

@@ -191,7 +191,24 @@
     "devType": "Type de tâche",
     "devPoints": "Points d'effort",
     "devBranch": "Branche",
-    "devNotSet": "Non défini"
+    "devNotSet": "Non défini",
+    "links": "Liens",
+    "addLink": "Ajouter le lien",
+    "addingLink": "Ajout…",
+    "addLinkPlaceholder": "Collez une PR, un Figma, une préversion ou toute URL",
+    "invalidLink": "Saisissez un lien complet commençant par http:// ou https://",
+    "noLinks": "Aucun lien pour le moment.",
+    "linkAddedBy": "Ajouté par {{name}} · {{date}}",
+    "linkAddedBySomeone": "un membre",
+    "removeLink": "Retirer le lien {{name}}",
+    "linkAdded": "a ajouté le lien {{value}}",
+    "linkRemoved": "a retiré le lien {{value}}",
+    "linkState": {
+      "open": "Ouverte",
+      "draft": "Brouillon",
+      "merged": "Fusionnée",
+      "closed": "Fermée"
+    }
   },
   "time": {
     "add": {
