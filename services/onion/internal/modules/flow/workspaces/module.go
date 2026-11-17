@@ -43,9 +43,10 @@ import (
 )
 
 type Module struct {
-	service    *application.Service
-	repository *moduleinfra.Repository
-	presence   PresenceSource
+	service             *application.Service
+	repository          *moduleinfra.Repository
+	presence            PresenceSource
+	githubWebhookSecret []byte
 }
 
 func NewModule(ctx context.Context, db *sql.DB) *Module {
@@ -55,8 +56,9 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 		WithLinkPreviewer(moduleinfra.NewLinkPreviewer())
 	configureGitHubApp(ctx, service)
 	return &Module{
-		service:    service,
-		repository: repository,
+		service:             service,
+		repository:          repository,
+		githubWebhookSecret: githubWebhookSecret(),
 	}
 }
 
@@ -115,6 +117,8 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	// JSON handler, while the ticket is its bearer-authenticated preflight.
 	mux.HandleFunc("GET /flow/ws", realtime.ServeRealtime)
 	mux.HandleFunc("POST /flow/ws-ticket", realtime.IssueRealtimeTicket)
+	// GitHub signs the raw body, so the webhook reads it itself.
+	mux.HandleFunc("POST /flow/github/webhook", api.GitHubWebhookHTTPHandler(m.service, m.githubWebhookSecret))
 	if err := flowworkspacev1.RegisterWorkspaceServiceServer(
 		api.NewWorkspaceAPI(m.service),
 		flowworkspacev1.WithMux(mux),
@@ -268,12 +272,13 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 }
 
 // GetAnonymousRoutes tells the global auth middleware to skip bearer-token
-// validation for the browser WebSocket path. Browsers cannot set the
-// Authorization header on a WebSocket handshake, so /flow/ws authenticates
-// its short-lived ticket inside the handler. /flow/ws-ticket remains protected
-// by the normal Bearer middleware.
+// validation for the browser WebSocket path and the GitHub webhook. Browsers
+// cannot set the Authorization header on a WebSocket handshake, so /flow/ws
+// authenticates its short-lived ticket inside the handler; GitHub signs each
+// webhook with the app's webhook secret, which the handler verifies.
+// /flow/ws-ticket remains protected by the normal Bearer middleware.
 func (m *Module) GetAnonymousRoutes() []string {
-	return []string{"/flow/ws"}
+	return []string{"/flow/ws", "/flow/github/webhook"}
 }
 
 // CreatePersonalWorkspace creates a personal workspace for a newly registered user.
