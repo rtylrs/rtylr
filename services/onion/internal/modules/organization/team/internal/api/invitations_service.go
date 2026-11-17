@@ -77,7 +77,10 @@ func (a *InvitationsAPI) InviteUser(ctx context.Context, req *hubteaminvitations
 		if emailErr := a.Service.EnqueueInviteEmail(ctx, actorID, device.BusinessID, req.GetEmail(), inviteLink); emailErr != nil {
 			logger.Ctx(ctx).Warn("failed to enqueue invite email", logger.Error(emailErr))
 		}
-		return &hubteaminvitationsv1.InviteUserResponse{UserId: userID, Message: "Invitation sent"}, nil
+		// The link goes back to the inviter so a member can still be activated
+		// when email is not delivered. It is a one-time credential, so it is
+		// returned only here and never logged.
+		return &hubteaminvitationsv1.InviteUserResponse{UserId: userID, Message: "Invitation sent", InviteLink: &inviteLink}, nil
 	}
 
 	return &hubteaminvitationsv1.InviteUserResponse{UserId: userID, Message: "Member created"}, nil
