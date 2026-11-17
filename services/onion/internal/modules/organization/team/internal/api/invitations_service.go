@@ -15,14 +15,6 @@ import (
 	hubteaminvitationsv1 "github.com/voxire/voxie/gen/go/hub/team/invitations/v1"
 )
 
-// emailDeliveryConfigured reports whether an email provider is set. Queued
-// invitation emails are delivered by the worker; without a provider they are
-// never sent, so the inviter is told no email is coming. A variable so tests
-// can set it.
-var emailDeliveryConfigured = func() bool {
-	return config.GlobalConfig != nil && config.GlobalConfig.ResendKey != ""
-}
-
 type InvitationsAPI struct {
 	Service *application.Service
 }
@@ -82,21 +74,10 @@ func (a *InvitationsAPI) InviteUser(ctx context.Context, req *hubteaminvitations
 
 	if password == "" && token != "" {
 		inviteLink := config.AuthAppURL + "/invite/" + token
-		emailQueued := a.Service.CanQueueInviteEmails() && emailDeliveryConfigured()
 		if emailErr := a.Service.EnqueueInviteEmail(ctx, actorID, device.BusinessID, req.GetEmail(), inviteLink); emailErr != nil {
 			logger.Ctx(ctx).Warn("failed to enqueue invite email", logger.Error(emailErr))
-			emailQueued = false
 		}
-		// The link goes back to the inviter so a member can still be activated
-		// when email is not delivered. It is a one-time credential, so it is
-		// returned only here and never logged. emailQueued tells the inviter
-		// whether an email is on its way at all, so they know to share the link.
-		return &hubteaminvitationsv1.InviteUserResponse{
-			UserId:            userID,
-			Message:           "Invitation sent",
-			InviteLink:        &inviteLink,
-			InviteEmailQueued: &emailQueued,
-		}, nil
+		return &hubteaminvitationsv1.InviteUserResponse{UserId: userID, Message: "Invitation sent"}, nil
 	}
 
 	return &hubteaminvitationsv1.InviteUserResponse{UserId: userID, Message: "Member created"}, nil
