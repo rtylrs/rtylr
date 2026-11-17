@@ -52,7 +52,7 @@ const THUMB_FRAME =
  * first and falls back to the original if the CDN cannot resize this file, then
  * to the placeholder if neither loads.
  */
-const SignedImage: React.FC<{
+interface SignedImageProps {
   url: string;
   name: string;
   variant: Exclude<AssetVariant, 'original'>;
@@ -60,7 +60,24 @@ const SignedImage: React.FC<{
   style?: React.CSSProperties;
   loading?: 'lazy' | 'eager';
   placeholder: React.ReactNode;
-}> = ({ url, name, variant, className, style, loading, placeholder }) => {
+}
+
+// Keyed by url so the fallback state below starts fresh for each file. A row
+// reused for another attachment would otherwise keep the previous file's
+// "resized copy failed" state and skip the new file's resized copy.
+const SignedImage: React.FC<SignedImageProps> = (props) => (
+  <SignedImageForUrl key={props.url} {...props} />
+);
+
+const SignedImageForUrl: React.FC<SignedImageProps> = ({
+  url,
+  name,
+  variant,
+  className,
+  style,
+  loading,
+  placeholder,
+}) => {
   const [useOriginal, setUseOriginal] = useState(false);
   const resized = useSignedAssetUrl(useOriginal ? null : url, variant);
   const original = useSignedAssetUrl(useOriginal ? url : null, 'original');
