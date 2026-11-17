@@ -14,6 +14,7 @@ import {
   Clock,
   Target,
   Trophy,
+  Repeat,
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -168,6 +169,7 @@ const Dashboard: React.FC = (): React.JSX.Element => {
     .reduce((sum, b) => sum + b.amountMinorUnits, 0);
 
   const hasSales = !!sales && (sales.openDealCount > 0 || sales.recentWonDealCount > 0);
+  const hasContracts = !!sales && sales.activeContractCount > 0;
   const serviceStats: ServiceStat[] = [
     ...(sales && hasSales
       ? [
@@ -187,6 +189,21 @@ const Dashboard: React.FC = (): React.JSX.Element => {
             value: formatMoney(sales.won.value, currency),
             icon: Trophy,
             deltaPct: sales.won.deltaPct,
+          },
+        ]
+      : []),
+    ...(sales && hasContracts
+      ? [
+          {
+            id: 'recurring-revenue',
+            label: t('insights.dashboard.service.recurringRevenue'),
+            value: formatMoney(sales.mrr.value, currency),
+            icon: Repeat,
+            detail: t('insights.dashboard.service.activeContracts', {
+              count: sales.activeContractCount,
+              formatted: formatNumber(sales.activeContractCount),
+            }),
+            deltaPct: sales.mrr.deltaPct,
           },
         ]
       : []),
@@ -228,8 +245,9 @@ const Dashboard: React.FC = (): React.JSX.Element => {
   ];
   const projects = (work?.projects ?? []).slice(0, 6);
 
-  // Deals, Work and unpaid invoices count as activity too: a service business
-  // with a pipeline, projects and invoices but no POS orders is not empty.
+  // Deals, contracts, Work and unpaid invoices count as activity too: a service
+  // business with a pipeline, projects and invoices but no POS orders is not
+  // empty.
   const isEmpty =
     !!data &&
     data.revenue.value === 0 &&
@@ -237,7 +255,8 @@ const Dashboard: React.FC = (): React.JSX.Element => {
     data.orders.value === 0 &&
     (work?.totalTasks ?? 0) === 0 &&
     unpaidMinor === 0 &&
-    !hasSales;
+    !hasSales &&
+    !hasContracts;
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
