@@ -47,7 +47,13 @@ export function useProjectRealtime(projectId: string | undefined): void {
         qc.invalidateQueries({ queryKey: ['project-overview', projectId] });
         qc.invalidateQueries({ queryKey: ['milestones', projectId] });
       }
-      if (e.type.startsWith('flowStatus.')) {
+      // The server names these `status.*`; `column.*` writes the same rows,
+      // because a project's board columns are its statuses.
+      if (
+        e.type.startsWith('status.') ||
+        e.type.startsWith('flowStatus.') ||
+        e.type.startsWith('column.')
+      ) {
         // A status rename/recolour changes the projections returned with every
         // task row, not just the status list. Keep all task consumers in sync.
         qc.invalidateQueries({ queryKey: ['statuses', projectId] });
