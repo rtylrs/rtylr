@@ -375,7 +375,7 @@ test.describe('Flow - Project Board', () => {
     // opens and sits on "Loading task…", which every other assertion here
     // would have accepted.
     await expect(drawer.getByText('Build SSO login screen and session handling.')).toBeVisible();
-    await expect(page.locator('#main-content').getByText('Todo', { exact: true })).toBeVisible();
+    await expect(page.locator('#main-content').getByText('To Do', { exact: true })).toBeVisible();
 
     // And the open task is in the URL, so back closes it and a refresh keeps it.
     //
