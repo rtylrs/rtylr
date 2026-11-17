@@ -17,9 +17,10 @@ import (
 // project's money. Without it the dashboard still answers, without invoices.
 const projectInvoicePermission = "finance:invoices:view"
 
-// ListProjects lists the Work projects the caller may open a project
-// dashboard for. Flow decides which: every public project, and the private
-// ones the caller owns, created or is a project member of.
+// ListProjects lists the Work projects the caller may pick a project
+// dashboard for. Flow decides which: every public project, the private ones
+// the caller owns, created or is a project member of, and whatever else Flow's
+// sidebar lists for them. Like that sidebar it is curated for admins too.
 func (a *DashboardAPI) ListProjects(ctx context.Context, _ *insightsdashboardv1.ListProjectsRequest) (*insightsdashboardv1.ListProjectsResponse, error) {
 	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
@@ -39,9 +40,10 @@ func (a *DashboardAPI) ListProjects(ctx context.Context, _ *insightsdashboardv1.
 	return &insightsdashboardv1.ListProjectsResponse{Projects: out}, nil
 }
 
-// GetProjectDashboard reports one Work project. A private project the caller
-// is not a member of answers 404, exactly like a missing project or another
-// business's, so its existence does not leak. Invoice totals are included only
+// GetProjectDashboard reports one Work project. Flow decides who may see a
+// private one: whoever Flow lets open it, plus Flow's bypass roles. Anyone else
+// gets 404, exactly like a missing project or another business's, so its
+// existence does not leak. Invoice totals are included only
 // when the caller may view finance invoices.
 func (a *DashboardAPI) GetProjectDashboard(ctx context.Context, req *insightsdashboardv1.GetProjectDashboardRequest) (*insightsdashboardv1.GetProjectDashboardResponse, error) {
 	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")

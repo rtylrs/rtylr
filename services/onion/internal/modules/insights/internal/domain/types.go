@@ -80,8 +80,8 @@ type ProjectHours struct {
 }
 
 // DashboardProject is a Work project a viewer may open a project dashboard
-// for. Flow decides which: public projects, and private ones the viewer is a
-// member of.
+// for. Flow decides which: public projects, and private ones Flow lets the
+// viewer see.
 type DashboardProject struct {
 	ID         int64
 	Name       string

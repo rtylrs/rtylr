@@ -26,6 +26,16 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	}
 }
 
+// ProjectAccess is Flow's decision on who may see a project's reporting. The
+// workspaces module serves it; the project dashboard readers below consult it.
+type ProjectAccess = application.ProjectAccess
+
+// SetProjectAccess wires Flow's project access decision into the project
+// dashboard readers. Without it they apply only their own rule.
+func (m *Module) SetProjectAccess(access ProjectAccess) {
+	m.service.SetProjectAccess(access)
+}
+
 // The readers below exist so another module can ask Flow for its own
 // delivery numbers without reaching into flow_* tables itself.
 //
@@ -230,9 +240,10 @@ type FlowProjectTimeTotals struct {
 	PriorMinutes   int64
 }
 
-// FlowDashboardProjects returns the projects userID may see in businessID:
-// every public project and the private ones they own, created or are a
-// project member of. Personal and archived projects are left out.
+// FlowDashboardProjects returns the projects userID may pick in businessID:
+// every public project, the private ones they own, created or are a project
+// member of, and anything else Flow's sidebar lists for them, such as their
+// reports' projects. Personal and archived projects are left out.
 func (m *Module) FlowDashboardProjects(ctx context.Context, businessID, userID int64) ([]FlowDashboardProject, error) {
 	result, err := m.service.ListDashboardProjects(ctx, businessID, userID)
 	if err != nil {
@@ -245,9 +256,11 @@ func (m *Module) FlowDashboardProjects(ctx context.Context, businessID, userID i
 	return projects, nil
 }
 
-// FlowDashboardProject returns one project under the FlowDashboardProjects
-// rule. found is false for a missing project, another business's project and
-// a private project userID is not a member of alike.
+// FlowDashboardProject returns one project userID may open a dashboard for:
+// the FlowDashboardProjects rule, plus any project Flow's access check grants,
+// which admits Flow's bypass roles and a manager whose report is involved.
+// found is false for a missing project, another business's project and a
+// private project userID may not see alike.
 func (m *Module) FlowDashboardProject(ctx context.Context, businessID, userID, projectID int64) (FlowDashboardProject, bool, error) {
 	p, found, err := m.service.GetDashboardProject(ctx, businessID, userID, projectID)
 	if err != nil || !found {

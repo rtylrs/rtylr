@@ -214,6 +214,9 @@ func initializeModules(ctx context.Context) *apiModules {
 	workspacesModule.SetInsightsMemberProfileSource(workspaceadapters.NewInsightsMemberProfileSource(userModule))
 	workspacesModule.SetPresenceSource(workspaceadapters.NewPresenceSource(hrCoreModule, hrLeaveModule))
 	workspacesModule.Service().SetLabourCostProvider(hrPayrollModule.LabourCostProvider())
+	// The project dashboard asks Flow who may see a project rather than
+	// restating Flow's privacy rules.
+	flowInsightsModule.SetProjectAccess(workspacesModule)
 	notificationsModule := notifications.NewModule(ctx, dbclient.Pool())
 	teamModule.SetNotificationPublisher(teamadapters.NewNotificationPublisher(notificationsModule))
 	teamModule.SetMemberProvisioner(teamadapters.NewHRMemberProvisioner(hrCoreModule, hrStaffModule))
