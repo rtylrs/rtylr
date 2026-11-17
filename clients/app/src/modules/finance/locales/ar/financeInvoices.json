@@ -19,7 +19,8 @@
     "balanceDue": "المبلغ المستحق",
     "history": "السجل",
     "client": "العميل",
-    "void": "إلغاء الفاتورة"
+    "void": "إلغاء الفاتورة",
+    "project": "المشروع"
   },
   "new": {
     "title": "فاتورة جديدة",
@@ -31,7 +32,12 @@
     "discount": "الخصم",
     "notes": "ملاحظات",
     "saveDraft": "حفظ كمسودة",
-    "saveAndSend": "حفظ وإرسال"
+    "saveAndSend": "حفظ وإرسال",
+    "project": "المشروع",
+    "noProject": "بدون مشروع",
+    "noProjectsAvailable": "لا توجد مشاريع عمل متاحة",
+    "projectFallback": "المشروع رقم {{id}}",
+    "projectHint": "اربط الفاتورة بمشروع العمل الذي تُصدر له لتُحتسب ضمن هذا المشروع."
   },
   "preview": {
     "heading": "فاتورة",
