@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tansta
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { flowApi, ApiStatus, type ApiStatusTemplateItem } from '../../shared/services/flowApi';
-import type { SortUpdate } from './statusUtils';
+import { applyStatusOrder, type InsertionPlan } from './statusUtils';
 
 function key(projectId: string) {
   return ['statuses', projectId];
@@ -18,17 +18,8 @@ function invalidateStatusViews(qc: QueryClient, projectId: string): void {
   qc.invalidateQueries({ queryKey: ['task'] });
 }
 
-function writeSortOrder({ status, sortOrder }: SortUpdate) {
-  return unwrap(
-    flowApi.updateStatus({
-      id: status.id,
-      name: status.name,
-      bucket: status.bucket,
-      color: status.color,
-      sortOrder,
-      isDefault: status.isDefault,
-    })
-  );
+function writeStatusOrder(projectId: string, ids: string[]) {
+  return unwrap(flowApi.reorderStatuses(projectId, ids)).then((r) => r.statuses ?? []);
 }
 
 /** A project's statuses, which are also its board columns. */
@@ -49,17 +40,27 @@ export interface CreateStatusInput {
   color?: string;
   sortOrder?: number;
   isDefault?: boolean;
-  /** Sort-order writes that make room for the new status first. */
-  makeRoom?: SortUpdate[];
+  /** Places the new status with one reorder after the create, when no gap allowed a sortOrder. */
+  placeAmong?: InsertionPlan['placeAmong'];
 }
 
 export function useCreateStatus(projectId: string) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ makeRoom = [], ...data }: CreateStatusInput) => {
-      await Promise.all(makeRoom.map(writeSortOrder));
-      return unwrap(flowApi.createStatus({ projectId, ...data })).then((r) => r.status);
+    mutationFn: async ({ placeAmong, ...data }: CreateStatusInput) => {
+      const created = await unwrap(flowApi.createStatus({ projectId, ...data })).then(
+        (r) => r.status
+      );
+      if (placeAmong && created?.id) {
+        const ids = [...placeAmong.ids];
+        ids.splice(placeAmong.index, 0, String(created.id));
+        // The status exists either way; a failed placement leaves it appended.
+        await writeStatusOrder(projectId, ids).catch(() =>
+          toast.error(t('flowToasts.status.updateFailed'))
+        );
+      }
+      return created;
     },
     onSuccess: () => invalidateStatusViews(qc, projectId),
     onError: () => {
@@ -87,16 +88,25 @@ export function useUpdateStatus(projectId: string) {
 }
 
 /**
- * Applies a reorder as independent writes: there is no bulk endpoint, and if
- * one fails the refetch shows the server's real order rather than a guess.
+ * Sets the whole order in one request, so it lands entirely or not at all. The
+ * board moves at once and snaps back if the server refuses.
  */
 export function useReorderStatuses(projectId: string) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (updates: SortUpdate[]) => Promise.all(updates.map(writeSortOrder)),
+    mutationFn: (ids: string[]) => writeStatusOrder(projectId, ids),
+    onMutate: async (ids) => {
+      await qc.cancelQueries({ queryKey: key(projectId) });
+      const previous = qc.getQueryData<ApiStatus[]>(key(projectId));
+      if (previous) qc.setQueryData(key(projectId), applyStatusOrder(previous, ids));
+      return { previous };
+    },
+    onError: (_err, _ids, context) => {
+      if (context?.previous) qc.setQueryData(key(projectId), context.previous);
+      toast.error(t('flowToasts.status.updateFailed'));
+    },
     onSettled: () => invalidateStatusViews(qc, projectId),
-    onError: () => toast.error(t('flowToasts.status.updateFailed')),
   });
 }
 

@@ -72,55 +72,57 @@ export function closedRecently(
   return now - at <= days * DAY_MS;
 }
 
-export interface SortUpdate {
-  status: ApiStatus;
-  sortOrder: number;
-}
-
 /**
- * The writes that move the status at `from` to `to`. Existing sort values are
- * reused in the new order, so a swap of neighbours is two writes; ties are
- * renumbered first because swapping equal values would change nothing.
+ * The project's full status order after moving the status at `from` to `to`,
+ * or null when nothing would move. The server takes the whole set at once.
  */
-export function reorderUpdates(
+export function movedStatusIds(
   ordered: readonly ApiStatus[],
   from: number,
   to: number
-): SortUpdate[] {
+): string[] | null {
   if (from === to || from < 0 || to < 0 || from >= ordered.length || to >= ordered.length) {
-    return [];
+    return null;
   }
-  const next = [...ordered];
-  const [moved] = next.splice(from, 1);
-  next.splice(to, 0, moved);
-  const values = ordered.map((s) => s.sortOrder);
-  const distinct = new Set(values).size === values.length;
-  return next.flatMap((status, i) => {
-    const sortOrder = distinct ? values[i] : i * SORT_STEP;
-    return sortOrder === status.sortOrder ? [] : [{ status, sortOrder }];
-  });
+  const ids = ordered.map((s) => s.id);
+  const [moved] = ids.splice(from, 1);
+  ids.splice(to, 0, moved);
+  return ids;
+}
+
+/** Where a new status goes: into a gap, or appended then placed by one reorder. */
+export interface InsertionPlan {
+  /** Sent with the create when the neighbours leave room for it. */
+  sortOrder?: number;
+  /** Set when there is no room: the full current order and the new status's index in it. */
+  placeAmong?: { ids: string[]; index: number };
 }
 
 /**
- * Where a new status inserted at `index` sorts, and any writes needed to make
- * room. Uses the gap between neighbours when there is one; otherwise every
- * status is renumbered in steps of ten.
+ * Where a new status inserted at `index` sorts. Uses the gap between
+ * neighbours when there is one; otherwise the create appends and a single
+ * reorder puts it in place.
  */
-export function insertionPlan(
-  ordered: readonly ApiStatus[],
-  index: number
-): { sortOrder: number; updates: SortUpdate[] } {
+export function insertionPlan(ordered: readonly ApiStatus[], index: number): InsertionPlan {
   const at = Math.max(0, Math.min(index, ordered.length));
   const prev = ordered[at - 1];
   const next = ordered[at];
-  if (!next) return { sortOrder: (prev?.sortOrder ?? -SORT_STEP) + SORT_STEP, updates: [] };
+  if (!next) return { sortOrder: (prev?.sortOrder ?? -SORT_STEP) + SORT_STEP };
   const lower = prev ? prev.sortOrder : -1;
   if (next.sortOrder - lower >= 2) {
-    return { sortOrder: Math.max(0, Math.floor((lower + next.sortOrder) / 2)), updates: [] };
+    return { sortOrder: Math.max(0, Math.floor((lower + next.sortOrder) / 2)) };
   }
-  const updates = ordered.flatMap((status, i) => {
-    const sortOrder = (i < at ? i : i + 1) * SORT_STEP;
-    return sortOrder === status.sortOrder ? [] : [{ status, sortOrder }];
+  return { placeAmong: { ids: ordered.map((s) => s.id), index: at } };
+}
+
+/** Statuses rearranged to `ids`, with the sort values the server will write. */
+export function applyStatusOrder(
+  statuses: readonly ApiStatus[],
+  ids: readonly string[]
+): ApiStatus[] {
+  const byId = new Map(statuses.map((s) => [s.id, s]));
+  return ids.flatMap((id, i) => {
+    const status = byId.get(id);
+    return status ? [{ ...status, sortOrder: i * SORT_STEP }] : [];
   });
-  return { sortOrder: at * SORT_STEP, updates };
 }

@@ -403,9 +403,8 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   };
   // A status made from the task panel is an in-flight state, appended at the end.
   const createAndApplyStatus = (name: string): void => {
-    const { sortOrder, updates } = insertionPlan(projectStatuses, projectStatuses.length);
     createStatus.mutate(
-      { name, bucket: 'active', sortOrder, makeRoom: updates },
+      { name, bucket: 'active', ...insertionPlan(projectStatuses, projectStatuses.length) },
       {
         onSuccess: (created) => {
           setNewStatusOpen(false);

@@ -17,7 +17,7 @@ import {
   STATUS_BUCKETS as BUCKETS,
   STATUS_COLORS,
   isOnlyDoneStatus,
-  reorderUpdates,
+  movedStatusIds,
   sortStatuses,
   type StatusBucket as Bucket,
 } from '../statusUtils';
@@ -123,17 +123,19 @@ const StatusSettingsPanel = ({
     });
   };
 
-  /** The row's unsaved name draft is carried into the moved status's write. */
+  /**
+   * Alt+Arrow moves while the name input still has focus, so an unsaved draft
+   * is saved alongside the reorder rather than lost.
+   */
   const move = (index: number, direction: -1 | 1, nameOverride?: string): void => {
     const target = index + direction;
-    if (target < 0 || target >= ordered.length) return;
+    const ids = movedStatusIds(ordered, index, target);
+    if (!ids) return;
     const a = ordered[index];
     const aName = nameOverride === undefined ? a.name : nameOverride.trim();
     if (!aName) return;
-    const updates = reorderUpdates(ordered, index, target).map((u) =>
-      u.status.id === a.id ? { ...u, status: { ...u.status, name: aName } } : u
-    );
-    reorderStatuses.mutate(updates);
+    if (aName !== a.name) rename(a, aName, () => undefined);
+    reorderStatuses.mutate(ids);
     setAnnouncement(
       t('flow.status.movedAnnouncement', {
         name: aName,
