@@ -71,6 +71,7 @@ func toProjectV2(p domain.Project) *flowprojectv2.Project {
 		Status:         p.Status,
 		Visibility:     p.Visibility,
 		IsPersonal:     p.IsPersonal,
+		DeveloperMode:  p.DeveloperMode,
 		CreatedBy:      p.CreatedBy,
 		TaskCount:      p.TaskCount,
 		CompletedCount: p.CompletedCount,
@@ -112,6 +113,8 @@ func mapProjectV2Error(err error) error {
 	switch {
 	case errors.Is(err, domain.ErrUnauthorized):
 		return onekiterrors.PermissionDenied()
+	case errors.Is(err, application.ErrPersonalProjectDeveloperMode):
+		return onekiterrors.New(http.StatusBadRequest, application.ErrPersonalProjectDeveloperMode.Error())
 	case errors.Is(err, application.ErrProjectNotArchived):
 		// 409: the project exists and the caller may act on it, but not in the
 		// state it is in. Archiving it first makes the same request valid.
@@ -203,16 +206,17 @@ func (a *ProjectAPIV2) CreateProject(ctx context.Context, req *flowprojectv2.Cre
 	}
 
 	input := domain.ProjectInput{
-		OwnerID:     authUser.UserID,
-		BusinessID:  businessID,
-		Name:        req.GetName(),
-		Description: req.GetDescription(),
-		Icon:        req.GetIcon(),
-		Color:       req.GetColor(),
-		Visibility:  visibility,
-		StartDate:   startDate,
-		DueDate:     dueDate,
-		CreatedBy:   authUser.UserID,
+		OwnerID:       authUser.UserID,
+		BusinessID:    businessID,
+		Name:          req.GetName(),
+		Description:   req.GetDescription(),
+		Icon:          req.GetIcon(),
+		Color:         req.GetColor(),
+		Visibility:    visibility,
+		StartDate:     startDate,
+		DueDate:       dueDate,
+		CreatedBy:     authUser.UserID,
+		DeveloperMode: req.GetDeveloperMode(),
 	}
 
 	project, err := a.Service.CreateProject(ctx, input)
@@ -295,6 +299,27 @@ func (a *ProjectAPIV2) ArchiveProject(ctx context.Context, req *flowprojectv2.Ar
 
 	publishBusinessEvent("project.archived", businessID, req.GetId(), authUser.UserID)
 	return &flowprojectv2.ArchiveProjectResponse{Project: toProjectV2(project)}, nil
+}
+
+func (a *ProjectAPIV2) SetProjectDeveloperMode(ctx context.Context, req *flowprojectv2.SetProjectDeveloperModeRequest) (*flowprojectv2.SetProjectDeveloperModeResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:edit"); err != nil {
+		return nil, err
+	}
+	businessID, authUser, err := a.resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	project, err := a.Service.SetProjectDeveloperMode(ctx, req.GetId(), authUser.UserID, businessID, req.GetEnabled())
+	if err != nil {
+		if err := mapProjectV2Error(err); err != nil {
+			return nil, err
+		}
+		return nil, onekiterrors.New(http.StatusBadRequest, "Failed to set developer mode")
+	}
+
+	publishBusinessEvent("project.updated", businessID, req.GetId(), authUser.UserID)
+	return &flowprojectv2.SetProjectDeveloperModeResponse{Project: toProjectV2(project)}, nil
 }
 
 func (a *ProjectAPIV2) SetProjectVisibility(ctx context.Context, req *flowprojectv2.SetProjectVisibilityRequest) (*flowprojectv2.SetProjectVisibilityResponse, error) {

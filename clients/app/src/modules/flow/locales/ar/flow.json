@@ -44,7 +44,9 @@
     "quietHoursActive": "ساعات الهدوء مفعّلة",
     "quietHoursNotice": "ساعات الهدوء ({{start}}–{{end}})، ستبقى التذكيرات غير العاجلة هادئة. وقت الملخص: {{digestHour}}:00. غيّر ذلك من الإعدادات ← نمط الحياة والإيقاع.",
     "realtimeReconnecting": "جارٍ إعادة الاتصال…",
-    "realtimeDisconnected": "غير متصل. أعد تحميل الصفحة لرؤية آخر التحديثات."
+    "realtimeDisconnected": "غير متصل. أعد تحميل الصفحة لرؤية آخر التحديثات.",
+    "softwareProject": "هذا مشروع برمجي",
+    "softwareProjectHint": "يضيف روابط الكود وحقول التطوير إلى المهام. يمكنك تغيير ذلك لاحقًا من إعدادات المشروع."
   },
   "sidebar": {
     "saveFailed": "تعذر حفظ الشريط الجانبي. تحقق من الاتصال وحاول مجدداً.",
@@ -186,7 +188,13 @@
     "noOneToMention": "لا يوجد أعضاء آخرون في هذا المشروع بعد",
     "openAttachment": "فتح {{name}}",
     "attachmentPreview": "معاينة الصورة المرفقة بالحجم الكامل",
-    "openOriginal": "فتح الأصل"
+    "openOriginal": "فتح الأصل",
+    "development": "التطوير",
+    "developmentEmpty": "ستظهر هنا الفروع وطلبات الدمج وعمليات النشر المرتبطة بهذه المهمة.",
+    "devType": "النوع",
+    "devPoints": "النقاط",
+    "devBranch": "الفرع",
+    "devNotSet": "غير محدد"
   },
   "time": {
     "add": {
@@ -950,8 +958,14 @@
     "integrations": {
       "slack": "نشر تحديثات المشروع في ‎#flow-updates",
       "github": "ربط طلبات الدمج بالمهام تلقائيًا",
-      "email": "إرسال ملخص يومي إلى الأعضاء"
-    }
+      "email": "إرسال ملخص يومي إلى الأعضاء",
+      "codeSection": "الكود"
+    },
+    "developerMode": "مشروع برمجي",
+    "developerModeHint": "يعرض روابط الكود ومعلومات CI والنشر وحقول التطوير في مهام هذا المشروع. إيقافه يخفيها فقط ولا يحذف أي شيء.",
+    "developerModeGateReason": "يمكن لمسؤولي المشروع فقط تغيير هذا الإعداد.",
+    "developerModeOn": "تم تشغيل ميزات التطوير",
+    "developerModeOff": "تم إيقاف ميزات التطوير"
   },
   "bulkEdit": {
     "clearSelectionLabel": "إلغاء التحديد",

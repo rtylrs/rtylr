@@ -71,6 +71,7 @@ export default function FlowLayout({ children }: { children: ReactNode }) {
   const [description, setDescription] = useState('');
   const [color, setColor] = useState(ACCENT_DEFAULT);
   const [visibility, setVisibility] = useState<'private' | 'public'>('private');
+  const [developerMode, setDeveloperMode] = useState(false);
   const canCreateProject = canFlowPermission('flow:projects:create', user?.effectiveAccess);
   const canCreateTask = canFlowPermission('flow:tasks:create', user?.effectiveAccess);
   const visiblePreferences = {
@@ -119,6 +120,7 @@ export default function FlowLayout({ children }: { children: ReactNode }) {
       setDescription('');
       setColor(ACCENT_DEFAULT);
       setVisibility('private');
+      setDeveloperMode(false);
     }
   }, [projectOpen]);
   useEffect(() => setMobileOpen(false), [location.pathname]);
@@ -215,7 +217,13 @@ export default function FlowLayout({ children }: { children: ReactNode }) {
   const submitProject = () => {
     if (!name.trim() || !canCreateProject || createProject.isPending) return;
     createProject.mutate(
-      { name: name.trim(), description: description.trim() || undefined, color, visibility },
+      {
+        name: name.trim(),
+        description: description.trim() || undefined,
+        color,
+        visibility,
+        developerMode,
+      },
       {
         onSuccess: () => setProjectOpen(false),
         onError: () => toast.error(t('flowErrors.generic')),
@@ -352,6 +360,24 @@ export default function FlowLayout({ children }: { children: ReactNode }) {
                 </p>
               )}
             </fieldset>
+            <label className="flex items-start gap-2 text-flow-body">
+              <input
+                type="checkbox"
+                checked={developerMode}
+                onChange={(event) => setDeveloperMode(event.target.checked)}
+                aria-describedby="flow-new-project-software-hint"
+                className="mt-1"
+              />
+              <span>
+                {t('flow.shell.softwareProject')}
+                <span
+                  id="flow-new-project-software-hint"
+                  className="block text-flow-meta text-[var(--flow-text-muted)]"
+                >
+                  {t('flow.shell.softwareProjectHint')}
+                </span>
+              </span>
+            </label>
             <GateNotice id="flow-new-project-gate" reason={gateReason} />
             <div className="flex justify-end gap-2">
               <Button variant="ghost" onClick={() => setProjectOpen(false)}>

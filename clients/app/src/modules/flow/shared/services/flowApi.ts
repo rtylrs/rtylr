@@ -571,6 +571,7 @@ export const flowApi = {
     startDate?: string;
     dueDate?: string;
     visibility?: string;
+    developerMode?: boolean;
   }) =>
     flowResult<{ project: ApiProject }>(() =>
       projectV2.createProject({
@@ -595,6 +596,7 @@ export const flowApi = {
         // which becomes a real project date once the backend persists it.
         startDate: data.startDate ?? '',
         dueDate: data.dueDate ?? '',
+        developerMode: data.developerMode ?? false,
       })
     ),
 

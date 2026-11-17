@@ -51,6 +51,7 @@ vi.mock('../projects/useStatuses', () => ({
   useSetTaskStatus: () => ({ mutate: setStatus }),
   useCreateStatus: () => ({ mutate: createStatus, isPending: false }),
 }));
+vi.mock('../projects-v2/useDeveloperMode', () => ({ useIsDeveloperProject: () => false }));
 vi.mock('../projects/useCurrentProject', () => ({
   useCurrentProject: () => ({ project: undefined }),
 }));

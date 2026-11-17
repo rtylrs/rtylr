@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/api"
 	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/application/identity"
+	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/outbox"
 	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/realtime"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/tenant"
@@ -49,7 +50,7 @@ type Module struct {
 func NewModule(ctx context.Context, db *sql.DB) *Module {
 	repository := moduleinfra.NewRepository(db)
 	return &Module{
-		service:    application.NewService(ctx, repository),
+		service:    application.NewService(ctx, repository).WithAuditRecorder(outbox.NewRecorder(db)),
 		repository: repository,
 	}
 }

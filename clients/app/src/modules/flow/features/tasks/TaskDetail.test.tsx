@@ -94,6 +94,10 @@ vi.mock('../../shared/hooks/queries/useApprovedLeaveInRange', () => ({
   useApprovedLeaveInRange: vi.fn(() => ({ data: null })),
 }));
 
+const developerProjectMock = vi.hoisted(() => vi.fn(() => false));
+vi.mock('../projects-v2/useDeveloperMode', () => ({
+  useIsDeveloperProject: () => developerProjectMock(),
+}));
 vi.mock('../projects/useCurrentProject', () => ({
   useCurrentProject: useCurrentProjectSpy,
 }));
@@ -182,6 +186,7 @@ beforeEach(() => {
   updateTaskMutate.mockClear();
   useLabelsSpy.mockReturnValue({ data: [] });
   useCurrentProjectSpy.mockReturnValue({ project: undefined, isLoading: false });
+  developerProjectMock.mockReturnValue(false);
   // The query-failure flags belong here, not in one describe's own hook. They
   // were reset inside the failure describe only, so `--sequence.shuffle` could
   // run a failure test before another and leave this stuck (#1194).
@@ -610,5 +615,31 @@ describe('every task detail control has an accessible name (#1079)', () => {
     };
     renderTaskDetail();
     expect(flowSelectTrigger('flow.taskDetail.status')).toBeInTheDocument();
+  });
+});
+
+describe('TaskDetail Development section (T-365)', () => {
+  const detail = () =>
+    ({
+      task: apiTask({}) as ApiTask,
+      subtasks: [],
+      comments: [],
+      activity: [],
+    }) as unknown as ApiTaskDetail;
+
+  it('is hidden on a project without developer features', () => {
+    taskDetailData.data = detail();
+    renderTaskDetail();
+    expect(screen.queryByText('flow.taskDetail.development')).not.toBeInTheDocument();
+  });
+
+  it('appears with the dev fields on a developer project', () => {
+    developerProjectMock.mockReturnValue(true);
+    taskDetailData.data = detail();
+    renderTaskDetail();
+    expect(
+      screen.getByRole('heading', { name: 'flow.taskDetail.development' })
+    ).toBeInTheDocument();
+    expect(screen.getByText('flow.taskDetail.devPoints')).toBeInTheDocument();
   });
 });

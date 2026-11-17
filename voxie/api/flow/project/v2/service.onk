@@ -18,6 +18,10 @@ service ProjectService {
 
   setProjectVisibility(SetProjectVisibilityRequest) -> SetProjectVisibilityResponse @put("/projects/visibility")
 
+  /// setProjectDeveloperMode turns developer features on or off for a project.
+  /// Requires project admin; the My Tasks bucket cannot be switched.
+  setProjectDeveloperMode(SetProjectDeveloperModeRequest) -> SetProjectDeveloperModeResponse @put("/projects/developer-mode")
+
   listArchivedProjects(ListArchivedProjectsRequest) -> ListArchivedProjectsResponse @get("/projects/archived")
 
   restoreProject(RestoreProjectRequest) -> RestoreProjectResponse @put("/projects/archived/restore")

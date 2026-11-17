@@ -26,6 +26,7 @@ export function useCreateProject() {
       color?: string;
       description?: string;
       visibility?: string;
+      developerMode?: boolean;
     }) => {
       return unwrap(flowApi.createProject(data));
     },

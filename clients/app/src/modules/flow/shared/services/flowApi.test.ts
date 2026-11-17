@@ -96,6 +96,7 @@ describe('flowApi OneKit adapters', () => {
       visibility: 'private',
       startDate: '',
       dueDate: '',
+      developerMode: false,
     });
     // The project sub-resources moved to v2 as well. They carry no workspace,
     // so unlike listProjects they were not broken on v1; they were simply the

@@ -11,7 +11,7 @@ SELECT
     COALESCE(p.color, '') AS color,
     COALESCE(p.status, 'active') AS status,
     COALESCE(p.visibility, 'private') AS visibility,
-    p.is_personal,
+    p.is_personal, p.developer_mode,
     p.start_date, p.due_date,
     p.created_by, p.created_at, p.updated_at,
     p.archived_at, p.purge_at,
@@ -53,7 +53,7 @@ SELECT
     COALESCE(p.color, '') AS color,
     COALESCE(p.status, 'active') AS status,
     COALESCE(p.visibility, 'private') AS visibility,
-    p.is_personal,
+    p.is_personal, p.developer_mode,
     p.start_date, p.due_date,
     p.created_by, p.created_at, p.updated_at,
     p.archived_at, p.purge_at,
@@ -106,7 +106,7 @@ SELECT
     COALESCE(p.color, '') AS color,
     COALESCE(p.status, 'active') AS status,
     COALESCE(p.visibility, 'private') AS visibility,
-    p.is_personal,
+    p.is_personal, p.developer_mode,
     p.start_date, p.due_date,
     p.created_by, p.created_at, p.updated_at,
     p.archived_at, p.purge_at,
@@ -124,6 +124,10 @@ LIMIT ? OFFSET ?;
 
 -- name: UpdateProjectVisibility :execresult
 UPDATE flow_projects SET visibility = ?, updated_at = NOW()
+WHERE id = ? AND business_id = ?;
+
+-- name: UpdateProjectDeveloperMode :execresult
+UPDATE flow_projects SET developer_mode = ?, updated_at = NOW()
 WHERE id = ? AND business_id = ?;
 
 -- name: RestoreProjectV2 :execresult

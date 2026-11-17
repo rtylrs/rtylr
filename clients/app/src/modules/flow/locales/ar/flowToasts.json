@@ -92,7 +92,8 @@
     "visibilityFailed": "فشل تحديث الظهور",
     "archived": "تمت أرشفة المشروع.",
     "archivedUntil": "تمت أرشفة المشروع. سيتم حذفه نهائيًا في {{date}}.",
-    "archiveFailed": "فشل أرشفة المشروع"
+    "archiveFailed": "فشل أرشفة المشروع",
+    "developerModeFailed": "تعذر تغيير ميزات التطوير"
   },
   "milestone": {
     "createFailed": "فشل إنشاء المرحلة",

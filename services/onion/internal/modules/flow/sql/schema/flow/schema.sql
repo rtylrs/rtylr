@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS `flow_projects` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `visibility` enum('private','public') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'private',
   `is_personal` tinyint(1) NOT NULL DEFAULT '0',
+  `developer_mode` tinyint(1) NOT NULL DEFAULT '0',
   `archived_at` timestamp NULL DEFAULT NULL,
   `purge_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),

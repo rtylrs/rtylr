@@ -72,6 +72,12 @@ vi.mock('../../shared/lib/currentUser', () => ({
   useCanDeleteResource: () => canManageProjectMock(),
 }));
 
+const developerProjectMock = vi.hoisted(() => vi.fn(() => false));
+vi.mock('../projects-v2/useDeveloperMode', () => ({
+  useIsDeveloperProject: () => developerProjectMock(),
+  useSetProjectDeveloperMode: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
 import ProjectSettings from './ProjectSettings';
 import { useFlowStore } from '../../shared/stores/flowStore';
 
@@ -121,8 +127,24 @@ describe('ProjectSettings integrations tab', () => {
 
     const comingSoonButtons = screen.getAllByRole('button', { name: 'flowCommon.comingSoon' });
 
-    expect(comingSoonButtons).toHaveLength(3);
+    expect(comingSoonButtons).toHaveLength(2);
     comingSoonButtons.forEach((button) => expect(button).toBeDisabled());
+  });
+
+  it('shows the Code section with GitHub only on a developer project', () => {
+    renderProjectSettings();
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.tabs.integrations' }));
+    expect(screen.queryByText('GitHub')).toBeNull();
+    expect(screen.queryByText('flow.projectSettings.integrations.codeSection')).toBeNull();
+  });
+
+  it('adds the Code section once developer features are on', () => {
+    developerProjectMock.mockReturnValue(true);
+    renderProjectSettings();
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.tabs.integrations' }));
+    expect(screen.getByText('flow.projectSettings.integrations.codeSection')).toBeInTheDocument();
+    expect(screen.getByText('GitHub')).toBeInTheDocument();
+    developerProjectMock.mockReturnValue(false);
   });
 
   it('sends the untouched project fields when saving a name-only edit', () => {

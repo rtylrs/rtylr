@@ -84,6 +84,8 @@ import { withAlpha } from '../../shared/lib/colorUtils';
 import { toLocalIso, todayIso } from '../../shared/lib/dateUtils';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
+import DevelopmentSection from './components/DevelopmentSection';
+import { useIsDeveloperProject } from '../projects-v2/useDeveloperMode';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -237,6 +239,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const removeAttachmentMut = useRemoveAttachment();
 
   const taskProjectId = detail?.task?.projectId;
+  const isDeveloperProject = useIsDeveloperProject(taskProjectId);
   const { project: taskProject } = useCurrentProject(taskProjectId);
   const { data: projectMembers = [] } = useProjectMembers(taskProjectId);
   const { data: allLabels = [] } = useLabels();
@@ -570,6 +573,8 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
                 disabled={!canEdit}
               />
             </section>
+
+            {isDeveloperProject && <DevelopmentSection />}
 
             <section className="mb-8">
               <h3

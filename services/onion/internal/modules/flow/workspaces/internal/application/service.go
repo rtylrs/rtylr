@@ -104,6 +104,10 @@ type Service struct {
 	// and visibility behaves as it did before it existed. A nil provider must
 	// never widen access, only fail to widen it.
 	orgchart orgchart.ManagerResolver
+
+	// audit records project changes in the business activity log. Optional:
+	// nil skips the record and never blocks the change.
+	audit auditRecorder
 }
 
 // SetWorkdayRosterSource wires the owner-owned HR and organization directory
@@ -433,6 +437,7 @@ type repository interface {
 	UpdateProject(ctx context.Context, input domain.UpdateProjectInput) error
 	UpdateProjectMemberRole(ctx context.Context, input domain.UpdateProjectMemberRoleInput) error
 	UpdateProjectVisibility(ctx context.Context, id, businessID int64, visibility string) error
+	UpdateProjectDeveloperMode(ctx context.Context, id, businessID int64, enabled bool) error
 	UpdateStatus(ctx context.Context, id, businessID, projectID int64, in domain.StatusInput) (domain.Status, error)
 	UpdateTask(ctx context.Context, input domain.UpdateTaskInput) error
 	UpdateTaskStatus(ctx context.Context, input domain.UpdateTaskStatusInput) error
