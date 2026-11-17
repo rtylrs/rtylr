@@ -72,59 +72,6 @@ func TestInviteUserReturnsTheActivationLinkToTheInviter(t *testing.T) {
 	if response.InviteLink == nil || *response.InviteLink != want {
 		t.Fatalf("invite link = %v, want the link for the created token", response.InviteLink)
 	}
-	// This service has no email queue, so nothing was sent.
-	if response.InviteEmailQueued == nil || *response.InviteEmailQueued {
-		t.Fatalf("invite email queued = %v, want false without an email queue", response.InviteEmailQueued)
-	}
-}
-
-func inviteWithEmail(t *testing.T, providerConfigured bool) *hubteaminvitationsv1.InviteUserResponse {
-	t.Helper()
-	db := testutil.OpenDB(t)
-	ctx := context.Background()
-	actorID, businessID := seedBulkInviteTenant(t, db)
-	invitee := fmt.Sprintf("queued-invitee-%d@test.local", time.Now().UnixNano())
-	cleanupInvitee(t, invitee)
-
-	restore := emailDeliveryConfigured
-	emailDeliveryConfigured = func() bool { return providerConfigured }
-	t.Cleanup(func() { emailDeliveryConfigured = restore })
-
-	api := NewInvitationsAPI(application.NewService(ctx, moduleinfra.NewRepository(db)).WithEmailNotifications(testEmailNotifications{db: db}))
-	authCtx := authPkg.WithAuthUser(ctx, &authPkg.AuthUser{
-		UserID:     actorID,
-		BusinessID: businessID,
-		EffectiveAccess: &authorization.EffectiveAccess{
-			IsOwner:         true,
-			DashPermissions: []string{"hub:team:invite"},
-		},
-	})
-	response, err := api.InviteUser(authCtx, &hubteaminvitationsv1.InviteUserRequest{
-		Email: invitee, FullName: "Queued Invitee", MemberType: "member",
-	})
-	if err != nil {
-		t.Fatalf("InviteUser: %v", err)
-	}
-	return response
-}
-
-func TestInviteUserReportsAQueuedInvitationEmail(t *testing.T) {
-	response := inviteWithEmail(t, true)
-	if response.InviteEmailQueued == nil || !*response.InviteEmailQueued {
-		t.Fatalf("invite email queued = %v, want true", response.InviteEmailQueued)
-	}
-}
-
-// With no email provider the queued email is never delivered, which is the
-// onion#1100 case. The inviter must be told so they share the link instead.
-func TestInviteUserReportsNoEmailWithoutAProvider(t *testing.T) {
-	response := inviteWithEmail(t, false)
-	if response.InviteEmailQueued == nil || *response.InviteEmailQueued {
-		t.Fatalf("invite email queued = %v, want false without a provider", response.InviteEmailQueued)
-	}
-	if response.InviteLink == nil {
-		t.Fatalf("invite link missing, want it returned so the inviter can share it")
-	}
 }
 
 // Direct credentials already give the inviter a username and password, and no
@@ -157,7 +104,7 @@ func TestInviteUserReturnsNoLinkForDirectCredentials(t *testing.T) {
 	if err != nil {
 		t.Fatalf("InviteUser: %v", err)
 	}
-	if response.InviteLink != nil || response.InviteEmailQueued != nil {
-		t.Fatalf("invite link or email status set for direct credentials, want neither")
+	if response.InviteLink != nil {
+		t.Fatalf("invite link = %q, want none for direct credentials", *response.InviteLink)
 	}
 }

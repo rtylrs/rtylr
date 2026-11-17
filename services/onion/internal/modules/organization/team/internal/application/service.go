@@ -99,12 +99,6 @@ func (s *Service) WithTerminatedEmployeeSource(source terminatedEmployeeSource) 
 	return s
 }
 
-// CanQueueInviteEmails reports whether this service has an email queue to put
-// invitations on. Without one EnqueueInviteEmail succeeds without queuing.
-func (s *Service) CanQueueInviteEmails() bool {
-	return s.emails != nil
-}
-
 // EnqueueInviteEmail queues actorID's invitation to join businessID for the
 // background worker to deliver, naming the inviter (or their email) and the
 // business. Queue failures are returned to the invite workflow; a name that
