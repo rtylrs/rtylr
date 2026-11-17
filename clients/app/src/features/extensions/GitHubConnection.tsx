@@ -19,6 +19,7 @@ import {
   useGitHubConnection,
   useStartGitHubInstall,
 } from '../../shared/hooks/queries/useGitHub';
+import { formatRelativeTime } from '../../shared/lib/dateUtils';
 
 /**
  * Dash > Extensions card for the business's GitHub App installation. GitHub
@@ -26,7 +27,7 @@ import {
  * this card hands to the server once and then strips from the URL.
  */
 export default function GitHubConnection() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const connection = useGitHubConnection();
   const start = useStartGitHubInstall();
@@ -114,6 +115,15 @@ export default function GitHubConnection() {
         </div>
         <h2 id="portal-extensions-github-title">GitHub</h2>
         <p role={connection.isError ? 'alert' : undefined}>{body}</p>
+        {data?.connected && (
+          <p className="portal-extensions-github-webhook">
+            {data.lastWebhookAt
+              ? t('extensions.github.lastWebhook', {
+                  when: formatRelativeTime(data.lastWebhookAt, i18n.language),
+                })
+              : t('extensions.github.noWebhooks')}
+          </p>
+        )}
         <div className="portal-extensions-item-footer">
           <span className="portal-extensions-price">{t('extensions.github.scope')}</span>
           <div className="portal-extensions-item-actions">

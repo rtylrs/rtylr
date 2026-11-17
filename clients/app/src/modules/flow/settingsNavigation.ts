@@ -8,6 +8,7 @@ import {
   Clock,
   PanelLeft,
   ListChecks,
+  Link2,
 } from 'lucide-react';
 import type { EffectiveAccess } from '@voxire/types';
 import type { SettingsSectionId } from './shared/schemas/settings';
@@ -18,6 +19,7 @@ export function getFlowSettingsSections(
 ): Array<{ id: SettingsSectionId; labelKey: string; icon: typeof Bell }> {
   return [
     { id: 'notifications', labelKey: 'flowCommon.settings.notifications', icon: Bell },
+    { id: 'accounts', labelKey: 'flow.settings.accounts.section', icon: Link2 },
     { id: 'time', labelKey: 'flow.settings.time.section', icon: Clock },
     { id: 'appearance', labelKey: 'flowCommon.settings.appearance', icon: Palette },
     { id: 'sidebar', labelKey: 'flow.sidebar.settingsSection', icon: PanelLeft },

@@ -27,4 +27,19 @@ service GitHubService {
 
   /// Replaces a project's repository selection. Project admins only.
   setProjectRepositories(SetProjectRepositoriesRequest) -> SetProjectRepositoriesResponse @put("/project-repositories")
+
+  /// Returns the caller's linked GitHub account in this business.
+  getMyGitHubLink(GetMyGitHubLinkRequest) -> GetMyGitHubLinkResponse @get("/link")
+
+  /// Returns the GitHub URL where the caller authorizes the app, so commits
+  /// and pull requests can be matched to them. Needs a connected business.
+  startGitHubLink(StartGitHubLinkRequest) -> StartGitHubLinkResponse @post("/link")
+
+  /// Exchanges the code GitHub redirected back with, after checking the
+  /// signed state, and stores the GitHub account id and login. The user
+  /// token is used once to read the account and is not stored.
+  completeGitHubLink(CompleteGitHubLinkRequest) -> CompleteGitHubLinkResponse @post("/link/complete")
+
+  /// Removes the caller's linked GitHub account.
+  unlinkGitHub(UnlinkGitHubRequest) -> UnlinkGitHubResponse @delete("/link")
 }

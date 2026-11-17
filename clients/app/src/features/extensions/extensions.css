@@ -149,6 +149,9 @@
 .portal-extensions-github .portal-extensions-status[data-health='removed'] {
   color: var(--status-error);
 }
+.portal-extensions-item > p.portal-extensions-github-webhook {
+  font-size: 12px;
+}
 @media (max-width: 600px) {
   .portal-extensions-item {
     padding: 18px;

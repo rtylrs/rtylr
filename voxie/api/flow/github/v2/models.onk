@@ -20,6 +20,28 @@ message GitHubConnection {
   connected_at: string
   /// can_manage is true when the caller may connect or disconnect GitHub.
   can_manage: bool
+  /// last_webhook_at is when the last signed webhook for this installation
+  /// arrived. Empty when none has arrived yet.
+  last_webhook_at: string
+  /// last_webhook_event is the X-GitHub-Event name of that webhook.
+  last_webhook_event: string
+  /// linking_enabled is true when members can link their GitHub accounts:
+  /// the server has the app's OAuth client credentials.
+  linking_enabled: bool
+}
+
+/// GitHubAccountLink is the caller's own GitHub account in this business.
+message GitHubAccountLink {
+  /// linked is false when the caller has not linked an account.
+  linked: bool
+  /// github_user_id is GitHub's numeric user id.
+  github_user_id: int64
+  /// login is the GitHub username, without the @.
+  login: string
+  /// avatar_url is the GitHub avatar, as GitHub reported it when linking.
+  avatar_url: string
+  /// linked_at is when the account was linked.
+  linked_at: string
 }
 
 /// GitHubRepository is one repository the installation can access.
@@ -106,3 +128,33 @@ message SetProjectRepositoriesRequest {
 message SetProjectRepositoriesResponse {
   repositories: ProjectRepository[]
 }
+
+message GetMyGitHubLinkRequest {}
+
+message GetMyGitHubLinkResponse {
+  link: GitHubAccountLink
+}
+
+message StartGitHubLinkRequest {}
+
+message StartGitHubLinkResponse {
+  /// authorize_url is the GitHub page that asks the member to authorize the
+  /// app. It carries a signed state that expires after ten minutes and is
+  /// bound to this business and member.
+  authorize_url: string
+}
+
+message CompleteGitHubLinkRequest {
+  /// code is the value GitHub appended to the callback URL.
+  code: string @required @len(1, 256)
+  /// state is the value GitHub echoed back to the callback URL.
+  state: string @required @len(1, 512)
+}
+
+message CompleteGitHubLinkResponse {
+  link: GitHubAccountLink
+}
+
+message UnlinkGitHubRequest {}
+
+message UnlinkGitHubResponse {}

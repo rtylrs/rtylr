@@ -35,6 +35,10 @@ type Config struct {
 	AppID         string
 	Slug          string
 	PrivateKeyPEM []byte
+	// ClientID and ClientSecret are the app's OAuth credentials for linking
+	// member accounts. Both empty leaves linking off.
+	ClientID     string
+	ClientSecret string
 	// APIURL and WebURL are overridable for tests only.
 	APIURL     string
 	WebURL     string
@@ -43,13 +47,16 @@ type Config struct {
 }
 
 type Client struct {
-	appID  string
-	slug   string
-	key    *rsa.PrivateKey
-	apiURL string
-	webURL string
-	http   *http.Client
-	now    func() time.Time
+	appID string
+	slug  string
+	key   *rsa.PrivateKey
+	// clientID and clientSecret are empty when linking is off.
+	clientID     string
+	clientSecret string
+	apiURL       string
+	webURL       string
+	http         *http.Client
+	now          func() time.Time
 }
 
 func NewClient(cfg Config) (*Client, error) {
@@ -61,13 +68,15 @@ func NewClient(cfg Config) (*Client, error) {
 		return nil, fmt.Errorf("parse github app private key: %w", err)
 	}
 	c := &Client{
-		appID:  strings.TrimSpace(cfg.AppID),
-		slug:   strings.TrimSpace(cfg.Slug),
-		key:    key,
-		apiURL: strings.TrimRight(cfg.APIURL, "/"),
-		webURL: strings.TrimRight(cfg.WebURL, "/"),
-		http:   cfg.HTTPClient,
-		now:    cfg.Now,
+		appID:        strings.TrimSpace(cfg.AppID),
+		slug:         strings.TrimSpace(cfg.Slug),
+		key:          key,
+		clientID:     strings.TrimSpace(cfg.ClientID),
+		clientSecret: strings.TrimSpace(cfg.ClientSecret),
+		apiURL:       strings.TrimRight(cfg.APIURL, "/"),
+		webURL:       strings.TrimRight(cfg.WebURL, "/"),
+		http:         cfg.HTTPClient,
+		now:          cfg.Now,
 	}
 	if c.apiURL == "" {
 		c.apiURL = DefaultAPIURL

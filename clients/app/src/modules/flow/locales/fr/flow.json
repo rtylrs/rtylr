@@ -545,6 +545,27 @@
       "errorName": "Chaque statut doit avoir un nom.",
       "errorDuplicate": "Deux statuts portent le même nom. Les noms doivent être uniques.",
       "errorNoDone": "Incluez au moins un statut dans la catégorie Terminé."
+    },
+    "accounts": {
+      "section": "Comptes connectés",
+      "subtitle": "Liez vos propres comptes pour que Flow vous attribue vos commits et pull requests.",
+      "notConnected": "Rien à lier pour l’instant. GitHub n’est pas connecté pour cette entreprise.",
+      "github": {
+        "label": "Compte GitHub",
+        "checking": "Vérification de GitHub…",
+        "linkedAs": "Lié en tant que @{{login}}",
+        "notLinked": "Non lié",
+        "linkingOff": "La liaison de comptes n’est pas encore configurée sur ce serveur.",
+        "link": "Lier GitHub",
+        "unlink": "Délier",
+        "working": "En cours…",
+        "linking": "Liaison de votre compte GitHub…",
+        "linked": "Compte GitHub lié",
+        "unlinked": "Compte GitHub délié",
+        "cancelled": "La liaison GitHub a été annulée",
+        "linkError": "Impossible de lier votre compte GitHub. Veuillez réessayer.",
+        "unlinkError": "Impossible de délier votre compte GitHub. Veuillez réessayer."
+      }
     }
   },
   "presence": {
@@ -978,7 +999,9 @@
       "save": "Enregistrer les dépôts",
       "saving": "Enregistrement…",
       "saved": "Dépôts enregistrés",
-      "saveError": "Impossible d’enregistrer les dépôts. Veuillez réessayer."
+      "saveError": "Impossible d’enregistrer les dépôts. Veuillez réessayer.",
+      "lastWebhook": "Dernier webhook reçu {{when}}",
+      "noWebhooks": "Aucun webhook reçu pour l’instant"
     },
     "memberCount_one": "{{count}} membre",
     "memberCount_many": "{{count}} membres",

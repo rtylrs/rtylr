@@ -78,6 +78,8 @@
     "disconnectedManual": "GitHub is disconnected here. Uninstall the app in your GitHub settings as well.",
     "disconnectError": "Unable to disconnect GitHub. Please try again.",
     "disconnectTitle": "Disconnect GitHub?",
-    "disconnectDescription": "Every project loses its repository selection, and the app is uninstalled from your GitHub account."
+    "disconnectDescription": "Every project loses its repository selection, and the app is uninstalled from your GitHub account.",
+    "lastWebhook": "Last webhook received {{when}}",
+    "noWebhooks": "No webhooks yet"
   }
 }

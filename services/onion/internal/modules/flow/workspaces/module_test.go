@@ -3,6 +3,7 @@ package workspaces
 import (
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -28,7 +29,16 @@ func TestRegisterAPIIncludesProtectedRealtimeTicketEndpoint(t *testing.T) {
 		t.Fatalf("expected the websocket route to be registered, got %d", ws.Code)
 	}
 
-	if got := (&Module{}).GetAnonymousRoutes(); len(got) != 1 || got[0] != "/flow/ws" {
-		t.Fatalf("only the websocket upgrade should be anonymous, got %v", got)
+	// The GitHub webhook is registered and, with no webhook secret, refuses
+	// every delivery instead of accepting unsigned ones.
+	hook := httptest.NewRecorder()
+	mux.ServeHTTP(hook, httptest.NewRequest(http.MethodPost, "/flow/github/webhook", strings.NewReader("{}")))
+	if hook.Code != http.StatusServiceUnavailable {
+		t.Fatalf("expected the GitHub webhook to refuse deliveries without a secret, got %d", hook.Code)
+	}
+
+	got := (&Module{}).GetAnonymousRoutes()
+	if len(got) != 2 || got[0] != "/flow/ws" || got[1] != "/flow/github/webhook" {
+		t.Fatalf("only the websocket upgrade and the signed GitHub webhook should be anonymous, got %v", got)
 	}
 }

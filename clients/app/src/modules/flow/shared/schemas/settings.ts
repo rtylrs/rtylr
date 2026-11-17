@@ -11,6 +11,7 @@ import { z } from 'zod';
  */
 const SETTINGS_SECTION_IDS = [
   'notifications',
+  'accounts',
   'time',
   'appearance',
   'labels',

@@ -40,10 +40,18 @@ type githubStore interface {
 	DeleteGitHubInstallation(ctx context.Context, businessID int64) error
 	ListProjectRepositories(ctx context.Context, businessID, projectID int64) ([]domain.ProjectRepository, error)
 	ReplaceProjectRepositories(ctx context.Context, businessID, projectID, installationID, callerID int64, repos []domain.GitHubRepository) error
+
+	GetGitHubInstallationByInstallationID(ctx context.Context, installationID int64) (domain.GitHubInstallation, error)
+	ApplyGitHubWebhook(ctx context.Context, effect domain.GitHubWebhookEffect) (duplicate bool, err error)
+	ListInstallationProjectRepositoryIDs(ctx context.Context, businessID, installationID int64) ([]int64, error)
+	GetGitHubUserLink(ctx context.Context, businessID, userID int64) (domain.GitHubUserLink, error)
+	ReplaceGitHubUserLink(ctx context.Context, link domain.GitHubUserLink) error
+	DeleteGitHubUserLink(ctx context.Context, businessID, userID int64) error
 }
 
 type githubIntegration struct {
 	app      GitHubApp
+	oauth    GitHubOAuth
 	stateKey []byte
 	now      func() time.Time
 }
@@ -58,7 +66,7 @@ func (s *Service) SetGitHubApp(app GitHubApp, stateKey []byte, now func() time.T
 	if now == nil {
 		now = time.Now
 	}
-	s.github = githubIntegration{app: app, stateKey: stateKey, now: now}
+	s.github = githubIntegration{app: app, oauth: s.github.oauth, stateKey: stateKey, now: now}
 }
 
 func (s *Service) githubConfigured() bool { return s.github.app != nil }
@@ -78,7 +86,15 @@ func (s *Service) GitHubConnection(ctx context.Context, businessID int64) (domai
 	conn.AccountLogin = inst.AccountLogin
 	conn.AccountType = inst.AccountType
 	conn.ConnectedAt = inst.CreatedAt
+	conn.LastWebhookAt = inst.LastWebhookAt
+	conn.LastWebhookEvent = inst.LastWebhookEvent
+	conn.LinkingEnabled = s.githubLinkingConfigured()
 	conn.Status = s.githubInstallationStatus(ctx, inst.InstallationID)
+	// When GitHub cannot be asked, the last suspend webhook still says
+	// something true about the installation.
+	if conn.Status == domain.GitHubStatusUnknown && inst.SuspendedAt != nil {
+		conn.Status = domain.GitHubStatusSuspended
+	}
 	return conn, nil
 }
 

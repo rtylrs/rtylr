@@ -24,6 +24,7 @@ import TimeSection from './sections/TimeSection';
 import BinSection from './sections/BinSection';
 import SidebarSettingsSection from './sections/SidebarSettingsSection';
 import StatusTemplateSection from './sections/StatusTemplateSection';
+import AccountsSection from './sections/AccountsSection';
 import { canFlowPermission } from '../../shared/lib/roleUtils';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
@@ -557,6 +558,7 @@ export const LabelsSection: React.FC = () => {
 const SECTION_CONTENT: Record<string, React.FC> = {
   bin: BinSection,
   notifications: NotificationsSection,
+  accounts: AccountsSection,
   appearance: AppearanceSection,
   labels: LabelsSection,
   statuses: StatusTemplateSection,

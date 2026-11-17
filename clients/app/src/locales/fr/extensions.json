@@ -78,6 +78,8 @@
     "disconnectedManual": "GitHub est déconnecté ici. Désinstallez aussi l’application dans vos paramètres GitHub.",
     "disconnectError": "Impossible de déconnecter GitHub. Veuillez réessayer.",
     "disconnectTitle": "Déconnecter GitHub ?",
-    "disconnectDescription": "Chaque projet perd sa sélection de dépôts et l’application est désinstallée de votre compte GitHub."
+    "disconnectDescription": "Chaque projet perd sa sélection de dépôts et l’application est désinstallée de votre compte GitHub.",
+    "lastWebhook": "Dernier webhook reçu {{when}}",
+    "noWebhooks": "Aucun webhook reçu pour l’instant"
   }
 }

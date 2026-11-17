@@ -4,6 +4,9 @@
 -- installation_id is unique across businesses so one GitHub account cannot be
 -- attached to two tenants: whoever completes the install first holds it, and a
 -- second business guessing the same id is rejected.
+--
+-- suspended_at and the last_webhook_* columns arrived with v16, which adds
+-- them to databases that already ran this file.
 
 CREATE TABLE IF NOT EXISTS `flow_github_installations` (
   `id` bigint NOT NULL AUTO_INCREMENT,
@@ -12,6 +15,9 @@ CREATE TABLE IF NOT EXISTS `flow_github_installations` (
   `account_login` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `account_type` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `installed_by` bigint NOT NULL,
+  `suspended_at` timestamp NULL DEFAULT NULL,
+  `last_webhook_at` timestamp NULL DEFAULT NULL,
+  `last_webhook_event` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_flow_github_installations_business` (`business_id`),
