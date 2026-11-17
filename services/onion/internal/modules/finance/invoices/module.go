@@ -81,6 +81,13 @@ func (m *Module) SetCustomerSnapshotProvider(p application.CustomerSnapshotProvi
 	m.service.SetCustomerSnapshotProvider(p)
 }
 
+// SetProjectReferenceReader connects invoice project tags to the flow module
+// through the port invoices owns, so a tag is verified against the caller's
+// business. flow implements it; no package imports the other.
+func (m *Module) SetProjectReferenceReader(r application.ProjectReferenceReader) {
+	m.service.SetProjectReferenceReader(r)
+}
+
 func (m *Module) SetBillableTimeReader(reader application.BillableTimeReader) {
 	m.service.SetBillableTimeReader(reader)
 }

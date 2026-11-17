@@ -39,6 +39,16 @@ func (s *Service) UpdateInvoice(ctx context.Context, businessID, invoiceID int64
 		newCustomerID = existing.CustomerID
 	}
 
+	// Same three states as the contract: absent keeps the tag, 0 clears it,
+	// and a new id is verified against the business before it is stored.
+	newProjectID := existing.ProjectID
+	if input.ProjectID != nil {
+		if err := s.verifyProject(ctx, businessID, *input.ProjectID); err != nil {
+			return nil, err
+		}
+		newProjectID = projectLink(*input.ProjectID)
+	}
+
 	issueDate, err := time.Parse("2006-01-02", input.IssueDate)
 	if err != nil {
 		return nil, err
@@ -96,6 +106,7 @@ func (s *Service) UpdateInvoice(ctx context.Context, businessID, invoiceID int64
 	existing.ClientAddress = input.ClientAddress
 	existing.ClientTaxID = input.ClientTaxID
 	existing.CustomerID = newCustomerID
+	existing.ProjectID = newProjectID
 	existing.IssueDate = issueDate
 	existing.DueDate = dueDate
 	existing.Currency = currency
