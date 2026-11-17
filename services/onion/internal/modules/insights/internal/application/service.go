@@ -26,10 +26,18 @@ type CRMDashboardReader interface {
 	CountCustomersCreatedBetween(context.Context, int64, time.Time, time.Time) (int64, error)
 }
 
+// CRMSalesDashboardReader reads deal totals from CRM sales: counts and
+// first-year values in minor units.
+type CRMSalesDashboardReader interface {
+	OpenDealPipeline(context.Context, int64) (int64, int64, error)
+	WonDealsBetween(context.Context, int64, time.Time, time.Time) (int64, int64, error)
+}
+
 type DashboardReaders struct {
-	Finance FinanceDashboardReader
-	POS     POSDashboardReader
-	CRM     CRMDashboardReader
+	Finance  FinanceDashboardReader
+	POS      POSDashboardReader
+	CRM      CRMDashboardReader
+	CRMSales CRMSalesDashboardReader
 }
 
 type repository interface {

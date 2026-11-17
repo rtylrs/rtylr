@@ -249,10 +249,12 @@ func initializeModules(ctx context.Context) *apiModules {
 	financeReconciliationModule := financereconciliation.NewModule(ctx, dbclient.Pool())
 	financeReportsModule := financereports.NewModule(ctx, dbclient.Pool()).WithReportingCurrency(businessModule.ReportingCurrency)
 	hrReportsModule := hr_reports.NewModule(ctx, dbclient.Pool())
+	crmSalesModule := crmsales.NewModule(ctx, dbclient.Pool()).WithMembershipReader(scopes.NewReader(dbclient.Pool()).IsBusinessUser).WithRepReader(crmSalesReps(scopes.NewReader(dbclient.Pool())))
 	insightsModule := insights.NewModule(ctx, dbclient.Pool(), insightsadapters.NewFlowReader(flowInsightsModule), insights.DashboardReaders{
-		Finance: financeReportsModule,
-		POS:     posOrdersModule,
-		CRM:     customersModule,
+		Finance:  financeReportsModule,
+		POS:      posOrdersModule,
+		CRM:      customersModule,
+		CRMSales: crmSalesModule,
 	}, insights.Sources{
 		Finance: financeReportsModule,
 		HR:      hrReportsModule,
@@ -331,7 +333,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Console:               consoleModule,
 		Config:                configModule,
 		CRMSettings:           crmsettings.NewModule(ctx, dbclient.Pool()),
-		CRMSales:              crmsales.NewModule(ctx, dbclient.Pool()).WithMembershipReader(scopes.NewReader(dbclient.Pool()).IsBusinessUser).WithRepReader(crmSalesReps(scopes.NewReader(dbclient.Pool()))),
+		CRMSales:              crmSalesModule,
 		Customers:             customersModule,
 		FeatureSupport:        featuresupport.NewModule(ctx, dbclient.Pool()),
 		Departments:           departments.NewModule(ctx, dbclient.Pool()),

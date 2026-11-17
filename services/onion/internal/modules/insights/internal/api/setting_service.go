@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	insightsdashboardv1 "github.com/voxire/voxie/gen/go/insights/dashboard/v1"
 	insightssettingv1 "github.com/voxire/voxie/gen/go/insights/setting/v1"
@@ -163,6 +164,34 @@ func (a *DashboardAPI) GetDashboardSummary(ctx context.Context, _ *insightsdashb
 			DeltaPct: snap.Margin.DeltaPct,
 		},
 	}, nil
+}
+
+// GetSalesSummary reports CRM deal totals. Deals carry no currency, so their
+// values are shown in the business's insights currency like the other cards.
+func (a *DashboardAPI) GetSalesSummary(ctx context.Context, _ *insightsdashboardv1.GetSalesSummaryRequest) (*insightsdashboardv1.GetSalesSummaryResponse, error) {
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
+	if err != nil {
+		return nil, err
+	}
+
+	summary, err := a.Service.GetSalesSummary(ctx, businessID)
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load sales summary")
+	}
+
+	return toSalesSummaryResponse(summary), nil
+}
+
+func toSalesSummaryResponse(summary domain.SalesSummary) *insightsdashboardv1.GetSalesSummaryResponse {
+	return &insightsdashboardv1.GetSalesSummaryResponse{
+		OpenPipelineValue: summary.OpenPipelineValue,
+		OpenDealCount:     summary.OpenDeals,
+		Won: &insightsdashboardv1.InsightsMetricCard{
+			Value:    summary.Won.Value,
+			DeltaPct: summary.Won.DeltaPct,
+		},
+		RecentWonDealCount: summary.RecentWonDeals,
+	}
 }
 
 // GetInsights reports Flow's delivery numbers as this contract shapes them.

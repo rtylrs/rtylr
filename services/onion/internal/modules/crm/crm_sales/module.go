@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	crmcontract "github.com/voxire/onion/internal/contracts/crm"
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/api"
@@ -102,4 +103,18 @@ func (m *Module) WithRepReader(reader func(context.Context, int64) ([]Rep, error
 		return result, nil
 	})
 	return m
+}
+
+// OpenDealPipeline reports how many deals are open and their first-year
+// value in minor units, for the Insights business overview.
+func (m *Module) OpenDealPipeline(ctx context.Context, businessID int64) (int64, int64, error) {
+	deals, value, err := m.repository.OpenDealPipeline(ctx, businessID)
+	return deals, int64(value), err
+}
+
+// WonDealsBetween reports how many deals were won with closed_at in
+// [from, to] and their first-year value in minor units.
+func (m *Module) WonDealsBetween(ctx context.Context, businessID int64, from, to time.Time) (int64, int64, error) {
+	deals, value, err := m.repository.WonDealsBetween(ctx, businessID, from, to)
+	return deals, int64(value), err
 }

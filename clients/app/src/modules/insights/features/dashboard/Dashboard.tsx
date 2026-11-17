@@ -12,6 +12,9 @@ import {
   AlertTriangle,
   FileText,
   Clock,
+  Target,
+  Trophy,
+  type LucideIcon,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Bar } from 'react-chartjs-2';
@@ -20,6 +23,7 @@ import { EmptyState } from '@voxire/ui';
 import { refreshEmptyStateAction } from '../../shared/lib/refreshAction';
 import {
   useInsightsDashboard,
+  useSalesSummary,
   useWorkSummary,
 } from '../../shared/hooks/queries/useInsightsDashboard';
 import { useInvoiceAging } from '../../shared/hooks/queries/useInsightsFinancial';
@@ -80,12 +84,22 @@ const DeltaBadge = ({ deltaPct }: DeltaBadgeProps): React.JSX.Element => {
   );
 };
 
+interface ServiceStat {
+  id: string;
+  label: string;
+  value: string;
+  icon: LucideIcon;
+  detail?: string;
+  deltaPct?: number;
+}
+
 const Dashboard: React.FC = (): React.JSX.Element => {
   const { t, i18n } = useTranslation();
   const { data, isLoading, isError, refetch } = useInsightsDashboard();
   const { data: seriesData } = useRevenueSeries();
   const { data: settings } = useInsightsSettings();
   const { data: work } = useWorkSummary();
+  const { data: sales } = useSalesSummary();
   const { data: agingData } = useInvoiceAging();
   const currency = (settings?.defaultCurrency as Currency) || 'USD';
 
@@ -153,7 +167,29 @@ const Dashboard: React.FC = (): React.JSX.Element => {
     .filter((b) => b.bucket !== 'current')
     .reduce((sum, b) => sum + b.amountMinorUnits, 0);
 
-  const serviceStats = [
+  const hasSales = !!sales && (sales.openDealCount > 0 || sales.recentWonDealCount > 0);
+  const serviceStats: ServiceStat[] = [
+    ...(sales && hasSales
+      ? [
+          {
+            id: 'deals-open',
+            label: t('insights.dashboard.service.openPipeline'),
+            value: formatMoney(sales.openPipelineValue, currency),
+            icon: Target,
+            detail: t('insights.dashboard.service.openDeals', {
+              count: sales.openDealCount,
+              formatted: formatNumber(sales.openDealCount),
+            }),
+          },
+          {
+            id: 'deals-won',
+            label: t('insights.dashboard.service.wonThisMonth'),
+            value: formatMoney(sales.won.value, currency),
+            icon: Trophy,
+            deltaPct: sales.won.deltaPct,
+          },
+        ]
+      : []),
     ...(work && work.totalTasks > 0
       ? [
           {
@@ -192,15 +228,16 @@ const Dashboard: React.FC = (): React.JSX.Element => {
   ];
   const projects = (work?.projects ?? []).slice(0, 6);
 
-  // Work and unpaid invoices count as activity too: a service business with
-  // projects and invoices but no POS orders is not an empty business.
+  // Deals, Work and unpaid invoices count as activity too: a service business
+  // with a pipeline, projects and invoices but no POS orders is not empty.
   const isEmpty =
     !!data &&
     data.revenue.value === 0 &&
     data.customers.value === 0 &&
     data.orders.value === 0 &&
     (work?.totalTasks ?? 0) === 0 &&
-    unpaidMinor === 0;
+    unpaidMinor === 0 &&
+    !hasSales;
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -301,6 +338,12 @@ const Dashboard: React.FC = (): React.JSX.Element => {
                   <p className="text-2xl font-bold truncate" style={{ color: 'var(--hub-text)' }}>
                     {stat.value}
                   </p>
+                  {stat.detail && (
+                    <p className="text-xs mt-1" style={{ color: 'var(--hub-text-muted)' }}>
+                      {stat.detail}
+                    </p>
+                  )}
+                  {stat.deltaPct !== undefined && <DeltaBadge deltaPct={stat.deltaPct} />}
                 </div>
               );
             })}

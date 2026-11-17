@@ -93,3 +93,16 @@ message GetDashboardSummaryResponse {
   /// margin is MTD margin percentage with delta.
   margin: InsightsPctCard
 }
+
+message GetSalesSummaryRequest {}
+
+message GetSalesSummaryResponse {
+  /// open_pipeline_value is the first-year value of every open CRM deal, in minor units.
+  open_pipeline_value: int64
+  /// open_deal_count is the number of open CRM deals.
+  open_deal_count: int64
+  /// won is the first-year value of deals won this month to date, in minor units, with the change against the same span last month.
+  won: InsightsMetricCard
+  /// recent_won_deal_count is the number of deals won since the start of last month.
+  recent_won_deal_count: int64
+}

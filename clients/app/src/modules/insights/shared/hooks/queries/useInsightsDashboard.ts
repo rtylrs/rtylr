@@ -1,7 +1,7 @@
 import { createOneKitClient, toFiniteNumber } from '@voxire/api';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { DashboardServiceClient } from '@voxire/voxie/insights/dashboard/v1/client';
-import type { InsightsDashboardResponse, WorkSummaryResponse } from './types';
+import type { InsightsDashboardResponse, SalesSummaryResponse, WorkSummaryResponse } from './types';
 
 const dashboardClient = createOneKitClient(DashboardServiceClient, 'insights');
 
@@ -57,6 +57,27 @@ export const useWorkSummary = (): UseQueryResult<WorkSummaryResponse> => {
             progressPct: toFiniteNumber(p.progressPercent),
           }))
           .filter((p) => p.totalTasks > 0),
+      };
+    },
+  });
+};
+
+// CRM open pipeline and the deal value won this month, compared with the same
+// span last month.
+export const useSalesSummary = (): UseQueryResult<SalesSummaryResponse> => {
+  return useQuery<SalesSummaryResponse>({
+    queryKey: ['insights-dashboard-sales'],
+    refetchInterval: 60000,
+    queryFn: async (): Promise<SalesSummaryResponse> => {
+      const res = await dashboardClient.getSalesSummary({});
+      return {
+        openPipelineValue: toFiniteNumber(res.openPipelineValue),
+        openDealCount: toFiniteNumber(res.openDealCount),
+        won: {
+          value: toFiniteNumber(res.won?.value),
+          deltaPct: toFiniteNumber(res.won?.deltaPct),
+        },
+        recentWonDealCount: toFiniteNumber(res.recentWonDealCount),
       };
     },
   });

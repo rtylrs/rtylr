@@ -32,6 +32,17 @@ type DashboardSnapshot struct {
 	Margin    PctCard
 }
 
+// SalesSummary is the CRM deal pair on the overview: the open pipeline as it
+// stands now and the value won this month to date. RecentWonDeals counts wins
+// since the start of last month so the client can tell "no CRM use" apart
+// from a quiet month.
+type SalesSummary struct {
+	OpenPipelineValue int64
+	OpenDeals         int64
+	Won               MoneyCard
+	RecentWonDeals    int64
+}
+
 // RevenuePoint is a single daily revenue sample in minor units.
 type RevenuePoint struct {
 	Date             string

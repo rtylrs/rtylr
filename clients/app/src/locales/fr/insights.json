@@ -18,7 +18,12 @@
     "vsPrior": "vs période précédente",
     "metaTitle": "Tableau de bord · rtylr",
     "service": {
-      "title": "Projets et factures",
+      "title": "Ventes, projets et factures",
+      "openPipeline": "Affaires en cours",
+      "openDeals_one": "{{formatted}} affaire ouverte",
+      "openDeals_many": "{{formatted}} d'affaires ouvertes",
+      "openDeals_other": "{{formatted}} affaires ouvertes",
+      "wonThisMonth": "Gagné ce mois-ci",
       "tasksDone": "Tâches terminées",
       "tasksDoneValue": "{{done}} sur {{total}}",
       "overdueTasks": "Tâches en retard",
