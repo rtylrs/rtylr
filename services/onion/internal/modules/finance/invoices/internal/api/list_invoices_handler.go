@@ -51,6 +51,7 @@ func newInvoiceSummary(inv domain.Invoice) *financeinvoicesv1.InvoiceSummary {
 		AmountPaid:    inv.AmountPaid,
 		AmountDue:     inv.AmountDue,
 		CreatedAt:     inv.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		ProjectId:     inv.ProjectID,
 	}
 }
 
