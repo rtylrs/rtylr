@@ -57,8 +57,14 @@ const dashboard: ProjectDashboardResponse = {
   progressPct: 25,
   overdueTaskCount: 7,
   overdueTasks: [
-    { id: '51', title: 'Fix footer', dueDate: '2026-10-01', assigneeId: '7' },
-    { id: '52', title: 'Write copy', dueDate: '2026-10-02', assigneeId: '' },
+    {
+      id: '51',
+      title: 'Fix footer',
+      dueDate: '2026-10-01',
+      assigneeId: '7',
+      assigneeName: 'Abed Amouneh',
+    },
+    { id: '52', title: 'Write copy', dueDate: '2026-10-02', assigneeId: '', assigneeName: '' },
   ],
   hoursThisMonth: { value: 2400, deltaPct: 50 },
   priorMinutes: 1600,
@@ -120,6 +126,40 @@ describe('ProjectDashboardPanel', () => {
     expect(link).toHaveAttribute('href', '/flow/p/8/list?openTask=51');
     expect(link).toHaveTextContent(`Due ${formatDueDate('2026-10-01', 'en')}`);
     expect(within(list).getByText('and 5 more overdue tasks')).toBeInTheDocument();
+  });
+
+  it('names the assignee after the due date, or says the task is unassigned', () => {
+    loaded(dashboard);
+    render(<ProjectDashboardPanel projectId="8" />);
+
+    const list = screen.getByRole('region', { name: 'Overdue tasks' });
+    const assigned = within(list).getByRole('link', { name: /Fix footer/ });
+    expect(assigned).toHaveTextContent(`Due ${formatDueDate('2026-10-01', 'en')}·Abed Amouneh`);
+    // The name is isolated so it reads correctly in a right-to-left page.
+    expect(within(assigned).getByText('Abed Amouneh').tagName).toBe('BDI');
+    const unassigned = within(list).getByRole('link', { name: /Write copy/ });
+    expect(within(unassigned).getByText('Unassigned')).toBeInTheDocument();
+  });
+
+  it('leaves an assignee whose name is unknown unlabelled', () => {
+    loaded({
+      ...dashboard,
+      overdueTasks: [
+        {
+          id: '53',
+          title: 'Plan launch',
+          dueDate: '2026-10-03',
+          assigneeId: '9',
+          assigneeName: '',
+        },
+      ],
+    });
+    render(<ProjectDashboardPanel projectId="8" />);
+
+    const link = screen.getByRole('link', { name: /Plan launch/ });
+    expect(link).toHaveTextContent(`Due ${formatDueDate('2026-10-03', 'en')}`);
+    expect(within(link).queryByText('Unassigned')).not.toBeInTheDocument();
+    expect(within(link).queryByText('·')).not.toBeInTheDocument();
   });
 
   it('says so when nothing is overdue', () => {
