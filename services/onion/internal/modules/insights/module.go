@@ -39,10 +39,11 @@ type (
 )
 
 type (
-	FinanceDashboardReader = application.FinanceDashboardReader
-	POSDashboardReader     = application.POSDashboardReader
-	CRMDashboardReader     = application.CRMDashboardReader
-	DashboardReaders       = application.DashboardReaders
+	FinanceDashboardReader  = application.FinanceDashboardReader
+	POSDashboardReader      = application.POSDashboardReader
+	CRMDashboardReader      = application.CRMDashboardReader
+	CRMSalesDashboardReader = application.CRMSalesDashboardReader
+	DashboardReaders        = application.DashboardReaders
 )
 
 // Sources are the owning modules report data is read from. Insights never
