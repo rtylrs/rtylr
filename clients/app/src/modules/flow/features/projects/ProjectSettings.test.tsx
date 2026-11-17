@@ -274,7 +274,9 @@ describe('ProjectSettings role gating (#793)', () => {
     expect(
       screen.getByRole('button', { name: 'flow.projectSettings.removeMemberLabel' })
     ).toBeDisabled();
-    expect(screen.queryByRole('button', { name: /Add/ })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'flow.projectSettings.addMemberShort' })
+    ).not.toBeInTheDocument();
   });
 
   it('a non-admin cannot fire a role change even if the disabled select is programmatically changed', () => {
@@ -303,7 +305,11 @@ describe('ProjectSettings role gating (#793)', () => {
     expect(
       screen.getByRole('button', { name: 'flow.projectSettings.removeMemberLabel' })
     ).toBeEnabled();
-    expect(screen.getByRole('button', { name: /Add/ })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'flow.projectSettings.addMemberShort' })
+    ).toBeInTheDocument();
+    // The count comes from the locale so Arabic and French get their own plurals.
+    expect(screen.getByText('flow.projectSettings.memberCount')).toBeInTheDocument();
   });
 
   it('labels the project owner as Owner with no role select or remove button', () => {
