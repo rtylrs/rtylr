@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/go-sql-driver/mysql"
 
@@ -23,15 +24,45 @@ func (r *Repository) GetGitHubInstallation(ctx context.Context, businessID int64
 		logger.Ctx(ctx).Error("GetGitHubInstallation failed", logger.Error(err))
 		return domain.GitHubInstallation{}, err
 	}
+	return toGitHubInstallation(row), nil
+}
+
+// GetGitHubInstallationByInstallationID resolves the business that holds a
+// GitHub installation id, for webhooks. domain.ErrGitHubNotConnected when no
+// business holds it.
+func (r *Repository) GetGitHubInstallationByInstallationID(ctx context.Context, installationID int64) (domain.GitHubInstallation, error) {
+	row, err := r.queries.GetGitHubInstallationByInstallationID(ctx, installationID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.GitHubInstallation{}, domain.ErrGitHubNotConnected
+	}
+	if err != nil {
+		logger.Ctx(ctx).Error("GetGitHubInstallationByInstallationID failed", logger.Error(err))
+		return domain.GitHubInstallation{}, err
+	}
+	return toGitHubInstallation(row), nil
+}
+
+func toGitHubInstallation(row sqlc.FlowGithubInstallation) domain.GitHubInstallation {
 	return domain.GitHubInstallation{
-		ID:             row.ID,
-		BusinessID:     row.BusinessID,
-		InstallationID: row.InstallationID,
-		AccountLogin:   row.AccountLogin,
-		AccountType:    row.AccountType,
-		InstalledBy:    row.InstalledBy,
-		CreatedAt:      row.CreatedAt,
-	}, nil
+		ID:               row.ID,
+		BusinessID:       row.BusinessID,
+		InstallationID:   row.InstallationID,
+		AccountLogin:     row.AccountLogin,
+		AccountType:      row.AccountType,
+		InstalledBy:      row.InstalledBy,
+		SuspendedAt:      nullTimePtr(row.SuspendedAt),
+		LastWebhookAt:    nullTimePtr(row.LastWebhookAt),
+		LastWebhookEvent: row.LastWebhookEvent,
+		CreatedAt:        row.CreatedAt,
+	}
+}
+
+func nullTimePtr(t sql.NullTime) *time.Time {
+	if !t.Valid {
+		return nil
+	}
+	v := t.Time
+	return &v
 }
 
 // CreateGitHubInstallation stores a new installation. A duplicate key means
@@ -140,4 +171,167 @@ func (r *Repository) ReplaceProjectRepositories(ctx context.Context, businessID,
 		}
 	}
 	return tx.Commit()
+}
+
+// githubDeliveryRetention keeps processed delivery ids long enough to cover
+// GitHub's manual redelivery window. Older ids are pruned as deliveries arrive.
+const githubDeliveryRetention = 7 * 24 * time.Hour
+
+// ApplyGitHubWebhook records the delivery id and applies its effect in one
+// transaction. It returns true without changing anything when the delivery
+// id was already recorded. A failed effect rolls back the id too, so the
+// delivery can be redelivered.
+func (r *Repository) ApplyGitHubWebhook(ctx context.Context, e domain.GitHubWebhookEffect) (bool, error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return false, err
+	}
+	defer func() { _ = tx.Rollback() }()
+	q := r.queries.WithTx(tx)
+	recorded, err := q.RecordGitHubWebhookDelivery(ctx, sqlc.RecordGitHubWebhookDeliveryParams{
+		DeliveryID: e.DeliveryID,
+		BusinessID: e.BusinessID,
+		Event:      e.Event,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("RecordGitHubWebhookDelivery failed", logger.Error(err))
+		return false, err
+	}
+	if recorded == 0 {
+		return true, nil
+	}
+	if err := applyGitHubWebhookEffect(ctx, q, e); err != nil {
+		logger.Ctx(ctx).Error("applying github webhook failed", logger.String("event", e.Event), logger.Error(err))
+		return false, err
+	}
+	if err := q.PruneGitHubWebhookDeliveries(ctx, e.ReceivedAt.Add(-githubDeliveryRetention)); err != nil {
+		logger.Ctx(ctx).Error("PruneGitHubWebhookDeliveries failed", logger.Error(err))
+		return false, err
+	}
+	return false, tx.Commit()
+}
+
+func applyGitHubWebhookEffect(ctx context.Context, q *sqlc.Queries, e domain.GitHubWebhookEffect) error {
+	if e.RevokeGitHubUserID != 0 {
+		if _, err := q.DeleteGitHubUserLinksByGitHubUser(ctx, e.RevokeGitHubUserID); err != nil {
+			return err
+		}
+	}
+	if e.InstallationID == 0 {
+		return nil
+	}
+	if e.DeleteInstallation {
+		if err := q.DeleteInstallationProjectRepositories(ctx, sqlc.DeleteInstallationProjectRepositoriesParams{
+			BusinessID:     e.BusinessID,
+			InstallationID: e.InstallationID,
+		}); err != nil {
+			return err
+		}
+		return q.DeleteGitHubInstallationByID(ctx, sqlc.DeleteGitHubInstallationByIDParams{
+			BusinessID:     e.BusinessID,
+			InstallationID: e.InstallationID,
+		})
+	}
+	if e.SetSuspended {
+		var suspendedAt sql.NullTime
+		if e.SuspendedAt != nil {
+			suspendedAt = sql.NullTime{Time: *e.SuspendedAt, Valid: true}
+		}
+		if err := q.SetGitHubInstallationSuspendedAt(ctx, sqlc.SetGitHubInstallationSuspendedAtParams{
+			SuspendedAt:    suspendedAt,
+			BusinessID:     e.BusinessID,
+			InstallationID: e.InstallationID,
+		}); err != nil {
+			return err
+		}
+	}
+	for _, repositoryID := range e.RemoveRepositoryIDs {
+		if err := q.DeleteInstallationProjectRepository(ctx, sqlc.DeleteInstallationProjectRepositoryParams{
+			BusinessID:     e.BusinessID,
+			InstallationID: e.InstallationID,
+			RepositoryID:   repositoryID,
+		}); err != nil {
+			return err
+		}
+	}
+	return q.TouchGitHubInstallationWebhook(ctx, sqlc.TouchGitHubInstallationWebhookParams{
+		LastWebhookAt:    sql.NullTime{Time: e.ReceivedAt, Valid: true},
+		LastWebhookEvent: e.Event,
+		BusinessID:       e.BusinessID,
+		InstallationID:   e.InstallationID,
+	})
+}
+
+// ListInstallationProjectRepositoryIDs returns every repository id the
+// business's projects picked from one installation.
+func (r *Repository) ListInstallationProjectRepositoryIDs(ctx context.Context, businessID, installationID int64) ([]int64, error) {
+	ids, err := r.queries.ListInstallationProjectRepositoryIDs(ctx, sqlc.ListInstallationProjectRepositoryIDsParams{
+		BusinessID:     businessID,
+		InstallationID: installationID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("ListInstallationProjectRepositoryIDs failed", logger.Error(err))
+	}
+	return ids, err
+}
+
+// GetGitHubUserLink returns the member's linked account, or
+// domain.ErrGitHubNotLinked.
+func (r *Repository) GetGitHubUserLink(ctx context.Context, businessID, userID int64) (domain.GitHubUserLink, error) {
+	row, err := r.queries.GetGitHubUserLink(ctx, sqlc.GetGitHubUserLinkParams{BusinessID: businessID, UserID: userID})
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.GitHubUserLink{}, domain.ErrGitHubNotLinked
+	}
+	if err != nil {
+		logger.Ctx(ctx).Error("GetGitHubUserLink failed", logger.Error(err))
+		return domain.GitHubUserLink{}, err
+	}
+	return domain.GitHubUserLink{
+		BusinessID:   row.BusinessID,
+		UserID:       row.UserID,
+		GitHubUserID: row.GithubUserID,
+		Login:        row.GithubLogin,
+		AvatarURL:    row.GithubAvatarUrl,
+		CreatedAt:    row.CreatedAt,
+	}, nil
+}
+
+// ReplaceGitHubUserLink stores the member's account in place of any earlier
+// one. A duplicate key after the delete can only be the GitHub account being
+// linked to another member of the business.
+func (r *Repository) ReplaceGitHubUserLink(ctx context.Context, link domain.GitHubUserLink) error {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+	q := r.queries.WithTx(tx)
+	if err := q.DeleteGitHubUserLink(ctx, sqlc.DeleteGitHubUserLinkParams{BusinessID: link.BusinessID, UserID: link.UserID}); err != nil {
+		logger.Ctx(ctx).Error("DeleteGitHubUserLink failed", logger.Error(err))
+		return err
+	}
+	err = q.CreateGitHubUserLink(ctx, sqlc.CreateGitHubUserLinkParams{
+		BusinessID:      link.BusinessID,
+		UserID:          link.UserID,
+		GithubUserID:    link.GitHubUserID,
+		GithubLogin:     link.Login,
+		GithubAvatarUrl: link.AvatarURL,
+	})
+	var mysqlErr *mysql.MySQLError
+	if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
+		return domain.ErrGitHubAccountLinkedElsewhere
+	}
+	if err != nil {
+		logger.Ctx(ctx).Error("CreateGitHubUserLink failed", logger.Error(err))
+		return err
+	}
+	return tx.Commit()
+}
+
+func (r *Repository) DeleteGitHubUserLink(ctx context.Context, businessID, userID int64) error {
+	err := r.queries.DeleteGitHubUserLink(ctx, sqlc.DeleteGitHubUserLinkParams{BusinessID: businessID, UserID: userID})
+	if err != nil {
+		logger.Ctx(ctx).Error("DeleteGitHubUserLink failed", logger.Error(err))
+	}
+	return err
 }
