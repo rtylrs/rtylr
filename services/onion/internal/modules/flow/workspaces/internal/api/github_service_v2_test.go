@@ -44,3 +44,22 @@ func TestRepositoryPickingNeedsFlowProjectEditPermission(t *testing.T) {
 		t.Errorf("list: status = %d, want %d", flowPermissionStatus(err), http.StatusForbidden)
 	}
 }
+
+func TestGitHubAccountLinkingNeedsFlowAccess(t *testing.T) {
+	api := &GitHubAPIV2{}
+	ctx := authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{BusinessID: 9, UserID: 7})
+	calls := map[string]func() error{
+		"get":   func() error { _, err := api.GetMyGitHubLink(ctx, &flowgithubv2.GetMyGitHubLinkRequest{}); return err },
+		"start": func() error { _, err := api.StartGitHubLink(ctx, &flowgithubv2.StartGitHubLinkRequest{}); return err },
+		"complete": func() error {
+			_, err := api.CompleteGitHubLink(ctx, &flowgithubv2.CompleteGitHubLinkRequest{Code: "c", State: "s"})
+			return err
+		},
+		"unlink": func() error { _, err := api.UnlinkGitHub(ctx, &flowgithubv2.UnlinkGitHubRequest{}); return err },
+	}
+	for name, call := range calls {
+		if got := flowPermissionStatus(call()); got != http.StatusForbidden {
+			t.Errorf("%s: status = %d, want %d", name, got, http.StatusForbidden)
+		}
+	}
+}
