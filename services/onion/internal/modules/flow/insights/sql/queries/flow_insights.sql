@@ -81,3 +81,22 @@ LEFT JOIN flow_tasks ft ON ft.id = fmt.task_id AND ft.parent_task_id IS NULL
 WHERE fm.business_id = ? AND fm.project_id IN (sqlc.slice('project_ids'))
 GROUP BY fm.project_id, fm.id, fm.name, fm.target_date
 ORDER BY fm.target_date ASC;
+
+-- Flow's own time logs only: rows linked to an HR time entry are HR's time.
+-- Tenancy comes from the task and project, since old log rows can carry
+-- business_id 0. Visibility and status let the caller name only public projects.
+-- name: GetLoggedMinutesByProject :many
+SELECT
+    fp.id AS project_id,
+    fp.name,
+    fp.visibility,
+    fp.status,
+    CAST(COALESCE(SUM(tl.duration_minutes), 0) AS SIGNED) AS minutes
+FROM flow_time_logs tl
+JOIN flow_tasks ft ON ft.id = tl.task_id
+JOIN flow_projects fp ON fp.id = ft.project_id
+WHERE ft.business_id = sqlc.arg('business_id') AND fp.business_id = sqlc.arg('business_id')
+  AND tl.time_entry_id IS NULL
+  AND tl.logged_at >= sqlc.arg('date_from') AND tl.logged_at <= sqlc.arg('date_to')
+GROUP BY fp.id, fp.name, fp.visibility, fp.status
+ORDER BY minutes DESC, fp.id ASC;

@@ -18,6 +18,7 @@ type repository interface {
 	GetInsightsStats(ctx context.Context, businessID int64) (domain.InsightsStats, error)
 	GetTeamWorkload(ctx context.Context, businessID int64) (domain.TeamWorkloadResult, error)
 	GetRoadmap(ctx context.Context, businessID int64) (domain.RoadmapResult, error)
+	GetLoggedTime(ctx context.Context, businessID int64, from, to time.Time) (domain.LoggedTime, error)
 }
 
 type Service struct {
@@ -58,4 +59,10 @@ func (s *Service) GetRoadmap(ctx context.Context, businessID int64) (domain.Road
 		},
 		cacher.WithExpiry(ctx, flowInsightsTTL),
 	)
+}
+
+// GetLoggedTime is not cached here: its window ends at the caller's "now", so
+// no two calls share a key. The caller caches the summary it builds.
+func (s *Service) GetLoggedTime(ctx context.Context, businessID int64, from, to time.Time) (domain.LoggedTime, error) {
+	return s.repo.GetLoggedTime(ctx, businessID, from, to)
 }
