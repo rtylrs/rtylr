@@ -24,8 +24,8 @@ import ErrorState from './ErrorState';
 interface ProjectDashboardPanelProps {
   projectId: string;
   // Shown instead of the panel when the viewer cannot open this project's
-  // dashboard: no Business Overview access (403), or a private project they
-  // are not a member of (404). Without it the panel explains which.
+  // dashboard: no Business Overview access (403), or a private project Work
+  // does not let them see (404). Without it the panel explains which.
   unavailableFallback?: React.ReactNode;
 }
 
