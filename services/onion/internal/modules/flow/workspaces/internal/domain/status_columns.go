@@ -8,12 +8,37 @@ import (
 // A project's statuses are its board columns. These errors guard the two ways
 // a delete could leave a project unusable.
 var (
-	ErrStatusInUse        = errors.New("status still has tasks; choose a status to move them to")
-	ErrLastDoneStatus     = errors.New("a project needs at least one done status")
-	ErrStatusMoveTarget   = errors.New("move target must be another status in the same project")
-	ErrStatusTemplateDone = errors.New("the template needs at least one done status")
-	ErrStatusTemplateSize = errors.New("the template needs between 1 and 30 statuses")
+	ErrStatusInUse         = errors.New("status still has tasks; choose a status to move them to")
+	ErrLastDoneStatus      = errors.New("a project needs at least one done status")
+	ErrStatusMoveTarget    = errors.New("move target must be another status in the same project")
+	ErrStatusTemplateDone  = errors.New("the template needs at least one done status")
+	ErrStatusTemplateSize  = errors.New("the template needs between 1 and 30 statuses")
+	ErrStatusOrderMismatch = errors.New("status order must list every status in the project exactly once")
 )
+
+// StatusOrderSpacing is the gap a reorder leaves between positions, so a
+// single create can still slot between two neighbours without renumbering.
+const StatusOrderSpacing = 10
+
+// ValidateStatusOrder reports whether ids is exactly the current set, each id
+// once. A partial list is rejected rather than merged: there is no single
+// correct place for the statuses it leaves out.
+func ValidateStatusOrder(current []Status, ids []int64) error {
+	if len(ids) != len(current) {
+		return ErrStatusOrderMismatch
+	}
+	want := make(map[int64]bool, len(current))
+	for _, s := range current {
+		want[s.ID] = true
+	}
+	for _, id := range ids {
+		if !want[id] {
+			return ErrStatusOrderMismatch
+		}
+		delete(want, id)
+	}
+	return nil
+}
 
 // StatusTemplateItem is one entry of a business's status template, the set a
 // new project copies.

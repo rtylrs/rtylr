@@ -414,6 +414,7 @@ type repository interface {
 	RemoveTaskDependency(ctx context.Context, input domain.RemoveTaskDependencyInput) error
 	RemoveWorkspaceMember(ctx context.Context, input domain.RemoveWorkspaceMemberInput) error
 	RenameProject(ctx context.Context, projectID, ownerID, workspaceID int64, name string) error
+	ReorderStatuses(ctx context.Context, businessID, projectID int64, ids []int64) ([]domain.Status, error)
 	RestoreProjectV2(ctx context.Context, id, businessID int64) error
 	SearchTasks(ctx context.Context, workspaceID int64, q string, limit, offset int64) ([]domain.Task, int64, error)
 	SearchTasksV2(ctx context.Context, businessID, callerID int64, includeAll bool, q string, limit, offset int64) ([]domain.Task, int64, error)

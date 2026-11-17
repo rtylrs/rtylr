@@ -199,6 +199,57 @@ func (r *Repository) UpdateStatus(ctx context.Context, id, businessID, projectID
 	return r.GetStatusByID(ctx, id, businessID)
 }
 
+// ReorderStatuses rewrites a project's whole order in one transaction, setting
+// sort_order to index*StatusOrderSpacing. The set is read with FOR UPDATE and
+// validated inside the transaction, so a status created or deleted after the
+// caller loaded the board fails the check instead of keeping a stale position.
+func (r *Repository) ReorderStatuses(ctx context.Context, businessID, projectID int64, ids []int64) ([]domain.Status, error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	rows, err := tx.QueryContext(ctx,
+		"SELECT id FROM flow_statuses WHERE project_id = ? AND business_id = ? FOR UPDATE",
+		projectID, businessID)
+	if err != nil {
+		logger.Ctx(ctx).Error("ReorderStatuses lock failed", logger.Error(err))
+		return nil, err
+	}
+	var current []domain.Status
+	for rows.Next() {
+		var s domain.Status
+		if scanErr := rows.Scan(&s.ID); scanErr != nil {
+			_ = rows.Close()
+			return nil, scanErr
+		}
+		current = append(current, s)
+	}
+	if closeErr := rows.Close(); closeErr != nil {
+		return nil, closeErr
+	}
+	if rowsErr := rows.Err(); rowsErr != nil {
+		return nil, rowsErr
+	}
+	if err := domain.ValidateStatusOrder(current, ids); err != nil {
+		return nil, err
+	}
+
+	for i, id := range ids {
+		if _, err := tx.ExecContext(ctx,
+			"UPDATE flow_statuses SET sort_order = ? WHERE id = ? AND project_id = ? AND business_id = ?",
+			i*domain.StatusOrderSpacing, id, projectID, businessID); err != nil {
+			logger.Ctx(ctx).Error("ReorderStatuses update failed", logger.Error(err))
+			return nil, err
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return r.ListStatusesByProject(ctx, businessID, projectID)
+}
+
 // DeleteStatus removes a status. Its tasks move to moveToID, which is required
 // when it has any, and a project's last done status cannot be deleted. Returns
 // how many tasks moved.

@@ -77,6 +77,17 @@ func (s *Service) UpdateProjectStatus(ctx context.Context, id, callerID, busines
 	return s.repo.UpdateStatus(ctx, id, businessID, existing.ProjectID, normalized)
 }
 
+// ReorderProjectStatuses sets the order of a project's whole status set at
+// once. Admin, like create and update: the order is the board's column order.
+// ids must be exactly the project's set; anything else is
+// ErrStatusOrderMismatch and nothing is written.
+func (s *Service) ReorderProjectStatuses(ctx context.Context, projectID, callerID, businessID int64, ids []int64) ([]domain.Status, error) {
+	if err := s.RequireProjectRole(ctx, projectID, callerID, businessID, domain.FlowRoleAdmin); err != nil {
+		return nil, domain.ErrUnauthorized
+	}
+	return s.repo.ReorderStatuses(ctx, businessID, projectID, ids)
+}
+
 // DeleteProjectStatus removes a status, moving its tasks to moveToID, and
 // returns how many moved. A status with tasks needs a target; the project's
 // last done status cannot be deleted.
