@@ -49,6 +49,8 @@ function fromApiSummary(inv: InvoiceSummary): Invoice {
     dueDate: inv.dueDate,
     issuedDate: inv.issueDate,
     number: inv.invoiceNumber,
+    // project_id is omitted on the wire when the invoice is untagged.
+    projectId: inv.projectId ?? null,
   }) as Invoice;
 }
 
@@ -80,6 +82,7 @@ function fromApiDetail(inv: InvoiceDetail, payments: Payment[] = []): Invoice {
     tax: inv.taxAmount,
     subtotal: inv.subtotal,
     number: inv.invoiceNumber,
+    projectId: inv.projectId ?? null,
     history: payments.map((payment) => ({
       id: payment.id,
       label: [payment.method, payment.reference].filter(Boolean).join(' · ') || 'Payment',
