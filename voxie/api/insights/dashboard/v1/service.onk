@@ -19,4 +19,10 @@ service DashboardService {
 
   /// Returns the hours logged in Work this month to date, in total and per public project, for the insights home dashboard.
   getHoursSummary(GetHoursSummaryRequest) -> GetHoursSummaryResponse @get("/hours")
+
+  /// Lists the Work projects the caller may open a project dashboard for: every public project and the private projects they are a member of.
+  listProjects(ListProjectsRequest) -> ListProjectsResponse @get("/projects")
+
+  /// Returns one Work project's dashboard: task progress, overdue tasks, hours logged and, for callers who may view finance invoices, the project's invoice totals. A private project the caller is not a member of is reported as not found.
+  getProjectDashboard(GetProjectDashboardRequest) -> GetProjectDashboardResponse @get("/projects/{project_id}")
 }
