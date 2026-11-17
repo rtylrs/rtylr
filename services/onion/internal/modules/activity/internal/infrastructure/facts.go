@@ -25,7 +25,7 @@ type mutationPayload struct {
 
 // auditApps lists the producers that publish audit facts. A fact from any other
 // app is rejected, which leaves it undispatched and retried.
-var auditApps = map[string]bool{"erp": true, "pos": true, "hub": true}
+var auditApps = map[string]bool{"erp": true, "pos": true, "hub": true, "flow": true}
 
 // RecordFact commits the Activity projection independently. Event identity makes retries idempotent.
 func (r *Repository) RecordFact(ctx context.Context, fact eventbus.Event) error {
