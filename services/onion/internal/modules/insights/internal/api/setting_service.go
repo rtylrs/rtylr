@@ -205,6 +205,41 @@ func toSalesSummaryResponse(summary domain.SalesSummary) *insightsdashboardv1.Ge
 	}
 }
 
+// GetHoursSummary reports the time logged in Work this month to date. Only
+// public projects are listed, like GetRoadmap.
+func (a *DashboardAPI) GetHoursSummary(ctx context.Context, _ *insightsdashboardv1.GetHoursSummaryRequest) (*insightsdashboardv1.GetHoursSummaryResponse, error) {
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
+	if err != nil {
+		return nil, err
+	}
+
+	summary, err := a.Service.GetHoursSummary(ctx, businessID)
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load hours summary")
+	}
+
+	return toHoursSummaryResponse(summary), nil
+}
+
+func toHoursSummaryResponse(summary domain.HoursSummary) *insightsdashboardv1.GetHoursSummaryResponse {
+	projects := make([]*insightsdashboardv1.ProjectHours, 0, len(summary.Projects))
+	for _, p := range summary.Projects {
+		projects = append(projects, &insightsdashboardv1.ProjectHours{
+			ProjectId:   p.ProjectID,
+			ProjectName: p.Name,
+			Minutes:     p.Minutes,
+		})
+	}
+	return &insightsdashboardv1.GetHoursSummaryResponse{
+		Logged: &insightsdashboardv1.InsightsMetricCard{
+			Value:    summary.Logged.Value,
+			DeltaPct: summary.Logged.DeltaPct,
+		},
+		PriorMinutes: summary.PriorMinutes,
+		Projects:     projects,
+	}
+}
+
 // GetInsights reports Flow's delivery numbers as this contract shapes them.
 //
 // Distinct from flow.insights.v1's getInsights, which returns velocity,

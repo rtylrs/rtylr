@@ -16,4 +16,7 @@ service DashboardService {
 
   /// Returns CRM open pipeline, month-to-date won deal value and recurring revenue for the insights home dashboard.
   getSalesSummary(GetSalesSummaryRequest) -> GetSalesSummaryResponse @get("/sales")
+
+  /// Returns the hours logged in Work this month to date, in total and per public project, for the insights home dashboard.
+  getHoursSummary(GetHoursSummaryRequest) -> GetHoursSummaryResponse @get("/hours")
 }

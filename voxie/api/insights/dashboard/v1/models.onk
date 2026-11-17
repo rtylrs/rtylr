@@ -110,3 +110,23 @@ message GetSalesSummaryResponse {
   /// active_contract_count is the number of signed monthly and yearly CRM contracts that have started and not ended.
   active_contract_count: int64
 }
+
+message ProjectHours {
+  /// project_id identifies a public Work project.
+  project_id: int64
+  /// project_name is the project's name.
+  project_name: string
+  /// minutes is the time logged on the project's tasks this month to date.
+  minutes: int64
+}
+
+message GetHoursSummaryRequest {}
+
+message GetHoursSummaryResponse {
+  /// logged is the minutes logged in Work this month to date, with the change against the same span last month.
+  logged: InsightsMetricCard
+  /// prior_minutes is the minutes logged over the same span last month.
+  prior_minutes: int64
+  /// projects lists the public projects with time logged this month to date, most time first. Private projects count in logged but are not listed.
+  projects: ProjectHours[]
+}
