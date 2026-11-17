@@ -18,7 +18,11 @@ const invoice = {
   history: [],
 };
 
-const mocks = vi.hoisted(() => ({ effectiveAccess: undefined as unknown }));
+const mocks = vi.hoisted(() => ({
+  effectiveAccess: undefined as unknown,
+  projectId: undefined as string | undefined,
+  workProjects: null as { id: string; name: string }[] | null,
+}));
 
 vi.mock('../../../../shared/stores/userStore', () => ({
   useUserStore: Object.assign(
@@ -56,12 +60,12 @@ vi.mock('motion/react', () => ({
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 
 vi.mock('./useInvoices', () => ({
-  useInvoiceDetail: () => ({ data: invoice, isLoading: false }),
+  useInvoiceDetail: () => ({ data: { ...invoice, projectId: mocks.projectId }, isLoading: false }),
   useDeleteInvoice: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 vi.mock('../../shared/hooks/queries/useWorkProjects', () => ({
-  useWorkProjects: () => ({ data: null }),
+  useWorkProjects: () => ({ data: mocks.workProjects }),
 }));
 
 vi.mock('../../shared/components/PageHeader', () => ({
@@ -112,5 +116,36 @@ describe('InvoiceDetail send/void actions', () => {
 
     expect(screen.getByText('Send')).toBeInTheDocument();
     expect(screen.getByText('Void')).toBeInTheDocument();
+  });
+});
+
+describe('InvoiceDetail project', () => {
+  beforeEach(() => {
+    mocks.effectiveAccess = createEffectiveAccess('finance', {
+      permissions: ['finance:invoices:view'],
+    });
+    mocks.projectId = undefined;
+    mocks.workProjects = null;
+  });
+
+  it('shows the tagged Work project by name', () => {
+    mocks.projectId = '7';
+    mocks.workProjects = [{ id: '7', name: 'Website' }];
+    render(<InvoiceDetail />);
+
+    expect(screen.getByText('Website')).toBeInTheDocument();
+  });
+
+  it('falls back to the project id when the project is not listed', () => {
+    mocks.projectId = '99';
+    render(<InvoiceDetail />);
+
+    expect(screen.getByText('financeInvoices.new.projectFallback')).toBeInTheDocument();
+  });
+
+  it('shows no project card for an untagged invoice', () => {
+    render(<InvoiceDetail />);
+
+    expect(screen.queryByText('financeInvoices.detail.project')).not.toBeInTheDocument();
   });
 });
