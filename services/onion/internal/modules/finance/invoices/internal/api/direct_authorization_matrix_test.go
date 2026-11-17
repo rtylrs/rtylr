@@ -19,6 +19,11 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 			response, err := NewInvoicesAPI(newInvoicesServiceForTest(testutil.DirectAuthorizationDB(ctx))).CreateInvoice(ctx, &financeinvoicesv1.CreateInvoiceRequest{ClientName: "Authorization Probe", IssueDate: "2026-08-27", DueDate: "2026-09-27", Currency: "USD", Items: []*financeinvoicesv1.InvoiceItem{{Description: "Authorization Probe", Quantity: 1, UnitPrice: 1}}})
 			return response, err
 		}},
+		{Name: "finance invoices set project", App: authorization.AppFinance, Permission: "finance:invoices:create", Call: func(ctx context.Context) (any, error) {
+			projectID := int64(0)
+			response, err := NewInvoicesAPI(newInvoicesServiceForTest(testutil.DirectAuthorizationDB(ctx))).SetInvoiceProject(ctx, &financeinvoicesv1.SetInvoiceProjectRequest{Id: 7401, Body: &financeinvoicesv1.SetInvoiceProjectBody{ProjectId: &projectID}})
+			return response, err
+		}},
 		{Name: "finance invoices send", App: authorization.AppFinance, Permission: "finance:invoices:send", Call: func(ctx context.Context) (any, error) {
 			response, err := NewInvoicesAPI(newInvoicesServiceForTest(testutil.DirectAuthorizationDB(ctx))).SendInvoice(ctx, &financeinvoicesv1.SendInvoiceRequest{Id: 7401})
 			return response, err

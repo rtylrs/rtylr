@@ -36,6 +36,16 @@ UPDATE finance_invoices SET
   total = ?, amount_due = ?, notes = ?, terms = ?
 WHERE id = ? AND business_id = ? AND status = 'draft';
 
+-- name: SetInvoiceProject :exec
+-- Re-tags an invoice with a Work project; NULL clears the tag. Only
+-- project_id and updated_at change: totals, status and items are never
+-- written here. The repository locks the row and checks the status first; the
+-- status guard repeats that check so a direct caller cannot re-tag a
+-- cancelled or void invoice either.
+UPDATE finance_invoices
+SET project_id = ?, updated_at = CURRENT_TIMESTAMP
+WHERE id = ? AND business_id = ? AND status NOT IN ('cancelled', 'void');
+
 -- name: UpdateInvoiceStatus :execresult
 -- Status-only write. "paid" and "partial" are derived from finance_payments and
 -- are rejected in the application and repository layers: writing either

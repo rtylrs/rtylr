@@ -266,6 +266,34 @@ func (a *InvoicesAPI) UpdateInvoiceStatus(ctx context.Context, req *financeinvoi
 	return &financeinvoicesv1.UpdateInvoiceStatusResponse{Message: "Invoice status updated successfully"}, nil
 }
 
+// SetInvoiceProject tags an invoice with the Work project it bills, or clears
+// the tag with 0, whatever its status except cancelled and void. It is gated
+// like every other invoice write (finance:invoices:create) and changes nothing
+// but the tag.
+func (a *InvoicesAPI) SetInvoiceProject(ctx context.Context, req *financeinvoicesv1.SetInvoiceProjectRequest) (*financeinvoicesv1.SetInvoiceProjectResponse, error) {
+	if err := requireFinancePermission(ctx, "finance:invoices:create"); err != nil {
+		return nil, err
+	}
+	businessID, errModel := invoiceBusinessID(ctx)
+	if errModel != nil {
+		return nil, errModel
+	}
+
+	// The field is optional on the wire so an empty body is refused here
+	// instead of being read as a clear.
+	body := req.GetBody()
+	if body == nil || body.ProjectId == nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, "project_id is required; send 0 to clear it")
+	}
+
+	inv, err := a.Service.SetInvoiceProject(ctx, businessID, req.GetId(), *body.ProjectId)
+	if err != nil {
+		return nil, invoiceServiceError(err, "Failed to set invoice project")
+	}
+
+	return &financeinvoicesv1.SetInvoiceProjectResponse{Invoice: newInvoiceDetailPayload(inv)}, nil
+}
+
 func (a *InvoicesAPI) DeleteInvoice(ctx context.Context, req *financeinvoicesv1.DeleteInvoiceRequest) (*financeinvoicesv1.DeleteInvoiceResponse, error) {
 	if err := requireFinancePermission(ctx, "finance:invoices:create"); err != nil {
 		return nil, err

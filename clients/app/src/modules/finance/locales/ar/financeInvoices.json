@@ -20,7 +20,10 @@
     "history": "السجل",
     "client": "العميل",
     "void": "إلغاء الفاتورة",
-    "project": "المشروع"
+    "project": "المشروع",
+    "changeProject": "تغيير المشروع",
+    "projectChanged": "تم تحديث المشروع",
+    "projectChangeFailed": "تعذّر تغيير المشروع"
   },
   "new": {
     "title": "فاتورة جديدة",

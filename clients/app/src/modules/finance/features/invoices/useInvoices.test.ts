@@ -12,11 +12,16 @@ const mockInvoicesClient = vi.hoisted(() => ({
   updateInvoice: vi.fn(),
   deleteInvoice: vi.fn(),
   updateInvoiceStatus: vi.fn(),
+  setInvoiceProject: vi.fn(),
 }));
 
 const mockPaymentsClient = vi.hoisted(() => ({
   recordPayment: vi.fn(),
 }));
+
+const mockToast = vi.hoisted(() => ({ error: vi.fn(), success: vi.fn() }));
+
+vi.mock('sonner', () => ({ toast: mockToast }));
 
 vi.mock('@voxire/api', () => ({
   createOneKitClient: (Client: { name: string }) =>
@@ -31,8 +36,10 @@ import {
   useUpdateInvoice,
   useDeleteInvoice,
   useUpdateInvoiceStatus,
+  useSetInvoiceProject,
   useRecordPayment,
 } from './useInvoices';
+import type { Invoice } from '../../shared/services/financeApi';
 
 const createWrapper = () => {
   const client = new QueryClient({
@@ -243,6 +250,74 @@ describe('useUpdateInvoiceStatus', () => {
       id: '1',
       body: { status: 'paid' },
     });
+  });
+});
+
+describe('useSetInvoiceProject', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const withClient = (client: QueryClient) => {
+    return ({ children }: { children: React.ReactNode }) =>
+      React.createElement(QueryClientProvider, { client }, children);
+  };
+
+  it('tags a sent invoice and keeps the cached payment history', async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const cached = {
+      id: '5',
+      client: 'Beta Corp',
+      amount: 1200,
+      status: 'Sent',
+      projectId: null,
+      history: [{ id: 'p1', label: 'card', at: '2026-05-02' }],
+    } as Invoice;
+    client.setQueryData(['finance', 'invoice', '5'], cached);
+    const invalidate = vi.spyOn(client, 'invalidateQueries');
+    mockInvoicesClient.setInvoiceProject.mockResolvedValue({
+      invoice: { ...baseDetail, projectId: '7' },
+    });
+
+    const { result } = renderHook(() => useSetInvoiceProject(), { wrapper: withClient(client) });
+    const updated = await act(() => result.current.mutateAsync({ id: '5', projectId: '7' }));
+
+    expect(mockInvoicesClient.setInvoiceProject).toHaveBeenCalledWith({
+      id: '5',
+      body: { projectId: '7' },
+    });
+    expect(updated.projectId).toBe('7');
+    expect(client.getQueryData<Invoice>(['finance', 'invoice', '5'])).toEqual({
+      ...cached,
+      projectId: '7',
+    });
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['finance', 'invoice', '5'] });
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['finance', 'invoices'] });
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['insights-dashboard-project'] });
+  });
+
+  it('sends 0 to clear the tag', async () => {
+    mockInvoicesClient.setInvoiceProject.mockResolvedValue({ invoice: baseDetail });
+
+    const { result } = renderHook(() => useSetInvoiceProject(), { wrapper: createWrapper() });
+    const updated = await act(() => result.current.mutateAsync({ id: '5', projectId: null }));
+
+    expect(mockInvoicesClient.setInvoiceProject).toHaveBeenCalledWith({
+      id: '5',
+      body: { projectId: '0' },
+    });
+    expect(updated.projectId).toBeNull();
+  });
+
+  it('toasts when the server refuses the change', async () => {
+    mockInvoicesClient.setInvoiceProject.mockRejectedValue(new Error('409'));
+
+    const { result } = renderHook(() => useSetInvoiceProject(), { wrapper: createWrapper() });
+    await act(async () => {
+      await expect(result.current.mutateAsync({ id: '5', projectId: '7' })).rejects.toThrow('409');
+    });
+
+    expect(mockToast.error).toHaveBeenCalledWith('financeInvoices.detail.projectChangeFailed');
   });
 });
 

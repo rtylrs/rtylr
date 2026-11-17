@@ -35,6 +35,8 @@ func invoiceServiceError(err error, fallbackMessage string) error {
 		return onekiterrors.New(http.StatusNotFound, "Customer not found")
 	case errors.Is(err, application.ErrProjectNotFound):
 		return onekiterrors.New(http.StatusNotFound, "Project not found")
+	case errors.Is(err, domain.ErrInvoiceProjectLocked):
+		return onekiterrors.New(http.StatusConflict, "Cancelled and void invoices cannot change project")
 	case errors.Is(err, domain.ErrInvoiceNotDraft):
 		return onekiterrors.New(http.StatusConflict, "Invoice lifecycle does not allow this change")
 	default:

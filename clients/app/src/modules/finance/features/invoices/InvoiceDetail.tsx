@@ -6,10 +6,10 @@ import { getRouteApi, useNavigate } from '@tanstack/react-router';
 
 const routeApi = getRouteApi('/business/finance/invoices/$id');
 import { motion } from 'motion/react';
-import { Send, Copy, XCircle, CreditCard, Printer } from 'lucide-react';
+import { Send, Copy, XCircle, CreditCard, Printer, FolderKanban } from 'lucide-react';
 import { toast } from 'sonner';
 import { getOneKitErrorMessage } from '@voxire/api';
-import { useInvoiceDetail, useUpdateInvoiceStatus } from './useInvoices';
+import { useInvoiceDetail, useSetInvoiceProject, useUpdateInvoiceStatus } from './useInvoices';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import PaymentBadge from '../../shared/components/PaymentBadge';
@@ -19,9 +19,16 @@ import SendInvoiceModal from '../../shared/components/SendInvoiceModal';
 import RecordPaymentModal from '../../shared/components/RecordPaymentModal';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import { SkeletonRow } from '../../shared/components/Skeleton';
-import { ACCENT, cardStyle, ghostBtn, primaryBtn } from '../../shared/lib/tokens';
+import {
+  ACCENT,
+  cardStyle,
+  ghostBtn,
+  inputStyle,
+  labelStyle,
+  primaryBtn,
+} from '../../shared/lib/tokens';
 import { canFinancePermission } from '../../shared/lib/financePermissions';
-import { useWorkProjects } from '../../shared/hooks/queries/useWorkProjects';
+import { useWorkProjects, type WorkProject } from '../../shared/hooks/queries/useWorkProjects';
 
 interface VoidInvoiceDialogProps {
   invoiceId: string;
@@ -66,6 +73,130 @@ const VoidInvoiceDialog: React.FC<VoidInvoiceDialogProps> = ({
   );
 };
 
+const cardHeadingStyle: React.CSSProperties = {
+  fontSize: 11,
+  color: 'var(--hub-text-dim)',
+  textTransform: 'uppercase',
+  letterSpacing: '0.08em',
+  marginBottom: 10,
+};
+
+interface InvoiceProjectCardProps {
+  invoiceId: string;
+  /** Current Work project id; '' when the invoice is untagged. */
+  projectId: string;
+  projectName: string | null;
+  workProjects: WorkProject[] | null | undefined;
+  canChange: boolean;
+}
+
+// The Work project an invoice bills. Unlike the rest of the document the tag
+// can change after the invoice is sent or paid, so a project's dashboard can
+// count invoices that were issued before the project was picked.
+const InvoiceProjectCard: React.FC<InvoiceProjectCardProps> = ({
+  invoiceId,
+  projectId,
+  projectName,
+  workProjects,
+  canChange,
+}) => {
+  const { t } = useTranslation('financeCommon');
+  const setProject = useSetInvoiceProject();
+  const [editing, setEditing] = useState(false);
+  const selectId = `invoice-project-${invoiceId}`;
+  const projects = workProjects ?? [];
+  // Keep the current tag selectable when the picker does not list it
+  // (archived, or a project this viewer cannot see) so the select never
+  // misreports it.
+  const listsCurrent = projectId === '' || projects.some((project) => project.id === projectId);
+
+  const choose = (next: string) => {
+    if (next === projectId) {
+      setEditing(false);
+      return;
+    }
+    setProject.mutate(
+      { id: invoiceId, projectId: next === '' ? null : next },
+      {
+        onSuccess: () => {
+          setEditing(false);
+          toast.success(t('financeInvoices.detail.projectChanged'));
+        },
+      }
+    );
+  };
+
+  return (
+    <div style={{ ...cardStyle, padding: 16 }}>
+      <div style={cardHeadingStyle}>{t('financeInvoices.detail.project')}</div>
+      {editing ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <label htmlFor={selectId} style={labelStyle}>
+            {t('financeInvoices.detail.changeProject')}
+          </label>
+          <select
+            id={selectId}
+            value={projectId}
+            disabled={setProject.isPending}
+            onChange={(event) => choose(event.target.value)}
+            style={inputStyle}
+          >
+            <option value="">{t('financeInvoices.new.noProject')}</option>
+            {projects.map((project) => (
+              <option key={project.id} value={project.id}>
+                {project.name}
+              </option>
+            ))}
+            {!listsCurrent && <option value={projectId}>{projectName ?? projectId}</option>}
+          </select>
+          {projects.length === 0 && (
+            <div style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>
+              {t('financeInvoices.new.noProjectsAvailable')}
+            </div>
+          )}
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              style={ghostBtn}
+              disabled={setProject.isPending}
+              onClick={() => setEditing(false)}
+            >
+              {t('financeCommon.cancel')}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 8,
+            flexWrap: 'wrap',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 13,
+              fontWeight: projectName ? 600 : 400,
+              color: projectName ? 'var(--hub-text)' : 'var(--hub-text-muted)',
+              minWidth: 0,
+              overflowWrap: 'anywhere',
+            }}
+          >
+            {projectName ?? t('financeInvoices.new.noProject')}
+          </div>
+          {canChange && (
+            <button type="button" style={ghostBtn} onClick={() => setEditing(true)}>
+              <FolderKanban size={13} /> {t('financeInvoices.detail.changeProject')}
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const InvoiceDetail: React.FC = () => {
   const { t } = useTranslation('financeCommon');
   const { id } = routeApi.useParams();
@@ -76,6 +207,8 @@ const InvoiceDetail: React.FC = () => {
   const [showPayment, setShowPayment] = useState(false);
   const [showVoid, setShowVoid] = useState(false);
   const canSendInvoice = canFinancePermission('finance:invoices:send');
+  // Same permission as every other invoice write on the server.
+  const canWriteInvoice = canFinancePermission('finance:invoices:create');
 
   if (isError && !invoice) {
     return (
@@ -137,6 +270,9 @@ const InvoiceDetail: React.FC = () => {
     ? (workProjects?.find((project) => project.id === invoice.projectId)?.name ??
       t('financeInvoices.new.projectFallback', { id: invoice.projectId }))
     : null;
+  // Cancelled covers void too (both fold into Cancelled); the server freezes
+  // the tag on both, so the control is not offered there.
+  const canChangeProject = canWriteInvoice && invoice.status !== 'Cancelled';
 
   return (
     <motion.div
@@ -322,23 +458,14 @@ const InvoiceDetail: React.FC = () => {
             </div>
           </div>
 
-          {projectName && (
-            <div style={{ ...cardStyle, padding: 16 }}>
-              <div
-                style={{
-                  fontSize: 11,
-                  color: 'var(--hub-text-dim)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
-                  marginBottom: 10,
-                }}
-              >
-                {t('financeInvoices.detail.project')}
-              </div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
-                {projectName}
-              </div>
-            </div>
+          {(projectName || canChangeProject) && (
+            <InvoiceProjectCard
+              invoiceId={invoice.id}
+              projectId={invoice.projectId ?? ''}
+              projectName={projectName}
+              workProjects={workProjects}
+              canChange={canChangeProject}
+            />
           )}
         </div>
       </div>

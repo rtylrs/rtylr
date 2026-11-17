@@ -203,6 +203,46 @@ export function useUpdateInvoiceStatus() {
   });
 }
 
+interface SetInvoiceProjectVariables {
+  id: string;
+  /** Work project to tag the invoice with; null clears the tag. */
+  projectId: string | null;
+}
+
+/**
+ * Sets or clears the Work project an invoice bills. Unlike useUpdateInvoice it
+ * works on sent and paid invoices too; the server refuses cancelled and void
+ * ones. The detail cache takes the new tag at once, then the invoice, the
+ * lists and the project dashboards refetch so per-project totals follow.
+ */
+export function useSetInvoiceProject() {
+  const qc = useQueryClient();
+  const { t } = useTranslation('financeCommon');
+  return useMutation({
+    mutationFn: async ({ id, projectId }: SetInvoiceProjectVariables): Promise<Invoice> => {
+      // "0" is the contract's clear value; an absent project_id is refused.
+      const res = await invoicesClient.setInvoiceProject({
+        id,
+        body: { projectId: projectId ?? '0' },
+      });
+      if (!res.invoice) throw new Error(t('financeInvoices.updatedNotReturned'));
+      return fromApiDetail(res.invoice);
+    },
+    onSuccess: (updated, variables) => {
+      // The response carries no payments, so merge the tag into the cached
+      // detail instead of replacing it and losing the history.
+      qc.setQueryData<Invoice>(['finance', 'invoice', variables.id], (current) =>
+        current ? { ...current, projectId: updated.projectId ?? null } : current
+      );
+      qc.invalidateQueries({ queryKey: ['finance', 'invoice', variables.id] });
+      qc.invalidateQueries({ queryKey: ['finance', 'invoices'] });
+      qc.invalidateQueries({ queryKey: ['insights-dashboard-project'] });
+    },
+    onError: (error) =>
+      toast.error(getOneKitErrorMessage(error, t('financeInvoices.detail.projectChangeFailed'))),
+  });
+}
+
 interface RecordPaymentVariables {
   id: string;
   amount: number;

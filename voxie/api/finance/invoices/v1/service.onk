@@ -14,6 +14,11 @@ service InvoicesService {
 
   updateInvoiceStatus(UpdateInvoiceStatusRequest) -> UpdateInvoiceStatusResponse @patch("/invoices/{id}/status") @body("body")
 
+  /// setInvoiceProject sets or clears (project_id 0) the Work project an
+  /// invoice bills, in any status except cancelled and void. Only the tag
+  /// changes; totals and status are never touched.
+  setInvoiceProject(SetInvoiceProjectRequest) -> SetInvoiceProjectResponse @put("/invoices/{id}/project") @body("body")
+
   deleteInvoice(DeleteInvoiceRequest) -> DeleteInvoiceResponse @delete("/invoices/{id}")
 
   sendInvoice(SendInvoiceRequest) -> SendInvoiceResponse @post("/invoices/{id}/send")

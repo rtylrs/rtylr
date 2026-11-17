@@ -151,6 +151,26 @@ func (s *Service) UpdateInvoiceStatus(ctx context.Context, businessID, invoiceID
 	return s.repo.UpdateInvoiceStatus(ctx, businessID, invoiceID, status)
 }
 
+// SetInvoiceProject sets the Work project an invoice bills, or clears it when
+// projectID is 0, in any status except cancelled and void. UpdateInvoice stays
+// draft-only because it rewrites the billed document; this writes the tag
+// alone, so a sent or paid invoice can still be counted toward its project.
+// The project is verified against the business exactly as on create.
+func (s *Service) SetInvoiceProject(ctx context.Context, businessID, invoiceID, projectID int64) (*domain.Invoice, error) {
+	defer invalidateInvoicesScope(ctx, businessID)
+	if err := s.verifyProject(ctx, businessID, projectID); err != nil {
+		return nil, err
+	}
+	if err := s.repo.SetInvoiceProject(ctx, businessID, invoiceID, projectLink(projectID)); err != nil {
+		return nil, err
+	}
+	// Invoices publish no audit facts (the activity feed takes none from
+	// finance), so this line is the trail of each re-tag.
+	logger.Ctx(ctx).Info("invoice project set",
+		logger.Any("business_id", businessID), logger.Any("invoice_id", invoiceID), logger.Any("project_id", projectID))
+	return s.GetInvoice(ctx, businessID, invoiceID)
+}
+
 func (s *Service) SendInvoice(ctx context.Context, businessID, invoiceID int64) error {
 	defer invalidateInvoicesScope(ctx, businessID)
 	inv, err := s.GetInvoice(ctx, businessID, invoiceID)

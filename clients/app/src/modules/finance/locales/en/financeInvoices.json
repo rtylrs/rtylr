@@ -20,7 +20,10 @@
     "history": "History",
     "client": "Client",
     "void": "Void invoice",
-    "project": "Project"
+    "project": "Project",
+    "changeProject": "Change project",
+    "projectChanged": "Project updated",
+    "projectChangeFailed": "Could not change the project"
   },
   "new": {
     "title": "New Invoice",
