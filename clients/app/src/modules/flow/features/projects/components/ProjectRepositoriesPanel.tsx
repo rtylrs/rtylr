@@ -12,6 +12,7 @@ import {
   useSetProjectRepositories,
   type GitHubRepository,
 } from '../../../../../shared/hooks/queries/useGitHub';
+import { formatRelativeTime } from '../../../../../shared/lib/dateUtils';
 
 const GATE_ID = 'flow-project-repositories-gate';
 const FILTER_THRESHOLD = 8;
@@ -33,7 +34,7 @@ const ProjectRepositoriesPanel = ({
   projectId,
   canAdminister,
 }: ProjectRepositoriesPanelProps): React.JSX.Element => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const connection = useGitHubConnection();
   const connected = !!connection.data?.configured && !!connection.data.connected;
   const selected = useProjectRepositories(projectId, connected);
@@ -117,6 +118,13 @@ const ProjectRepositoriesPanel = ({
           >
             {t(`flow.projectSettings.code.health.${health}`)}
           </span>
+        </p>
+        <p className="text-flow-meta" style={{ color: 'var(--flow-text-dim)' }}>
+          {connection.data?.lastWebhookAt
+            ? t('flow.projectSettings.code.lastWebhook', {
+                when: formatRelativeTime(connection.data.lastWebhookAt, i18n.language),
+              })
+            : t('flow.projectSettings.code.noWebhooks')}
         </p>
         <GateNotice
           id={GATE_ID}
