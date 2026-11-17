@@ -18,7 +18,11 @@
     "vsPrior": "vs prior",
     "metaTitle": "Dashboard · rtylr",
     "service": {
-      "title": "Projects and invoices",
+      "title": "Sales, projects and invoices",
+      "openPipeline": "Open pipeline",
+      "openDeals_one": "{{formatted}} open deal",
+      "openDeals_other": "{{formatted}} open deals",
+      "wonThisMonth": "Won this month",
       "tasksDone": "Tasks done",
       "tasksDoneValue": "{{done}} of {{total}}",
       "overdueTasks": "Overdue tasks",
