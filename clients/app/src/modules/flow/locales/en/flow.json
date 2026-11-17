@@ -909,7 +909,8 @@
     "inProgress": "In progress",
     "overdue": "Overdue",
     "labourCost": "Labour cost",
-    "percentComplete": "{{percent}}% complete"
+    "percentComplete": "{{percent}}% complete",
+    "unassigned": "Unassigned"
   },
   "projectCalendar": {
     "pageTitle": "Calendar · rtylr"
