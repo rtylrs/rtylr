@@ -77,6 +77,12 @@ vi.mock('../projects-v2/useDeveloperMode', () => ({
   useIsDeveloperProject: () => developerProjectMock(),
   useSetProjectDeveloperMode: () => ({ mutate: vi.fn(), isPending: false }),
 }));
+vi.mock('../../../../shared/hooks/queries/useGitHub', () => ({
+  useGitHubConnection: () => ({ data: { configured: true, connected: false }, isLoading: false }),
+  useProjectRepositories: () => ({ data: [], isLoading: false }),
+  useInstallationRepositories: () => ({ data: [], isLoading: false }),
+  useSetProjectRepositories: () => ({ mutate: vi.fn(), isPending: false }),
+}));
 
 import ProjectSettings from './ProjectSettings';
 import { useFlowStore } from '../../shared/stores/flowStore';
@@ -131,19 +137,23 @@ describe('ProjectSettings integrations tab', () => {
     comingSoonButtons.forEach((button) => expect(button).toBeDisabled());
   });
 
-  it('shows the Code section with GitHub only on a developer project', () => {
+  it('hides the repository picker on a project without developer features', () => {
     renderProjectSettings();
     fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.tabs.integrations' }));
-    expect(screen.queryByText('GitHub')).toBeNull();
-    expect(screen.queryByText('flow.projectSettings.integrations.codeSection')).toBeNull();
+    expect(screen.queryByRole('heading', { name: 'flow.projectSettings.code.heading' })).toBeNull();
   });
 
-  it('adds the Code section once developer features are on', () => {
+  it('puts GitHub under a Code heading that links to Extensions when nothing is connected', () => {
     developerProjectMock.mockReturnValue(true);
     renderProjectSettings();
     fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.tabs.integrations' }));
-    expect(screen.getByText('flow.projectSettings.integrations.codeSection')).toBeInTheDocument();
-    expect(screen.getByText('GitHub')).toBeInTheDocument();
+
+    expect(
+      screen.getByRole('heading', { name: 'flow.projectSettings.code.heading' })
+    ).toBeVisible();
+    expect(
+      screen.getByRole('link', { name: 'flow.projectSettings.code.connectLink' })
+    ).toHaveAttribute('href', '/extensions');
     developerProjectMock.mockReturnValue(false);
   });
 
