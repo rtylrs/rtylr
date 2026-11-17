@@ -67,14 +67,16 @@ function renderTabs(
 }
 
 describe('ProjectViewTabs preview-route gating', () => {
-  it('hides Overview, Timeline and Dashboard tabs when the preview-routes flag is off', () => {
+  it('hides Overview and Timeline tabs when the preview-routes flag is off', () => {
     mockUseFeatureFlag.mockReturnValue(false);
     renderTabs();
 
     expect(screen.queryByText('Overview')).not.toBeInTheDocument();
     expect(screen.queryByText('Timeline')).not.toBeInTheDocument();
-    expect(screen.queryByText('Dashboard')).not.toBeInTheDocument();
 
+    // The Dashboard view shows server figures since T-567, so it is no longer
+    // a preview.
+    expect(screen.getByText('Dashboard')).toBeInTheDocument();
     expect(screen.getByText('Board')).toBeInTheDocument();
     expect(screen.getByText('List')).toBeInTheDocument();
     expect(screen.getByText('Calendar')).toBeInTheDocument();
