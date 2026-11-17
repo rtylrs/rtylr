@@ -112,6 +112,8 @@ type Service struct {
 	// linkPreviewer fetches pasted links' titles. Optional: nil stores the
 	// URL label only.
 	linkPreviewer LinkPreviewer
+
+	github githubIntegration
 }
 
 // SetWorkdayRosterSource wires the owner-owned HR and organization directory
@@ -298,6 +300,7 @@ func (s *Service) ResolveWorkspaceID(ctx context.Context, userID, businessID int
 }
 
 type repository interface {
+	githubStore
 	AddProjectMember(ctx context.Context, input domain.AddProjectMemberInput) error
 	AddTaskDependency(ctx context.Context, input domain.AddTaskDependencyInput) error
 	AddWorkspaceMember(ctx context.Context, input domain.AddWorkspaceMemberInput) error
