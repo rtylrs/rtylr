@@ -189,6 +189,7 @@ export const useProjectDashboard = (
             title: task.title ?? '',
             dueDate: task.dueDate ?? '',
             assigneeId: task.assigneeId ?? '',
+            assigneeName: task.assigneeName ?? '',
           }))
           .filter((task) => task.id !== ''),
         hoursThisMonth: {
