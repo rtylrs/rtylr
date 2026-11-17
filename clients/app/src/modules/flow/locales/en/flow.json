@@ -946,7 +946,10 @@
     "developerModeHint": "Shows code links, CI and deploy info, and dev fields on this project's tasks. Turning it off hides them; nothing is deleted.",
     "developerModeGateReason": "Only project admins can change this.",
     "developerModeOn": "Developer features turned on",
-    "developerModeOff": "Developer features turned off"
+    "developerModeOff": "Developer features turned off",
+    "memberCount_one": "{{count}} member",
+    "memberCount_other": "{{count}} members",
+    "addMemberShort": "Add"
   },
   "bulkEdit": {
     "clearSelectionLabel": "Clear selection",
