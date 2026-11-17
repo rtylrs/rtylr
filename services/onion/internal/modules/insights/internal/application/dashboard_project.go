@@ -10,8 +10,9 @@ import (
 )
 
 // ErrProjectNotFound is returned for a project the viewer may not open: one
-// that does not exist, belongs to another business, or is private and the
-// viewer is not a member. The three are deliberately indistinguishable.
+// that does not exist, belongs to another business, or is private and Flow
+// does not let the viewer see it. The three are deliberately
+// indistinguishable.
 var ErrProjectNotFound = errors.New("insights: project not found")
 
 // ListDashboardProjects returns the Work projects userID may open a project
