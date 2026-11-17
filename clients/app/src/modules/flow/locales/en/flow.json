@@ -44,7 +44,9 @@
     "quietHoursActive": "Quiet hours are active",
     "quietHoursNotice": "Quiet hours ({{start}}–{{end}}), non-urgent reminders stay soft. Digest preference: {{digestHour}}:00. Change in Settings → Life & rhythm.",
     "realtimeReconnecting": "Reconnecting…",
-    "realtimeDisconnected": "Disconnected. Reload to see the latest."
+    "realtimeDisconnected": "Disconnected. Reload to see the latest.",
+    "softwareProject": "This is a software project",
+    "softwareProjectHint": "Adds code links and dev fields to tasks. You can change this later in project settings."
   },
   "sidebar": {
     "saveFailed": "Sidebar could not be saved. Check your connection and try again.",
@@ -182,7 +184,13 @@
     "noOneToMention": "No one else is on this project yet",
     "openAttachment": "Open {{name}}",
     "attachmentPreview": "Full-size preview of the attached image",
-    "openOriginal": "Open original"
+    "openOriginal": "Open original",
+    "development": "Development",
+    "developmentEmpty": "Branches, pull requests and deploys linked to this task will show here.",
+    "devType": "Type",
+    "devPoints": "Points",
+    "devBranch": "Branch",
+    "devNotSet": "Not set"
   },
   "time": {
     "add": {
@@ -914,8 +922,14 @@
     "integrations": {
       "slack": "Post project updates to #flow-updates",
       "github": "Link PRs to tasks automatically",
-      "email": "Send daily digests to members"
-    }
+      "email": "Send daily digests to members",
+      "codeSection": "Code"
+    },
+    "developerMode": "Developer project",
+    "developerModeHint": "Shows code links, CI and deploy info, and dev fields on this project's tasks. Turning it off hides them; nothing is deleted.",
+    "developerModeGateReason": "Only project admins can change this.",
+    "developerModeOn": "Developer features turned on",
+    "developerModeOff": "Developer features turned off"
   },
   "bulkEdit": {
     "clearSelectionLabel": "Clear selection",

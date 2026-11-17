@@ -44,7 +44,9 @@
     "quietHoursActive": "Les heures calmes sont actives",
     "quietHoursNotice": "Heures calmes ({{start}}–{{end}}) : les rappels non urgents restent discrets. Digest : {{digestHour}}:00. Modifiez ce réglage dans Paramètres → Vie et rythme.",
     "realtimeReconnecting": "Reconnexion en cours…",
-    "realtimeDisconnected": "Non connecté. Rechargez pour voir les dernières données."
+    "realtimeDisconnected": "Non connecté. Rechargez pour voir les dernières données.",
+    "softwareProject": "C'est un projet logiciel",
+    "softwareProjectHint": "Ajoute des liens de code et des champs de développement aux tâches. Modifiable plus tard dans les paramètres du projet."
   },
   "sidebar": {
     "saveFailed": "La barre latérale n'a pas pu être enregistrée. Vérifiez votre connexion et réessayez.",
@@ -183,7 +185,13 @@
     "noOneToMention": "Personne d’autre n’est encore sur ce projet",
     "openAttachment": "Ouvrir {{name}}",
     "attachmentPreview": "Aperçu en taille réelle de l’image jointe",
-    "openOriginal": "Ouvrir l’original"
+    "openOriginal": "Ouvrir l’original",
+    "development": "Développement",
+    "developmentEmpty": "Les branches, pull requests et déploiements liés à cette tâche apparaîtront ici.",
+    "devType": "Type de tâche",
+    "devPoints": "Points d'effort",
+    "devBranch": "Branche",
+    "devNotSet": "Non défini"
   },
   "time": {
     "add": {
@@ -923,8 +931,14 @@
     "integrations": {
       "slack": "Publier les mises à jour du projet dans #flow-updates",
       "github": "Lier les PR aux tâches automatiquement",
-      "email": "Envoyer un résumé quotidien aux membres"
-    }
+      "email": "Envoyer un résumé quotidien aux membres",
+      "codeSection": "Code source"
+    },
+    "developerMode": "Projet de développement",
+    "developerModeHint": "Affiche les liens de code, la CI, les déploiements et les champs de développement sur les tâches de ce projet. Le désactiver les masque ; rien n'est supprimé.",
+    "developerModeGateReason": "Seuls les administrateurs du projet peuvent modifier ce réglage.",
+    "developerModeOn": "Fonctions de développement activées",
+    "developerModeOff": "Fonctions de développement désactivées"
   },
   "bulkEdit": {
     "clearSelectionLabel": "Effacer la sélection",

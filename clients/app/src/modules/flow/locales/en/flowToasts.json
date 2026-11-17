@@ -84,7 +84,8 @@
     "visibilityFailed": "Failed to update visibility",
     "archived": "Project archived.",
     "archivedUntil": "Project archived. It will be permanently deleted on {{date}}.",
-    "archiveFailed": "Failed to archive project"
+    "archiveFailed": "Failed to archive project",
+    "developerModeFailed": "Failed to change developer features"
   },
   "milestone": {
     "createFailed": "Failed to create milestone",
