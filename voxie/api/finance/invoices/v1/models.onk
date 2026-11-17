@@ -373,3 +373,23 @@ message UpdateInvoiceStatusResponse {
   /// message is a human-readable result message.
   message: string
 }
+
+message SetInvoiceProjectBody {
+  /// project_id is the Work project to tag the invoice with, or 0 to clear
+  /// the tag. Required: an absent field is refused rather than read as a
+  /// clear. Any other value must be a project in the caller's business.
+  project_id: int64? @gte(0)
+}
+
+message SetInvoiceProjectRequest {
+  /// id is the unique identifier for the resource.
+  id: int64 @gt(0)
+  /// body carries the project tag bound from the HTTP payload.
+  body: SetInvoiceProjectBody
+}
+
+message SetInvoiceProjectResponse {
+  /// invoice is the invoice after the tag change. Only project_id (and
+  /// updated_at) differ from before; totals and status are never touched.
+  invoice: InvoiceDetail
+}
