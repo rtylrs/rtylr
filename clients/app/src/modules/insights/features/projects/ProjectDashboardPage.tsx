@@ -7,7 +7,9 @@ import { EmptyState } from '@voxire/ui';
 import {
   requestErrorStatus,
   useDashboardProjects,
+  useProjectDashboard,
 } from '../../shared/hooks/queries/useInsightsDashboard';
+import type { DashboardProjectOption } from '../../shared/hooks/queries/types';
 import ProjectDashboardPanel from '../../shared/components/ProjectDashboardPanel';
 import { CardSkeleton } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
@@ -15,12 +17,26 @@ import ErrorState from '../../shared/components/ErrorState';
 /**
  * /insights/projects/$projectId: one Work project's dashboard with a picker
  * of the projects the viewer may open. /insights/projects opens the first.
+ *
+ * The picker is curated like Work's sidebar, so a business admin may open a
+ * private project that is not in it. Once that project's dashboard loads it
+ * joins the picker as the selected option instead of a blank placeholder.
  */
 const ProjectDashboardPage: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { projectId = '' } = useParams({ strict: false });
-  const { data: projects, isLoading, isError, error, refetch } = useDashboardProjects();
+  const { data: listedProjects, isLoading, isError, error, refetch } = useDashboardProjects();
+  // Same query as the panel below, so this reads its cache rather than asking
+  // the server twice.
+  const { data: current } = useProjectDashboard(projectId);
+  const projects = React.useMemo((): DashboardProjectOption[] | undefined => {
+    if (!listedProjects || projectId === '' || !current || current.project.id !== projectId) {
+      return listedProjects;
+    }
+    if (listedProjects.some((p) => p.id === projectId)) return listedProjects;
+    return [current.project, ...listedProjects];
+  }, [listedProjects, projectId, current]);
   const listed = !!projects && projects.some((p) => p.id === projectId);
 
   const header = (
