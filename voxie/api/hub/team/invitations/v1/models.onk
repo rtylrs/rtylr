@@ -24,10 +24,6 @@ message InviteUserRequest {
 message InviteUserResponse {
   user_id: int64
   message: string
-  /// Activation link for an invitation-mode invite, returned only to the inviter so it can be
-  /// shared out of band when email is not delivered. Absent for direct credentials.
-  /// It is a one-time credential: never log it or put it in a redirect.
-  invite_link: string?
 }
 
 message BulkInviteRequest {
