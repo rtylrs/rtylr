@@ -95,11 +95,16 @@ type FlowReader interface {
 	FlowTeamWorkload(ctx context.Context, businessID int64) ([]FlowWorkloadMember, error)
 	FlowRoadmap(ctx context.Context, businessID int64) ([]FlowRoadmapProject, error)
 	FlowLoggedTime(ctx context.Context, businessID int64, from, to time.Time) (FlowLoggedTime, error)
+	application.FlowProjectReader
 }
 
 type (
-	FlowLoggedTime  = domain.FlowLoggedTime
-	FlowProjectTime = domain.FlowProjectTime
+	FlowLoggedTime        = domain.FlowLoggedTime
+	FlowProjectTime       = domain.FlowProjectTime
+	DashboardProject      = domain.DashboardProject
+	ProjectOverdueTask    = domain.ProjectOverdueTask
+	FlowProjectProgress   = domain.FlowProjectProgress
+	FlowProjectTimeTotals = domain.FlowProjectTimeTotals
 )
 
 type FlowDelivery struct {

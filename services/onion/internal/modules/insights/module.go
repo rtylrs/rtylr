@@ -33,11 +33,15 @@ type Module struct {
 type FlowReader = api.FlowReader
 
 type (
-	FlowDelivery       = api.FlowDelivery
-	FlowWorkloadMember = api.FlowWorkloadMember
-	FlowRoadmapProject = api.FlowRoadmapProject
-	FlowLoggedTime     = api.FlowLoggedTime
-	FlowProjectTime    = api.FlowProjectTime
+	FlowDelivery          = api.FlowDelivery
+	FlowWorkloadMember    = api.FlowWorkloadMember
+	FlowRoadmapProject    = api.FlowRoadmapProject
+	FlowLoggedTime        = api.FlowLoggedTime
+	FlowProjectTime       = api.FlowProjectTime
+	DashboardProject      = api.DashboardProject
+	ProjectOverdueTask    = api.ProjectOverdueTask
+	FlowProjectProgress   = api.FlowProjectProgress
+	FlowProjectTimeTotals = api.FlowProjectTimeTotals
 )
 
 type (
@@ -45,6 +49,7 @@ type (
 	POSDashboardReader      = application.POSDashboardReader
 	CRMDashboardReader      = application.CRMDashboardReader
 	CRMSalesDashboardReader = application.CRMSalesDashboardReader
+	FinanceProjectReader    = application.FinanceProjectReader
 	DashboardReaders        = application.DashboardReaders
 )
 
@@ -61,6 +66,10 @@ func NewModule(ctx context.Context, db *sql.DB, flow api.FlowReader, dashboard D
 	// The hours card reads Flow through the same reader as the other Work cards.
 	if dashboard.Flow == nil && flow != nil {
 		dashboard.Flow = flow
+	}
+	// So does the project dashboard: Flow decides who may see a project.
+	if dashboard.FlowProjects == nil && flow != nil {
+		dashboard.FlowProjects = flow
 	}
 	return &Module{service: application.NewService(infrastructure.NewRepository(db, sources), dashboard), flow: flow}
 }

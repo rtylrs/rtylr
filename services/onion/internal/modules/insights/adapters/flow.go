@@ -83,6 +83,51 @@ func (a flowInsightsAdapter) FlowLoggedTime(ctx context.Context, businessID int6
 	return insights.FlowLoggedTime{TotalMinutes: result.TotalMinutes, Projects: projects}, nil
 }
 
+func (a flowInsightsAdapter) FlowDashboardProjects(ctx context.Context, businessID, userID int64) ([]insights.DashboardProject, error) {
+	result, err := a.module.FlowDashboardProjects(ctx, businessID, userID)
+	if err != nil {
+		return nil, err
+	}
+	projects := make([]insights.DashboardProject, 0, len(result))
+	for _, project := range result {
+		projects = append(projects, insights.DashboardProject(project))
+	}
+	return projects, nil
+}
+
+func (a flowInsightsAdapter) FlowDashboardProject(ctx context.Context, businessID, userID, projectID int64) (insights.DashboardProject, bool, error) {
+	project, found, err := a.module.FlowDashboardProject(ctx, businessID, userID, projectID)
+	if err != nil || !found {
+		return insights.DashboardProject{}, false, err
+	}
+	return insights.DashboardProject(project), true, nil
+}
+
+func (a flowInsightsAdapter) FlowProjectProgress(ctx context.Context, businessID, projectID int64) (insights.FlowProjectProgress, error) {
+	result, err := a.module.FlowProjectProgress(ctx, businessID, projectID)
+	if err != nil {
+		return insights.FlowProjectProgress{}, err
+	}
+	overdue := make([]insights.ProjectOverdueTask, 0, len(result.Overdue))
+	for _, task := range result.Overdue {
+		overdue = append(overdue, insights.ProjectOverdueTask(task))
+	}
+	return insights.FlowProjectProgress{
+		TotalTasks:     result.TotalTasks,
+		CompletedTasks: result.CompletedTasks,
+		OverdueTasks:   result.OverdueTasks,
+		Overdue:        overdue,
+	}, nil
+}
+
+func (a flowInsightsAdapter) FlowProjectTime(ctx context.Context, businessID, projectID int64, thisFrom, thisTo, priorFrom, priorTo time.Time) (insights.FlowProjectTimeTotals, error) {
+	result, err := a.module.FlowProjectTime(ctx, businessID, projectID, thisFrom, thisTo, priorFrom, priorTo)
+	if err != nil {
+		return insights.FlowProjectTimeTotals{}, err
+	}
+	return insights.FlowProjectTimeTotals(result), nil
+}
+
 func NewFlowReader(module *flowinsights.Module) insights.FlowReader {
 	return flowInsightsAdapter{module: module}
 }
