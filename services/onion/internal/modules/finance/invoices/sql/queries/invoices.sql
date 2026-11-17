@@ -1,5 +1,5 @@
 -- name: GetInvoiceByID :one
-SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id, customer_id,
+SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id, customer_id, project_id,
        status, issue_date, due_date, paid_date, reporting_date, currency, subtotal, discount_type,
        discount_value, discount_amount, tax_rate, tax_amount, total, amount_paid, amount_due,
        notes, terms, created_at, updated_at
@@ -13,7 +13,7 @@ WHERE id = ? AND business_id = ?
 FOR UPDATE;
 
 -- name: GetInvoiceByIDForUpdate :one
-SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id, customer_id,
+SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id, customer_id, project_id,
        status, issue_date, due_date, paid_date, reporting_date, currency, subtotal, discount_type,
        discount_value, discount_amount, tax_rate, tax_amount, total, amount_paid, amount_due,
        notes, terms, created_at, updated_at
@@ -62,7 +62,7 @@ WHERE business_id = ?
 GROUP BY status;
 
 -- name: ListOverdueInvoices :many
-SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id, customer_id,
+SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id, customer_id, project_id,
        status, issue_date, due_date, paid_date, reporting_date, currency, subtotal, discount_type,
        discount_value, discount_amount, tax_rate, tax_amount, total, amount_paid, amount_due,
        notes, terms, created_at, updated_at
@@ -194,7 +194,7 @@ SELECT COALESCE(SUM(tax_amount),0) FROM finance_expenses WHERE business_id = ? A
 -- name: ListInvoicesByCustomer :many
 -- Customer-filtered page backing crm.sales-style per-customer views; the
 -- index idx_finance_invoices_business_customer serves it.
-SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id, customer_id,
+SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id, customer_id, project_id,
        status, issue_date, due_date, paid_date, reporting_date, currency, subtotal, discount_type,
        discount_value, discount_amount, tax_rate, tax_amount, total, amount_paid, amount_due,
        notes, terms, created_at, updated_at
