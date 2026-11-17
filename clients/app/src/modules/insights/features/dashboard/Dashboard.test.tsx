@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   useInsightsSettings: vi.fn(),
   useWorkSummary: vi.fn(),
   useSalesSummary: vi.fn(),
+  useHoursSummary: vi.fn(),
   useInvoiceAging: vi.fn(),
 }));
 
@@ -23,6 +24,7 @@ vi.mock('../../shared/hooks/queries/useInsightsDashboard', () => ({
   useInsightsDashboard: mocks.useInsightsDashboard,
   useWorkSummary: mocks.useWorkSummary,
   useSalesSummary: mocks.useSalesSummary,
+  useHoursSummary: mocks.useHoursSummary,
 }));
 
 vi.mock('../../shared/hooks/queries/useInsightsFinancial', () => ({
@@ -44,6 +46,7 @@ describe('Dashboard empty state', () => {
     mocks.useInsightsSettings.mockReturnValue({ data: { defaultCurrency: 'USD' } });
     mocks.useWorkSummary.mockReturnValue({ data: undefined });
     mocks.useSalesSummary.mockReturnValue({ data: undefined });
+    mocks.useHoursSummary.mockReturnValue({ data: undefined });
     mocks.useInvoiceAging.mockReturnValue({ data: undefined });
   });
 
@@ -99,11 +102,15 @@ describe('Dashboard empty state', () => {
         activeContractCount: 0,
       },
     });
+    mocks.useHoursSummary.mockReturnValue({
+      data: { logged: { value: 0, deltaPct: 0 }, priorMinutes: 0, projects: [] },
+    });
 
     render(<Dashboard />);
 
     expect(screen.queryByText('No KPI data yet')).not.toBeInTheDocument();
-    // A business without deals, Work tasks or unpaid invoices gets no empty cards.
+    // A business without deals, Work tasks, hours or unpaid invoices gets no empty cards.
+    expect(screen.queryByText('Hours logged (this month)')).not.toBeInTheDocument();
     expect(screen.queryByText('Sales, projects and invoices')).not.toBeInTheDocument();
     expect(screen.queryByText('Open pipeline')).not.toBeInTheDocument();
     expect(screen.queryByText('Won this month')).not.toBeInTheDocument();
@@ -275,6 +282,87 @@ describe('Dashboard empty state', () => {
       'aria-valuenow',
       '20'
     );
+  });
+});
+
+describe('Dashboard hours logged', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.useInsightsDashboard.mockReturnValue({
+      data: {
+        revenue: { value: 0, deltaPct: 0 },
+        customers: { value: 0, deltaPct: 0 },
+        orders: { value: 0, deltaPct: 0 },
+        margin: { value: 0, deltaPct: 0 },
+      },
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+    mocks.useRevenueSeries.mockReturnValue({ data: { series: [] } });
+    mocks.useInsightsSettings.mockReturnValue({ data: { defaultCurrency: 'USD' } });
+    mocks.useSalesSummary.mockReturnValue({ data: undefined });
+    mocks.useInvoiceAging.mockReturnValue({ data: undefined });
+    mocks.useWorkSummary.mockReturnValue({
+      data: {
+        totalTasks: 66,
+        completedTasks: 15,
+        overdueTasks: 0,
+        projects: [
+          {
+            id: '9',
+            name: 'Investment Hub',
+            totalTasks: 61,
+            completedTasks: 12,
+            progressPct: 19.7,
+          },
+          { id: '11', name: 'Office move', totalTasks: 5, completedTasks: 3, progressPct: 60 },
+        ],
+      },
+    });
+  });
+
+  it("shows hours this month against last month and each public project's hours", () => {
+    mocks.useHoursSummary.mockReturnValue({
+      data: {
+        logged: { value: 2400, deltaPct: 50 },
+        priorMinutes: 1600,
+        projects: [{ projectId: '9', minutes: 2070 }],
+      },
+    });
+
+    render(<Dashboard />);
+
+    const card = screen.getByText('Hours logged (this month)').closest('div')?.parentElement;
+    expect(card).toHaveTextContent('40 h');
+    expect(card).toHaveTextContent('+50.0% vs prior');
+    expect(screen.getByText('12 of 61 · 34.5 h this month')).toBeInTheDocument();
+    // No time on Office move this month, so its row shows tasks only.
+    expect(screen.getByText('3 of 5')).toBeInTheDocument();
+  });
+
+  it('keeps the hours card when only last month had time logged', () => {
+    mocks.useHoursSummary.mockReturnValue({
+      data: { logged: { value: 0, deltaPct: -100 }, priorMinutes: 600, projects: [] },
+    });
+
+    render(<Dashboard />);
+
+    const card = screen.getByText('Hours logged (this month)').closest('div')?.parentElement;
+    expect(card).toHaveTextContent('0 h');
+    expect(card).toHaveTextContent('-100.0% vs prior');
+    expect(screen.getByText('12 of 61')).toBeInTheDocument();
+  });
+
+  it('hides the hours card when no time was logged this month or last', () => {
+    mocks.useHoursSummary.mockReturnValue({
+      data: { logged: { value: 0, deltaPct: 0 }, priorMinutes: 0, projects: [] },
+    });
+
+    render(<Dashboard />);
+
+    expect(screen.queryByText('Hours logged (this month)')).not.toBeInTheDocument();
+    expect(screen.getByText('12 of 61')).toBeInTheDocument();
   });
 });
 
