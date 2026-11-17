@@ -62,6 +62,7 @@ vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 vi.mock('./useInvoices', () => ({
   useInvoiceDetail: () => ({ data: { ...invoice, projectId: mocks.projectId }, isLoading: false }),
   useDeleteInvoice: () => ({ mutate: vi.fn(), isPending: false }),
+  useSetInvoiceProject: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 vi.mock('../../shared/hooks/queries/useWorkProjects', () => ({
