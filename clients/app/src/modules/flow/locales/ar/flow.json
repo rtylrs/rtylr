@@ -194,7 +194,24 @@
     "devType": "النوع",
     "devPoints": "النقاط",
     "devBranch": "الفرع",
-    "devNotSet": "غير محدد"
+    "devNotSet": "غير محدد",
+    "links": "الروابط",
+    "addLink": "إضافة رابط",
+    "addingLink": "جارٍ الإضافة…",
+    "addLinkPlaceholder": "الصق رابط طلب دمج أو Figma أو معاينة أو أي رابط",
+    "invalidLink": "أدخل رابطًا كاملًا يبدأ بـ http:// أو https://",
+    "noLinks": "لا توجد روابط بعد.",
+    "linkAddedBy": "أضافه {{name}} · {{date}}",
+    "linkAddedBySomeone": "أحد أعضاء الفريق",
+    "removeLink": "إزالة الرابط {{name}}",
+    "linkAdded": "أضاف الرابط {{value}}",
+    "linkRemoved": "أزال الرابط {{value}}",
+    "linkState": {
+      "open": "مفتوح",
+      "draft": "مسودة",
+      "merged": "مدموج",
+      "closed": "مغلق"
+    }
   },
   "time": {
     "add": {

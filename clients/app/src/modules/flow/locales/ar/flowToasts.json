@@ -181,5 +181,9 @@
   "attachment": {
     "addFailed": "تعذّر إضافة المرفق",
     "removeFailed": "تعذّر حذف المرفق"
+  },
+  "link": {
+    "addFailed": "تعذرت إضافة الرابط",
+    "removeFailed": "تعذرت إزالة الرابط"
   }
 }
