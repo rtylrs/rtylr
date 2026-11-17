@@ -23,7 +23,7 @@ func (f *dashboardCRMSalesFake) OpenDealPipeline(context.Context, int64) (int64,
 	return f.openDeals, f.openValue, f.err
 }
 
-func (f *dashboardCRMSalesFake) RecurringRevenue(_ context.Context, _ int64, monthStart time.Time) (int64, int64, int64, error) {
+func (f *dashboardCRMSalesFake) RecurringRevenue(_ context.Context, _ int64, monthStart, _ time.Time) (int64, int64, int64, error) {
 	f.monthStart = monthStart
 	return f.contracts, f.mrr, f.mrrAtMonthStart, f.err
 }
