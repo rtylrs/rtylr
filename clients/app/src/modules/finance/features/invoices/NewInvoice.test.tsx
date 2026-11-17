@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   listCrmCustomersMock: vi.fn(),
   routeSearch: { clone: undefined as string | undefined, client: '42' as string | undefined },
   sourceInvoice: undefined as unknown,
+  workProjects: null as { id: string; name: string }[] | null,
 }));
 
 vi.mock('../../shared/lib/clients', () => ({
@@ -46,7 +47,7 @@ vi.mock('../../shared/hooks/queries/useSignedContracts', () => ({
 }));
 
 vi.mock('../../shared/hooks/queries/useWorkProjects', () => ({
-  useWorkProjects: () => ({ data: null }),
+  useWorkProjects: () => ({ data: mocks.workProjects }),
 }));
 
 vi.mock('../../shared/components/PageHeader', () => ({ default: () => null }));
@@ -62,6 +63,94 @@ beforeEach(() => {
   mocks.listCrmCustomersMock.mockReset();
   mocks.routeSearch = { clone: undefined, client: '42' };
   mocks.sourceInvoice = undefined;
+  mocks.workProjects = null;
+});
+
+// Found by id rather than label so the picker tests do not depend on the
+// locale strings, which land in their own commits.
+const projectPicker = () => document.getElementById('invoice-project') as HTMLSelectElement;
+
+const fillLineAndSave = () => {
+  fireEvent.click(screen.getByRole('button', { name: /Next/ }));
+  fireEvent.change(screen.getByPlaceholderText('Description'), {
+    target: { value: 'Consulting' },
+  });
+  const [, priceInput] = screen.getAllByRole('textbox');
+  fireEvent.change(priceInput, { target: { value: '100' } });
+  fireEvent.click(screen.getByRole('button', { name: /Next/ }));
+  fireEvent.click(screen.getByRole('button', { name: /Next/ }));
+  fireEvent.click(screen.getByRole('button', { name: /Save as Draft/ }));
+};
+
+describe('NewInvoice project picker', () => {
+  it('sends the chosen Work project with the create payload', async () => {
+    mocks.listCrmCustomersMock.mockResolvedValue({
+      customers: [{ id: 42, name: 'Acme Corp', email: 'billing@acme.test' }],
+    });
+    mocks.workProjects = [
+      { id: '7', name: 'Website' },
+      { id: '8', name: 'App redesign' },
+    ];
+
+    render(<NewInvoice />);
+    await screen.findByText('Acme Corp');
+
+    fireEvent.change(projectPicker(), { target: { value: '8' } });
+    fillLineAndSave();
+
+    expect(mocks.createInvoiceMock.mock.calls[0]?.[0]).toMatchObject({ projectId: '8' });
+  });
+
+  it('leaves the invoice untagged by default', async () => {
+    mocks.listCrmCustomersMock.mockResolvedValue({
+      customers: [{ id: 42, name: 'Acme Corp', email: 'billing@acme.test' }],
+    });
+    mocks.workProjects = [{ id: '7', name: 'Website' }];
+
+    render(<NewInvoice />);
+    await screen.findByText('Acme Corp');
+    fillLineAndSave();
+
+    expect(mocks.createInvoiceMock.mock.calls[0]?.[0].projectId).toBeUndefined();
+  });
+
+  it('disables the picker when no Work projects are available', async () => {
+    mocks.listCrmCustomersMock.mockResolvedValue({ customers: [] });
+
+    render(<NewInvoice />);
+
+    const picker = projectPicker();
+    expect(picker).toBeDisabled();
+    expect(picker.options).toHaveLength(1);
+    expect(picker.value).toBe('');
+  });
+
+  it('keeps the cloned invoice project, even one no longer listed', async () => {
+    mocks.routeSearch = { clone: 'INV-9', client: undefined };
+    mocks.workProjects = [{ id: '7', name: 'Website' }];
+    mocks.sourceInvoice = {
+      id: 'INV-9',
+      client: 'Source Client',
+      clientEmail: 'source@example.test',
+      amount: 100,
+      status: 'Sent',
+      issuedDate: '2026-08-01',
+      dueDate: '2026-08-31',
+      projectId: '99',
+      items: [{ id: 'source-1', description: 'Line', quantity: 1, unitPrice: 100, taxRate: 0 }],
+    };
+
+    render(<NewInvoice />);
+    await screen.findByText('Source Client');
+    expect(projectPicker()).toHaveValue('99');
+
+    fireEvent.click(screen.getByRole('button', { name: /Next/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Next/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Next/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Save as Draft/ }));
+
+    expect(mocks.createInvoiceMock.mock.calls[0]?.[0]).toMatchObject({ projectId: '99' });
+  });
 });
 
 describe('NewInvoice deep-linked client', () => {
