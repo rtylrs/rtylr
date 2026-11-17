@@ -83,3 +83,22 @@ SELECT CAST(GREATEST(
   COALESCE((SELECT MAX(i.updated_at) FROM finance_invoices i WHERE i.business_id = sqlc.arg(business_id)), '1000-01-01'),
   COALESCE((SELECT MAX(e.updated_at) FROM finance_expenses e WHERE e.business_id = sqlc.arg(business_id)), '1000-01-01')
 ) AS DATETIME) AS last_change;
+
+-- The invoices tagged with one Work project. Drafts are not yet billed and
+-- cancelled or void invoices never will be, so none of the three count.
+-- Overdue matches the overview's aging buckets (still due, past its due date)
+-- and also counts an invoice already marked overdue.
+-- name: InsightsProjectInvoiceTotals :one
+SELECT
+  CAST(COUNT(*) AS SIGNED) AS invoice_count,
+  COALESCE(SUM(total), 0) AS invoiced,
+  COALESCE(SUM(amount_paid), 0) AS paid,
+  COALESCE(SUM(CASE WHEN status IN ('sent','viewed','partial','overdue') AND amount_due > 0 THEN amount_due END), 0) AS outstanding,
+  COALESCE(SUM(CASE WHEN status IN ('sent','viewed','partial','overdue') AND amount_due > 0
+                     AND (status = 'overdue' OR due_date < CURDATE()) THEN amount_due END), 0) AS overdue,
+  CAST(COUNT(CASE WHEN status IN ('sent','viewed','partial','overdue') AND amount_due > 0
+                   AND (status = 'overdue' OR due_date < CURDATE()) THEN 1 END) AS SIGNED) AS overdue_count
+FROM finance_invoices
+WHERE business_id = sqlc.arg(business_id)
+  AND project_id = sqlc.arg(project_id)
+  AND status NOT IN ('draft','cancelled','void');

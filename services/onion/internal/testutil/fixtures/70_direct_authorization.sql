@@ -74,6 +74,13 @@ VALUES
     (7206, 1001, 1001, 'revenue-monthly', 'monthly', 'email', 'owner@test.local', TRUE)
 ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), template_id = VALUES(template_id), is_active = VALUES(is_active);
 
+-- A public Work project for the insights project dashboard.
+INSERT INTO flow_projects
+    (id, workspace_id, owner_id, business_id, name, visibility, created_by)
+VALUES
+    (7301, 0, 1001, 1001, 'Direct Authorization Project', 'public', 1001)
+ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), owner_id = VALUES(owner_id), visibility = VALUES(visibility);
+
 INSERT INTO pos_orders
     (id, owner_id, business_id, session_id, table_id, location_id, order_number, type, status, payment_status, customer_name, staff_id, subtotal, total, amount_paid)
 VALUES

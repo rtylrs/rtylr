@@ -71,6 +71,14 @@ func TestInsightsAPIsRequireExactPermissionsBeforeServiceAccess(t *testing.T) {
 			_, err := (&DashboardAPI{}).GetHoursSummary(ctx, &insightsdashboardv1.GetHoursSummaryRequest{})
 			return err
 		}},
+		{"dashboard projects", "insights:dashboard:view", func(ctx context.Context) error {
+			_, err := (&DashboardAPI{}).ListProjects(ctx, &insightsdashboardv1.ListProjectsRequest{})
+			return err
+		}},
+		{"dashboard project", "insights:dashboard:view", func(ctx context.Context) error {
+			_, err := (&DashboardAPI{}).GetProjectDashboard(ctx, &insightsdashboardv1.GetProjectDashboardRequest{ProjectId: 8})
+			return err
+		}},
 		{"dashboard flow insights", "insights:dashboard:view", func(ctx context.Context) error {
 			_, err := (&DashboardAPI{}).GetInsights(ctx, &insightsdashboardv1.GetInsightsRequest{})
 			return err

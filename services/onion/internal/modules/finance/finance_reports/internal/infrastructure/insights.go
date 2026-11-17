@@ -99,3 +99,23 @@ func (r *Repository) InsightsInvoiceRevenue(ctx context.Context, businessID int6
 func (r *Repository) InsightsLastChange(ctx context.Context, businessID int64) (time.Time, error) {
 	return r.queries.InsightsFinanceLastChange(ctx, sqlc.InsightsFinanceLastChangeParams{BusinessID: businessID})
 }
+
+// InsightsProjectInvoices totals the invoices tagged with one Work project.
+// Amounts are summed across currencies, like the overview's invoice cards.
+func (r *Repository) InsightsProjectInvoices(ctx context.Context, businessID, projectID int64) (financecontract.ProjectInvoiceTotals, error) {
+	row, err := r.queries.InsightsProjectInvoiceTotals(ctx, sqlc.InsightsProjectInvoiceTotalsParams{
+		BusinessID: businessID,
+		ProjectID:  sql.NullInt64{Int64: projectID, Valid: true},
+	})
+	if err != nil {
+		return financecontract.ProjectInvoiceTotals{}, err
+	}
+	return financecontract.ProjectInvoiceTotals{
+		InvoiceCount: row.InvoiceCount,
+		Invoiced:     sqlutil.DecimalToMinorUnits(row.Invoiced),
+		Paid:         sqlutil.DecimalToMinorUnits(row.Paid),
+		Outstanding:  sqlutil.DecimalToMinorUnits(row.Outstanding),
+		Overdue:      sqlutil.DecimalToMinorUnits(row.Overdue),
+		OverdueCount: row.OverdueCount,
+	}, nil
+}

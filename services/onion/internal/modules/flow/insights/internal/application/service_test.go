@@ -33,6 +33,22 @@ func (m *mockRepo) GetLoggedTime(_ context.Context, _ int64, _, _ time.Time) (do
 	return m.logged, m.err
 }
 
+func (m *mockRepo) ListDashboardProjects(_ context.Context, _, _ int64) ([]domain.DashboardProject, error) {
+	return nil, m.err
+}
+
+func (m *mockRepo) GetDashboardProject(_ context.Context, _, _, _ int64) (domain.DashboardProject, bool, error) {
+	return domain.DashboardProject{}, false, m.err
+}
+
+func (m *mockRepo) GetProjectTaskProgress(_ context.Context, _, _ int64) (domain.ProjectTaskProgress, error) {
+	return domain.ProjectTaskProgress{}, m.err
+}
+
+func (m *mockRepo) GetProjectTimeTotals(_ context.Context, _, _ int64, _, _, _, _ time.Time) (domain.ProjectTimeTotals, error) {
+	return domain.ProjectTimeTotals{}, m.err
+}
+
 func TestGetInsights_PropagatesError(t *testing.T) {
 	want := errors.New("boom")
 	s := &Service{repo: &mockRepo{err: want}}

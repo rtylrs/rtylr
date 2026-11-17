@@ -44,10 +44,25 @@ vi.mock('../tasks/useTasks', () => ({
   useTasks: () => tasksState,
 }));
 
+// The Insights project dashboard panel (T-567) is tested on its own. Here it
+// stands in as unavailable, so the client-side tiles it falls back to render,
+// unless a test says the server panel answered.
+const panelState = vi.hoisted(() => ({ available: false }));
+vi.mock('../../../insights/shared/components/ProjectDashboardPanel', () => ({
+  default: ({
+    projectId,
+    unavailableFallback,
+  }: {
+    projectId: string;
+    unavailableFallback?: React.ReactNode;
+  }) => (panelState.available ? <p>Insights panel for {projectId}</p> : <>{unavailableFallback}</>),
+}));
+
 import ProjectDashboard from './ProjectDashboard';
 import { useFlowStore } from '../../shared/stores/flowStore';
 
 beforeEach(() => {
+  panelState.available = false;
   tasksState.data = [];
   tasksState.isPending = false;
   tasksState.isLoading = false;
@@ -142,5 +157,24 @@ describe('ProjectDashboard: no tasks yet', () => {
 
     const emptyTitles = screen.getAllByText('flow.projectDashboard.noTasksYet');
     expect(emptyTitles.length).toBe(2);
+  });
+});
+
+describe('ProjectDashboard: Insights project dashboard', () => {
+  it('shows the server panel for this project instead of the client tiles', () => {
+    panelState.available = true;
+    render(<ProjectDashboard />);
+
+    expect(screen.getByText('Insights panel for p1')).toBeInTheDocument();
+    expect(screen.queryByText('flow.projectDashboard.totalTasks')).not.toBeInTheDocument();
+    // The status and assignee cards stay below the panel.
+    expect(screen.getByText('flow.projectDashboard.statusBreakdown')).toBeInTheDocument();
+    expect(screen.getByText('flow.projectDashboard.byAssignee')).toBeInTheDocument();
+  });
+
+  it('falls back to the client tiles when the panel is unavailable', () => {
+    render(<ProjectDashboard />);
+    expect(screen.queryByText(/Insights panel/)).not.toBeInTheDocument();
+    expect(screen.getByText('flow.projectDashboard.totalTasks')).toBeInTheDocument();
   });
 });

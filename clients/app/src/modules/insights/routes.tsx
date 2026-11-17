@@ -32,6 +32,7 @@ const Products = lazy(() => import('./features/products/Products'));
 const Operations = lazy(() => import('./features/operations/Operations'));
 const Financial = lazy(() => import('./features/financial/Financial'));
 const Reports = lazy(() => import('./features/reports/Reports'));
+const ProjectDashboard = lazy(() => import('./features/projects/ProjectDashboardPage'));
 
 export function createInsightsRoutes<TParent extends AnyRoute>(parent: TParent) {
   const insights = createRoute({
@@ -59,6 +60,13 @@ export function createInsightsRoutes<TParent extends AnyRoute>(parent: TParent) 
     createRoute({ getParentRoute: () => insights, path: 'operations', component: Operations }),
     createRoute({ getParentRoute: () => insights, path: 'financial', component: Financial }),
     createRoute({ getParentRoute: () => insights, path: 'reports', component: Reports }),
+    // One Work project's dashboard; the bare path opens the first project.
+    createRoute({ getParentRoute: () => insights, path: 'projects', component: ProjectDashboard }),
+    createRoute({
+      getParentRoute: () => insights,
+      path: 'projects/$projectId',
+      component: ProjectDashboard,
+    }),
     createRoute({
       getParentRoute: () => insights,
       path: 'settings',

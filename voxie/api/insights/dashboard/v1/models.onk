@@ -130,3 +130,85 @@ message GetHoursSummaryResponse {
   /// projects lists the public projects with time logged this month to date, most time first. Private projects count in logged but are not listed.
   projects: ProjectHours[]
 }
+
+message DashboardProject {
+  /// project_id identifies the Work project.
+  project_id: int64
+  /// project_name is the project's name.
+  project_name: string
+  /// status is the project's lifecycle state: active, completed or archived.
+  status: string
+  /// visibility is public or private.
+  visibility: string
+}
+
+message ListProjectsRequest {}
+
+message ListProjectsResponse {
+  /// projects lists the projects the caller may open, by name. Archived projects and personal My Tasks projects are left out.
+  projects: DashboardProject[]
+}
+
+message GetProjectDashboardRequest {
+  /// project_id identifies the Work project.
+  project_id: int64 @gt(0)
+}
+
+message ProjectProgress {
+  /// total_tasks counts the project's top-level tasks that are not archived.
+  total_tasks: int64
+  /// completed_tasks counts the top-level tasks that are done.
+  completed_tasks: int64
+  /// percent is completed_tasks as a share of total_tasks, from 0 to 100.
+  percent: float64
+}
+
+message OverdueTask {
+  /// task_id identifies the task.
+  task_id: int64
+  /// title is the task's title.
+  title: string
+  /// due_date is the task's due date as YYYY-MM-DD.
+  due_date: string
+  /// assignee_id identifies the person the task is assigned to; absent when it is unassigned.
+  assignee_id: int64?
+}
+
+message ProjectHoursLogged {
+  /// this_month is the minutes logged on the project's tasks this month to date, with the change against the same span last month.
+  this_month: InsightsMetricCard
+  /// prior_minutes is the minutes logged over the same span last month.
+  prior_minutes: int64
+  /// all_time_minutes is every minute logged on the project's tasks.
+  all_time_minutes: int64
+}
+
+message ProjectInvoices {
+  /// invoice_count counts the project's invoices that are not drafts, cancelled or void.
+  invoice_count: int64
+  /// invoiced is the total of those invoices, in minor units.
+  invoiced: int64
+  /// paid is the amount paid against those invoices, in minor units.
+  paid: int64
+  /// outstanding is the amount still due on sent, viewed, partially paid and overdue invoices, in minor units.
+  outstanding: int64
+  /// overdue is the amount still due on invoices that are marked overdue or past their due date, in minor units.
+  overdue: int64
+  /// overdue_count counts those overdue invoices.
+  overdue_count: int64
+}
+
+message GetProjectDashboardResponse {
+  /// project is the project the dashboard describes.
+  project: DashboardProject
+  /// progress is the project's task completion.
+  progress: ProjectProgress
+  /// overdue_task_count counts the project's open tasks past their due date.
+  overdue_task_count: int64
+  /// overdue_tasks lists up to five of those tasks, oldest due date first.
+  overdue_tasks: OverdueTask[]
+  /// hours is the time logged on the project's tasks.
+  hours: ProjectHoursLogged
+  /// invoices totals the invoices tagged with this project. Absent when the caller may not view finance invoices.
+  invoices: ProjectInvoices?
+}

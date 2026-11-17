@@ -180,3 +180,95 @@ func (m *Module) FlowLoggedTime(ctx context.Context, businessID int64, from, to 
 
 	return FlowLoggedTime{TotalMinutes: result.TotalMinutes, Projects: projects}, nil
 }
+
+// FlowDashboardProject is a project a user may open a project dashboard for.
+type FlowDashboardProject struct {
+	ID         int64
+	Name       string
+	Status     string
+	Visibility string
+}
+
+// FlowOverdueTask is an open task past its due date. AssigneeID is zero when
+// the task is unassigned.
+type FlowOverdueTask struct {
+	ID         int64
+	Title      string
+	DueDate    string
+	AssigneeID int64
+}
+
+// FlowProjectProgress is one project's task completion and overdue work.
+// TotalTasks and CompletedTasks count top-level tasks, like FlowRoadmap;
+// OverdueTasks counts every open task past its due date, like FlowInsights.
+// Overdue lists the five oldest.
+type FlowProjectProgress struct {
+	TotalTasks     int64
+	CompletedTasks int64
+	OverdueTasks   int64
+	Overdue        []FlowOverdueTask
+}
+
+// FlowProjectTimeTotals is the minutes logged on one project's tasks, all time and
+// in two windows. Like FlowLoggedTime, only Flow's own time logs count.
+type FlowProjectTimeTotals struct {
+	AllTimeMinutes int64
+	ThisMinutes    int64
+	PriorMinutes   int64
+}
+
+// FlowDashboardProjects returns the projects userID may see in businessID:
+// every public project and the private ones they own, created or are a
+// project member of. Personal and archived projects are left out.
+func (m *Module) FlowDashboardProjects(ctx context.Context, businessID, userID int64) ([]FlowDashboardProject, error) {
+	result, err := m.service.ListDashboardProjects(ctx, businessID, userID)
+	if err != nil {
+		return nil, err
+	}
+	projects := make([]FlowDashboardProject, 0, len(result))
+	for _, p := range result {
+		projects = append(projects, FlowDashboardProject(p))
+	}
+	return projects, nil
+}
+
+// FlowDashboardProject returns one project under the FlowDashboardProjects
+// rule. found is false for a missing project, another business's project and
+// a private project userID is not a member of alike.
+func (m *Module) FlowDashboardProject(ctx context.Context, businessID, userID, projectID int64) (FlowDashboardProject, bool, error) {
+	p, found, err := m.service.GetDashboardProject(ctx, businessID, userID, projectID)
+	if err != nil || !found {
+		return FlowDashboardProject{}, false, err
+	}
+	return FlowDashboardProject(p), true, nil
+}
+
+// FlowProjectProgress returns one project's task completion and overdue work.
+// It does not check visibility: call FlowDashboardProject first.
+func (m *Module) FlowProjectProgress(ctx context.Context, businessID, projectID int64) (FlowProjectProgress, error) {
+	result, err := m.service.GetProjectTaskProgress(ctx, businessID, projectID)
+	if err != nil {
+		return FlowProjectProgress{}, err
+	}
+	overdue := make([]FlowOverdueTask, 0, len(result.Overdue))
+	for _, t := range result.Overdue {
+		overdue = append(overdue, FlowOverdueTask(t))
+	}
+	return FlowProjectProgress{
+		TotalTasks:     result.TotalTasks,
+		CompletedTasks: result.CompletedTasks,
+		OverdueTasks:   result.OverdueTasks,
+		Overdue:        overdue,
+	}, nil
+}
+
+// FlowProjectTime returns the minutes logged on one project's tasks, all time
+// and with logged_at in [thisFrom, thisTo] and [priorFrom, priorTo]. It does
+// not check visibility: call FlowDashboardProject first.
+func (m *Module) FlowProjectTime(ctx context.Context, businessID, projectID int64, thisFrom, thisTo, priorFrom, priorTo time.Time) (FlowProjectTimeTotals, error) {
+	result, err := m.service.GetProjectTimeTotals(ctx, businessID, projectID, thisFrom, thisTo, priorFrom, priorTo)
+	if err != nil {
+		return FlowProjectTimeTotals{}, err
+	}
+	return FlowProjectTimeTotals(result), nil
+}

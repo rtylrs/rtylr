@@ -148,7 +148,7 @@ export function createFlowRoutes<TParent extends AnyRoute>(parent: TParent) {
   const projectDashboardRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/p/$projectId/dashboard',
-    component: () => previewRoute(<ProjectDashboard />),
+    component: () => withLayout(<ProjectDashboard />),
   });
 
   const projectSettingsRoute = createRoute({

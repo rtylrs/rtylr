@@ -255,6 +255,8 @@ func initializeModules(ctx context.Context) *apiModules {
 		POS:      posOrdersModule,
 		CRM:      customersModule,
 		CRMSales: crmSalesModule,
+		// Invoices tagged with a Work project, for the project dashboard.
+		FinanceProjects: financeReportsModule,
 	}, insights.Sources{
 		Finance: financeReportsModule,
 		HR:      hrReportsModule,

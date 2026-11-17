@@ -30,6 +30,12 @@ func (m *Module) InsightsInvoiceRevenue(ctx context.Context, businessID int64, f
 	return m.repository.InsightsInvoiceRevenue(ctx, businessID, from, to)
 }
 
+// InsightsProjectInvoices totals the invoices tagged with one Work project in
+// the business. The caller decides whether the viewer may see them.
+func (m *Module) InsightsProjectInvoices(ctx context.Context, businessID, projectID int64) (financecontract.ProjectInvoiceTotals, error) {
+	return m.repository.InsightsProjectInvoices(ctx, businessID, projectID)
+}
+
 func (m *Module) InsightsLastChange(ctx context.Context, businessID int64) (time.Time, error) {
 	return m.repository.InsightsLastChange(ctx, businessID)
 }

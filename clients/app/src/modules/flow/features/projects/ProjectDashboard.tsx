@@ -15,15 +15,19 @@ import { useCurrentProject } from './useCurrentProject';
 import { useProjectLabourCost } from '../../shared/hooks/queries/useProjectLabourCost';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
+import ProjectDashboardPanel from '../../../insights/shared/components/ProjectDashboardPanel';
 
 /**
- * ProjectDashboard - one-glance health view. Four tiles across the top:
- *   Total · Done · In progress · Overdue
- * Then a status breakdown bar and a grouped-by-assignee distribution card.
+ * ProjectDashboard - one-glance health view. The top is the Insights project
+ * dashboard (T-567): progress, overdue tasks, hours logged and, for people who
+ * may view finance invoices, the project's invoices, computed by the server.
+ * Below it, a status breakdown bar and a grouped-by-assignee distribution
+ * card, computed client-side from the task list.
  *
- * Everything is computed client-side from the task list so the page renders
- * instantly; once the backend ships a `/flow/projects/{id}/stats` endpoint
- * we can swap to the server-computed values for correctness at scale.
+ * Someone who cannot open the Insights dashboard (no Business Overview access,
+ * or a private project they reach through their workspace rather than as a
+ * project member) gets the four client-side tiles
+ * (Total · Done · In progress · Overdue) instead of the server panel.
  */
 const ProjectDashboard: React.FC = () => {
   const { t } = useTranslation();
@@ -129,31 +133,38 @@ const ProjectDashboard: React.FC = () => {
         onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
       />
 
-      <div className="flex-1 overflow-auto p-5 space-y-5 max-w-5xl w-full mx-auto">
-        {/* Stat tiles */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatTile
-            label={t('flow.projectDashboard.totalTasks')}
-            value={stats.total}
-            tint={project.color}
-          />
-          <StatTile
-            label={t('flow.projectDashboard.done')}
-            value={stats.done}
-            tint="var(--flow-status-approved)"
-            hint={t('flow.projectDashboard.percentComplete', { percent: progress })}
-          />
-          <StatTile
-            label={t('flow.projectDashboard.inProgress')}
-            value={stats.inProgress}
-            tint={STATUS_COLORS.in_progress}
-          />
-          <StatTile
-            label={t('flow.projectDashboard.overdue')}
-            value={stats.overdue}
-            tint="var(--flow-danger-fg)"
-          />
-          {labourCost && Number(labourCost.costMinorUnits ?? 0) > 0 && (
+      <div className="flex-1 overflow-auto p-5 space-y-5 max-w-6xl w-full mx-auto">
+        <ProjectDashboardPanel
+          projectId={projectId}
+          unavailableFallback={
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <StatTile
+                label={t('flow.projectDashboard.totalTasks')}
+                value={stats.total}
+                tint={project.color}
+              />
+              <StatTile
+                label={t('flow.projectDashboard.done')}
+                value={stats.done}
+                tint="var(--flow-status-approved)"
+                hint={t('flow.projectDashboard.percentComplete', { percent: progress })}
+              />
+              <StatTile
+                label={t('flow.projectDashboard.inProgress')}
+                value={stats.inProgress}
+                tint={STATUS_COLORS.in_progress}
+              />
+              <StatTile
+                label={t('flow.projectDashboard.overdue')}
+                value={stats.overdue}
+                tint="var(--flow-danger-fg)"
+              />
+            </div>
+          }
+        />
+
+        {labourCost && Number(labourCost.costMinorUnits ?? 0) > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <StatTile
               label={t('flow.projectDashboard.labourCost')}
               value={Number(labourCost.costMinorUnits ?? 0) / 100}
@@ -164,8 +175,8 @@ const ProjectDashboard: React.FC = () => {
                   : undefined
               }
             />
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Status breakdown bar */}
         <Card title={t('flow.projectDashboard.statusBreakdown')}>

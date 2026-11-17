@@ -20,6 +20,34 @@ vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
 }));
 
+// Project rows link to their project dashboard; resolve the path the way the
+// router would so the test can read the href.
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({
+    children,
+    to,
+    params,
+    className,
+    style,
+  }: React.PropsWithChildren<{
+    to: string;
+    params?: Record<string, string>;
+    className?: string;
+    style?: React.CSSProperties;
+  }>) => (
+    <a
+      href={Object.entries(params ?? {}).reduce(
+        (path, [key, value]) => path.replace(`$${key}`, value),
+        to
+      )}
+      className={className}
+      style={style}
+    >
+      {children}
+    </a>
+  ),
+}));
+
 vi.mock('../../shared/hooks/queries/useInsightsDashboard', () => ({
   useInsightsDashboard: mocks.useInsightsDashboard,
   useWorkSummary: mocks.useWorkSummary,
@@ -281,6 +309,11 @@ describe('Dashboard empty state', () => {
     expect(screen.getByRole('progressbar', { name: 'Investment Hub' })).toHaveAttribute(
       'aria-valuenow',
       '20'
+    );
+    // Each project row opens that project's own dashboard (T-567).
+    expect(screen.getByRole('link', { name: 'Investment Hub' })).toHaveAttribute(
+      'href',
+      '/insights/projects/9'
     );
   });
 });

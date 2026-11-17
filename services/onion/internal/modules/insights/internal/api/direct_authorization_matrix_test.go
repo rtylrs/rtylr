@@ -28,6 +28,15 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 			response, err := NewDashboardAPI(application.NewService(testRepository(testutil.DirectAuthorizationDB(ctx)), testDashboardReaders(testutil.DirectAuthorizationDB(ctx))), nil).GetHoursSummary(ctx, &insightsdashboard.GetHoursSummaryRequest{})
 			return response, err
 		}},
+		{Name: "insights dashboard projects", App: authorization.AppInsights, Permission: "insights:dashboard:view", Call: func(ctx context.Context) (any, error) {
+			response, err := NewDashboardAPI(application.NewService(testRepository(testutil.DirectAuthorizationDB(ctx)), testDashboardReaders(testutil.DirectAuthorizationDB(ctx))), nil).ListProjects(ctx, &insightsdashboard.ListProjectsRequest{})
+			return response, err
+		}},
+		// Project 7301 is the public Work project in 70_direct_authorization.sql.
+		{Name: "insights dashboard project", App: authorization.AppInsights, Permission: "insights:dashboard:view", Call: func(ctx context.Context) (any, error) {
+			response, err := NewDashboardAPI(application.NewService(testRepository(testutil.DirectAuthorizationDB(ctx)), testDashboardReaders(testutil.DirectAuthorizationDB(ctx))), nil).GetProjectDashboard(ctx, &insightsdashboard.GetProjectDashboardRequest{ProjectId: 7301})
+			return response, err
+		}},
 		{Name: "insights financial view", App: authorization.AppInsights, Permission: "insights:financial:view", Call: func(ctx context.Context) (any, error) {
 			response, err := NewFinancialAPI(application.NewService(testRepository(testutil.DirectAuthorizationDB(ctx)), testDashboardReaders(testutil.DirectAuthorizationDB(ctx)))).GetCashFlowAnalytics(ctx, nil)
 			return response, err

@@ -60,6 +60,50 @@ export interface HoursSummaryResponse {
   projects: ProjectHoursThisMonth[];
 }
 
+// A Work project the viewer may open a project dashboard for: every public
+// project and the private ones they are a member of.
+export interface DashboardProjectOption {
+  id: string;
+  name: string;
+  status: string;
+  visibility: string;
+}
+
+export interface ProjectOverdueTask {
+  id: string;
+  title: string;
+  // YYYY-MM-DD
+  dueDate: string;
+  // Empty when the task is unassigned.
+  assigneeId: string;
+}
+
+// Invoices tagged with the project, in minor units of the insights default
+// currency, like the overview's invoice cards.
+export interface ProjectInvoiceTotals {
+  invoiceCount: number;
+  invoiced: number;
+  paid: number;
+  outstanding: number;
+  overdue: number;
+  overdueCount: number;
+}
+
+export interface ProjectDashboardResponse {
+  project: DashboardProjectOption;
+  totalTasks: number;
+  completedTasks: number;
+  progressPct: number;
+  overdueTaskCount: number;
+  overdueTasks: ProjectOverdueTask[];
+  // Minutes logged this month to date, against the same span last month.
+  hoursThisMonth: CountCard;
+  priorMinutes: number;
+  allTimeMinutes: number;
+  // Absent when the viewer may not view finance invoices.
+  invoices?: ProjectInvoiceTotals;
+}
+
 export interface InsightsDashboardResponse {
   revenue: MoneyCard;
   customers: CountCard;
