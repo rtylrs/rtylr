@@ -96,7 +96,6 @@ const VIEWS: ViewDef[] = [
     icon: BarChart3,
     to: '/flow/p/$projectId/dashboard',
     match: (p) => p.endsWith('/dashboard'),
-    previewOnly: true,
   },
 ];
 
