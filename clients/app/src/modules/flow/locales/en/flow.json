@@ -938,15 +938,39 @@
     "visibilitySaved": "Visibility updated",
     "integrations": {
       "slack": "Post project updates to #flow-updates",
-      "github": "Link PRs to tasks automatically",
-      "email": "Send daily digests to members",
-      "codeSection": "Code"
+      "email": "Send daily digests to members"
     },
     "developerMode": "Developer project",
     "developerModeHint": "Shows code links, CI and deploy info, and dev fields on this project's tasks. Turning it off hides them; nothing is deleted.",
     "developerModeGateReason": "Only project admins can change this.",
     "developerModeOn": "Developer features turned on",
-    "developerModeOff": "Developer features turned off"
+    "developerModeOff": "Developer features turned off",
+    "code": {
+      "heading": "Code",
+      "description": "The GitHub repositories this project uses. One repository can serve several projects.",
+      "checking": "Checking GitHub…",
+      "notConnected": "GitHub is not connected for this business yet.",
+      "connectLink": "Connect GitHub in Extensions",
+      "connectedTo": "Connected to {{account}} ·",
+      "health": {
+        "active": "Active",
+        "suspended": "Suspended on GitHub. Repositories cannot be listed until it is resumed.",
+        "removed": "Uninstalled on GitHub. Reconnect it in Extensions.",
+        "unknown": "GitHub did not respond, so the status is unknown."
+      },
+      "gateReason": "Only a project admin can choose repositories.",
+      "pickerLabel": "Repositories",
+      "loadingRepositories": "Loading repositories…",
+      "noneAvailable": "The GitHub App cannot see any repositories yet. Grant it access on GitHub.",
+      "none": "No repositories picked yet.",
+      "filter": "Filter repositories",
+      "noMatches": "No repositories match.",
+      "private": "Private",
+      "save": "Save repositories",
+      "saving": "Saving…",
+      "saved": "Repositories saved",
+      "saveError": "Unable to save repositories. Please try again."
+    }
   },
   "bulkEdit": {
     "clearSelectionLabel": "Clear selection",
