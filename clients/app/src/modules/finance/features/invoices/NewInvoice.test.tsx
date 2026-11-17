@@ -45,6 +45,10 @@ vi.mock('../../shared/hooks/queries/useSignedContracts', () => ({
   useSignedContracts: () => ({ data: null }),
 }));
 
+vi.mock('../../shared/hooks/queries/useWorkProjects', () => ({
+  useWorkProjects: () => ({ data: null }),
+}));
+
 vi.mock('../../shared/components/PageHeader', () => ({ default: () => null }));
 
 // i18next is not mocked here: the real locale files mean an assertion

@@ -49,6 +49,10 @@ vi.mock('../../shared/hooks/queries/useSignedContracts', () => ({
   useSignedContracts: () => ({ data: null }),
 }));
 
+vi.mock('../../shared/hooks/queries/useWorkProjects', () => ({
+  useWorkProjects: () => ({ data: null }),
+}));
+
 vi.mock('../../shared/components/PageHeader', () => ({ default: () => null }));
 
 beforeAll(async () => {
