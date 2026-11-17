@@ -19,7 +19,8 @@
     "balanceDue": "Solde dû",
     "history": "Historique",
     "client": "Client",
-    "void": "Annuler la facture"
+    "void": "Annuler la facture",
+    "project": "Projet"
   },
   "new": {
     "title": "Nouvelle facture",
@@ -31,7 +32,12 @@
     "discount": "Remise",
     "notes": "Notes",
     "saveDraft": "Enregistrer comme brouillon",
-    "saveAndSend": "Enregistrer et envoyer"
+    "saveAndSend": "Enregistrer et envoyer",
+    "project": "Projet",
+    "noProject": "Aucun projet",
+    "noProjectsAvailable": "Aucun projet Work disponible",
+    "projectFallback": "Projet n° {{id}}",
+    "projectHint": "Associez le projet Work facturé pour que cette facture soit comptée dans ce projet."
   },
   "preview": {
     "heading": "FACTURE",
