@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import type { ApiStatus } from '../../../shared/services/flowApi';
 import { useTasks } from '../../tasks/useTasks';
 import { useDeleteStatus } from '../useStatuses';
-import { defaultStatus, isOnlyDoneStatus, sortStatuses } from '../statusUtils';
+import { defaultStatus, displayStatusName, isOnlyDoneStatus, sortStatuses } from '../statusUtils';
 
 interface DeleteStatusDialogProps {
   projectId: string;
@@ -65,7 +65,9 @@ const DeleteStatusDialog = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-flow-section font-semibold">
             <AlertTriangle size={14} style={{ color: 'var(--flow-danger-fg)' }} aria-hidden />
-            {t('flow.status.deleteTitle', { name: status?.name ?? '' })}
+            {t('flow.status.deleteTitle', {
+              name: status ? displayStatusName(status.name, t) : '',
+            })}
           </DialogTitle>
           <DialogDescription className="text-flow-meta">
             {protectedDone
@@ -101,7 +103,7 @@ const DeleteStatusDialog = ({
               <option value="">{t('flow.status.chooseTarget')}</option>
               {others.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.name}
+                  {displayStatusName(s.name, t)}
                 </option>
               ))}
             </select>

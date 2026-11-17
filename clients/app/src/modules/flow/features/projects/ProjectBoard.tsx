@@ -38,6 +38,7 @@ import {
   useUpdateStatus,
 } from './useStatuses';
 import {
+  displayStatusName,
   STATUS_COLORS,
   closedRecently,
   insertionPlan,
@@ -1051,7 +1052,7 @@ const KanbanColumn: React.FC<{
             className="flex-1 text-start text-flow-meta font-semibold truncate hover:opacity-70 transition-opacity"
             style={{ color: 'var(--flow-text)' }}
           >
-            {col.name}
+            {displayStatusName(col.name, t)}
           </button>
         )}
 
@@ -1222,7 +1223,7 @@ const ColumnMenu: React.FC<{
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        aria-label={t('flow.board.columnMenu', { name: col.name })}
+        aria-label={t('flow.board.columnMenu', { name: displayStatusName(col.name, t) })}
         className="flow-focus flex h-11 w-11 shrink-0 items-center justify-center rounded-sm text-[var(--flow-text-dim)] hover:bg-[var(--flow-hover)] md:h-6 md:w-6"
       >
         <MoreHorizontal size={13} aria-hidden="true" />

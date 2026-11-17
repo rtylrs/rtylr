@@ -21,7 +21,11 @@ import { EFFORT_PRESETS, formatEffortMinutes } from '../lib/effortPresets';
 import { useCreateTask } from '../../features/tasks/useTasks';
 import { useLabels } from '../../features/tasks/useLabels';
 import { useProjectStatuses } from '../../features/projects/useStatuses';
-import { defaultStatus, sortStatuses } from '../../features/projects/statusUtils';
+import {
+  defaultStatus,
+  displayStatusName,
+  sortStatuses,
+} from '../../features/projects/statusUtils';
 import FlowSelect from './FlowSelect';
 import { withAlpha } from '../lib/colorUtils';
 
@@ -329,7 +333,7 @@ export const QuickCreate: React.FC = () => {
                     value={statusId}
                     options={statuses.map((s) => ({
                       value: s.id,
-                      label: s.name,
+                      label: displayStatusName(s.name, t),
                       icon: (
                         <span
                           aria-hidden="true"
