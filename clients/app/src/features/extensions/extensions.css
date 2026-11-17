@@ -142,6 +142,13 @@
   color: var(--status-error);
   margin-top: 16px;
 }
+.portal-extensions-github {
+  margin-block: 16px 8px;
+}
+.portal-extensions-github .portal-extensions-status[data-health='suspended'],
+.portal-extensions-github .portal-extensions-status[data-health='removed'] {
+  color: var(--status-error);
+}
 @media (max-width: 600px) {
   .portal-extensions-item {
     padding: 18px;
