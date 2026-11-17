@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   params: {} as Record<string, string>,
   navigate: vi.fn(),
   useDashboardProjects: vi.fn(),
+  useProjectDashboard: vi.fn(),
 }));
 
 vi.mock('@voxire/components', () => ({ HelmetContainer: () => null }));
@@ -28,6 +29,7 @@ vi.mock('../../shared/hooks/queries/useInsightsDashboard', async (importOriginal
   return {
     requestErrorStatus: actual.requestErrorStatus,
     useDashboardProjects: mocks.useDashboardProjects,
+    useProjectDashboard: mocks.useProjectDashboard,
   };
 });
 
@@ -53,6 +55,7 @@ function listed(data: typeof projects) {
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.params = {};
+  mocks.useProjectDashboard.mockReturnValue({ data: undefined });
 });
 
 describe('ProjectDashboardPage', () => {
@@ -95,6 +98,34 @@ describe('ProjectDashboardPage', () => {
     render(<ProjectDashboardPage />);
     expect(screen.getByText('Panel for 77')).toBeInTheDocument();
     expect(screen.getByRole('combobox', { name: 'Project' })).toHaveValue('');
+  });
+
+  // A business admin may open a private project Work's sidebar does not list
+  // for them. Once its dashboard loads, the picker shows it as selected.
+  it('adds an opened project the picker does not list as the selected option', () => {
+    mocks.params = { projectId: '77' };
+    listed(projects);
+    mocks.useProjectDashboard.mockReturnValue({
+      data: { project: { id: '77', name: 'Board pack', status: 'active', visibility: 'private' } },
+    });
+    render(<ProjectDashboardPage />);
+
+    expect(mocks.useProjectDashboard).toHaveBeenCalledWith('77');
+    expect(screen.getByText('Panel for 77')).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Project' })).toHaveValue('77');
+    expect(screen.getByRole('option', { name: 'Board pack (private)' })).toBeInTheDocument();
+    expect(screen.getAllByRole('option')).toHaveLength(3);
+  });
+
+  it('does not add a project whose dashboard is for another id', () => {
+    mocks.params = { projectId: '77' };
+    listed(projects);
+    mocks.useProjectDashboard.mockReturnValue({
+      data: { project: { id: '76', name: 'Stale', status: 'active', visibility: 'private' } },
+    });
+    render(<ProjectDashboardPage />);
+    expect(screen.getByRole('combobox', { name: 'Project' })).toHaveValue('');
+    expect(screen.queryByRole('option', { name: 'Stale (private)' })).not.toBeInTheDocument();
   });
 
   it('explains a missing Business Overview permission', () => {
