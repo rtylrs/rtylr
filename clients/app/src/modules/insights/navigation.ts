@@ -6,11 +6,13 @@ import {
   Activity,
   Wallet,
   FileText,
+  FolderKanban,
 } from 'lucide-react';
 import type { PortalNavItem } from '../../shell/navigation';
 
 export const insightsNavItems: PortalNavItem[] = [
   { key: 'overview', path: '/insights', icon: LayoutDashboard },
+  { key: 'projects', path: '/insights/projects', icon: FolderKanban },
   { key: 'revenue', path: '/insights/revenue', icon: DollarSign },
   { key: 'customers', path: '/insights/customers', icon: Users },
   { key: 'products', path: '/insights/products', icon: Package },

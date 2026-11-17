@@ -31,4 +31,11 @@ describe('Portal Caret context', () => {
     });
     expect(context.filters).toEqual({ period: 'month' });
   });
+
+  it('names the project dashboard page for a project id', () => {
+    expect(buildPortalPageContext({ pathname: '/insights/projects/4' })).toMatchObject({
+      app: 'insights',
+      page: 'Project dashboard',
+    });
+  });
 });

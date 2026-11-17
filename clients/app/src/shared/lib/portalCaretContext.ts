@@ -30,6 +30,11 @@ const PAGE_HINTS: Record<string, PageInfo> = {
     page: 'Business Overview',
     hint: 'cross-app business analytics',
   },
+  '/insights/projects': {
+    module: 'insights',
+    page: 'Project dashboard',
+    hint: 'progress, overdue tasks, hours and invoices for one Work project',
+  },
   '/insights/revenue': {
     module: 'insights',
     page: 'Revenue',
