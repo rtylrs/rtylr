@@ -124,3 +124,20 @@ export function insertionPlan(
   });
   return { sortOrder: at * SORT_STEP, updates };
 }
+
+// Default statuses are stored as English text. Until a project renames one,
+// show it in the reader's language; renamed statuses show as typed.
+const BUILT_IN_STATUS_KEYS: Record<string, string> = {
+  backlog: 'flowStatus.backlog',
+  'to do': 'flowStatus.todo',
+  todo: 'flowStatus.todo',
+  'in progress': 'flowStatus.inProgress',
+  'in review': 'flowStatus.inReview',
+  done: 'flowStatus.done',
+  cancelled: 'flowStatus.cancelled',
+};
+
+export function displayStatusName(name: string, t: (key: string) => string): string {
+  const key = BUILT_IN_STATUS_KEYS[name.trim().toLowerCase()];
+  return key ? t(key) : name;
+}
