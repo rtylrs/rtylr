@@ -33,6 +33,15 @@ export interface WorkSummaryResponse {
   projects: WorkProjectProgress[];
 }
 
+// CRM deal values are in minor units of the insights default currency: deals
+// carry no currency of their own.
+export interface SalesSummaryResponse {
+  openPipelineValue: number;
+  openDealCount: number;
+  won: MoneyCard;
+  recentWonDealCount: number;
+}
+
 export interface InsightsDashboardResponse {
   revenue: MoneyCard;
   customers: CountCard;
