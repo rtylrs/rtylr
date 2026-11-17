@@ -40,6 +40,10 @@ export interface SalesSummaryResponse {
   openDealCount: number;
   won: MoneyCard;
   recentWonDealCount: number;
+  // Monthly recurring revenue of won monthly and yearly deals, compared with
+  // the start of this month.
+  mrr: MoneyCard;
+  activeContractCount: number;
 }
 
 export interface InsightsDashboardResponse {

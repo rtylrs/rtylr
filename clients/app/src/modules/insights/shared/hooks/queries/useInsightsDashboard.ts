@@ -63,7 +63,7 @@ export const useWorkSummary = (): UseQueryResult<WorkSummaryResponse> => {
 };
 
 // CRM open pipeline and the deal value won this month, compared with the same
-// span last month.
+// span last month, plus recurring revenue from won monthly and yearly deals.
 export const useSalesSummary = (): UseQueryResult<SalesSummaryResponse> => {
   return useQuery<SalesSummaryResponse>({
     queryKey: ['insights-dashboard-sales'],
@@ -78,6 +78,11 @@ export const useSalesSummary = (): UseQueryResult<SalesSummaryResponse> => {
           deltaPct: toFiniteNumber(res.won?.deltaPct),
         },
         recentWonDealCount: toFiniteNumber(res.recentWonDealCount),
+        mrr: {
+          value: toFiniteNumber(res.mrr?.value),
+          deltaPct: toFiniteNumber(res.mrr?.deltaPct),
+        },
+        activeContractCount: toFiniteNumber(res.activeContractCount),
       };
     },
   });
