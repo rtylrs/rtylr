@@ -595,3 +595,59 @@ message RemoveTaskDependencyResponse {
   /// message is a human-readable result message.
   message: string
 }
+
+message TaskLink {
+  /// id is the unique identifier for the resource.
+  id: int64
+  /// task_id is the task the link belongs to.
+  task_id: int64
+  /// url is the link as added: always http or https.
+  url: string
+  /// kind is the recognised link type: github_pr, github_issue, gitlab_mr,
+  /// gitlab_issue, figma, vercel, netlify, sentry, google_docs or generic.
+  kind: string
+  /// title is the fetched page or PR title. Empty when it could not be read,
+  /// for example a private repository.
+  title: string
+  /// ref is a short label derived from the URL, such as "rtylrs/rtylr#1615"
+  /// or the host name.
+  ref: string
+  /// state is the PR or issue state when known: open, closed, merged or draft.
+  state: string
+  /// added_by is the user who added the link.
+  added_by: int64
+  /// created_at is when the link was added.
+  created_at: string
+}
+
+message CreateTaskLinkRequest {
+  /// task_id is the task to add the link to.
+  task_id: int64 @gt(0)
+  /// url is the http or https URL to add.
+  url: string @required
+}
+
+message CreateTaskLinkResponse {
+  /// link is the added link, or the existing one when the task already had it.
+  link: TaskLink
+}
+
+message ListTaskLinksRequest {
+  /// task_id is the task whose links to list.
+  task_id: int64 @gt(0)
+}
+
+message ListTaskLinksResponse {
+  /// links are the task's links, newest first.
+  links: TaskLink[]
+}
+
+message DeleteTaskLinkRequest {
+  /// id is the link to remove.
+  id: int64 @gt(0)
+}
+
+message DeleteTaskLinkResponse {
+  /// message is a human-readable result message.
+  message: string
+}
