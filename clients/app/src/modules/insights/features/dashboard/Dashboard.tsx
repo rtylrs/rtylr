@@ -1,5 +1,6 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { Link } from '@tanstack/react-router';
 import {
   DollarSign,
   ShoppingCart,
@@ -409,9 +410,14 @@ const Dashboard: React.FC = (): React.JSX.Element => {
               return (
                 <li key={project.id} className="space-y-1">
                   <div className="flex items-center justify-between gap-3 text-sm">
-                    <span className="truncate" style={{ color: 'var(--hub-text)' }}>
+                    <Link
+                      to="/insights/projects/$projectId"
+                      params={{ projectId: project.id }}
+                      className="truncate hover:underline"
+                      style={{ color: 'var(--hub-text)' }}
+                    >
                       {project.name}
-                    </span>
+                    </Link>
                     <span className="shrink-0 text-xs" style={{ color: 'var(--hub-text-muted)' }}>
                       {t('insights.dashboard.service.tasksDoneValue', {
                         done: formatNumber(project.completedTasks),
