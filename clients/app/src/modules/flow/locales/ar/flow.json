@@ -945,7 +945,8 @@
     "inProgress": "قيد التنفيذ",
     "overdue": "متأخرة",
     "labourCost": "تكلفة العمل",
-    "percentComplete": "{{percent}}% مكتمل"
+    "percentComplete": "{{percent}}% مكتمل",
+    "unassigned": "غير مسندة"
   },
   "projectCalendar": {
     "pageTitle": "التقويم · rtylr"
