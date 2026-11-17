@@ -73,7 +73,10 @@ const ProjectDashboard: React.FC = () => {
 
     const assigneeTally = new Map<string, { name: string; count: number }>();
     apiTasks.forEach((t) => {
-      const name = t.assignee || 'Unassigned';
+      // The wire carries assignee_name; `assignee` is the legacy field and is
+      // usually empty, which put every task under Unassigned. An empty name
+      // means unassigned and is labelled at render time.
+      const name = t.assigneeName || t.assignee || '';
       const prev = assigneeTally.get(name) ?? { name, count: 0 };
       prev.count += 1;
       assigneeTally.set(name, prev);
@@ -253,12 +256,12 @@ const ProjectDashboard: React.FC = () => {
           ) : (
             <div className="space-y-2">
               {stats.byAssignee.slice(0, 8).map((a) => (
-                <div key={a.name} className="flex items-center gap-3">
+                <div key={a.name || '__unassigned'} className="flex items-center gap-3">
                   <span
                     className="text-flow-meta w-[128px] truncate"
                     style={{ color: 'var(--flow-text-muted)' }}
                   >
-                    {a.name}
+                    {a.name || t('flow.projectDashboard.unassigned')}
                   </span>
                   <div
                     className="flex-1 h-1.5 rounded-full overflow-hidden"
