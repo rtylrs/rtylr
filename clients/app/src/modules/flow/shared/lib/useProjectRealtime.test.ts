@@ -78,6 +78,16 @@ describe('useProjectRealtime', () => {
     );
   });
 
+  // The server publishes status.*; column.* writes the same rows.
+  it.each(['status.updated', 'status.created', 'status.deleted', 'column.updated'])(
+    'invalidates the status list on %s',
+    (type) => {
+      const spy = mount('p-7');
+      handler?.(event({ type }));
+      expect(keys(spy)).toContain(JSON.stringify(['statuses', 'p-7']));
+    }
+  );
+
   it('invalidates status projections when a teammate edits a status', () => {
     const spy = mount('p-7');
     handler?.(event({ type: 'flowStatus.updated' }));
