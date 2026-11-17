@@ -29,7 +29,16 @@ describe('useProjectDashboard', () => {
       project: { projectId: '8', projectName: 'Website', status: 'active', visibility: 'public' },
       progress: { totalTasks: '8', completedTasks: '2', percent: 25 },
       overdueTaskCount: '3',
-      overdueTasks: [{ taskId: '51', title: 'Fix footer', dueDate: '2026-10-01', assigneeId: '7' }],
+      overdueTasks: [
+        {
+          taskId: '51',
+          title: 'Fix footer',
+          dueDate: '2026-10-01',
+          assigneeId: '7',
+          assigneeName: 'Abed Amouneh',
+        },
+        { taskId: '52', title: 'Write copy', dueDate: '2026-10-02' },
+      ],
       hours: {
         thisMonth: { value: '2400', deltaPct: 50 },
         priorMinutes: '1600',
@@ -54,7 +63,16 @@ describe('useProjectDashboard', () => {
       completedTasks: 2,
       progressPct: 25,
       overdueTaskCount: 3,
-      overdueTasks: [{ id: '51', title: 'Fix footer', dueDate: '2026-10-01', assigneeId: '7' }],
+      overdueTasks: [
+        {
+          id: '51',
+          title: 'Fix footer',
+          dueDate: '2026-10-01',
+          assigneeId: '7',
+          assigneeName: 'Abed Amouneh',
+        },
+        { id: '52', title: 'Write copy', dueDate: '2026-10-02', assigneeId: '', assigneeName: '' },
+      ],
       hoursThisMonth: { value: 2400, deltaPct: 50 },
       priorMinutes: 1600,
       allTimeMinutes: 9000,
