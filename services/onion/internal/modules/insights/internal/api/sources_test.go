@@ -40,6 +40,9 @@ func testDashboardReaders(db *sql.DB) application.DashboardReaders {
 		CRM:      customers.NewModule(ctx, db),
 		CRMSales: crmsales.NewModule(ctx, db),
 		Flow:     flowHours{flowinsights.NewModule(ctx, db)},
+		// The project dashboard reads the same owners.
+		FlowProjects:    flowHours{flowinsights.NewModule(ctx, db)},
+		FinanceProjects: financereports.NewModule(ctx, db),
 	}
 }
 
@@ -57,4 +60,38 @@ func (f flowHours) FlowLoggedTime(ctx context.Context, businessID int64, from, t
 		projects = append(projects, domain.FlowProjectTime{ProjectID: p.ProjectID, Name: p.Name, Visibility: p.Visibility, Status: p.Status, Minutes: p.Minutes})
 	}
 	return domain.FlowLoggedTime{TotalMinutes: result.TotalMinutes, Projects: projects}, nil
+}
+
+func (f flowHours) FlowDashboardProjects(ctx context.Context, businessID, userID int64) ([]domain.DashboardProject, error) {
+	result, err := f.module.FlowDashboardProjects(ctx, businessID, userID)
+	if err != nil {
+		return nil, err
+	}
+	projects := make([]domain.DashboardProject, 0, len(result))
+	for _, p := range result {
+		projects = append(projects, domain.DashboardProject(p))
+	}
+	return projects, nil
+}
+
+func (f flowHours) FlowDashboardProject(ctx context.Context, businessID, userID, projectID int64) (domain.DashboardProject, bool, error) {
+	p, found, err := f.module.FlowDashboardProject(ctx, businessID, userID, projectID)
+	return domain.DashboardProject(p), found, err
+}
+
+func (f flowHours) FlowProjectProgress(ctx context.Context, businessID, projectID int64) (domain.FlowProjectProgress, error) {
+	result, err := f.module.FlowProjectProgress(ctx, businessID, projectID)
+	if err != nil {
+		return domain.FlowProjectProgress{}, err
+	}
+	overdue := make([]domain.ProjectOverdueTask, 0, len(result.Overdue))
+	for _, task := range result.Overdue {
+		overdue = append(overdue, domain.ProjectOverdueTask(task))
+	}
+	return domain.FlowProjectProgress{TotalTasks: result.TotalTasks, CompletedTasks: result.CompletedTasks, OverdueTasks: result.OverdueTasks, Overdue: overdue}, nil
+}
+
+func (f flowHours) FlowProjectTime(ctx context.Context, businessID, projectID int64, thisFrom, thisTo, priorFrom, priorTo time.Time) (domain.FlowProjectTimeTotals, error) {
+	result, err := f.module.FlowProjectTime(ctx, businessID, projectID, thisFrom, thisTo, priorFrom, priorTo)
+	return domain.FlowProjectTimeTotals(result), err
 }
