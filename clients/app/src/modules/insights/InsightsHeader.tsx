@@ -19,7 +19,13 @@ export default function InsightsHeader({ actions }: { actions: ReactNode }) {
   const user = useUserStore((state) => state.user);
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const pages = insightsNavItems.filter((page) => canAccessPortalPath(user, page.path));
-  const currentPage = insightsNavItems.find((page) => page.path === pathname);
+  // Nested pages such as /insights/projects/4 take their parent's name; the
+  // Overview root only matches itself.
+  const currentPage =
+    insightsNavItems.find((page) => page.path === pathname) ??
+    insightsNavItems.find(
+      (page) => page.path !== '/insights' && pathname.startsWith(`${page.path}/`)
+    );
   return (
     <header className="insights-header">
       <div className="insights-header-start">
