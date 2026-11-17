@@ -10,6 +10,16 @@ export interface GitHubConnection {
   accountType: string;
   status: GitHubHealth;
   canManage: boolean;
+  /** ISO time of the last signed webhook, or '' when none has arrived. */
+  lastWebhookAt: string;
+  /** Whether members can link their own GitHub accounts on this server. */
+  linkingEnabled: boolean;
+}
+
+export interface GitHubAccountLink {
+  linked: boolean;
+  login: string;
+  avatarUrl: string;
 }
 
 export interface GitHubRepository {
@@ -19,6 +29,7 @@ export interface GitHubRepository {
 }
 
 export const GITHUB_CONNECTION_KEY = ['github', 'connection'];
+export const GITHUB_LINK_KEY = ['github', 'link'];
 const projectRepositoriesKey = (projectId: string) => ['github', 'project-repositories', projectId];
 
 const HEALTH: readonly GitHubHealth[] = ['active', 'suspended', 'removed', 'unknown'];
@@ -37,6 +48,8 @@ export const useGitHubConnection = () =>
         accountType: c?.accountType ?? '',
         status,
         canManage: !!c?.canManage,
+        lastWebhookAt: c?.lastWebhookAt ?? '',
+        linkingEnabled: !!c?.linkingEnabled,
       };
     },
   });
@@ -93,5 +106,41 @@ export const useSetProjectRepositories = (projectId: string) => {
     mutationFn: (repositoryIds: string[]) =>
       githubClient.setProjectRepositories({ projectId, repositoryIds }),
     onSuccess: () => qc.invalidateQueries({ queryKey: projectRepositoriesKey(projectId) }),
+  });
+};
+
+/** The signed-in member's own GitHub account in this business. */
+export const useGitHubLink = (enabled: boolean) =>
+  useQuery({
+    queryKey: GITHUB_LINK_KEY,
+    queryFn: async (): Promise<GitHubAccountLink> => {
+      const link = (await githubClient.getMyGitHubLink({})).link;
+      return {
+        linked: !!link?.linked,
+        login: link?.login ?? '',
+        avatarUrl: link?.avatarUrl ?? '',
+      };
+    },
+    enabled,
+  });
+
+export const useStartGitHubLink = () =>
+  useMutation({
+    mutationFn: async () => (await githubClient.startGitHubLink({})).authorizeUrl ?? '',
+  });
+
+export const useCompleteGitHubLink = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { code: string; state: string }) => githubClient.completeGitHubLink(input),
+    onSettled: () => qc.invalidateQueries({ queryKey: GITHUB_LINK_KEY }),
+  });
+};
+
+export const useUnlinkGitHub = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => githubClient.unlinkGitHub({}),
+    onSettled: () => qc.invalidateQueries({ queryKey: GITHUB_LINK_KEY }),
   });
 };
