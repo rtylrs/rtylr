@@ -40,7 +40,7 @@ vi.mock('../lib/clients', () => ({
   labelV2: mockClients.labelV2,
 }));
 
-import { DEFAULT_PROJECT_ICON, flowApi } from './flowApi';
+import { DEFAULT_PROJECT_ICON, flowApi, toApiStatus } from './flowApi';
 import {
   businessClient,
   milestoneV2,
@@ -474,5 +474,23 @@ describe('Flow task persistence adapters', () => {
       waitingOn: '',
       decisionNote: 'Reviewed',
     });
+  });
+});
+
+describe('toApiStatus', () => {
+  it('fills the zero and false values the wire omits, so the first status sorts first', () => {
+    const first = toApiStatus({ id: '1', projectId: '8', name: 'Backlog', bucket: 'backlog' });
+    expect(first.sortOrder).toBe(0);
+    expect(first.isDefault).toBe(false);
+
+    const later = toApiStatus({
+      id: '2',
+      projectId: '8',
+      name: 'To Do',
+      bucket: 'backlog',
+      sortOrder: 10,
+    });
+    const ordered = [later, first].sort((a, b) => a.sortOrder - b.sortOrder);
+    expect(ordered.map((s) => s.name)).toEqual(['Backlog', 'To Do']);
   });
 });

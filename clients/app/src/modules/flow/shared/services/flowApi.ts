@@ -1,4 +1,5 @@
 import type { FlowTask as ContractTask } from '@voxire/voxie/flow/task/v2/types';
+import type { Status as ContractStatus } from '@voxire/voxie/flow/status/v2/types';
 
 import { oneKitResult } from '@voxire/api';
 import {
@@ -166,6 +167,25 @@ export interface ApiStatus {
   isDefault: boolean;
   createdAt: string;
 }
+
+// The wire omits zero and false (sort_order 0, is_default false), so every
+// status is normalised here: a missing sortOrder sorted the first status last.
+export function toApiStatus(s: ContractStatus): ApiStatus {
+  return {
+    id: String(s.id ?? ''),
+    projectId: String(s.projectId ?? ''),
+    name: s.name ?? '',
+    bucket: (s.bucket ?? 'active') as ApiStatus['bucket'],
+    legacyStatus: s.legacyStatus ?? '',
+    color: s.color ?? '',
+    sortOrder: s.sortOrder ?? 0,
+    isDefault: s.isDefault ?? false,
+    createdAt: s.createdAt ?? '',
+  };
+}
+
+const toApiStatuses = (list: ContractStatus[] | undefined): ApiStatus[] =>
+  (list ?? []).map(toApiStatus);
 
 /** One entry of the workspace status template that new projects copy. */
 export interface ApiStatusTemplateItem {
@@ -912,7 +932,11 @@ export const flowApi = {
 
   // A project's statuses are its board columns, in sort order.
   listStatuses: (projectId: string) =>
-    flowResult<{ statuses: ApiStatus[] }>(() => statusClient.listStatuses({ projectId })),
+    flowResult<{ statuses: ApiStatus[] }>(() =>
+      statusClient
+        .listStatuses({ projectId })
+        .then((r) => ({ ...r, statuses: toApiStatuses(r.statuses) }))
+    ),
 
   createStatus: (data: {
     projectId: string;
@@ -924,15 +948,17 @@ export const flowApi = {
     isDefault?: boolean;
   }) =>
     flowResult<{ status: ApiStatus }>(() =>
-      statusClient.createStatus({
-        projectId: data.projectId,
-        name: data.name,
-        bucket: data.bucket,
-        legacyStatus: data.legacyStatus,
-        color: data.color,
-        sortOrder: data.sortOrder,
-        isDefault: data.isDefault,
-      })
+      statusClient
+        .createStatus({
+          projectId: data.projectId,
+          name: data.name,
+          bucket: data.bucket,
+          legacyStatus: data.legacyStatus,
+          color: data.color,
+          sortOrder: data.sortOrder,
+          isDefault: data.isDefault,
+        })
+        .then((r) => ({ ...r, status: r.status ? toApiStatus(r.status) : undefined }))
     ),
 
   updateStatus: (data: {
@@ -945,24 +971,28 @@ export const flowApi = {
     isDefault?: boolean;
   }) =>
     flowResult<{ status: ApiStatus }>(() =>
-      statusClient.updateStatus({
-        id: data.id,
-        body: {
-          name: data.name,
-          bucket: data.bucket,
-          color: data.color,
-          legacyStatus: data.legacyStatus,
-          sortOrder: data.sortOrder,
-          isDefault: data.isDefault,
-        },
-      })
+      statusClient
+        .updateStatus({
+          id: data.id,
+          body: {
+            name: data.name,
+            bucket: data.bucket,
+            color: data.color,
+            legacyStatus: data.legacyStatus,
+            sortOrder: data.sortOrder,
+            isDefault: data.isDefault,
+          },
+        })
+        .then((r) => ({ ...r, status: r.status ? toApiStatus(r.status) : undefined }))
     ),
 
   // statusIds must be the project's whole set in the new order; anything else
   // is a 400 and nothing is written.
   reorderStatuses: (projectId: string, statusIds: string[]) =>
     flowResult<{ statuses: ApiStatus[] }>(() =>
-      statusClient.reorderStatuses({ projectId, statusIds })
+      statusClient
+        .reorderStatuses({ projectId, statusIds })
+        .then((r) => ({ ...r, statuses: toApiStatuses(r.statuses) }))
     ),
 
   // A status that still has tasks needs moveToStatusId (409 otherwise), and a
@@ -973,7 +1003,12 @@ export const flowApi = {
     ),
 
   getStatusTemplate: () =>
-    flowResult<{ statuses: ApiStatusTemplateItem[] }>(() => statusClient.getStatusTemplate({})),
+    flowResult<{ statuses: ApiStatusTemplateItem[] }>(() =>
+      statusClient.getStatusTemplate({}).then((r) => ({
+        ...r,
+        statuses: (r.statuses ?? []).map((item) => ({ ...item, sortOrder: item.sortOrder ?? 0 })),
+      }))
+    ),
 
   saveStatusTemplate: (statuses: ApiStatusTemplateItem[]) =>
     flowResult<{ statuses: ApiStatusTemplateItem[] }>(() =>
