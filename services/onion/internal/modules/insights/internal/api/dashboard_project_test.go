@@ -23,8 +23,9 @@ func TestToProjectDashboardResponse(t *testing.T) {
 		ProgressPct:    25,
 		OverdueTasks:   3,
 		Overdue: []domain.ProjectOverdueTask{
-			{ID: 51, Title: "Fix footer", DueDate: "2026-10-01", AssigneeID: 7},
+			{ID: 51, Title: "Fix footer", DueDate: "2026-10-01", AssigneeID: 7, AssigneeName: "Abed Amouneh"},
 			{ID: 52, Title: "Write copy", DueDate: "2026-10-02"},
+			{ID: 53, Title: "Plan launch", DueDate: "2026-10-03", AssigneeID: 9},
 		},
 		Logged:         domain.CountCard{Value: 2_400, DeltaPct: 50},
 		PriorMinutes:   1_600,
@@ -37,15 +38,23 @@ func TestToProjectDashboardResponse(t *testing.T) {
 	if got.Progress.GetTotalTasks() != 8 || got.Progress.GetCompletedTasks() != 2 || got.Progress.GetPercent() != 25 {
 		t.Errorf("Progress = %+v, want 2/8 at 25%%", got.Progress)
 	}
-	if got.OverdueTaskCount != 3 || len(got.OverdueTasks) != 2 {
+	if got.OverdueTaskCount != 3 || len(got.OverdueTasks) != 3 {
 		t.Fatalf("overdue = %d %+v", got.OverdueTaskCount, got.OverdueTasks)
 	}
 	if got.OverdueTasks[0].AssigneeId == nil || *got.OverdueTasks[0].AssigneeId != 7 {
 		t.Errorf("assigned task = %+v, want assignee 7", got.OverdueTasks[0])
 	}
-	// An unassigned task leaves assignee_id out rather than sending 0.
-	if got.OverdueTasks[1].AssigneeId != nil {
+	if got.OverdueTasks[0].AssigneeName == nil || *got.OverdueTasks[0].AssigneeName != "Abed Amouneh" {
+		t.Errorf("assigned task = %+v, want assignee name Abed Amouneh", got.OverdueTasks[0])
+	}
+	// An unassigned task leaves assignee_id and assignee_name out rather than
+	// sending 0 and "".
+	if got.OverdueTasks[1].AssigneeId != nil || got.OverdueTasks[1].AssigneeName != nil {
 		t.Errorf("unassigned task = %+v, want no assignee", got.OverdueTasks[1])
+	}
+	// An assignee whose name is unknown keeps the id and leaves the name out.
+	if got.OverdueTasks[2].AssigneeId == nil || *got.OverdueTasks[2].AssigneeId != 9 || got.OverdueTasks[2].AssigneeName != nil {
+		t.Errorf("unnamed assignee = %+v, want assignee 9 with no name", got.OverdueTasks[2])
 	}
 	if got.Hours.GetThisMonth().GetValue() != 2_400 || got.Hours.GetThisMonth().GetDeltaPct() != 50 || got.Hours.GetPriorMinutes() != 1_600 || got.Hours.GetAllTimeMinutes() != 9_000 {
 		t.Errorf("Hours = %+v", got.Hours)
