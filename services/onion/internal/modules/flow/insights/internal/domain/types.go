@@ -77,3 +77,38 @@ type LoggedTime struct {
 	TotalMinutes int64
 	Projects     []ProjectLoggedTime
 }
+
+// DashboardProject is a project a user may open a project dashboard for.
+type DashboardProject struct {
+	ID         int64
+	Name       string
+	Status     string
+	Visibility string
+}
+
+// OverdueTask is an open task past its due date. AssigneeID is zero when the
+// task is unassigned.
+type OverdueTask struct {
+	ID         int64
+	Title      string
+	DueDate    string
+	AssigneeID int64
+}
+
+// ProjectTaskProgress is one project's task completion and its overdue work.
+// TotalTasks and CompletedTasks count top-level tasks; OverdueTasks counts
+// every open task past its due date. Overdue lists the oldest few.
+type ProjectTaskProgress struct {
+	TotalTasks     int64
+	CompletedTasks int64
+	OverdueTasks   int64
+	Overdue        []OverdueTask
+}
+
+// ProjectTimeTotals is the time logged on one project's tasks: in two windows
+// and in total, in minutes.
+type ProjectTimeTotals struct {
+	AllTimeMinutes int64
+	ThisMinutes    int64
+	PriorMinutes   int64
+}

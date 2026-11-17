@@ -19,6 +19,10 @@ type repository interface {
 	GetTeamWorkload(ctx context.Context, businessID int64) (domain.TeamWorkloadResult, error)
 	GetRoadmap(ctx context.Context, businessID int64) (domain.RoadmapResult, error)
 	GetLoggedTime(ctx context.Context, businessID int64, from, to time.Time) (domain.LoggedTime, error)
+	ListDashboardProjects(ctx context.Context, businessID, userID int64) ([]domain.DashboardProject, error)
+	GetDashboardProject(ctx context.Context, businessID, userID, projectID int64) (domain.DashboardProject, bool, error)
+	GetProjectTaskProgress(ctx context.Context, businessID, projectID int64) (domain.ProjectTaskProgress, error)
+	GetProjectTimeTotals(ctx context.Context, businessID, projectID int64, thisFrom, thisTo, priorFrom, priorTo time.Time) (domain.ProjectTimeTotals, error)
 }
 
 type Service struct {
@@ -65,4 +69,28 @@ func (s *Service) GetRoadmap(ctx context.Context, businessID int64) (domain.Road
 // no two calls share a key. The caller caches the summary it builds.
 func (s *Service) GetLoggedTime(ctx context.Context, businessID int64, from, to time.Time) (domain.LoggedTime, error) {
 	return s.repo.GetLoggedTime(ctx, businessID, from, to)
+}
+
+// The project dashboard reads below are not cached here. Visibility depends on
+// the caller, and a project's tasks and time change while someone is looking
+// at it, so each read goes to the database; all four are indexed by project.
+
+// ListDashboardProjects returns the projects userID may open a dashboard for.
+func (s *Service) ListDashboardProjects(ctx context.Context, businessID, userID int64) ([]domain.DashboardProject, error) {
+	return s.repo.ListDashboardProjects(ctx, businessID, userID)
+}
+
+// GetDashboardProject returns a project userID may see, or found false.
+func (s *Service) GetDashboardProject(ctx context.Context, businessID, userID, projectID int64) (domain.DashboardProject, bool, error) {
+	return s.repo.GetDashboardProject(ctx, businessID, userID, projectID)
+}
+
+// GetProjectTaskProgress returns one project's task completion and overdue work.
+func (s *Service) GetProjectTaskProgress(ctx context.Context, businessID, projectID int64) (domain.ProjectTaskProgress, error) {
+	return s.repo.GetProjectTaskProgress(ctx, businessID, projectID)
+}
+
+// GetProjectTimeTotals returns the minutes logged on one project.
+func (s *Service) GetProjectTimeTotals(ctx context.Context, businessID, projectID int64, thisFrom, thisTo, priorFrom, priorTo time.Time) (domain.ProjectTimeTotals, error) {
+	return s.repo.GetProjectTimeTotals(ctx, businessID, projectID, thisFrom, thisTo, priorFrom, priorTo)
 }
