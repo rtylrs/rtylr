@@ -36,6 +36,8 @@ type (
 	FlowDelivery       = api.FlowDelivery
 	FlowWorkloadMember = api.FlowWorkloadMember
 	FlowRoadmapProject = api.FlowRoadmapProject
+	FlowLoggedTime     = api.FlowLoggedTime
+	FlowProjectTime    = api.FlowProjectTime
 )
 
 type (
@@ -56,6 +58,10 @@ type Sources = infrastructure.Sources
 // for numbers and never queries its tables. The other owning modules arrive
 // the same way through sources.
 func NewModule(ctx context.Context, db *sql.DB, flow api.FlowReader, dashboard DashboardReaders, sources Sources) *Module {
+	// The hours card reads Flow through the same reader as the other Work cards.
+	if dashboard.Flow == nil && flow != nil {
+		dashboard.Flow = flow
+	}
 	return &Module{service: application.NewService(infrastructure.NewRepository(db, sources), dashboard), flow: flow}
 }
 

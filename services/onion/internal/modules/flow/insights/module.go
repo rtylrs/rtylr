@@ -3,6 +3,7 @@ package flow_insights
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	moduleinfra "github.com/voxire/onion/internal/modules/flow/insights/internal/infrastructure"
 
@@ -12,7 +13,7 @@ import (
 // FlowInsights is a data provider, not an HTTP surface. Its legacy chi routes
 // were shadowed duplicates of the onekit flow.insights.v1 service that
 // workspaces serves with pagination, and they are gone (#683). The module
-// stays because insights.dashboard.v1 and echo consume the three readers
+// stays because insights.dashboard.v1 and echo consume the readers
 // below rather than growing their own cross-schema queries.
 type Module struct {
 	service *application.Service
@@ -24,7 +25,7 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	}
 }
 
-// The three readers below exist so another module can ask Flow for its own
+// The readers below exist so another module can ask Flow for its own
 // delivery numbers without reaching into flow_* tables itself.
 //
 // insights.dashboard.v1 declares getInsights, getWorkload and getRoadmap as its
@@ -70,6 +71,24 @@ type FlowRoadmapProject struct {
 	Progress       float64
 	TotalTasks     int64
 	CompletedTasks int64
+}
+
+// FlowProjectTime is the time logged on one project's tasks. Visibility and
+// Status are carried so a business-wide view can keep private projects
+// unnamed.
+type FlowProjectTime struct {
+	ProjectID  int64
+	Name       string
+	Visibility string
+	Status     string
+	Minutes    int64
+}
+
+// FlowLoggedTime is the time logged in Flow over a window, in minutes: the
+// business total and its split per project, most time first.
+type FlowLoggedTime struct {
+	TotalMinutes int64
+	Projects     []FlowProjectTime
 }
 
 // FlowInsights returns Flow's task velocity and completion statistics.
@@ -137,4 +156,27 @@ func (m *Module) FlowRoadmap(ctx context.Context, businessID int64) ([]FlowRoadm
 	}
 
 	return projects, nil
+}
+
+// FlowLoggedTime returns the minutes logged on Flow tasks with logged_at in
+// [from, to]. Only Flow's own time logs count; rows linked to an HR time entry
+// belong to HR.
+func (m *Module) FlowLoggedTime(ctx context.Context, businessID int64, from, to time.Time) (FlowLoggedTime, error) {
+	result, err := m.service.GetLoggedTime(ctx, businessID, from, to)
+	if err != nil {
+		return FlowLoggedTime{}, err
+	}
+
+	projects := make([]FlowProjectTime, 0, len(result.Projects))
+	for _, p := range result.Projects {
+		projects = append(projects, FlowProjectTime{
+			ProjectID:  p.ProjectID,
+			Name:       p.Name,
+			Visibility: p.Visibility,
+			Status:     p.Status,
+			Minutes:    p.Minutes,
+		})
+	}
+
+	return FlowLoggedTime{TotalMinutes: result.TotalMinutes, Projects: projects}, nil
 }

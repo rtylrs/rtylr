@@ -24,6 +24,10 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 			response, err := NewDashboardAPI(application.NewService(testRepository(testutil.DirectAuthorizationDB(ctx)), testDashboardReaders(testutil.DirectAuthorizationDB(ctx))), nil).GetSalesSummary(ctx, &insightsdashboard.GetSalesSummaryRequest{})
 			return response, err
 		}},
+		{Name: "insights dashboard hours", App: authorization.AppInsights, Permission: "insights:dashboard:view", Call: func(ctx context.Context) (any, error) {
+			response, err := NewDashboardAPI(application.NewService(testRepository(testutil.DirectAuthorizationDB(ctx)), testDashboardReaders(testutil.DirectAuthorizationDB(ctx))), nil).GetHoursSummary(ctx, &insightsdashboard.GetHoursSummaryRequest{})
+			return response, err
+		}},
 		{Name: "insights financial view", App: authorization.AppInsights, Permission: "insights:financial:view", Call: func(ctx context.Context) (any, error) {
 			response, err := NewFinancialAPI(application.NewService(testRepository(testutil.DirectAuthorizationDB(ctx)), testDashboardReaders(testutil.DirectAuthorizationDB(ctx)))).GetCashFlowAnalytics(ctx, nil)
 			return response, err

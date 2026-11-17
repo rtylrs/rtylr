@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/flow/insights/internal/domain"
 )
@@ -12,6 +13,7 @@ type mockRepo struct {
 	stats   domain.InsightsStats
 	team    domain.TeamWorkloadResult
 	roadmap domain.RoadmapResult
+	logged  domain.LoggedTime
 	err     error
 }
 
@@ -25,6 +27,10 @@ func (m *mockRepo) GetTeamWorkload(_ context.Context, _ int64) (domain.TeamWorkl
 
 func (m *mockRepo) GetRoadmap(_ context.Context, _ int64) (domain.RoadmapResult, error) {
 	return m.roadmap, m.err
+}
+
+func (m *mockRepo) GetLoggedTime(_ context.Context, _ int64, _, _ time.Time) (domain.LoggedTime, error) {
+	return m.logged, m.err
 }
 
 func TestGetInsights_PropagatesError(t *testing.T) {

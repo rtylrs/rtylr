@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/flow/insights/internal/domain"
 	"github.com/voxire/onion/internal/modules/flow/insights/internal/infrastructure/persistence/sqlc"
@@ -151,6 +152,33 @@ func (r *Repository) GetRoadmap(ctx context.Context, businessID int64) (domain.R
 
 	if result.Projects == nil {
 		result.Projects = []domain.RoadmapProject{}
+	}
+	return result, nil
+}
+
+// GetLoggedTime sums Flow's own time logs with logged_at in [from, to], per
+// project and in total.
+func (r *Repository) GetLoggedTime(ctx context.Context, businessID int64, from, to time.Time) (domain.LoggedTime, error) {
+	rows, err := r.queries.GetLoggedMinutesByProject(ctx, sqlc.GetLoggedMinutesByProjectParams{
+		BusinessID: businessID,
+		DateFrom:   sql.NullTime{Time: from, Valid: true},
+		DateTo:     sql.NullTime{Time: to, Valid: true},
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("GetLoggedTime failed", logger.Error(err))
+		return domain.LoggedTime{}, err
+	}
+
+	result := domain.LoggedTime{Projects: make([]domain.ProjectLoggedTime, 0, len(rows))}
+	for _, row := range rows {
+		result.TotalMinutes += row.Minutes
+		result.Projects = append(result.Projects, domain.ProjectLoggedTime{
+			ProjectID:  row.ProjectID,
+			Name:       row.Name,
+			Visibility: string(row.Visibility),
+			Status:     nullProjectStatus(row.Status),
+			Minutes:    row.Minutes,
+		})
 	}
 	return result, nil
 }

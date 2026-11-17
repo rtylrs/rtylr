@@ -94,7 +94,13 @@ type FlowReader interface {
 	FlowInsights(ctx context.Context, businessID int64) (FlowDelivery, error)
 	FlowTeamWorkload(ctx context.Context, businessID int64) ([]FlowWorkloadMember, error)
 	FlowRoadmap(ctx context.Context, businessID int64) ([]FlowRoadmapProject, error)
+	FlowLoggedTime(ctx context.Context, businessID int64, from, to time.Time) (FlowLoggedTime, error)
 }
+
+type (
+	FlowLoggedTime  = domain.FlowLoggedTime
+	FlowProjectTime = domain.FlowProjectTime
+)
 
 type FlowDelivery struct {
 	TotalTasks        int64
@@ -196,6 +202,41 @@ func toSalesSummaryResponse(summary domain.SalesSummary) *insightsdashboardv1.Ge
 			DeltaPct: summary.MRR.DeltaPct,
 		},
 		ActiveContractCount: summary.ActiveContracts,
+	}
+}
+
+// GetHoursSummary reports the time logged in Work this month to date. Only
+// public projects are listed, like GetRoadmap.
+func (a *DashboardAPI) GetHoursSummary(ctx context.Context, _ *insightsdashboardv1.GetHoursSummaryRequest) (*insightsdashboardv1.GetHoursSummaryResponse, error) {
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
+	if err != nil {
+		return nil, err
+	}
+
+	summary, err := a.Service.GetHoursSummary(ctx, businessID)
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load hours summary")
+	}
+
+	return toHoursSummaryResponse(summary), nil
+}
+
+func toHoursSummaryResponse(summary domain.HoursSummary) *insightsdashboardv1.GetHoursSummaryResponse {
+	projects := make([]*insightsdashboardv1.ProjectHours, 0, len(summary.Projects))
+	for _, p := range summary.Projects {
+		projects = append(projects, &insightsdashboardv1.ProjectHours{
+			ProjectId:   p.ProjectID,
+			ProjectName: p.Name,
+			Minutes:     p.Minutes,
+		})
+	}
+	return &insightsdashboardv1.GetHoursSummaryResponse{
+		Logged: &insightsdashboardv1.InsightsMetricCard{
+			Value:    summary.Logged.Value,
+			DeltaPct: summary.Logged.DeltaPct,
+		},
+		PriorMinutes: summary.PriorMinutes,
+		Projects:     projects,
 	}
 }
 

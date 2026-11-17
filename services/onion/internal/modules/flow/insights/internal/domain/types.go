@@ -59,3 +59,21 @@ type RoadmapProject struct {
 type RoadmapResult struct {
 	Projects []RoadmapProject
 }
+
+// ProjectLoggedTime is the time logged on one project's tasks over a window.
+// Visibility and Status travel with it so a business-wide consumer can name
+// only the projects it may show.
+type ProjectLoggedTime struct {
+	ProjectID  int64
+	Name       string
+	Visibility string
+	Status     string
+	Minutes    int64
+}
+
+// LoggedTime is the time logged in Flow over a window: the business total and
+// its split per project, most time first.
+type LoggedTime struct {
+	TotalMinutes int64
+	Projects     []ProjectLoggedTime
+}

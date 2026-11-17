@@ -2,6 +2,7 @@ package insightsadapters
 
 import (
 	"context"
+	"time"
 
 	flowinsights "github.com/voxire/onion/internal/modules/flow/insights"
 	"github.com/voxire/onion/internal/modules/insights"
@@ -62,6 +63,24 @@ func (a flowInsightsAdapter) FlowRoadmap(ctx context.Context, businessID int64) 
 		})
 	}
 	return projects, nil
+}
+
+func (a flowInsightsAdapter) FlowLoggedTime(ctx context.Context, businessID int64, from, to time.Time) (insights.FlowLoggedTime, error) {
+	result, err := a.module.FlowLoggedTime(ctx, businessID, from, to)
+	if err != nil {
+		return insights.FlowLoggedTime{}, err
+	}
+	projects := make([]insights.FlowProjectTime, 0, len(result.Projects))
+	for _, project := range result.Projects {
+		projects = append(projects, insights.FlowProjectTime{
+			ProjectID:  project.ProjectID,
+			Name:       project.Name,
+			Visibility: project.Visibility,
+			Status:     project.Status,
+			Minutes:    project.Minutes,
+		})
+	}
+	return insights.FlowLoggedTime{TotalMinutes: result.TotalMinutes, Projects: projects}, nil
 }
 
 func NewFlowReader(module *flowinsights.Module) insights.FlowReader {

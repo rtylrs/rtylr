@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { formatCurrency, formatNumber, formatPercent, timeAgo } from './format';
+import { formatCurrency, formatHours, formatNumber, formatPercent, timeAgo } from './format';
 
 describe('formatCurrency', () => {
   it('formats a positive integer as USD currency', () => {
@@ -12,6 +12,18 @@ describe('formatCurrency', () => {
 
   it('formats a large value with comma separators', () => {
     expect(formatCurrency(1000000)).toBe('$1,000,000');
+  });
+});
+
+describe('formatHours', () => {
+  it('shows minutes as hours to one decimal in the reader language', () => {
+    expect(formatHours(2070, 'en')).toBe('34.5');
+    expect(formatHours(2070, 'fr')).toBe('34,5');
+    expect(formatHours(2400, 'en')).toBe('40');
+  });
+
+  it('keeps Latin digits in Arabic like the rest of the dashboard', () => {
+    expect(formatHours(2070, 'ar')).toBe('34.5');
   });
 });
 

@@ -35,11 +35,18 @@ type CRMSalesDashboardReader interface {
 	RecurringRevenue(ctx context.Context, businessID int64, monthStart, now time.Time) (contracts, mrr, mrrAtMonthStart int64, err error)
 }
 
+// FlowHoursReader reads the minutes logged in Work (Flow) with logged_at in
+// [from, to].
+type FlowHoursReader interface {
+	FlowLoggedTime(ctx context.Context, businessID int64, from, to time.Time) (domain.FlowLoggedTime, error)
+}
+
 type DashboardReaders struct {
 	Finance  FinanceDashboardReader
 	POS      POSDashboardReader
 	CRM      CRMDashboardReader
 	CRMSales CRMSalesDashboardReader
+	Flow     FlowHoursReader
 }
 
 type repository interface {
