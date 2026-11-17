@@ -74,6 +74,7 @@
     "overdueListTitle": "Tâches en retard",
     "nothingOverdue": "Rien n'est en retard.",
     "dueOn": "Échéance : {{date}}",
+    "unassigned": "Non assignée",
     "moreOverdue_one": "et {{formatted}} autre tâche en retard",
     "moreOverdue_many": "et {{formatted}} d'autres tâches en retard",
     "moreOverdue_other": "et {{formatted}} autres tâches en retard"

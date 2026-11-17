@@ -120,6 +120,31 @@ export const formatDueDate = (dueDate: string, language: string): string => {
   }
 };
 
+// The assignee after an overdue task's due date. The name is isolated with
+// <bdi> so a Latin name reads correctly in Arabic and the reverse. An assigned
+// task whose name is unknown shows nothing rather than claiming it is
+// unassigned.
+const OverdueTaskAssignee = ({ task }: { task: ProjectOverdueTask }): React.JSX.Element | null => {
+  const { t } = useTranslation();
+  const label =
+    task.assigneeId === ''
+      ? t('insights.projectDashboard.unassigned')
+      : task.assigneeName !== ''
+        ? task.assigneeName
+        : null;
+  if (label === null) return null;
+  return (
+    <>
+      <span aria-hidden="true" style={{ color: 'var(--hub-text-dim)' }}>
+        ·
+      </span>
+      <bdi className="truncate" style={{ color: 'var(--hub-text-muted)' }}>
+        {label}
+      </bdi>
+    </>
+  );
+};
+
 const OverdueTaskList = ({
   projectId,
   tasks,
@@ -161,10 +186,13 @@ const OverdueTaskList = ({
                 <span className="truncate text-start" style={{ color: 'var(--hub-text)' }}>
                   {task.title}
                 </span>
-                <span className="shrink-0 text-xs" style={{ color: 'var(--delta-down)' }}>
-                  {t('insights.projectDashboard.dueOn', {
-                    date: formatDueDate(task.dueDate, i18n.language),
-                  })}
+                <span className="flex shrink-0 items-center gap-1 text-xs min-w-0 max-w-[55%]">
+                  <span className="shrink-0" style={{ color: 'var(--delta-down)' }}>
+                    {t('insights.projectDashboard.dueOn', {
+                      date: formatDueDate(task.dueDate, i18n.language),
+                    })}
+                  </span>
+                  <OverdueTaskAssignee task={task} />
                 </span>
               </Link>
             </li>

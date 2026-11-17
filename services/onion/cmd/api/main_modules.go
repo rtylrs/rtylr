@@ -250,6 +250,9 @@ func initializeModules(ctx context.Context) *apiModules {
 	financeReportsModule := financereports.NewModule(ctx, dbclient.Pool()).WithReportingCurrency(businessModule.ReportingCurrency)
 	hrReportsModule := hr_reports.NewModule(ctx, dbclient.Pool())
 	crmSalesModule := crmsales.NewModule(ctx, dbclient.Pool()).WithMembershipReader(scopes.NewReader(dbclient.Pool()).IsBusinessUser).WithRepReader(crmSalesReps(scopes.NewReader(dbclient.Pool())))
+	// The project dashboard names overdue tasks' assignees the way Flow's task
+	// list does, through Flow's own identity reader.
+	flowInsightsModule.SetAssigneeNames(workspacesModule.AssigneeNames)
 	insightsModule := insights.NewModule(ctx, dbclient.Pool(), insightsadapters.NewFlowReader(flowInsightsModule), insights.DashboardReaders{
 		Finance:  financeReportsModule,
 		POS:      posOrdersModule,

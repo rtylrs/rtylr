@@ -87,12 +87,14 @@ type DashboardProject struct {
 }
 
 // OverdueTask is an open task past its due date. AssigneeID is zero when the
-// task is unassigned.
+// task is unassigned. AssigneeName is the name Flow's task list shows for the
+// assignee, empty when the task is unassigned or the name is unknown.
 type OverdueTask struct {
-	ID         int64
-	Title      string
-	DueDate    string
-	AssigneeID int64
+	ID           int64
+	Title        string
+	DueDate      string
+	AssigneeID   int64
+	AssigneeName string
 }
 
 // ProjectTaskProgress is one project's task completion and its overdue work.

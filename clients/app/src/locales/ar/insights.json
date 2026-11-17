@@ -86,6 +86,7 @@
     "overdueListTitle": "المهام المتأخرة",
     "nothingOverdue": "لا يوجد شيء متأخر.",
     "dueOn": "تاريخ الاستحقاق {{date}}",
+    "unassigned": "غير مسندة",
     "moreOverdue_zero": "ولا مهام متأخرة أخرى",
     "moreOverdue_one": "ومهمة متأخرة أخرى",
     "moreOverdue_two": "ومهمتان متأخرتان أخريان",

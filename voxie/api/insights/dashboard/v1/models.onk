@@ -172,6 +172,8 @@ message OverdueTask {
   due_date: string
   /// assignee_id identifies the person the task is assigned to; absent when it is unassigned.
   assignee_id: int64?
+  /// assignee_name is the assignee's display name, as Work's task list shows it; absent when the task is unassigned or the name is unknown.
+  assignee_name: string?
 }
 
 message ProjectHoursLogged {
