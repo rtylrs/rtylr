@@ -574,7 +574,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
               />
             </section>
 
-            {isDeveloperProject && <DevelopmentSection />}
+            {isDeveloperProject && <DevelopmentSection taskId={task.id} />}
 
             <section className="mb-8">
               <h3
