@@ -105,8 +105,8 @@ message GetSalesSummaryResponse {
   won: InsightsMetricCard
   /// recent_won_deal_count is the number of deals won since the start of last month.
   recent_won_deal_count: int64
-  /// mrr is the monthly recurring revenue of won monthly and yearly deals (yearly counted at a twelfth), in minor units, with the change since the start of this month.
+  /// mrr is the monthly recurring revenue of signed CRM contracts active today, in minor units, with the change since the start of this month.
   mrr: InsightsMetricCard
-  /// active_contract_count is the number of won monthly and yearly deals. Deals have no end date, so every one counts as active.
+  /// active_contract_count is the number of signed monthly and yearly CRM contracts that have started and not ended.
   active_contract_count: int64
 }
