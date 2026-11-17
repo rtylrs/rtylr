@@ -138,8 +138,10 @@ const retryUnlessDenied = (failureCount: number, error: unknown): boolean => {
   return status !== 403 && status !== 404 && failureCount < 2;
 };
 
-// The Work projects the viewer may open a project dashboard for: every public
-// project and the private ones they are a member of, by name.
+// The Work projects the viewer may pick a project dashboard for, by name: every
+// public project, the private ones they belong to, and whatever else Work's
+// sidebar lists for them. Curated like that sidebar, so a business admin may
+// open a private project's dashboard that is not in this list.
 export const useDashboardProjects = (): UseQueryResult<DashboardProjectOption[]> => {
   return useQuery<DashboardProjectOption[]>({
     queryKey: ['insights-dashboard-projects'],
@@ -159,8 +161,9 @@ export const useDashboardProjects = (): UseQueryResult<DashboardProjectOption[]>
 };
 
 // One Work project's dashboard. The server answers 404 for a private project
-// the viewer is not a member of, and leaves invoices out when the viewer may
-// not view finance invoices.
+// Work does not let the viewer see (business admins and the managers of
+// people on it may), and leaves invoices out when the viewer may not view
+// finance invoices.
 export const useProjectDashboard = (
   projectId: string
 ): UseQueryResult<ProjectDashboardResponse> => {
