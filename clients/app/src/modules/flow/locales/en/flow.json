@@ -190,7 +190,24 @@
     "devType": "Type",
     "devPoints": "Points",
     "devBranch": "Branch",
-    "devNotSet": "Not set"
+    "devNotSet": "Not set",
+    "links": "Links",
+    "addLink": "Add link",
+    "addingLink": "Adding…",
+    "addLinkPlaceholder": "Paste a PR, Figma, preview or any URL",
+    "invalidLink": "Enter a full link starting with http:// or https://",
+    "noLinks": "No links yet.",
+    "linkAddedBy": "Added by {{name}} · {{date}}",
+    "linkAddedBySomeone": "a teammate",
+    "removeLink": "Remove link {{name}}",
+    "linkAdded": "added link {{value}}",
+    "linkRemoved": "removed link {{value}}",
+    "linkState": {
+      "open": "Open",
+      "draft": "Draft",
+      "merged": "Merged",
+      "closed": "Closed"
+    }
   },
   "time": {
     "add": {

@@ -161,5 +161,9 @@
   "attachment": {
     "addFailed": "Failed to add attachment",
     "removeFailed": "Failed to remove attachment"
+  },
+  "link": {
+    "addFailed": "Couldn't add the link",
+    "removeFailed": "Couldn't remove the link"
   }
 }
