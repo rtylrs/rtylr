@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import InvoiceDetail from './InvoiceDetail';
 import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
@@ -22,6 +22,8 @@ const mocks = vi.hoisted(() => ({
   effectiveAccess: undefined as unknown,
   projectId: undefined as string | undefined,
   workProjects: null as { id: string; name: string }[] | null,
+  status: 'Sent' as 'Draft' | 'Sent' | 'Paid' | 'Overdue' | 'Cancelled',
+  setProject: vi.fn(),
 }));
 
 vi.mock('../../../../shared/stores/userStore', () => ({
@@ -60,9 +62,12 @@ vi.mock('motion/react', () => ({
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 
 vi.mock('./useInvoices', () => ({
-  useInvoiceDetail: () => ({ data: { ...invoice, projectId: mocks.projectId }, isLoading: false }),
+  useInvoiceDetail: () => ({
+    data: { ...invoice, status: mocks.status, projectId: mocks.projectId },
+    isLoading: false,
+  }),
   useDeleteInvoice: () => ({ mutate: vi.fn(), isPending: false }),
-  useSetInvoiceProject: () => ({ mutate: vi.fn(), isPending: false }),
+  useSetInvoiceProject: () => ({ mutate: mocks.setProject, isPending: false }),
 }));
 
 vi.mock('../../shared/hooks/queries/useWorkProjects', () => ({
@@ -127,6 +132,7 @@ describe('InvoiceDetail project', () => {
     });
     mocks.projectId = undefined;
     mocks.workProjects = null;
+    mocks.status = 'Sent';
   });
 
   it('shows the tagged Work project by name', () => {
@@ -144,9 +150,111 @@ describe('InvoiceDetail project', () => {
     expect(screen.getByText('financeInvoices.new.projectFallback')).toBeInTheDocument();
   });
 
-  it('shows no project card for an untagged invoice', () => {
+  it('shows no project card for an untagged invoice the viewer cannot change', () => {
     render(<InvoiceDetail />);
 
     expect(screen.queryByText('financeInvoices.detail.project')).not.toBeInTheDocument();
+  });
+});
+
+describe('InvoiceDetail change project', () => {
+  beforeEach(() => {
+    mocks.effectiveAccess = createEffectiveAccess('finance', {
+      permissions: ['finance:invoices:view', 'finance:invoices:create'],
+    });
+    mocks.projectId = undefined;
+    mocks.workProjects = [
+      { id: '7', name: 'Website' },
+      { id: '8', name: 'App redesign' },
+    ];
+    mocks.status = 'Sent';
+    mocks.setProject.mockReset();
+  });
+
+  it('tags a sent, untagged invoice with a Work project', () => {
+    render(<InvoiceDetail />);
+
+    expect(screen.getByText('financeInvoices.new.noProject')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /financeInvoices.detail.changeProject/ }));
+    const select = screen.getByLabelText('financeInvoices.detail.changeProject');
+    expect(
+      Array.from((select as HTMLSelectElement).options).map((option) => option.textContent)
+    ).toEqual(['financeInvoices.new.noProject', 'Website', 'App redesign']);
+
+    fireEvent.change(select, { target: { value: '8' } });
+    expect(mocks.setProject).toHaveBeenCalledWith(
+      { id: 'INV-100', projectId: '8' },
+      expect.objectContaining({ onSuccess: expect.any(Function) })
+    );
+  });
+
+  it('clears the project with No project', () => {
+    mocks.projectId = '7';
+    render(<InvoiceDetail />);
+
+    fireEvent.click(screen.getByRole('button', { name: /financeInvoices.detail.changeProject/ }));
+    fireEvent.change(screen.getByLabelText('financeInvoices.detail.changeProject'), {
+      target: { value: '' },
+    });
+    expect(mocks.setProject).toHaveBeenCalledWith(
+      { id: 'INV-100', projectId: null },
+      expect.anything()
+    );
+  });
+
+  it('does not write when the same project is picked again', () => {
+    mocks.projectId = '7';
+    render(<InvoiceDetail />);
+
+    fireEvent.click(screen.getByRole('button', { name: /financeInvoices.detail.changeProject/ }));
+    fireEvent.change(screen.getByLabelText('financeInvoices.detail.changeProject'), {
+      target: { value: '7' },
+    });
+    expect(mocks.setProject).not.toHaveBeenCalled();
+    expect(screen.queryByLabelText('financeInvoices.detail.changeProject')).not.toBeInTheDocument();
+  });
+
+  it('keeps an unlisted current project selectable', () => {
+    mocks.projectId = '99';
+    render(<InvoiceDetail />);
+
+    fireEvent.click(screen.getByRole('button', { name: /financeInvoices.detail.changeProject/ }));
+    const select = screen.getByLabelText(
+      'financeInvoices.detail.changeProject'
+    ) as HTMLSelectElement;
+    expect(select.value).toBe('99');
+  });
+
+  it('offers the change on a paid invoice', () => {
+    mocks.status = 'Paid';
+    render(<InvoiceDetail />);
+
+    expect(
+      screen.getByRole('button', { name: /financeInvoices.detail.changeProject/ })
+    ).toBeInTheDocument();
+  });
+
+  it('hides the change on a cancelled or void invoice', () => {
+    mocks.status = 'Cancelled';
+    mocks.projectId = '7';
+    render(<InvoiceDetail />);
+
+    expect(screen.getByText('Website')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /financeInvoices.detail.changeProject/ })
+    ).not.toBeInTheDocument();
+  });
+
+  it('hides the change without finance:invoices:create', () => {
+    mocks.effectiveAccess = createEffectiveAccess('finance', {
+      permissions: ['finance:invoices:view', 'finance:invoices:send'],
+    });
+    mocks.projectId = '7';
+    render(<InvoiceDetail />);
+
+    expect(screen.getByText('Website')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /financeInvoices.detail.changeProject/ })
+    ).not.toBeInTheDocument();
   });
 });
