@@ -20,7 +20,10 @@
     "history": "Historique",
     "client": "Client",
     "void": "Annuler la facture",
-    "project": "Projet"
+    "project": "Projet",
+    "changeProject": "Changer de projet",
+    "projectChanged": "Projet mis à jour",
+    "projectChangeFailed": "Impossible de changer le projet"
   },
   "new": {
     "title": "Nouvelle facture",
