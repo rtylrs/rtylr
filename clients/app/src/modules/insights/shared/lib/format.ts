@@ -13,6 +13,18 @@ export function formatNumber(value: number): string {
   return new Intl.NumberFormat('en-US').format(toFiniteNumber(value));
 }
 
+// Minutes as hours to one decimal, with the language's separator but Latin
+// digits like the rest of the dashboard.
+export function formatHours(minutes: number, language: string): string {
+  const hours = toFiniteNumber(minutes) / 60;
+  const options: Intl.NumberFormatOptions = { maximumFractionDigits: 1 };
+  try {
+    return new Intl.NumberFormat(`${language}-u-nu-latn`, options).format(hours);
+  } catch {
+    return new Intl.NumberFormat('en-US', options).format(hours);
+  }
+}
+
 export function formatPercent(value: number): string {
   const safeValue = toFiniteNumber(value);
   return `${safeValue >= 0 ? '+' : ''}${safeValue.toFixed(1)}%`;

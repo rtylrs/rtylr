@@ -46,6 +46,20 @@ export interface SalesSummaryResponse {
   activeContractCount: number;
 }
 
+// Time logged in Work (Flow), in minutes. Only public projects are listed;
+// private ones count in the total without being named.
+export interface ProjectHoursThisMonth {
+  projectId: string;
+  minutes: number;
+}
+
+export interface HoursSummaryResponse {
+  // Minutes logged this month to date, against the same span last month.
+  logged: CountCard;
+  priorMinutes: number;
+  projects: ProjectHoursThisMonth[];
+}
+
 export interface InsightsDashboardResponse {
   revenue: MoneyCard;
   customers: CountCard;

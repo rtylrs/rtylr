@@ -15,6 +15,7 @@ import {
   Target,
   Trophy,
   Repeat,
+  Timer,
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +24,7 @@ import type { ChartOptions } from 'chart.js';
 import { EmptyState } from '@voxire/ui';
 import { refreshEmptyStateAction } from '../../shared/lib/refreshAction';
 import {
+  useHoursSummary,
   useInsightsDashboard,
   useSalesSummary,
   useWorkSummary,
@@ -31,7 +33,7 @@ import { useInvoiceAging } from '../../shared/hooks/queries/useInsightsFinancial
 import { useRevenueSeries } from '../../shared/hooks/queries/useRevenue';
 import { useInsightsSettings } from '../../shared/hooks/queries/useInsightsSettings';
 import { formatMoney, type Currency } from '../../shared/utils/money';
-import { formatNumber, formatPercent } from '../../shared/lib/format';
+import { formatHours, formatNumber, formatPercent } from '../../shared/lib/format';
 import { CardSkeleton } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import CaretAskBar from '../../shared/components/CaretAskBar';
@@ -101,6 +103,7 @@ const Dashboard: React.FC = (): React.JSX.Element => {
   const { data: settings } = useInsightsSettings();
   const { data: work } = useWorkSummary();
   const { data: sales } = useSalesSummary();
+  const { data: hours } = useHoursSummary();
   const { data: agingData } = useInvoiceAging();
   const currency = (settings?.defaultCurrency as Currency) || 'USD';
 
@@ -170,6 +173,8 @@ const Dashboard: React.FC = (): React.JSX.Element => {
 
   const hasSales = !!sales && (sales.openDealCount > 0 || sales.recentWonDealCount > 0);
   const hasContracts = !!sales && sales.activeContractCount > 0;
+  const hasHours = !!hours && (hours.logged.value > 0 || hours.priorMinutes > 0);
+  const projectMinutes = new Map((hours?.projects ?? []).map((p) => [p.projectId, p.minutes]));
   const serviceStats: ServiceStat[] = [
     ...(sales && hasSales
       ? [
@@ -226,6 +231,19 @@ const Dashboard: React.FC = (): React.JSX.Element => {
           },
         ]
       : []),
+    ...(hours && hasHours
+      ? [
+          {
+            id: 'hours-logged',
+            label: t('insights.dashboard.service.hoursLogged'),
+            value: t('insights.dashboard.service.hoursValue', {
+              hours: formatHours(hours.logged.value, i18n.language),
+            }),
+            icon: Timer,
+            deltaPct: hours.logged.deltaPct,
+          },
+        ]
+      : []),
     ...(unpaidMinor > 0
       ? [
           {
@@ -245,9 +263,9 @@ const Dashboard: React.FC = (): React.JSX.Element => {
   ];
   const projects = (work?.projects ?? []).slice(0, 6);
 
-  // Deals, contracts, Work and unpaid invoices count as activity too: a service
-  // business with a pipeline, projects and invoices but no POS orders is not
-  // empty.
+  // Deals, contracts, Work tasks and hours, and unpaid invoices count as
+  // activity too: a service business with a pipeline, projects and invoices
+  // but no POS orders is not empty.
   const isEmpty =
     !!data &&
     data.revenue.value === 0 &&
@@ -256,7 +274,8 @@ const Dashboard: React.FC = (): React.JSX.Element => {
     (work?.totalTasks ?? 0) === 0 &&
     unpaidMinor === 0 &&
     !hasSales &&
-    !hasContracts;
+    !hasContracts &&
+    !hasHours;
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -386,6 +405,7 @@ const Dashboard: React.FC = (): React.JSX.Element => {
           <ul className="space-y-3">
             {projects.map((project) => {
               const pct = Math.min(100, Math.max(0, Math.round(project.progressPct)));
+              const minutes = projectMinutes.get(project.id) ?? 0;
               return (
                 <li key={project.id} className="space-y-1">
                   <div className="flex items-center justify-between gap-3 text-sm">
@@ -397,6 +417,10 @@ const Dashboard: React.FC = (): React.JSX.Element => {
                         done: formatNumber(project.completedTasks),
                         total: formatNumber(project.totalTasks),
                       })}
+                      {minutes > 0 &&
+                        ` · ${t('insights.dashboard.service.hoursThisMonth', {
+                          hours: formatHours(minutes, i18n.language),
+                        })}`}
                     </span>
                   </div>
                   <div

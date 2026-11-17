@@ -1,7 +1,12 @@
 import { createOneKitClient, toFiniteNumber } from '@voxire/api';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { DashboardServiceClient } from '@voxire/voxie/insights/dashboard/v1/client';
-import type { InsightsDashboardResponse, SalesSummaryResponse, WorkSummaryResponse } from './types';
+import type {
+  HoursSummaryResponse,
+  InsightsDashboardResponse,
+  SalesSummaryResponse,
+  WorkSummaryResponse,
+} from './types';
 
 const dashboardClient = createOneKitClient(DashboardServiceClient, 'insights');
 
@@ -83,6 +88,28 @@ export const useSalesSummary = (): UseQueryResult<SalesSummaryResponse> => {
           deltaPct: toFiniteNumber(res.mrr?.deltaPct),
         },
         activeContractCount: toFiniteNumber(res.activeContractCount),
+      };
+    },
+  });
+};
+
+// Minutes logged in Work this month to date, compared with the same span last
+// month, and how much of it went to each public project.
+export const useHoursSummary = (): UseQueryResult<HoursSummaryResponse> => {
+  return useQuery<HoursSummaryResponse>({
+    queryKey: ['insights-dashboard-hours'],
+    refetchInterval: 60000,
+    queryFn: async (): Promise<HoursSummaryResponse> => {
+      const res = await dashboardClient.getHoursSummary({});
+      return {
+        logged: {
+          value: toFiniteNumber(res.logged?.value),
+          deltaPct: toFiniteNumber(res.logged?.deltaPct),
+        },
+        priorMinutes: toFiniteNumber(res.priorMinutes),
+        projects: (res.projects ?? [])
+          .map((p) => ({ projectId: p.projectId ?? '', minutes: toFiniteNumber(p.minutes) }))
+          .filter((p) => p.projectId !== '' && p.minutes > 0),
       };
     },
   });
