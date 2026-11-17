@@ -133,6 +133,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   // The activation link for an invitation, shown once so the inviter can share
   // it when the email does not arrive. Kept in memory only.
   const [inviteLink, setInviteLink] = useState<string | null>(null);
+  const [inviteEmailQueued, setInviteEmailQueued] = useState(false);
 
   // Single tab state
   const [name, setName] = useState('');
@@ -266,6 +267,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
         await assignLocations(userId, selectedLocations);
       }
       if (res.inviteLink) {
+        setInviteEmailQueued(res.inviteEmailQueued === true);
         setInviteLink(res.inviteLink);
         return;
       }
@@ -544,6 +546,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
       <InviteLinkDialog
         link={inviteLink}
         email={email}
+        emailQueued={inviteEmailQueued}
         onClose={() => {
           setInviteLink(null);
           navigate({ to: '/team' });
