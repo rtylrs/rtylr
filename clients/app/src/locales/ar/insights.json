@@ -3,18 +3,18 @@
     "generic": "Something went wrong. Please try again."
   },
   "dashboard": {
-    "title": "Business Overview",
+    "title": "نظرة عامة على الأعمال",
     "caretAskBar": {
-      "placeholder": "Ask Caret anything about your business…"
+      "placeholder": "اسأل Caret أي شيء عن عملك…"
     },
     "cards": {
-      "revenue": "Revenue (MTD)",
-      "customers": "Customers",
-      "orders": "Orders",
-      "margin": "Gross Margin"
+      "revenue": "الإيرادات (منذ بداية الشهر)",
+      "customers": "العملاء",
+      "orders": "الطلبات",
+      "margin": "هامش الربح الإجمالي"
     },
-    "emptyTitle": "No KPI data yet",
-    "emptyDescription": "Metrics will appear here once your business starts generating activity.",
+    "emptyTitle": "لا توجد بيانات مؤشرات بعد",
+    "emptyDescription": "ستظهر المؤشرات هنا عندما يبدأ نشاط عملك.",
     "vsPrior": "مقابل السابق",
     "metaTitle": "لوحة المعلومات · rtylr",
     "service": {
