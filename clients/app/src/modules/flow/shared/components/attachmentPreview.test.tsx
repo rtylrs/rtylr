@@ -30,12 +30,16 @@ const image = {
 
 function renderWithQuery(ui: ReactElement) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+  const view = render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+  return {
+    ...view,
+    rerender: (next: ReactElement) =>
+      view.rerender(<QueryClientProvider client={client}>{next}</QueryClientProvider>),
+  };
 }
 
 describe('image attachments', () => {
   beforeEach(() => {
-    sessionStorage.clear();
     signAssetUrl.mockReset();
     signAssetUrl.mockResolvedValue({ url: SIGNED, expiresAt: 1 });
   });
@@ -114,7 +118,6 @@ describe('removing attachments', () => {
 
 describe('thumbnail fallback', () => {
   beforeEach(() => {
-    sessionStorage.clear();
     signAssetUrl.mockReset();
     signAssetUrl.mockImplementation(async (path: string) => ({
       url: `https://api.voxire.com${path}?sig=s`,
@@ -131,6 +134,25 @@ describe('thumbnail fallback', () => {
 
     await waitFor(() =>
       expect(screen.getByRole('img', { name: image.name }).getAttribute('src')).toContain('/files/')
+    );
+  });
+
+  it('tries the resized copy again when a row shows a different file', async () => {
+    // The fallback state used to survive a url change, so a reused row skipped
+    // the next file's resized copy and loaded its full-size original.
+    const view = renderWithQuery(<AttachmentUpload attachments={[image] as never} />);
+    fireEvent.error(await screen.findByRole('img', { name: image.name }));
+    await waitFor(() =>
+      expect(screen.getByRole('img', { name: image.name }).getAttribute('src')).toContain('/files/')
+    );
+
+    const next = { ...image, url: 'https://api.voxire.com/files/11111111-2222-4333-8444-555555555555' };
+    view.rerender(<AttachmentUpload attachments={[next] as never} />);
+
+    await waitFor(() =>
+      expect(screen.getByRole('img', { name: image.name }).getAttribute('src')).toContain(
+        '/images/11111111-2222-4333-8444-555555555555'
+      )
     );
   });
 });
