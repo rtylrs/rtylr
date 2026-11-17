@@ -43,6 +43,7 @@ const FocusToday = React.lazy(() => import('./features/focus-today/FocusToday'))
 const Start = React.lazy(() => import('./features/Start'));
 const MyIssues = React.lazy(() => import('./features/tasks/MyIssues'));
 const Archive = React.lazy(() => import('./features/archive/Archive'));
+const GitHubLinkCallback = React.lazy(() => import('./features/settings/GitHubLinkCallback'));
 
 const RouteLoading = (): React.JSX.Element => {
   const { t } = useTranslation();
@@ -297,6 +298,13 @@ export function createFlowRoutes<TParent extends AnyRoute>(parent: TParent) {
     component: () => withLayout(<PresenceScreen />),
   });
 
+  // The GitHub App's Callback URL for member account linking.
+  const githubCallbackRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/github/callback',
+    component: () => withLayout(<GitHubLinkCallback />),
+  });
+
   const settingsRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/settings',
@@ -344,6 +352,7 @@ export function createFlowRoutes<TParent extends AnyRoute>(parent: TParent) {
     timeReportsRoute,
     directoryRoute,
     presenceRoute,
+    githubCallbackRoute,
     settingsRoute,
     catchAllRoute,
   ]);
