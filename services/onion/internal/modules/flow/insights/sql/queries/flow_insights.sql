@@ -143,6 +143,36 @@ WHERE fp.id = sqlc.arg('project_id')
        OR EXISTS (SELECT 1 FROM flow_project_members pm
                   WHERE pm.project_id = fp.id AND pm.user_id = sqlc.arg('user_id')));
 
+-- One project by id with no viewer rule, for a project Flow's own access
+-- check has already granted. Personal projects still never come back.
+-- name: GetDashboardProjectByID :one
+SELECT
+    fp.id,
+    fp.name,
+    COALESCE(fp.status, 'active') AS status,
+    fp.visibility
+FROM flow_projects fp
+WHERE fp.id = sqlc.arg('project_id')
+  AND fp.business_id = sqlc.arg('business_id')
+  AND fp.is_personal = FALSE;
+
+-- The projects among project_ids, for the ones Flow's sidebar lists that the
+-- viewer rule above does not cover. Same exclusions as
+-- ListDashboardProjectsForUser.
+-- name: ListDashboardProjectsByIDs :many
+SELECT
+    fp.id,
+    fp.name,
+    COALESCE(fp.status, 'active') AS status,
+    fp.visibility
+FROM flow_projects fp
+WHERE fp.business_id = sqlc.arg('business_id')
+  AND fp.is_personal = FALSE
+  AND fp.archived_at IS NULL
+  AND COALESCE(fp.status, 'active') <> 'archived'
+  AND fp.id IN (sqlc.slice('project_ids'))
+ORDER BY fp.name ASC, fp.id ASC;
+
 -- Progress counts top-level tasks, like the roadmap, without its 12-month
 -- window. Overdue counts every open task past its due date, subtasks
 -- included, like the business-wide overdue count. Archived tasks are hidden

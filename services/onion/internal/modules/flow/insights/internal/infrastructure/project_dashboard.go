@@ -42,6 +42,39 @@ func (r *Repository) GetDashboardProject(ctx context.Context, businessID, userID
 	return domain.DashboardProject{ID: row.ID, Name: row.Name, Status: string(row.Status), Visibility: string(row.Visibility)}, true, nil
 }
 
+// GetDashboardProjectByID returns one project with no viewer rule, for a
+// project Flow's access check has already granted. found is false for a
+// missing project, another business's project and a personal project alike.
+func (r *Repository) GetDashboardProjectByID(ctx context.Context, businessID, projectID int64) (project domain.DashboardProject, found bool, err error) {
+	row, err := r.queries.GetDashboardProjectByID(ctx, sqlc.GetDashboardProjectByIDParams{ProjectID: projectID, BusinessID: businessID})
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.DashboardProject{}, false, nil
+	}
+	if err != nil {
+		logger.Ctx(ctx).Error("GetDashboardProjectByID failed", logger.Error(err))
+		return domain.DashboardProject{}, false, err
+	}
+	return domain.DashboardProject{ID: row.ID, Name: row.Name, Status: string(row.Status), Visibility: string(row.Visibility)}, true, nil
+}
+
+// ListDashboardProjectsByIDs returns the active, non-personal projects among
+// projectIDs in businessID. An empty projectIDs reads nothing.
+func (r *Repository) ListDashboardProjectsByIDs(ctx context.Context, businessID int64, projectIDs []int64) ([]domain.DashboardProject, error) {
+	out := []domain.DashboardProject{}
+	if len(projectIDs) == 0 {
+		return out, nil
+	}
+	rows, err := r.queries.ListDashboardProjectsByIDs(ctx, sqlc.ListDashboardProjectsByIDsParams{BusinessID: businessID, ProjectIds: projectIDs})
+	if err != nil {
+		logger.Ctx(ctx).Error("ListDashboardProjectsByIDs failed", logger.Error(err))
+		return nil, err
+	}
+	for _, row := range rows {
+		out = append(out, domain.DashboardProject{ID: row.ID, Name: row.Name, Status: string(row.Status), Visibility: string(row.Visibility)})
+	}
+	return out, nil
+}
+
 // GetProjectTaskProgress returns one project's task counts and its oldest
 // overdue tasks.
 func (r *Repository) GetProjectTaskProgress(ctx context.Context, businessID, projectID int64) (domain.ProjectTaskProgress, error) {
