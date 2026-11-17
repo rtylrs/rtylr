@@ -53,7 +53,7 @@ import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import { useLabels, useSetTaskLabels } from './useLabels';
 import { useCreateStatus, useProjectStatuses, useSetTaskStatus } from '../projects/useStatuses';
-import { insertionPlan, sortStatuses } from '../projects/statusUtils';
+import { displayStatusName, insertionPlan, sortStatuses } from '../projects/statusUtils';
 import NewStatusDialog from '../projects/components/NewStatusDialog';
 import { useTaskActivity } from './useTaskActivity';
 import { useTaskRealtime } from '../../shared/lib/useTaskRealtime';
@@ -696,7 +696,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
               value={currentStatusId}
               options={projectStatuses.map((s) => ({
                 value: s.id,
-                label: s.name,
+                label: displayStatusName(s.name, t),
                 icon: (
                   <span
                     aria-hidden="true"

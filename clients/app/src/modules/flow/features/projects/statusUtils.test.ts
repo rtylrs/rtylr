@@ -3,6 +3,7 @@ import type { ApiStatus } from '../../shared/services/flowApi';
 import {
   closedRecently,
   defaultStatus,
+  displayStatusName,
   firstDoneStatus,
   insertionPlan,
   isOnlyDoneStatus,
@@ -104,5 +105,20 @@ describe('insertionPlan', () => {
 
   it('places with one reorder when there is no room before the first status', () => {
     expect(insertionPlan(ordered, 0)).toEqual({ placeAmong: { ids: ['1', '2', '3'], index: 0 } });
+  });
+});
+
+describe('displayStatusName', () => {
+  const t = (key: string): string => `<${key}>`;
+
+  it('translates an unrenamed default status, whatever its case or spacing', () => {
+    expect(displayStatusName('To Do', t)).toBe('<flowStatus.todo>');
+    expect(displayStatusName(' in progress ', t)).toBe('<flowStatus.inProgress>');
+    expect(displayStatusName('CANCELLED', t)).toBe('<flowStatus.cancelled>');
+  });
+
+  it('shows a renamed or custom status exactly as typed', () => {
+    expect(displayStatusName('Design', t)).toBe('Design');
+    expect(displayStatusName('Done (client)', t)).toBe('Done (client)');
   });
 });

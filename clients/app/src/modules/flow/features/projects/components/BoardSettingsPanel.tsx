@@ -6,6 +6,7 @@ import { Switch } from '@voxire/ui';
 import GateNotice from '../../../shared/components/GateNotice';
 import type { BoardGroupKey } from '../../../shared/lib/boardUtils';
 import { useDialogBehavior } from '../../../shared/lib/useDialogBehavior';
+import { displayStatusName } from '../statusUtils';
 
 const GROUP_KEYS: BoardGroupKey[] = ['none', 'assignee', 'priority', 'due'];
 
@@ -129,7 +130,7 @@ const BoardSettingsPanel = ({
                   className="truncate text-flow-body"
                   style={{ color: 'var(--flow-text-muted)' }}
                 >
-                  {col.name}
+                  {displayStatusName(col.name, t)}
                 </span>
                 <Switch
                   checked={false}

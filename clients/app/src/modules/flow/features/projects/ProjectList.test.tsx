@@ -124,7 +124,8 @@ describe('buildListGroups', () => {
 
   it('orders status groups by sort order and leaves empty statuses out', () => {
     const groups = buildListGroups([on('a', '3'), on('b', '1')], statuses, 'status', identity);
-    expect(groups.map((g) => g.label)).toEqual(['To Do', 'Done']);
+    // Default statuses are shown through the locale (identity t here).
+    expect(groups.map((g) => g.label)).toEqual(['flowStatus.todo', 'flowStatus.done']);
     expect(groups[0].statusId).toBe('1');
   });
 
@@ -135,7 +136,7 @@ describe('buildListGroups', () => {
       'status',
       identity
     );
-    expect(groups.map((g) => g.label)).toEqual(['To Do', 'Doing']);
+    expect(groups.map((g) => g.label)).toEqual(['flowStatus.todo', 'Doing']);
     expect(groups.flatMap((g) => g.tasks.map((t) => t.id)).sort()).toEqual(['a', 'b']);
   });
 

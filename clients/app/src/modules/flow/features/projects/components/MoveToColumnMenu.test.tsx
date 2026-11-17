@@ -52,7 +52,7 @@ describe('MoveToColumnMenu', () => {
   it('moves the task to the chosen column and closes', () => {
     const { onMove } = setup();
     fireEvent.click(trigger());
-    fireEvent.click(screen.getByRole('menuitem', { name: /In progress/ }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /flowStatus\.inProgress/ }));
     expect(onMove).toHaveBeenCalledWith('2');
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
   });
@@ -62,7 +62,7 @@ describe('MoveToColumnMenu', () => {
   it('marks the current column and does not let it be chosen', () => {
     const { onMove } = setup();
     fireEvent.click(trigger());
-    const current = screen.getByRole('menuitem', { name: /Backlog/ });
+    const current = screen.getByRole('menuitem', { name: /flowStatus\.backlog/ });
     expect(current).toBeDisabled();
     expect(current).toHaveAttribute('aria-current', 'true');
     fireEvent.click(current);
@@ -74,20 +74,26 @@ describe('MoveToColumnMenu', () => {
   it('focuses the first selectable item on open, skipping the current column', () => {
     setup();
     fireEvent.click(trigger());
-    expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: /In progress/ }));
+    expect(document.activeElement).toBe(
+      screen.getByRole('menuitem', { name: /flowStatus\.inProgress/ })
+    );
   });
 
   it('walks the selectable items with arrow keys and wraps around', () => {
     setup();
     fireEvent.click(trigger());
     const menu = screen.getByRole('menu');
-    expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: /In progress/ }));
+    expect(document.activeElement).toBe(
+      screen.getByRole('menuitem', { name: /flowStatus\.inProgress/ })
+    );
     fireEvent.keyDown(menu, { key: 'ArrowDown' });
-    expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: /Done/ }));
+    expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: /flowStatus\.done/ }));
     fireEvent.keyDown(menu, { key: 'ArrowDown' });
-    expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: /In progress/ }));
+    expect(document.activeElement).toBe(
+      screen.getByRole('menuitem', { name: /flowStatus\.inProgress/ })
+    );
     fireEvent.keyDown(menu, { key: 'ArrowUp' });
-    expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: /Done/ }));
+    expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: /flowStatus\.done/ }));
   });
 
   it('closes on Escape', () => {

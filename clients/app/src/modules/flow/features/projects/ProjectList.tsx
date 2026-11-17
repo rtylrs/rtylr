@@ -13,7 +13,7 @@ import { useToggleDone } from '../tasks/useToggleDone';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import { useCurrentProject } from './useCurrentProject';
 import { useProjectStatuses } from './useStatuses';
-import { defaultStatus, sortStatuses, statusIdOf } from './statusUtils';
+import { defaultStatus, displayStatusName, sortStatuses, statusIdOf } from './statusUtils';
 import { DUE_LANES, PRIORITY_LABEL_KEY, PRIORITY_ORDER, laneKeyFor } from './taskGroups';
 import { TaskContextMenu, ContextMenuState } from '../../shared/components/TaskContextMenu';
 import PriorityIcon from '../../shared/components/PriorityIcon';
@@ -86,7 +86,7 @@ export function buildListGroups(
     return ordered
       .map((s) => ({
         id: s.id,
-        label: s.name,
+        label: displayStatusName(s.name, t),
         color: s.color,
         statusId: s.id,
         tasks: tasks.filter((task) => homeOf(task) === s.id),

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { CornerUpRight, Check } from 'lucide-react';
 import { useThemeScope } from '@voxire/ui';
+import { displayStatusName } from '../statusUtils';
 
 export interface MoveTarget {
   id: string;
@@ -205,7 +206,7 @@ const MoveToColumnMenu = ({
                     ) : (
                       <span className="w-3" aria-hidden />
                     )}
-                    <span className="truncate">{target.name}</span>
+                    <span className="truncate">{displayStatusName(target.name, t)}</span>
                   </button>
                 );
               })
