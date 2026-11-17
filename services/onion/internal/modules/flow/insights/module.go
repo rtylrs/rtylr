@@ -16,7 +16,8 @@ import (
 // stays because insights.dashboard.v1 and echo consume the readers
 // below rather than growing their own cross-schema queries.
 type Module struct {
-	service *application.Service
+	service       *application.Service
+	assigneeNames application.AssigneeNames
 }
 
 func NewModule(ctx context.Context, db *sql.DB) *Module {
@@ -190,12 +191,24 @@ type FlowDashboardProject struct {
 }
 
 // FlowOverdueTask is an open task past its due date. AssigneeID is zero when
-// the task is unassigned.
+// the task is unassigned. AssigneeName is the name Flow's task list shows for
+// the assignee, empty when the task is unassigned or the name is unknown.
 type FlowOverdueTask struct {
-	ID         int64
-	Title      string
-	DueDate    string
-	AssigneeID int64
+	ID           int64
+	Title        string
+	DueDate      string
+	AssigneeID   int64
+	AssigneeName string
+}
+
+// AssigneeNames reads the display name Flow's task list shows for each of
+// userIDs. The workspaces module serves it.
+type AssigneeNames = application.AssigneeNames
+
+// SetAssigneeNames wires the name lookup FlowProjectProgress uses to name
+// overdue tasks' assignees. Without it the names stay empty.
+func (m *Module) SetAssigneeNames(names AssigneeNames) {
+	m.assigneeNames = names
 }
 
 // FlowProjectProgress is one project's task completion and overdue work.
@@ -243,11 +256,15 @@ func (m *Module) FlowDashboardProject(ctx context.Context, businessID, userID, p
 	return FlowDashboardProject(p), true, nil
 }
 
-// FlowProjectProgress returns one project's task completion and overdue work.
+// FlowProjectProgress returns one project's task completion and overdue work,
+// with each overdue task's assignee named the way Flow's task list names them.
 // It does not check visibility: call FlowDashboardProject first.
 func (m *Module) FlowProjectProgress(ctx context.Context, businessID, projectID int64) (FlowProjectProgress, error) {
 	result, err := m.service.GetProjectTaskProgress(ctx, businessID, projectID)
 	if err != nil {
+		return FlowProjectProgress{}, err
+	}
+	if err := application.NameOverdueAssignees(ctx, m.assigneeNames, businessID, result.Overdue); err != nil {
 		return FlowProjectProgress{}, err
 	}
 	overdue := make([]FlowOverdueTask, 0, len(result.Overdue))
