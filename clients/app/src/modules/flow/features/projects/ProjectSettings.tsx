@@ -266,7 +266,7 @@ const ProjectSettings: React.FC = () => {
                 className="text-flow-meta font-semibold uppercase tracking-wider"
                 style={{ color: 'var(--flow-text-muted)' }}
               >
-                {members.length} member{members.length !== 1 ? 's' : ''}
+                {t('flow.projectSettings.memberCount', { count: members.length })}
               </p>
               {canManageProject && (
                 <button
@@ -275,7 +275,7 @@ const ProjectSettings: React.FC = () => {
                   className="flex items-center gap-1 text-flow-meta px-2 py-1 rounded-sm"
                   style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
                 >
-                  <Plus size={10} /> Add
+                  <Plus size={10} /> {t('flow.projectSettings.addMemberShort')}
                 </button>
               )}
             </div>

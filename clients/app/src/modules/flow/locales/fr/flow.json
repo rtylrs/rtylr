@@ -1002,7 +1002,11 @@
       "saveError": "Impossible d’enregistrer les dépôts. Veuillez réessayer.",
       "lastWebhook": "Dernier webhook reçu {{when}}",
       "noWebhooks": "Aucun webhook reçu pour l’instant"
-    }
+    },
+    "memberCount_one": "{{count}} membre",
+    "memberCount_many": "{{count}} membres",
+    "memberCount_other": "{{count}} membres",
+    "addMemberShort": "Ajouter"
   },
   "bulkEdit": {
     "clearSelectionLabel": "Effacer la sélection",

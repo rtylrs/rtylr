@@ -993,7 +993,10 @@
       "saveError": "Unable to save repositories. Please try again.",
       "lastWebhook": "Last webhook received {{when}}",
       "noWebhooks": "No webhooks yet"
-    }
+    },
+    "memberCount_one": "{{count}} member",
+    "memberCount_other": "{{count}} members",
+    "addMemberShort": "Add"
   },
   "bulkEdit": {
     "clearSelectionLabel": "Clear selection",

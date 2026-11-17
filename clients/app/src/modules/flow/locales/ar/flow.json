@@ -1029,7 +1029,14 @@
       "saveError": "تعذّر حفظ المستودعات. يُرجى المحاولة مرة أخرى.",
       "lastWebhook": "آخر webhook وصل {{when}}",
       "noWebhooks": "لم يصل أي webhook بعد"
-    }
+    },
+    "memberCount_zero": "لا أعضاء",
+    "memberCount_one": "عضو واحد",
+    "memberCount_two": "عضوان",
+    "memberCount_few": "{{count}} أعضاء",
+    "memberCount_many": "{{count}} عضوًا",
+    "memberCount_other": "{{count}} عضو",
+    "addMemberShort": "إضافة"
   },
   "bulkEdit": {
     "clearSelectionLabel": "إلغاء التحديد",
