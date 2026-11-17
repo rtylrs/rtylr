@@ -38,6 +38,7 @@ type repository interface {
 	GetInvoiceItems(ctx context.Context, invoiceID int64) ([]domain.InvoiceItem, error)
 	UpdateInvoiceWithItems(ctx context.Context, businessID int64, inv domain.Invoice, items []domain.InvoiceItem) error
 	UpdateInvoiceStatus(ctx context.Context, businessID, invoiceID int64, status string) error
+	SetInvoiceProject(ctx context.Context, businessID, invoiceID int64, projectID *int64) error
 	UpdateInvoicePaymentTotals(ctx context.Context, businessID, invoiceID int64, amountPaid, amountDue float64, status string, paidDate *time.Time) error
 	DeleteInvoice(ctx context.Context, businessID, invoiceID int64) error
 	RecordPayment(ctx context.Context, businessID int64, input domain.PaymentInput) (*domain.Payment, error)

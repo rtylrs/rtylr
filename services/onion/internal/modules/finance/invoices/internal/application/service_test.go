@@ -37,6 +37,7 @@ type mockRepo struct {
 	lastUpdatedItems     []domain.InvoiceItem
 	statusWrites         int
 	lastStatusWrite      string
+	projectWrites        int
 	sumCalls             atomic.Int64
 	delay                time.Duration
 	activeCalls          atomic.Int64
@@ -92,6 +93,23 @@ func (m *mockRepo) UpdateInvoiceStatus(_ context.Context, _, _ int64, status str
 	m.statusWrites++
 	m.lastStatusWrite = status
 	return m.err
+}
+
+// SetInvoiceProject mirrors the repository: the status rule is checked under
+// the row lock and only the tag changes.
+func (m *mockRepo) SetInvoiceProject(_ context.Context, _, _ int64, projectID *int64) error {
+	if m.err != nil {
+		return m.err
+	}
+	if m.invoice == nil {
+		return domain.ErrInvoiceNotFound
+	}
+	if err := domain.CanChangeInvoiceProject(m.invoice.Status); err != nil {
+		return err
+	}
+	m.projectWrites++
+	m.invoice.ProjectID = projectID
+	return nil
 }
 
 func (m *mockRepo) UpdateInvoicePaymentTotals(_ context.Context, _, _ int64, _, _ float64, _ string, _ *time.Time) error {
