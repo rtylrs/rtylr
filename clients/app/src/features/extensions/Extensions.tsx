@@ -70,6 +70,7 @@ import {
   type ExtensionCategory,
   type ExtensionEntry,
 } from './catalog';
+import GitHubConnection from './GitHubConnection';
 import './extensions.css';
 
 const FEATURE_ICONS: Record<string, LucideIcon> = {
@@ -254,6 +255,7 @@ export default function Extensions() {
           </Button>
         </div>
       )}
+      <GitHubConnection />
       {loading ? (
         <p role="status" className="portal-extensions-notice">
           {t('extensions.loading')}

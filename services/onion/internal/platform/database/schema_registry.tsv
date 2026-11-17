@@ -105,6 +105,7 @@ flow/v11_project_owner_members.sql	internal/modules/flow/sql/schema/flow/v11_pro
 flow/v12_status_columns.sql	internal/modules/flow/sql/schema/flow/v12_status_columns.sql
 flow/v13_developer_projects.sql	internal/modules/flow/sql/schema/flow/v13_developer_projects.sql
 flow/v14_task_links.sql	internal/modules/flow/sql/schema/flow/v14_task_links.sql
+flow/v15_github.sql	internal/modules/flow/sql/schema/flow/v15_github.sql
 flow/v8_time_tracking.sql	internal/modules/flow/sql/schema/flow/v8_time_tracking.sql
 flow/v9_workspace_removal_prep.sql	internal/modules/flow/sql/schema/flow/v9_workspace_removal_prep.sql
 pos/schema.sql	internal/modules/pos/sql/schema/pos/schema.sql

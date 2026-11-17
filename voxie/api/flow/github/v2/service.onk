@@ -1,0 +1,30 @@
+package flow.github.v2
+
+/// GitHubService connects a business to GitHub through a GitHub App and lets
+/// a project pick repositories from that installation. Business-scoped: the
+/// business is resolved from auth. Tokens and the app key never leave the
+/// server.
+service GitHubService {
+  /// Returns the business's installation and its health, read from GitHub.
+  getGitHubConnection(GetGitHubConnectionRequest) -> GetGitHubConnectionResponse @get("/connection")
+
+  /// Returns the GitHub URL that installs the app. Business admins only.
+  startGitHubInstall(StartGitHubInstallRequest) -> StartGitHubInstallResponse @post("/install")
+
+  /// Stores the installation GitHub redirected back with, after checking the
+  /// signed state and the installation itself. Business admins only.
+  completeGitHubInstall(CompleteGitHubInstallRequest) -> CompleteGitHubInstallResponse @post("/install/complete")
+
+  /// Removes the installation and every project's repository selection.
+  /// Business admins only.
+  disconnectGitHub(DisconnectGitHubRequest) -> DisconnectGitHubResponse @delete("/connection")
+
+  /// Lists the repositories the installation can access. Project admins only.
+  listGitHubRepositories(ListGitHubRepositoriesRequest) -> ListGitHubRepositoriesResponse @get("/repositories")
+
+  /// Lists the repositories a project has picked.
+  listProjectRepositories(ListProjectRepositoriesRequest) -> ListProjectRepositoriesResponse @get("/project-repositories")
+
+  /// Replaces a project's repository selection. Project admins only.
+  setProjectRepositories(SetProjectRepositoriesRequest) -> SetProjectRepositoriesResponse @put("/project-repositories")
+}
