@@ -79,6 +79,69 @@ type ProjectHours struct {
 	Minutes   int64
 }
 
+// DashboardProject is a Work project a viewer may open a project dashboard
+// for. Flow decides which: public projects, and private ones the viewer is a
+// member of.
+type DashboardProject struct {
+	ID         int64
+	Name       string
+	Status     string
+	Visibility string
+}
+
+// ProjectOverdueTask is an open task past its due date. AssigneeID is zero
+// when the task is unassigned.
+type ProjectOverdueTask struct {
+	ID         int64
+	Title      string
+	DueDate    string
+	AssigneeID int64
+}
+
+// FlowProjectProgress is one project's task completion as Flow reports it:
+// top-level tasks for progress, every open task past its due date for
+// overdue, and the oldest few of those.
+type FlowProjectProgress struct {
+	TotalTasks     int64
+	CompletedTasks int64
+	OverdueTasks   int64
+	Overdue        []ProjectOverdueTask
+}
+
+// FlowProjectTimeTotals is the minutes logged on one project: all time, and
+// in the two windows the caller asked for.
+type FlowProjectTimeTotals struct {
+	AllTimeMinutes int64
+	ThisMinutes    int64
+	PriorMinutes   int64
+}
+
+// ProjectInvoices totals the invoices tagged with one project, in minor units.
+type ProjectInvoices struct {
+	InvoiceCount int64
+	Invoiced     int64
+	Paid         int64
+	Outstanding  int64
+	Overdue      int64
+	OverdueCount int64
+}
+
+// ProjectDashboard is one project's page: progress, overdue work, the time
+// logged this month against the same span last month and in total, and,
+// when the viewer may see money, its invoices. Invoices is nil otherwise.
+type ProjectDashboard struct {
+	Project        DashboardProject
+	TotalTasks     int64
+	CompletedTasks int64
+	ProgressPct    float64
+	OverdueTasks   int64
+	Overdue        []ProjectOverdueTask
+	Logged         CountCard
+	PriorMinutes   int64
+	AllTimeMinutes int64
+	Invoices       *ProjectInvoices
+}
+
 // RevenuePoint is a single daily revenue sample in minor units.
 type RevenuePoint struct {
 	Date             string

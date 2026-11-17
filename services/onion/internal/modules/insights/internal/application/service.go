@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	financecontract "github.com/voxire/onion/internal/contracts/finance"
 	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 )
 
@@ -41,12 +42,31 @@ type FlowHoursReader interface {
 	FlowLoggedTime(ctx context.Context, businessID int64, from, to time.Time) (domain.FlowLoggedTime, error)
 }
 
+// FlowProjectReader reads one Work project for the project dashboard. Flow
+// owns who may see a project, so the list and single-project reads take the
+// viewer; a project the viewer may not see comes back as found false, the
+// same as a missing one. The progress and time reads trust the caller to
+// have checked first.
+type FlowProjectReader interface {
+	FlowDashboardProjects(ctx context.Context, businessID, userID int64) ([]domain.DashboardProject, error)
+	FlowDashboardProject(ctx context.Context, businessID, userID, projectID int64) (domain.DashboardProject, bool, error)
+	FlowProjectProgress(ctx context.Context, businessID, projectID int64) (domain.FlowProjectProgress, error)
+	FlowProjectTime(ctx context.Context, businessID, projectID int64, thisFrom, thisTo, priorFrom, priorTo time.Time) (domain.FlowProjectTimeTotals, error)
+}
+
+// FinanceProjectReader totals the invoices tagged with one Work project.
+type FinanceProjectReader interface {
+	InsightsProjectInvoices(ctx context.Context, businessID, projectID int64) (financecontract.ProjectInvoiceTotals, error)
+}
+
 type DashboardReaders struct {
-	Finance  FinanceDashboardReader
-	POS      POSDashboardReader
-	CRM      CRMDashboardReader
-	CRMSales CRMSalesDashboardReader
-	Flow     FlowHoursReader
+	Finance         FinanceDashboardReader
+	POS             POSDashboardReader
+	CRM             CRMDashboardReader
+	CRMSales        CRMSalesDashboardReader
+	Flow            FlowHoursReader
+	FlowProjects    FlowProjectReader
+	FinanceProjects FinanceProjectReader
 }
 
 type repository interface {
