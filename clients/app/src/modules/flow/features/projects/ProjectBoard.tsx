@@ -43,7 +43,7 @@ import {
   insertionPlan,
   isClosedBucket,
   isOnlyDoneStatus,
-  reorderUpdates,
+  movedStatusIds,
   sortStatuses,
   statusIdOf,
 } from './statusUtils';
@@ -603,13 +603,11 @@ const ProjectBoard: React.FC = () => {
       toast.error(t('flowToasts.column.nameRequired'));
       return;
     }
-    const { sortOrder, updates } = insertionPlan(columns, columns.length);
     createStatus.mutate({
       name,
       bucket: 'active',
       color: STATUS_COLORS[4],
-      sortOrder,
-      makeRoom: updates,
+      ...insertionPlan(columns, columns.length),
     });
     setNewColumnName('');
     setAddingColumn(false);
@@ -617,9 +615,8 @@ const ProjectBoard: React.FC = () => {
 
   const insertStatus = (name: string): void => {
     if (insertAt === null) return;
-    const { sortOrder, updates } = insertionPlan(columns, insertAt);
     createStatus.mutate(
-      { name, bucket: 'active', color: STATUS_COLORS[4], sortOrder, makeRoom: updates },
+      { name, bucket: 'active', color: STATUS_COLORS[4], ...insertionPlan(columns, insertAt) },
       { onSuccess: () => setInsertAt(null) }
     );
   };
@@ -744,11 +741,10 @@ const ProjectBoard: React.FC = () => {
               onInsert={(side) => setInsertAt(side === 'before' ? i : i + 1)}
               canMoveBefore={i > 0}
               canMoveAfter={i < columns.length - 1}
-              onMove={(side) =>
-                reorderStatuses.mutate(
-                  reorderUpdates(columns, i, side === 'before' ? i - 1 : i + 1)
-                )
-              }
+              onMove={(side) => {
+                const ids = movedStatusIds(columns, i, side === 'before' ? i - 1 : i + 1);
+                if (ids) reorderStatuses.mutate(ids);
+              }}
               deleteBlocked={isOnlyDoneStatus(col, columns)}
               onDelete={() => setPendingDeleteColumn(col)}
             />

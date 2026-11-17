@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ProjectBoard from './ProjectBoard';
@@ -144,5 +144,35 @@ describe('Board column menu', () => {
     expect(remove).toHaveAccessibleDescription(
       'A project needs at least one done status, so this one cannot be deleted.'
     );
+  });
+
+  it('moves a column with one reorder of the whole set', async () => {
+    renderBoard();
+    await openColumnMenu('Review');
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Move right' }));
+
+    expect(mutation.mutate).toHaveBeenCalledTimes(1);
+    expect(mutation.mutate).toHaveBeenCalledWith(['11', '9']);
+  });
+
+  it('inserts with no gap by creating, then placing with one reorder', async () => {
+    renderBoard();
+    await openColumnMenu('Review');
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Add status to the left' }));
+    const dialog = await screen.findByRole('dialog');
+    fireEvent.change(within(dialog).getByLabelText('Status name'), {
+      target: { value: 'Triage' },
+    });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Add status' }));
+
+    expect(mutation.mutate).toHaveBeenCalledTimes(1);
+    expect(mutation.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Triage',
+        placeAmong: { ids: ['9', '11'], index: 0 },
+      }),
+      expect.anything()
+    );
+    expect(mutation.mutate.mock.calls[0][0]).not.toHaveProperty('sortOrder');
   });
 });

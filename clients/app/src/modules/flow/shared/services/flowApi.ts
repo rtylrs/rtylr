@@ -958,6 +958,13 @@ export const flowApi = {
       })
     ),
 
+  // statusIds must be the project's whole set in the new order; anything else
+  // is a 400 and nothing is written.
+  reorderStatuses: (projectId: string, statusIds: string[]) =>
+    flowResult<{ statuses: ApiStatus[] }>(() =>
+      statusClient.reorderStatuses({ projectId, statusIds })
+    ),
+
   // A status that still has tasks needs moveToStatusId (409 otherwise), and a
   // project's last done status cannot be deleted (409).
   deleteStatus: (id: string, moveToStatusId?: string) =>
