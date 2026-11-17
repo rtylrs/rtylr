@@ -105,6 +105,7 @@ describe('GitHub connection card', () => {
     const ui = renderCard();
     expect(await screen.findByText('Suspended on GitHub')).toBeVisible();
     expect(screen.getByText(/Connected to acme \(organisation\)/)).toBeVisible();
+    expect(screen.getByText('No webhooks yet')).toBeVisible();
     await ui.click(screen.getByRole('button', { name: 'Disconnect' }));
     expect(api.disconnect).not.toHaveBeenCalled();
     await ui.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Disconnect' }));
@@ -122,5 +123,19 @@ describe('GitHub connection card', () => {
     renderCard();
     expect(await screen.findByText('GitHub is not set up on this server yet.')).toBeVisible();
     expect(screen.getByRole('button', { name: 'Connect GitHub' })).toBeDisabled();
+  });
+
+  it('says when the last signed webhook arrived', async () => {
+    api.get.mockResolvedValue({
+      connection: {
+        configured: true,
+        connected: true,
+        accountLogin: 'acme',
+        status: 'active',
+        lastWebhookAt: new Date(Date.now() - 3 * 60 * 1000).toISOString(),
+      },
+    });
+    renderCard();
+    expect(await screen.findByText('Last webhook received 3 minutes ago')).toBeVisible();
   });
 });
