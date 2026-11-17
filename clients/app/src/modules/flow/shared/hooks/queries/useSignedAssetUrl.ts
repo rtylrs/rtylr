@@ -7,7 +7,6 @@ const HOUR_SECONDS = 60 * 60;
 // A link is re-signed once it has less than this left, so an image still on
 // screen never points at an expired link.
 const RESIGN_MARGIN_SECONDS = 10 * 60;
-const STORAGE_PREFIX = 'flow-signed-asset:';
 
 const KNOWN_CDN_HOSTS = new Set([
   'cdn.voxire.com',
@@ -80,32 +79,10 @@ export function windowExpiry(nowSeconds: number): number {
 
 const nowSeconds = () => Math.floor(Date.now() / 1000);
 
-function storageKey(url: string, variant: AssetVariant) {
-  return `${STORAGE_PREFIX}${variant}:${url}`;
-}
-
-// Signed links are kept for the tab's session, so reopening a task does not
-// wait on a signing request before its images can start loading.
-function readStored(url: string, variant: AssetVariant): SignedAssetUrl | undefined {
-  try {
-    const raw = sessionStorage.getItem(storageKey(url, variant));
-    if (!raw) return undefined;
-    const stored = JSON.parse(raw) as SignedAssetUrl;
-    if (typeof stored?.url !== 'string' || typeof stored?.expiresAt !== 'number') return undefined;
-    return stored.expiresAt - nowSeconds() > RESIGN_MARGIN_SECONDS ? stored : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-function writeStored(url: string, variant: AssetVariant, signed: SignedAssetUrl) {
-  try {
-    sessionStorage.setItem(storageKey(url, variant), JSON.stringify(signed));
-  } catch {
-    // Storage may be full or blocked; the link still works for this render.
-  }
-}
-
+// A signed link is a bearer credential, so it lives only in the in-memory query
+// cache. It is never written to sessionStorage or localStorage, where any
+// same-origin script could read it and it would outlive a logout or a business
+// switch.
 const signedAssetQuery = (url: string, variant: AssetVariant) => ({
   queryKey: ['signed-asset', variant, url],
   queryFn: async () => {
@@ -114,10 +91,8 @@ const signedAssetQuery = (url: string, variant: AssetVariant) => ({
       expiresAt: windowExpiry(nowSeconds()),
       params: target.params,
     });
-    writeStored(url, variant, signed);
     return signed;
   },
-  initialData: () => readStored(url, variant),
   staleTime: (query: { state: { data?: SignedAssetUrl } }) => {
     const expiresAt = query.state.data?.expiresAt;
     if (!expiresAt) return 0;
