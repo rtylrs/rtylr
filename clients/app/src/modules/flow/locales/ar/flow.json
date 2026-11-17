@@ -1006,7 +1006,14 @@
       "saving": "جارٍ الحفظ…",
       "saved": "تم حفظ المستودعات",
       "saveError": "تعذّر حفظ المستودعات. يُرجى المحاولة مرة أخرى."
-    }
+    },
+    "memberCount_zero": "لا أعضاء",
+    "memberCount_one": "عضو واحد",
+    "memberCount_two": "عضوان",
+    "memberCount_few": "{{count}} أعضاء",
+    "memberCount_many": "{{count}} عضوًا",
+    "memberCount_other": "{{count}} عضو",
+    "addMemberShort": "إضافة"
   },
   "bulkEdit": {
     "clearSelectionLabel": "إلغاء التحديد",

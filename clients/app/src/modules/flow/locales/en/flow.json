@@ -970,7 +970,10 @@
       "saving": "Saving…",
       "saved": "Repositories saved",
       "saveError": "Unable to save repositories. Please try again."
-    }
+    },
+    "memberCount_one": "{{count}} member",
+    "memberCount_other": "{{count}} members",
+    "addMemberShort": "Add"
   },
   "bulkEdit": {
     "clearSelectionLabel": "Clear selection",

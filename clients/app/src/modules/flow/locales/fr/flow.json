@@ -979,7 +979,11 @@
       "saving": "Enregistrement…",
       "saved": "Dépôts enregistrés",
       "saveError": "Impossible d’enregistrer les dépôts. Veuillez réessayer."
-    }
+    },
+    "memberCount_one": "{{count}} membre",
+    "memberCount_many": "{{count}} membres",
+    "memberCount_other": "{{count}} membres",
+    "addMemberShort": "Ajouter"
   },
   "bulkEdit": {
     "clearSelectionLabel": "Effacer la sélection",
