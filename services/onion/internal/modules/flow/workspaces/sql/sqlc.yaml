@@ -45,6 +45,8 @@ sql:
       # v14 adds flow_task_links (T-367).
       - "../../sql/schema/flow/v14_task_links.sql"
       - "../../sql/schema/flow/v15_github.sql"
+      # v16 adds member GitHub links and webhook delivery ids (T-366 part B).
+      - "../../sql/schema/flow/v16_github_links.sql"
       # hr_employees.user_id is the only link between a workspace member (a
       # user id) and a work day (keyed on employee id). The team view resolves
       # through it; nothing here writes to hr_employees.
