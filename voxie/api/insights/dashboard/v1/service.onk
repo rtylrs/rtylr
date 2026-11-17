@@ -14,6 +14,6 @@ service DashboardService {
   /// Returns MTD headline KPI cards for the insights home dashboard.
   getDashboardSummary(GetDashboardSummaryRequest) -> GetDashboardSummaryResponse @get("/summary")
 
-  /// Returns CRM open pipeline and month-to-date won deal value for the insights home dashboard.
+  /// Returns CRM open pipeline, month-to-date won deal value and recurring revenue for the insights home dashboard.
   getSalesSummary(GetSalesSummaryRequest) -> GetSalesSummaryResponse @get("/sales")
 }

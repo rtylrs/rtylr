@@ -27,10 +27,12 @@ type CRMDashboardReader interface {
 }
 
 // CRMSalesDashboardReader reads deal totals from CRM sales: counts and
-// first-year values in minor units.
+// first-year values in minor units, plus recurring contracts and their MRR now
+// and as of a month start.
 type CRMSalesDashboardReader interface {
 	OpenDealPipeline(context.Context, int64) (int64, int64, error)
 	WonDealsBetween(context.Context, int64, time.Time, time.Time) (int64, int64, error)
+	RecurringRevenue(ctx context.Context, businessID int64, monthStart, now time.Time) (contracts, mrr, mrrAtMonthStart int64, err error)
 }
 
 type DashboardReaders struct {

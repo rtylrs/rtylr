@@ -95,6 +95,8 @@ describe('Dashboard empty state', () => {
         openDealCount: 0,
         won: { value: 0, deltaPct: 0 },
         recentWonDealCount: 0,
+        mrr: { value: 0, deltaPct: 0 },
+        activeContractCount: 0,
       },
     });
 
@@ -105,6 +107,7 @@ describe('Dashboard empty state', () => {
     expect(screen.queryByText('Sales, projects and invoices')).not.toBeInTheDocument();
     expect(screen.queryByText('Open pipeline')).not.toBeInTheDocument();
     expect(screen.queryByText('Won this month')).not.toBeInTheDocument();
+    expect(screen.queryByText('Recurring revenue (MRR)')).not.toBeInTheDocument();
     expect(screen.queryByText('Tasks done')).not.toBeInTheDocument();
     expect(screen.queryByText('Unpaid invoices')).not.toBeInTheDocument();
   });
@@ -127,6 +130,8 @@ describe('Dashboard empty state', () => {
         openDealCount: 12,
         won: { value: 300000, deltaPct: 50 },
         recentWonDealCount: 4,
+        mrr: { value: 0, deltaPct: 0 },
+        activeContractCount: 0,
       },
     });
 
@@ -142,6 +147,46 @@ describe('Dashboard empty state', () => {
     const won = screen.getByText('Won this month').closest('div')?.parentElement;
     expect(won).toHaveTextContent('3,000');
     expect(won).toHaveTextContent('+50.0% vs prior');
+    // No won monthly or yearly deal, so no recurring revenue card.
+    expect(screen.queryByText('Recurring revenue (MRR)')).not.toBeInTheDocument();
+  });
+
+  it('shows recurring revenue with its active contracts for a business with no other activity', () => {
+    mocks.useInsightsDashboard.mockReturnValue({
+      data: {
+        revenue: { value: 0, deltaPct: 0 },
+        customers: { value: 0, deltaPct: 0 },
+        orders: { value: 0, deltaPct: 0 },
+        margin: { value: 0, deltaPct: 0 },
+      },
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+    mocks.useSalesSummary.mockReturnValue({
+      data: {
+        openPipelineValue: 0,
+        openDealCount: 0,
+        won: { value: 0, deltaPct: 0 },
+        recentWonDealCount: 0,
+        mrr: { value: 33383, deltaPct: 66.9 },
+        activeContractCount: 4,
+      },
+    });
+
+    render(<Dashboard />);
+
+    expect(screen.queryByText('No KPI data yet')).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Sales, projects and invoices' })
+    ).toBeInTheDocument();
+    const mrr = screen.getByText('Recurring revenue (MRR)').closest('div')?.parentElement;
+    expect(mrr).toHaveTextContent('333.83');
+    expect(mrr).toHaveTextContent('4 active contracts');
+    expect(mrr).toHaveTextContent('+66.9% vs prior');
+    // Contracts won long ago, with nothing open or won lately, show only MRR.
+    expect(screen.queryByText('Open pipeline')).not.toBeInTheDocument();
+    expect(screen.queryByText('Won this month')).not.toBeInTheDocument();
   });
 
   it('keeps the won card when last month had wins but nothing is open', () => {
@@ -162,6 +207,8 @@ describe('Dashboard empty state', () => {
         openDealCount: 0,
         won: { value: 0, deltaPct: -100 },
         recentWonDealCount: 1,
+        mrr: { value: 0, deltaPct: 0 },
+        activeContractCount: 0,
       },
     });
 

@@ -118,3 +118,10 @@ func (m *Module) WonDealsBetween(ctx context.Context, businessID int64, from, to
 	deals, value, err := m.repository.WonDealsBetween(ctx, businessID, from, to)
 	return deals, int64(value), err
 }
+
+// RecurringRevenue reports the signed recurring contracts active at now and
+// their MRR in minor units, at now and as of monthStart.
+func (m *Module) RecurringRevenue(ctx context.Context, businessID int64, monthStart, now time.Time) (contracts, mrr, mrrAtMonthStart int64, err error) {
+	contracts, current, atMonthStart, err := m.repository.RecurringRevenue(ctx, businessID, monthStart, now)
+	return contracts, int64(current), int64(atMonthStart), err
+}

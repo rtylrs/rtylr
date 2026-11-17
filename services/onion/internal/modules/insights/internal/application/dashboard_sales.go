@@ -16,7 +16,7 @@ func (s *Service) GetSalesSummary(ctx context.Context, businessID int64) (domain
 	if err != nil {
 		return domain.SalesSummary{}, err
 	}
-	return cacher.Of[domain.SalesSummary]().GetOrComputeSingle(ctx, key+"|domain=v1", func(ctx context.Context) (domain.SalesSummary, error) {
+	return cacher.Of[domain.SalesSummary]().GetOrComputeSingle(ctx, key+"|domain=v2", func(ctx context.Context) (domain.SalesSummary, error) {
 		return s.readSalesSummary(ctx, businessID, time.Now())
 	}, cacher.WithExpiry(ctx, dashboardCacheTTL))
 }
@@ -44,10 +44,16 @@ func (s *Service) readSalesSummary(ctx context.Context, businessID int64, now ti
 	if err != nil {
 		return domain.SalesSummary{}, fmt.Errorf("read recent won deal count: %w", err)
 	}
+	contracts, mrr, mrrAtMonthStart, err := sales.RecurringRevenue(ctx, businessID, thisFrom, thisTo)
+	if err != nil {
+		return domain.SalesSummary{}, fmt.Errorf("read recurring revenue: %w", err)
+	}
 	return domain.SalesSummary{
 		OpenPipelineValue: openValue,
 		OpenDeals:         openDeals,
 		Won:               domain.MoneyCard{Value: wonThis, DeltaPct: dashboardDeltaPct(wonThis, wonPrior)},
 		RecentWonDeals:    recentWon,
+		MRR:               domain.MoneyCard{Value: mrr, DeltaPct: dashboardDeltaPct(mrr, mrrAtMonthStart)},
+		ActiveContracts:   contracts,
 	}, nil
 }
