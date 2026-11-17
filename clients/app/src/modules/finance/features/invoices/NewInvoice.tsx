@@ -14,6 +14,7 @@ import {
   useSignedContracts,
   type SignedContract,
 } from '../../shared/hooks/queries/useSignedContracts';
+import { useWorkProjects } from '../../shared/hooks/queries/useWorkProjects';
 import TaxBreakdown from '../../shared/components/TaxBreakdown';
 import InvoicePreview from '../../shared/components/InvoicePreview';
 import { useTranslation } from 'react-i18next';
@@ -59,6 +60,9 @@ const NewInvoice: React.FC = () => {
   // CRM->FIN-01 (#839): signed contracts offered as one-click prefills.
   const { data: signedContracts } = useSignedContracts();
   const [prefilledContractId, setPrefilledContractId] = useState('');
+  // Optional Work project the invoice bills; '' leaves it untagged.
+  const { data: workProjects } = useWorkProjects();
+  const [projectId, setProjectId] = useState('');
   const createInvoice = useCreateInvoice();
   const updateInvoiceStatus = useUpdateInvoiceStatus();
   const { data: sourceInvoice } = useInvoiceDetail(clone);
@@ -94,6 +98,7 @@ const NewInvoice: React.FC = () => {
           ? sourceInvoice.discountType
           : 'none'
       );
+      setProjectId(sourceInvoice.projectId ?? '');
     }
     // Clone prefill only: re-running on the derived defaults (today/due)
     // or settings would wipe in-progress edits, so this intentionally
@@ -179,6 +184,7 @@ const NewInvoice: React.FC = () => {
     }));
     const payload: CreateInvoiceRequest = {
       customerId: client.crmCustomerId,
+      projectId: projectId || undefined,
       clientName: client.name,
       clientEmail: client.email ?? '',
       clientAddress: '',
@@ -323,6 +329,37 @@ const NewInvoice: React.FC = () => {
                     onChange={(e) => setDueDate(e.target.value)}
                     style={{ ...inputStyle, marginTop: 6 }}
                   />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="invoice-project" style={labelStyle}>
+                  {t('financeInvoices.new.project')}
+                </label>
+                <select
+                  id="invoice-project"
+                  value={projectId}
+                  onChange={(e) => setProjectId(e.target.value)}
+                  disabled={!workProjects?.length && !projectId}
+                  style={{ ...inputStyle, marginTop: 6 }}
+                >
+                  <option value="">
+                    {workProjects?.length || projectId
+                      ? t('financeInvoices.new.noProject')
+                      : t('financeInvoices.new.noProjectsAvailable')}
+                  </option>
+                  {(workProjects ?? []).map((project) => (
+                    <option key={project.id} value={project.id}>
+                      {project.name}
+                    </option>
+                  ))}
+                  {projectId && !workProjects?.some((project) => project.id === projectId) && (
+                    <option value={projectId}>
+                      {t('financeInvoices.new.projectFallback', { id: projectId })}
+                    </option>
+                  )}
+                </select>
+                <div style={{ marginTop: 4, fontSize: 11, color: 'var(--hub-text-dim)' }}>
+                  {t('financeInvoices.new.projectHint')}
                 </div>
               </div>
             </div>

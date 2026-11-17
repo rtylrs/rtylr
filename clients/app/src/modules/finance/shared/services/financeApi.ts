@@ -45,6 +45,8 @@ export interface Invoice {
   tax?: number;
   subtotal?: number;
   number?: string;
+  /** Work project the invoice bills; null or absent when untagged. */
+  projectId?: string | null;
   history?: { id?: string; label: string; at: string }[];
 }
 

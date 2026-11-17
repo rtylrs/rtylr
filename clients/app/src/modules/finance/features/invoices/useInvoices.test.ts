@@ -149,6 +149,21 @@ describe('useInvoiceDetail', () => {
     ]);
   });
 
+  it('maps the tagged Work project and treats a missing project_id as untagged', async () => {
+    mockInvoicesClient.getInvoice.mockResolvedValueOnce({
+      invoice: { ...baseDetail, projectId: '77' },
+      payments: [],
+    });
+    const tagged = renderHook(() => useInvoiceDetail('5'), { wrapper: createWrapper() });
+    await waitFor(() => expect(tagged.result.current.isSuccess).toBe(true));
+    expect(tagged.result.current.data?.projectId).toBe('77');
+
+    mockInvoicesClient.getInvoice.mockResolvedValueOnce({ invoice: baseDetail, payments: [] });
+    const untagged = renderHook(() => useInvoiceDetail('6'), { wrapper: createWrapper() });
+    await waitFor(() => expect(untagged.result.current.isSuccess).toBe(true));
+    expect(untagged.result.current.data?.projectId).toBeNull();
+  });
+
   it('does not fetch when id is undefined', () => {
     const { result } = renderHook(() => useInvoiceDetail(undefined), { wrapper: createWrapper() });
     expect(result.current.fetchStatus).toBe('idle');

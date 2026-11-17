@@ -13,6 +13,7 @@ type invoiceRowScanner interface {
 func invoiceFromRow(row invoiceRowScanner) (domain.Invoice, error) {
 	var invoice domain.Invoice
 	var clientEmail, clientAddress, clientTaxID sql.NullString
+	var projectID sql.NullInt64
 	var paidDate sql.NullTime
 	var currency, discountType, notes, terms sql.NullString
 	if err := row.Scan(
@@ -24,6 +25,7 @@ func invoiceFromRow(row invoiceRowScanner) (domain.Invoice, error) {
 		&clientEmail,
 		&clientAddress,
 		&clientTaxID,
+		&projectID,
 		&invoice.Status,
 		&invoice.IssueDate,
 		&invoice.DueDate,
@@ -54,6 +56,9 @@ func invoiceFromRow(row invoiceRowScanner) (domain.Invoice, error) {
 	}
 	if clientTaxID.Valid {
 		invoice.ClientTaxID = clientTaxID.String
+	}
+	if projectID.Valid {
+		invoice.ProjectID = &projectID.Int64
 	}
 	if paidDate.Valid {
 		invoice.PaidDate = &paidDate.Time

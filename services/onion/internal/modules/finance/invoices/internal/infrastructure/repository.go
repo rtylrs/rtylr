@@ -48,29 +48,46 @@ func NewRepository(db *sql.DB) *Repository {
 // customer-scoped path. Customer filtering is optional so every caller gets
 // identical status, search, and date semantics.
 func (r *Repository) ListInvoices(ctx context.Context, businessID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error) {
-	return r.listInvoices(ctx, businessID, 0, status, search, dateFrom, dateTo, limit, offset)
+	return r.listInvoices(ctx, businessID, invoiceLinkFilter{}, status, search, dateFrom, dateTo, limit, offset)
 }
 
 // ListInvoicesForCustomer is the customer-scoped variant of ListInvoices. It
 // deliberately shares the full filter pipeline; a customer filter must not
 // silently turn status, search, or date filters into no-ops.
 func (r *Repository) ListInvoicesForCustomer(ctx context.Context, businessID, customerID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error) {
-	return r.listInvoices(ctx, businessID, customerID, status, search, dateFrom, dateTo, limit, offset)
+	return r.listInvoices(ctx, businessID, invoiceLinkFilter{customerID: customerID}, status, search, dateFrom, dateTo, limit, offset)
+}
+
+// ListInvoicesForProject is the Work-project-scoped variant of ListInvoices,
+// sharing the same filter pipeline for the same reason as the customer one.
+func (r *Repository) ListInvoicesForProject(ctx context.Context, businessID, projectID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error) {
+	return r.listInvoices(ctx, businessID, invoiceLinkFilter{projectID: projectID}, status, search, dateFrom, dateTo, limit, offset)
+}
+
+// invoiceLinkFilter narrows a list to invoices linked to a CRM customer or a
+// Work project. A zero id leaves that link unfiltered.
+type invoiceLinkFilter struct {
+	customerID int64
+	projectID  int64
 }
 
 // dynamic-query: squirrel
-func (r *Repository) listInvoices(ctx context.Context, businessID, customerID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error) {
+func (r *Repository) listInvoices(ctx context.Context, businessID int64, links invoiceLinkFilter, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error) {
 	qb := squirrel.Select(
 		"id", "owner_id", "business_id", "invoice_number", "client_name", "client_email", "client_address", "client_tax_id",
-		"status", "issue_date", "due_date", "paid_date", "currency", "subtotal", "discount_type",
+		"project_id", "status", "issue_date", "due_date", "paid_date", "currency", "subtotal", "discount_type",
 		"discount_value", "discount_amount", "tax_rate", "tax_amount", "total", "amount_paid", "amount_due",
 		"notes", "terms", "created_at", "updated_at",
 	).
 		From("finance_invoices").
 		Where(squirrel.Eq{"business_id": businessID})
 
-	if customerID > 0 {
-		qb = qb.Where(squirrel.Eq{"customer_id": customerID})
+	if links.customerID > 0 {
+		qb = qb.Where(squirrel.Eq{"customer_id": links.customerID})
+	}
+
+	if links.projectID > 0 {
+		qb = qb.Where(squirrel.Eq{"project_id": links.projectID})
 	}
 
 	if status != "" {
@@ -170,6 +187,7 @@ func (r *Repository) CreateInvoiceWithItems(ctx context.Context, businessID int6
 		ClientAddress:  sqlNullString(inv.ClientAddress),
 		ClientTaxID:    sqlNullString(inv.ClientTaxID),
 		CustomerID:     nullableInt64FromPtr(inv.CustomerID),
+		ProjectID:      nullableInt64FromPtr(inv.ProjectID),
 		Status:         sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatus(inv.Status), Valid: inv.Status != ""},
 		IssueDate:      inv.IssueDate,
 		DueDate:        inv.DueDate,

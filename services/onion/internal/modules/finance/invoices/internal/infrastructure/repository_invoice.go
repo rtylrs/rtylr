@@ -115,6 +115,7 @@ func (r *Repository) UpdateInvoiceWithItems(ctx context.Context, businessID int6
 		ClientAddress:  sqlNullString(inv.ClientAddress),
 		ClientTaxID:    sqlNullString(inv.ClientTaxID),
 		CustomerID:     nullableInt64FromPtr(inv.CustomerID),
+		ProjectID:      nullableInt64FromPtr(inv.ProjectID),
 		IssueDate:      inv.IssueDate,
 		DueDate:        inv.DueDate,
 		Currency:       sqlNullString(inv.Currency),

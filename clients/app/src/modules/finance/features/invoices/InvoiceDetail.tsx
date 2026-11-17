@@ -21,6 +21,7 @@ import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import { ACCENT, cardStyle, ghostBtn, primaryBtn } from '../../shared/lib/tokens';
 import { canFinancePermission } from '../../shared/lib/financePermissions';
+import { useWorkProjects } from '../../shared/hooks/queries/useWorkProjects';
 
 interface VoidInvoiceDialogProps {
   invoiceId: string;
@@ -70,6 +71,7 @@ const InvoiceDetail: React.FC = () => {
   const { id } = routeApi.useParams();
   const navigate = useNavigate();
   const { data: invoice, isLoading, isError, error, isFetching, refetch } = useInvoiceDetail(id);
+  const { data: workProjects } = useWorkProjects();
   const [showSend, setShowSend] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [showVoid, setShowVoid] = useState(false);
@@ -129,6 +131,12 @@ const InvoiceDetail: React.FC = () => {
 
   // clientId is not available in the current Invoice payload; using empty string until the API provides it.
   const clientObj = { id: invoice.id, name: invoice.client, email: invoice.clientEmail };
+  // The picker only lists active projects the caller can see, so an archived
+  // or hidden project falls back to its id rather than disappearing.
+  const projectName = invoice.projectId
+    ? (workProjects?.find((project) => project.id === invoice.projectId)?.name ??
+      t('financeInvoices.new.projectFallback', { id: invoice.projectId }))
+    : null;
 
   return (
     <motion.div
@@ -313,6 +321,25 @@ const InvoiceDetail: React.FC = () => {
               {invoice.clientEmail}
             </div>
           </div>
+
+          {projectName && (
+            <div style={{ ...cardStyle, padding: 16 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: 'var(--hub-text-dim)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  marginBottom: 10,
+                }}
+              >
+                {t('financeInvoices.detail.project')}
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
+                {projectName}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

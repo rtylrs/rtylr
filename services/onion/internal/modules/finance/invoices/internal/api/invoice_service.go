@@ -46,9 +46,14 @@ func (a *InvoicesAPI) ListInvoices(ctx context.Context, req *financeinvoicesv1.L
 	)
 	// CRM->FIN-02's read surface: per-customer revenue starts here. The
 	// business+customer index serves this shape (schemas zz migration).
-	if req.GetCustomerId() > 0 {
+	// The project filter backs per-project totals the same way, through the
+	// business+project index; a customer filter takes precedence.
+	switch {
+	case req.GetCustomerId() > 0:
 		invoices, hasMore, err = a.Service.ListInvoicesForCustomer(ctx, businessID, req.GetCustomerId(), page, pageSize, req.GetStatus(), req.GetSearch(), req.GetDateFrom(), req.GetDateTo())
-	} else {
+	case req.GetProjectId() > 0:
+		invoices, hasMore, err = a.Service.ListInvoicesForProject(ctx, businessID, req.GetProjectId(), page, pageSize, req.GetStatus(), req.GetSearch(), req.GetDateFrom(), req.GetDateTo())
+	default:
 		invoices, hasMore, err = a.Service.ListInvoices(ctx, businessID, req.GetStatus(), req.GetSearch(), req.GetDateFrom(), req.GetDateTo(), page, pageSize)
 	}
 	if err != nil {
@@ -135,6 +140,7 @@ func (a *InvoicesAPI) CreateInvoice(ctx context.Context, req *financeinvoicesv1.
 
 	inv, err := a.Service.CreateInvoice(ctx, businessID, domain.InvoiceInput{
 		CustomerID:    req.GetCustomerId(),
+		ProjectID:     req.GetProjectId(),
 		ClientName:    req.GetClientName(),
 		ClientEmail:   req.GetClientEmail(),
 		ClientAddress: req.GetClientAddress(),
@@ -213,6 +219,9 @@ func (a *InvoicesAPI) UpdateInvoice(ctx context.Context, req *financeinvoicesv1.
 	}
 
 	inv, err := a.Service.UpdateInvoice(ctx, businessID, req.GetId(), domain.InvoiceUpdateInput{
+		// A pointer, not GetProjectId: an absent field must keep the tag
+		// rather than read as 0, which clears it.
+		ProjectID:     body.ProjectId,
 		ClientName:    body.GetClientName(),
 		ClientEmail:   body.GetClientEmail(),
 		ClientAddress: body.GetClientAddress(),

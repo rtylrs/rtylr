@@ -30,6 +30,7 @@ func invalidateInvoicesScope(ctx context.Context, businessID int64) {
 type repository interface {
 	ListInvoices(ctx context.Context, businessID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error)
 	ListInvoicesForCustomer(ctx context.Context, businessID, customerID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error)
+	ListInvoicesForProject(ctx context.Context, businessID, projectID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error)
 	ListInvoicesByCustomer(ctx context.Context, businessID, customerID int64, limit, offset int) ([]domain.Invoice, error)
 	CountInvoicesByCustomer(ctx context.Context, businessID, customerID int64) (int64, error)
 	GetInvoiceByID(ctx context.Context, businessID, invoiceID int64) (*domain.Invoice, error)
@@ -76,6 +77,7 @@ type Service struct {
 	repo              repository
 	sendInvoiceEmail  invoiceEmailSender
 	customerSnapshots CustomerSnapshotProvider
+	projectReferences ProjectReferenceReader
 	billableTime      BillableTimeReader
 }
 
@@ -90,7 +92,7 @@ func NewService(repo repository, sendEmail invoiceEmailSender) *Service {
 func (s *Service) ListInvoices(ctx context.Context, businessID int64, status, search, dateFrom, dateTo string, page, pageSize int64) ([]domain.Invoice, bool, error) {
 	limit, offset := paginateInvoices(page, pageSize)
 	key := cacheKeys.Scoped(invoicesScope, businessID, fmt.Sprintf("list|s=%s|q=%s|f=%s|t=%s|p=%d|ps=%d", status, search, dateFrom, dateTo, page, pageSize))
-	rows, err := cacher.Of[[]domain.Invoice]().GetOrComputeSingle(ctx, key+"|domain=v2",
+	rows, err := cacher.Of[[]domain.Invoice]().GetOrComputeSingle(ctx, key+"|domain=v3",
 		func(ctx context.Context) ([]domain.Invoice, error) {
 			return s.repo.ListInvoices(ctx, businessID, status, search, dateFrom, dateTo, limit+1, offset)
 		},
@@ -111,9 +113,30 @@ func (s *Service) ListInvoices(ctx context.Context, businessID int64, status, se
 func (s *Service) ListInvoicesForCustomer(ctx context.Context, businessID, customerID, page, pageSize int64, status, search, dateFrom, dateTo string) ([]domain.Invoice, bool, error) {
 	limit, offset := paginateInvoices(page, pageSize)
 	key := cacheKeys.Scoped(invoicesScope, businessID, fmt.Sprintf("by-customer=%d|s=%s|q=%s|f=%s|t=%s|p=%d|ps=%d", customerID, status, search, dateFrom, dateTo, page, pageSize))
-	rows, err := cacher.Of[[]domain.Invoice]().GetOrComputeSingle(ctx, key+"|domain=v2",
+	rows, err := cacher.Of[[]domain.Invoice]().GetOrComputeSingle(ctx, key+"|domain=v3",
 		func(ctx context.Context) ([]domain.Invoice, error) {
 			return s.repo.ListInvoicesForCustomer(ctx, businessID, customerID, status, search, dateFrom, dateTo, limit+1, offset)
+		},
+		cacher.WithExpiry(ctx, invoicesTTL),
+	)
+	if err != nil {
+		return nil, false, err
+	}
+	hasMore := len(rows) > limit
+	if hasMore {
+		rows = rows[:limit]
+	}
+	return rows, hasMore, nil
+}
+
+// ListInvoicesForProject applies the same pagination and filter semantics as
+// ListInvoices while also restricting the result to one Work project.
+func (s *Service) ListInvoicesForProject(ctx context.Context, businessID, projectID, page, pageSize int64, status, search, dateFrom, dateTo string) ([]domain.Invoice, bool, error) {
+	limit, offset := paginateInvoices(page, pageSize)
+	key := cacheKeys.Scoped(invoicesScope, businessID, fmt.Sprintf("by-project=%d|s=%s|q=%s|f=%s|t=%s|p=%d|ps=%d", projectID, status, search, dateFrom, dateTo, page, pageSize))
+	rows, err := cacher.Of[[]domain.Invoice]().GetOrComputeSingle(ctx, key+"|domain=v3",
+		func(ctx context.Context) ([]domain.Invoice, error) {
+			return s.repo.ListInvoicesForProject(ctx, businessID, projectID, status, search, dateFrom, dateTo, limit+1, offset)
 		},
 		cacher.WithExpiry(ctx, invoicesTTL),
 	)
@@ -202,6 +225,9 @@ func (s *Service) CreateInvoice(ctx context.Context, businessID int64, input dom
 	name, email, address, snapErr := s.resolveCustomerSnapshot(ctx, businessID, input.CustomerID)
 	if snapErr != nil {
 		return nil, snapErr
+	}
+	if err := s.verifyProject(ctx, businessID, input.ProjectID); err != nil {
+		return nil, err
 	}
 	if input.CustomerID > 0 {
 		input.ClientName = name
@@ -294,6 +320,7 @@ func (s *Service) CreateInvoice(ctx context.Context, businessID int64, input dom
 	if input.CustomerID > 0 {
 		inv.CustomerID = &input.CustomerID
 	}
+	inv.ProjectID = projectLink(input.ProjectID)
 
 	inv, err = s.repo.CreateInvoiceWithItems(ctx, businessID, inv, items)
 	if err != nil {

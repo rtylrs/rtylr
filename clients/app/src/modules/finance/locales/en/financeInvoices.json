@@ -19,7 +19,8 @@
     "balanceDue": "Balance due",
     "history": "History",
     "client": "Client",
-    "void": "Void invoice"
+    "void": "Void invoice",
+    "project": "Project"
   },
   "new": {
     "title": "New Invoice",
@@ -31,7 +32,12 @@
     "discount": "Discount",
     "notes": "Notes",
     "saveDraft": "Save as Draft",
-    "saveAndSend": "Save & Send"
+    "saveAndSend": "Save & Send",
+    "project": "Project",
+    "noProject": "No project",
+    "noProjectsAvailable": "No Work projects available",
+    "projectFallback": "Project #{{id}}",
+    "projectHint": "Tag the Work project this invoice bills so it counts toward that project."
   },
   "preview": {
     "heading": "INVOICE",
