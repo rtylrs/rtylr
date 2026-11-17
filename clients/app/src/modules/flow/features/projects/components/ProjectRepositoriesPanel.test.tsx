@@ -3,7 +3,11 @@ import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({
+    t: (key: string, options?: { when?: string }) =>
+      options?.when ? `${key} ${options.when}` : key,
+    i18n: { language: 'en' },
+  }),
 }));
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock('@tanstack/react-router', () => ({
@@ -35,9 +39,11 @@ vi.mock('../../../../../shared/hooks/queries/useGitHub', () => ({
 
 import ProjectRepositoriesPanel from './ProjectRepositoriesPanel';
 
+const connectionData = github.connection.data;
 beforeEach(() => {
   github.mutate.mockClear();
   github.availableCalls = [];
+  github.connection.data = connectionData;
 });
 afterEach(cleanup);
 
@@ -63,5 +69,16 @@ describe('ProjectRepositoriesPanel', () => {
     expect(screen.queryByRole('checkbox')).toBeNull();
     expect(screen.queryByRole('button', { name: 'flow.projectSettings.code.save' })).toBeNull();
     expect(github.availableCalls.every((enabled) => !enabled)).toBe(true);
+  });
+
+  it('says when the last webhook arrived, or that none has', () => {
+    render(<ProjectRepositoriesPanel projectId="p1" canAdminister={false} />);
+    expect(screen.getByText('flow.projectSettings.code.noWebhooks')).toBeVisible();
+    cleanup();
+
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    github.connection.data = { ...connectionData, lastWebhookAt: twoHoursAgo };
+    render(<ProjectRepositoriesPanel projectId="p1" canAdminister={false} />);
+    expect(screen.getByText('flow.projectSettings.code.lastWebhook 2 hours ago')).toBeVisible();
   });
 });
