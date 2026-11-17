@@ -71,7 +71,7 @@ describe('InviteUser activation link', () => {
 
   it('shows the activation link before leaving, so it can be shared if the email never arrives', async () => {
     // With no outbound email an invited member could never be activated.
-    inviteMock.mockResolvedValue({ userId: '1', inviteLink: LINK });
+    inviteMock.mockResolvedValue({ userId: '1', inviteLink: LINK, inviteEmailQueued: true });
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
     render(<InviteUser />);
@@ -80,6 +80,7 @@ describe('InviteUser activation link', () => {
 
     const field = await screen.findByLabelText('team.inviteUser.inviteLinkLabel');
     expect(field).toHaveValue(LINK);
+    expect(screen.getByText('team.inviteUser.inviteLinkDescription')).toBeTruthy();
     expect(navigateMock).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole('button', { name: 'team.inviteUser.copyInviteLink' }));
@@ -90,6 +91,17 @@ describe('InviteUser activation link', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'team.inviteUser.inviteLinkDone' }));
     expect(navigateMock).toHaveBeenCalledWith({ to: '/team' });
+  });
+
+  it('says no email was sent when none is on its way', async () => {
+    // With no email provider the dialog used to claim an email had been sent.
+    inviteMock.mockResolvedValue({ userId: '1', inviteLink: LINK, inviteEmailQueued: false });
+    render(<InviteUser />);
+
+    await sendSingleInvite();
+
+    expect(await screen.findByText('team.inviteUser.inviteLinkEmailNotSent')).toBeTruthy();
+    expect(screen.queryByText('team.inviteUser.inviteLinkDescription')).toBeNull();
   });
 
   it('goes straight back to the team when there is no link to share', async () => {

@@ -28,6 +28,10 @@ message InviteUserResponse {
   /// shared out of band when email is not delivered. Absent for direct credentials.
   /// It is a one-time credential: never log it or put it in a redirect.
   invite_link: string?
+  /// True only when the invitation email was queued and this server has an email provider
+  /// configured. False means no email is on its way, so the inviter must share invite_link.
+  /// Absent for direct credentials.
+  invite_email_queued: bool?
 }
 
 message BulkInviteRequest {
