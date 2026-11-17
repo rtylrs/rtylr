@@ -918,7 +918,8 @@
     "inProgress": "En cours",
     "overdue": "En retard",
     "labourCost": "Coût de main-d'œuvre",
-    "percentComplete": "{{percent}} % terminé"
+    "percentComplete": "{{percent}} % terminé",
+    "unassigned": "Non assignée"
   },
   "projectCalendar": {
     "pageTitle": "Calendrier · rtylr"
