@@ -955,7 +955,11 @@
     "developerModeHint": "Affiche les liens de code, la CI, les déploiements et les champs de développement sur les tâches de ce projet. Le désactiver les masque ; rien n'est supprimé.",
     "developerModeGateReason": "Seuls les administrateurs du projet peuvent modifier ce réglage.",
     "developerModeOn": "Fonctions de développement activées",
-    "developerModeOff": "Fonctions de développement désactivées"
+    "developerModeOff": "Fonctions de développement désactivées",
+    "memberCount_one": "{{count}} membre",
+    "memberCount_many": "{{count}} membres",
+    "memberCount_other": "{{count}} membres",
+    "addMemberShort": "Ajouter"
   },
   "bulkEdit": {
     "clearSelectionLabel": "Effacer la sélection",
