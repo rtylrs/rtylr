@@ -19,6 +19,7 @@ import (
 	flowcyclev2 "github.com/voxire/voxie/gen/go/flow/cycle/v2"
 	flowdashboardv1 "github.com/voxire/voxie/gen/go/flow/dashboard/v1"
 	flowdashboardv2 "github.com/voxire/voxie/gen/go/flow/dashboard/v2"
+	flowgithubv2 "github.com/voxire/voxie/gen/go/flow/github/v2"
 	flowinsightsv1 "github.com/voxire/voxie/gen/go/flow/insights/v1"
 	flowinsightsv2 "github.com/voxire/voxie/gen/go/flow/insights/v2"
 	flowlabelv1 "github.com/voxire/voxie/gen/go/flow/label/v1"
@@ -49,8 +50,12 @@ type Module struct {
 
 func NewModule(ctx context.Context, db *sql.DB) *Module {
 	repository := moduleinfra.NewRepository(db)
+	service := application.NewService(ctx, repository).
+		WithAuditRecorder(outbox.NewRecorder(db)).
+		WithLinkPreviewer(moduleinfra.NewLinkPreviewer())
+	configureGitHubApp(ctx, service)
 	return &Module{
-		service:    application.NewService(ctx, repository).WithAuditRecorder(outbox.NewRecorder(db)).WithLinkPreviewer(moduleinfra.NewLinkPreviewer()),
+		service:    service,
 		repository: repository,
 	}
 }
@@ -169,6 +174,12 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 		flowstatusv2.WithMux(mux),
 	); err != nil {
 		panic(fmt.Errorf("register flow status v2: %w", err))
+	}
+	if err := flowgithubv2.RegisterGitHubServiceServer(
+		api.NewGitHubAPIV2(m.service),
+		flowgithubv2.WithMux(mux),
+	); err != nil {
+		panic(fmt.Errorf("register flow github v2: %w", err))
 	}
 	if err := flowcyclev2.RegisterCycleServiceServer(
 		api.NewCycleAPIV2(m.service),

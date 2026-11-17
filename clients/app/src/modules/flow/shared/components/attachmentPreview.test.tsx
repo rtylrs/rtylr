@@ -30,7 +30,12 @@ const image = {
 
 function renderWithQuery(ui: ReactElement) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+  const view = render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+  return {
+    ...view,
+    rerender: (next: ReactElement) =>
+      view.rerender(<QueryClientProvider client={client}>{next}</QueryClientProvider>),
+  };
 }
 
 describe('image attachments', () => {
@@ -46,8 +51,13 @@ describe('image attachments', () => {
 
     const thumb = await screen.findByRole('img', { name: image.name });
     expect(thumb).toHaveAttribute('src', SIGNED);
-    // Signed by path, so a file stored under an earlier CDN host still signs.
-    expect(signAssetUrl).toHaveBeenCalledWith(new URL(CDN_FILE).pathname, expect.anything());
+    // The thumbnail is a resized copy, signed by path so a file stored under
+    // an earlier CDN host still signs.
+    const id = new URL(CDN_FILE).pathname.split('/').pop();
+    expect(signAssetUrl).toHaveBeenCalledWith(
+      `/images/${id}`,
+      expect.objectContaining({ params: { w: '160' } })
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'flow.taskDetail.openAttachment' }));
 
@@ -103,5 +113,46 @@ describe('removing attachments', () => {
     expect(
       screen.getAllByRole('button', { name: 'flow.taskDetail.removeAttachmentLabel' })
     ).toHaveLength(1);
+  });
+});
+
+describe('thumbnail fallback', () => {
+  beforeEach(() => {
+    signAssetUrl.mockReset();
+    signAssetUrl.mockImplementation(async (path: string) => ({
+      url: `https://api.voxire.com${path}?sig=s`,
+      expiresAt: Math.floor(Date.now() / 1000) + 3600,
+    }));
+  });
+
+  it('loads the original when the resized copy fails', async () => {
+    renderWithQuery(<AttachmentUpload attachments={[image] as never} />);
+    const thumb = await screen.findByRole('img', { name: image.name });
+    expect(thumb.getAttribute('src')).toContain('/images/');
+
+    fireEvent.error(thumb);
+
+    await waitFor(() =>
+      expect(screen.getByRole('img', { name: image.name }).getAttribute('src')).toContain('/files/')
+    );
+  });
+
+  it('tries the resized copy again when a row shows a different file', async () => {
+    // The fallback state used to survive a url change, so a reused row skipped
+    // the next file's resized copy and loaded its full-size original.
+    const view = renderWithQuery(<AttachmentUpload attachments={[image] as never} />);
+    fireEvent.error(await screen.findByRole('img', { name: image.name }));
+    await waitFor(() =>
+      expect(screen.getByRole('img', { name: image.name }).getAttribute('src')).toContain('/files/')
+    );
+
+    const next = { ...image, url: 'https://api.voxire.com/files/11111111-2222-4333-8444-555555555555' };
+    view.rerender(<AttachmentUpload attachments={[next] as never} />);
+
+    await waitFor(() =>
+      expect(screen.getByRole('img', { name: image.name }).getAttribute('src')).toContain(
+        '/images/11111111-2222-4333-8444-555555555555'
+      )
+    );
   });
 });

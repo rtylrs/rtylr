@@ -53,5 +53,31 @@
     "analytics": "Analyses",
     "delivery": "Livraison",
     "data": "Données"
+  },
+  "github": {
+    "category": "Code",
+    "description": "Connectez votre organisation GitHub une seule fois. Chaque projet de développement choisit ensuite ses dépôts.",
+    "scope": "Application GitHub",
+    "connect": "Connecter GitHub",
+    "disconnect": "Déconnecter",
+    "checking": "Vérification de GitHub…",
+    "loadError": "Impossible de vérifier la connexion GitHub.",
+    "notConfigured": "GitHub n’est pas encore configuré sur ce serveur.",
+    "connectedTo": "Connecté à {{account}} ({{type}}). Les projets choisissent leurs dépôts dans les paramètres de projet Flow.",
+    "accountOrganization": "organisation",
+    "accountUser": "compte personnel",
+    "health": {
+      "active": "Actif",
+      "suspended": "Suspendu sur GitHub",
+      "removed": "Désinstallé sur GitHub",
+      "unknown": "État inconnu"
+    },
+    "connected": "GitHub connecté",
+    "connectError": "Impossible de connecter GitHub. Veuillez réessayer.",
+    "disconnected": "GitHub déconnecté",
+    "disconnectedManual": "GitHub est déconnecté ici. Désinstallez aussi l’application dans vos paramètres GitHub.",
+    "disconnectError": "Impossible de déconnecter GitHub. Veuillez réessayer.",
+    "disconnectTitle": "Déconnecter GitHub ?",
+    "disconnectDescription": "Chaque projet perd sa sélection de dépôts et l’application est désinstallée de votre compte GitHub."
   }
 }

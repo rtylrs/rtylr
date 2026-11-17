@@ -5,7 +5,6 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import {
   MessageSquare,
-  GitBranch,
   Mail,
   Trash2,
   Save,
@@ -36,6 +35,7 @@ import { useCanAdministerProject } from '../../shared/lib/currentUser';
 import ProjectVisibilityField from './components/ProjectVisibilityField';
 import ProjectDeveloperModeField from './components/ProjectDeveloperModeField';
 import { useIsDeveloperProject } from '../projects-v2/useDeveloperMode';
+import ProjectRepositoriesPanel from './components/ProjectRepositoriesPanel';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
@@ -553,76 +553,51 @@ const ProjectSettings: React.FC = () => {
         {/* ── Integrations ── */}
         {tab === 'integrations' && (
           <div className="space-y-6">
-            {[
-              {
-                key: 'general',
-                heading: null,
-                items: [
-                  {
-                    icon: MessageSquare,
-                    name: 'Slack',
-                    description: t('flow.projectSettings.integrations.slack'),
-                  },
-                  {
-                    icon: Mail,
-                    name: 'Email',
-                    description: t('flow.projectSettings.integrations.email'),
-                  },
-                ],
-              },
-              // Code integrations only appear on a developer project.
-              ...(isDeveloperProject
-                ? [
-                    {
-                      key: 'code',
-                      heading: t('flow.projectSettings.integrations.codeSection'),
-                      items: [
-                        {
-                          icon: GitBranch,
-                          name: 'GitHub',
-                          description: t('flow.projectSettings.integrations.github'),
-                        },
-                      ],
-                    },
-                  ]
-                : []),
-            ].map((group) => (
-              <section key={group.key} className="space-y-2">
-                {group.heading && <SectionHeading>{group.heading}</SectionHeading>}
-                {group.items.map(({ icon: Icon, name, description }) => (
-                  <div
-                    key={name}
-                    className="flex items-center gap-3 rounded-md px-3 py-2.5"
-                    style={{
-                      background: 'var(--flow-input-bg)',
-                      border: '1px solid var(--flow-border-control)',
-                    }}
-                  >
-                    <Icon size={14} style={{ color: 'var(--flow-text-muted)' }} />
-                    <div className="flex-1">
-                      <p
-                        className="text-flow-meta font-medium"
-                        style={{ color: 'var(--flow-text)' }}
-                      >
-                        {name}
-                      </p>
-                      <p className="text-flow-meta" style={{ color: 'var(--flow-text-dim)' }}>
-                        {description}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      className="text-flow-meta px-2 py-1 rounded-sm hover:bg-[var(--flow-hover)]"
-                      style={{ color: 'var(--flow-text-muted)' }}
-                      disabled
-                      title={t('flowCommon.comingSoon')}
-                    >
-                      {t('flowCommon.comingSoon')}
-                    </button>
+            {isDeveloperProject && (
+              <ProjectRepositoriesPanel projectId={projectId} canAdminister={canManageProject} />
+            )}
+            <div className="space-y-2">
+              {[
+                {
+                  icon: MessageSquare,
+                  name: 'Slack',
+                  description: t('flow.projectSettings.integrations.slack'),
+                },
+                {
+                  icon: Mail,
+                  name: 'Email',
+                  description: t('flow.projectSettings.integrations.email'),
+                },
+              ].map(({ icon: Icon, name, description }) => (
+                <div
+                  key={name}
+                  className="flex items-center gap-3 rounded-md px-3 py-2.5"
+                  style={{
+                    background: 'var(--flow-input-bg)',
+                    border: '1px solid var(--flow-border-control)',
+                  }}
+                >
+                  <Icon size={14} style={{ color: 'var(--flow-text-muted)' }} />
+                  <div className="flex-1">
+                    <p className="text-flow-meta font-medium" style={{ color: 'var(--flow-text)' }}>
+                      {name}
+                    </p>
+                    <p className="text-flow-meta" style={{ color: 'var(--flow-text-dim)' }}>
+                      {description}
+                    </p>
                   </div>
-                ))}
-              </section>
-            ))}
+                  <button
+                    type="button"
+                    className="text-flow-meta px-2 py-1 rounded-sm hover:bg-[var(--flow-hover)]"
+                    style={{ color: 'var(--flow-text-muted)' }}
+                    disabled
+                    title={t('flowCommon.comingSoon')}
+                  >
+                    {t('flowCommon.comingSoon')}
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

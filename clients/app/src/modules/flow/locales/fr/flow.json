@@ -947,15 +947,39 @@
     "visibilitySaved": "Visibilité mise à jour",
     "integrations": {
       "slack": "Publier les mises à jour du projet dans #flow-updates",
-      "github": "Lier les PR aux tâches automatiquement",
-      "email": "Envoyer un résumé quotidien aux membres",
-      "codeSection": "Code source"
+      "email": "Envoyer un résumé quotidien aux membres"
     },
     "developerMode": "Projet de développement",
     "developerModeHint": "Affiche les liens de code, la CI, les déploiements et les champs de développement sur les tâches de ce projet. Le désactiver les masque ; rien n'est supprimé.",
     "developerModeGateReason": "Seuls les administrateurs du projet peuvent modifier ce réglage.",
     "developerModeOn": "Fonctions de développement activées",
     "developerModeOff": "Fonctions de développement désactivées",
+    "code": {
+      "heading": "Code source",
+      "description": "Les dépôts GitHub utilisés par ce projet. Un même dépôt peut servir à plusieurs projets.",
+      "checking": "Vérification de GitHub…",
+      "notConnected": "GitHub n’est pas encore connecté pour cette entreprise.",
+      "connectLink": "Connecter GitHub dans les extensions",
+      "connectedTo": "Connecté à {{account}} ·",
+      "health": {
+        "active": "Actif",
+        "suspended": "Suspendu sur GitHub. Les dépôts ne peuvent pas être listés tant qu’il n’est pas réactivé.",
+        "removed": "Désinstallé sur GitHub. Reconnectez-le dans les extensions.",
+        "unknown": "GitHub n’a pas répondu, l’état est donc inconnu."
+      },
+      "gateReason": "Seul un administrateur du projet peut choisir les dépôts.",
+      "pickerLabel": "Dépôts",
+      "loadingRepositories": "Chargement des dépôts…",
+      "noneAvailable": "L’application GitHub ne voit encore aucun dépôt. Donnez-lui accès sur GitHub.",
+      "none": "Aucun dépôt choisi pour l’instant.",
+      "filter": "Filtrer les dépôts",
+      "noMatches": "Aucun dépôt ne correspond.",
+      "private": "Privé",
+      "save": "Enregistrer les dépôts",
+      "saving": "Enregistrement…",
+      "saved": "Dépôts enregistrés",
+      "saveError": "Impossible d’enregistrer les dépôts. Veuillez réessayer."
+    },
     "memberCount_one": "{{count}} membre",
     "memberCount_many": "{{count}} membres",
     "memberCount_other": "{{count}} membres",

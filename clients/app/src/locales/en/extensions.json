@@ -53,5 +53,31 @@
     "analytics": "Analytics",
     "delivery": "Delivery",
     "data": "Data"
+  },
+  "github": {
+    "category": "Code",
+    "description": "Connect your GitHub organisation once. Each developer project then picks the repositories it uses.",
+    "scope": "GitHub App",
+    "connect": "Connect GitHub",
+    "disconnect": "Disconnect",
+    "checking": "Checking GitHub…",
+    "loadError": "Unable to check the GitHub connection.",
+    "notConfigured": "GitHub is not set up on this server yet.",
+    "connectedTo": "Connected to {{account}} ({{type}}). Projects pick their repositories in Flow project settings.",
+    "accountOrganization": "organisation",
+    "accountUser": "personal account",
+    "health": {
+      "active": "Active",
+      "suspended": "Suspended on GitHub",
+      "removed": "Uninstalled on GitHub",
+      "unknown": "Status unknown"
+    },
+    "connected": "GitHub connected",
+    "connectError": "Unable to connect GitHub. Please try again.",
+    "disconnected": "GitHub disconnected",
+    "disconnectedManual": "GitHub is disconnected here. Uninstall the app in your GitHub settings as well.",
+    "disconnectError": "Unable to disconnect GitHub. Please try again.",
+    "disconnectTitle": "Disconnect GitHub?",
+    "disconnectDescription": "Every project loses its repository selection, and the app is uninstalled from your GitHub account."
   }
 }

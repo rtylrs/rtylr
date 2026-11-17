@@ -57,5 +57,31 @@
     "analytics": "التحليلات",
     "delivery": "التوصيل",
     "data": "البيانات"
+  },
+  "github": {
+    "category": "الشيفرة",
+    "description": "اربط مؤسستك على GitHub مرة واحدة، ثم يختار كل مشروع تطوير المستودعات التي يستخدمها.",
+    "scope": "تطبيق GitHub",
+    "connect": "ربط GitHub",
+    "disconnect": "فصل",
+    "checking": "جارٍ التحقق من GitHub…",
+    "loadError": "تعذّر التحقق من اتصال GitHub.",
+    "notConfigured": "لم يتم إعداد GitHub على هذا الخادم بعد.",
+    "connectedTo": "متصل بـ {{account}} ({{type}}). تختار المشاريع مستودعاتها من إعدادات مشروع Flow.",
+    "accountOrganization": "مؤسسة",
+    "accountUser": "حساب شخصي",
+    "health": {
+      "active": "نشط",
+      "suspended": "معلّق على GitHub",
+      "removed": "أُزيل من GitHub",
+      "unknown": "الحالة غير معروفة"
+    },
+    "connected": "تم ربط GitHub",
+    "connectError": "تعذّر ربط GitHub. يُرجى المحاولة مرة أخرى.",
+    "disconnected": "تم فصل GitHub",
+    "disconnectedManual": "تم فصل GitHub هنا. أزل التطبيق من إعدادات GitHub أيضًا.",
+    "disconnectError": "تعذّر فصل GitHub. يُرجى المحاولة مرة أخرى.",
+    "disconnectTitle": "فصل GitHub؟",
+    "disconnectDescription": "ستفقد كل المشاريع المستودعات المختارة، وستتم إزالة التطبيق من حسابك على GitHub."
   }
 }
