@@ -37,6 +37,7 @@ vi.mock('../../shared/lib/clients', () => ({
     connectIntegration: api.connect,
     disconnectIntegration: api.disconnect,
   },
+  githubClient: { getGitHubConnection: async () => ({ connection: { configured: true } }) },
 }));
 vi.mock('../../shared/hooks/queries/useSubscription', () => ({
   useMySubscription: () => api.subscription,
