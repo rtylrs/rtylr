@@ -86,3 +86,66 @@ func TestInsightsDealTotals(t *testing.T) {
 		t.Errorf("business without deals = %d deals, %d minor; want zeros", deals, value)
 	}
 }
+
+// TestInsightsRecurringRevenue uses its own businesses, so the MRR it checks
+// is exact.
+func TestInsightsRecurringRevenue(t *testing.T) {
+	db := testutil.OpenDB(t)
+	ctx := context.Background()
+	repo := configuredRepository(db)
+	const biz, other, empty int64 = 75650001, 75650002, 75650003
+	removeDeals := func() {
+		if _, err := db.ExecContext(ctx, `DELETE FROM crm_deals WHERE business_id IN (?, ?)`, biz, other); err != nil {
+			t.Fatalf("clear deals: %v", err)
+		}
+	}
+	removeDeals()
+	t.Cleanup(removeDeals)
+
+	insert := func(businessID int64, value, billing, status string, closedAt time.Time) {
+		t.Helper()
+		closed := sql.NullTime{Time: closedAt, Valid: !closedAt.IsZero()}
+		if _, err := db.ExecContext(ctx, `INSERT INTO crm_deals (business_id, owner_id, pipeline_id, stage_id, title, value, billing, status, closed_at)
+			VALUES (?, ?, 1, 1, ?, ?, ?, ?, ?)`, businessID, businessID, unique(t, "Deal"), value, billing, status, closed); err != nil {
+			t.Fatalf("insert deal: %v", err)
+		}
+	}
+	monthStart := time.Date(2026, time.October, 1, 0, 0, 0, 0, time.UTC)
+	september := time.Date(2026, time.September, 20, 9, 0, 0, 0, time.UTC)
+	october := time.Date(2026, time.October, 5, 9, 0, 0, 0, time.UTC)
+
+	// Recurring before the month: 100.00 a month and 1,200.00 a year (100.00 a month).
+	insert(biz, "100.00", "monthly", "won", september)
+	insert(biz, "1200.00", "yearly", "won", september)
+	// Won this month, one of them on the month's first instant: 50.50 a month
+	// and 1,000.00 a year (83.33 a month).
+	insert(biz, "50.50", "monthly", "won", monthStart)
+	insert(biz, "1000.00", "yearly", "won", october)
+	// Not recurring contracts: a one-time win, open deals and a lost one.
+	insert(biz, "9000.00", "one_time", "won", september)
+	insert(biz, "700.00", "monthly", "open", time.Time{})
+	insert(biz, "1200.00", "yearly", "open", time.Time{})
+	insert(biz, "800.00", "monthly", "lost", september)
+	// Another business's contract stays out of biz's MRR.
+	insert(other, "999.00", "monthly", "won", september)
+
+	read := func(businessID int64) (int64, money.Amount, money.Amount) {
+		t.Helper()
+		contracts, mrr, atMonthStart, err := repo.RecurringRevenue(ctx, businessID, monthStart)
+		if err != nil {
+			t.Fatalf("RecurringRevenue: %v", err)
+		}
+		return contracts, mrr, atMonthStart
+	}
+
+	// 100.00 + 50.50 + (1,200.00 + 1,000.00) / 12 = 333.83.
+	if contracts, mrr, atMonthStart := read(biz); contracts != 4 || mrr != 33383 || atMonthStart != 20000 {
+		t.Errorf("recurring revenue = %d contracts, MRR %d, %d at month start; want 4, 33383, 20000", contracts, mrr, atMonthStart)
+	}
+	if contracts, mrr, atMonthStart := read(other); contracts != 1 || mrr != 99900 || atMonthStart != 99900 {
+		t.Errorf("other business = %d contracts, MRR %d, %d at month start; want 1, 99900, 99900", contracts, mrr, atMonthStart)
+	}
+	if contracts, mrr, atMonthStart := read(empty); contracts != 0 || mrr != 0 || atMonthStart != 0 {
+		t.Errorf("business without contracts = %d contracts, MRR %d, %d at month start; want zeros", contracts, mrr, atMonthStart)
+	}
+}
