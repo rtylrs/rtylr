@@ -198,6 +198,7 @@ func invoiceFromSqlc(row sqlc.FinanceInvoice) domain.Invoice {
 		ClientAddress:  nullStr(row.ClientAddress, ""),
 		ClientTaxID:    nullStr(row.ClientTaxID, ""),
 		CustomerID:     nullableInt64Ptr(row.CustomerID),
+		ProjectID:      nullableInt64Ptr(row.ProjectID),
 		Status:         string(row.Status.FinanceInvoicesStatus),
 		IssueDate:      row.IssueDate,
 		DueDate:        row.DueDate,

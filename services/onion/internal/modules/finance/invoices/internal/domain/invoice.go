@@ -27,6 +27,7 @@ type Invoice struct {
 	ClientAddress  string
 	ClientTaxID    string
 	CustomerID     *int64
+	ProjectID      *int64 // Work project the invoice bills; nil when untagged
 	Status         string
 	IssueDate      time.Time
 	DueDate        time.Time
@@ -51,6 +52,7 @@ type Invoice struct {
 
 type InvoiceInput struct {
 	CustomerID    int64
+	ProjectID     int64 // Work project to tag; 0 leaves the invoice untagged
 	ClientName    string
 	ClientEmail   string
 	ClientAddress string
@@ -68,6 +70,7 @@ type InvoiceInput struct {
 
 type InvoiceUpdateInput struct {
 	CustomerID    *int64
+	ProjectID     *int64 // nil keeps the current project, 0 clears it, else sets it
 	ClientName    string
 	ClientEmail   string
 	ClientAddress string

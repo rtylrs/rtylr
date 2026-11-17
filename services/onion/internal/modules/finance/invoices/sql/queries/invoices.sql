@@ -24,14 +24,14 @@ FOR UPDATE;
 -- name: CreateInvoice :execresult
 INSERT INTO finance_invoices
   (owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id, customer_id,
-   status, issue_date, due_date, currency, subtotal, discount_type, discount_value,
+   project_id, status, issue_date, due_date, currency, subtotal, discount_type, discount_value,
    discount_amount, tax_rate, tax_amount, total, amount_paid, amount_due, notes, terms)
-VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
 
 -- name: UpdateInvoice :exec
 UPDATE finance_invoices SET
   client_name = ?, client_email = ?, client_address = ?, client_tax_id = ?, customer_id = ?,
-  issue_date = ?, due_date = ?, currency = ?, subtotal = ?, discount_type = ?,
+  project_id = ?, issue_date = ?, due_date = ?, currency = ?, subtotal = ?, discount_type = ?,
   discount_value = ?, discount_amount = ?, tax_rate = ?, tax_amount = ?,
   total = ?, amount_due = ?, notes = ?, terms = ?
 WHERE id = ? AND business_id = ? AND status = 'draft';
