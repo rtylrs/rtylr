@@ -41,6 +41,14 @@ func (m *mockRepo) GetDashboardProject(_ context.Context, _, _, _ int64) (domain
 	return domain.DashboardProject{}, false, m.err
 }
 
+func (m *mockRepo) GetDashboardProjectByID(_ context.Context, _, _ int64) (domain.DashboardProject, bool, error) {
+	return domain.DashboardProject{}, false, m.err
+}
+
+func (m *mockRepo) ListDashboardProjectsByIDs(_ context.Context, _ int64, _ []int64) ([]domain.DashboardProject, error) {
+	return nil, m.err
+}
+
 func (m *mockRepo) GetProjectTaskProgress(_ context.Context, _, _ int64) (domain.ProjectTaskProgress, error) {
 	return domain.ProjectTaskProgress{}, m.err
 }

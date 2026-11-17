@@ -21,12 +21,15 @@ type repository interface {
 	GetLoggedTime(ctx context.Context, businessID int64, from, to time.Time) (domain.LoggedTime, error)
 	ListDashboardProjects(ctx context.Context, businessID, userID int64) ([]domain.DashboardProject, error)
 	GetDashboardProject(ctx context.Context, businessID, userID, projectID int64) (domain.DashboardProject, bool, error)
+	GetDashboardProjectByID(ctx context.Context, businessID, projectID int64) (domain.DashboardProject, bool, error)
+	ListDashboardProjectsByIDs(ctx context.Context, businessID int64, projectIDs []int64) ([]domain.DashboardProject, error)
 	GetProjectTaskProgress(ctx context.Context, businessID, projectID int64) (domain.ProjectTaskProgress, error)
 	GetProjectTimeTotals(ctx context.Context, businessID, projectID int64, thisFrom, thisTo, priorFrom, priorTo time.Time) (domain.ProjectTimeTotals, error)
 }
 
 type Service struct {
-	repo repository
+	repo   repository
+	access ProjectAccess
 }
 
 func NewService(_ context.Context, repo repository) *Service {
@@ -75,15 +78,6 @@ func (s *Service) GetLoggedTime(ctx context.Context, businessID int64, from, to 
 // the caller, and a project's tasks and time change while someone is looking
 // at it, so each read goes to the database; all four are indexed by project.
 
-// ListDashboardProjects returns the projects userID may open a dashboard for.
-func (s *Service) ListDashboardProjects(ctx context.Context, businessID, userID int64) ([]domain.DashboardProject, error) {
-	return s.repo.ListDashboardProjects(ctx, businessID, userID)
-}
-
-// GetDashboardProject returns a project userID may see, or found false.
-func (s *Service) GetDashboardProject(ctx context.Context, businessID, userID, projectID int64) (domain.DashboardProject, bool, error) {
-	return s.repo.GetDashboardProject(ctx, businessID, userID, projectID)
-}
 
 // GetProjectTaskProgress returns one project's task completion and overdue work.
 func (s *Service) GetProjectTaskProgress(ctx context.Context, businessID, projectID int64) (domain.ProjectTaskProgress, error) {
