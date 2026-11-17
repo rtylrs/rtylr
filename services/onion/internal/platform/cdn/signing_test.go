@@ -1,6 +1,7 @@
 package cdn
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -69,6 +70,27 @@ func TestSignedDeliveryRejectsTamperedQuery(t *testing.T) {
 func TestDeliveryCacheControlPrivateForSignedRequests(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/files/id?expires=1&sig=x", nil)
 	if got := deliveryCacheControl(req); got != "private, no-store" {
-		t.Fatalf("signed cache control = %q", got)
+		t.Fatalf("expired signed cache control = %q", got)
+	}
+}
+
+// A live signed link may be kept by the viewer's browser until it expires, so
+// a page that shows the same attachments again does not download them again.
+// It must stay private so no shared cache serves it to anyone else.
+func TestDeliveryCacheControlCachesLiveSignedLinkUntilExpiry(t *testing.T) {
+	expires := time.Now().Add(90 * time.Minute).Unix()
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/files/id?expires=%d&sig=x", expires), nil)
+	got := deliveryCacheControl(req)
+	var maxAge int64
+	if _, err := fmt.Sscanf(got, "private, max-age=%d", &maxAge); err != nil {
+		t.Fatalf("live signed cache control = %q, want private with a max-age", got)
+	}
+	if maxAge <= 0 || maxAge > 90*60 {
+		t.Fatalf("max-age = %d, want at most the %d seconds left on the link", maxAge, 90*60)
+	}
+
+	unsigned := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/files/id?expires=%d", expires), nil)
+	if got := deliveryCacheControl(unsigned); got != "private, no-store" {
+		t.Fatalf("expires without a signature = %q, want private, no-store", got)
 	}
 }
