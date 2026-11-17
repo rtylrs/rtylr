@@ -46,6 +46,9 @@ message InvoiceSummary {
   amount_due: float64
   /// created_at is when the record was created.
   created_at: string
+  /// project_id is the Work project this invoice bills; absent when the
+  /// invoice is not tagged with a project.
+  project_id: int64?
 }
 
 /// BillableTimeEntry is approved billable HR time that has not been linked to
@@ -85,6 +88,10 @@ message InvoiceDetail {
   /// values printed on the document at issue time and are deliberately not
   /// re-derived from the customer record.
   customer_id: int64?
+  /// project_id is the Work project this invoice bills, so per-project
+  /// invoiced, paid and overdue totals count it; absent when the invoice is
+  /// not tagged with a project.
+  project_id: int64?
   /// invoice_number is the invoice number value for this contract.
   invoice_number: string
   /// client_name is the client name value for this contract.
@@ -189,6 +196,10 @@ message CreateInvoiceRequest {
   /// behaviour. The server must verify the referenced customer belongs to
   /// the caller's business before accepting the link.
   customer_id: int64?
+  /// project_id tags the invoice with the Work project it bills. Absent or 0
+  /// leaves the invoice untagged. The server rejects a project that does not
+  /// belong to the caller's business.
+  project_id: int64?
   /// issue_date is the issue date value for this contract.
   issue_date: string @required
   /// due_date is the due date value for this contract.
@@ -244,6 +255,9 @@ message ListInvoicesRequest {
   /// customer_id filters by the linked CRM customer; absent to include
   /// invoices for all customers and invoices with no customer link.
   customer_id: int64? @query("customer_id")
+  /// project_id filters by the tagged Work project; absent to include
+  /// invoices for every project and untagged invoices.
+  project_id: int64? @query("project_id")
   /// date_from is the inclusive start date filter.
   date_from: string @query("date_from")
   /// date_to is the inclusive end date filter.
@@ -306,6 +320,11 @@ message UpdateInvoiceBody {
   client_address: string
   /// client_tax_id is the client tax id value for this contract.
   client_tax_id: string
+  /// project_id re-tags the draft with a Work project. Absent keeps the
+  /// current tag, 0 clears it, and any other value must be a project in the
+  /// caller's business. Optional so an omitted field can never be read as a
+  /// clear, and 0 is safe as the clear value because no project has id 0.
+  project_id: int64?
   /// issue_date is the issue date value for this contract.
   issue_date: string @required
   /// due_date is the due date value for this contract.
