@@ -31,12 +31,13 @@ import { CardSkeleton } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import CaretAskBar from '../../shared/components/CaretAskBar';
 
-const today = new Date().toLocaleDateString('en-US', {
-  weekday: 'long',
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-});
+export const formatToday = (language: string): string =>
+  new Date().toLocaleDateString(language, {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 
 const sparklineOptions: ChartOptions<'bar'> = {
   responsive: true,
@@ -80,7 +81,7 @@ const DeltaBadge = ({ deltaPct }: DeltaBadgeProps): React.JSX.Element => {
 };
 
 const Dashboard: React.FC = (): React.JSX.Element => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data, isLoading, isError, refetch } = useInsightsDashboard();
   const { data: seriesData } = useRevenueSeries();
   const { data: settings } = useInsightsSettings();
@@ -213,7 +214,7 @@ const Dashboard: React.FC = (): React.JSX.Element => {
           {t('insights.dashboard.title')}
         </h1>
         <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
-          {today}
+          {formatToday(i18n.language)}
         </p>
       </div>
 

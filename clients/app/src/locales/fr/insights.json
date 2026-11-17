@@ -3,18 +3,18 @@
     "generic": "Something went wrong. Please try again."
   },
   "dashboard": {
-    "title": "Business Overview",
+    "title": "Vue d'ensemble de l'activité",
     "caretAskBar": {
-      "placeholder": "Ask Caret anything about your business…"
+      "placeholder": "Posez une question à Caret sur votre activité…"
     },
     "cards": {
-      "revenue": "Revenue (MTD)",
-      "customers": "Customers",
-      "orders": "Orders",
-      "margin": "Gross Margin"
+      "revenue": "Chiffre d’affaires (mois en cours)",
+      "customers": "Clients",
+      "orders": "Commandes",
+      "margin": "Marge brute"
     },
-    "emptyTitle": "No KPI data yet",
-    "emptyDescription": "Metrics will appear here once your business starts generating activity.",
+    "emptyTitle": "Pas encore de données KPI",
+    "emptyDescription": "Les indicateurs apparaîtront ici dès que votre activité générera des données.",
     "vsPrior": "vs période précédente",
     "metaTitle": "Tableau de bord · rtylr",
     "service": {

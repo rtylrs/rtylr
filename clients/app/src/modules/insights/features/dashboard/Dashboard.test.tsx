@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { initTestI18n } from '../../shared/testUtils/i18nTestSetup';
-import Dashboard from './Dashboard';
+import Dashboard, { formatToday } from './Dashboard';
 
 initTestI18n();
 
@@ -147,5 +147,12 @@ describe('Dashboard empty state', () => {
       'aria-valuenow',
       '20'
     );
+  });
+});
+
+describe('formatToday', () => {
+  it('formats the date in the reader language, not always English', () => {
+    expect(formatToday('en')).toMatch(/[A-Za-z]/);
+    expect(formatToday('ar')).toMatch(/[؀-ۿ]/);
   });
 });
