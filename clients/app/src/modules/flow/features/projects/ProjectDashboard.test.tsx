@@ -178,3 +178,32 @@ describe('ProjectDashboard: Insights project dashboard', () => {
     expect(screen.getByText('flow.projectDashboard.totalTasks')).toBeInTheDocument();
   });
 });
+
+// The task list carries the assignee's display name in assigneeName; the legacy
+// `assignee` field is empty, so every task used to land under Unassigned.
+describe('ProjectDashboard: by assignee', () => {
+  it('groups tasks by assignee name and labels the rest as unassigned', () => {
+    tasksState.data = [
+      {
+        id: '1',
+        title: 'A',
+        status: 'todo',
+        assignee: '',
+        assigneeName: 'Abed Amouneh',
+      } as ApiTask,
+      {
+        id: '2',
+        title: 'B',
+        status: 'todo',
+        assignee: '',
+        assigneeName: 'Abed Amouneh',
+      } as ApiTask,
+      { id: '3', title: 'C', status: 'todo', assignee: '', assigneeName: '' } as ApiTask,
+    ];
+    render(<ProjectDashboard />);
+
+    expect(screen.getByText('Abed Amouneh')).toBeInTheDocument();
+    expect(screen.getByText('flow.projectDashboard.unassigned')).toBeInTheDocument();
+    expect(screen.queryByText('Unassigned')).not.toBeInTheDocument();
+  });
+});
