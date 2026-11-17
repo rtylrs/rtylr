@@ -78,6 +78,10 @@ func toProjectDashboardResponse(d domain.ProjectDashboard) *insightsdashboardv1.
 		if t.AssigneeID > 0 {
 			assignee := t.AssigneeID
 			task.AssigneeId = &assignee
+			if t.AssigneeName != "" {
+				name := t.AssigneeName
+				task.AssigneeName = &name
+			}
 		}
 		overdue = append(overdue, task)
 	}
