@@ -20,9 +20,9 @@ const DIR = __dirname;
 describe('a failed project load is not a missing project', () => {
   it('useCurrentProject reports the failure separately from the data', () => {
     const source = fs.readFileSync(path.join(DIR, 'useCurrentProject.ts'), 'utf8');
-    expect(source).toContain('const loadFailed = hasQueryFailed(projectsQuery)');
-    expect(source).toContain('loadFailed,');
-    expect(source).toContain('refetch: projectsQuery.refetch');
+    expect(source).toContain('const listFailed = hasQueryFailed(projectsQuery)');
+    expect(source).toContain('loadFailed: listFailed');
+    expect(source).toContain('projectsQuery.refetch');
   });
 
   it.each(SCREENS)('%s renders the failure notice rather than a not-found line', (screen) => {
