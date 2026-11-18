@@ -51,6 +51,7 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hrstaffv1.RegisterStaffServiceServer(
 		api.NewStaffAPI(m.service, m.permissions),
 		hrstaffv1.WithMux(mux),
+		hrstaffv1.WithErrorWriter(api.WriteError),
 	); err != nil {
 		panic(fmt.Errorf("register HR staff service: %w", err))
 	}
