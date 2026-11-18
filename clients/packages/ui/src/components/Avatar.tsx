@@ -16,6 +16,11 @@ interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
    * avatar keeps the accent tint.
    */
   seed?: string;
+  /**
+   * The person's name. Shown on hover by the app's avatar name tooltip, and
+   * read out as the avatar's label unless it is hidden from assistive tech.
+   */
+  name?: string;
 }
 
 const sizePx: Record<AvatarSize, number> = { xs: 24, sm: 28, md: 36, lg: 48 };
@@ -30,10 +35,17 @@ const sizeClasses: Record<AvatarSize, string> = {
 
 const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
   (
-    { src, alt, initials, size = "md", seed, className, style, ...props },
+    { src, alt, initials, size = "md", seed, name, className, style, ...props },
     ref,
   ) => {
     const resolve = useAvatarResolver();
+    const labelled = Boolean(props["aria-hidden"] || props["aria-label"]);
+    const nameProps = name
+      ? {
+          "data-avatar-name": name,
+          ...(labelled ? {} : { role: "img", "aria-label": name }),
+        }
+      : {};
     const chosen =
       seed && !src && resolve ? resolve.render(seed, sizePx[size]) : null;
     const picked = seed && resolve ? resolve.colorIndex(seed) : undefined;
@@ -54,6 +66,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
           )}
           style={style}
           data-avatar-chosen=""
+          {...nameProps}
           {...props}
         >
           {chosen}
@@ -78,6 +91,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
             : style
         }
         data-avatar-seeded={color ? "" : undefined}
+        {...nameProps}
         {...props}
       >
         {src ? (
