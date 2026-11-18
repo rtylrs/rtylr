@@ -14,18 +14,16 @@ const (
 )
 
 // CanSeeProjectReport reports whether callerID may see reporting on one
-// project, such as its project dashboard. That is anyone Flow lets open the
-// project (canSeeProject: creator, owner, member, a manager of someone involved
-// in it, or the business owner or an admin) and anyone holding business-wide
-// reporting visibility (hubProfileBypasses, which adds flow:team:manage). The
-// second check is what still sets reporting apart from opening the project:
-// flow:team:manage is reporting visibility, not resource access, so a holder
-// who is not a business owner or admin sees the dashboard but cannot open the
-// board.
+// project, such as its project dashboard. That is exactly who Flow lets open
+// the project (canSeeProject: creator, owner, member, a manager of someone
+// involved in it, or the business owner, an admin or a Flow Admin), so Insights
+// and Work agree on who sees a project.
 //
-// The My Tasks bucket is never reported on, whoever asks. A project that does
-// not exist or belongs to another business is false with no error, so a caller
-// cannot tell it apart from one it may not see.
+// The My Tasks bucket is never reported on, whoever asks, which is the one
+// difference from opening it: its owner opens their own bucket but gets no
+// dashboard for it. A project that does not exist or belongs to another
+// business is false with no error, so a caller cannot tell it apart from one it
+// may not see.
 func (s *Service) CanSeeProjectReport(ctx context.Context, projectID, callerID, businessID int64) (bool, error) {
 	if projectID <= 0 || callerID <= 0 || businessID <= 0 {
 		return false, nil
@@ -40,10 +38,7 @@ func (s *Service) CanSeeProjectReport(ctx context.Context, projectID, callerID, 
 	if p.IsPersonal {
 		return false, nil
 	}
-	if s.canSeeProject(ctx, p, callerID, businessID) {
-		return true, nil
-	}
-	return s.hubProfileBypasses(ctx, callerID, businessID), nil
+	return s.canSeeProject(ctx, p, callerID, businessID), nil
 }
 
 // ListedProjectIDs returns the ids of the projects Flow's sidebar lists for

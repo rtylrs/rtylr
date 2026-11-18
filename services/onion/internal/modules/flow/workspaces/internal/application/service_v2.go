@@ -22,9 +22,14 @@ var ErrNotFound = errors.New("flow project not found")
 var ErrProjectNotArchived = errors.New("only archived projects can be purged")
 
 // canSeeProject reports whether callerID may READ projectID under the curation
-// rule: creator, member, manager visibility through the reporting line, or an
-// owner or admin of the project's business (administratorOpens). Public
-// visibility never widens read access here.
+// rule: creator, member, manager visibility through the reporting line, or
+// business-wide Flow access in the project's business (businessWideOpens: the
+// business owner, an admin or a Flow Admin). Public visibility never widens read
+// access here.
+//
+// This is the one rule for opening a project. Every read scoped to one project
+// (its board, cycles, milestones, statuses, task drawer, realtime topics and
+// Insights dashboard) admits exactly who this admits.
 func (s *Service) canSeeProject(ctx context.Context, p domain.Project, callerID, businessID int64) bool {
 	if p.CreatedBy == callerID || p.OwnerID == callerID {
 		return true
@@ -35,7 +40,7 @@ func (s *Service) canSeeProject(ctx context.Context, p domain.Project, callerID,
 	if s.managesSomeoneOn(ctx, p, callerID, businessID) {
 		return true
 	}
-	return s.administratorOpens(ctx, p, callerID, businessID)
+	return s.businessWideOpens(ctx, p, callerID, businessID)
 }
 
 // managesSomeoneOn reports whether the caller manages anyone involved in this

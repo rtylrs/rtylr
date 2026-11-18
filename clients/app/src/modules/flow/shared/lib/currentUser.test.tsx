@@ -8,6 +8,7 @@ import {
   useCanCreateTask,
   useCanEditTask,
   useCanDeleteResource,
+  useCurrentProjectRole,
   isTaskMine,
   findProjectRole,
 } from './currentUser';
@@ -144,5 +145,55 @@ describe('Flow project task creation', () => {
     });
     const { result } = renderHook(() => useCanCreateTask('p1'), { wrapper });
     expect(result.current).toBe(role === 'member');
+  });
+});
+
+// A department manager reaching a report's project, or a Flow Admin, opens a
+// project without being on its roster. They read it, and the board offers no
+// edit the server would refuse.
+describe('Flow project opened without a roster seat', () => {
+  beforeEach(() => {
+    mocks.members.mockReturnValue([{ userId: '9', role: 'admin' }]);
+    mocks.project.mockReturnValue({ id: 'p1', ownerId: '9', createdBy: '9' });
+    useUserStore.setState({
+      user: {
+        id: 7,
+        effectiveAccess: createEffectiveAccess('flow', {
+          permissions: [
+            'flow:projects:view',
+            'flow:projects:edit',
+            'flow:tasks:view',
+            'flow:tasks:create',
+            'flow:tasks:edit',
+            'flow:team:manage',
+          ],
+        }),
+      },
+    });
+  });
+
+  it('reads as a viewer with no edit, create or delete controls', () => {
+    const { result } = renderHook(
+      () => ({
+        role: useCurrentProjectRole('p1'),
+        edit: useCanEditTask('p1'),
+        create: useCanCreateTask('p1'),
+        remove: useCanDeleteResource('p1'),
+      }),
+      { wrapper }
+    );
+    expect(result.current).toEqual({ role: 'viewer', edit: false, create: false, remove: false });
+  });
+
+  it('stays unresolved until the roster has loaded', () => {
+    mocks.members.mockReturnValue(undefined);
+    const { result } = renderHook(() => useCurrentProjectRole('p1'), { wrapper });
+    expect(result.current).toBeUndefined();
+  });
+
+  it('stays unresolved when the project could not be opened', () => {
+    mocks.project.mockReturnValue(undefined);
+    const { result } = renderHook(() => useCurrentProjectRole('p1'), { wrapper });
+    expect(result.current).toBeUndefined();
   });
 });

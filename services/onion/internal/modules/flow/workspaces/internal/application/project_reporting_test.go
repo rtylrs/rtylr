@@ -119,6 +119,45 @@ func TestListedProjectIDsStaysCuratedForAdmins(t *testing.T) {
 	}
 }
 
+// Insights and Work agree: whoever may see a project's dashboard may open the
+// project in Work, and nobody else. Each caller is v2UserA on a private project
+// v2UserB created.
+func TestCanSeeProjectReportAgreesWithOpeningTheProject(t *testing.T) {
+	svc, ctx, _ := v2Svc(t)
+	private := createV2Project(ctx, t, svc, "report-agrees", "private", v2UserB)
+
+	cases := []struct {
+		name     string
+		resolver hubprofile.Resolver
+		reports  []int64
+		want     bool
+	}{
+		{"plain member", reportingResolver(authorization.EffectiveAccess{}), nil, false},
+		{"business owner", reportingResolver(authorization.EffectiveAccess{IsOwner: true}), nil, true},
+		{"business admin", adminInBusiness{businessID: v2Business}, nil, true},
+		{"flow admin", flowAdminInBusiness{businessID: v2Business}, nil, true},
+		{"flow admin of another business", flowAdminInBusiness{businessID: v2Business + 1}, nil, false},
+		{"manager of the creator", reportingResolver(authorization.EffectiveAccess{}), []int64{v2UserB}, true},
+		{"manager of someone else", reportingResolver(authorization.EffectiveAccess{}), []int64{v2UserB + 1000}, false},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			svc.hubProfiles = tc.resolver
+			svc.orgchart = &stubOrgchart{reports: tc.reports}
+
+			report, err := svc.CanSeeProjectReport(ctx, private.ID, v2UserA, v2Business)
+			if err != nil {
+				t.Fatalf("CanSeeProjectReport: %v", err)
+			}
+			_, openErr := svc.GetProjectV2(ctx, private.ID, v2UserA, v2Business)
+			opens := openErr == nil
+			if report != tc.want || opens != tc.want {
+				t.Errorf("report = %v, opens in Work = %v; want both %v", report, opens, tc.want)
+			}
+		})
+	}
+}
+
 func containsID(ids []int64, id int64) bool {
 	for _, got := range ids {
 		if got == id {

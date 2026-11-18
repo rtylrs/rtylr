@@ -38,10 +38,11 @@ func (s *Service) IsTaskMember(ctx context.Context, userID, taskID int64) bool {
 }
 
 // CanSubscribeProject authorizes a `project:<id>` realtime topic: whoever
-// IsProjectMember admits, plus an owner or admin of the project's own business
-// who may open it (administratorOpens), so a board they opened by link stays
-// live. The topic carries no business, so the project's business is read from
-// the project itself and the administrator check runs against that business.
+// IsProjectMember admits, plus anyone else who may open the project
+// (canSeeProject), such as a department manager of someone on it or a business
+// owner, admin or Flow Admin, so every board they can open stays live. The
+// topic carries no business, so the project's business is read from the
+// project itself and the checks run against that business.
 func (s *Service) CanSubscribeProject(ctx context.Context, userID, projectID int64) bool {
 	if s.IsProjectMember(ctx, userID, projectID) {
 		return true
@@ -53,7 +54,7 @@ func (s *Service) CanSubscribeProject(ctx context.Context, userID, projectID int
 	if err != nil || p.BusinessID <= 0 {
 		return false
 	}
-	return s.administratorOpens(ctx, p, userID, p.BusinessID)
+	return s.canSeeProject(ctx, p, userID, p.BusinessID)
 }
 
 // CanSubscribeTask is CanSubscribeProject for a `task:<id>` topic, resolved
@@ -73,7 +74,7 @@ func (s *Service) CanSubscribeTask(ctx context.Context, userID, taskID int64) bo
 	if err != nil || p.BusinessID <= 0 || p.BusinessID != task.BusinessID {
 		return false
 	}
-	return s.administratorOpens(ctx, p, userID, p.BusinessID)
+	return s.canSeeProject(ctx, p, userID, p.BusinessID)
 }
 
 // ─────────────────────────────────────────────
@@ -152,7 +153,10 @@ func (s *Service) workspaceRoleFor(ctx context.Context, workspaceID, userID int6
 }
 
 // hubProfileBypasses reports whether central Flow access permits business-wide
-// reporting visibility.
+// visibility: the business owner, an admin, or a Flow Admin holding
+// flow:team:manage. It lets them open any non-personal project in the business
+// (businessWideOpens) and see its reporting. It grants no write by itself; only
+// the owner and admins pass RequireProjectRole above viewer without a role.
 func (s *Service) hubProfileBypasses(ctx context.Context, userID, businessID int64) bool {
 	if s.hubProfiles == nil {
 		return false
@@ -191,11 +195,19 @@ func (s *Service) isBusinessAdministrator(ctx context.Context, userID, businessI
 // RequireProjectRole reports whether userID holds at least minRole on a
 // project, returning domain.ErrUnauthorized when they do not. Flow project
 // membership and project scope are the only source of this authorization.
+//
+// A viewer check, which only ever gates a read, also admits anyone who may open
+// the project (opensProject), so a Flow Admin who opens a private project they
+// are not on can read its statuses, columns and task details. It is viewer only
+// and never widens a member or admin check: opening a project gives no write.
 func (s *Service) RequireProjectRole(ctx context.Context, projectID, userID, businessID int64, minRole string) error {
 	if s.isBusinessAdministrator(ctx, userID, businessID) {
 		return nil
 	}
 	if domain.RoleAllows(s.projectRoleFor(ctx, projectID, userID), minRole) {
+		return nil
+	}
+	if minRole == domain.FlowRoleViewer && s.opensProject(ctx, projectID, userID, businessID) {
 		return nil
 	}
 	return domain.ErrUnauthorized

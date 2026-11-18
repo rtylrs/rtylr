@@ -46,7 +46,15 @@ export function findProjectRole(
   return members.find((m: { userId: string }) => String(m.userId) === String(userId))?.role;
 }
 
-/** Owners and admins have full access; members also need a project role. */
+/**
+ * Owners and admins have full access; members also need a project role.
+ *
+ * Someone who is not on the roster can still open a project: a department
+ * manager through a report on it, or a Flow Admin. The server returns the
+ * project only to those who may open it, so a loaded project with a loaded
+ * roster that does not name the caller reads as 'viewer': they see the board
+ * read only, with no edit controls the server would refuse.
+ */
 export function useCurrentProjectRole(projectId?: string): FlowProjectRole | undefined {
   const userId = useCurrentUserId();
   const access = useUserStore((state) => state.user?.effectiveAccess);
@@ -63,6 +71,7 @@ export function useCurrentProjectRole(projectId?: string): FlowProjectRole | und
   ) {
     return 'admin';
   }
+  if (members !== undefined && project !== undefined) return 'viewer';
   return undefined;
 }
 
