@@ -106,3 +106,48 @@ func TestRateLimitComesFromTheContract(t *testing.T) {
 		t.Fatalf("analytics after contact limit = %d, want 200", rec.Code)
 	}
 }
+
+// postFrom posts from its own client address so these cases keep their own
+// rate-limit budget whatever other tests in the package have spent.
+func postFrom(mux *http.ServeMux, addr, path, body string) *httptest.ResponseRecorder {
+	req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.RemoteAddr = addr
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+	return rec
+}
+
+// A visitor can ask for a quote with only a phone number; email is optional
+// as long as there is some way to reach them.
+func TestQuoteAcceptsAPhoneWithoutAnEmail(t *testing.T) {
+	mux, repo := newServer(t)
+	rec := postFrom(mux, "203.0.113.21:1234", "/quote",
+		`{"name":"Rami","phone_number":" +961 3 123 456 ","service":"web","project":"A store for my shop"}`)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("phone-only quote = %d %s, want 200", rec.Code, rec.Body.String())
+	}
+	if len(repo.leads) != 1 || repo.leads[0].Email != "" || repo.leads[0].Phone != "+961 3 123 456" {
+		t.Fatalf("lead = %+v, want the trimmed phone and no email", repo.leads)
+	}
+}
+
+func TestQuoteNeedsAWayToReachTheVisitor(t *testing.T) {
+	mux, repo := newServer(t)
+	for _, tc := range []struct{ name, body, want string }{
+		{"no email or phone", `{"name":"Rami","service":"web"}`, "email or phone number is required"},
+		{"blank email and phone", `{"name":"Rami","email":"  ","phone_number":" ","service":"web"}`, "email or phone number is required"},
+		{"phone too short", `{"name":"Rami","phone_number":"12-34","service":"web"}`, "phone number is invalid"},
+		{"email malformed", `{"name":"Rami","email":"rami-at-example","service":"web"}`, "email is invalid"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			rec := postFrom(mux, "203.0.113.22:1234", "/quote", tc.body)
+			if rec.Code != http.StatusBadRequest || !strings.Contains(rec.Body.String(), tc.want) {
+				t.Fatalf("status = %d %s, want 400 mentioning %q", rec.Code, rec.Body.String(), tc.want)
+			}
+		})
+	}
+	if len(repo.leads) != 0 {
+		t.Fatalf("an invalid quote was stored: %+v", repo.leads)
+	}
+}
