@@ -16,6 +16,9 @@ import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { monthCells, tasksByLocalDay, agendaDays } from '../../shared/lib/monthGrid';
 import { CalendarAgenda } from '../../shared/components/CalendarAgenda';
 import { todayIso } from '../../shared/lib/dateUtils';
+import { apiTaskToTask } from '../../shared/lib/taskMapper';
+import FilterBar from '../../shared/filters/FilterBar';
+import { useProjectTaskFilters } from './useProjectTaskFilters';
 
 /**
  * ProjectCalendar - month grid with tasks placed on their due_date.
@@ -79,7 +82,17 @@ const ProjectCalendar: React.FC = () => {
     };
   }, [cursor, i18n.language]);
 
-  const tasksByDay = useMemo(() => tasksByLocalDay(apiTasks), [apiTasks]);
+  // Same filters as the board and list. A month cell fits three pills, so the
+  // calendar always hides non-matching tasks rather than fading them.
+  const mappedTasks = useMemo(() => apiTasks.map(apiTaskToTask), [apiTasks]);
+  const projectFilters = useProjectTaskFilters(projectId, mappedTasks);
+  const { matchingIds } = projectFilters;
+  const calendarTasks = useMemo(
+    () =>
+      matchingIds === null ? apiTasks : apiTasks.filter((task) => matchingIds.has(String(task.id))),
+    [apiTasks, matchingIds]
+  );
+  const tasksByDay = useMemo(() => tasksByLocalDay(calendarTasks), [calendarTasks]);
 
   const agenda = useMemo(() => agendaDays(cells, tasksByDay), [cells, tasksByDay]);
 
@@ -135,6 +148,16 @@ const ProjectCalendar: React.FC = () => {
         projectId={projectId}
         taskCount={apiTasks.length}
         onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
+      />
+
+      <FilterBar
+        state={projectFilters.state}
+        currentUserId={projectFilters.currentUserId}
+        fields={projectFilters.fields}
+        people={projectFilters.people}
+        visible={matchingIds?.size ?? apiTasks.length}
+        total={apiTasks.length}
+        allowDim={false}
       />
 
       <div className="flex items-center justify-between px-4 py-2">
