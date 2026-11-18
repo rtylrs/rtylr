@@ -27,6 +27,7 @@ import type { RowProps } from '../../../../shared/hooks/useVirtualRows';
 import { VirtualList } from '../../../../shared/components/VirtualList';
 import FilterBar from '../../shared/filters/FilterBar';
 import { useProjectTaskFilters } from './useProjectTaskFilters';
+import { projectFiltersForView, useSaveFiltersAsView } from '../views/useSaveFiltersAsView';
 
 export type ListGroupKey = 'status' | 'assignee' | 'priority' | 'due' | 'none';
 
@@ -393,6 +394,7 @@ const ProjectList: React.FC = () => {
   // Same filters as the board: one set per project, in the URL and remembered.
   const projectFilters = useProjectTaskFilters(projectId, projectTasks);
   const { shownTasks, dimmedIds, matchingIds } = projectFilters;
+  const saveAsView = useSaveFiltersAsView();
   const groups = useMemo(
     () => buildListGroups(shownTasks, statusesQuery.data ?? [], groupBy, t),
     [shownTasks, statusesQuery.data, groupBy, t]
@@ -454,6 +456,13 @@ const ProjectList: React.FC = () => {
         people={projectFilters.people}
         visible={matchingIds?.size ?? projectTasks.length}
         total={projectTasks.length}
+        savingView={saveAsView.pending}
+        onSaveAsView={() =>
+          saveAsView.save(
+            t('flow.filters.savedViewName', { project: project.name }),
+            projectFiltersForView(projectFilters.state.filters, projectId, statusesQuery.data ?? [])
+          )
+        }
       />
 
       {/* Column headers */}
