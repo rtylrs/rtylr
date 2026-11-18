@@ -76,6 +76,13 @@ interface AvatarPickerProps {
   userId: string;
   name?: string;
   current: ChosenAvatar | undefined;
+  /**
+   * The first-login welcome: a greeting instead of the settings title, and
+   * "Skip for now" instead of "Use default". Closing it in any way counts as
+   * the skip, so it is never shown twice.
+   */
+  welcome?: boolean;
+  onSkip?: () => void;
 }
 
 /** Choose a photo, an illustration, an initials colour or an emoji. */
@@ -85,6 +92,8 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
   userId,
   name,
   current,
+  welcome = false,
+  onSkip,
 }) => {
   const { t } = useTranslation();
   const update = useUpdateAvatar();
@@ -176,8 +185,14 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[640px]">
         <DialogHeader>
-          <DialogTitle>{t('settings.avatar.dialogTitle')}</DialogTitle>
-          <DialogDescription>{t('settings.avatar.dialogDescription')}</DialogDescription>
+          <DialogTitle>
+            {welcome ? t('settings.avatar.welcomeTitle') : t('settings.avatar.dialogTitle')}
+          </DialogTitle>
+          <DialogDescription>
+            {welcome
+              ? t('settings.avatar.welcomeDescription')
+              : t('settings.avatar.dialogDescription')}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="flex items-center gap-4">
@@ -377,14 +392,27 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
         </div>
 
         <div className="flex items-center justify-between gap-2 border-t pt-3">
-          <button
-            type="button"
-            onClick={() => save(null)}
-            disabled={update.isPending || !current}
-            className="min-h-9 rounded-md px-3 text-sm opacity-80 hover:opacity-100 disabled:opacity-40"
-          >
-            {t('settings.avatar.useDefault')}
-          </button>
+          {welcome ? (
+            <button
+              type="button"
+              onClick={() => {
+                onSkip?.();
+                onOpenChange(false);
+              }}
+              className="min-h-9 rounded-md px-3 text-sm opacity-80 hover:opacity-100"
+            >
+              {t('settings.avatar.skip')}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => save(null)}
+              disabled={update.isPending || !current}
+              className="min-h-9 rounded-md px-3 text-sm opacity-80 hover:opacity-100 disabled:opacity-40"
+            >
+              {t('settings.avatar.useDefault')}
+            </button>
+          )}
           <div className="flex gap-2">
             <button
               type="button"

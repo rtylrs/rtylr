@@ -11,6 +11,8 @@ const mockGetMe = vi.fn();
 const mockGetConfig = vi.fn();
 const routerState = vi.hoisted(() => ({ pathname: '/' }));
 
+// The avatar welcome has its own suite; here it would need a query client.
+vi.mock('../avatar/FirstLoginAvatarPrompt', () => ({ FirstLoginAvatarPrompt: () => null }));
 vi.mock('../lib/clients', () => ({
   userClient: { getMe: (...args: unknown[]) => mockGetMe(...args) },
   configClient: { getConfig: (...args: unknown[]) => mockGetConfig(...args) },
