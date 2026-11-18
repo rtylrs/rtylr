@@ -3,6 +3,7 @@
     "personal": "Personnel",
     "workspace": "Espace de travail",
     "myTasks": "Mes tâches",
+    "teamTasks": "Tâches de l’équipe",
     "triage": "Tri",
     "roadmap": "Feuille de route",
     "cycles": "Itérations",
@@ -1211,5 +1212,10 @@
     },
     "showCompleted": "Afficher les terminées",
     "completed": "Terminées"
+  },
+  "teamTasks": {
+    "summary": "{{tasks}} tâches ouvertes pour {{people}} personnes",
+    "emptyTitle": "Aucune tâche à afficher",
+    "emptyDescription": "Les tâches des projets que vous pouvez voir apparaîtront ici, regroupées par personne."
   }
 }

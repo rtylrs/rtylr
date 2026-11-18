@@ -43,6 +43,7 @@ const Triage = React.lazy(() => import('./features/triage/Triage'));
 const FocusToday = React.lazy(() => import('./features/focus-today/FocusToday'));
 const Start = React.lazy(() => import('./features/Start'));
 const MyIssues = React.lazy(() => import('./features/tasks/MyIssues'));
+const TeamTasks = React.lazy(() => import('./features/tasks/TeamTasks'));
 const Archive = React.lazy(() => import('./features/archive/Archive'));
 const GitHubLinkCallback = React.lazy(() => import('./features/settings/GitHubLinkCallback'));
 
@@ -169,6 +170,12 @@ export function createFlowRoutes<TParent extends AnyRoute>(parent: TParent) {
 
   // "My tasks" shows every task assigned to the user across all workspaces and
   // projects (it is not workspace-scoped): a single cross-project board.
+  const teamTasksRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/team-tasks',
+    component: () => withLayout(<TeamTasks />),
+  });
+
   const myIssuesRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/my-issues',
@@ -333,6 +340,7 @@ export function createFlowRoutes<TParent extends AnyRoute>(parent: TParent) {
     projectSettingsRoute,
     taskDetailRoute,
     myIssuesRoute,
+    teamTasksRoute,
     allProjectsRoute,
     todayRoute,
     timelineRoute,

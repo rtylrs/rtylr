@@ -31,6 +31,7 @@ import {
 const INTERNAL_ROUTES = [
   ['/flow/inbox', 'flowNav.inbox'],
   ['/flow/my-issues', 'flow.shell.myTasks'],
+  ['/flow/team-tasks', 'flow.shell.teamTasks'],
   ['/flow/today', 'flowNav.focusToday'],
   ['/flow/projects', 'flowNav.projects'],
   ['/flow/triage', 'flow.shell.triage'],

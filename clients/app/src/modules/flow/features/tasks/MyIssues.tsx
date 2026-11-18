@@ -20,22 +20,16 @@ import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { useUserStore } from '../../shared/stores/userStore';
 import { canFlowPermission } from '../../shared/lib/roleUtils';
 import { Button } from '../../../../shared/components/ui/button';
-import { Plus, ListTodo, CheckCheck } from 'lucide-react';
+import { Plus, ListTodo } from 'lucide-react';
 import FilterBar from '../../shared/filters/FilterBar';
+import ShowCompletedToggle from '../../shared/filters/ShowCompletedToggle';
+import {
+  includesClosed,
+  isClosedTask as isClosed,
+  useShowCompleted,
+} from '../../shared/filters/useShowCompleted';
 import { useCurrentUserId } from '../../shared/lib/currentUser';
 import { useMyTaskFilters } from './useMyTaskFilters';
-import type { Task } from '../../shared/stores/flowStore';
-
-const SHOW_COMPLETED_KEY = 'flow:my-tasks:show-completed';
-const isClosed = (task: Task): boolean => task.status === 'done' || task.status === 'cancelled';
-
-function loadShowCompleted(): boolean {
-  try {
-    return localStorage.getItem(SHOW_COMPLETED_KEY) === '1';
-  } catch {
-    return false;
-  }
-}
 
 const MyIssues: React.FC = () => {
   const { t } = useTranslation();
@@ -56,21 +50,12 @@ const MyIssues: React.FC = () => {
   const [completedCollapsed, setCompletedCollapsed] = useState(false);
   const currentUserId = useCurrentUserId();
 
-  const [showCompleted, setShowCompletedState] = useState(loadShowCompleted);
-  const setShowCompleted = (value: boolean): void => {
-    setShowCompletedState(value);
-    try {
-      localStorage.setItem(SHOW_COMPLETED_KEY, value ? '1' : '0');
-    } catch {
-      // A preference that does not stick is not worth an error.
-    }
-  };
+  const [showCompleted, setShowCompleted] = useShowCompleted('my-tasks');
 
   const { state: filterState, fields, matchingIds } = useMyTaskFilters(tasks);
   // Done and cancelled stay out unless asked for, either with the toggle or by
   // filtering on one of those statuses (which would otherwise show nothing).
-  const includeClosed =
-    showCompleted || filterState.filters.statuses.some((s) => s === 'done' || s === 'cancelled');
+  const includeClosed = includesClosed(showCompleted, filterState.filters.statuses);
   const inScope = useMemo(
     () => tasks.filter((task) => includeClosed || !isClosed(task)),
     [tasks, includeClosed]
@@ -134,26 +119,7 @@ const MyIssues: React.FC = () => {
           visible={shown.length}
           total={inScope.length}
           allowDim={false}
-          extra={
-            <button
-              type="button"
-              aria-pressed={showCompleted}
-              onClick={() => setShowCompleted(!showCompleted)}
-              className="flow-focus flex min-h-9 items-center gap-1.5 rounded-md px-2.5 text-flow-meta font-medium md:min-h-8"
-              style={
-                showCompleted
-                  ? {
-                      background: 'var(--accent-muted)',
-                      color: 'var(--accent-on-muted)',
-                      border: '1px solid var(--accent-border)',
-                    }
-                  : { color: 'var(--flow-text-muted)', border: '1px solid var(--flow-border)' }
-              }
-            >
-              <CheckCheck size={13} aria-hidden="true" />
-              {t('flow.filters.showCompleted')}
-            </button>
-          }
+          extra={<ShowCompletedToggle pressed={showCompleted} onChange={setShowCompleted} />}
         />
       )}
 

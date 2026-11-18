@@ -105,6 +105,14 @@ const builtinItems: SidebarItemPreference[] = [
     visible: true,
   },
   {
+    id: 'builtin:team-tasks',
+    kind: 'builtin',
+    label: 'flow.shell.teamTasks',
+    route: '/flow/team-tasks',
+    icon: 'users',
+    visible: true,
+  },
+  {
     id: 'builtin:today',
     kind: 'builtin',
     label: 'flowNav.focusToday',
@@ -427,13 +435,22 @@ export const parseSidebarPreferences = (raw?: string): SidebarPreferences => {
     const topLevelItemIds = stringArray(record.topLevelItemIds).filter(
       (id) => validItemIds.has(id) && !usedIds.has(id)
     );
-    defaults.topLevelItemIds.forEach((id) => {
+    defaults.topLevelItemIds.forEach((id, index) => {
       if (
-        !topLevelItemIds.includes(id) &&
-        !mergedGroups.some((group) => group.itemIds.includes(id))
+        topLevelItemIds.includes(id) ||
+        mergedGroups.some((group) => group.itemIds.includes(id))
       ) {
-        topLevelItemIds.push(id);
+        return;
       }
+      // A built-in added after the user saved their sidebar goes next to the
+      // item it follows by default, not to the bottom of the list.
+      const before = defaults.topLevelItemIds
+        .slice(0, index)
+        .reverse()
+        .find((previous) => topLevelItemIds.includes(previous));
+      const at =
+        before === undefined ? topLevelItemIds.length : topLevelItemIds.indexOf(before) + 1;
+      topLevelItemIds.splice(at, 0, id);
     });
     const groupOrder = stringArray(record.groupOrder).filter((id) => validGroupIds.has(id));
     mergedGroups.forEach((group) => {

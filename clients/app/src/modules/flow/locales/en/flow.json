@@ -3,6 +3,7 @@
     "personal": "Personal",
     "workspace": "Workspace",
     "myTasks": "My tasks",
+    "teamTasks": "Team tasks",
     "triage": "Triage",
     "roadmap": "Roadmap",
     "cycles": "Cycles",
@@ -1199,5 +1200,10 @@
     },
     "showCompleted": "Show completed",
     "completed": "Completed"
+  },
+  "teamTasks": {
+    "summary": "{{tasks}} open tasks across {{people}} people",
+    "emptyTitle": "No tasks to show",
+    "emptyDescription": "Tasks in projects you can see will appear here, grouped by person."
   }
 }
