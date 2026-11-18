@@ -1149,5 +1149,53 @@
     "description": "Use the actions available to you in this business.",
     "noActions": "No actions assigned",
     "noActionsDescription": "Ask a business administrator to update your Work access."
+  },
+  "filters": {
+    "title": "Filter tasks",
+    "filter": "Filter",
+    "filterHint": "Filter (F)",
+    "searchPlaceholder": "Search tasks",
+    "searchLabel": "Search tasks by title, ID, description or label",
+    "people": "Show tasks by person",
+    "showPerson": "Show tasks for {{name}}",
+    "you": "{{name}} (you)",
+    "unassigned": "Unassigned",
+    "morePeople": "Show everyone ({{count}} more)",
+    "onlyMine": "Only mine",
+    "onlyMineHint": "Show only tasks assigned to you (Q)",
+    "clearAll": "Clear filters",
+    "clearHint": "Clear every filter (Shift+Esc)",
+    "clearField": "Clear",
+    "visibleCount": "{{visible}} of {{total}} tasks visible",
+    "active": "Active filters",
+    "removeChip": "Remove filter: {{label}}",
+    "unknownValue": "Unknown",
+    "pickField": "Select a field to start filtering.",
+    "searchField": "Search: {{field}}",
+    "noOptions": "Nothing matches",
+    "shownOf": "{{shown}} of {{total}}",
+    "dim": "Dim instead of hide",
+    "noMatches": "No tasks match these filters.",
+    "fields": {
+      "assignee": "Assignee",
+      "priority": "Priority",
+      "label": "Label",
+      "due": "Due date",
+      "status": "Status",
+      "cycle": "Cycle",
+      "milestone": "Milestone",
+      "project": "Project"
+    },
+    "due": {
+      "overdue": "Overdue",
+      "today": "Due today",
+      "next7": "Due in the next 7 days",
+      "next30": "Due in the next 30 days",
+      "noDate": "No due date",
+      "custom": "Custom range",
+      "from": "From",
+      "to": "To",
+      "range": "{{from}} to {{to}}"
+    }
   }
 }
