@@ -44,3 +44,24 @@ func (s *Service) administratorOpensProject(ctx context.Context, projectID, call
 	}
 	return s.administratorOpens(ctx, p, callerID, businessID)
 }
+
+// CanReadTask is the read gate for a task's subresources: its subtasks,
+// activity, attachments, time logs and links. It admits whoever IsTaskMember
+// admits, plus a business owner or admin reading a task in a project they may
+// open, so the task drawer works on a board they opened by link.
+//
+// IsTaskMember itself is left alone because it also gates writes such as adding
+// a comment; this only widens reads.
+func (s *Service) CanReadTask(ctx context.Context, userID, businessID, taskID int64) bool {
+	if s.IsTaskMember(ctx, userID, taskID) {
+		return true
+	}
+	if taskID <= 0 || !s.isBusinessAdministrator(ctx, userID, businessID) {
+		return false
+	}
+	task, err := s.repo.GetTaskByID(ctx, taskID)
+	if err != nil || task.BusinessID != businessID {
+		return false
+	}
+	return s.administratorOpensProject(ctx, task.ProjectID, userID, businessID)
+}
