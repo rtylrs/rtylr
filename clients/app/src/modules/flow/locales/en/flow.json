@@ -1199,7 +1199,11 @@
       "range": "{{from}} to {{to}}"
     },
     "showCompleted": "Show completed",
-    "completed": "Completed"
+    "completed": "Completed",
+    "saveAsView": "Save as view",
+    "savedAsView": "Saved as the view “{{name}}”",
+    "openView": "Open",
+    "savedViewName": "{{project}}: filtered"
   },
   "teamTasks": {
     "summary": "{{tasks}} open tasks across {{people}} people",
