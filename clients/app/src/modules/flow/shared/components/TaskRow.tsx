@@ -203,7 +203,12 @@ export const TaskRow: React.FC<TaskRowProps> = ({
             {formatDueDate(task.dueDate, t)}
           </span>
         )}
-        <AssigneeAvatar name={task.assignee} initials={task.assigneeInitials} size={20} />
+        <AssigneeAvatar
+          name={task.assignee}
+          initials={task.assigneeInitials}
+          seed={task.assigneeId || undefined}
+          size={20}
+        />
       </div>
 
       {contextMenu && <TaskContextMenu menu={contextMenu} onClose={() => setContextMenu(null)} />}

@@ -785,7 +785,14 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           <FlowSelect
             label={t('flow.taskDetail.assignee')}
             value={task.assigneeId ? String(task.assigneeId) : ''}
-            leading={<AssigneeAvatar name={assignee} initials={assigneeInitials} size={18} />}
+            leading={
+              <AssigneeAvatar
+                name={assignee}
+                initials={assigneeInitials}
+                seed={task.assigneeId ? String(task.assigneeId) : undefined}
+                size={18}
+              />
+            }
             options={[
               { value: '', label: t('flow.quickCreate.unassigned') },
               ...(task.assigneeId &&
