@@ -26,6 +26,9 @@ type WebsiteLeadAPI struct {
 var _ websiteleadv1.WebsiteLeadServiceServer = (*WebsiteLeadAPI)(nil)
 
 func (a *WebsiteLeadAPI) SubmitQuote(ctx context.Context, req *websiteleadv1.SubmitQuoteRequest) (*websiteleadv1.SubmitQuoteResponse, error) {
+	if err := normalizeQuoteContact(req); err != nil {
+		return nil, err
+	}
 	// Prepend the timeline to the brief so it surfaces in the notification email
 	// and Google Sheets without a dedicated column.
 	project := req.GetProject()
@@ -95,6 +98,34 @@ func (a *WebsiteLeadAPI) RecordAnalyticsEvent(ctx context.Context, req *websitel
 // simpleEmail is deliberately loose: one @, something on both sides, a dot in
 // the domain. Deliverability is Resend's problem, not the form's.
 var simpleEmail = regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]+$`)
+
+// minPhoneDigits is the shortest number accepted when a quote has no email.
+// Lebanese numbers are 7 or 8 digits without the country code.
+const minPhoneDigits = 7
+
+// normalizeQuoteContact trims the contact fields and requires a way to reach
+// the visitor: an email, a phone number, or both. A phone alone is enough so
+// people who do not want to give an email can still ask for a quote.
+func normalizeQuoteContact(req *websiteleadv1.SubmitQuoteRequest) error {
+	req.Email = strings.TrimSpace(req.Email)
+	req.PhoneNumber = strings.TrimSpace(req.PhoneNumber)
+	bad := func(message string) error { return onekiterrors.New(http.StatusBadRequest, message) }
+	digits := 0
+	for _, r := range req.PhoneNumber {
+		if r >= '0' && r <= '9' {
+			digits++
+		}
+	}
+	switch {
+	case req.Email == "" && req.PhoneNumber == "":
+		return bad("email or phone number is required")
+	case req.Email != "" && !simpleEmail.MatchString(req.Email):
+		return bad("email is invalid")
+	case req.PhoneNumber != "" && digits < minPhoneDigits:
+		return bad("phone number is invalid")
+	}
+	return nil
+}
 
 // normalizeNewsletter trims and lower-cases the email and defaults the
 // language in place before checking, so the stored row is what was validated.
