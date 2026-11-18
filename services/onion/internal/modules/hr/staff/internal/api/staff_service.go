@@ -262,6 +262,7 @@ func newStaffPayload(staff domain.Staff, hasSensitiveDetailsPermission bool, cal
 		staff.Address = ""
 		staff.EmergencyContactName = ""
 		staff.EmergencyContactPhone = ""
+		staff.Notes = ""
 	}
 
 	return &hrstaffv1.Staff{
