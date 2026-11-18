@@ -45,9 +45,9 @@ beforeEach(() => {
 });
 
 describe('avatar model', () => {
-  it('offers the twenty chosen styles, credits every CC BY one, and has unique ids', () => {
-    expect(AVATAR_STYLES).toHaveLength(20);
-    expect(new Set(AVATAR_STYLES.map((s) => s.id)).size).toBe(20);
+  it('offers the twenty chosen styles plus RTYLR Moods, credits every CC BY one, and has unique ids', () => {
+    expect(AVATAR_STYLES).toHaveLength(21);
+    expect(new Set(AVATAR_STYLES.map((s) => s.id)).size).toBe(21);
     const credited = AVATAR_STYLES.filter((s) => s.credit?.license === 'CC BY 4.0').map(
       (s) => s.id
     );

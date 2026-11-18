@@ -23,6 +23,8 @@ func TestAvatarValidate(t *testing.T) {
 		{"photo with a traversal", Avatar{Kind: "photo", URL: cdn + "/files/../users"}, false},
 		{"illustrated, offered style", Avatar{Kind: "illustrated", Style: "notionists", Seed: "k3x9a"}, true},
 		{"illustrated, unknown style", Avatar{Kind: "illustrated", Style: "pepe", Seed: "k3x9a"}, false},
+		{"RTYLR mood", Avatar{Kind: "illustrated", Style: "rtylr-moods", Seed: "galaxy-brain"}, true},
+		{"RTYLR mood that does not exist", Avatar{Kind: "illustrated", Style: "rtylr-moods", Seed: "k3x9a"}, false},
 		{"illustrated, seed with markup", Avatar{Kind: "illustrated", Style: "gaze", Seed: "<svg>"}, false},
 		{"initials, palette colour", Avatar{Kind: "initials", Color: color(11)}, true},
 		{"initials, colour off the palette", Avatar{Kind: "initials", Color: color(12)}, false},

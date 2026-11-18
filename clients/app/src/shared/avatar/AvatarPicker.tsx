@@ -22,6 +22,7 @@ import {
   type ChosenAvatar,
 } from './avatarModel';
 import { AvatarPicture } from './AvatarPicture';
+import { MOODS, MOODS_STYLE_ID } from './moods';
 import { PhotoCropper } from './PhotoCropper';
 import { useUpdateAvatar } from './useAvatars';
 
@@ -290,7 +291,7 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
                 role="listbox"
                 aria-label={selectedStyle?.label}
               >
-                {seeds.map((seed) => {
+                {(style === MOODS_STYLE_ID ? MOODS.map((m) => m.id) : seeds).map((seed) => {
                   const option: ChosenAvatar = { kind: 'illustrated', style, seed };
                   const selected =
                     draft?.kind === 'illustrated' && draft.style === style && draft.seed === seed;
@@ -300,7 +301,11 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
                       type="button"
                       role="option"
                       aria-selected={selected}
-                      aria-label={t('settings.avatar.optionN', { style: selectedStyle?.label })}
+                      aria-label={
+                        style === MOODS_STYLE_ID
+                          ? (MOODS.find((m) => m.id === seed)?.label ?? seed)
+                          : t('settings.avatar.optionN', { style: selectedStyle?.label })
+                      }
                       onClick={() => setDraft(option)}
                       className="aspect-square overflow-hidden rounded-full"
                       style={{ boxShadow: selected ? '0 0 0 3px currentColor' : undefined }}
@@ -313,6 +318,7 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
               <div className="flex items-center justify-between gap-2">
                 <button
                   type="button"
+                  hidden={style === MOODS_STYLE_ID}
                   onClick={() => setSeeds(freshSeeds())}
                   className="inline-flex min-h-8 items-center gap-1.5 rounded-md border px-2.5 text-sm"
                 >

@@ -35,7 +35,7 @@ export interface AvatarStyle {
 const CC_BY = 'https://creativecommons.org/licenses/by/4.0/';
 
 /**
- * The twenty styles Abed picked (2026-11-18), by mood. Licences from
+ * The twenty styles Abed picked (2026-11-18), plus RTYLR Moods, by mood. Licences from
  * dicebear.com/licenses: CC BY 4.0 styles carry a credit line in the picker,
  * which is all that licence asks; Avataaars is the artist's own free terms;
  * the rest are CC0. Keep this list and onion's `domain.AvatarStyles` in step:
@@ -124,6 +124,8 @@ export const AVATAR_STYLES: readonly AvatarStyle[] = [
   },
   { id: 'voxel-bot', label: 'Voxel Bot', group: 'funky', isNew: true },
   { id: 'gaze', label: 'Gaze', group: 'funky', isNew: true },
+  // Drawn for RTYLR and owned by Voxire: see moods.ts.
+  { id: 'rtylr-moods', label: 'RTYLR Moods', group: 'funky', isNew: true },
   { id: 'glass', label: 'Glass', group: 'abstract' },
   { id: 'slice', label: 'Slice', group: 'abstract', isNew: true },
   { id: 'stack', label: 'Stack', group: 'abstract', isNew: true },
