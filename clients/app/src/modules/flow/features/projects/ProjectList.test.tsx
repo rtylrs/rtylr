@@ -9,6 +9,11 @@ import type { Task } from '../../shared/stores/flowStore';
 const mockNavigate = vi.fn();
 
 // Filtering has its own suite (ProjectBoardFilters); here it is a no-op.
+const saveAsView = vi.hoisted(() => ({ save: vi.fn(), pending: false }));
+vi.mock('../views/useSaveFiltersAsView', () => ({
+  projectFiltersForView: (filters: unknown) => filters,
+  useSaveFiltersAsView: () => saveAsView,
+}));
 vi.mock('./useProjectTaskFilters', () => ({
   useProjectTaskFilters: (_projectId: string, tasks: unknown[]) => ({
     state: {

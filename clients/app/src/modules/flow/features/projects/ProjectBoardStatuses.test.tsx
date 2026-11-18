@@ -18,6 +18,11 @@ const status = vi.hoisted(() => (id: string, name: string, bucket: string, sortO
   createdAt: '',
 }));
 const taskData = vi.hoisted(() => ({ rows: [] as unknown[] }));
+const saveAsView = vi.hoisted(() => ({ save: vi.fn(), pending: false }));
+vi.mock('../views/useSaveFiltersAsView', () => ({
+  projectFiltersForView: (filters: unknown) => filters,
+  useSaveFiltersAsView: () => saveAsView,
+}));
 vi.mock('@tanstack/react-router', () => ({
   useParams: () => ({ projectId: '2' }),
   useLocation: () => ({ pathname: '/flow/p/2' }),
