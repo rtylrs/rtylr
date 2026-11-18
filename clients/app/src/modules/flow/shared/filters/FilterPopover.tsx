@@ -71,7 +71,7 @@ export const FilterPopover: React.FC<FilterPopoverProps> = ({
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
       <PopoverContent
-        align={i18n.dir?.() === 'rtl' ? 'end' : 'start'}
+        align={i18n?.dir?.() === 'rtl' ? 'end' : 'start'}
         aria-label={t('flow.filters.title')}
         className="w-[min(560px,calc(100vw-1.5rem))] overflow-hidden rounded-lg shadow-lg"
         style={{ background: 'var(--flow-surface)', border: '1px solid var(--flow-border)' }}
