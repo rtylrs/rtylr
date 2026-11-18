@@ -1,6 +1,11 @@
 package api
 
-import "context"
+import (
+	"context"
+	"net/http"
+
+	"github.com/voxire/onion/internal/platform/onekiterrors"
+)
 
 // PermissionProvider is the small portion of hr_core needed to decide whether
 // a staff response may include compensation fields, and separately whether
@@ -18,31 +23,64 @@ type PermissionProvider interface {
 // plain strings through the adapter.
 const permissionViewDirectory = "view_directory"
 
-// canViewDirectory reports whether the caller may see the company-wide staff
-// directory: the business must have turned the feature on, and the caller's
-// role must hold view_directory. Both gates fail closed - a caller with no
-// resolvable employee row, or a permission-store error, is denied rather than
-// let through, matching canViewSensitiveDetails below.
-func canViewDirectory(ctx context.Context, permissions PermissionProvider, businessID, userID int64) bool {
+// Stable codes the client uses to tell "an admin turned the directory off"
+// apart from "your role can't see it". Both are 403s.
+const (
+	directoryDisabledCode          = "directory_disabled"
+	directoryPermissionMissingCode = "directory_permission_missing"
+)
+
+type directoryAccessError struct {
+	code    string
+	message string
+}
+
+func (e *directoryAccessError) Error() string         { return e.message }
+func (e *directoryAccessError) HTTPStatusCode() int   { return http.StatusForbidden }
+func (e *directoryAccessError) PublicMessage() string { return e.message }
+func (e *directoryAccessError) PublicCode() string    { return e.code }
+
+var (
+	errDirectoryDisabled = &directoryAccessError{
+		code:    directoryDisabledCode,
+		message: "The company directory is turned off for this business",
+	}
+	errDirectoryPermissionMissing = &directoryAccessError{
+		code:    directoryPermissionMissingCode,
+		message: onekiterrors.PermissionDeniedMessage,
+	}
+)
+
+// checkDirectoryAccess returns nil when the caller may see the company-wide
+// staff directory: the business must have it on, and the caller's role must
+// hold view_directory. It fails closed - a caller with no resolvable employee
+// row is denied, and a store error is a 500, never a pass.
+func checkDirectoryAccess(ctx context.Context, permissions PermissionProvider, businessID, userID int64) error {
 	if permissions == nil || userID <= 0 {
-		return false
+		return errDirectoryPermissionMissing
 	}
 
 	enabled, err := permissions.IsDirectoryEnabled(ctx, businessID)
-	if err != nil || !enabled {
-		return false
+	if err != nil {
+		return onekiterrors.New(http.StatusInternalServerError, "Failed to check directory access")
+	}
+	if !enabled {
+		return errDirectoryDisabled
 	}
 
 	employeeID, err := permissions.GetEmployeeIDByUserID(ctx, businessID, userID)
 	if err != nil || employeeID <= 0 {
-		return false
+		return errDirectoryPermissionMissing
 	}
 
 	allowed, err := permissions.HasPermission(ctx, businessID, employeeID, permissionViewDirectory)
 	if err != nil {
-		return false
+		return onekiterrors.New(http.StatusInternalServerError, "Failed to check directory access")
 	}
-	return allowed
+	if !allowed {
+		return errDirectoryPermissionMissing
+	}
+	return nil
 }
 
 // sensitiveDetailPermissionKeys gates every staff field a casual directory

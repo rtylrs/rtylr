@@ -598,11 +598,18 @@
     "noResults": "لا يوجد أحد يطابق بحثك.",
     "noMembersYet": "لا يوجد أحد في الدليل بعد.",
     "loadFailedTitle": "تعذّر تحميل دليل الموظفين",
-    "loadFailedDescription": "حاول مرة أخرى. إذا استمر الفشل، اسأل مسؤولاً إن كان دورك يسمح برؤية الدليل.",
+    "loadFailedDescription": "حدث خطأ من جهتنا. حاول مرة أخرى بعد قليل.",
     "retryCta": "إعادة المحاولة",
     "clearSearchCta": "مسح البحث",
     "refreshCta": "تحديث",
-    "noDepartment": "بدون قسم"
+    "noDepartment": "بدون قسم",
+    "disabledTitle": "دليل الموظفين متوقف",
+    "disabledDescription": "أوقف أحد المسؤولين دليل الموظفين لهذه الشركة.",
+    "disabledAdminDescription": "فعّله من إعدادات الموارد البشرية ليتمكن الجميع من العثور على زملائهم.",
+    "openHrSettingsCta": "فتح إعدادات الموارد البشرية",
+    "noAccessTitle": "لا يمكنك رؤية دليل الموظفين",
+    "noAccessDescription": "دورك لا يشمل دليل الموظفين. اسأل مسؤولاً إن كنت تحتاجه.",
+    "departmentsUnavailable": "تعذّر تحميل الأقسام، لذلك يظهر الجميع في قائمة واحدة."
   },
   "leave": {
     "heading": "الإجازات",

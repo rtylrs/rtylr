@@ -137,7 +137,9 @@
     "subtitle": "Work week, overtime, PTO policy, and currency",
     "monday": "Monday",
     "sunday": "Sunday",
-    "save": "Save settings"
+    "save": "Save settings",
+    "directoryTitle": "Company directory",
+    "directoryDescription": "Lets everyone in the business see their colleagues' names, roles, departments, email and phone in Flow. Pay, address and emergency contacts stay in HR."
   },
   "progress": "Setup progress",
   "org": {

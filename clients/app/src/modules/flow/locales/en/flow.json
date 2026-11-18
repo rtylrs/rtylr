@@ -582,11 +582,18 @@
     "noResults": "No one matches your search.",
     "noMembersYet": "No one in the directory yet.",
     "loadFailedTitle": "Couldn't load the directory",
-    "loadFailedDescription": "Try again. If it keeps failing, ask an admin whether your role can see the directory.",
+    "loadFailedDescription": "Something went wrong on our side. Try again in a moment.",
     "retryCta": "Retry",
     "clearSearchCta": "Clear search",
     "refreshCta": "Refresh",
-    "noDepartment": "No department"
+    "noDepartment": "No department",
+    "disabledTitle": "The directory is turned off",
+    "disabledDescription": "An admin has turned off the company directory for this business.",
+    "disabledAdminDescription": "Turn it on in HR settings so everyone can find their colleagues.",
+    "openHrSettingsCta": "Open HR settings",
+    "noAccessTitle": "You can't see the directory",
+    "noAccessDescription": "Your role doesn't include the directory. Ask an admin if you need it.",
+    "departmentsUnavailable": "Departments couldn't load, so everyone is listed together."
   },
   "leave": {
     "heading": "Time off",
