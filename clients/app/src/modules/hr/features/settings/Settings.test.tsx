@@ -13,6 +13,8 @@ vi.mock('../../shared/hooks/useHrExtras', () => ({
   useUpdateHrSettings: mocks.useUpdateHrSettings,
 }));
 
+vi.mock('./CompanyDirectorySetting', () => ({ default: () => null }));
+
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
 }));
