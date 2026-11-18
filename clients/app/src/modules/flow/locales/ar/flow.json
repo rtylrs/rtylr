@@ -3,6 +3,7 @@
     "personal": "شخصي",
     "workspace": "مساحة العمل",
     "myTasks": "مهامي",
+    "teamTasks": "مهام الفريق",
     "triage": "الفرز",
     "roadmap": "خارطة الطريق",
     "cycles": "الدورات",
@@ -1259,5 +1260,10 @@
     },
     "showCompleted": "عرض المكتملة",
     "completed": "المكتملة"
+  },
+  "teamTasks": {
+    "summary": "{{tasks}} مهمة مفتوحة لدى {{people}} أشخاص",
+    "emptyTitle": "لا توجد مهام لعرضها",
+    "emptyDescription": "ستظهر هنا مهام المشاريع التي يمكنك رؤيتها، مجمّعة حسب الشخص."
   }
 }
