@@ -17,10 +17,16 @@ export { Switch } from "./components/Switch";
 export { Avatar } from "./components/Avatar";
 export {
   avatarColor,
+  avatarColorAt,
   avatarColorIndex,
   AVATAR_PALETTE,
 } from "./lib/avatarColor";
 export type { AvatarColor } from "./lib/avatarColor";
+export {
+  AvatarResolverProvider,
+  useAvatarResolver,
+} from "./lib/avatarResolver";
+export type { AvatarResolver } from "./lib/avatarResolver";
 export type { AvatarProps, AvatarSize } from "./components/Avatar";
 
 export { EmptyState } from "./components/EmptyState";

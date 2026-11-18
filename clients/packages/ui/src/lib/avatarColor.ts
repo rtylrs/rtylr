@@ -41,6 +41,14 @@ export function avatarColorIndex(seed: string): number {
   return hash(seed.trim().toLowerCase()) % AVATAR_PALETTE.length;
 }
 
+/** The palette colour at an index, for a colour the person picked. */
+export function avatarColorAt(index: number): AvatarColor {
+  const i =
+    ((Math.trunc(index) % AVATAR_PALETTE.length) + AVATAR_PALETTE.length) %
+    AVATAR_PALETTE.length;
+  return { background: AVATAR_PALETTE[i], foreground: "#FFFFFF" };
+}
+
 export function avatarColor(seed: string): AvatarColor {
   return {
     background: AVATAR_PALETTE[avatarColorIndex(seed)],

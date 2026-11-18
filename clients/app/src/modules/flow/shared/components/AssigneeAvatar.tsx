@@ -1,7 +1,7 @@
 import React from 'react';
 import { ACCENT_DEFAULT } from '../lib/colorUtils';
 import { withAlpha } from '../lib/colorUtils';
-import { avatarColor } from '@voxire/ui';
+import { avatarColor, avatarColorAt, useAvatarResolver } from '@voxire/ui';
 
 interface AssigneeAvatarProps {
   name: string;
@@ -24,8 +24,29 @@ export const AssigneeAvatar: React.FC<AssigneeAvatarProps> = ({
   // A seeded avatar is a solid circle in the person's own colour, the same
   // one they get everywhere else in the portal. An explicit colour keeps the
   // old tinted look for callers that pass one.
-  const seeded = !color && seed ? avatarColor(seed) : null;
+  const resolve = useAvatarResolver();
+  const chosen = !color && seed && resolve ? resolve.render(seed, size) : null;
+  const picked = !color && seed && resolve ? resolve.colorIndex(seed) : undefined;
+  const seeded =
+    !color && seed ? (picked === undefined ? avatarColor(seed) : avatarColorAt(picked)) : null;
   const tint = color ?? ACCENT_DEFAULT;
+  if (chosen) {
+    return (
+      <span
+        title={name}
+        data-avatar-chosen=""
+        className="rounded-full inline-flex items-center justify-center overflow-hidden shrink-0"
+        style={{
+          width: size,
+          height: size,
+          border: stacked ? '2px solid var(--flow-card)' : undefined,
+          boxSizing: 'border-box',
+        }}
+      >
+        {chosen}
+      </span>
+    );
+  }
   return (
     <span
       title={name}

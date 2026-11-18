@@ -1,4 +1,4 @@
-import { resolveCdnBaseUrl } from '@voxire/config';
+import { resolveCdnBaseUrl } from "@voxire/config";
 
 export interface UploadedAsset {
   id: string;
@@ -10,18 +10,30 @@ export interface UploadedAsset {
 export interface UploadAssetOptions {
   cdnBaseUrl?: string;
   signal?: AbortSignal;
+  /**
+   * The CDN stores files private by default: reading one needs the uploader's
+   * token. Something every colleague's browser must load without a token, like
+   * an avatar photo, has to opt in to public.
+   */
+  visibility?: "public" | "private";
 }
 
-const DEFAULT_CDN_BASE_URL = 'https://api.voxire.com';
+const DEFAULT_CDN_BASE_URL = "https://api.voxire.com";
 
 const getCdnBaseUrl = (override?: string): string => {
-  const env = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env;
-  const base = override || env?.VITE_CDN_URL || resolveCdnBaseUrl() || DEFAULT_CDN_BASE_URL;
-  return base.replace(/\/+$/, '');
+  const env = (
+    import.meta as ImportMeta & { env?: Record<string, string | undefined> }
+  ).env;
+  const base =
+    override ||
+    env?.VITE_CDN_URL ||
+    resolveCdnBaseUrl() ||
+    DEFAULT_CDN_BASE_URL;
+  return base.replace(/\/+$/, "");
 };
 
 const getToken = (): string | null => {
-  if (typeof document === 'undefined') return null;
+  if (typeof document === "undefined") return null;
   const match = document.cookie.match(/(?:^|;\s*)token=([^;]+)/);
   let token: string | null = null;
   if (match) {
@@ -35,7 +47,7 @@ const getToken = (): string | null => {
       token = match[1];
     }
   }
-  if (!token || token.split('.').length !== 3) return null;
+  if (!token || token.split(".").length !== 3) return null;
   return token;
 };
 
@@ -51,23 +63,24 @@ const uploadErrorMessage = async (response: Response): Promise<string> => {
 
 export const uploadAsset = async (
   file: File,
-  options: UploadAssetOptions = {}
+  options: UploadAssetOptions = {},
 ): Promise<UploadedAsset> => {
   const token = getToken();
   if (!token) {
-    throw new Error('You need to sign in before uploading files.');
+    throw new Error("You need to sign in before uploading files.");
   }
 
   const body = new FormData();
-  body.append('file', file);
+  body.append("file", file);
+  if (options.visibility) body.append("visibility", options.visibility);
 
   const response = await fetch(`${getCdnBaseUrl(options.cdnBaseUrl)}/upload`, {
-    method: 'POST',
+    method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
     },
     body,
-    credentials: 'include',
+    credentials: "include",
     signal: options.signal,
   });
 
@@ -108,18 +121,18 @@ export interface SignAssetUrlOptions {
  */
 export const signAssetUrl = async (
   url: string,
-  options: SignAssetUrlOptions = {}
+  options: SignAssetUrlOptions = {},
 ): Promise<SignedAssetUrl> => {
   const token = getToken();
   if (!token) {
-    throw new Error('You need to sign in before opening files.');
+    throw new Error("You need to sign in before opening files.");
   }
 
   const response = await fetch(`${getCdnBaseUrl(options.cdnBaseUrl)}/sign`, {
-    method: 'POST',
+    method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       url,
@@ -128,7 +141,7 @@ export const signAssetUrl = async (
         : { expires_in: options.expiresIn ?? 3600 }),
       ...(options.params ? { params: options.params } : {}),
     }),
-    credentials: 'include',
+    credentials: "include",
     signal: options.signal,
   });
 

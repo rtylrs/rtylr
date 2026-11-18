@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { removeCookie, getDefaultCookieDomain } from '@voxire/auth';
 import type { EffectiveAccess, ProvisioningStatus } from '@voxire/types';
+import type { ChosenAvatar } from '../avatar/avatarModel';
 
 interface Addons {
   feedback: boolean;
@@ -25,6 +26,8 @@ export interface StoredUser {
   subscriptionStatus?: string;
   effectiveAccess?: EffectiveAccess;
   provisioningStatus?: ProvisioningStatus;
+  /** The avatar the user chose; absent means the default initials. */
+  avatar?: ChosenAvatar;
 }
 
 interface UserState {

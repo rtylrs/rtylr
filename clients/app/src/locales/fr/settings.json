@@ -189,5 +189,49 @@
     "show": "Afficher {{item}}",
     "restore": "Rétablir par défaut",
     "saveFailed": "Impossible d’enregistrer la navigation. Réessayez."
+  },
+  "avatar": {
+    "title": "Avatar",
+    "description": "Votre apparence auprès de votre équipe, partout dans RTYLR.",
+    "change": "Changer d’avatar",
+    "dialogTitle": "Choisissez votre avatar",
+    "dialogDescription": "Importez une photo, choisissez une illustration, ou utilisez vos initiales ou un emoji.",
+    "tabs": {
+      "photo": "Photo",
+      "illustrated": "Illustration",
+      "initials": "Initiales",
+      "emoji": "Emoji"
+    },
+    "groups": {
+      "professional": "Professionnel",
+      "cool": "Branché",
+      "funky": "Décalé",
+      "abstract": "Abstrait"
+    },
+    "new": "Nouveau",
+    "shuffle": "Mélanger",
+    "by": "par {{author}}",
+    "remix": "remix de DiceBear",
+    "optionN": "Option {{style}}",
+    "initialsHint": "Choisissez une couleur pour vos initiales.",
+    "colour": "Couleur",
+    "colourN": "Couleur {{n}}",
+    "uploadPhoto": "Importer une photo",
+    "photoHint": "JPG, PNG ou WebP, 5 Mo maximum. Déposez-la ici ou cliquez pour la choisir.",
+    "wrongType": "Utilisez une image JPG, PNG ou WebP.",
+    "tooLarge": "Cette photo dépasse 5 Mo. Choisissez-en une plus légère.",
+    "uploadFailed": "Impossible d’importer cette photo. Réessayez.",
+    "photoFrame": "Cadrage de la photo. Faites-la glisser ou utilisez les flèches pour la déplacer, plus et moins pour zoomer.",
+    "zoom": "Zoom",
+    "dragHint": "Faites glisser la photo pour la placer dans le cercle.",
+    "choosePhotoAgain": "Choisir une autre photo",
+    "usePhoto": "Utiliser cette photo",
+    "uploading": "Importation…",
+    "useDefault": "Avatar par défaut",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saved": "Avatar mis à jour",
+    "saveFailed": "Impossible d’enregistrer votre avatar. Réessayez."
   }
 }
