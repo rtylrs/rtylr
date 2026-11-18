@@ -310,3 +310,26 @@ func TestWebsiteLead_Create_WithAllFields(t *testing.T) {
 		t.Errorf("expected positive ID, got %d", id)
 	}
 }
+
+// A quote can now arrive with only a phone number. The email column is NOT
+// NULL, so the lead is stored with an empty email rather than rejected.
+func TestWebsiteLead_Create_PhoneWithoutEmail(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), domain.LeadInput{
+		Name:    "Phone Only Lead",
+		Phone:   "+961 3 123 456",
+		Service: "web",
+	})
+	if err != nil {
+		t.Fatalf("Create phone-only: %v", err)
+	}
+	var email, phone string
+	if err := db.QueryRowContext(context.Background(),
+		"SELECT email, phone FROM voxire_website_leads WHERE id = ?", id).Scan(&email, &phone); err != nil {
+		t.Fatalf("read lead: %v", err)
+	}
+	if email != "" || phone != "+961 3 123 456" {
+		t.Fatalf("stored email %q phone %q", email, phone)
+	}
+}
