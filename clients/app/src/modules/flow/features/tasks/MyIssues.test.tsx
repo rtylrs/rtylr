@@ -34,6 +34,32 @@ vi.mock('../../shared/stores/flowStore', () => ({
   },
 }));
 
+// Filtering has its own suite (MyIssuesFilters); here it narrows nothing.
+vi.mock('./useMyTaskFilters', () => ({
+  useMyTaskFilters: () => ({
+    state: {
+      filters: {
+        assignees: [],
+        priorities: [],
+        labels: [],
+        due: [],
+        statuses: [],
+        cycles: [],
+        milestones: [],
+        projects: [],
+        query: '',
+      },
+      setFilters: vi.fn(),
+      clear: vi.fn(),
+      active: false,
+      dim: false,
+      setDim: vi.fn(),
+    },
+    fields: [],
+    matchingIds: null,
+  }),
+}));
+
 vi.mock('../../shared/components/TaskRow', () => ({
   TaskRow: ({ task }: { task: { title: string } }) => <div>{task.title}</div>,
 }));

@@ -1208,6 +1208,8 @@
       "from": "Du",
       "to": "Au",
       "range": "du {{from}} au {{to}}"
-    }
+    },
+    "showCompleted": "Afficher les terminées",
+    "completed": "Terminées"
   }
 }
