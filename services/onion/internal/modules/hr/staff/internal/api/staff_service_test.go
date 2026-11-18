@@ -75,6 +75,7 @@ func TestNewStaffPayloadOmitsSensitiveDetailWhenUnauthorized(t *testing.T) {
 		Address:               "12 Cedar St",
 		EmergencyContactName:  "Sam Employee",
 		EmergencyContactPhone: "+1-555-0100",
+		Notes:                 "On a performance plan",
 	}
 
 	payload := newStaffPayload(staff, false, 700)
@@ -89,7 +90,7 @@ func TestNewStaffPayloadOmitsSensitiveDetailWhenUnauthorized(t *testing.T) {
 	}
 	for _, key := range []string{
 		"salary", "hourly_rate", "overtime_rate",
-		"address", "emergency_contact_name", "emergency_contact_phone",
+		"address", "emergency_contact_name", "emergency_contact_phone", "notes",
 	} {
 		if _, present := fields[key]; present {
 			t.Fatalf("unauthorized payload contains %q: %s", key, encoded)
