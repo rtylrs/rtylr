@@ -1,0 +1,256 @@
+import type { Task } from '../stores/flowStore';
+import { addDays } from '../lib/dateUtils';
+
+/**
+ * The filter model every task list in Flow shares: the board, the list, the
+ * calendar, My tasks and Team tasks.
+ *
+ * Values inside one field are OR'd and fields are AND'd, the way Jira's quick
+ * filters behave: "Ahmed or Mohammad, and High priority".
+ */
+
+/** Stands in for "nobody" in the assignee field, next to real user ids. */
+export const UNASSIGNED = 'none';
+
+export const DUE_WINDOWS = ['overdue', 'today', 'next_7', 'next_30', 'no_date'] as const;
+export type DueWindow = (typeof DUE_WINDOWS)[number];
+
+export const PRIORITIES: readonly Task['priority'][] = [
+  'urgent',
+  'high',
+  'medium',
+  'low',
+  'no_priority',
+];
+
+export interface TaskFilters {
+  /** User ids, or UNASSIGNED. */
+  assignees: string[];
+  priorities: Task['priority'][];
+  /** Label ids. */
+  labels: string[];
+  due: DueWindow[];
+  /** Inclusive custom range, `YYYY-MM-DD`. Either end may be open. */
+  dueFrom?: string;
+  dueTo?: string;
+  /**
+   * Status keys. On a project they are status ids (the board's columns); on a
+   * cross-project page they are the built-in status names. The caller says
+   * which through `FilterContext.statusOf`.
+   */
+  statuses: string[];
+  cycles: string[];
+  milestones: string[];
+  projects: string[];
+  /** Free text matched against title, identifier, description and label names. */
+  query: string;
+}
+
+/** The fields the Filter popover can list; `query` has its own box. */
+export type FilterField =
+  'assignees' | 'priorities' | 'labels' | 'due' | 'statuses' | 'cycles' | 'milestones' | 'projects';
+
+export type ListField = Exclude<FilterField, 'due'>;
+
+export const EMPTY_TASK_FILTERS: TaskFilters = {
+  assignees: [],
+  priorities: [],
+  labels: [],
+  due: [],
+  dueFrom: undefined,
+  dueTo: undefined,
+  statuses: [],
+  cycles: [],
+  milestones: [],
+  projects: [],
+  query: '',
+};
+
+const LIST_FIELDS: ListField[] = [
+  'assignees',
+  'priorities',
+  'labels',
+  'statuses',
+  'cycles',
+  'milestones',
+  'projects',
+];
+
+export interface FilterContext {
+  /** Local today as `YYYY-MM-DD`. Passed in so tests and renders agree on one day. */
+  today: string;
+  /** Label id to name, so a search for "design" finds tasks labelled Design. */
+  labelNames?: ReadonlyMap<string, string>;
+  /** The status key a task is filtered by. Defaults to its built-in status. */
+  statusOf?: (task: Task) => string;
+}
+
+/** True when the due field narrows anything. */
+export function hasDueFilter(filters: TaskFilters): boolean {
+  return filters.due.length > 0 || Boolean(filters.dueFrom) || Boolean(filters.dueTo);
+}
+
+/**
+ * How many fields are narrowing, for the "Filter (n)" badge. The search box is
+ * not counted: it shows its own text.
+ */
+export function activeFieldCount(filters: TaskFilters): number {
+  let n = LIST_FIELDS.filter((field) => filters[field].length > 0).length;
+  if (hasDueFilter(filters)) n += 1;
+  return n;
+}
+
+export function hasActiveTaskFilters(filters: TaskFilters): boolean {
+  return activeFieldCount(filters) > 0 || filters.query.trim() !== '';
+}
+
+/**
+ * Lower-case and drop combining marks, so "cafe" finds "Café" and an Arabic
+ * search ignores harakat.
+ */
+export function normalizeSearchText(value: string): string {
+  return value
+    .normalize('NFKD')
+    .replace(/[̀-ًͯ-ٰٟ]/g, '')
+    .toLowerCase();
+}
+
+function dayOf(date: string | undefined): string {
+  return date ? (date.split('T')[0] ?? '') : '';
+}
+
+// Day strings, never Dates: a due date is a calendar day, and `YYYY-MM-DD`
+// sorts in date order (see myTasksBuckets for the bug that taught this).
+function inDueWindow(due: string, window: DueWindow, today: string): boolean {
+  switch (window) {
+    case 'overdue':
+      return due !== '' && due < today;
+    case 'today':
+      return due === today;
+    case 'next_7':
+      return due !== '' && due >= today && due <= addDays(today, 7);
+    case 'next_30':
+      return due !== '' && due >= today && due <= addDays(today, 30);
+    case 'no_date':
+      return due === '';
+  }
+}
+
+function matchesDue(task: Task, filters: TaskFilters, today: string): boolean {
+  if (!hasDueFilter(filters)) return true;
+  const due = dayOf(task.dueDate);
+  if (filters.due.some((w) => inDueWindow(due, w, today))) return true;
+  if (filters.dueFrom || filters.dueTo) {
+    if (due === '') return false;
+    if (filters.dueFrom && due < filters.dueFrom) return false;
+    if (filters.dueTo && due > filters.dueTo) return false;
+    return true;
+  }
+  return false;
+}
+
+function matchesQuery(task: Task, query: string, ctx: FilterContext): boolean {
+  const tokens = normalizeSearchText(query).split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return true;
+  const labelText = (task.labelIds ?? []).map((id) => ctx.labelNames?.get(id) ?? '').join(' ');
+  const haystack = normalizeSearchText(
+    [task.identifier, task.title, task.description ?? '', labelText].join('\n')
+  );
+  return tokens.every((token) => haystack.includes(token));
+}
+
+/** Whether one task passes every active field. */
+export function matchesTaskFilters(task: Task, filters: TaskFilters, ctx: FilterContext): boolean {
+  if (filters.assignees.length > 0) {
+    const key = task.assigneeId ? task.assigneeId : UNASSIGNED;
+    if (!filters.assignees.includes(key)) return false;
+  }
+  if (filters.priorities.length > 0 && !filters.priorities.includes(task.priority)) return false;
+  if (filters.labels.length > 0) {
+    const own = task.labelIds ?? [];
+    if (!filters.labels.some((id) => own.includes(id))) return false;
+  }
+  if (filters.statuses.length > 0) {
+    const status = ctx.statusOf ? ctx.statusOf(task) : task.status;
+    if (!filters.statuses.includes(status)) return false;
+  }
+  if (filters.cycles.length > 0 && !filters.cycles.includes(task.cycleId ?? '')) return false;
+  if (filters.milestones.length > 0 && !filters.milestones.includes(task.milestoneId ?? '')) {
+    return false;
+  }
+  if (filters.projects.length > 0 && !filters.projects.includes(task.projectId)) return false;
+  if (!matchesDue(task, filters, ctx.today)) return false;
+  return matchesQuery(task, filters.query, ctx);
+}
+
+/** Adds the value when absent and removes it when present. */
+export function toggleValue<T extends string>(values: readonly T[], value: T): T[] {
+  return values.includes(value) ? values.filter((v) => v !== value) : [...values, value];
+}
+
+/**
+ * "Only mine" is not a separate flag: it is the assignee field holding exactly
+ * the current user, so the avatar strip and the pill can never disagree.
+ */
+export function isOnlyMine(filters: TaskFilters, userId: string | null): boolean {
+  return userId !== null && filters.assignees.length === 1 && filters.assignees[0] === userId;
+}
+
+export function toggleOnlyMine(filters: TaskFilters, userId: string | null): TaskFilters {
+  if (userId === null) return filters;
+  return { ...filters, assignees: isOnlyMine(filters, userId) ? [] : [userId] };
+}
+
+/**
+ * The URL and storage shape: the same fields, with empty ones left out so a
+ * shared link stays short.
+ */
+export type SerializedTaskFilters = Partial<TaskFilters>;
+
+export function serializeTaskFilters(filters: TaskFilters): SerializedTaskFilters | undefined {
+  const out: Record<string, unknown> = {};
+  for (const field of LIST_FIELDS) {
+    if (filters[field].length > 0) out[field] = filters[field];
+  }
+  if (filters.due.length > 0) out.due = filters.due;
+  if (filters.dueFrom) out.dueFrom = filters.dueFrom;
+  if (filters.dueTo) out.dueTo = filters.dueTo;
+  if (filters.query.trim() !== '') out.query = filters.query;
+  return Object.keys(out).length > 0 ? (out as SerializedTaskFilters) : undefined;
+}
+
+const DAY = /^\d{4}-\d{2}-\d{2}$/;
+
+function stringList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((v) => typeof v === 'string' || typeof v === 'number').map((v) => String(v));
+}
+
+/**
+ * Accepts anything (a hand-edited URL, an old localStorage entry) and returns
+ * a complete, valid filter set. Unknown values are dropped rather than failing
+ * the whole set.
+ */
+export function parseTaskFilters(value: unknown): TaskFilters {
+  if (typeof value !== 'object' || value === null) return EMPTY_TASK_FILTERS;
+  const raw = value as Record<string, unknown>;
+  const day = (v: unknown): string | undefined =>
+    typeof v === 'string' && DAY.test(v) ? v : undefined;
+  return {
+    assignees: stringList(raw.assignees),
+    priorities: stringList(raw.priorities).filter((p): p is Task['priority'] =>
+      (PRIORITIES as readonly string[]).includes(p)
+    ),
+    labels: stringList(raw.labels),
+    due: stringList(raw.due).filter((d): d is DueWindow =>
+      (DUE_WINDOWS as readonly string[]).includes(d)
+    ),
+    dueFrom: day(raw.dueFrom),
+    dueTo: day(raw.dueTo),
+    statuses: stringList(raw.statuses),
+    cycles: stringList(raw.cycles),
+    milestones: stringList(raw.milestones),
+    projects: stringList(raw.projects),
+    query: typeof raw.query === 'string' ? raw.query : '',
+  };
+}
