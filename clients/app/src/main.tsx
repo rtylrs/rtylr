@@ -11,6 +11,7 @@ import '@voxire/ui/toast.css';
 import { CookiesProvider } from 'react-cookie';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { AvatarDirectoryProvider } from './shared/avatar/AvatarDirectoryProvider';
+import { AvatarNameTooltip } from './shared/avatar/AvatarNameTooltip';
 import { queryClient } from './shared/lib/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import { bootObservability } from '@voxire/observability';
@@ -42,6 +43,7 @@ if (rootElement) {
               <CookieBanner />
               <AvatarDirectoryProvider>
                 <RouterProvider router={router} />
+                <AvatarNameTooltip />
               </AvatarDirectoryProvider>
               <Toaster className="rtylr-toaster" expand={false} offset={20} mobileOffset={16} />
             </I18nextProvider>

@@ -196,6 +196,7 @@ const TeamTasks: React.FC = () => {
                         size="xs"
                         initials={initialsFromName(section.name)}
                         seed={section.id}
+                        name={section.name}
                         aria-hidden
                       />
                     )}

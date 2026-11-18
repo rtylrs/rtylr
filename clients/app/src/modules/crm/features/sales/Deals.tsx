@@ -77,7 +77,7 @@ const DealCard: React.FC<{
       <span className="sales-deal-meta">
         <Money value={deal.value} billing={deal.billing} />
         {owner && (
-          <span className="sales-avatar" title={owner} aria-label={owner}>
+          <span className="sales-avatar" data-avatar-name={owner} aria-label={owner}>
             {initials(owner)}
           </span>
         )}

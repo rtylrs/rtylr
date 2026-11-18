@@ -89,16 +89,13 @@ export default function ProfileMenu({ opensDown = false }: { opensDown?: boolean
       ref={ref}
       onToggle={place}
     >
-      <summary
-        role="button"
-        className="portal-rail-button"
-        aria-label={t('common.userMenu')}
-        title={t('common.userMenu')}
-      >
+      <summary role="button" className="portal-rail-button" aria-label={t('common.userMenu')}>
         <Avatar
           seed={user?.id !== undefined ? String(user.id) : undefined}
           initials={initialsOf(user?.fullName)}
+          name={user?.fullName || undefined}
           size="sm"
+          aria-hidden
         />
       </summary>
       <div

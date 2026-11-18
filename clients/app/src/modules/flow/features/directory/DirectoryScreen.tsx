@@ -175,6 +175,7 @@ const DirectoryScreen = (): React.JSX.Element => {
                         <Avatar
                           initials={initials(fullName)}
                           seed={member.userId ? String(member.userId) : fullName}
+                          name={fullName}
                           size="sm"
                         />
                         <div className="min-w-0 flex-1">
