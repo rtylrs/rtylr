@@ -80,6 +80,18 @@ describe('useKeyboardShortcuts', () => {
     expect(useCommandPalette.getState().open).toBe(true);
   });
 
+  it('focuses the page filter search on slash instead of the command bar', () => {
+    render(
+      <>
+        <Host />
+        <input data-flow-filter-search aria-label="Search tasks" />
+      </>
+    );
+    fireEvent.keyDown(document.body, { key: '/' });
+    expect(document.activeElement).toBe(document.querySelector('[data-flow-filter-search]'));
+    expect(useCommandPalette.getState().open).toBe(false);
+  });
+
   it.each(['t', 'r', 's'])(
     'does not navigate g %s into a preview route while the flag is off',
     (key) => {
