@@ -25,6 +25,11 @@ const router = vi.hoisted(() => {
   };
 });
 
+const saveAsView = vi.hoisted(() => ({ save: vi.fn(), pending: false }));
+vi.mock('../views/useSaveFiltersAsView', () => ({
+  projectFiltersForView: (filters: unknown) => filters,
+  useSaveFiltersAsView: () => saveAsView,
+}));
 vi.mock('@tanstack/react-router', async () => {
   const React = await import('react');
   return {
@@ -247,6 +252,16 @@ describe('Board filters', () => {
     } finally {
       banner.remove();
     }
+  });
+
+  it('saves the current filters as a view named after the project', () => {
+    router.set({ filter: { priorities: ['high'] } });
+    renderBoard();
+    fireEvent.click(screen.getByRole('button', { name: /save as view/i }));
+    expect(saveAsView.save).toHaveBeenCalledWith(
+      'Investment Hub: filtered',
+      expect.objectContaining({ priorities: ['high'] })
+    );
   });
 
   it('removes one value with its chip and everything with Shift+Escape', () => {
