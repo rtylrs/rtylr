@@ -1196,6 +1196,8 @@
       "from": "From",
       "to": "To",
       "range": "{{from}} to {{to}}"
-    }
+    },
+    "showCompleted": "Show completed",
+    "completed": "Completed"
   }
 }
