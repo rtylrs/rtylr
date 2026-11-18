@@ -13,7 +13,9 @@ vi.mock('../../shared/hooks/useHrExtras', () => ({
   useUpdateHrSettings: mocks.useUpdateHrSettings,
 }));
 
-vi.mock('./CompanyDirectorySetting', () => ({ default: () => null }));
+vi.mock('./CompanyDirectorySetting', () => ({
+  default: () => <div data-testid="company-directory-setting" />,
+}));
 
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
@@ -58,5 +60,20 @@ describe('Settings', () => {
     fireEvent.click(screen.getByRole('button', { name: 'hrCommon.retry' }));
 
     expect(mocks.refetch).toHaveBeenCalledOnce();
+  });
+
+  it('keeps the company directory switch reachable when general settings fail to load', () => {
+    mocks.useHrSettings.mockReturnValue({
+      data: undefined,
+      isError: true,
+      isFetching: false,
+      isLoading: false,
+      refetch: mocks.refetch,
+    });
+
+    render(<Settings />);
+
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+    expect(screen.getByTestId('company-directory-setting')).toBeInTheDocument();
   });
 });
