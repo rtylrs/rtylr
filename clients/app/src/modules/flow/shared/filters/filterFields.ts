@@ -1,7 +1,17 @@
 import type { TFunction } from 'i18next';
 import type { Task } from '../stores/flowStore';
 import { initialsFromName } from '../lib/memberUtils';
+import { statusLabelKey } from '../lib/statusLabels';
 import { PRIORITIES, UNASSIGNED, type ListField } from './taskFilters';
+
+const BUILT_IN_STATUSES: Task['status'][] = [
+  'backlog',
+  'todo',
+  'in_progress',
+  'in_review',
+  'done',
+  'cancelled',
+];
 
 export interface FilterOption {
   value: string;
@@ -37,6 +47,15 @@ export function priorityField(t: TFunction): FilterFieldConfig {
     field: 'priorities',
     label: t('flow.filters.fields.priority'),
     options: PRIORITIES.map((p) => ({ value: p, label: t(PRIORITY_KEY[p]) })),
+  };
+}
+
+/** The built-in statuses, for lists that span projects with their own columns. */
+export function builtInStatusField(t: TFunction): FilterFieldConfig {
+  return {
+    field: 'statuses',
+    label: t('flow.filters.fields.status'),
+    options: BUILT_IN_STATUSES.map((s) => ({ value: s, label: t(statusLabelKey(s)) })),
   };
 }
 
