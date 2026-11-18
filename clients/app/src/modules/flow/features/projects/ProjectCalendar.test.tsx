@@ -19,6 +19,37 @@ import { render, screen, fireEvent } from '@testing-library/react';
 
 const { language } = vi.hoisted(() => ({ language: { value: 'en-US' } }));
 
+// Filtering has its own suite (ProjectBoardFilters); here it is a no-op unless
+// a test names the tasks that match.
+const filterStub = vi.hoisted(() => ({ matching: null as Set<string> | null }));
+vi.mock('./useProjectTaskFilters', () => ({
+  useProjectTaskFilters: (_projectId: string, tasks: unknown[]) => ({
+    state: {
+      filters: {
+        assignees: [],
+        priorities: [],
+        labels: [],
+        due: [],
+        statuses: [],
+        cycles: [],
+        milestones: [],
+        projects: [],
+        query: '',
+      },
+      setFilters: vi.fn(),
+      clear: vi.fn(),
+      active: false,
+      dim: false,
+      setDim: vi.fn(),
+    },
+    fields: [],
+    people: [],
+    currentUserId: null,
+    matchingIds: filterStub.matching,
+    shownTasks: tasks,
+    dimmedIds: null,
+  }),
+}));
 vi.mock('react-i18next', async (importOriginal) => ({
   ...(await importOriginal<typeof import('react-i18next')>()),
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: language.value } }),
@@ -176,6 +207,20 @@ describe('ProjectCalendar pills carry status (#1087)', () => {
     // only thing this test ever saw.
     expect(doing.style.background).toBe('color-mix(in srgb, var(--tone) 13%, transparent)');
     expect(doing.style.color).toBe('color-mix(in srgb, var(--tone) 50%, var(--flow-text))');
+  });
+
+  it('shows only the tasks the project filter matches', () => {
+    filterStub.matching = new Set(['t1']);
+    try {
+      withTasks([
+        { id: 't1', title: 'Doing', status: 'in_progress', dueDate: iso, priority: 'medium' },
+        { id: 't2', title: 'Finished', status: 'done', dueDate: iso, priority: 'medium' },
+      ]);
+      expect(screen.getByTitle('Doing')).toBeTruthy();
+      expect(screen.queryByTitle('Finished')).toBeNull();
+    } finally {
+      filterStub.matching = null;
+    }
   });
 
   it('lets a right-to-left title decide its own truncation end', () => {

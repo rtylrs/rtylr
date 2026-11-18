@@ -8,6 +8,35 @@ import type { Task } from '../../shared/stores/flowStore';
 
 const mockNavigate = vi.fn();
 
+// Filtering has its own suite (ProjectBoardFilters); here it is a no-op.
+vi.mock('./useProjectTaskFilters', () => ({
+  useProjectTaskFilters: (_projectId: string, tasks: unknown[]) => ({
+    state: {
+      filters: {
+        assignees: [],
+        priorities: [],
+        labels: [],
+        due: [],
+        statuses: [],
+        cycles: [],
+        milestones: [],
+        projects: [],
+        query: '',
+      },
+      setFilters: vi.fn(),
+      clear: vi.fn(),
+      active: false,
+      dim: false,
+      setDim: vi.fn(),
+    },
+    fields: [],
+    people: [],
+    currentUserId: null,
+    matchingIds: null,
+    shownTasks: tasks,
+    dimmedIds: null,
+  }),
+}));
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => mockNavigate,
   useParams: () => ({}),

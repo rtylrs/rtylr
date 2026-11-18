@@ -25,6 +25,8 @@ import ProjectViewTabs from './ProjectViewTabs';
 import type { ApiStatus } from '../../shared/services/flowApi';
 import type { RowProps } from '../../../../shared/hooks/useVirtualRows';
 import { VirtualList } from '../../../../shared/components/VirtualList';
+import FilterBar from '../../shared/filters/FilterBar';
+import { useProjectTaskFilters } from './useProjectTaskFilters';
 
 export type ListGroupKey = 'status' | 'assignee' | 'priority' | 'due' | 'none';
 
@@ -128,9 +130,11 @@ interface TaskRowProps {
   depth?: number;
   /** From a windowed list (see VirtualList). */
   rowProps?: RowProps;
+  /** Faded because it does not match the filters ("Dim instead of hide"). */
+  dimmed?: boolean;
 }
 
-export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0, rowProps }) => {
+export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0, rowProps, dimmed = false }) => {
   // Windowed rows mount as they scroll into view, so they skip the entrance
   // and layout animations a short list uses.
   const windowed = rowProps?.['data-index'] !== undefined;
@@ -182,7 +186,8 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0, rowProps }) =
       }}
       layout={!windowed}
       initial={windowed ? false : { opacity: 0, x: -6 }}
-      animate={{ opacity: 1, x: 0 }}
+      animate={{ opacity: dimmed ? 0.35 : 1, x: 0 }}
+      data-filter-dimmed={dimmed ? '' : undefined}
       transition={{ duration: 0.15 }}
       className="flex items-center gap-3 px-4 py-2.5 group hover:bg-[var(--flow-hover)] transition-colors cursor-pointer"
       style={{
@@ -269,7 +274,9 @@ export const TaskGroup: React.FC<{
   group: ListGroup;
   /** False for the ungrouped list, which has no header. */
   showHeader?: boolean;
-}> = ({ group, showHeader = true }) => {
+  /** Rows to fade while "Dim instead of hide" is on. */
+  dimmedIds?: ReadonlySet<string> | null;
+}> = ({ group, showHeader = true, dimmedIds = null }) => {
   const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const { projectId } = useParams({ strict: false });
@@ -320,6 +327,7 @@ export const TaskGroup: React.FC<{
                   key={group.tasks[index].id}
                   rowProps={rowProps}
                   task={group.tasks[index]}
+                  dimmed={dimmedIds?.has(group.tasks[index].id) ?? false}
                 />
               )}
             />
@@ -382,9 +390,12 @@ const ProjectList: React.FC = () => {
     () => (apiTasks ?? []).map(apiTaskToTask).filter((task) => !task.archived),
     [apiTasks]
   );
+  // Same filters as the board: one set per project, in the URL and remembered.
+  const projectFilters = useProjectTaskFilters(projectId, projectTasks);
+  const { shownTasks, dimmedIds, matchingIds } = projectFilters;
   const groups = useMemo(
-    () => buildListGroups(projectTasks, statusesQuery.data ?? [], groupBy, t),
-    [projectTasks, statusesQuery.data, groupBy, t]
+    () => buildListGroups(shownTasks, statusesQuery.data ?? [], groupBy, t),
+    [shownTasks, statusesQuery.data, groupBy, t]
   );
 
   if (
@@ -436,6 +447,15 @@ const ProjectList: React.FC = () => {
         }
       />
 
+      <FilterBar
+        state={projectFilters.state}
+        currentUserId={projectFilters.currentUserId}
+        fields={projectFilters.fields}
+        people={projectFilters.people}
+        visible={matchingIds?.size ?? projectTasks.length}
+        total={projectTasks.length}
+      />
+
       {/* Column headers */}
       <div
         className="flex items-center gap-3 px-4 py-2 text-flow-meta font-semibold uppercase tracking-wider"
@@ -455,11 +475,18 @@ const ProjectList: React.FC = () => {
 
       <div className="flex-1 overflow-y-auto">
         {groups.map((group) => (
-          <TaskGroup key={`${groupBy}:${group.id}`} group={group} showHeader={groupBy !== 'none'} />
+          <TaskGroup
+            key={`${groupBy}:${group.id}`}
+            group={group}
+            showHeader={groupBy !== 'none'}
+            dimmedIds={dimmedIds}
+          />
         ))}
         {groups.length === 0 && (
           <p className="px-4 py-6 text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>
-            {t('flow.projectList.empty')}
+            {projectTasks.length > 0 && matchingIds !== null
+              ? t('flow.filters.noMatches')
+              : t('flow.projectList.empty')}
           </p>
         )}
       </div>

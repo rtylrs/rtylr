@@ -32,7 +32,8 @@ interface FilterPopoverProps {
   filters: TaskFilters;
   onChange: (next: TaskFilters) => void;
   dim: boolean;
-  onDimChange: (dim: boolean) => void;
+  /** Omitted where the list cannot fade tasks; the switch is then not shown. */
+  onDimChange?: (dim: boolean) => void;
   trigger: React.ReactNode;
 }
 
@@ -70,7 +71,7 @@ export const FilterPopover: React.FC<FilterPopoverProps> = ({
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
       <PopoverContent
-        align={i18n.dir() === 'rtl' ? 'end' : 'start'}
+        align={i18n.dir?.() === 'rtl' ? 'end' : 'start'}
         aria-label={t('flow.filters.title')}
         className="w-[min(560px,calc(100vw-1.5rem))] overflow-hidden rounded-lg shadow-lg"
         style={{ background: 'var(--flow-surface)', border: '1px solid var(--flow-border)' }}
@@ -146,17 +147,21 @@ export const FilterPopover: React.FC<FilterPopoverProps> = ({
           className="flex flex-wrap items-center justify-between gap-2 px-3 py-2"
           style={{ borderTop: '1px solid var(--flow-border)' }}
         >
-          <label
-            className="flex items-center gap-2 text-flow-meta"
-            style={{ color: 'var(--flow-text-muted)' }}
-          >
-            <Switch
-              checked={dim}
-              onCheckedChange={onDimChange}
-              aria-label={t('flow.filters.dim')}
-            />
-            {t('flow.filters.dim')}
-          </label>
+          {onDimChange ? (
+            <label
+              className="flex items-center gap-2 text-flow-meta"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              <Switch
+                checked={dim}
+                onCheckedChange={onDimChange}
+                aria-label={t('flow.filters.dim')}
+              />
+              {t('flow.filters.dim')}
+            </label>
+          ) : (
+            <span />
+          )}
           <button
             type="button"
             disabled={leftItems.every((i) => selectedCount(i.field) === 0)}
