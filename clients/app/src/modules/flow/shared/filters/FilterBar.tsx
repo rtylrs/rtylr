@@ -167,7 +167,12 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     zIndex: pressed ? 5 : undefined,
                   }}
                 >
-                  <Avatar size="sm" initials={initialsFromName(person.name)} aria-hidden />
+                  <Avatar
+                    size="sm"
+                    initials={initialsFromName(person.name)}
+                    seed={person.id}
+                    aria-hidden
+                  />
                 </button>
               );
             })}

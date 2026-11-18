@@ -239,7 +239,7 @@ const ProjectOverview: React.FC = () => {
           </div>
           <div className="flex items-center gap-3">
             <AvatarStack
-              members={team.map((t) => ({ name: t.name, initials: t.initials }))}
+              members={team.map((t) => ({ name: t.name, initials: t.initials, seed: t.id }))}
               size={30}
               max={6}
             />
