@@ -64,11 +64,15 @@ func (s *Service) Submit(ctx context.Context, input domain.LeadInput) (int64, er
 		defer cancel()
 		s.sendNotification(taskCtx, id, input)
 	}()
-	go func() {
-		taskCtx, cancel := asyncLeadContext(ctx)
-		defer cancel()
-		s.sendAutoReply(taskCtx, input)
-	}()
+	// A quote can arrive with only a phone number; there is then no one to
+	// send the auto-reply to.
+	if input.Email != "" {
+		go func() {
+			taskCtx, cancel := asyncLeadContext(ctx)
+			defer cancel()
+			s.sendAutoReply(taskCtx, input)
+		}()
+	}
 	go func() {
 		taskCtx, cancel := asyncLeadContext(ctx)
 		defer cancel()
@@ -127,11 +131,16 @@ func (s *Service) sendNotification(ctx context.Context, id int64, lead domain.Le
 	escPhone := html.EscapeString(lead.Phone)
 
 	// Quick-action buttons.
-	replyBtn := ctaButton(
-		fmt.Sprintf("mailto:%s?subject=Re%%3A%%20Your%%20Voxire%%20Enquiry", html.EscapeString(lead.Email)),
-		"Reply to "+escName,
-		"#63c6bd", "#111118",
-	)
+	// A quote can arrive with only a phone number, so the email reply button
+	// and the email row appear only when there is an address to reply to.
+	var replyBtn string
+	if lead.Email != "" {
+		replyBtn = ctaButton(
+			fmt.Sprintf("mailto:%s?subject=Re%%3A%%20Your%%20Voxire%%20Enquiry", html.EscapeString(lead.Email)),
+			"Reply to "+escName,
+			"#63c6bd", "#111118",
+		)
+	}
 	var phoneButtons string
 	if lead.Phone != "" {
 		cleanPhone := strings.ReplaceAll(lead.Phone, " ", "")
@@ -148,7 +157,11 @@ func (s *Service) sendNotification(ctx context.Context, id int64, lead domain.Le
 	// Build field rows.
 	var rows strings.Builder
 	rows.WriteString(fieldRow("Name", escName))
-	rows.WriteString(fieldRow("Email", fmt.Sprintf(`<a href="mailto:%s" style="color:#63c6bd;text-decoration:none;">%s</a>`, escEmail, escEmail)))
+	if lead.Email != "" {
+		rows.WriteString(fieldRow("Email", fmt.Sprintf(`<a href="mailto:%s" style="color:#63c6bd;text-decoration:none;">%s</a>`, escEmail, escEmail)))
+	} else {
+		rows.WriteString(fieldRow("Email", ""))
+	}
 	if lead.Phone != "" {
 		rows.WriteString(fieldRow("Phone", fmt.Sprintf(`<a href="tel:%s" style="color:#63c6bd;text-decoration:none;">%s</a>`, escPhone, escPhone)))
 	}
