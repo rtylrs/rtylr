@@ -85,6 +85,7 @@ import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import FilterBar from '../../shared/filters/FilterBar';
 import { useProjectTaskFilters } from './useProjectTaskFilters';
+import { projectFiltersForView, useSaveFiltersAsView } from '../views/useSaveFiltersAsView';
 
 /** What the board renders while a card is being dragged. */
 interface DragView {
@@ -343,6 +344,7 @@ const ProjectBoard: React.FC = () => {
     dimmedIds,
   } = useProjectTaskFilters(projectId, tasks);
   const { filters, dim } = filterState;
+  const saveAsView = useSaveFiltersAsView();
   const hideUnmatched = matchingIds !== null && !dim;
 
   // Precompute the ordered lane index across all tasks so every column
@@ -721,6 +723,13 @@ const ProjectBoard: React.FC = () => {
         people={people}
         visible={matchingIds?.size ?? tasks.length}
         total={tasks.length}
+        savingView={saveAsView.pending}
+        onSaveAsView={() =>
+          saveAsView.save(
+            t('flow.filters.savedViewName', { project: project.name }),
+            projectFiltersForView(filters, projectId, columns)
+          )
+        }
       />
 
       <BoardSettingsPanel
