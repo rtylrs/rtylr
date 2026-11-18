@@ -103,7 +103,7 @@ export const FilterPopover: React.FC<FilterPopoverProps> = ({
                     {item.label}
                     {count > 0 && (
                       <span
-                        className="rounded-full px-1.5 text-[11px] font-semibold"
+                        className="rounded-full px-1.5 text-flow-meta font-semibold"
                         style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
                       >
                         {count}
@@ -214,7 +214,7 @@ const OptionsPane: React.FC<{
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t('flow.filters.searchField', { field: config.label })}
           aria-label={t('flow.filters.searchField', { field: config.label })}
-          className="min-w-0 flex-1 bg-transparent text-flow-meta outline-none"
+          className="min-w-0 flex-1 bg-transparent text-flow-meta"
           style={{ color: 'var(--flow-text)' }}
         />
       </label>
@@ -269,7 +269,7 @@ const OptionRow: React.FC<{ option: FilterOption; checked: boolean; onToggle: ()
     <span
       className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px]"
       style={{
-        border: `1px solid ${checked ? 'var(--flow-action-bg)' : 'var(--flow-border-strong, var(--flow-border))'}`,
+        border: `1px solid ${checked ? 'var(--flow-action-bg)' : 'var(--flow-text-dim)'}`,
         background: checked ? 'var(--flow-action-bg)' : 'transparent',
         color: 'var(--flow-on-accent)',
       }}
