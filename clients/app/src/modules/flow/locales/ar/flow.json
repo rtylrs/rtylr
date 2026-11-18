@@ -1259,7 +1259,11 @@
       "range": "من {{from}} إلى {{to}}"
     },
     "showCompleted": "عرض المكتملة",
-    "completed": "المكتملة"
+    "completed": "المكتملة",
+    "saveAsView": "حفظ كعرض",
+    "savedAsView": "تم الحفظ كعرض «{{name}}»",
+    "openView": "فتح",
+    "savedViewName": "{{project}}: مُصفّى"
   },
   "teamTasks": {
     "summary": "{{tasks}} مهمة مفتوحة لدى {{people}} أشخاص",
