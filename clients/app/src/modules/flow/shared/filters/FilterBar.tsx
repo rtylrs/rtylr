@@ -115,11 +115,11 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             }}
             placeholder={t('flow.filters.searchPlaceholder')}
             aria-label={t('flow.filters.searchLabel')}
-            className="min-w-0 flex-1 bg-transparent text-flow-meta outline-none"
+            className="min-w-0 flex-1 bg-transparent text-flow-meta"
             style={{ color: 'var(--flow-text)' }}
           />
           <kbd
-            className="hidden rounded px-1 text-[10px] font-semibold md:inline"
+            className="hidden rounded px-1 text-flow-meta font-semibold md:inline"
             style={{ border: '1px solid var(--flow-border)', color: 'var(--flow-text-dim)' }}
             aria-hidden="true"
           >
@@ -168,7 +168,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 type="button"
                 onClick={() => openPopover('assignees')}
                 aria-label={t('flow.filters.morePeople', { count: overflow })}
-                className="flow-focus flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-[11px] font-semibold"
+                className="flow-focus flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-flow-meta font-semibold"
                 style={{
                   marginInlineStart: 3,
                   background: 'var(--flow-hover)',
@@ -255,7 +255,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               {t('flow.filters.filter')}
               {count > 0 && (
                 <span
-                  className="rounded-full px-1.5 text-[11px] font-semibold"
+                  className="rounded-full px-1.5 text-flow-meta font-semibold"
                   style={{ background: 'var(--flow-action-bg)', color: 'var(--flow-on-accent)' }}
                 >
                   {count}
