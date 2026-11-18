@@ -11,6 +11,12 @@ export interface DirectoryMember extends Staff {
   departmentName?: string;
 }
 
+export interface DirectoryResult {
+  members: DirectoryMember[];
+  /** False when departments failed to load; members then arrive ungrouped. */
+  departmentsLoaded: boolean;
+}
+
 /** Why listStaff refused the caller, from the 403's `code`. */
 export type DirectoryDenial = 'disabled' | 'permission';
 
@@ -24,20 +30,24 @@ const MAX_RETRIES = 3;
 /**
  * The whole business's roster. listStaff is gated server-side: the business
  * must have the directory on and the caller's role must hold view_directory.
+ * Departments only label the groups, so their failure must not hide the roster.
  */
 export function useDirectory(search?: string) {
   return useQuery({
     queryKey: ['directory', search],
-    queryFn: async (): Promise<DirectoryMember[]> => {
+    queryFn: async (): Promise<DirectoryResult> => {
       const [staffResponse, departmentsResponse] = await Promise.all([
         staffClient.listStaff({ search: search || undefined }),
-        departmentClient.listDepartments({}),
+        departmentClient.listDepartments({}).catch(() => null),
       ]);
-      const departments = departmentsResponse.departments ?? [];
-      return (staffResponse.staff ?? []).map((member) => ({
-        ...member,
-        departmentName: departments.find((d) => d.id === member.departmentId)?.name,
-      }));
+      const departments = departmentsResponse?.departments ?? [];
+      return {
+        members: (staffResponse.staff ?? []).map((member) => ({
+          ...member,
+          departmentName: departments.find((d) => d.id === member.departmentId)?.name,
+        })),
+        departmentsLoaded: departmentsResponse !== null,
+      };
     },
     // A 403 is an answer, not a blip: retrying it only delays the message.
     retry: (failureCount, error) => !getDirectoryDenial(error) && failureCount < MAX_RETRIES,

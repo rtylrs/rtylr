@@ -41,7 +41,9 @@ const DirectoryScreen = (): React.JSX.Element => {
   );
   const [search, setSearch] = useState('');
   const directoryQuery = useDirectory(search);
-  const { data: members, isLoading: queryLoading, isPending, refetch } = directoryQuery;
+  const { data, isLoading: queryLoading, isPending, refetch } = directoryQuery;
+  const members = data?.members;
+  const departmentsLoaded = data?.departmentsLoaded ?? true;
   const denial = getDirectoryDenial(directoryQuery.error);
   const isError = hasQueryFailed(directoryQuery);
   const isLoading = queryLoading || (isPending && !isError);
@@ -140,20 +142,27 @@ const DirectoryScreen = (): React.JSX.Element => {
 
         {!isLoading && !isError && members && members.length > 0 && (
           <div className="space-y-5">
+            {!departmentsLoaded && (
+              <p className="text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>
+                {t('flow.directory.departmentsUnavailable')}
+              </p>
+            )}
             {groups.map((group) => (
               <section key={group.key}>
-                <h2
-                  className="mb-2 flex items-baseline gap-2 text-flow-meta font-semibold uppercase tracking-wider"
-                  style={{ color: 'var(--flow-text-muted)' }}
-                >
-                  {group.name ?? t('flow.directory.noDepartment')}
-                  <span
-                    className="font-normal tabular-nums"
-                    style={{ color: 'var(--flow-text-dim)' }}
+                {departmentsLoaded && (
+                  <h2
+                    className="mb-2 flex items-baseline gap-2 text-flow-meta font-semibold uppercase tracking-wider"
+                    style={{ color: 'var(--flow-text-muted)' }}
                   >
-                    {group.members.length}
-                  </span>
-                </h2>
+                    {group.name ?? t('flow.directory.noDepartment')}
+                    <span
+                      className="font-normal tabular-nums"
+                      style={{ color: 'var(--flow-text-dim)' }}
+                    >
+                      {group.members.length}
+                    </span>
+                  </h2>
+                )}
                 <ul className="space-y-1.5">
                   {group.members.map((member) => {
                     const fullName = `${member.firstName ?? ''} ${member.lastName ?? ''}`.trim();
