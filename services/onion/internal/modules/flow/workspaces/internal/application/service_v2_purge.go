@@ -33,7 +33,7 @@ func (s *Service) IsProjectMemberOrBypass(ctx context.Context, userID, businessI
 // open (opensProject): that is the board of a project they opened, so the
 // clause is lifted for that project only and they see all of its tasks. This is
 // what lets a department manager who opens a report's project, or a business
-// owner or admin who opens one by link, see the board. A
+// owner, admin or Flow Admin who opens one by link, see the board. A
 // business-wide listing stays curated for all of them, because access to a
 // project they open is not a reason to fill every list with every project's
 // work (ruling P8).

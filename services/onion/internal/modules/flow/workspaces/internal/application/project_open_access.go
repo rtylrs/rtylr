@@ -6,24 +6,24 @@ import (
 	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/domain"
 )
 
-// administratorOpens reports whether callerID may open p because they own or
-// administer the business it belongs to.
+// businessWideOpens reports whether callerID may open p because they hold
+// business-wide Flow access in the business it belongs to: the business owner,
+// an admin, or a Flow Admin holding flow:team:manage (hubProfileBypasses).
 //
-// This is access, not listing (ruling P8): the sidebar stays curated, and an
-// administrator reaches a private project by link, the Insights project picker
-// or the recycle bin. It mirrors the business owner/admin pass that
-// RequireProjectRole already gives writes, so an administrator who may edit a
-// project may also open it.
+// This is access, not listing (ruling P8): the sidebar stays curated, and they
+// reach a private project by link, the Insights project picker or the recycle
+// bin. Opening is reading. It gives no write a Flow Admin did not already have;
+// RequireProjectRole admits them at viewer level only.
 //
 // Two things stay closed. A My Tasks bucket belongs to one person and is exempt
-// from every visibility policy, so no administrator opens someone else's. And
-// the project must belong to the business the caller is acting in, so being an
-// administrator somewhere never opens a project somewhere else.
-func (s *Service) administratorOpens(ctx context.Context, p domain.Project, callerID, businessID int64) bool {
+// from every visibility policy, so nobody opens someone else's. And the project
+// must belong to the business the caller is acting in, so business-wide access
+// somewhere never opens a project somewhere else.
+func (s *Service) businessWideOpens(ctx context.Context, p domain.Project, callerID, businessID int64) bool {
 	if p.IsPersonal || p.BusinessID != businessID {
 		return false
 	}
-	return s.isBusinessAdministrator(ctx, callerID, businessID)
+	return s.hubProfileBypasses(ctx, callerID, businessID)
 }
 
 // opensProject is canSeeProject addressed by id, for reads scoped to one
@@ -47,7 +47,8 @@ func (s *Service) opensProject(ctx context.Context, projectID, callerID, busines
 // CanReadTask is the read gate for a task's subresources: its subtasks,
 // activity, attachments, time logs and links. It admits whoever IsTaskMember
 // admits, plus anyone who may open the task's project (canSeeProject), such as
-// a department manager of someone on it or a business owner or admin, so the task drawer works on every board they can open.
+// a department manager of someone on it or a business owner, admin or Flow
+// Admin, so the task drawer works on every board they can open.
 //
 // IsTaskMember itself is left alone because it also gates writes such as adding
 // a comment; this only widens reads.
