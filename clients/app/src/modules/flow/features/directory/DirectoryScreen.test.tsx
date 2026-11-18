@@ -27,6 +27,7 @@ interface DirectoryQueryState {
   isPaused?: boolean;
   failureCount?: number;
   error?: unknown;
+  departmentsLoaded?: boolean;
 }
 
 const directoryState = vi.hoisted(() => ({
@@ -94,7 +95,10 @@ beforeEach(() => {
     isError: false,
   };
   effectiveAccess.value = undefined;
-  useDirectoryMock.mockImplementation(() => directoryState.value);
+  useDirectoryMock.mockImplementation(() => {
+    const { data, departmentsLoaded = true, ...rest } = directoryState.value;
+    return { ...rest, data: data && { members: data, departmentsLoaded } };
+  });
 });
 
 describe('DirectoryScreen', () => {
@@ -173,6 +177,15 @@ describe('DirectoryScreen', () => {
     render(<DirectoryScreen />);
     expect(screen.getByText('flow.directory.noAccessTitle')).toBeInTheDocument();
     expect(screen.queryByText('flow.directory.retryCta')).not.toBeInTheDocument();
+  });
+
+  it('still lists everyone, ungrouped and labelled, when departments fail to load', () => {
+    directoryState.value = { ...directoryState.value, departmentsLoaded: false };
+    render(<DirectoryScreen />);
+    expect(screen.getByText('Jane Doe')).toBeInTheDocument();
+    expect(screen.getByText('Sam Lee')).toBeInTheDocument();
+    expect(screen.getByText('flow.directory.departmentsUnavailable')).toBeInTheDocument();
+    expect(screen.queryByText('flow.directory.noDepartment')).not.toBeInTheDocument();
   });
 
   it('shows the load-failed state for a query stuck paused after a failed attempt, not the empty state', () => {
