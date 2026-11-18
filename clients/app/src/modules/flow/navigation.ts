@@ -1,5 +1,6 @@
 import {
   ListTodo,
+  UsersRound,
   Sun,
   FolderKanban,
   Inbox,
@@ -27,6 +28,7 @@ export function getFlowHomePath(
 
 export const flowNavItems = [
   { path: '/flow/my-issues', key: 'flow.shell.myTasks', icon: ListTodo },
+  { path: '/flow/team-tasks', key: 'flow.shell.teamTasks', icon: UsersRound },
   { path: '/flow/today', key: 'flowNav.focusToday', icon: Sun },
   { path: '/flow/projects', key: 'flow.allProjects.title', icon: FolderKanban },
   { path: '/flow/inbox', key: 'flowNav.inbox', icon: Inbox },

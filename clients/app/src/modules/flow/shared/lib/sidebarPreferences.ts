@@ -105,6 +105,14 @@ const builtinItems: SidebarItemPreference[] = [
     visible: true,
   },
   {
+    id: 'builtin:team-tasks',
+    kind: 'builtin',
+    label: 'flow.shell.teamTasks',
+    route: '/flow/team-tasks',
+    icon: 'users',
+    visible: true,
+  },
+  {
     id: 'builtin:today',
     kind: 'builtin',
     label: 'flowNav.focusToday',
