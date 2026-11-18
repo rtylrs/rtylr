@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `auth_provider` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'password',
   `token_epoch` bigint NOT NULL DEFAULT '0',
   `two_factor_enabled` tinyint(1) NOT NULL DEFAULT '0',
+  `avatar` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'chosen avatar as JSON; NULL = default initials',
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `username` (`username`),
