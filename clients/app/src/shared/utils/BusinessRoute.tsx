@@ -11,6 +11,7 @@ import { useBusinessFavicon } from '../hooks/useBusinessFavicon';
 import { canAccessPortalPath } from './canAccessPortalPath';
 import PortalShell from '../../shell/PortalShell';
 import { Link } from '@tanstack/react-router';
+import { FirstLoginAvatarPrompt } from '../avatar/FirstLoginAvatarPrompt';
 
 const getCookieToken = (): string | null => {
   const raw = document.cookie
@@ -244,6 +245,7 @@ function BusinessRoute(): React.JSX.Element | null {
           <Link to="/">{t('common.portal.backHome')}</Link>
         </section>
       )}
+      <FirstLoginAvatarPrompt />
     </PortalShell>
   );
 }
