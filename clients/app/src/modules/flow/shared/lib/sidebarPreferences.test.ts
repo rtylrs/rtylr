@@ -46,9 +46,35 @@ describe('sidebar preferences', () => {
     expect(preferences.topLevelItemIds).toEqual([
       'builtin:inbox',
       'builtin:my-issues',
+      'builtin:team-tasks',
       'builtin:today',
       'builtin:projects-shortcut',
       'builtin:triage',
+    ]);
+  });
+
+  it('puts a built-in added since the user saved next to its default neighbour', () => {
+    // A sidebar saved before Team tasks existed, with the user's own order.
+    const stored = JSON.stringify({
+      version: 1,
+      groupOrder: [...SIDEBAR_GROUP_IDS],
+      groups: [],
+      items: [],
+      topLevelItemIds: [
+        'builtin:triage',
+        'builtin:my-issues',
+        'builtin:inbox',
+        'builtin:today',
+        'builtin:projects-shortcut',
+      ],
+    });
+    expect(parseSidebarPreferences(stored).topLevelItemIds).toEqual([
+      'builtin:triage',
+      'builtin:my-issues',
+      'builtin:team-tasks',
+      'builtin:inbox',
+      'builtin:today',
+      'builtin:projects-shortcut',
     ]);
   });
 
