@@ -298,7 +298,12 @@ const TimePanel = ({
                 className="flex items-start gap-2 rounded-sm px-2 py-2 md:py-1.5"
                 style={{ background: 'var(--flow-hover)' }}
               >
-                <Avatar size="sm" initials={initialsFromName(authorName)} aria-hidden="true" />
+                <Avatar
+                  size="sm"
+                  initials={initialsFromName(authorName)}
+                  seed={String(log.userId)}
+                  aria-hidden="true"
+                />
                 <div className="min-w-0 flex-1">
                   <span
                     className="text-flow-meta font-semibold"

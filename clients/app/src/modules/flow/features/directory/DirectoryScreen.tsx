@@ -127,7 +127,11 @@ const DirectoryScreen = (): React.JSX.Element => {
                         className="flex items-center gap-3 rounded-md p-2"
                         style={{ background: 'var(--flow-hover)' }}
                       >
-                        <Avatar initials={initials(fullName)} size="sm" />
+                        <Avatar
+                          initials={initials(fullName)}
+                          seed={member.userId ? String(member.userId) : fullName}
+                          size="sm"
+                        />
                         <div className="min-w-0 flex-1">
                           <div
                             className="text-flow-body font-medium"

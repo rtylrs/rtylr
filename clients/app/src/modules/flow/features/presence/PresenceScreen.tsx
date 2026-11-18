@@ -138,7 +138,11 @@ const PresenceScreen = (): React.JSX.Element => {
                           className="flex items-center gap-3 rounded-md p-2"
                           style={{ background: 'var(--flow-hover)' }}
                         >
-                          <Avatar initials={initials(fullName)} size="sm" />
+                          <Avatar
+                            initials={initials(fullName)}
+                            seed={entry.userId ? String(entry.userId) : fullName}
+                            size="sm"
+                          />
                           <span
                             className="min-w-0 flex-1 text-flow-body font-medium"
                             style={{ color: 'var(--flow-text)' }}

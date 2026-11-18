@@ -106,7 +106,12 @@ export const CommentList: React.FC<CommentListProps> = ({
         const editing = canEdit && editingId === c.id;
         return (
           <div key={c.id} className="flex gap-3 group">
-            <AssigneeAvatar name={c.author} initials={c.authorInitials} size={28} />
+            <AssigneeAvatar
+              name={c.author}
+              initials={c.authorInitials}
+              seed={c.authorId ? String(c.authorId) : undefined}
+              size={28}
+            />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <span
