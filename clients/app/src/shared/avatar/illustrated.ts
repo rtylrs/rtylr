@@ -1,4 +1,5 @@
 import type { StyleDefinition } from '@dicebear/core';
+import { MOODS_STYLE_ID, moodDataUri } from './moods';
 
 /**
  * Style definitions are 7 to 370 KB of JSON each, so each one is its own chunk
@@ -34,6 +35,7 @@ const key = (style: string, seed: string): string => `${style}:${seed}`;
 
 /** A data URI already rendered for this style and seed, if any. */
 export function cachedIllustration(style: string, seed: string): string | undefined {
+  if (style === MOODS_STYLE_ID) return moodDataUri(seed);
   return rendered.get(key(style, seed));
 }
 
@@ -43,6 +45,10 @@ export function cachedIllustration(style: string, seed: string): string | undefi
  * markup never enters the document.
  */
 export function renderIllustration(style: string, seed: string): Promise<string> {
+  if (style === MOODS_STYLE_ID) {
+    const mood = moodDataUri(seed);
+    return mood ? Promise.resolve(mood) : Promise.reject(new Error(`Unknown mood: ${seed}`));
+  }
   const k = key(style, seed);
   const done = rendered.get(k);
   if (done) return Promise.resolve(done);
