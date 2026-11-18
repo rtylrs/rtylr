@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { EmptyState } from '../../../../../shared/components/dash/EmptyState';
 import NavigationSettings from './NavigationSettings';
+import { AvatarPicker, AvatarPreview } from '../../../../../shared/avatar/AvatarPicker';
 import { securityClient, userClient } from '../../../../../shared/lib/clients';
 import { useUserStore } from '../../../../../shared/stores/userStore';
 import { ConfirmDialog } from '../../../../../shared/components/dash';
@@ -175,6 +176,7 @@ const Account: React.FC = () => {
   const { user, setUser } = useUserStore();
   const [formData, setFormData] = useState({ name: '', email: '' });
   const [isEditing, setIsEditing] = useState(false);
+  const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
   const [confirmInvalidateOpen, setConfirmInvalidateOpen] = useState(false);
   const [loginHistoryPage, setLoginHistoryPage] = useState(1);
 
@@ -288,6 +290,36 @@ const Account: React.FC = () => {
           title={t('settings.accountPage.heading')}
           description={t('settings.accountPage.subheading')}
         />
+
+        {/* Avatar */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('settings.avatar.title')}</CardTitle>
+            <CardDescription>{t('settings.avatar.description')}</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="flex items-center gap-4">
+              <AvatarPreview
+                avatar={user?.avatar}
+                userId={String(user?.id ?? '')}
+                name={user?.fullName}
+                size={64}
+              />
+              <Button variant="outline" onClick={() => setAvatarPickerOpen(true)}>
+                {t('settings.avatar.change')}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        {avatarPickerOpen && (
+          <AvatarPicker
+            open={avatarPickerOpen}
+            onOpenChange={setAvatarPickerOpen}
+            userId={String(user?.id ?? '')}
+            name={user?.fullName}
+            current={user?.avatar}
+          />
+        )}
 
         {/* Profile */}
         <Card>
