@@ -122,6 +122,13 @@ func (m *Module) WithGoogleOAuth(clientID, clientSecret, redirectURI string) *Mo
 	return m
 }
 
+// WithAvatarPhotoBaseURL sets the public CDN origin an avatar photo must be
+// stored under.
+func (m *Module) WithAvatarPhotoBaseURL(base string) *Module {
+	m.userService.WithAvatarPhotoBaseURL(base)
+	return m
+}
+
 func (m *Module) WithBusinessProvisioner(provisioner application.BusinessProvisioner) *Module {
 	m.userService.WithBusinessProvisioner(provisioner)
 	return m
