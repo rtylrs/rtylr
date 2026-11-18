@@ -33,6 +33,8 @@ export interface FilterBarProps {
   total: number;
   /** Page-specific controls after the Filter button (e.g. "Show completed"). */
   extra?: React.ReactNode;
+  /** False where fading cannot be shown (the calendar), which hides the switch. */
+  allowDim?: boolean;
 }
 
 interface Chip {
@@ -58,6 +60,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   visible,
   total,
   extra,
+  allowDim = true,
 }) => {
   const { t } = useTranslation();
   const { filters, setFilters, clear, active, dim, setDim } = state;
@@ -234,7 +237,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           filters={filters}
           onChange={(next) => setFilters(next)}
           dim={dim}
-          onDimChange={setDim}
+          onDimChange={allowDim ? setDim : undefined}
           trigger={
             <button
               type="button"
