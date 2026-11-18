@@ -26,6 +26,16 @@ export const test = base.extend<object, object>({
         });
       }
     );
+    // The one-time avatar welcome opens over whatever page a test is on.
+    // Specs that stub /users/me never have an avatar, so mark it as seen for
+    // every user and let the tests see the page they are asserting on.
+    await context.addInitScript(() => {
+      const getItem = Storage.prototype.getItem;
+      Storage.prototype.getItem = function (key: string): string | null {
+        if (key.startsWith('rtylr:avatar-welcome-seen:')) return '1';
+        return getItem.call(this, key);
+      };
+    });
     await use(context);
   },
 });
