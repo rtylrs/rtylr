@@ -153,7 +153,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                   type="button"
                   aria-pressed={pressed}
                   aria-label={t('flow.filters.showPerson', { name })}
-                  title={name}
+                  data-avatar-name={name}
                   data-filter-person={person.id}
                   onClick={() =>
                     setFilters((f) => ({ ...f, assignees: toggleValue(f.assignees, person.id) }))
@@ -196,7 +196,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               type="button"
               aria-pressed={filters.assignees.includes(UNASSIGNED)}
               aria-label={t('flow.filters.showPerson', { name: t('flow.filters.unassigned') })}
-              title={t('flow.filters.unassigned')}
+              data-avatar-name={t('flow.filters.unassigned')}
               data-filter-person={UNASSIGNED}
               onClick={() =>
                 setFilters((f) => ({ ...f, assignees: toggleValue(f.assignees, UNASSIGNED) }))
