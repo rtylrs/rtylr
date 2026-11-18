@@ -1,9 +1,10 @@
 package website.lead.v1
 
-/// A quote request from the public website.
+/// A quote request from the public website. Email or phone_number is
+/// required, at least one, so a visitor can ask for a quote with only a phone.
 message SubmitQuoteRequest {
   name: string @required @len(1, 200)
-  email: string @required @len(3, 255)
+  email: string @len(0, 255)
   phone_number: string @len(0, 50)
   company: string @len(0, 200)
   service: string @required @len(1, 200)
