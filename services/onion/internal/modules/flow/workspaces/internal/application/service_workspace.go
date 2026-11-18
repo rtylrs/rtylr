@@ -38,10 +38,11 @@ func (s *Service) IsTaskMember(ctx context.Context, userID, taskID int64) bool {
 }
 
 // CanSubscribeProject authorizes a `project:<id>` realtime topic: whoever
-// IsProjectMember admits, plus an owner or admin of the project's own business
-// who may open it (administratorOpens), so a board they opened by link stays
-// live. The topic carries no business, so the project's business is read from
-// the project itself and the administrator check runs against that business.
+// IsProjectMember admits, plus anyone else who may open the project
+// (canSeeProject), such as a department manager of someone on it or a business
+// owner or admin, so every board they can open stays live. The
+// topic carries no business, so the project's business is read from the
+// project itself and the checks run against that business.
 func (s *Service) CanSubscribeProject(ctx context.Context, userID, projectID int64) bool {
 	if s.IsProjectMember(ctx, userID, projectID) {
 		return true
@@ -53,7 +54,7 @@ func (s *Service) CanSubscribeProject(ctx context.Context, userID, projectID int
 	if err != nil || p.BusinessID <= 0 {
 		return false
 	}
-	return s.administratorOpens(ctx, p, userID, p.BusinessID)
+	return s.canSeeProject(ctx, p, userID, p.BusinessID)
 }
 
 // CanSubscribeTask is CanSubscribeProject for a `task:<id>` topic, resolved
@@ -73,7 +74,7 @@ func (s *Service) CanSubscribeTask(ctx context.Context, userID, taskID int64) bo
 	if err != nil || p.BusinessID <= 0 || p.BusinessID != task.BusinessID {
 		return false
 	}
-	return s.administratorOpens(ctx, p, userID, p.BusinessID)
+	return s.canSeeProject(ctx, p, userID, p.BusinessID)
 }
 
 // ─────────────────────────────────────────────

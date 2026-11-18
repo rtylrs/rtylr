@@ -26,29 +26,28 @@ func (s *Service) administratorOpens(ctx context.Context, p domain.Project, call
 	return s.isBusinessAdministrator(ctx, callerID, businessID)
 }
 
-// administratorOpensProject is administratorOpens addressed by id, for reads
-// scoped to one project. A project that does not exist in businessID is false.
+// opensProject is canSeeProject addressed by id, for reads scoped to one
+// project: whoever may open the project may read everything on its board. A
+// project that does not exist in businessID is false.
 //
-// The administrator check runs first because it is the cheaper answer for the
-// common caller, who is not one, and saves the project lookup.
-func (s *Service) administratorOpensProject(ctx context.Context, projectID, callerID, businessID int64) bool {
-	if projectID <= 0 || callerID <= 0 || businessID <= 0 {
+// It reads the four proxy facts rather than the full project row, because it
+// runs on every project-scoped listing and the full row carries count
+// subqueries none of these checks need.
+func (s *Service) opensProject(ctx context.Context, projectID, callerID, businessID int64) bool {
+	if projectID <= 0 || callerID <= 0 || businessID <= 0 || s.repo == nil {
 		return false
 	}
-	if !s.isBusinessAdministrator(ctx, callerID, businessID) {
+	p, err := s.repo.GetProjectProxyFacts(ctx, projectID)
+	if err != nil || p.BusinessID != businessID {
 		return false
 	}
-	p, err := s.repo.GetProjectV2ByID(ctx, projectID, businessID)
-	if err != nil {
-		return false
-	}
-	return s.administratorOpens(ctx, p, callerID, businessID)
+	return s.canSeeProject(ctx, p, callerID, businessID)
 }
 
 // CanReadTask is the read gate for a task's subresources: its subtasks,
 // activity, attachments, time logs and links. It admits whoever IsTaskMember
-// admits, plus a business owner or admin reading a task in a project they may
-// open, so the task drawer works on a board they opened by link.
+// admits, plus anyone who may open the task's project (canSeeProject), such as
+// a department manager of someone on it or a business owner or admin, so the task drawer works on every board they can open.
 //
 // IsTaskMember itself is left alone because it also gates writes such as adding
 // a comment; this only widens reads.
@@ -56,12 +55,12 @@ func (s *Service) CanReadTask(ctx context.Context, userID, businessID, taskID in
 	if s.IsTaskMember(ctx, userID, taskID) {
 		return true
 	}
-	if taskID <= 0 || !s.isBusinessAdministrator(ctx, userID, businessID) {
+	if taskID <= 0 || s.repo == nil {
 		return false
 	}
 	task, err := s.repo.GetTaskByID(ctx, taskID)
 	if err != nil || task.BusinessID != businessID {
 		return false
 	}
-	return s.administratorOpensProject(ctx, task.ProjectID, userID, businessID)
+	return s.opensProject(ctx, task.ProjectID, userID, businessID)
 }

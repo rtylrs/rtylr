@@ -39,10 +39,10 @@ func (s *Service) CreateCycleV2(ctx context.Context, businessID, projectID int64
 
 // ListMilestonesV2 lists milestones under the task visibility clause. Like
 // ListTasksV2, the clause is lifted only when the listing is narrowed to one
-// project a business owner or admin may open; the business-wide list stays
+// project the caller may open (opensProject); the business-wide list stays
 // curated.
 func (s *Service) ListMilestonesV2(ctx context.Context, businessID int64, projectID *int64, callerID, limit, offset int64) ([]domain.Milestone, int64, error) {
-	includeAll := projectID != nil && s.administratorOpensProject(ctx, *projectID, callerID, businessID)
+	includeAll := projectID != nil && s.opensProject(ctx, *projectID, callerID, businessID)
 	return s.repo.ListMilestonesV2(ctx, businessID, projectID, callerID, includeAll, limit, offset)
 }
 
