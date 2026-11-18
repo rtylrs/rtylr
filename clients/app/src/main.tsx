@@ -10,6 +10,7 @@ import { Toaster } from 'sonner';
 import '@voxire/ui/toast.css';
 import { CookiesProvider } from 'react-cookie';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { AvatarDirectoryProvider } from './shared/avatar/AvatarDirectoryProvider';
 import { queryClient } from './shared/lib/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import { bootObservability } from '@voxire/observability';
@@ -39,7 +40,9 @@ if (rootElement) {
             <I18nextProvider i18n={i18next}>
               <HelmetContainer title="Portal - RTYLR" favicon="/favicon.ico" />
               <CookieBanner />
-              <RouterProvider router={router} />
+              <AvatarDirectoryProvider>
+                <RouterProvider router={router} />
+              </AvatarDirectoryProvider>
               <Toaster className="rtylr-toaster" expand={false} offset={20} mobileOffset={16} />
             </I18nextProvider>
           </Suspense>
