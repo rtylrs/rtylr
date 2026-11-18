@@ -25,3 +25,22 @@ func (s *Service) administratorOpens(ctx context.Context, p domain.Project, call
 	}
 	return s.isBusinessAdministrator(ctx, callerID, businessID)
 }
+
+// administratorOpensProject is administratorOpens addressed by id, for reads
+// scoped to one project. A project that does not exist in businessID is false.
+//
+// The administrator check runs first because it is the cheaper answer for the
+// common caller, who is not one, and saves the project lookup.
+func (s *Service) administratorOpensProject(ctx context.Context, projectID, callerID, businessID int64) bool {
+	if projectID <= 0 || callerID <= 0 || businessID <= 0 {
+		return false
+	}
+	if !s.isBusinessAdministrator(ctx, callerID, businessID) {
+		return false
+	}
+	p, err := s.repo.GetProjectV2ByID(ctx, projectID, businessID)
+	if err != nil {
+		return false
+	}
+	return s.administratorOpens(ctx, p, callerID, businessID)
+}

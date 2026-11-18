@@ -27,10 +27,18 @@ func (s *Service) IsProjectMemberOrBypass(ctx context.Context, userID, businessI
 
 // ListTasksV2 lists tasks across the caller's visible projects, optionally
 // narrowed to one project. Visibility is enforced row-by-row via the parent
-// project clause unless a hub bypass applies.
+// project clause.
+//
+// The one exception is a listing narrowed to a single project that a business
+// owner or admin may open (administratorOpensProject): that is the board of a
+// project they opened by link, so the clause is lifted for that project only.
+// A business-wide listing stays curated for administrators too, because access
+// to a project they open is not a reason to fill every list with every
+// project's work (ruling P8).
 func (s *Service) ListTasksV2(ctx context.Context, callerID, businessID int64, filter domain.ListTasksFilter) ([]domain.Task, int64, error) {
 	filter.BusinessID = businessID
-	return s.repo.GetTasksByBusinessV2(ctx, filter, callerID, false)
+	includeAll := s.administratorOpensProject(ctx, filter.ProjectID, callerID, businessID)
+	return s.repo.GetTasksByBusinessV2(ctx, filter, callerID, includeAll)
 }
 
 // SearchTasksV2 is business-wide fulltext search under the same visibility
@@ -151,8 +159,11 @@ func (s *Service) CreateLabelV2(ctx context.Context, businessID int64, name, col
 	return domain.Label{ID: id, Name: name, Color: color, CreatedAt: now}, nil
 }
 
+// ListCyclesV2 lists one project's cycles under the task visibility clause,
+// lifted only for a business owner or admin who may open that project.
 func (s *Service) ListCyclesV2(ctx context.Context, projectID, businessID, callerID, limit, offset int64) ([]domain.Cycle, int64, error) {
-	return s.repo.ListCyclesV2(ctx, projectID, businessID, callerID, false, limit, offset)
+	includeAll := s.administratorOpensProject(ctx, projectID, callerID, businessID)
+	return s.repo.ListCyclesV2(ctx, projectID, businessID, callerID, includeAll, limit, offset)
 }
 
 // ErrInvalidCycleDates reports a start/end pair a cycle cannot be created from.
