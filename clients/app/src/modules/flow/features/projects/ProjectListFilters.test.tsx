@@ -23,6 +23,11 @@ const router = vi.hoisted(() => {
   };
 });
 
+const saveAsView = vi.hoisted(() => ({ save: vi.fn(), pending: false }));
+vi.mock('../views/useSaveFiltersAsView', () => ({
+  projectFiltersForView: (filters: unknown) => filters,
+  useSaveFiltersAsView: () => saveAsView,
+}));
 vi.mock('@tanstack/react-router', async () => {
   const React = await import('react');
   return {

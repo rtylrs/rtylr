@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { DueWindow } from '../filters/taskFilters';
 
 // -- Types ---------------------------------------------------------------
 
@@ -210,12 +211,25 @@ export interface SavedView {
    * behaved before the field existed.
    */
   visibility?: 'shared' | 'private';
+  /**
+   * Stored server-side as free-form JSON. `assigneeId` and `projectId` are the
+   * single-value keys views were first saved with; views saved since carry the
+   * multi-value `assignees` and `projects` instead. Both are read (see
+   * shared/filters/viewFilters), only the new ones are written.
+   */
   filters: {
     status?: Task['status'][];
     priority?: Task['priority'][];
     assigneeId?: string;
     projectId?: string;
     labels?: string[];
+    assignees?: string[];
+    projects?: string[];
+    milestones?: string[];
+    cycles?: string[];
+    due?: DueWindow[];
+    dueFrom?: string;
+    dueTo?: string;
   };
   groupBy?: 'status' | 'priority' | 'assignee' | 'project' | 'label';
   sortBy?: 'priority' | 'dueDate' | 'updated' | 'created';

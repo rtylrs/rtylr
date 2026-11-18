@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ListFilter, Search, UserRound, UserX, X } from 'lucide-react';
+import { BookmarkPlus, ListFilter, Search, UserRound, UserX, X } from 'lucide-react';
 import { Avatar } from '@voxire/ui';
 import { initialsFromName } from '../lib/memberUtils';
 import {
@@ -35,6 +35,9 @@ export interface FilterBarProps {
   extra?: React.ReactNode;
   /** False where fading cannot be shown (the calendar), which hides the switch. */
   allowDim?: boolean;
+  /** Offered while a filter is active: keep it as a saved view. */
+  onSaveAsView?: () => void;
+  savingView?: boolean;
 }
 
 interface Chip {
@@ -61,6 +64,8 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   total,
   extra,
   allowDim = true,
+  onSaveAsView,
+  savingView = false,
 }) => {
   const { t } = useTranslation();
   const { filters, setFilters, clear, active, dim, setDim } = state;
@@ -272,6 +277,18 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
         {active && (
           <>
+            {onSaveAsView && (
+              <button
+                type="button"
+                onClick={onSaveAsView}
+                disabled={savingView}
+                className="flow-focus flex min-h-9 items-center gap-1.5 rounded-md px-2.5 text-flow-meta font-medium disabled:opacity-50 md:min-h-8"
+                style={{ color: 'var(--flow-text-muted)', border: '1px solid var(--flow-border)' }}
+              >
+                <BookmarkPlus size={13} aria-hidden="true" />
+                {t('flow.filters.saveAsView')}
+              </button>
+            )}
             <button
               type="button"
               onClick={clear}

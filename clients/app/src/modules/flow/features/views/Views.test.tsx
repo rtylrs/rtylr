@@ -30,9 +30,14 @@ vi.mock('sonner', () => ({
 }));
 
 const navigateMock = vi.hoisted(() => vi.fn());
+const searchState = vi.hoisted(() => ({ value: {} as Record<string, unknown> }));
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => navigateMock,
+  useSearch: () => searchState.value,
 }));
+vi.mock('../../shared/lib/currentUser', () => ({ useCurrentUserId: () => '1' }));
+vi.mock('../tasks/useLabels', () => ({ useLabels: () => ({ data: [] }) }));
+vi.mock('../milestones/useMilestones', () => ({ useMilestones: () => ({ data: [] }) }));
 
 const viewsState = vi.hoisted(() => ({ data: [] as SavedView[] }));
 const createViewMutate = vi.hoisted(() => vi.fn());
@@ -190,5 +195,71 @@ describe('Views task loading', () => {
     expect(screen.queryByText("No tasks match this view's filters.")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
     expect(tasksQuery.refetch).toHaveBeenCalledOnce();
+  });
+});
+
+describe('Views filter bar', () => {
+  const task = (id: string, extra: Partial<ApiTask> = {}): ApiTask => ({
+    id,
+    projectId: '2',
+    title: `Remote task ${id}`,
+    status: 'todo',
+    priority: 'high',
+    assignee: '',
+    assigneeInitials: '',
+    dueDate: '',
+    subtaskCount: 0,
+    projectName: 'Website',
+    ...extra,
+  });
+
+  beforeEach(() => {
+    searchState.value = {};
+  });
+
+  it('names the project in a chip, and removing it saves the view without it', () => {
+    viewsState.data = [{ id: '1', name: 'Site', icon: 'eye', filters: { projects: ['2'] } }];
+    tasksQuery.data = [task('1'), task('2', { projectId: '3', projectName: 'App' })];
+    renderViews();
+
+    expect(screen.getByText('Remote task 1')).toBeInTheDocument();
+    expect(screen.queryByText('Remote task 2')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Remove filter: Project: Website' }));
+    expect(updateViewMutate).toHaveBeenCalledWith({
+      id: '1',
+      data: { filters: expect.objectContaining({ projects: [] }) },
+    });
+    // Shown at once, before the save comes back.
+    expect(screen.getByText('Remote task 2')).toBeInTheDocument();
+  });
+
+  it('still filters a view saved with the old single assignee key', () => {
+    viewsState.data = [{ id: '1', name: 'Hers', icon: 'eye', filters: { assigneeId: '5' } }];
+    tasksQuery.data = [task('1', { assigneeId: '5', assignee: 'Rana' }), task('2')];
+    renderViews();
+    expect(screen.getByText('Remote task 1')).toBeInTheDocument();
+    expect(screen.queryByText('Remote task 2')).not.toBeInTheDocument();
+  });
+
+  it('searches inside the view without saving the search', () => {
+    viewsState.data = [{ id: '1', name: 'All', icon: 'eye', filters: {} }];
+    tasksQuery.data = [task('1'), task('2', { title: 'Tax return' })];
+    renderViews();
+    fireEvent.change(screen.getByRole('textbox', { name: /search tasks by title/i }), {
+      target: { value: 'tax' },
+    });
+    expect(screen.queryByText('Remote task 1')).not.toBeInTheDocument();
+    expect(screen.getByText('Tax return')).toBeInTheDocument();
+    expect(updateViewMutate).not.toHaveBeenCalled();
+  });
+
+  it('opens the view named in the link', () => {
+    searchState.value = { view: '2' };
+    viewsState.data = [
+      { id: '1', name: 'First', icon: 'eye', filters: {} },
+      { id: '2', name: 'Just saved', icon: 'eye', filters: {} },
+    ];
+    renderViews();
+    expect(screen.getByRole('heading', { level: 1, name: 'Just saved' })).toBeInTheDocument();
   });
 });

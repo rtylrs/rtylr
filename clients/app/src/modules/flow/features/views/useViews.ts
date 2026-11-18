@@ -7,6 +7,9 @@ import { flowApi } from '../../shared/services/flowApi';
 import type { ApiView } from '../../shared/services/flowApi';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 import { PRIORITY_ORDER, type SavedView, type Task } from '../../shared/stores/flowStore';
+import { hasActiveTaskFilters, matchesTaskFilters } from '../../shared/filters/taskFilters';
+import { viewFiltersToTaskFilters } from '../../shared/filters/viewFilters';
+import { todayIso } from '../../shared/lib/dateUtils';
 
 const t = (key: string): string => i18next.t(key) as string;
 
@@ -63,25 +66,23 @@ export function useDeleteView() {
   });
 }
 
-export function useFilteredTasks(view: SavedView | null, tasks: Task[]) {
+/**
+ * The tasks a view shows, through the same filter model as every other Flow
+ * list. `query` is the unsaved search typed on the Views page.
+ */
+export function useFilteredTasks(
+  view: SavedView | null,
+  tasks: Task[],
+  query = '',
+  labelNames?: ReadonlyMap<string, string>
+) {
   return useMemo(() => {
     if (!view) return tasks;
-    let filtered = [...tasks];
-    if (view.filters.status && view.filters.status.length) {
-      filtered = filtered.filter((t) => view.filters.status!.includes(t.status));
-    }
-    if (view.filters.priority && view.filters.priority.length) {
-      filtered = filtered.filter((t) => view.filters.priority!.includes(t.priority));
-    }
-    if (view.filters.assigneeId) {
-      filtered = filtered.filter((t) => t.assigneeId === view.filters.assigneeId);
-    }
-    if (view.filters.projectId) {
-      filtered = filtered.filter((t) => t.projectId === view.filters.projectId);
-    }
-    if (view.filters.labels && view.filters.labels.length) {
-      filtered = filtered.filter((t) => t.labelIds?.some((l) => view.filters.labels!.includes(l)));
-    }
+    const filters = { ...viewFiltersToTaskFilters(view.filters), query };
+    const ctx = { today: todayIso(), labelNames };
+    const filtered = hasActiveTaskFilters(filters)
+      ? tasks.filter((task) => matchesTaskFilters(task, filters, ctx))
+      : [...tasks];
     if (view.sortBy) {
       const dir = view.sortDir === 'desc' ? -1 : 1;
       filtered.sort((a, b) => {
@@ -100,5 +101,5 @@ export function useFilteredTasks(view: SavedView | null, tasks: Task[]) {
       });
     }
     return filtered;
-  }, [tasks, view]);
+  }, [tasks, view, query, labelNames]);
 }

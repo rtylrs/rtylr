@@ -18,6 +18,11 @@ const status = vi.hoisted(() => (id: string, name: string, sortOrder: number) =>
   isDefault: sortOrder === 0,
   createdAt: '',
 }));
+const saveAsView = vi.hoisted(() => ({ save: vi.fn(), pending: false }));
+vi.mock('../views/useSaveFiltersAsView', () => ({
+  projectFiltersForView: (filters: unknown) => filters,
+  useSaveFiltersAsView: () => saveAsView,
+}));
 vi.mock('@tanstack/react-router', () => ({
   useParams: () => ({ projectId: '2' }),
   useLocation: () => ({ pathname: '/flow/p/2' }),

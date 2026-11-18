@@ -1,5 +1,5 @@
 import { EmptyState } from '../../../../shared/components/dash/EmptyState';
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -16,7 +16,7 @@ import {
   Lock,
   Users,
 } from 'lucide-react';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 
 import type { SavedView } from '../../shared/stores/flowStore';
@@ -32,7 +32,35 @@ import {
 import TaskRow from '../../shared/components/TaskRow';
 import { VirtualList } from '../../../../shared/components/VirtualList';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
-import ViewFilterChips, { EMPTY_FILTERS, hasActiveFilters } from './ViewFilterChips';
+import FilterBar from '../../shared/filters/FilterBar';
+import type { TaskFilterState } from '../../shared/filters/useTaskFilters';
+import {
+  EMPTY_TASK_FILTERS,
+  hasActiveTaskFilters,
+  serializeTaskFilters,
+  type TaskFilters,
+} from '../../shared/filters/taskFilters';
+import {
+  taskFiltersToViewFilters,
+  viewFiltersToTaskFilters,
+} from '../../shared/filters/viewFilters';
+import {
+  assigneeField,
+  builtInStatusField,
+  labelField,
+  namedField,
+  peopleFrom,
+  priorityField,
+  type FilterFieldConfig,
+} from '../../shared/filters/filterFields';
+import { useCurrentUserId } from '../../shared/lib/currentUser';
+import { useLabels } from '../tasks/useLabels';
+import { useMilestones } from '../milestones/useMilestones';
+
+/** Same filters, ignoring the unsaved search. */
+const sameFilters = (a: TaskFilters, b: TaskFilters): boolean =>
+  JSON.stringify(serializeTaskFilters({ ...a, query: '' }) ?? {}) ===
+  JSON.stringify(serializeTaskFilters({ ...b, query: '' }) ?? {});
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
@@ -51,15 +79,95 @@ const Views: React.FC = () => {
   const updateView = useUpdateView();
   const deleteView = useDeleteView();
   const tasksQuery = useTasks({});
-  const allTasks = (tasksQuery.data ?? []).map(apiTaskToTask).filter((task) => !task.archived);
+  const allTasks = useMemo(
+    () => (tasksQuery.data ?? []).map(apiTaskToTask).filter((task) => !task.archived),
+    [tasksQuery.data]
+  );
+  // `?view=` comes from "Save as view" on a board, which opens the view it made.
+  const { view: viewFromUrl } = useSearch({ strict: false }) as { view?: string };
   const [selected, setSelected] = useState<SavedView | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [pendingDelete, setPendingDelete] = useState<SavedView | null>(null);
 
-  const displayView = views.find((view) => view.id === selected?.id) ?? views[0] ?? null;
-  const tasks = useFilteredTasks(displayView, allTasks);
-  const filtersActive = hasActiveFilters(displayView?.filters);
+  const displayView =
+    views.find((view) => view.id === (selected?.id ?? viewFromUrl)) ?? views[0] ?? null;
+
+  // ── Filters ───────────────────────────────────────────────────────────────
+  // The view's saved filters, edited with the same bar as a board. Changes are
+  // saved to the view; `draft` shows them straight away instead of waiting for
+  // the round trip. The search box is a quick look inside the view and is not
+  // saved with it.
+  const currentUserId = useCurrentUserId();
+  const labelsQuery = useLabels();
+  const milestonesQuery = useMilestones();
+  const [query, setQuery] = useState('');
+  const [draft, setDraft] = useState<TaskFilters | null>(null);
+  const savedFilters = useMemo(
+    () => viewFiltersToTaskFilters(displayView?.filters),
+    [displayView?.filters]
+  );
+  useEffect(() => {
+    setDraft(null);
+  }, [displayView?.id, savedFilters]);
+  useEffect(() => {
+    setQuery('');
+  }, [displayView?.id]);
+  const currentFilters: TaskFilters = { ...(draft ?? savedFilters), query };
+  const shownView = useMemo(
+    () =>
+      displayView && draft
+        ? { ...displayView, filters: taskFiltersToViewFilters(draft) }
+        : displayView,
+    [displayView, draft]
+  );
+  const labelNames = useMemo(
+    () => new Map((labelsQuery.data ?? []).map((l) => [String(l.id), l.name])),
+    [labelsQuery.data]
+  );
+  const tasks = useFilteredTasks(shownView, allTasks, query, labelNames);
+  const filtersActive = hasActiveTaskFilters({ ...currentFilters, query: '' });
+
+  const people = useMemo(() => peopleFrom([], allTasks), [allTasks]);
+  const projects = useMemo(() => {
+    const byId = new Map<string, string>();
+    for (const task of allTasks) {
+      if (!byId.has(task.projectId)) byId.set(task.projectId, task.projectName || task.projectId);
+    }
+    return [...byId]
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [allTasks]);
+  const fields = useMemo((): FilterFieldConfig[] => {
+    const out = [
+      assigneeField(people, currentUserId, t),
+      namedField('projects', t('flow.filters.fields.project'), projects),
+      priorityField(t),
+      labelField(labelsQuery.data ?? [], t),
+      builtInStatusField(t),
+    ];
+    const milestones = milestonesQuery.data ?? [];
+    if (milestones.length > 0) {
+      out.push(namedField('milestones', t('flow.filters.fields.milestone'), milestones));
+    }
+    return out;
+  }, [people, currentUserId, projects, labelsQuery.data, milestonesQuery.data, t]);
+
+  const saveFilters = (next: TaskFilters): void => {
+    setQuery(next.query);
+    if (!displayView || sameFilters(next, currentFilters)) return;
+    const saved = { ...next, query: '' };
+    setDraft(saved);
+    updateView.mutate({ id: displayView.id, data: { filters: taskFiltersToViewFilters(saved) } });
+  };
+  const filterState: TaskFilterState = {
+    filters: currentFilters,
+    setFilters: (next) => saveFilters(typeof next === 'function' ? next(currentFilters) : next),
+    clear: () => saveFilters(EMPTY_TASK_FILTERS),
+    active: hasActiveTaskFilters(currentFilters),
+    dim: false,
+    setDim: () => undefined,
+  };
 
   const startEdit = (v: SavedView, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -296,10 +404,14 @@ const Views: React.FC = () => {
           )}
         </div>
         {displayView && (
-          <ViewFilterChips
-            filters={displayView.filters}
-            disabled={updateView.isPending}
-            onChange={(next) => updateView.mutate({ id: displayView.id, data: { filters: next } })}
+          <FilterBar
+            state={filterState}
+            currentUserId={currentUserId}
+            fields={fields}
+            people={people}
+            visible={tasks.length}
+            total={allTasks.length}
+            allowDim={false}
           />
         )}
         <motion.div
@@ -328,9 +440,7 @@ const Views: React.FC = () => {
                   <button
                     type="button"
                     disabled={updateView.isPending}
-                    onClick={() =>
-                      updateView.mutate({ id: displayView.id, data: { filters: EMPTY_FILTERS } })
-                    }
+                    onClick={() => saveFilters(EMPTY_TASK_FILTERS)}
                     className="mt-3 inline-flex min-h-11 items-center rounded-md px-4 text-flow-body font-semibold disabled:opacity-50"
                     style={{ background: 'var(--flow-action-bg)', color: 'var(--flow-on-accent)' }}
                   >
