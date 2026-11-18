@@ -94,19 +94,19 @@ describe('Sidebar live row drag', () => {
   it('moves the dragged row to where the pointer is, and the others slide aside', () => {
     renderNav();
     const before = topRows();
-    expect(before.slice(0, 3)).toEqual(['Inbox', 'My tasks', 'Today']);
+    expect(before.slice(0, 3)).toEqual(['Inbox', 'My tasks', 'Team tasks']);
 
     fireEvent.dragStart(row('Inbox'), { dataTransfer });
     // Lower half of "My tasks": the dragged row goes after it.
     dragOver(row('My tasks'), lowerHalf(row('My tasks')));
-    expect(topRows().slice(0, 3)).toEqual(['My tasks', 'Inbox', 'Today']);
+    expect(topRows().slice(0, 3)).toEqual(['My tasks', 'Inbox', 'Team tasks']);
 
-    // Upper half of "Today" would put it before Today: that is where it already is.
-    dragOver(row('Today'), upperHalf(row('Today')));
-    expect(topRows().slice(0, 3)).toEqual(['My tasks', 'Inbox', 'Today']);
-    // Lower half of Today: after it.
-    dragOver(row('Today'), lowerHalf(row('Today')));
-    expect(topRows().slice(0, 3)).toEqual(['My tasks', 'Today', 'Inbox']);
+    // Upper half of "Team tasks" would put it before Team tasks: that is where it already is.
+    dragOver(row('Team tasks'), upperHalf(row('Team tasks')));
+    expect(topRows().slice(0, 3)).toEqual(['My tasks', 'Inbox', 'Team tasks']);
+    // Lower half of Team tasks: after it.
+    dragOver(row('Team tasks'), lowerHalf(row('Team tasks')));
+    expect(topRows().slice(0, 3)).toEqual(['My tasks', 'Team tasks', 'Inbox']);
   });
 
   it('saves nothing until the drop, and saves the previewed order on it', () => {
@@ -123,7 +123,7 @@ describe('Sidebar live row drag', () => {
     expect(next.topLevelItemIds.slice(0, 3)).toEqual([
       'builtin:my-issues',
       'builtin:inbox',
-      'builtin:today',
+      'builtin:team-tasks',
     ]);
   });
 
