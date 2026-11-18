@@ -34,25 +34,108 @@ const Settings: React.FC = () => {
     if (data && !form) setForm(data);
   }, [data, form]);
 
-  if (isError && !form) {
+  // The directory switch must not depend on this card: when these
+  // settings fail to load, the switch still has to be reachable.
+  const renderGeneral = (): React.ReactNode => {
+    if (isError && !form) {
+      return (
+        <div role="alert">
+          <EmptyState
+            icon={SettingsIcon}
+            title={t('hrErrors.hrSettingsLoadFailed')}
+            description={t('hrErrors.generic')}
+            action={{ label: t('hrCommon.retry'), onClick: () => void refetch() }}
+          />
+        </div>
+      );
+    }
+
+    if (isLoading || !form) {
+      return <Skeleton height={280} />;
+    }
+
+    const save = () => {
+      update.mutate(form, { onSuccess: () => toast.success(t('hrSetup.hrSettings.saved')) });
+    };
+
     return (
-      <div role="alert">
-        <EmptyState
-          icon={SettingsIcon}
-          title={t('hrErrors.hrSettingsLoadFailed')}
-          description={t('hrErrors.generic')}
-          action={{ label: t('hrCommon.retry'), onClick: () => void refetch() }}
-        />
-      </div>
+      <Card>
+        <div
+          style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}
+        >
+          <div>
+            <Label>{t('hrSetup.hrSettings.workWeekStart')}</Label>
+            <Select
+              value={form.workWeekStart}
+              onChange={(e) =>
+                setForm({ ...form, workWeekStart: e.target.value as HrSettings['workWeekStart'] })
+              }
+            >
+              <option value="Monday">{t('hrSetup.hrSettings.monday')}</option>
+              <option value="Sunday">{t('hrSetup.hrSettings.sunday')}</option>
+            </Select>
+          </div>
+          <div>
+            <Label>{t('hrSetup.hrSettings.weeklyHours')}</Label>
+            <Input
+              type="number"
+              value={form.weeklyHours}
+              onChange={(e) => setForm({ ...form, weeklyHours: Number(e.target.value) })}
+            />
+          </div>
+          <div>
+            <Label>{t('hrSetup.hrSettings.overtimeAfter')}</Label>
+            <Input
+              type="number"
+              value={form.overtimeAfterHours}
+              onChange={(e) => setForm({ ...form, overtimeAfterHours: Number(e.target.value) })}
+            />
+          </div>
+          <div>
+            <Label>{t('hrSetup.hrSettings.ptoPolicy')}</Label>
+            <Input
+              type="number"
+              value={form.ptoPolicyDays}
+              onChange={(e) => setForm({ ...form, ptoPolicyDays: Number(e.target.value) })}
+            />
+          </div>
+          <div>
+            <Label>{t('hrSetup.hrSettings.currency')}</Label>
+            <Select
+              value={form.currency}
+              onChange={(e) =>
+                setForm({ ...form, currency: e.target.value as HrSettings['currency'] })
+              }
+            >
+              {SETTINGS_CURRENCIES.map((code) => (
+                <option key={code} value={code}>
+                  {code}, {t(`hrCommon.currencies.${code}`)}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <Label>{t('hrSetup.hrSettings.industry')}</Label>
+            <Select
+              value={form.industry ?? ''}
+              onChange={(e) => setForm({ ...form, industry: e.target.value })}
+            >
+              <option value="">-</option>
+              {INDUSTRIES.map((i) => (
+                <option key={i.value} value={i.value}>
+                  {i.label}
+                </option>
+              ))}
+            </Select>
+          </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 18 }}>
+          <Button variant="primary" onClick={save}>
+            {t('hrSetup.hrSettings.save')}
+          </Button>
+        </div>
+      </Card>
     );
-  }
-
-  if (isLoading || !form) {
-    return <Skeleton height={280} />;
-  }
-
-  const save = () => {
-    update.mutate(form, { onSuccess: () => toast.success(t('hrSetup.hrSettings.saved')) });
   };
 
   return (
@@ -63,82 +146,7 @@ const Settings: React.FC = () => {
           title={t('hrSetup.hrSettings.pageTitle')}
           subtitle={t('hrSetup.hrSettings.subtitle')}
         />
-        <Card>
-          <div
-            style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}
-          >
-            <div>
-              <Label>{t('hrSetup.hrSettings.workWeekStart')}</Label>
-              <Select
-                value={form.workWeekStart}
-                onChange={(e) =>
-                  setForm({ ...form, workWeekStart: e.target.value as HrSettings['workWeekStart'] })
-                }
-              >
-                <option value="Monday">{t('hrSetup.hrSettings.monday')}</option>
-                <option value="Sunday">{t('hrSetup.hrSettings.sunday')}</option>
-              </Select>
-            </div>
-            <div>
-              <Label>{t('hrSetup.hrSettings.weeklyHours')}</Label>
-              <Input
-                type="number"
-                value={form.weeklyHours}
-                onChange={(e) => setForm({ ...form, weeklyHours: Number(e.target.value) })}
-              />
-            </div>
-            <div>
-              <Label>{t('hrSetup.hrSettings.overtimeAfter')}</Label>
-              <Input
-                type="number"
-                value={form.overtimeAfterHours}
-                onChange={(e) => setForm({ ...form, overtimeAfterHours: Number(e.target.value) })}
-              />
-            </div>
-            <div>
-              <Label>{t('hrSetup.hrSettings.ptoPolicy')}</Label>
-              <Input
-                type="number"
-                value={form.ptoPolicyDays}
-                onChange={(e) => setForm({ ...form, ptoPolicyDays: Number(e.target.value) })}
-              />
-            </div>
-            <div>
-              <Label>{t('hrSetup.hrSettings.currency')}</Label>
-              <Select
-                value={form.currency}
-                onChange={(e) =>
-                  setForm({ ...form, currency: e.target.value as HrSettings['currency'] })
-                }
-              >
-                {SETTINGS_CURRENCIES.map((code) => (
-                  <option key={code} value={code}>
-                    {code}, {t(`hrCommon.currencies.${code}`)}
-                  </option>
-                ))}
-              </Select>
-            </div>
-            <div>
-              <Label>{t('hrSetup.hrSettings.industry')}</Label>
-              <Select
-                value={form.industry ?? ''}
-                onChange={(e) => setForm({ ...form, industry: e.target.value })}
-              >
-                <option value="">-</option>
-                {INDUSTRIES.map((i) => (
-                  <option key={i.value} value={i.value}>
-                    {i.label}
-                  </option>
-                ))}
-              </Select>
-            </div>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 18 }}>
-            <Button variant="primary" onClick={save}>
-              {t('hrSetup.hrSettings.save')}
-            </Button>
-          </div>
-        </Card>
+        {renderGeneral()}
         <CompanyDirectorySetting />
       </div>
     </>
