@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Sun, Moon, Monitor, LogOut, ExternalLink, Check, ChevronDown } from 'lucide-react';
 import { signOut } from '@voxire/auth';
-import { APP_URLS, getAvatarUrl } from '@voxire/config';
+import { APP_URLS } from '@voxire/config';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +11,7 @@ import {
 } from '@voxire/ui';
 import { Avatar } from '../shared/components/ui';
 import { useUserStore } from '../shared/stores/userStore';
+import { initialsOf } from '../shared/avatar/AvatarPicker';
 import { useBusinessStore } from '../shared/stores/businessStore';
 import { useConfigStore } from '../shared/stores/configStore';
 import { useThemeStore } from '../shared/stores/themeStore';
@@ -95,9 +96,8 @@ export default function ProfileMenu({ opensDown = false }: { opensDown?: boolean
         title={t('common.userMenu')}
       >
         <Avatar
-          src={getAvatarUrl(user?.email || user?.fullName)}
-          alt=""
-          initials={user?.fullName?.slice(0, 2)}
+          seed={user?.id !== undefined ? String(user.id) : undefined}
+          initials={initialsOf(user?.fullName)}
           size="sm"
         />
       </summary>
