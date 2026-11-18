@@ -18,6 +18,9 @@ type repository interface {
 	DeleteUser(ctx context.Context, id int64) error
 	EmailExists(ctx context.Context, email string) (bool, error)
 	GetUserAccessState(ctx context.Context, userID int64) (domain.UserAccessState, error)
+	GetUserAvatar(ctx context.Context, userID int64) (string, error)
+	SetUserAvatar(ctx context.Context, userID int64, stored string) error
+	ListBusinessUserAvatars(ctx context.Context, businessID int64) (map[int64]string, error)
 	GetUserBusinessID(ctx context.Context, userID int64) (int64, error)
 	GetUserByEmail(ctx context.Context, email string) (*domain.User, error)
 	GetUserByID(ctx context.Context, id int64) (*domain.User, error)
