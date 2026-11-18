@@ -232,6 +232,9 @@
     "save": "Save",
     "saving": "Saving…",
     "saved": "Avatar updated",
-    "saveFailed": "Couldn't save your avatar. Try again."
+    "saveFailed": "Couldn't save your avatar. Try again.",
+    "welcomeTitle": "Welcome! Pick your avatar",
+    "welcomeDescription": "Choose how your team sees you. You can change it any time in Account settings.",
+    "skip": "Skip for now"
   }
 }
