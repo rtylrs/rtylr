@@ -586,11 +586,18 @@
     "noResults": "Personne ne correspond à votre recherche.",
     "noMembersYet": "Personne dans l'annuaire pour l'instant.",
     "loadFailedTitle": "Impossible de charger l'annuaire",
-    "loadFailedDescription": "Réessayez. Si l'échec persiste, demandez à un administrateur si votre rôle peut voir l'annuaire.",
+    "loadFailedDescription": "Un problème est survenu de notre côté. Réessayez dans un instant.",
     "retryCta": "Réessayer",
     "clearSearchCta": "Effacer la recherche",
     "refreshCta": "Actualiser",
-    "noDepartment": "Sans département"
+    "noDepartment": "Sans département",
+    "disabledTitle": "L'annuaire est désactivé",
+    "disabledDescription": "Un administrateur a désactivé l'annuaire de l'entreprise.",
+    "disabledAdminDescription": "Activez-le dans les paramètres RH pour que chacun puisse trouver ses collègues.",
+    "openHrSettingsCta": "Ouvrir les paramètres RH",
+    "noAccessTitle": "Vous n'avez pas accès à l'annuaire",
+    "noAccessDescription": "Votre rôle n'inclut pas l'annuaire. Demandez à un administrateur si vous en avez besoin.",
+    "departmentsUnavailable": "Les départements n'ont pas pu être chargés, tout le monde est donc listé ensemble."
   },
   "leave": {
     "heading": "Congés",

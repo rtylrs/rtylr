@@ -137,7 +137,9 @@
     "subtitle": "Semaine de travail, heures supplémentaires, congés et devise",
     "monday": "Lundi",
     "sunday": "Dimanche",
-    "save": "Enregistrer les paramètres"
+    "save": "Enregistrer les paramètres",
+    "directoryTitle": "Annuaire de l'entreprise",
+    "directoryDescription": "Permet à chacun de voir le nom, le rôle, le département, l'e-mail et le téléphone de ses collègues dans Flow. Le salaire, l'adresse et les contacts d'urgence restent dans RH."
   },
   "progress": "Progression de la configuration",
   "org": {
