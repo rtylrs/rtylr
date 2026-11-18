@@ -36,7 +36,8 @@ func setupRoutes(ctx context.Context, mux *stdhttp.ServeMux) []http.MiddlewareFu
 	//   user:<id>        → caller must be that user
 	//   business:<id>    → caller must belong to that business
 	//   workspace:<id>   → caller must belong to the workspace
-	//   project:<id>     → caller must be a project or workspace member
+	//   project:<id>     → caller must be a project or workspace member, or an
+	//                      owner or admin of the project's business opening it
 	//   task:<id>        → caller must be able to access the task's project
 	//
 	// Unknown topic schemes are denied by default.
@@ -65,9 +66,9 @@ func setupRoutes(ctx context.Context, mux *stdhttp.ServeMux) []http.MiddlewareFu
 		case "workspace":
 			return workspacesSvc.IsWorkspaceMember(ctx, userID, id)
 		case "project":
-			return workspacesSvc.IsProjectMember(ctx, userID, id)
+			return workspacesSvc.CanSubscribeProject(ctx, userID, id)
 		case "task":
-			return workspacesSvc.IsTaskMember(ctx, userID, id)
+			return workspacesSvc.CanSubscribeTask(ctx, userID, id)
 		default:
 			return false
 		}

@@ -43,7 +43,7 @@ func (a *TaskAPIV2) ListTaskLinks(ctx context.Context, req *flowtaskv2.ListTaskL
 	if err != nil {
 		return nil, err
 	}
-	if !a.Service.IsTaskMember(ctx, caller.UserID, req.GetTaskId()) {
+	if !a.Service.CanReadTask(ctx, caller.UserID, businessID, req.GetTaskId()) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 	links, err := a.Service.ListTaskLinks(ctx, req.GetTaskId(), businessID)

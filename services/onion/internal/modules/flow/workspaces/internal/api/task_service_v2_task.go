@@ -127,11 +127,11 @@ func (a *TaskAPIV2) CreateSubtask(ctx context.Context, req *flowtaskv2.CreateSub
 }
 
 func (a *TaskAPIV2) GetSubtasks(ctx context.Context, req *flowtaskv2.GetSubtasksRequest) (*flowtaskv2.GetSubtasksResponse, error) {
-	caller, _, err := a.resolveAuth(ctx)
+	caller, businessID, err := a.resolveAuth(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if !a.Service.IsTaskMember(ctx, caller.UserID, req.GetTaskId()) {
+	if !a.Service.CanReadTask(ctx, caller.UserID, businessID, req.GetTaskId()) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -214,11 +214,11 @@ func (a *TaskAPIV2) UpdateComment(ctx context.Context, req *flowtaskv2.UpdateCom
 }
 
 func (a *TaskAPIV2) GetTaskActivity(ctx context.Context, req *flowtaskv2.GetTaskActivityRequest) (*flowtaskv2.GetTaskActivityResponse, error) {
-	caller, _, err := a.resolveAuth(ctx)
+	caller, businessID, err := a.resolveAuth(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if !a.Service.IsTaskMember(ctx, caller.UserID, req.GetTaskId()) {
+	if !a.Service.CanReadTask(ctx, caller.UserID, businessID, req.GetTaskId()) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 	activities, err := a.Service.GetTaskActivity(ctx, req.GetTaskId())

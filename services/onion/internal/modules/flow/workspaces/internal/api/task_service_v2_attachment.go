@@ -29,11 +29,11 @@ func (a *TaskAPIV2) CreateAttachment(ctx context.Context, req *flowtaskv2.Create
 }
 
 func (a *TaskAPIV2) GetAttachments(ctx context.Context, req *flowtaskv2.GetAttachmentsRequest) (*flowtaskv2.GetAttachmentsResponse, error) {
-	caller, _, err := a.resolveAuth(ctx)
+	caller, businessID, err := a.resolveAuth(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if !a.Service.IsTaskMember(ctx, caller.UserID, req.GetTaskId()) {
+	if !a.Service.CanReadTask(ctx, caller.UserID, businessID, req.GetTaskId()) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 	attachments, err := a.Service.GetAttachments(ctx, req.GetTaskId())
@@ -85,11 +85,11 @@ func (a *TaskAPIV2) CreateTimeLog(ctx context.Context, req *flowtaskv2.CreateTim
 }
 
 func (a *TaskAPIV2) GetTimeLogs(ctx context.Context, req *flowtaskv2.GetTimeLogsRequest) (*flowtaskv2.GetTimeLogsResponse, error) {
-	caller, _, err := a.resolveAuth(ctx)
+	caller, businessID, err := a.resolveAuth(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if !a.Service.IsTaskMember(ctx, caller.UserID, req.GetTaskId()) {
+	if !a.Service.CanReadTask(ctx, caller.UserID, businessID, req.GetTaskId()) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 	logs, err := a.Service.GetTimeLogs(ctx, req.GetTaskId())

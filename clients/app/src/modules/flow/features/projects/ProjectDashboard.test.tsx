@@ -27,6 +27,20 @@ vi.mock('./useProjects', () => ({
   useProjects: () => ({ data: [], isLoading: false, refetch: vi.fn() }),
 }));
 
+// An unlisted project is asked for directly; these screens are tested with the
+// project in the store, so the direct lookup never has anything to say.
+vi.mock('../projects-v2/useAllProjects', () => ({
+  useProject: () => ({
+    data: undefined,
+    isPending: false,
+    isError: false,
+    isPaused: false,
+    failureCount: 0,
+    error: null,
+    refetch: vi.fn(),
+  }),
+}));
+
 const tasksState = vi.hoisted(() => ({
   data: [] as ApiTask[],
   isPending: false,

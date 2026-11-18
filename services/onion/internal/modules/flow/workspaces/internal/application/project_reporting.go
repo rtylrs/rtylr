@@ -15,9 +15,13 @@ const (
 
 // CanSeeProjectReport reports whether callerID may see reporting on one
 // project, such as its project dashboard. That is anyone Flow lets open the
-// project (canSeeProject: creator, owner, member, or a manager of someone
-// involved in it) and anyone holding business-wide reporting visibility
-// (hubProfileBypasses: business owner, admin, or flow:team:manage).
+// project (canSeeProject: creator, owner, member, a manager of someone involved
+// in it, or the business owner or an admin) and anyone holding business-wide
+// reporting visibility (hubProfileBypasses, which adds flow:team:manage). The
+// second check is what still sets reporting apart from opening the project:
+// flow:team:manage is reporting visibility, not resource access, so a holder
+// who is not a business owner or admin sees the dashboard but cannot open the
+// board.
 //
 // The My Tasks bucket is never reported on, whoever asks. A project that does
 // not exist or belongs to another business is false with no error, so a caller
