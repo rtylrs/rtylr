@@ -207,6 +207,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		m.WithBusinessProvisioner(hrCoreModule)
 		m.SetEmployeeProvisioner(hrCoreModule)
 		m.WithGoogleOAuth(cfg.GoogleOAuthClientID, cfg.GoogleOAuthClientSecret, cfg.GoogleOAuthRedirectURI)
+		m.WithAvatarPhotoBaseURL(cfg.CDNBaseURL)
 		return m
 	}()
 	workspacesModule.SetWorkDayLineStore(workspaceadapters.NewHRTimeWorkDayLineStore(hrTimeModule, hrCoreModule))

@@ -8,6 +8,12 @@ service UserService {
   /// Updates the authenticated user profile.
   updateProfile(UpdateProfileRequest) -> UpdateProfileResponse @patch("/users/me")
 
+  /// Sets or resets the authenticated user's avatar.
+  updateAvatar(UpdateAvatarRequest) -> UpdateAvatarResponse @put("/users/me/avatar")
+
+  /// Lists the chosen avatars of the caller's business colleagues.
+  listBusinessAvatars(ListBusinessAvatarsRequest) -> ListBusinessAvatarsResponse @get("/users/avatars")
+
   /// Changes the authenticated user password.
   changePassword(ChangePasswordRequest) -> ChangePasswordResponse @post("/users/password")
 

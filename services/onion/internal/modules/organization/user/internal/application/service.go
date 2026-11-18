@@ -54,6 +54,7 @@ type Service struct {
 	googleOAuthProvider *GoogleOAuthProvider
 	businessProvisioner BusinessProvisioner
 	employeeProvisioner EmployeeProvisioner
+	avatarPhotoBase     string
 }
 
 type BusinessProvisioner interface {

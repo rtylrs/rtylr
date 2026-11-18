@@ -49,7 +49,9 @@ func (a *UserAPI) GetMe(ctx context.Context, _ *hubuserv1.GetMeRequest) (*hubuse
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get user info")
 	}
 
-	return profileToGetMeResponse(profile), nil
+	response := profileToGetMeResponse(profile)
+	a.attachAvatar(ctx, response)
+	return response, nil
 }
 
 func (a *UserAPI) UpdateProfile(ctx context.Context, req *hubuserv1.UpdateProfileRequest) (*hubuserv1.UpdateProfileResponse, error) {
@@ -67,7 +69,9 @@ func (a *UserAPI) UpdateProfile(ctx context.Context, req *hubuserv1.UpdateProfil
 		profile, profileErr := a.ProfileResolver.GetProfile(ctx, device.User.UserID, device.User.BusinessID)
 		if profileErr == nil {
 			profile.FullName = user.FullName
-			return &hubuserv1.UpdateProfileResponse{User: profileToGetMeResponse(profile)}, nil
+			response := profileToGetMeResponse(profile)
+			a.attachAvatar(ctx, response)
+			return &hubuserv1.UpdateProfileResponse{User: response}, nil
 		}
 	}
 

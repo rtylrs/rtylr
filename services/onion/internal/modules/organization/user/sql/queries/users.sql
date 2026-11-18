@@ -104,3 +104,23 @@ SELECT COUNT(*) AS cnt FROM (
     JOIN businesses b ON b.id = member.business_id AND b.is_active = TRUE
     WHERE member.user_id = ? AND member.business_id = ? AND member.status = 'active'
 ) x;
+
+-- name: GetUserAvatar :one
+SELECT avatar FROM users WHERE id = ?;
+
+-- name: SetUserAvatar :exec
+UPDATE users SET avatar = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?;
+
+-- Colleagues are the business owner plus active members, the same set Flow
+-- treats as the business's people (see team.sql ListActiveMemberUserIDsByBusinessID).
+-- name: ListBusinessUserAvatars :many
+SELECT u.id, u.avatar
+FROM users AS u
+WHERE u.avatar IS NOT NULL
+  AND u.id IN (
+    SELECT business.owner_id FROM businesses AS business WHERE business.id = ?
+    UNION
+    SELECT member.user_id
+    FROM authorization_business_members AS member
+    WHERE member.business_id = ? AND member.status = 'active'
+  );
