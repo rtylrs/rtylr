@@ -6,6 +6,19 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en-US' } }),
 }));
 
+const navigate = vi.hoisted(() => vi.fn());
+vi.mock('@tanstack/react-router', () => ({ useNavigate: () => navigate }));
+
+const effectiveAccess = vi.hoisted(() => ({ value: undefined as unknown }));
+vi.mock('../../../../shared/stores/userStore', () => ({
+  useUserStore: (selector: (state: unknown) => unknown) =>
+    selector({ user: { effectiveAccess: effectiveAccess.value } }),
+}));
+vi.mock('@voxire/permissions', () => ({
+  canEffectiveAccess: (access: unknown, permission: string) =>
+    Array.isArray(access) && access.includes(permission),
+}));
+
 interface DirectoryQueryState {
   data: Array<Record<string, unknown>> | undefined;
   isLoading: boolean;
@@ -13,6 +26,7 @@ interface DirectoryQueryState {
   isError: boolean;
   isPaused?: boolean;
   failureCount?: number;
+  error?: unknown;
 }
 
 const directoryState = vi.hoisted(() => ({
@@ -43,11 +57,15 @@ const directoryState = vi.hoisted(() => ({
 }));
 
 const useDirectoryMock = vi.hoisted(() => vi.fn());
-vi.mock('./useDirectory', () => ({
+vi.mock('./useDirectory', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./useDirectory')>()),
   useDirectory: (search: string | undefined) => useDirectoryMock(search),
 }));
 
+import { ApiError } from '@voxire/voxie/hr/staff/v1/client';
 import DirectoryScreen from './DirectoryScreen';
+
+const forbidden = (code: string) => new ApiError(403, JSON.stringify({ message: 'denied', code }));
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -75,6 +93,7 @@ beforeEach(() => {
     isLoading: false,
     isError: false,
   };
+  effectiveAccess.value = undefined;
   useDirectoryMock.mockImplementation(() => directoryState.value);
 });
 
@@ -110,10 +129,50 @@ describe('DirectoryScreen', () => {
     expect(screen.queryByText('flow.directory.noMembersYet')).not.toBeInTheDocument();
   });
 
-  it('shows a load-failed state, not a crash, when listStaff denies the caller', () => {
+  it('shows a load-failed state with retry for a non-permission failure', () => {
     directoryState.value = { data: undefined, isLoading: false, isError: true };
     render(<DirectoryScreen />);
     expect(screen.getByText('flow.directory.loadFailedTitle')).toBeInTheDocument();
+    expect(screen.getByText('flow.directory.retryCta')).toBeInTheDocument();
+  });
+
+  it('says the directory is off, not that it failed, when the business turned it off', () => {
+    directoryState.value = {
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      error: forbidden('directory_disabled'),
+    };
+    render(<DirectoryScreen />);
+    expect(screen.getByText('flow.directory.disabledTitle')).toBeInTheDocument();
+    expect(screen.getByText('flow.directory.disabledDescription')).toBeInTheDocument();
+    expect(screen.queryByText('flow.directory.loadFailedTitle')).not.toBeInTheDocument();
+    expect(screen.queryByText('flow.directory.openHrSettingsCta')).not.toBeInTheDocument();
+  });
+
+  it('offers HR settings to an admin when the directory is off', () => {
+    effectiveAccess.value = ['hub:business:settings:manage'];
+    directoryState.value = {
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      error: forbidden('directory_disabled'),
+    };
+    render(<DirectoryScreen />);
+    fireEvent.click(screen.getByText('flow.directory.openHrSettingsCta'));
+    expect(navigate).toHaveBeenCalledWith({ to: '/settings/hr' });
+  });
+
+  it('says the role lacks access, with no pointless retry, when view_directory is missing', () => {
+    directoryState.value = {
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      error: forbidden('directory_permission_missing'),
+    };
+    render(<DirectoryScreen />);
+    expect(screen.getByText('flow.directory.noAccessTitle')).toBeInTheDocument();
+    expect(screen.queryByText('flow.directory.retryCta')).not.toBeInTheDocument();
   });
 
   it('shows the load-failed state for a query stuck paused after a failed attempt, not the empty state', () => {
