@@ -282,7 +282,9 @@ const OptionRow: React.FC<{ option: FilterOption; checked: boolean; onToggle: ()
     >
       {checked && <Check size={11} strokeWidth={3} />}
     </span>
-    {option.initials !== undefined && <Avatar size="xs" initials={option.initials} aria-hidden />}
+    {option.initials !== undefined && (
+      <Avatar size="xs" initials={option.initials} seed={option.value} aria-hidden />
+    )}
     {option.color && (
       <span
         className="h-2.5 w-2.5 shrink-0 rounded-full"

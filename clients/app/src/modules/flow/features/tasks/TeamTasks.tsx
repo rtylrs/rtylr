@@ -192,7 +192,12 @@ const TeamTasks: React.FC = () => {
                         aria-hidden="true"
                       />
                     ) : (
-                      <Avatar size="xs" initials={initialsFromName(section.name)} aria-hidden />
+                      <Avatar
+                        size="xs"
+                        initials={initialsFromName(section.name)}
+                        seed={section.id}
+                        aria-hidden
+                      />
                     )}
                     {section.id === currentUserId
                       ? t('flow.filters.you', { name: section.name })

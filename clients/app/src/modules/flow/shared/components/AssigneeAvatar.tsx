@@ -1,12 +1,15 @@
 import React from 'react';
 import { ACCENT_DEFAULT } from '../lib/colorUtils';
 import { withAlpha } from '../lib/colorUtils';
+import { avatarColor } from '@voxire/ui';
 
 interface AssigneeAvatarProps {
   name: string;
   initials: string;
   size?: number;
   color?: string;
+  /** The person's id: picks their colour from the shared avatar palette. */
+  seed?: string;
   stacked?: boolean;
 }
 
@@ -14,9 +17,15 @@ export const AssigneeAvatar: React.FC<AssigneeAvatarProps> = ({
   name,
   initials,
   size = 22,
-  color = ACCENT_DEFAULT,
+  color,
+  seed,
   stacked = false,
 }) => {
+  // A seeded avatar is a solid circle in the person's own colour, the same
+  // one they get everywhere else in the portal. An explicit colour keeps the
+  // old tinted look for callers that pass one.
+  const seeded = !color && seed ? avatarColor(seed) : null;
+  const tint = color ?? ACCENT_DEFAULT;
   return (
     <span
       title={name}
@@ -24,8 +33,8 @@ export const AssigneeAvatar: React.FC<AssigneeAvatarProps> = ({
       style={{
         width: size,
         height: size,
-        background: withAlpha(color, 13),
-        color,
+        background: seeded ? seeded.background : withAlpha(tint, 13),
+        color: seeded ? seeded.foreground : tint,
         // Initials scale with the circle, so the scale cannot supply this
         // one: at the sizes in use (18 to 28) a 12px floor overflows a two
         // character monogram, and reaching 12px proportionally needs a 30px
@@ -44,7 +53,7 @@ export const AssigneeAvatar: React.FC<AssigneeAvatarProps> = ({
 };
 
 interface AvatarStackProps {
-  members: { name: string; initials: string; color?: string }[];
+  members: { name: string; initials: string; color?: string; seed?: string }[];
   max?: number;
   size?: number;
 }
@@ -61,6 +70,7 @@ export const AvatarStack: React.FC<AvatarStackProps> = ({ members, max = 4, size
           initials={m.initials}
           size={size}
           color={m.color}
+          seed={m.seed}
           stacked
         />
       ))}

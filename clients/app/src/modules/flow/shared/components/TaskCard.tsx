@@ -225,7 +225,12 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         {/* Footer */}
         <div className="flex items-center justify-between mt-1">
           <div className="flex items-center gap-2">
-            <AssigneeAvatar name={task.assignee} initials={task.assigneeInitials} size={18} />
+            <AssigneeAvatar
+              name={task.assignee}
+              initials={task.assigneeInitials}
+              seed={task.assigneeId || undefined}
+              size={18}
+            />
             {task.subtaskCount > 0 && (
               <span
                 className="flex items-center gap-0.5 text-flow-meta"

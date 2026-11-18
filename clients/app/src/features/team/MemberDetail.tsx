@@ -298,6 +298,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
         <div className="portal-page-header">
           <Avatar
             initials={getInitials(member.name)}
+            seed={String(member.id)}
             size="lg"
             className="shrink-0"
             style={{ background: 'var(--accent-muted)', color: 'var(--accent-on-muted)' }}
