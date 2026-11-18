@@ -15,6 +15,12 @@ export type { AlertProps } from "./components/Alert";
 export { Switch } from "./components/Switch";
 
 export { Avatar } from "./components/Avatar";
+export {
+  avatarColor,
+  avatarColorIndex,
+  AVATAR_PALETTE,
+} from "./lib/avatarColor";
+export type { AvatarColor } from "./lib/avatarColor";
 export type { AvatarProps, AvatarSize } from "./components/Avatar";
 
 export { EmptyState } from "./components/EmptyState";
