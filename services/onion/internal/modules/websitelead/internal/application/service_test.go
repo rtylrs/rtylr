@@ -233,3 +233,28 @@ func TestSubmit_EscapesLeadFieldsInEmails(t *testing.T) {
 		t.Fatalf("notification missing PathEscape'd WhatsApp phone segment")
 	}
 }
+
+// A phone-only quote has no address for the auto-reply, and the team's
+// notification must not carry an empty Reply-To or an email reply button.
+func TestSubmit_PhoneOnlyLeadSendsOnlyTheNotification(t *testing.T) {
+	got, wait := captureEmails(t, 1)
+	s := &Service{repo: &mockRepo{createID: 9}, notify: testNotify()}
+	if _, err := s.Submit(context.Background(), domain.LeadInput{
+		Name: "Rami", Phone: "+961 3 123 456", Service: "web",
+	}); err != nil {
+		t.Fatal(err)
+	}
+	wait()
+	// Give a stray auto-reply goroutine time to show up before counting.
+	time.Sleep(100 * time.Millisecond)
+	if len(*got) != 1 {
+		t.Fatalf("sent %d emails, want only the team notification", len(*got))
+	}
+	n := (*got)[0]
+	if !strings.HasPrefix(n.Subject, "[Lead #9]") || n.ReplyTo != "" {
+		t.Fatalf("notification subject %q reply-to %q", n.Subject, n.ReplyTo)
+	}
+	if strings.Contains(n.HTML, "mailto:") || !strings.Contains(n.HTML, "wa.me/") {
+		t.Fatal("notification should offer WhatsApp and no email reply for a phone-only lead")
+	}
+}
