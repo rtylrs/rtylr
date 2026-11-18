@@ -302,6 +302,7 @@ const TimePanel = ({
                   size="sm"
                   initials={initialsFromName(authorName)}
                   seed={String(log.userId)}
+                  name={authorName}
                   aria-hidden="true"
                 />
                 <div className="min-w-0 flex-1">

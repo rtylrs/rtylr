@@ -141,6 +141,7 @@ const PresenceScreen = (): React.JSX.Element => {
                           <Avatar
                             initials={initials(fullName)}
                             seed={entry.userId ? String(entry.userId) : fullName}
+                            name={fullName}
                             size="sm"
                           />
                           <span
