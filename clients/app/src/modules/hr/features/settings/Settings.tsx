@@ -17,6 +17,7 @@ import {
   useIsMobile,
 } from '../../shared/components/ui';
 import { HrSettings } from '../../shared/services/hrExtras';
+import CompanyDirectorySetting from './CompanyDirectorySetting';
 
 // The code is what gets stored; only the name is translated.
 const SETTINGS_CURRENCIES = ['USD', 'EUR', 'GBP'] as const;
@@ -138,6 +139,7 @@ const Settings: React.FC = () => {
             </Button>
           </div>
         </Card>
+        <CompanyDirectorySetting />
       </div>
     </>
   );
