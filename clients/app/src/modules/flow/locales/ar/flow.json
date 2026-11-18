@@ -1209,5 +1209,53 @@
     "description": "استخدم الإجراءات المتاحة لك في هذا النشاط التجاري.",
     "noActions": "لم يتم تعيين إجراءات",
     "noActionsDescription": "اطلب من مسؤول النشاط التجاري تحديث صلاحياتك في Flow."
+  },
+  "filters": {
+    "title": "تصفية المهام",
+    "filter": "تصفية",
+    "filterHint": "تصفية (F)",
+    "searchPlaceholder": "ابحث في المهام",
+    "searchLabel": "ابحث في المهام بالعنوان أو المعرّف أو الوصف أو التصنيف",
+    "people": "عرض المهام حسب الشخص",
+    "showPerson": "عرض مهام {{name}}",
+    "you": "{{name}} (أنت)",
+    "unassigned": "غير مسندة",
+    "morePeople": "عرض الجميع ({{count}} آخرين)",
+    "onlyMine": "مهامي فقط",
+    "onlyMineHint": "عرض المهام المسندة إليك فقط (Q)",
+    "clearAll": "مسح عوامل التصفية",
+    "clearHint": "مسح كل عوامل التصفية (Shift+Esc)",
+    "clearField": "مسح",
+    "visibleCount": "{{visible}} من {{total}} مهمة ظاهرة",
+    "active": "عوامل التصفية النشطة",
+    "removeChip": "إزالة عامل التصفية: {{label}}",
+    "unknownValue": "غير معروف",
+    "pickField": "اختر حقلًا لبدء التصفية.",
+    "searchField": "بحث: {{field}}",
+    "noOptions": "لا توجد نتائج",
+    "shownOf": "{{shown}} من {{total}}",
+    "dim": "تعتيم بدلًا من الإخفاء",
+    "noMatches": "لا توجد مهام تطابق عوامل التصفية هذه.",
+    "fields": {
+      "assignee": "المسؤول",
+      "priority": "الأولوية",
+      "label": "التصنيف",
+      "due": "تاريخ الاستحقاق",
+      "status": "الحالة",
+      "cycle": "الدورة",
+      "milestone": "المرحلة",
+      "project": "المشروع"
+    },
+    "due": {
+      "overdue": "متأخرة",
+      "today": "مستحقة اليوم",
+      "next7": "مستحقة خلال 7 أيام",
+      "next30": "مستحقة خلال 30 يومًا",
+      "noDate": "بلا تاريخ استحقاق",
+      "custom": "نطاق مخصص",
+      "from": "من",
+      "to": "إلى",
+      "range": "من {{from}} إلى {{to}}"
+    }
   }
 }

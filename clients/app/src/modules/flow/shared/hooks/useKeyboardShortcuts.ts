@@ -8,7 +8,7 @@ import { canAccessPortalPath } from '../../../../shared/utils/canAccessPortalPat
 import { canFlowPermission } from '../lib/roleUtils';
 
 // Keyboard shortcuts: global.
-// c = new task, / = search, g i = inbox, g m = my tasks, cmd+k = command bar
+// c = new task, / = the page's filter search or the command bar, g i = inbox, g m = my tasks, cmd+k = command bar
 export function useKeyboardShortcuts() {
   const navigate = useNavigate();
   // The same gate router.tsx puts on these destinations. Without it the g
@@ -45,6 +45,14 @@ export function useKeyboardShortcuts() {
       if (e.key === '/') {
         e.preventDefault();
         e.stopPropagation();
+        // A list with a filter bar searches itself, the way / does on Jira and
+        // GitHub; everywhere else / is still the command bar.
+        const pageSearch = document.querySelector<HTMLInputElement>('[data-flow-filter-search]');
+        if (pageSearch) {
+          pageSearch.focus();
+          pageSearch.select();
+          return;
+        }
         setCommandBarOpen(true);
         return;
       }

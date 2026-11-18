@@ -1161,5 +1161,53 @@
     "description": "Utilisez les actions disponibles dans cette entreprise.",
     "noActions": "Aucune action attribuée",
     "noActionsDescription": "Demandez à un administrateur de mettre à jour votre accès à Work."
+  },
+  "filters": {
+    "title": "Filtrer les tâches",
+    "filter": "Filtrer",
+    "filterHint": "Filtrer (F)",
+    "searchPlaceholder": "Rechercher des tâches",
+    "searchLabel": "Rechercher des tâches par titre, identifiant, description ou étiquette",
+    "people": "Afficher les tâches par personne",
+    "showPerson": "Afficher les tâches de {{name}}",
+    "you": "{{name}} (vous)",
+    "unassigned": "Non assignée",
+    "morePeople": "Afficher tout le monde ({{count}} de plus)",
+    "onlyMine": "Les miennes",
+    "onlyMineHint": "N’afficher que les tâches qui vous sont assignées (Q)",
+    "clearAll": "Effacer les filtres",
+    "clearHint": "Effacer tous les filtres (Maj+Échap)",
+    "clearField": "Effacer",
+    "visibleCount": "{{visible}} tâches visibles sur {{total}}",
+    "active": "Filtres actifs",
+    "removeChip": "Retirer le filtre : {{label}}",
+    "unknownValue": "Inconnu",
+    "pickField": "Choisissez un champ pour commencer à filtrer.",
+    "searchField": "Rechercher : {{field}}",
+    "noOptions": "Aucun résultat",
+    "shownOf": "{{shown}} sur {{total}}",
+    "dim": "Estomper au lieu de masquer",
+    "noMatches": "Aucune tâche ne correspond à ces filtres.",
+    "fields": {
+      "assignee": "Responsable",
+      "priority": "Priorité",
+      "label": "Étiquette",
+      "due": "Échéance",
+      "status": "Statut",
+      "cycle": "Itération",
+      "milestone": "Jalon",
+      "project": "Projet"
+    },
+    "due": {
+      "overdue": "En retard",
+      "today": "Échéance aujourd’hui",
+      "next7": "Échéance dans les 7 prochains jours",
+      "next30": "Échéance dans les 30 prochains jours",
+      "noDate": "Sans échéance",
+      "custom": "Période personnalisée",
+      "from": "Du",
+      "to": "Au",
+      "range": "du {{from}} au {{to}}"
+    }
   }
 }

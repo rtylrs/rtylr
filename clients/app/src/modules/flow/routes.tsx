@@ -9,6 +9,7 @@ import RouteNotFound from './shared/components/RouteNotFound';
 import { settingsSearchSchema } from './shared/schemas/settings';
 import { myDaySearchSchema } from './shared/schemas/time';
 import { taskDrawerSearchSchema } from './shared/schemas/taskDrawer';
+import { taskFilterSearchSchema } from './shared/schemas/taskFilterSearch';
 import { useTranslation } from 'react-i18next';
 import { useUserStore } from '../../shared/stores/userStore';
 import { getFlowHomePath } from './navigation';
@@ -84,7 +85,7 @@ export function createFlowRoutes<TParent extends AnyRoute>(parent: TParent) {
   const rootRoute = createRoute({
     getParentRoute: () => parent,
     path: 'flow',
-    validateSearch: taskDrawerSearchSchema,
+    validateSearch: taskDrawerSearchSchema.extend(taskFilterSearchSchema.shape),
     component: () => (
       <Suspense fallback={<RouteLoading />}>
         <FlowLayout>

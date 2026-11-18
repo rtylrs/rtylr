@@ -28,7 +28,7 @@ export function isTaskMine(taskAssigneeId: string): boolean {
 }
 
 /** The signed-in user's id, reactive to store updates. */
-function useCurrentUserId(): string | null {
+export function useCurrentUserId(): string | null {
   return useUserStore((state) => (state.user?.id === undefined ? null : String(state.user.id)));
 }
 

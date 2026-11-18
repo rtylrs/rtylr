@@ -1,0 +1,120 @@
+import type { TFunction } from 'i18next';
+import type { Task } from '../stores/flowStore';
+import { initialsFromName } from '../lib/memberUtils';
+import { PRIORITIES, UNASSIGNED, type ListField } from './taskFilters';
+
+export interface FilterOption {
+  value: string;
+  /** Already translated, or a person's / label's own name. */
+  label: string;
+  /** A dot of this colour before the label (labels, statuses). */
+  color?: string;
+  /** Initials in a small avatar before the label (people). */
+  initials?: string;
+}
+
+export interface FilterFieldConfig {
+  field: ListField;
+  label: string;
+  options: FilterOption[];
+}
+
+export interface FilterPerson {
+  id: string;
+  name: string;
+}
+
+const PRIORITY_KEY: Record<Task['priority'], string> = {
+  urgent: 'flowPriority.urgent',
+  high: 'flowPriority.high',
+  medium: 'flowPriority.medium',
+  low: 'flowPriority.low',
+  no_priority: 'flowPriority.noPriority',
+};
+
+export function priorityField(t: TFunction): FilterFieldConfig {
+  return {
+    field: 'priorities',
+    label: t('flow.filters.fields.priority'),
+    options: PRIORITIES.map((p) => ({ value: p, label: t(PRIORITY_KEY[p]) })),
+  };
+}
+
+/** People, the current user first and marked, then Unassigned. */
+export function assigneeField(
+  people: readonly FilterPerson[],
+  currentUserId: string | null,
+  t: TFunction
+): FilterFieldConfig {
+  return {
+    field: 'assignees',
+    label: t('flow.filters.fields.assignee'),
+    options: [
+      ...orderPeople(people, currentUserId).map((p) => ({
+        value: p.id,
+        label: p.id === currentUserId ? t('flow.filters.you', { name: p.name }) : p.name,
+        initials: initialsFromName(p.name),
+      })),
+      { value: UNASSIGNED, label: t('flow.filters.unassigned') },
+    ],
+  };
+}
+
+export function labelField(
+  labels: readonly { id: number | string; name: string; color: string }[],
+  t: TFunction
+): FilterFieldConfig {
+  return {
+    field: 'labels',
+    label: t('flow.filters.fields.label'),
+    options: labels.map((l) => ({ value: String(l.id), label: l.name, color: l.color })),
+  };
+}
+
+export function namedField(
+  field: Extract<ListField, 'statuses' | 'cycles' | 'milestones' | 'projects'>,
+  label: string,
+  items: readonly { id: string; name: string; color?: string }[]
+): FilterFieldConfig {
+  return {
+    field,
+    label,
+    options: items.map((i) => ({ value: String(i.id), label: i.name, color: i.color })),
+  };
+}
+
+/** Me first, then everyone else alphabetically, so the strip is stable. */
+export function orderPeople(
+  people: readonly FilterPerson[],
+  currentUserId: string | null
+): FilterPerson[] {
+  const seen = new Set<string>();
+  const unique = people.filter((p) => {
+    if (!p.id || seen.has(p.id)) return false;
+    seen.add(p.id);
+    return true;
+  });
+  return unique.sort((a, b) => {
+    if (a.id === currentUserId) return -1;
+    if (b.id === currentUserId) return 1;
+    return a.name.localeCompare(b.name);
+  });
+}
+
+/**
+ * Members plus anyone a task is still assigned to who is no longer a member,
+ * so a removed teammate's tasks can still be filtered.
+ */
+export function peopleFrom(
+  members: readonly { userId: string; name: string }[],
+  tasks: readonly Pick<Task, 'assigneeId' | 'assignee'>[]
+): FilterPerson[] {
+  const byId = new Map<string, string>();
+  for (const m of members) byId.set(String(m.userId), m.name);
+  for (const task of tasks) {
+    if (task.assigneeId && !byId.has(task.assigneeId)) {
+      byId.set(task.assigneeId, task.assignee || task.assigneeId);
+    }
+  }
+  return [...byId].map(([id, name]) => ({ id, name }));
+}

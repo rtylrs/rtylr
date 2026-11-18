@@ -83,6 +83,8 @@ import type { ApiStatus } from '../../shared/services/flowApi';
 import type { Task } from '../../shared/stores/flowStore';
 import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
+import FilterBar from '../../shared/filters/FilterBar';
+import { useProjectTaskFilters } from './useProjectTaskFilters';
 
 /** What the board renders while a card is being dragged. */
 interface DragView {
@@ -328,10 +330,25 @@ const ProjectBoard: React.FC = () => {
     [apiTasks]
   );
 
+  // ── Filters ─────────────────────────────────────────────────────────────
+  // Shared by every view of this project, carried in the URL and remembered
+  // per project. Hide is the default; "Dim instead of hide" keeps every card.
+  const {
+    state: filterState,
+    fields: filterFields,
+    people,
+    currentUserId,
+    matchingIds,
+    shownTasks: boardTasks,
+    dimmedIds,
+  } = useProjectTaskFilters(projectId, tasks);
+  const { filters, dim } = filterState;
+  const hideUnmatched = matchingIds !== null && !dim;
+
   // Precompute the ordered lane index across all tasks so every column
   // renders the same rows in the same order - otherwise empty columns
   // would silently skip lanes and the swimlane grid misaligns.
-  const laneIndex = useMemo(() => buildLaneIndex(tasks, groupBy), [tasks, groupBy]);
+  const laneIndex = useMemo(() => buildLaneIndex(boardTasks, groupBy), [boardTasks, groupBy]);
 
   // Every column is a move destination for the non-drag path (B2).
   const moveTargets: MoveTarget[] = useMemo(
@@ -375,12 +392,21 @@ const ProjectBoard: React.FC = () => {
   }
 
   const knownStatusIds = new Set(columns.map((c) => c.id));
+  // Cards keep a hand-arranged order. With some hidden, a drop would be placed
+  // against cards the user cannot see, so a filtered board (like a swimlane
+  // one) only moves cards between columns.
+  const canReorder = groupBy === 'none' && !hideUnmatched;
+  // A status filter narrows the columns themselves; an empty column for every
+  // unchosen status would only push the chosen ones off screen.
+  const shownColumns = columns
+    .map((col, index) => ({ col, index }))
+    .filter(({ col }) => filters.statuses.length === 0 || filters.statuses.includes(col.id));
   const now = Date.now();
 
   /** Every card on a column, in board order. A task whose status is not a column here sits in the first. */
   function allTasksForColumn(col: ApiStatus, colIndex: number): Task[] {
     return orderBoardTasks(
-      tasks.filter((t) => {
+      boardTasks.filter((t) => {
         const own = statusIdOf(t);
         if (own === col.id) return true;
         return colIndex === 0 && (!own || !knownStatusIds.has(own));
@@ -508,7 +534,7 @@ const ProjectBoard: React.FC = () => {
       taskId,
       task,
       source: { columnId: sourceColumnId, index: Math.max(0, sourceIndex) },
-      reorder: groupBy === 'none',
+      reorder: canReorder,
       startX: e.clientX,
       startY: e.clientY,
       x: e.clientX,
@@ -688,6 +714,15 @@ const ProjectBoard: React.FC = () => {
         }
       />
 
+      <FilterBar
+        state={filterState}
+        currentUserId={currentUserId}
+        fields={filterFields}
+        people={people}
+        visible={matchingIds?.size ?? tasks.length}
+        total={tasks.length}
+      />
+
       <BoardSettingsPanel
         open={boardSettingsOpen}
         onClose={() => setBoardSettingsOpen(false)}
@@ -713,11 +748,12 @@ const ProjectBoard: React.FC = () => {
           down to narrow viewports because the column snaps to 248px. */}
       <div className="min-h-0 flex-1 overflow-auto">
         <div className="flex h-full min-w-max gap-2 px-3 py-3">
-          {columns.map((col, i) => (
+          {shownColumns.map(({ col, index: i }) => (
             <KanbanColumn
               key={String(col.id)}
               col={col}
               lanes={buildLanes(laneIndex, tasksForColumn(col, i), groupBy)}
+              dimmedIds={dimmedIds}
               groupBy={groupBy}
               isOver={dragOver === String(col.id)}
               selectedTaskIds={selectedTaskIds}
@@ -728,7 +764,7 @@ const ProjectBoard: React.FC = () => {
               moveTargets={moveTargets}
               registerRef={(el) => columnRefs.current.set(String(col.id), el)}
               registerList={(el) => listRefs.current.set(String(col.id), el)}
-              reorder={groupBy === 'none'}
+              reorder={canReorder}
               placeholder={placeholderFor(String(col.id))}
               onMoveTask={(taskId, columnId) => moveTask.mutate({ taskId, columnId })}
               onDragPointerDown={handleDragPointerDown}
@@ -860,6 +896,8 @@ type Side = 'before' | 'after';
 const KanbanColumn: React.FC<{
   col: ApiStatus;
   lanes: Lane[];
+  /** Cards that do not match the filters, faded in "Dim instead of hide". */
+  dimmedIds?: ReadonlySet<string> | null;
   groupBy: GroupKey;
   isOver: boolean;
   selectedTaskIds: string[];
@@ -894,6 +932,7 @@ const KanbanColumn: React.FC<{
 }> = ({
   col,
   lanes,
+  dimmedIds = null,
   groupBy,
   isOver,
   selectedTaskIds,
@@ -981,7 +1020,18 @@ const KanbanColumn: React.FC<{
         visible += 1;
       }
       out.push(
-        <div key={task.id} data-board-card={task.id} style={lifted ? HIDDEN_CARD_STYLE : undefined}>
+        <div
+          key={task.id}
+          data-board-card={task.id}
+          data-filter-dimmed={dimmedIds?.has(task.id) ? '' : undefined}
+          style={
+            lifted
+              ? HIDDEN_CARD_STYLE
+              : dimmedIds?.has(task.id)
+                ? { opacity: 0.35, transition: 'opacity 0.15s' }
+                : undefined
+          }
+        >
           <TaskCard
             task={task}
             controls={renderCardControls(task.id, task.title)}
@@ -1003,6 +1053,11 @@ const KanbanColumn: React.FC<{
   // Total count for the column header pill (stays accurate regardless
   // of group-by - it's the sum of tasks across all lanes).
   const colTaskCount = lanes.reduce((n, l) => n + l.tasks.length, 0);
+  // While dimming, the pill reads "matching/all" so the column still says how
+  // much of it the filter picked out.
+  const colMatchCount = dimmedIds
+    ? lanes.reduce((n, l) => n + l.tasks.filter((task) => !dimmedIds.has(task.id)).length, 0)
+    : null;
 
   return (
     <div
@@ -1056,7 +1111,7 @@ const KanbanColumn: React.FC<{
           className="text-flow-meta px-1.5 py-0.5 rounded-full font-medium shrink-0"
           style={{ background: withAlpha(col.color, 13), color: onTint(col.color) }}
         >
-          {colTaskCount}
+          {colMatchCount === null ? colTaskCount : `${colMatchCount}/${colTaskCount}`}
         </span>
 
         {canManage && (

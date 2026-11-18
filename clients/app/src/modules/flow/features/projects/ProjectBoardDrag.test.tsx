@@ -68,6 +68,35 @@ vi.mock('../tasks/useTasks', () => ({
 }));
 vi.mock('../tasks/useLabels', () => ({ useLabels: () => ({ data: [] }) }));
 vi.mock('./useColumns', () => ({ useMoveTaskToColumn: () => mutation }));
+vi.mock('./useProjectTaskFilters', () => ({
+  useProjectTaskFilters: (_projectId: string, tasks: unknown[]) => ({
+    state: {
+      filters: {
+        assignees: [],
+        priorities: [],
+        labels: [],
+        due: [],
+        statuses: [],
+        cycles: [],
+        milestones: [],
+        projects: [],
+        query: '',
+      },
+      setFilters: vi.fn(),
+      clear: vi.fn(),
+      active: false,
+      dim: false,
+      setDim: vi.fn(),
+    },
+    fields: [],
+    people: [],
+    currentUserId: null,
+    matchingIds: null,
+    shownTasks: tasks,
+    dimmedIds: null,
+  }),
+}));
+
 vi.mock('./useStatuses', () => ({
   useProjectStatuses: () => ({
     isPending: false,
