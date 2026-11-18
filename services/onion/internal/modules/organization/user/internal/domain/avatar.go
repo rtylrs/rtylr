@@ -39,7 +39,18 @@ var AvatarStyles = map[string]struct{}{
 	"avataaars": {}, "adventurer": {}, "big-smile": {}, "thumbs": {},
 	"croodles": {}, "glass": {}, "cameo": {}, "shadows": {}, "cutouts": {},
 	"voxel-art": {}, "line-face": {}, "voxel-bot": {}, "slice": {},
-	"gaze": {}, "stack": {}, "patchwork": {},
+	"gaze": {}, "stack": {}, "patchwork": {}, AvatarStyleMoods: {},
+}
+
+// AvatarStyleMoods is RTYLR's own set of twelve reaction faces, drawn for the
+// portal. Its seed names the face rather than feeding a generator, so only
+// these ids draw anything.
+const AvatarStyleMoods = "rtylr-moods"
+
+var avatarMoods = map[string]struct{}{
+	"stone-face": {}, "this-is-fine": {}, "side-eye": {}, "galaxy-brain": {},
+	"stonks": {}, "mind-blown": {}, "facepalm": {}, "deal-with-it": {},
+	"shrug": {}, "smug": {}, "thinking": {}, "nervous-sweat": {},
 }
 
 var (
@@ -60,6 +71,9 @@ func (a Avatar) Validate(photoBase string) error {
 		}
 	case AvatarKindIllustrated:
 		if _, ok := AvatarStyles[a.Style]; !ok || !avatarSeed.MatchString(a.Seed) {
+			return ErrAvatarInvalid
+		}
+		if _, isMood := avatarMoods[a.Seed]; a.Style == AvatarStyleMoods && !isMood {
 			return ErrAvatarInvalid
 		}
 	case AvatarKindInitials:
