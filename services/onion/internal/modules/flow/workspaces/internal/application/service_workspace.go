@@ -37,6 +37,45 @@ func (s *Service) IsTaskMember(ctx context.Context, userID, taskID int64) bool {
 	return task.OwnerID == userID
 }
 
+// CanSubscribeProject authorizes a `project:<id>` realtime topic: whoever
+// IsProjectMember admits, plus an owner or admin of the project's own business
+// who may open it (administratorOpens), so a board they opened by link stays
+// live. The topic carries no business, so the project's business is read from
+// the project itself and the administrator check runs against that business.
+func (s *Service) CanSubscribeProject(ctx context.Context, userID, projectID int64) bool {
+	if s.IsProjectMember(ctx, userID, projectID) {
+		return true
+	}
+	if userID <= 0 || projectID <= 0 || s.repo == nil {
+		return false
+	}
+	p, err := s.repo.GetProjectProxyFacts(ctx, projectID)
+	if err != nil || p.BusinessID <= 0 {
+		return false
+	}
+	return s.administratorOpens(ctx, p, userID, p.BusinessID)
+}
+
+// CanSubscribeTask is CanSubscribeProject for a `task:<id>` topic, resolved
+// through the task's project.
+func (s *Service) CanSubscribeTask(ctx context.Context, userID, taskID int64) bool {
+	if s.IsTaskMember(ctx, userID, taskID) {
+		return true
+	}
+	if userID <= 0 || taskID <= 0 || s.repo == nil {
+		return false
+	}
+	task, err := s.repo.GetTaskByID(ctx, taskID)
+	if err != nil || task.ProjectID == 0 {
+		return false
+	}
+	p, err := s.repo.GetProjectProxyFacts(ctx, task.ProjectID)
+	if err != nil || p.BusinessID <= 0 || p.BusinessID != task.BusinessID {
+		return false
+	}
+	return s.administratorOpens(ctx, p, userID, p.BusinessID)
+}
+
 // ─────────────────────────────────────────────
 // Authorization
 // ─────────────────────────────────────────────
