@@ -1211,7 +1211,11 @@
       "range": "du {{from}} au {{to}}"
     },
     "showCompleted": "Afficher les terminées",
-    "completed": "Terminées"
+    "completed": "Terminées",
+    "saveAsView": "Enregistrer comme vue",
+    "savedAsView": "Enregistré comme vue « {{name}} »",
+    "openView": "Ouvrir",
+    "savedViewName": "{{project}} : filtré"
   },
   "teamTasks": {
     "summary": "{{tasks}} tâches ouvertes pour {{people}} personnes",
