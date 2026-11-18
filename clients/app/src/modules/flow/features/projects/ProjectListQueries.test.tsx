@@ -20,6 +20,35 @@ const remote = vi.hoisted(() => ({
   retryProject: vi.fn(),
   openTask: vi.fn(),
 }));
+// Filtering has its own suite (ProjectBoardFilters); here it is a no-op.
+vi.mock('./useProjectTaskFilters', () => ({
+  useProjectTaskFilters: (_projectId: string, tasks: unknown[]) => ({
+    state: {
+      filters: {
+        assignees: [],
+        priorities: [],
+        labels: [],
+        due: [],
+        statuses: [],
+        cycles: [],
+        milestones: [],
+        projects: [],
+        query: '',
+      },
+      setFilters: vi.fn(),
+      clear: vi.fn(),
+      active: false,
+      dim: false,
+      setDim: vi.fn(),
+    },
+    fields: [],
+    people: [],
+    currentUserId: null,
+    matchingIds: null,
+    shownTasks: tasks,
+    dimmedIds: null,
+  }),
+}));
 vi.mock('../../shared/lib/useOpenTask', () => ({ useOpenTask: () => remote.openTask }));
 vi.mock('@tanstack/react-router', () => ({
   useLocation: () => ({ pathname: '/flow/p/7/list' }),
