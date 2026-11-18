@@ -189,5 +189,49 @@
     "show": "Show {{item}}",
     "restore": "Restore default",
     "saveFailed": "Couldn’t save the navigation. Try again."
+  },
+  "avatar": {
+    "title": "Avatar",
+    "description": "How you appear to your team everywhere in RTYLR.",
+    "change": "Change avatar",
+    "dialogTitle": "Choose your avatar",
+    "dialogDescription": "Upload a photo, pick an illustration, or use your initials or an emoji.",
+    "tabs": {
+      "photo": "Photo",
+      "illustrated": "Illustrated",
+      "initials": "Initials",
+      "emoji": "Emoji"
+    },
+    "groups": {
+      "professional": "Professional",
+      "cool": "Cool",
+      "funky": "Funky",
+      "abstract": "Abstract"
+    },
+    "new": "New",
+    "shuffle": "Shuffle",
+    "by": "by {{author}}",
+    "remix": "remixed by DiceBear",
+    "optionN": "{{style}} option",
+    "initialsHint": "Pick a colour for your initials.",
+    "colour": "Colour",
+    "colourN": "Colour {{n}}",
+    "uploadPhoto": "Upload a photo",
+    "photoHint": "JPG, PNG or WebP, up to 5 MB. Drop it here or click to choose.",
+    "wrongType": "Use a JPG, PNG or WebP image.",
+    "tooLarge": "That photo is over 5 MB. Choose a smaller one.",
+    "uploadFailed": "Couldn't upload that photo. Try again.",
+    "photoFrame": "Photo framing. Drag or use the arrow keys to move it, plus and minus to zoom.",
+    "zoom": "Zoom",
+    "dragHint": "Drag the photo to position it in the circle.",
+    "choosePhotoAgain": "Choose another photo",
+    "usePhoto": "Use this photo",
+    "uploading": "Uploading…",
+    "useDefault": "Use default",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Avatar updated",
+    "saveFailed": "Couldn't save your avatar. Try again."
   }
 }
