@@ -111,6 +111,9 @@ message GetMeResponse {
   effective_access: EffectiveAccess?
   /// Account provisioning and security state.
   provisioning_status: ProvisioningStatus?
+  /// The avatar the user chose. Absent means the default: initials on a colour
+  /// derived from the user id.
+  avatar: UserAvatar?
 }
 
 message UpdateProfileRequest {
@@ -138,4 +141,43 @@ message SwitchBusinessRequest {
 message SwitchBusinessResponse {
   /// Fresh JWT scoped to the selected business.
   token: string
+}
+
+/// A user's chosen avatar. One per user, shown in every app and business.
+///
+/// kind is one of:
+/// - "photo": url is an image the user uploaded to the RTYLR CDN.
+/// - "illustrated": a generated avatar, style + seed (rendered by the client).
+/// - "initials": initials on palette colour `color` (0 to 11).
+/// - "emoji": `emoji` on palette colour `color`.
+message UserAvatar {
+  kind: string @required @len(1, 16)
+  url: string? @len(0, 1024)
+  style: string? @len(0, 32)
+  seed: string? @len(0, 64)
+  color: int32?
+  emoji: string? @len(0, 32)
+}
+
+message UpdateAvatarRequest {
+  /// The new avatar. Absent resets the user to the default.
+  avatar: UserAvatar?
+}
+
+message UpdateAvatarResponse {
+  user: GetMeResponse
+}
+
+message ListBusinessAvatarsRequest {}
+
+/// One colleague's chosen avatar.
+message BusinessUserAvatar {
+  user_id: int64
+  avatar: UserAvatar
+}
+
+message ListBusinessAvatarsResponse {
+  /// Every active member of the caller's business who has chosen an avatar.
+  /// Members on the default are left out; clients derive theirs from the id.
+  avatars: BusinessUserAvatar[]
 }
