@@ -33,7 +33,9 @@ export const AssigneeAvatar: React.FC<AssigneeAvatarProps> = ({
   if (chosen) {
     return (
       <span
-        title={name}
+        data-avatar-name={name || undefined}
+        role={name ? 'img' : undefined}
+        aria-label={name || undefined}
         data-avatar-chosen=""
         className="rounded-full inline-flex items-center justify-center overflow-hidden shrink-0"
         style={{
@@ -49,7 +51,9 @@ export const AssigneeAvatar: React.FC<AssigneeAvatarProps> = ({
   }
   return (
     <span
-      title={name}
+      data-avatar-name={name || undefined}
+      role={name ? 'img' : undefined}
+      aria-label={name || undefined}
       className="rounded-full inline-flex items-center justify-center font-bold shrink-0"
       style={{
         width: size,
