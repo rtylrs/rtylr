@@ -49,6 +49,8 @@ const PhotoPicture: React.FC<{ url: string }> = ({ url }) => {
   );
 };
 
+const ILLUSTRATION_GROUND = '#EEF0F3';
+
 const Illustration: React.FC<{ style: string; seed: string }> = ({ style, seed }) => {
   const [uri, setUri] = useState(() => cachedIllustration(style, seed));
   useEffect(() => {
@@ -70,7 +72,17 @@ const Illustration: React.FC<{ style: string; seed: string }> = ({ style, seed }
   }, [style, seed]);
   if (!uri)
     return <span className="h-full w-full" style={{ background: 'var(--surface-2, #e5e7eb)' }} />;
-  return <img src={uri} alt="" draggable={false} className="h-full w-full object-cover" />;
+  // Several styles draw on a transparent ground, which reads as a floating
+  // head at 18px; a light ground keeps every style a full circle.
+  return (
+    <img
+      src={uri}
+      alt=""
+      draggable={false}
+      className="h-full w-full object-cover"
+      style={{ background: ILLUSTRATION_GROUND }}
+    />
+  );
 };
 
 export default AvatarPicture;
