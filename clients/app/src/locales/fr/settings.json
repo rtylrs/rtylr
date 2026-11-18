@@ -232,6 +232,9 @@
     "save": "Enregistrer",
     "saving": "Enregistrement…",
     "saved": "Avatar mis à jour",
-    "saveFailed": "Impossible d’enregistrer votre avatar. Réessayez."
+    "saveFailed": "Impossible d’enregistrer votre avatar. Réessayez.",
+    "welcomeTitle": "Bienvenue ! Choisissez votre avatar",
+    "welcomeDescription": "Choisissez comment votre équipe vous voit. Vous pourrez le changer à tout moment dans les paramètres du compte.",
+    "skip": "Plus tard"
   }
 }
