@@ -34,13 +34,26 @@ func TestUpsertHRConfigRequestAcceptsSnakeCaseCorePayload(t *testing.T) {
 	}
 }
 
-func TestUpsertHRConfigRequestRejectsCoreUpdateWithoutCompanyName(t *testing.T) {
+// A single-setting update (the directory toggle) must not have to resend the
+// company name, which this table no longer stores; mergeCoreConfigInput keeps
+// everything the payload omits.
+func TestUpsertHRConfigRequestAcceptsPartialUpdateWithoutCompanyName(t *testing.T) {
 	var req UpsertHRConfigRequest
-	if err := json.Unmarshal([]byte(`{"default_currency":"USD"}`), &req); err != nil {
+	if err := json.Unmarshal([]byte(`{"directory_enabled":false}`), &req); err != nil {
+		t.Fatalf("Unmarshal: %v", err)
+	}
+	if err := (&UpsertHRConfigHandler{}).Validate(context.Background(), &req); err != nil {
+		t.Fatalf("Validate rejected a partial update: %v", err)
+	}
+}
+
+func TestUpsertHRConfigRequestRejectsBlankCompanyName(t *testing.T) {
+	var req UpsertHRConfigRequest
+	if err := json.Unmarshal([]byte(`{"company_name":"  ","default_currency":"USD"}`), &req); err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
 	if err := (&UpsertHRConfigHandler{}).Validate(context.Background(), &req); err == nil {
-		t.Fatal("Validate accepted a core config update without company_name")
+		t.Fatal("Validate accepted a blank company_name")
 	}
 }
 
@@ -148,5 +161,20 @@ func TestMergeCoreConfigInputSeedsSchemaDefaults(t *testing.T) {
 
 	if got.DefaultCurrency != "USD" || got.DefaultTimezone != "UTC" || got.FiscalYearStartMonth != 1 || got.OvertimeMultiplier != 1.5 {
 		t.Fatalf("defaults not applied: %+v", got)
+	}
+}
+
+// The HR Settings toggle sends only directory_enabled; turning it off must
+// stick rather than merge back to the stored true.
+func TestMergeCoreConfigInputTurnsDirectoryOff(t *testing.T) {
+	var req UpsertHRConfigRequest
+	if err := json.Unmarshal([]byte(`{"directory_enabled":false}`), &req); err != nil {
+		t.Fatalf("Unmarshal: %v", err)
+	}
+
+	got := mergeCoreConfigInput(&hrcore.Config{CompanyName: "Acme", DirectoryEnabled: true}, &req)
+
+	if got.DirectoryEnabled {
+		t.Fatal("an explicit directory_enabled=false must turn the directory off")
 	}
 }
