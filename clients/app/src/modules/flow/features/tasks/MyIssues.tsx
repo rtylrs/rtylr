@@ -20,7 +20,22 @@ import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { useUserStore } from '../../shared/stores/userStore';
 import { canFlowPermission } from '../../shared/lib/roleUtils';
 import { Button } from '../../../../shared/components/ui/button';
-import { Plus, ListTodo } from 'lucide-react';
+import { Plus, ListTodo, CheckCheck } from 'lucide-react';
+import FilterBar from '../../shared/filters/FilterBar';
+import { useCurrentUserId } from '../../shared/lib/currentUser';
+import { useMyTaskFilters } from './useMyTaskFilters';
+import type { Task } from '../../shared/stores/flowStore';
+
+const SHOW_COMPLETED_KEY = 'flow:my-tasks:show-completed';
+const isClosed = (task: Task): boolean => task.status === 'done' || task.status === 'cancelled';
+
+function loadShowCompleted(): boolean {
+  try {
+    return localStorage.getItem(SHOW_COMPLETED_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
 
 const MyIssues: React.FC = () => {
   const { t } = useTranslation();
@@ -38,6 +53,33 @@ const MyIssues: React.FC = () => {
   const [collapsed, setCollapsed] = useState<ReadonlySet<MyTaskBucket>>(
     MY_TASK_BUCKET_COLLAPSED_BY_DEFAULT
   );
+  const [completedCollapsed, setCompletedCollapsed] = useState(false);
+  const currentUserId = useCurrentUserId();
+
+  const [showCompleted, setShowCompletedState] = useState(loadShowCompleted);
+  const setShowCompleted = (value: boolean): void => {
+    setShowCompletedState(value);
+    try {
+      localStorage.setItem(SHOW_COMPLETED_KEY, value ? '1' : '0');
+    } catch {
+      // A preference that does not stick is not worth an error.
+    }
+  };
+
+  const { state: filterState, fields, matchingIds } = useMyTaskFilters(tasks);
+  // Done and cancelled stay out unless asked for, either with the toggle or by
+  // filtering on one of those statuses (which would otherwise show nothing).
+  const includeClosed =
+    showCompleted || filterState.filters.statuses.some((s) => s === 'done' || s === 'cancelled');
+  const inScope = useMemo(
+    () => tasks.filter((task) => includeClosed || !isClosed(task)),
+    [tasks, includeClosed]
+  );
+  const shown = useMemo(
+    () => (matchingIds === null ? inScope : inScope.filter((task) => matchingIds.has(task.id))),
+    [inScope, matchingIds]
+  );
+  const completed = useMemo(() => shown.filter(isClosed), [shown]);
 
   const toggle = (bucket: MyTaskBucket): void => {
     setCollapsed((current) => {
@@ -50,12 +92,12 @@ const MyIssues: React.FC = () => {
 
   const byBucket = useMemo(() => {
     const map = new Map<string, typeof tasks>(MY_TASK_BUCKET_ORDER.map((b) => [b, []]));
-    for (const task of tasks) {
-      if (task.status === 'done' || task.status === 'cancelled') continue;
+    for (const task of shown) {
+      if (isClosed(task)) continue;
       map.get(bucketForMyTask(task))?.push(task);
     }
     return map;
-  }, [tasks]);
+  }, [shown]);
 
   return (
     <div className="flex flex-col h-full">
@@ -84,8 +126,47 @@ const MyIssues: React.FC = () => {
         )}
       </div>
 
+      {tasks.length > 0 && !loadFailed && (
+        <FilterBar
+          state={filterState}
+          currentUserId={currentUserId}
+          fields={fields}
+          visible={shown.length}
+          total={inScope.length}
+          allowDim={false}
+          extra={
+            <button
+              type="button"
+              aria-pressed={showCompleted}
+              onClick={() => setShowCompleted(!showCompleted)}
+              className="flow-focus flex min-h-9 items-center gap-1.5 rounded-md px-2.5 text-flow-meta font-medium md:min-h-8"
+              style={
+                showCompleted
+                  ? {
+                      background: 'var(--accent-muted)',
+                      color: 'var(--accent-on-muted)',
+                      border: '1px solid var(--accent-border)',
+                    }
+                  : { color: 'var(--flow-text-muted)', border: '1px solid var(--flow-border)' }
+              }
+            >
+              <CheckCheck size={13} aria-hidden="true" />
+              {t('flow.filters.showCompleted')}
+            </button>
+          }
+        />
+      )}
+
       <div className="relative flex-1 overflow-y-auto">
         <div className="p-4 space-y-5">
+          {tasks.length > 0 && shown.length === 0 && (
+            <p
+              className="px-1 py-6 text-center text-flow-meta"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              {t('flow.filters.noMatches')}
+            </p>
+          )}
           {MY_TASK_BUCKET_ORDER.map((bucket, bucketIdx) => {
             const bucketTasks = byBucket.get(bucket) ?? [];
             if (bucketTasks.length === 0) return null;
@@ -139,6 +220,47 @@ const MyIssues: React.FC = () => {
               </motion.section>
             );
           })}
+
+          {completed.length > 0 && (
+            <section data-my-tasks-completed>
+              <h2>
+                <button
+                  type="button"
+                  onClick={() => setCompletedCollapsed((c) => !c)}
+                  aria-expanded={!completedCollapsed}
+                  aria-controls="my-tasks-completed"
+                  className="flow-focus flex min-h-11 w-full items-center gap-2 px-1 text-start text-flow-meta font-semibold"
+                  style={{ color: 'var(--flow-text)' }}
+                >
+                  {completedCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
+                  {t('flow.filters.completed')}
+                  <span
+                    className="rounded-sm px-1.5 py-0.5 text-flow-meta font-medium"
+                    style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
+                  >
+                    {completed.length}
+                  </span>
+                </button>
+              </h2>
+              <VirtualList
+                id="my-tasks-completed"
+                hidden={completedCollapsed}
+                className="rounded-xl overflow-hidden"
+                style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
+                count={completedCollapsed ? 0 : completed.length}
+                estimateSize={41}
+                renderRow={(index, rowProps) => (
+                  <TaskRow
+                    key={completed[index].id}
+                    rowProps={rowProps}
+                    task={completed[index]}
+                    showProject
+                    selected={selectedTaskIds.includes(completed[index].id)}
+                  />
+                )}
+              />
+            </section>
+          )}
         </div>
 
         {loadFailed && !isLoading && (
