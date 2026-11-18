@@ -1,12 +1,15 @@
 import { EmptyState } from '../../../../shared/components/dash/EmptyState';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, Users, AlertCircle } from 'lucide-react';
+import { Search, Users, AlertCircle, EyeOff, Lock } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
+import { canEffectiveAccess } from '@voxire/permissions';
 import { Avatar } from '@voxire/ui';
+import { useUserStore } from '../../../../shared/stores/userStore';
 import { CardSkeleton } from '../../shared/components/Skeleton';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
-import { useDirectory } from './useDirectory';
+import { getDirectoryDenial, useDirectory } from './useDirectory';
 import { groupByDepartment } from './groupByDepartment';
 
 const inputStyle: React.CSSProperties = {
@@ -26,15 +29,20 @@ function initials(name: string): string {
 }
 
 /**
- * Business-wide roster, backed by hr.staff.v1's listStaff - gated
- * server-side by view_directory (onion PR #267), so a caller without it
- * gets a real 403 here, not just a hidden screen.
+ * Business-wide roster, backed by hr.staff.v1's listStaff. The server can
+ * refuse it two ways (directory off, or no view_directory), and each gets its
+ * own message instead of a generic load failure.
  */
 const DirectoryScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const canManageSettings = useUserStore((state) =>
+    canEffectiveAccess(state.user?.effectiveAccess, 'hub:business:settings:manage')
+  );
   const [search, setSearch] = useState('');
   const directoryQuery = useDirectory(search);
   const { data: members, isLoading: queryLoading, isPending, refetch } = directoryQuery;
+  const denial = getDirectoryDenial(directoryQuery.error);
   const isError = hasQueryFailed(directoryQuery);
   const isLoading = queryLoading || (isPending && !isError);
   const groups = useMemo(() => groupByDepartment(members ?? []), [members]);
@@ -67,7 +75,35 @@ const DirectoryScreen = (): React.JSX.Element => {
 
         {isLoading && <CardSkeleton />}
 
-        {!isLoading && isError && (
+        {!isLoading && isError && denial === 'disabled' && (
+          <EmptyState
+            icon={EyeOff}
+            title={t('flow.directory.disabledTitle')}
+            description={
+              canManageSettings
+                ? t('flow.directory.disabledAdminDescription')
+                : t('flow.directory.disabledDescription')
+            }
+            action={
+              canManageSettings
+                ? {
+                    label: t('flow.directory.openHrSettingsCta'),
+                    onClick: () => void navigate({ to: '/settings/hr' }),
+                  }
+                : undefined
+            }
+          />
+        )}
+
+        {!isLoading && isError && denial === 'permission' && (
+          <EmptyState
+            icon={Lock}
+            title={t('flow.directory.noAccessTitle')}
+            description={t('flow.directory.noAccessDescription')}
+          />
+        )}
+
+        {!isLoading && isError && denial === null && (
           <EmptyState
             icon={AlertCircle}
             title={t('flow.directory.loadFailedTitle')}
