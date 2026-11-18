@@ -66,7 +66,9 @@ type UpsertHRConfigResponse struct {
 }
 
 func (h *UpsertHRConfigHandler) Validate(_ context.Context, req *UpsertHRConfigRequest) error {
-	if !req.hasCoreConfigFields {
+	// The company name is owned by organization and not stored here, so a
+	// partial update (one toggle) need not resend it. Sent blank, it's an error.
+	if !req.coreFieldPresent("company_name") {
 		return nil
 	}
 	req.CompanyName = strings.TrimSpace(req.CompanyName)
