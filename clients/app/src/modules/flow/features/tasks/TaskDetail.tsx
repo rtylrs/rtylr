@@ -27,6 +27,7 @@ import {
   PartyPopper,
   UserPen,
   UserPlus,
+  Printer,
 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 
@@ -86,6 +87,7 @@ import DevelopmentSection from './components/DevelopmentSection';
 import { useIsDeveloperProject } from '../projects-v2/useDeveloperMode';
 import LinksSection from './components/LinksSection';
 import TaskActivityTabs from './components/TaskActivityTabs';
+import TaskPrintView from './components/TaskPrintView';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -179,6 +181,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
 
   const [labelPickerOpen, setLabelPickerOpen] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [printing, setPrinting] = useState(false);
 
   const updateTask = (
     taskId: string,
@@ -437,6 +440,19 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
             >
               <Copy size={11} />
               <span className="hidden sm:inline">{t('flow.taskDetail.copyId')}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPrinting(true)}
+              disabled={printing}
+              // Not on phones: the header is full there, the task key was
+              // squeezed to one letter, and printing from a phone is rare.
+              className="hidden h-7 w-7 rounded-sm items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40 sm:flex"
+              style={{ color: 'var(--flow-text-muted)' }}
+              title={t('flow.taskDetail.print.action')}
+              aria-label={t('flow.taskDetail.print.action')}
+            >
+              <Printer size={12} aria-hidden="true" />
             </button>
             <button
               type="button"
@@ -1070,6 +1086,47 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           </div>
         </DetailField>
       </aside>
+      {printing && (
+        <TaskPrintView
+          identifier={task.identifier ?? task.id}
+          projectName={project?.name || task.projectName || ''}
+          title={task.title}
+          description={displayDescription(task.description)}
+          fields={[
+            {
+              label: t('flow.taskDetail.status'),
+              value: (() => {
+                const current = projectStatuses.find((s) => s.id === currentStatusId);
+                return current
+                  ? displayStatusName(current.name, t)
+                  : t(STATUS_LABEL_KEYS[task.status]);
+              })(),
+            },
+            {
+              label: t('flow.taskDetail.priority'),
+              value:
+                task.priority === 'no_priority'
+                  ? t('flow.taskDetail.noPriority')
+                  : t(`flowPriority.${task.priority}`),
+            },
+            {
+              label: t('flow.taskDetail.assignee'),
+              value: task.assigneeId ? assignee : t('flow.quickCreate.unassigned'),
+            },
+            { label: t('flow.taskDetail.reporter'), value: reporterName },
+            { label: t('flow.taskDetail.dueDate'), value: task.dueDate },
+            {
+              label: t('flow.taskDetail.estimate'),
+              value:
+                estimatedHours == null ? '' : `${estimatedHours} ${t('flow.taskDetail.hours')}`,
+            },
+            { label: t('flow.taskDetail.labels'), value: taskLabels.map((l) => l.name).join(', ') },
+          ]}
+          subtasks={taskSubtasks}
+          comments={taskComments}
+          onDone={() => setPrinting(false)}
+        />
+      )}
       <NewStatusDialog
         open={newStatusOpen}
         onOpenChange={setNewStatusOpen}
