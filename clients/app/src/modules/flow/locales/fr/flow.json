@@ -927,7 +927,29 @@
     "overdue": "En retard",
     "labourCost": "Coût de main-d'œuvre",
     "percentComplete": "{{percent}} % terminé",
-    "unassigned": "Non assignée"
+    "unassigned": "Non assignée",
+    "summary": {
+      "recentTitle": "7 derniers jours",
+      "created": "Créées",
+      "completed": "Terminées",
+      "updated": "Modifiées",
+      "dueSoon": "Échéance proche",
+      "last7Days": "7 derniers jours",
+      "next7Days": "7 prochains jours",
+      "openFiltered": "{{label}} : {{n}} tâches. Les ouvrir dans la liste",
+      "needsAttention": "À surveiller",
+      "overdue": "En retard",
+      "unassignedInCycle": "Non assignées dans {{cycle}}",
+      "allClear": "Rien en retard et aucune tâche non assignée dans le cycle actif.",
+      "hoursTitle": "Temps saisi et estimation",
+      "hoursValue": "{{hours}} h",
+      "loggedOf": "saisies sur {{hours}} h estimées",
+      "openEstimate": "{{hours}} h estimées sur les tâches ouvertes",
+      "unestimated": "{{n}} ouvertes sans estimation",
+      "priorityTitle": "Tâches ouvertes par priorité",
+      "noOpenTasks": "Aucune tâche ouverte.",
+      "workloadDetail": "{{open}} ouvertes · {{hours}} h estimées"
+    }
   },
   "projectCalendar": {
     "pageTitle": "Calendrier · rtylr"
@@ -1216,6 +1238,11 @@
       "from": "Du",
       "to": "Au",
       "range": "du {{from}} au {{to}}"
+    },
+    "changed": {
+      "created7d": "Créées ces 7 derniers jours",
+      "completed7d": "Terminées ces 7 derniers jours",
+      "updated7d": "Modifiées ces 7 derniers jours"
     },
     "showCompleted": "Afficher les terminées",
     "completed": "Terminées",
