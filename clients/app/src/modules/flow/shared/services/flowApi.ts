@@ -104,6 +104,9 @@ export interface ApiTask {
   assigneeName?: ContractTask['assigneeName'];
   assigneeId?: string;
   assigneeInitials: string;
+  // Who created the task. The detail read passes the wire task through, so the
+  // value is already there; pinned to the contract like archived below.
+  reporterId?: ContractTask['reporterId'];
   dueDate: string;
   // Write path only for now. The wire carries start_date on both Task and
   // UpdateTaskBody, but the response mapping never populates it, so reading
