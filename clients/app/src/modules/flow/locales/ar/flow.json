@@ -954,7 +954,29 @@
     "overdue": "متأخرة",
     "labourCost": "تكلفة العمل",
     "percentComplete": "{{percent}}% مكتمل",
-    "unassigned": "غير مسندة"
+    "unassigned": "غير مسندة",
+    "summary": {
+      "recentTitle": "آخر 7 أيام",
+      "created": "أُنشئت",
+      "completed": "اكتملت",
+      "updated": "حُدّثت",
+      "dueSoon": "تستحق قريبًا",
+      "last7Days": "آخر 7 أيام",
+      "next7Days": "الأيام السبعة القادمة",
+      "openFiltered": "{{label}}: {{n}} مهام. افتحها في القائمة",
+      "needsAttention": "تحتاج إلى انتباه",
+      "overdue": "متأخرة",
+      "unassignedInCycle": "غير مسندة في {{cycle}}",
+      "allClear": "لا توجد مهام متأخرة ولا عمل غير مسند في الدورة النشطة.",
+      "hoursTitle": "المسجّل مقابل التقدير",
+      "hoursValue": "{{hours}} س",
+      "loggedOf": "مسجّلة من أصل {{hours}} س مقدّرة",
+      "openEstimate": "{{hours}} س مقدّرة على المهام المفتوحة",
+      "unestimated": "{{n}} مفتوحة بلا تقدير",
+      "priorityTitle": "المهام المفتوحة حسب الأولوية",
+      "noOpenTasks": "لا توجد مهام مفتوحة.",
+      "workloadDetail": "{{open}} مفتوحة · {{hours}} س مقدّرة"
+    }
   },
   "projectCalendar": {
     "pageTitle": "التقويم · rtylr"
@@ -1264,6 +1286,11 @@
       "from": "من",
       "to": "إلى",
       "range": "من {{from}} إلى {{to}}"
+    },
+    "changed": {
+      "created7d": "أُنشئت في آخر 7 أيام",
+      "completed7d": "اكتملت في آخر 7 أيام",
+      "updated7d": "حُدّثت في آخر 7 أيام"
     },
     "showCompleted": "عرض المكتملة",
     "completed": "المكتملة",
