@@ -161,3 +161,4 @@ internal/modules/caret/sql/migration_20261030_buddy_run_routine.sql	internal/mod
 rtylr/portal_preferences.sql	internal/modules/portal/sql/schema/rtylr/portal_preferences.sql
 shared/zz_console_owner_provisioning.sql	internal/modules/organization/sql/schema/shared/zz_console_owner_provisioning.sql
 internal/modules/finance/invoices/sql/migration_20261117_invoice_project.sql	internal/modules/finance/invoices/sql/migration_20261117_invoice_project.sql
+pager/pager.sql	internal/modules/pager/sql/schema/pager/pager.sql
