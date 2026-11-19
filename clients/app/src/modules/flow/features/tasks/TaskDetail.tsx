@@ -1,11 +1,9 @@
-import { EmptyState } from '../../../../shared/components/dash/EmptyState';
 import React, { useEffect, useRef, useState } from 'react';
 import { useOpenTask } from '../../shared/lib/useOpenTask';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import type { TFunction } from 'i18next';
 import {
   ArrowLeft,
   Copy,
@@ -26,8 +24,6 @@ import {
   Hourglass,
   Pin,
   Lightbulb,
-  Activity,
-  Type,
   PartyPopper,
 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
@@ -62,7 +58,7 @@ import { useApprovedLeaveInRange } from '../../shared/hooks/queries/useApprovedL
 import DescriptionEditor from './components/DescriptionEditor';
 import TimePanel from './components/TimePanel';
 import { useFlowStore, Attachment, Task } from '../../shared/stores/flowStore';
-import type { ApiTask, ApiTaskDetail, ApiTaskActivity } from '../../shared/services/flowApi';
+import type { ApiTask, ApiTaskDetail } from '../../shared/services/flowApi';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useCanEditTask, useCanDeleteResource } from '../../shared/lib/currentUser';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
@@ -87,105 +83,15 @@ import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import DevelopmentSection from './components/DevelopmentSection';
 import { useIsDeveloperProject } from '../projects-v2/useDeveloperMode';
 import LinksSection from './components/LinksSection';
+import TaskActivityTabs from './components/TaskActivityTabs';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatRelative(dateStr: string, t: TFunction): string {
-  const d = new Date(dateStr);
-  const diff = Date.now() - d.getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return t('flow.taskDetail.justNow');
-  if (mins < 60) return t('flow.taskDetail.minutesAgo', { count: mins });
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return t('flow.taskDetail.hoursAgo', { count: hours });
-  const days = Math.floor(hours / 24);
-  if (days < 30) return t('flow.taskDetail.daysAgo', { count: days });
-  return d.toLocaleDateString(t('flow.taskDetail.dateLocale'), {
-    month: 'short',
-    day: 'numeric',
-  });
-}
-
-function humanizeValue(action: string, value: string): string {
-  if (!value) return '-';
-  if (action.includes('status') || action === 'status_changed' || action === 'status_change') {
-    return value
-      .split('_')
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' ');
-  }
-  if (
-    action.includes('priority') ||
-    action === 'priority_changed' ||
-    action === 'priority_change'
-  ) {
-    return value.charAt(0).toUpperCase() + value.slice(1);
-  }
-  return value;
-}
 
 function inferAttachmentMime(name: string): string {
   if (/\.(apng|avif|gif|jpe?g|png|svg|webp)$/i.test(name)) {
     return 'image/*';
   }
   return 'application/octet-stream';
-}
-
-function describeActivity(
-  a: ApiTaskActivity,
-  t: TFunction,
-  peopleNames: Record<string, string>
-): React.ReactNode {
-  const action = a.action;
-  const oldVal = humanizeValue(action, a.oldValue);
-  const newVal = humanizeValue(action, a.newValue);
-
-  if (action === 'link_added') {
-    return t('flow.taskDetail.linkAdded', { value: a.newValue });
-  }
-  if (action === 'link_removed') {
-    return t('flow.taskDetail.linkRemoved', { value: a.oldValue });
-  }
-
-  if (action === 'status_changed' || action === 'status_change') {
-    return t('flow.taskDetail.statusChanged', { from: oldVal, to: newVal });
-  }
-  if (action === 'priority_changed' || action === 'priority_change') {
-    return t('flow.taskDetail.priorityChanged', { from: oldVal, to: newVal });
-  }
-  if (action === 'assignee_changed' || action === 'assignee_change') {
-    // The server records user ids here, and 0 for unassigned, so the row read
-    // "assigned to 4217" until the id was resolved to a name.
-    const to =
-      !a.newValue || a.newValue === '0'
-        ? t('flow.quickCreate.unassigned')
-        : (peopleNames[a.newValue] ?? t('flow.time.unknownAuthor'));
-    return t('flow.taskDetail.assigneeChanged', { to });
-  }
-  if (action === 'title_changed' || action === 'title_change') {
-    return t('flow.taskDetail.titleChanged');
-  }
-  if (action === 'due_date_changed' || action === 'due_date_change') {
-    return t('flow.taskDetail.dueDateChanged', { to: newVal });
-  }
-  // generic
-  const label = action
-    .replace(/_/g, ' ')
-    .replace(/\bchanged\b/, 'changed')
-    .trim();
-  return a.newValue
-    ? t('flow.taskDetail.genericActivity', { label, value: newVal })
-    : t('flow.taskDetail.genericActivityNoValue', { label });
-}
-
-function activityIcon(action: string): React.ComponentType<{ size?: number }> {
-  if (action.includes('status')) return CircleDot;
-  if (action.includes('priority')) return Flag;
-  if (action.includes('assignee')) return UserIcon;
-  if (action.includes('title')) return Type;
-  if (action.includes('due_date')) return CalendarIcon;
-  if (action.includes('label')) return Tag;
-  return Activity;
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -297,7 +203,6 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
     addSubtaskMut.mutate({ taskId, title });
   };
 
-  const [tab, setTab] = useState<'activity' | 'comments'>('comments');
   const [depId, setDepId] = useState('');
 
   if (isLoading) {
@@ -621,57 +526,28 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
 
             <LinksSection taskId={task.id} canEdit={canEdit} peopleNames={peopleNames} />
 
-            {/* Tabs */}
-            <div
-              className="flex items-center gap-1 mb-4"
-              style={{ borderBottom: '1px solid var(--flow-border)' }}
-            >
-              {(['comments', 'activity'] as const).map((tabName) => (
-                <button
-                  type="button"
-                  key={tabName}
-                  onClick={() => setTab(tabName)}
-                  className="px-3 py-2 text-flow-meta font-medium capitalize"
-                  style={{
-                    color: tab === tabName ? 'var(--flow-text)' : 'var(--flow-text-muted)',
-                    borderBottom:
-                      tab === tabName ? '2px solid var(--accent)' : '2px solid transparent',
-                  }}
-                >
-                  {tabName === 'comments'
-                    ? t('flow.taskDetail.comments')
-                    : t('flow.taskDetail.activity')}
-                  {tabName === 'comments' && (
-                    <span
-                      className="ms-1.5 text-flow-meta px-1 rounded-sm"
-                      style={{
-                        background: 'var(--flow-hover)',
-                        color: 'var(--flow-text-dim)',
-                      }}
-                    >
-                      {taskComments.length}
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
-
-            {tab === 'comments' && (
-              <div>
-                <div className="mb-4">
-                  <CommentList
-                    comments={taskComments}
-                    currentUserId={currentUserId}
-                    mentionCandidates={mentionCandidates}
-                    mentionNames={Object.values(peopleNames)}
-                    onEdit={
-                      canEdit
-                        ? (commentId, body) =>
-                            updateCommentMut.mutate({ id: commentId, content: body })
-                        : undefined
-                    }
-                  />
-                </div>
+            <TaskActivityTabs
+              taskId={task.id}
+              projectId={task.projectId}
+              currentUserId={currentUserId}
+              comments={taskComments}
+              activity={taskActivityData}
+              peopleNames={peopleNames}
+              renderComments={(comments) => (
+                <CommentList
+                  comments={comments}
+                  currentUserId={currentUserId}
+                  mentionCandidates={mentionCandidates}
+                  mentionNames={Object.values(peopleNames)}
+                  onEdit={
+                    canEdit
+                      ? (commentId, body) =>
+                          updateCommentMut.mutate({ id: commentId, content: body })
+                      : undefined
+                  }
+                />
+              )}
+              composer={
                 <CommentInput
                   mentionCandidates={mentionCandidates}
                   onSubmit={(body) =>
@@ -693,17 +569,8 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
                   }
                   disabled={!canEdit}
                 />
-              </div>
-            )}
-
-            {tab === 'activity' && (
-              <ActivitySection
-                entries={taskActivityData}
-                peopleNames={peopleNames}
-                t={t}
-                onGoToComments={() => setTab('comments')}
-              />
-            )}
+              }
+            />
           </div>
         </motion.div>
       </div>
@@ -1259,52 +1126,6 @@ function TaskTextField({
   }
   return multiline ? <textarea {...props} {...handlers} /> : <input {...props} {...handlers} />;
 }
-
-// ── Activity Section ──────────────────────────────────────────────────────────
-
-const ActivitySection: React.FC<{
-  entries: ApiTaskActivity[];
-  peopleNames: Record<string, string>;
-  t: TFunction;
-  onGoToComments: () => void;
-}> = ({ entries, peopleNames, t, onGoToComments }) => {
-  if (entries.length === 0) {
-    return (
-      <EmptyState
-        icon={Activity}
-        title={t('flow.taskDetail.noActivity')}
-        action={{
-          label: t('flow.taskDetail.goToComments'),
-          onClick: onGoToComments,
-        }}
-        size="compact"
-      />
-    );
-  }
-  return (
-    <div className="space-y-3">
-      {entries.map((a) => {
-        const Icon = activityIcon(a.action);
-        return (
-          <div key={a.id} className="flex items-start gap-2.5">
-            <span
-              className="h-5 w-5 rounded-full flex items-center justify-center shrink-0 mt-0.5"
-              style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
-            >
-              <Icon size={10} />
-            </span>
-            <div className="flex-1 text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>
-              {describeActivity(a, t, peopleNames)}
-              <span className="ms-2" style={{ color: 'var(--flow-text-dim)' }}>
-                {formatRelative(a.createdAt, t)}
-              </span>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
 
 // ── DetailField ───────────────────────────────────────────────────────────────
 
