@@ -26,6 +26,7 @@ import {
   Lightbulb,
   PartyPopper,
   UserPen,
+  UserPlus,
 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 
@@ -289,6 +290,19 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   // map comments use, so it costs no request of its own.
   const reporterId = task.reporterId && task.reporterId !== '0' ? String(task.reporterId) : '';
   const reporterName = reporterId ? (peopleNames[reporterId] ?? t('flow.time.unknownAuthor')) : '';
+  // Hidden rather than disabled: it is a shortcut, and to a viewer, or to the
+  // person already assigned, it has nothing to offer.
+  const canAssignToMe =
+    canEdit && currentUserId !== undefined && String(task.assigneeId ?? '') !== currentUserId;
+  const assignToMe = (): void => {
+    if (!user || currentUserId === undefined) return;
+    const name = user.fullName ?? '';
+    updateTask(task.id, {
+      assigneeId: currentUserId,
+      assignee: name,
+      assigneeInitials: getInitials(name),
+    });
+  };
   const project = taskProject ?? projects.find((p) => p.id === task.projectId);
   const dependencyTasks = allTasks.filter((ot) => task.dependencies?.includes(ot.id));
   const dependencyCandidates = allTasks.filter(
@@ -393,6 +407,20 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
             />
           </div>
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+            {canAssignToMe && (
+              <button
+                type="button"
+                onClick={assignToMe}
+                disabled={updateTaskMut.isPending}
+                className="flex h-8 items-center gap-1 rounded-sm px-2 text-flow-meta hover:bg-[var(--flow-hover)] disabled:opacity-40 sm:h-7"
+                style={{ color: 'var(--flow-text-muted)' }}
+                title={t('flow.taskDetail.assignToMe')}
+                aria-label={t('flow.taskDetail.assignToMe')}
+              >
+                <UserPlus size={11} aria-hidden="true" />
+                <span className="hidden sm:inline">{t('flow.taskDetail.assignToMe')}</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={async () => {
