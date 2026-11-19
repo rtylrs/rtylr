@@ -302,6 +302,10 @@
     },
     "strip": {
       "text": "Need help getting started? Book a personalized demo."
+    },
+    "topic": {
+      "investors": "You are writing to the founders about investing in or partnering with rtylr. Your message goes straight to them.",
+      "sales": "You are writing to the sales team. Tell us your team size, how many locations or entities you run, and what you use today."
     }
   },
   "pricing": {

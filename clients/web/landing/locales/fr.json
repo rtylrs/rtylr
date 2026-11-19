@@ -293,6 +293,10 @@
     },
     "strip": {
       "text": "Besoin d’aide pour démarrer ? Réservez une démo personnalisée."
+    },
+    "topic": {
+      "investors": "Vous écrivez aux fondateurs au sujet d'un investissement ou d'un partenariat avec rtylr. Votre message leur parvient directement.",
+      "sales": "Vous écrivez à l'équipe commerciale. Indiquez la taille de votre équipe, le nombre de sites ou d'entités que vous gérez et ce que vous utilisez aujourd'hui."
     }
   },
   "faq": {
