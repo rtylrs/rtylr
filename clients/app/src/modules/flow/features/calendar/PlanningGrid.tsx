@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Flag } from 'lucide-react';
+import { Flag, TreePalm } from 'lucide-react';
 import type { MonthCell } from '../../shared/lib/monthGrid';
 import {
   chunkWeeks,
@@ -399,12 +399,19 @@ export function PlanningGrid<T extends GridTask>({
                         {cell.date.getDate()}
                       </span>
                       {leaveDay && (
+                        // An icon and a number, because a month cell has no room
+                        // for the sentence; the sentence is the tooltip and what
+                        // a screen reader hears.
                         <span
-                          className="min-w-0 truncate text-flow-meta"
+                          className="flex min-w-0 items-center gap-0.5 text-flow-meta"
                           title={t('flow.calendar.leaveCount', { count: leaveDay.people })}
                           style={{ color: 'var(--flow-warn-fg)' }}
                         >
-                          {t('flow.calendar.leaveCount', { count: leaveDay.people })}
+                          <TreePalm size={11} aria-hidden="true" className="shrink-0" />
+                          <span aria-hidden="true">{leaveDay.people}</span>
+                          <span className="sr-only">
+                            {t('flow.calendar.leaveCount', { count: leaveDay.people })}
+                          </span>
                         </span>
                       )}
                       {creatable && (
