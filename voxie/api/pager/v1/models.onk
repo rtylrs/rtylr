@@ -4,9 +4,9 @@ package pager.v1
 // the moment they describe has happened. Statuses are waiting, ready,
 // collected and expired.
 //
-// Errors carry a stable `code` next to `message`: venue_not_found,
-// ticket_not_found, invalid_number, invalid_transition and
-// too_many_open_tickets.
+// Errors carry a stable `code` next to `message`: venue_not_found (404),
+// ticket_not_found (404), invalid_number (400), invalid_transition (409) and
+// too_many_open_tickets (429).
 
 /// A ticket as the venue's staff see it.
 message Ticket {

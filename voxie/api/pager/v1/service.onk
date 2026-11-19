@@ -11,7 +11,7 @@ service PagerService {
   getPublicVenue(GetPublicVenueRequest) -> GetPublicVenueResponse @get("/public/venues/{slug}") @meta("rate_limit", "60/m")
 
   /// Follows the ticket with this number, creating it unless the venue is strict.
-  joinTicket(JoinTicketRequest) -> JoinTicketResponse @post("/public/venues/{slug}/join") @meta("rate_limit", "30/m")
+  joinTicket(JoinTicketRequest) -> JoinTicketResponse @post("/public/venues/{slug}/join") @meta("rate_limit", "60/m")
 
   /// Returns the ticket a phone is following. Polled every few seconds.
   getPublicTicket(GetPublicTicketRequest) -> GetPublicTicketResponse @get("/public/tickets/{public_token}") @meta("rate_limit", "120/m")
@@ -42,6 +42,6 @@ service PagerService {
   /// Returns the business's pager settings.
   getSettings(GetSettingsRequest) -> GetSettingsResponse @get("/settings")
 
-  /// Updates the business's pager settings.
+  /// Updates the business's pager settings. Owners and admins only.
   updateSettings(UpdateSettingsRequest) -> UpdateSettingsResponse @put("/settings")
 }
