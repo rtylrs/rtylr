@@ -169,7 +169,6 @@ export function createFlowRoutes<TParent extends AnyRoute>(parent: TParent) {
   });
 
   const AllProjects = React.lazy(() => import('./features/projects-v2/AllProjects'));
-  const Profile = React.lazy(() => import('./features/profile-v2/Profile'));
 
   // "My tasks" shows every task assigned to the user across all workspaces and
   // projects (it is not workspace-scoped): a single cross-project board.
@@ -189,15 +188,6 @@ export function createFlowRoutes<TParent extends AnyRoute>(parent: TParent) {
     getParentRoute: () => rootRoute,
     path: '/projects',
     component: () => withLayout(<AllProjects />),
-  });
-
-  const profileRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: '/u/$userId',
-    component: () => {
-      const { userId } = profileRoute.useParams();
-      return withLayout(<Profile userId={userId} />);
-    },
   });
 
   const todayRoute = createRoute({
@@ -358,7 +348,6 @@ export function createFlowRoutes<TParent extends AnyRoute>(parent: TParent) {
     archiveRoute,
     inboxRoute,
     myDayRoute,
-    profileRoute,
     leaveRoute,
     teamViewRoute,
     timeReportsRoute,

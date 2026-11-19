@@ -632,13 +632,6 @@
       "cancelled": "Cancelled"
     }
   },
-  "profile": {
-    "notFound": "Profile not found.",
-    "publicProjects": "Public projects",
-    "noPublicProjects": "No public projects.",
-    "heading": "Profile",
-    "notFoundHint": "The link may be old, or this person may no longer be in your business."
-  },
   "board": {
     "pageTitle": "Board · rtylr",
     "addTaskLabel": "Add task",

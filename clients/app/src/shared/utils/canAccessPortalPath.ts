@@ -72,7 +72,6 @@ export function canAccessPortalPath(user: StoredUser | null, pathname: string): 
       pathname === '/flow' ||
       pathname === '/flow/start' ||
       pathname.startsWith('/flow/settings') ||
-      pathname.startsWith('/flow/u/') ||
       pathname === '/flow/leave' ||
       pathname.startsWith('/flow/time') ||
       pathname === '/flow/directory' ||

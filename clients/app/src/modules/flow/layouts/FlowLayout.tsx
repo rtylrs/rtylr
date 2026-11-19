@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation, useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { Menu, PanelLeft, Plus, UserCircle, X } from 'lucide-react';
+import { Menu, PanelLeft, Plus, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@voxire/ui';
 import { FLAG_KEYS, useFeatureFlag } from '@voxire/config';
 import { toast } from 'sonner';
@@ -206,12 +206,6 @@ export default function FlowLayout({ children }: { children: ReactNode }) {
         canCreateProject={canCreateProject}
         sidebarRef={sidebarRef}
       />
-      <nav className="portal-flow-footer" aria-label={t('flowNav.settings')}>
-        <Link to="/flow/u/$userId" params={{ userId: userId ?? '' }} className="portal-nav-link">
-          <UserCircle size={15} />
-          {t('flow.profile.heading')}
-        </Link>
-      </nav>
     </>
   );
   const submitProject = () => {

@@ -648,13 +648,6 @@
       "cancelled": "ملغى"
     }
   },
-  "profile": {
-    "notFound": "لم يتم العثور على الملف الشخصي.",
-    "publicProjects": "المشاريع العامة",
-    "noPublicProjects": "لا توجد مشاريع عامة.",
-    "heading": "الملف الشخصي",
-    "notFoundHint": "قد يكون الرابط قديماً، أو ربما لم يعد هذا الشخص في نشاطك التجاري."
-  },
   "board": {
     "pageTitle": "اللوحة · rtylr",
     "addTaskLabel": "إضافة مهمة",

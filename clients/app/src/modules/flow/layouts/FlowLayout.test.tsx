@@ -115,7 +115,7 @@ describe('Flow module layout', () => {
     );
     expect(mocks.realtime).toHaveBeenCalledWith('42', '7', true);
     expect(screen.getByRole('link', { name: 'RTYLR' })).toHaveAttribute('href', '/');
-    expect(screen.getByRole('link', { name: 'Profile' })).toHaveAttribute('href', '/flow/u/7');
+    expect(screen.queryByRole('link', { name: 'Profile' })).not.toBeInTheDocument();
   });
   it('clears stale projects when the current list is empty', () => {
     useFlowStore.setState({
