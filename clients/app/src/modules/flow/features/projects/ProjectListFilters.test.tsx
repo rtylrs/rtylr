@@ -134,6 +134,7 @@ beforeAll(async () => {
 
 beforeEach(() => {
   localStorage.clear();
+  sessionStorage.clear();
   router.set({});
 });
 
@@ -146,8 +147,8 @@ describe('Project list filters', () => {
     expect(screen.getByText('1 of 2 tasks visible')).toBeTruthy();
   });
 
-  it('opens with the project filter the board left behind', () => {
-    localStorage.setItem('flow:filters:project:7', JSON.stringify({ priorities: ['low'] }));
+  it('opens with the project filter the board left behind in the same visit', () => {
+    sessionStorage.setItem('flow:filters:project:7', JSON.stringify({ priorities: ['low'] }));
     renderList();
     expect(screen.queryByText('Payment plan tracker')).toBeNull();
     expect(screen.getByText('Document vault')).toBeTruthy();
