@@ -107,6 +107,28 @@ describe('matchesTaskFilters', () => {
     expect(matchesTaskFilters(task({ dueDate: '' }), filters, ctx)).toBe(false);
   });
 
+  describe('recent changes', () => {
+    // Midday UTC lands on the same calendar day in every timezone the tests run in.
+    const at = (day: string): string => `${day}T12:00:00Z`;
+
+    it.each([
+      ['created_7d', { createdAt: at('2026-11-12') }, true],
+      ['created_7d', { createdAt: at('2026-11-11') }, false],
+      ['updated_7d', { updatedAt: at(TODAY) }, true],
+      ['completed_7d', { completedAt: at('2026-11-15') }, true],
+      ['completed_7d', { completedAt: undefined }, false],
+    ] as const)('%s against %o is %s', (window, overrides, expected) => {
+      expect(matchesTaskFilters(task(overrides), f({ changed: [window] }), ctx)).toBe(expected);
+    });
+
+    it('ORs windows and ANDs them with the other fields', () => {
+      const filters = f({ changed: ['created_7d', 'completed_7d'], priorities: ['high'] });
+      const recent = task({ createdAt: at('2026-11-01'), completedAt: at(TODAY) });
+      expect(matchesTaskFilters({ ...recent, priority: 'high' }, filters, ctx)).toBe(true);
+      expect(matchesTaskFilters(recent, filters, ctx)).toBe(false);
+    });
+  });
+
   describe('search', () => {
     it('matches the identifier', () => {
       expect(matchesTaskFilters(task(), f({ query: 't-213' }), ctx)).toBe(true);
@@ -143,6 +165,8 @@ describe('counting', () => {
       query: 'x',
     });
     expect(activeFieldCount(filters)).toBe(2);
+    expect(activeFieldCount(f({ changed: ['created_7d', 'updated_7d'] }))).toBe(1);
+    expect(hasActiveTaskFilters(f({ changed: ['updated_7d'] }))).toBe(true);
     expect(hasActiveTaskFilters(f({ query: '  ' }))).toBe(false);
     expect(hasActiveTaskFilters(f({ query: 'x' }))).toBe(true);
   });
@@ -168,6 +192,15 @@ describe('serialising', () => {
     expect(out).toEqual({ assignees: ['u1'], due: ['overdue'], dueTo: '2026-12-01', query: 'tax' });
     expect(parseTaskFilters(out)).toEqual(filters);
     expect(serializeTaskFilters(EMPTY_TASK_FILTERS)).toBeUndefined();
+  });
+
+  it('carries recent change windows and drops unknown ones', () => {
+    expect(serializeTaskFilters(f({ changed: ['completed_7d'] }))).toEqual({
+      changed: ['completed_7d'],
+    });
+    expect(parseTaskFilters({ changed: ['created_7d', 'created_30d'] }).changed).toEqual([
+      'created_7d',
+    ]);
   });
 
   it('drops values it does not know instead of failing the whole filter', () => {
