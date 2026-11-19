@@ -131,7 +131,11 @@ function inferAttachmentMime(name: string): string {
   return 'application/octet-stream';
 }
 
-function describeActivity(a: ApiTaskActivity, t: TFunction): React.ReactNode {
+function describeActivity(
+  a: ApiTaskActivity,
+  t: TFunction,
+  peopleNames: Record<string, string>
+): React.ReactNode {
   const action = a.action;
   const oldVal = humanizeValue(action, a.oldValue);
   const newVal = humanizeValue(action, a.newValue);
@@ -150,7 +154,13 @@ function describeActivity(a: ApiTaskActivity, t: TFunction): React.ReactNode {
     return t('flow.taskDetail.priorityChanged', { from: oldVal, to: newVal });
   }
   if (action === 'assignee_changed' || action === 'assignee_change') {
-    return t('flow.taskDetail.assigneeChanged', { to: newVal });
+    // The server records user ids here, and 0 for unassigned, so the row read
+    // "assigned to 4217" until the id was resolved to a name.
+    const to =
+      !a.newValue || a.newValue === '0'
+        ? t('flow.quickCreate.unassigned')
+        : (peopleNames[a.newValue] ?? t('flow.time.unknownAuthor'));
+    return t('flow.taskDetail.assigneeChanged', { to });
   }
   if (action === 'title_changed' || action === 'title_change') {
     return t('flow.taskDetail.titleChanged');
@@ -689,6 +699,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
             {tab === 'activity' && (
               <ActivitySection
                 entries={taskActivityData}
+                peopleNames={peopleNames}
                 t={t}
                 onGoToComments={() => setTab('comments')}
               />
@@ -1253,9 +1264,10 @@ function TaskTextField({
 
 const ActivitySection: React.FC<{
   entries: ApiTaskActivity[];
+  peopleNames: Record<string, string>;
   t: TFunction;
   onGoToComments: () => void;
-}> = ({ entries, t, onGoToComments }) => {
+}> = ({ entries, peopleNames, t, onGoToComments }) => {
   if (entries.length === 0) {
     return (
       <EmptyState
@@ -1282,7 +1294,7 @@ const ActivitySection: React.FC<{
               <Icon size={10} />
             </span>
             <div className="flex-1 text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>
-              {describeActivity(a, t)}
+              {describeActivity(a, t, peopleNames)}
               <span className="ms-2" style={{ color: 'var(--flow-text-dim)' }}>
                 {formatRelative(a.createdAt, t)}
               </span>
