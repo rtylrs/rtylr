@@ -384,18 +384,6 @@
   padding-inline: 24px;
 }
 
-.portal-flow-footer {
-  flex-shrink: 0;
-  margin-top: auto;
-  padding: 10px 12px 14px;
-}
-.portal-flow-footer .portal-nav-link {
-  min-height: 34px;
-  padding: 7px 12px;
-  font-size: 13px;
-  gap: 10px;
-}
-
 .flow-task-drawer-title {
   border-bottom: 1px solid var(--flow-border);
   padding: 16px 24px;
