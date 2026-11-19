@@ -25,6 +25,7 @@ import {
   Pin,
   Lightbulb,
   PartyPopper,
+  UserPen,
 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 
@@ -225,6 +226,11 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
     if (member.name) peopleNames[String(member.id)] = member.name;
   }
   const currentUserId = user?.id === undefined ? undefined : String(user.id);
+  // The signed-in person is not always on either list (no team-view access,
+  // not a project member yet), yet they are often the reporter.
+  if (currentUserId !== undefined && user?.fullName && !peopleNames[currentUserId]) {
+    peopleNames[currentUserId] = user.fullName;
+  }
   // The people a comment here can mention: the project's members, who are the
   // ones the server notifies when their name follows an "@".
   const mentionCandidates: MentionCandidate[] = projectMembers
@@ -279,6 +285,10 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   }
 
   const { assignee, assigneeInitials } = apiTaskToTask(task);
+  // Reporter comes as an id on the task. It resolves through the same people
+  // map comments use, so it costs no request of its own.
+  const reporterId = task.reporterId && task.reporterId !== '0' ? String(task.reporterId) : '';
+  const reporterName = reporterId ? (peopleNames[reporterId] ?? t('flow.time.unknownAuthor')) : '';
   const project = taskProject ?? projects.find((p) => p.id === task.projectId);
   const dependencyTasks = allTasks.filter((ot) => task.dependencies?.includes(ot.id));
   const dependencyCandidates = allTasks.filter(
@@ -690,6 +700,22 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
             disabled={!canEdit}
           />
         </DetailField>
+
+        {reporterId && (
+          <DetailField icon={UserPen} label={t('flow.taskDetail.reporter')}>
+            <div className="flex min-w-0 items-center gap-2">
+              <AssigneeAvatar
+                name={reporterName}
+                initials={getInitials(reporterName)}
+                seed={reporterId}
+                size={18}
+              />
+              <span className="truncate text-flow-meta" style={{ color: 'var(--flow-text)' }}>
+                {reporterName}
+              </span>
+            </div>
+          </DetailField>
+        )}
 
         {overlappingLeave && overlappingLeave.length > 0 && (
           <div
