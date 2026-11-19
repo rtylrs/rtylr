@@ -1,5 +1,6 @@
 import { useQueries } from '@tanstack/react-query';
 import { useUserStore } from '../stores/userStore';
+import { useFlowStore } from '../stores/flowStore';
 import { canEditTask, canDelete, mostRestrictiveProjectRole, canFlowPermission } from './roleUtils';
 import {
   projectMembersQueryOptions,
@@ -124,6 +125,47 @@ export function useCanEditTask(projectId?: string): boolean {
     projectRole !== undefined &&
     canEditTask(projectRole)
   );
+}
+
+/**
+ * `useCanEditTask` for a screen that mixes projects: a predicate answering, per
+ * project, whether the signed-in user may change a task's fields there.
+ *
+ * The Plan calendar shows every project's tasks together, and dragging one to
+ * another day is a task update, which onion gates on `flow:tasks:edit` plus a
+ * project role above viewer. So the drag handle has to be decided per task, not
+ * once for the screen.
+ *
+ * Same rules as `useCurrentProjectRole` + `canEditTask`: a hub owner or admin
+ * may; otherwise the roster decides, and the project's owner counts as admin
+ * when the roster does not name them. A project whose roster has not loaded, or
+ * does not name the caller, answers false. That fails closed: a department
+ * manager or Flow Admin who reaches a project without a roster row sees it read
+ * only, which is what useCurrentProjectRole already does for them.
+ */
+export function useCanEditTaskIn(projectIds: readonly string[]): (projectId: string) => boolean {
+  const userId = useCurrentUserId();
+  const access = useUserStore((state) => state.user?.effectiveAccess);
+  const projects = useFlowStore((state) => state.projects);
+  const canEdit = canFlowPermission('flow:tasks:edit', access);
+  const bypass = Boolean(access?.isOwner || access?.isAdmin);
+  const ids = [...new Set(projectIds.filter(Boolean))].sort();
+  const results = useQueries({
+    queries: ids.map((id) => ({
+      ...projectMembersQueryOptions(id),
+      enabled: canEdit && !bypass && canFlowPermission('flow:projects:view', access),
+    })),
+  });
+
+  return (projectId: string): boolean => {
+    if (!canEdit) return false;
+    if (bypass) return true;
+    const index = ids.indexOf(String(projectId));
+    const role = index === -1 ? undefined : findProjectRole(results[index]?.data, userId);
+    if (role !== undefined) return canEditTask(role);
+    const project = (projects ?? []).find((p) => String(p.id) === String(projectId));
+    return userId !== null && project?.ownerId !== undefined && String(project.ownerId) === userId;
+  };
 }
 
 /**
