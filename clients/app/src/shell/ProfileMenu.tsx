@@ -1,6 +1,17 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Sun, Moon, Monitor, LogOut, ExternalLink, Check, ChevronDown } from 'lucide-react';
+import {
+  Sun,
+  Moon,
+  Monitor,
+  LogOut,
+  ExternalLink,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Pencil,
+  UserRound,
+} from 'lucide-react';
 import { signOut } from '@voxire/auth';
 import { APP_URLS } from '@voxire/config';
 import {
@@ -11,12 +22,16 @@ import {
 } from '@voxire/ui';
 import { Avatar } from '../shared/components/ui';
 import { useUserStore } from '../shared/stores/userStore';
-import { initialsOf } from '../shared/avatar/AvatarPicker';
+import { AvatarPicker, initialsOf } from '../shared/avatar/AvatarPicker';
+import { useSettingsModalStore } from '../features/settings/settingsModalStore';
 import { useBusinessStore } from '../shared/stores/businessStore';
 import { useConfigStore } from '../shared/stores/configStore';
 import { useThemeStore } from '../shared/stores/themeStore';
 import { selectLanguage } from '../shared/services/i18next';
 import BusinessSwitcher from '../features/business-switcher/BusinessSwitcher';
+
+/** Account settings: avatar, name and email. The portal's profile page. */
+const PROFILE_PATH = '/settings/account';
 
 const languages = [
   { code: 'en', label: 'English' },
@@ -38,6 +53,20 @@ export default function ProfileMenu({ opensDown = false }: { opensDown?: boolean
   const ref = useRef<HTMLDetailsElement>(null);
   const close = () => {
     if (ref.current) ref.current.open = false;
+  };
+  const [pickerOpen, setPickerOpen] = useState(false);
+  // A real link, so a middle click still opens it in a new tab; a plain click
+  // opens the settings modal over the current page like every settings link.
+  const openProfile = (event: ReactMouseEvent<HTMLAnchorElement>) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+      return;
+    event.preventDefault();
+    close();
+    useSettingsModalStore.getState().open(PROFILE_PATH);
+  };
+  const changeAvatar = () => {
+    close();
+    setPickerOpen(true);
   };
   const [placement, setPlacement] = useState<{ down: boolean; room?: number }>({
     down: opensDown,
@@ -107,9 +136,36 @@ export default function ProfileMenu({ opensDown = false }: { opensDown?: boolean
         }
       >
         <div className="portal-profile-identity">
-          <strong>{user?.fullName}</strong>
-          <span>{user?.email}</span>
+          <button
+            type="button"
+            className="portal-profile-avatar"
+            onClick={changeAvatar}
+            aria-label={t('common.changeYourAvatar')}
+          >
+            <Avatar
+              seed={user?.id !== undefined ? String(user.id) : undefined}
+              initials={initialsOf(user?.fullName)}
+              size="md"
+              aria-hidden
+            />
+            <span className="portal-profile-avatar-edit" aria-hidden="true">
+              <Pencil size={10} />
+            </span>
+          </button>
+          <a href={PROFILE_PATH} className="portal-profile-identity-link" onClick={openProfile}>
+            <strong>{user?.fullName}</strong>
+            <span>{user?.email}</span>
+            <ChevronRight
+              className="portal-profile-identity-chevron"
+              size={14}
+              aria-hidden="true"
+            />
+          </a>
         </div>
+        <a href={PROFILE_PATH} className="portal-profile-link" onClick={openProfile}>
+          <UserRound size={16} />
+          {t('common.yourProfile')}
+        </a>
         <BusinessSwitcher onNavigate={close} />
         <fieldset>
           <legend>{t('common.appearance.title')}</legend>
@@ -194,6 +250,15 @@ export default function ProfileMenu({ opensDown = false }: { opensDown?: boolean
           {t('common.signOut')}
         </button>
       </div>
+      {pickerOpen && (
+        <AvatarPicker
+          open={pickerOpen}
+          onOpenChange={setPickerOpen}
+          userId={String(user?.id ?? '')}
+          name={user?.fullName}
+          current={user?.avatar}
+        />
+      )}
     </details>
   );
 }
