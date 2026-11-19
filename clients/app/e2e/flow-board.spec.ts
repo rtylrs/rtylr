@@ -103,6 +103,9 @@ async function primeAuthCookie(context: import('@playwright/test').BrowserContex
       sameSite: 'Lax',
       secure: false,
     },
+    // Answer the cookie banner up front: at 390px it covers the bottom of the
+    // screen, including the move menu this file clicks through.
+    { name: 'rtylr-consent', value: 'denied', domain: 'localhost', path: '/', sameSite: 'Lax' },
   ]);
 }
 
