@@ -1108,26 +1108,6 @@
       "apply": "Déposer une candidature"
     }
   },
-  "blog": {
-    "hero": {
-      "subtitle": "Des écrits concrets, éprouvés sur le terrain : caisse, stocks, paie, et ce qui change quand tout partage une seule plateforme. Sans remplissage, seulement ce qui tient un samedi soir.",
-      "intro": "Les articles couvrent quatre sujets : faire tourner une PME libanaise sur un seul système plutôt que six, le quotidien de la caisse et de la restauration, ce qui change vraiment quand on quitte les tableurs et les outils dispersés, et des explications claires pour chaque module rtylr. Écrit à partir du fonctionnement du produit, pas d’une liste de mots-clés.",
-      "eyebrow": "BLOG",
-      "title": "Des guides concrets pour piloter toute l’entreprise."
-    },
-    "meta": {
-      "title": "Blog · Guides pratiques caisse, stocks et opérations | rtylr",
-      "description": "Guides opérationnels sur la caisse, les stocks, la paie et la gestion d’entreprise unifiée : tactiques concrètes pour restaurants, commerces et épiceries.",
-      "schemaDescription": "Guides opérationnels sur la caisse, les stocks, la paie et les logiciels d’entreprise tout-en-un."
-    },
-    "readingTime": "Lecture : {{minutes}} min",
-    "readingTimeShort": "{{minutes}} min",
-    "post": {
-      "allPosts": "Tous les articles",
-      "ctaTitle": "Découvrez rtylr sur vos propres chiffres",
-      "ctaBody": "Caisse, stocks, RH, CRM et finance sur une seule plateforme. Démarrez gratuitement."
-    }
-  },
   "notFound": {
     "meta": {
       "title": "Page introuvable · rtylr",

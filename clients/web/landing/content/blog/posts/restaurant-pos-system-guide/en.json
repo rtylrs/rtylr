@@ -1,0 +1,174 @@
+{
+  "slug": "restaurant-pos-system-guide",
+  "locale": "en",
+  "title": "How to Choose a Restaurant POS System: A Saturday-Night Checklist",
+  "metaTitle": "Restaurant POS System: The Real Checklist | rtylr",
+  "description": "A practical checklist for choosing a restaurant POS system: offline mode, ticket and table management, tips into payroll, recipe inventory depletion, and live P&L.",
+  "excerpt": "A hands-on checklist for choosing a restaurant POS system, judged by how it behaves during a Saturday rush, not by its feature grid.",
+  "keyword": "restaurant POS system",
+  "segment": "small",
+  "type": "guide",
+  "format": "legacy",
+  "tags": [
+    "pos",
+    "restaurants"
+  ],
+  "author": "abed-el-fattah-amouneh",
+  "date": "2026-05-21",
+  "readingMinutes": 6,
+  "cover": {
+    "motif": "receipt",
+    "title": "Sales / Checkout",
+    "rows": [
+      {
+        "label": "Table 12, 4 seats",
+        "value": "Open"
+      },
+      {
+        "label": "Split by seat",
+        "value": "4 bills"
+      },
+      {
+        "label": "Tips to payroll",
+        "value": "On",
+        "tone": "good"
+      },
+      {
+        "label": "Connection",
+        "value": "Offline, queued",
+        "tone": "warn"
+      }
+    ]
+  },
+  "blocks": [
+    {
+      "type": "p",
+      "text": "It's 8:40 on a Saturday and you have a 25-minute ticket time, two servers calling in modifiers from memory, and a card reader that just spun for nine seconds before timing out. The restaurant POS system you picked in a calm Tuesday demo is now the thing standing between your kitchen and a dining room full of people who will tweet about the wait. This is the test that matters. Not the feature grid on the sales page. The rush."
+    },
+    {
+      "type": "p",
+      "text": "Most buying guides rank POS systems by how many integrations they list. After running floors and closing books, I'd rank them by how they behave when something goes wrong. Below is the checklist I actually use, ordered by what hurts most when it's missing, plus an honest note on when a single all-in-one system is the wrong call."
+    },
+    {
+      "type": "h2",
+      "text": "Offline mode is not a footnote, it's the whole game"
+    },
+    {
+      "type": "p",
+      "text": "Your internet will drop mid-service. Maybe the ISP, maybe a kid who unplugged the router by the host stand, maybe a storm. The only question is whether your restaurant POS system keeps taking orders and cards while it's down. A lot of cloud-first systems freeze the second they lose connection, and now you're writing tickets on a notepad and hand-keying 40 transactions at midnight."
+    },
+    {
+      "type": "p",
+      "text": "When you evaluate offline mode, push past the marketing checkbox and ask three things:"
+    },
+    {
+      "type": "ul",
+      "items": [
+        "Can it still send orders to the kitchen and fire tickets while offline, or does it only queue payments?",
+        "Does it store-and-forward card transactions automatically when the connection returns, or do you re-run every card by hand?",
+        "When it reconnects, do inventory counts, tips, and sales reconcile cleanly, or do you spend Sunday morning hunting for duplicates?"
+      ]
+    },
+    {
+      "type": "p",
+      "text": "rtylr's POS keeps selling when the internet drops and syncs the backlog once it's back. That's the bar. If a vendor gets vague here, assume the worst and test it yourself: unplug the router during the trial and run ten orders."
+    },
+    {
+      "type": "h2",
+      "text": "Table and ticket management that survives a real floor"
+    },
+    {
+      "type": "p",
+      "text": "Full-service and quick-service break differently, so weight this section to your format. For table service, the workflow that wins or loses your night is the boring stuff: split a check four ways after dessert, move a party from a two-top to a booth without re-firing the order, add a seat mid-meal, and transfer an open tab from the bar to a table when the party gets seated."
+    },
+    {
+      "type": "p",
+      "text": "Run this exact sequence in any demo and watch how many taps each step takes:"
+    },
+    {
+      "type": "ul",
+      "items": [
+        "Open a tab at the bar, add two drinks, then transfer it to table 12 when they sit.",
+        "Fire an appetizer immediately but hold the entrees, then release the entrees from the kitchen view.",
+        "Split the final check by seat, then re-split one seat's items across two cards.",
+        "Comp a single item and have it show on the manager report with a reason code."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "If any of those takes more than a few taps or needs a manager override for routine moves, your servers will fight the system every shift. Counter and cafe operators care less about seat maps and more about speed-of-order: modifier screens that don't bury the common choices three menus deep, and a clear path to fire-and-pay in under fifteen seconds."
+    },
+    {
+      "type": "h2",
+      "text": "Tips and payroll: the reconciliation nobody demos"
+    },
+    {
+      "type": "p",
+      "text": "Here's a cost that never shows up in a feature comparison: the hours your manager spends every pay period exporting tip totals from the POS, dropping them into a spreadsheet, splitting the pool, and re-keying it into payroll. Do that twice a month across a year and it's real money and a steady source of errors that make staff distrust their checks."
+    },
+    {
+      "type": "p",
+      "text": "The thing to look for is whether tips captured at the terminal flow into payroll without a human re-typing them. In rtylr, tips recorded on a POS sale move into payroll automatically because the POS and payroll sit on one database, so the gratuity a server earned at 9pm Saturday is already attached to the right employee when you run payroll. Ask any vendor directly: does the tip a server takes on a card show up in their paycheck without an export-import dance? If the answer involves a CSV, you'll own that CSV forever."
+    },
+    {
+      "type": "quote",
+      "text": "The best tip handling is the kind your manager never thinks about, because it never required a spreadsheet."
+    },
+    {
+      "type": "h2",
+      "text": "Inventory and recipe depletion in real time"
+    },
+    {
+      "type": "p",
+      "text": "This is where restaurants leak margin quietly. If your POS and your inventory don't share a database, your counts are always a guess, and you find out you're out of salmon when a server walks back from table 9 to tell the table you're out of salmon."
+    },
+    {
+      "type": "p",
+      "text": "What you want is recipe-linked depletion: when the kitchen sells a burger, the system pulls one patty, one bun, two slices of cheese, and the rest of the build sheet from stock automatically. rtylr does this. A POS sale depletes inventory in real time, and because recipes are linked, a single plate sold draws down every ingredient it contains. The payoff is twofold. You get live counts so 86'd items can flag before a server promises something the line can't make, and you get a real food-cost number instead of a quarterly shock."
+    },
+    {
+      "type": "h3",
+      "text": "Multi-branch, if you're there yet"
+    },
+    {
+      "type": "p",
+      "text": "One location doesn't need this. Two or more does, badly. The questions that matter: can you transfer stock between branches with an audit trail of who moved what and when, can you compare labor and food cost per location on one screen, and can a regional manager see all sites without logging into five accounts? rtylr handles location-to-location transfers with an audit trail, which is the part that saves you during an inventory dispute between two managers who each swear they had the cases."
+    },
+    {
+      "type": "h2",
+      "text": "Reporting you'll read on Sunday, and the live P&L"
+    },
+    {
+      "type": "p",
+      "text": "Most POS reporting is a wall of charts nobody opens. The reports that actually change decisions are short: sales by hour so you staff the right shifts, item-level margin so you can re-engineer the menu, void and comp logs by employee so you catch theft early, and labor as a percentage of sales in close to real time."
+    },
+    {
+      "type": "p",
+      "text": "The bigger leap is closing the books without a month-end scramble. When every sale and every payroll run posts to the ledger automatically, you get a live P&L instead of a number your bookkeeper hands you three weeks late. rtylr posts sales and payroll to the books as they happen, so the question shifts from \"how did last month go\" to \"how is tonight going.\" That's the difference between accounting that records history and accounting that lets you react."
+    },
+    {
+      "type": "h2",
+      "text": "When all-in-one is the wrong call"
+    },
+    {
+      "type": "p",
+      "text": "I won't pretend one platform is right for everyone. Be honest about your situation before you consolidate:"
+    },
+    {
+      "type": "ul",
+      "items": [
+        "You have deep, working integrations already. If your specialized payroll provider, accountant's tooling, and reservation system are wired together and your team likes them, ripping all of it out to gain one database may cost more than it saves.",
+        "You need one best-in-class niche feature. A 200-seat fine-dining room with complex coursing, or a bar with heavy mixology inventory, may want a specialist tool for that one job even at the price of more systems to reconcile.",
+        "You're mid-rush-season. Never migrate your restaurant POS system three weeks before your busiest stretch. Switch in your slow season with time to train."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "The case for one platform is simple: every place your data crosses a system boundary is a place it gets re-keyed, drifts, or breaks. POS to inventory, tips to payroll, sales to the ledger. Each of those handoffs is a spreadsheet and a person and an error rate. rtylr's bet is that putting POS, inventory, payroll, CRM, and finance on one shared database removes those seams, and for a single owner-operator running three locations, that's usually the right trade."
+    },
+    {
+      "type": "p",
+      "text": "Pick the system that behaves well on your worst night, not the one with the longest feature list on its best slide. If you want to see what one shared database does to a Saturday rush, take rtylr for a spin at rtylr.com and unplug the router during your trial. That's the only demo that tells the truth."
+    }
+  ]
+}

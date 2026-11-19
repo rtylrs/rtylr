@@ -1353,22 +1353,115 @@
   },
   "blog": {
     "meta": {
-      "title": "Blog · POS, inventory & operations playbooks | rtylr",
-      "description": "Operator playbooks on POS, inventory, payroll, and running an all-in-one business platform: concrete tactics for restaurants, retail, and grocery.",
-      "schemaDescription": "Operator playbooks on POS, inventory, payroll, and all-in-one business software."
+      "title": "The rtylr blog: running a business on one workspace",
+      "description": "Guides, comparisons and essays on running a business from one workspace, written for small teams, mid-size companies and large groups, plus where software goes next."
     },
     "hero": {
-      "eyebrow": "BLOG",
-      "title": "Playbooks for running the whole business.",
-      "subtitle": "Concrete, operator-tested writing on POS, inventory, payroll, and what changes when they share one platform. No fluff, just what works on a Saturday night.",
-      "intro": "The writing here covers four things: running a small or mid-sized Lebanese business on one system instead of six, the day to day of POS and restaurants, what actually changes when you move off spreadsheets and disconnected tools, and plain explainers for each rtylr module. Written from how the product works, not from a keyword list."
+      "eyebrow": "THE RTYLR BLOG",
+      "title": "Run the whole business from one place.",
+      "subtitle": "Practical writing on the work of running a company: money, people, customers, stock and the tools that are supposed to hold it together. Specific, honest about tradeoffs, and clear about when rtylr is the wrong choice.",
+      "intro": "Every post is written for one kind of reader. Owners of small businesses who run staff, money and stock themselves. Operations, finance and HR leads at mid-size companies replacing five to ten tools. IT and finance heads at large groups who need governance across sites and countries. And anyone who wants the argument for why business software is changing, from the two people building rtylr in Beirut."
     },
     "readingTime": "{{minutes}} min read",
     "readingTimeShort": "{{minutes}} min",
+    "sections": {
+      "title": "Read by the size of your business",
+      "latest": "Latest posts",
+      "navLabel": "Blog sections",
+      "all": "All posts",
+      "browse": "Browse",
+      "otherLanguage": "المدونة بالعربية"
+    },
+    "segments": {
+      "small": {
+        "label": "Small businesses",
+        "title": "Run a small business on one system",
+        "intro": "For owners of teams up to 25 people who run staff, money, customers and stock themselves: restaurants, shops, studios and clinics. Practical guides to the jobs that eat your week, with honest notes on when a simpler tool is the better buy.",
+        "metaTitle": "Small business guides: one system for the whole shop",
+        "metaDescription": "Guides for owners of teams up to 25 people who run staff, money, customers and stock themselves, with honest notes on when a simpler tool is the better buy."
+      },
+      "mid": {
+        "label": "Mid-size companies",
+        "title": "Fewer tools, one set of numbers",
+        "intro": "For operations, finance and HR leads at companies of 25 to 250 people, usually across several locations or teams, who are replacing five to ten tools that disagree with each other. Comparisons, rollout plans and the costs that never make it into a vendor deck.",
+        "metaTitle": "Mid-size companies: replace five tools with one",
+        "metaDescription": "For operations, finance and HR leads at companies of 25 to 250 people replacing five to ten tools: comparisons, rollout plans and the costs vendors leave out."
+      },
+      "large": {
+        "label": "Large companies and groups",
+        "title": "One system across every entity and site",
+        "intro": "For IT, finance and operations heads at groups of 250 people or more, often across several entities and countries. Single sign-on, audit trails, consolidation, and rolling one system out across sites without stopping the business while you do it.",
+        "metaTitle": "Large companies and groups: governance at scale",
+        "metaDescription": "For IT, finance and operations heads at groups of 250+ people across entities and countries: single sign-on, audit trails, consolidation and site rollouts."
+      },
+      "vision": {
+        "label": "Vision",
+        "title": "Where business software is going",
+        "intro": "Essays on why business software split into ten tools, why one shared data model with an AI that knows the whole business replaces them, how large that market is, and what the team shipped and why. Written by the two people building rtylr.",
+        "metaTitle": "Vision: why business software is changing | rtylr",
+        "metaDescription": "Essays on why business software split into ten tools, why one data model with an AI that knows the whole business replaces them, and what the rtylr team ships."
+      }
+    },
+    "tag": {
+      "eyebrow": "TOPIC",
+      "metaTitle": "{{tag}}: guides and essays from the rtylr blog",
+      "metaDescription": "Every rtylr blog post about {{tag}}: practical guides, comparisons and essays on running a business from one connected workspace, for teams of any size.",
+      "intro": "Everything we have written about {{tag}}, newest first, across every size of business.",
+      "heading": "Posts on {{tag}}",
+      "label": "Topics"
+    },
+    "authors": {
+      "abed": {
+        "name": "Abed El-Fattah Amouneh",
+        "role": "Co-founder, rtylr",
+        "bio": "Abed El-Fattah Amouneh is a co-founder of rtylr. In 2024 he left a corporate role to build, with Mohammad Homsi, one system for running a whole business instead of six that never agree. He writes about the business side: the market, buying decisions, and what changes when a company runs on one set of records.",
+        "metaTitle": "Abed El-Fattah Amouneh, co-founder of rtylr",
+        "metaDescription": "Posts by Abed El-Fattah Amouneh, co-founder of rtylr, on the market for business software, buying decisions, and running a company on one set of records."
+      },
+      "mohammad": {
+        "name": "Mohammad Homsi",
+        "role": "Co-founder, rtylr",
+        "bio": "Mohammad Homsi is a co-founder of rtylr. In 2024 he left a corporate role to build it with Abed El-Fattah Amouneh, and he works on the product and the platform underneath it. He writes about what shipped, why it was built that way, and the engineering behind one shared data model.",
+        "metaTitle": "Mohammad Homsi, co-founder of rtylr | rtylr blog",
+        "metaDescription": "Posts by Mohammad Homsi, co-founder of rtylr, on what the team shipped, why it was built that way, and the engineering behind one shared business data model."
+      },
+      "heading": "Posts by {{name}}",
+      "eyebrow": "AUTHOR",
+      "links": "Elsewhere"
+    },
     "post": {
       "allPosts": "All posts",
-      "ctaTitle": "See rtylr on your own numbers",
-      "ctaBody": "POS, inventory, HR, CRM, and finance on one platform. Free to start."
+      "published": "Published {{date}}",
+      "updated": "Updated {{date}}",
+      "by": "By",
+      "toc": "On this page",
+      "faq": "Questions people ask",
+      "related": "Keep reading",
+      "otherLanguage": "اقرأ هذه المقالة بالعربية",
+      "breadcrumb": "Breadcrumb",
+      "aboutAuthor": "About the author"
+    },
+    "cta": {
+      "small": {
+        "title": "Run it all from one place, free",
+        "body": "The Free plan covers 10 people at one location and needs no card. Set it up in an afternoon and see your own numbers in one place."
+      },
+      "mid": {
+        "title": "See it on your own numbers",
+        "body": "A 30 minute walkthrough with someone who built rtylr, on the tools you are replacing and the teams and locations you run."
+      },
+      "large": {
+        "title": "Plan a rollout with us",
+        "body": "Scale adds single sign-on, audit logs, unlimited locations and an SLA. Tell us about your entities and sites and we will walk through a rollout."
+      },
+      "vision": {
+        "title": "Talk to the founders",
+        "body": "If you invest in business software or want to partner on it, write to the two people building rtylr. Every message is read by one of us."
+      },
+      "startFree": "Start free",
+      "bookDemo": "Book a demo",
+      "talkToSales": "Talk to sales",
+      "talkToFounders": "Talk to the founders"
     }
   },
   "legal": {

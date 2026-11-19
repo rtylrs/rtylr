@@ -300,34 +300,37 @@ export function contactPageSchema(opts: {
 }
 
 /**
- * blogIndexSchema for /blog/: a Blog whose posts are enumerated, so a
- * consumer reading the graph can see what is on the page without
- * parsing the markup.
+ * A blog listing (the index, a segment, a tag or an author page): a
+ * CollectionPage whose posts are enumerated, so a consumer reading the graph
+ * can see what is on the page without parsing the markup.
  */
-export function blogIndexSchema(opts: {
+export function blogCollectionSchema(opts: {
+  name: string;
+  path: string;
   description: string;
-  posts: { title: string; slug: string; datePublished: string }[];
+  inLanguage: string;
+  posts: { title: string; path: string; datePublished: string }[];
+  breadcrumbs: BreadcrumbInput[];
 }): Record<string, unknown> {
   return {
     '@context': 'https://schema.org',
     '@graph': [
       {
-        '@type': 'Blog',
-        name: 'rtylr blog',
-        url: `${BASE}/blog/`,
+        '@type': 'CollectionPage',
+        name: opts.name,
+        url: `${BASE}${opts.path}`,
         description: opts.description,
+        inLanguage: opts.inLanguage,
+        isPartOf: { '@type': 'Blog', name: 'rtylr blog', url: `${BASE}/blog/` },
         publisher: ORG,
-        blogPost: opts.posts.map((p) => ({
+        hasPart: opts.posts.map((p) => ({
           '@type': 'BlogPosting',
           headline: p.title,
-          url: `${BASE}/blog/${p.slug}/`,
+          url: `${BASE}${p.path}`,
           datePublished: p.datePublished,
         })),
       },
-      breadcrumbList([
-        { label: 'rtylr', path: '/' },
-        { label: 'Blog', path: '/blog/' },
-      ]),
+      breadcrumbList(opts.breadcrumbs),
     ],
   };
 }
@@ -394,14 +397,25 @@ export function webPageSchema(opts: {
   };
 }
 
+/**
+ * One post. BlogPosting is a subtype of Article, so it carries everything
+ * Google reads for Article. The author is a Person with a profile page on
+ * this site, which is the property that ties a byline to a real author.
+ */
 export function blogPostingSchema(opts: {
   title: string;
-  slug: string;
+  path: string;
   description: string;
   datePublished: string;
   dateModified?: string;
+  inLanguage: string;
+  section: string;
+  keywords: string[];
+  image: string;
+  author: { name: string; path: string; sameAs: string[] };
+  breadcrumbs: BreadcrumbInput[];
 }): Record<string, unknown> {
-  const url = `${BASE}/blog/${opts.slug}/`;
+  const url = `${BASE}${opts.path}`;
   return {
     '@context': 'https://schema.org',
     '@graph': [
@@ -413,15 +427,19 @@ export function blogPostingSchema(opts: {
         mainEntityOfPage: { '@type': 'WebPage', '@id': url },
         datePublished: opts.datePublished,
         dateModified: opts.dateModified ?? opts.datePublished,
-        author: ORG,
+        inLanguage: opts.inLanguage,
+        articleSection: opts.section,
+        keywords: opts.keywords.join(', '),
+        image: opts.image,
+        author: {
+          '@type': 'Person',
+          name: opts.author.name,
+          url: `${BASE}${opts.author.path}`,
+          sameAs: opts.author.sameAs,
+        },
         publisher: ORG,
-        image: `${BASE}/og-default.png`,
       },
-      breadcrumbList([
-        { label: 'rtylr', path: '/' },
-        { label: 'Blog', path: '/blog/' },
-        { label: opts.title, path: `/blog/${opts.slug}/` },
-      ]),
+      breadcrumbList(opts.breadcrumbs),
     ],
   };
 }

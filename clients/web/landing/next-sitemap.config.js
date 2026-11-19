@@ -23,7 +23,13 @@
 //
 // Required in a require() rather than an import: next-sitemap loads this
 // file with the CommonJS loader. Node strips the types.
-const { alternatesFor, basePathOf, shippedLocales } = require('./lib/locales.ts');
+const {
+  LOCALES,
+  alternatesFor,
+  basePathOf,
+  inServedSection,
+  localisePath,
+} = require('./lib/locales.ts');
 
 // lastmod used to be `new Date()` for every URL, so all 23 entries carried the
 // build time. Google uses lastmod to prioritise recrawls and stops trusting it
@@ -33,8 +39,8 @@ const { alternatesFor, basePathOf, shippedLocales } = require('./lib/locales.ts'
 // There are exactly two sources of truth here, and hand-maintaining a dates
 // file is not one of them:
 //
-//   posts   for /blog/<slug>/, the post's own dateModified, or date until
-//           #1353 adds dateModified.
+//   posts   for a post, its own dateModified, or date. For a blog listing,
+//           the newest post it can show.
 //   git     for everything else, the last commit that touched the page file.
 //
 // The three legal routes are the exception: pages/legal/*.tsx are thin
@@ -45,7 +51,6 @@ const { execSync } = require('node:child_process');
 const fs = require('node:fs');
 const nodePath = require('node:path');
 
-const posts = require('./lib/blog/posts.json');
 
 const BUILD_TIME = new Date().toISOString();
 
@@ -86,7 +91,7 @@ const LEGAL_ROUTES = new Set(['/legal/terms/', '/legal/privacy-policy/', '/legal
 /** pages/pricing/index.tsx -> /pricing/, pages/legal/terms.tsx -> /legal/terms/. */
 function routeOf(relative) {
   const withoutExt = relative.replace(/^pages\//, '').replace(/\.tsx$/, '');
-  // Dynamic segments are not real routes: [slug] is covered by posts.json and
+  // Dynamic segments are not real routes: the blog is covered by its post files and
   // [locale] is not exported while only English ships.
   if (withoutExt.includes('[') || withoutExt.startsWith('_') || withoutExt === '404') return null;
   const route = withoutExt === 'index' ? '/' : `/${withoutExt.replace(/\/index$/, '')}/`;
@@ -110,18 +115,66 @@ for (const file of pageFiles()) {
   if (iso) ROUTE_LASTMOD.set(route, iso);
 }
 
-/** slug -> ISO date, from the post's own front matter. */
-const POST_LASTMOD = new Map(
-  posts
-    .filter((post) => post.slug && (post.dateModified || post.date))
-    .map((post) => [post.slug, new Date(post.dateModified || post.date).toISOString()])
-);
+// One folder per post under content/blog/posts, one JSON file per locale.
+const POSTS_DIR = nodePath.join(__dirname, 'content/blog/posts');
+const posts = fs
+  .readdirSync(POSTS_DIR, { withFileTypes: true })
+  .filter((e) => e.isDirectory())
+  .flatMap((e) =>
+    ['en', 'ar']
+      .map((code) => nodePath.join(POSTS_DIR, e.name, `${code}.json`))
+      .filter((f) => fs.existsSync(f))
+      .map((f) => JSON.parse(fs.readFileSync(f, 'utf8')))
+  );
+
+const blogPrefix = (locale) => (locale === 'en' ? '/blog/' : `/${locale}/blog/`);
+const isoOf = (post) => new Date(post.dateModified || post.date).toISOString();
+
+/** Post URL -> ISO date, from the post's own file. */
+const POST_LASTMOD = new Map(posts.map((p) => [`${blogPrefix(p.locale)}${p.slug}/`, isoOf(p)]));
+
+/** Newest post date per locale, for the listing pages that show them. */
+const NEWEST_IN = new Map();
+for (const p of posts) {
+  const iso = isoOf(p);
+  if (!NEWEST_IN.has(p.locale) || NEWEST_IN.get(p.locale) < iso) NEWEST_IN.set(p.locale, iso);
+}
 
 /** The build time is the last resort, not the default. */
 function lastmodFor(norm) {
-  const post = norm.match(/^\/blog\/([^/]+)\/$/);
-  if (post) return POST_LASTMOD.get(post[1]) ?? ROUTE_LASTMOD.get('/blog/') ?? BUILD_TIME;
+  if (POST_LASTMOD.has(norm)) return POST_LASTMOD.get(norm);
+  const listing = norm.match(/^\/(?:(ar)\/)?blog\//);
+  if (listing) return NEWEST_IN.get(listing[1] ?? 'en') ?? BUILD_TIME;
   return ROUTE_LASTMOD.get(norm) ?? BUILD_TIME;
+}
+
+const OUT_DIR = nodePath.join(__dirname, 'dist/landing');
+const exported = (route) => fs.existsSync(nodePath.join(OUT_DIR, route, 'index.html'));
+
+/**
+ * hreflang for a section a locale serves on its own (the blog). A post may
+ * exist in one language only, so the set is read off the export: two
+ * locales are alternates for a route exactly when both exported it.
+ */
+function sectionAlternates(base) {
+  const members = LOCALES.filter(
+    (l) => (l.shipped || inServedSection(base, l)) && exported(localisePath(base, l.code))
+  );
+  if (members.length < 2) return [];
+  const set = members.map((l) => ({
+    hreflang: l.htmlLang,
+    href: `https://rtylr.com${localisePath(base, l.code)}`,
+  }));
+  set.push({ hreflang: 'x-default', href: `https://rtylr.com${base}` });
+  return set;
+}
+
+/** Whether a URL under an unshipped locale prefix is a page that exists on purpose. */
+function servedPath(norm) {
+  const code = norm.split('/').filter(Boolean)[0];
+  const locale = LOCALES.find((l) => l.code === code);
+  if (!locale || locale.shipped) return true;
+  return inServedSection(basePathOf(norm), locale);
 }
 
 /** @type {import('next-sitemap').IConfig} */
@@ -129,16 +182,10 @@ module.exports = {
   siteUrl: 'https://rtylr.com',
   generateRobotsTxt: false, // we maintain robots.txt by hand - it has AI-bot allowances
   outDir: 'dist/landing', // matches next.config.js output directory
-  // Unshipped locale prefixes can never appear here, because no route is
-  // exported for them. The exclusion is belt and braces: if one ever leaks
-  // into the export, it must not also be advertised.
-  exclude: [
-    '/404',
-    '/homepage-legacy*',
-    ...['ar', 'fr']
-      .filter((code) => !shippedLocales().some((l) => l.code === code))
-      .flatMap((code) => [`/${code}`, `/${code}/*`]),
-  ],
+  // Unshipped locale prefixes are dropped in transform() below rather than
+  // here, because a locale may serve one section (the Arabic blog) while the
+  // rest of its routes stay unpublished.
+  exclude: ['/404', '/homepage-legacy*'],
   // Trailing slashes match next.config's trailingSlash: true so the
   // URLs in the sitemap match the served URLs 1:1.
   trailingSlash: true,
@@ -151,6 +198,9 @@ module.exports = {
     // next-sitemap's `path` argument isn't guaranteed to include the
     // trailing slash regardless of the global trailingSlash option.
     const norm = path === '/' ? '/' : path.replace(/\/$/, '') + '/';
+    // An unshipped locale's route that leaked into the export must not
+    // also be advertised.
+    if (!servedPath(norm)) return null;
 
     const high = ['/workspace/', '/pricing/'];
     const medium = ['/demo/', '/contact/', '/hardware/', '/integrations/', '/support/'];
@@ -183,7 +233,9 @@ module.exports = {
     // https://rtylr.com/pricing/pricing/. Every alternate would 404 and
     // Google would drop the whole set silently. The default is designed for
     // multi-domain setups (fr.example.com) where href really is a base.
-    const alternateRefs = alternatesFor(basePathOf(norm)).map(({ hreflang, href }) => ({
+    const base = basePathOf(norm);
+    const alternates = base.startsWith('/blog/') ? sectionAlternates(base) : alternatesFor(base);
+    const alternateRefs = alternates.map(({ hreflang, href }) => ({
       href,
       hreflang,
       hrefIsAbsolute: true,

@@ -1,0 +1,8 @@
+{
+  "all-in-one": { "en": "All-in-one software", "ar": "البرامج المتكاملة" },
+  "tool-sprawl": { "en": "Tool sprawl", "ar": "تكدّس الأدوات" },
+  "pos": { "en": "Point of sale", "ar": "نقاط البيع" },
+  "restaurants": { "en": "Restaurants", "ar": "المطاعم" },
+  "inventory": { "en": "Inventory", "ar": "المخزون" },
+  "payroll": { "en": "Payroll", "ar": "الرواتب" }
+}
