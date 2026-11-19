@@ -18,4 +18,12 @@ interface MilestoneService {
   @put
   @route("/milestones/{id}")
   updateMilestone(...UpdateMilestoneRequest): UpdateMilestoneResponse;
+
+  /**
+   * deleteMilestone removes the milestone. Its tasks stay in the project and
+   * simply stop belonging to a milestone.
+   */
+  @delete
+  @route("/milestones/{id}")
+  deleteMilestone(...DeleteMilestoneRequest): DeleteMilestoneResponse;
 }

@@ -482,6 +482,11 @@ model CreateTaskRequest {
    */
   @Onkt.encode("string")
   labels: int64[];
+
+  /** Milestone to file the task under; must belong to the task's project. */
+  @minValueExclusive(0)
+  @encode(string)
+  milestone_id?: int64;
 }
 
 model CreateTaskResponse {
@@ -589,6 +594,13 @@ model UpdateTaskBody {
    * view, so this writes flow_task_focus_pins rather than a task column.
    */
   focus_pin?: boolean;
+
+  /**
+   * Milestone the task rolls up to. Absent leaves it untouched; 0 removes the
+   * task from its milestone. Must belong to the task's project.
+   */
+  @encode(string)
+  milestone_id?: int64;
 }
 
 model UpdateTaskRequest {

@@ -24,6 +24,10 @@ model Milestone {
   computed_progress: int32;
   done_count: int32;
   task_count: int32;
+
+  /** Open tasks in the milestone whose due date has passed. */
+  overdue_count: int32;
+
   status: string;
   description: string;
   project: MilestoneProject;
@@ -89,3 +93,11 @@ model UpdateMilestoneRequest {
 }
 
 model UpdateMilestoneResponse {}
+
+model DeleteMilestoneRequest {
+  @minValueExclusive(0)
+  @encode(string)
+  id: int64;
+}
+
+model DeleteMilestoneResponse {}
