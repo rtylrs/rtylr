@@ -882,7 +882,31 @@
       "due": "Due date",
       "none": "None"
     },
-    "empty": "No tasks in this project yet."
+    "empty": "No tasks in this project yet.",
+    "columns": "Columns",
+    "resetColumns": "Reset columns",
+    "moveColumnEarlier": "Move {{column}} earlier",
+    "moveColumnLater": "Move {{column}} later",
+    "resizeColumn": "Resize {{column}}",
+    "exportCsv": "Export CSV",
+    "gridLabel": "Tasks in {{project}}",
+    "estimateValue": "{{hours}}h",
+    "noLabels": "No labels yet",
+    "showSubtasks_one": "Show {{count}} subtask",
+    "showSubtasks_other": "Show {{count}} subtasks",
+    "hideSubtasks": "Hide subtasks",
+    "subtasksLoading": "Loading subtasks…",
+    "subtasksFailed": "Couldn't load subtasks",
+    "column": {
+      "priority": "Priority",
+      "status": "Status",
+      "assignee": "Assignee",
+      "startDate": "Start date",
+      "estimate": "Estimate",
+      "labels": "Labels",
+      "key": "Key",
+      "created": "Created"
+    }
   },
   "projectOverview": {
     "pageTitle": "Overview · rtylr",
