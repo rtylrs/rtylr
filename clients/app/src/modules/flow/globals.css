@@ -659,3 +659,93 @@
     font-size: 16px !important;
   }
 }
+
+/* One task on paper (TaskPrintView). Never shown on screen. While a print is
+   running the root carries .flow-printing and this page is the only thing
+   printed; the app shell fixes its own height and scrolls inside, which would
+   cut the task off after one sheet, so that is undone for print too. */
+.flow-task-print {
+  display: none;
+}
+@media print {
+  html.flow-printing,
+  html.flow-printing body {
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+  html.flow-printing body > :not(.flow-task-print) {
+    display: none !important;
+  }
+  html.flow-printing .flow-task-print {
+    display: block;
+    color: black;
+    font-size: 11pt;
+    line-height: 1.45;
+  }
+  .flow-task-print h1 {
+    margin: 0 0 12pt;
+    font-size: 18pt;
+    font-weight: 700;
+  }
+  .flow-task-print h2 {
+    margin: 16pt 0 6pt;
+    font-size: 12pt;
+    font-weight: 600;
+    break-after: avoid;
+  }
+  .flow-task-print-meta {
+    color: dimgray;
+    font-size: 9pt;
+  }
+  .flow-task-print-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4pt 16pt;
+    margin: 0;
+    padding: 8pt 0;
+    border-block: 1px solid silver;
+  }
+  .flow-task-print-fields dt {
+    color: dimgray;
+    font-size: 9pt;
+  }
+  .flow-task-print-fields dd {
+    margin: 0;
+  }
+  /* The editor hangs into its gutter on screen (negative margin, dimmed when
+     read-only); on paper that clipped the first letter and greyed the text. */
+  .flow-task-print .flow-description {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    color: black;
+    opacity: 1;
+    font-size: 11pt;
+  }
+  .flow-task-print .flow-description .flow-description-content {
+    min-height: 0;
+  }
+  .flow-task-print-subtasks,
+  .flow-task-print-comments {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .flow-task-print-comments > li {
+    padding-block: 6pt;
+    border-block-end: 1px solid gainsboro;
+    break-inside: avoid;
+  }
+  .flow-task-print-body {
+    margin: 2pt 0 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .flow-task-print-done {
+    text-decoration: line-through;
+  }
+  .flow-task-print footer {
+    margin-top: 16pt;
+  }
+}
