@@ -103,6 +103,10 @@ async function primeAuthCookie(context: import('@playwright/test').BrowserContex
       sameSite: 'Lax',
       secure: false,
     },
+    // Without a recorded choice the consent banner covers the bottom of a 390px
+    // screen. During Flow's default quiet hours (22:00 to 07:00 local) a notice
+    // pushes the board down far enough that the move menu opens under it.
+    { name: 'rtylr-consent', value: 'denied', domain: 'localhost', path: '/', sameSite: 'Lax' },
   ]);
 }
 
