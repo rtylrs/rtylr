@@ -209,7 +209,9 @@
       "draft": "Brouillon",
       "merged": "Fusionnée",
       "closed": "Fermée"
-    }
+    },
+    "noMilestone": "Aucun jalon",
+    "noMilestonesInProject": "Aucun jalon dans ce projet"
   },
   "time": {
     "add": {
@@ -774,7 +776,15 @@
     "noProjects": "Aucun projet pour le moment",
     "noTasksYet": "Aucune tâche",
     "noProjectsGate": "Il faut un projet avant d'ajouter un jalon, et votre rôle ne permet pas d'en créer un. Demandez à un administrateur de créer un projet.",
-    "noTasksHint": "Les tâches ne peuvent pas encore être ajoutées à un jalon"
+    "noTasksHint": "Aucune tâche pour l'instant. Choisissez ce jalon dans le champ Jalon d'une tâche.",
+    "openTasks": "Ouvrir les tâches de {{name}}",
+    "editMilestone": "Modifier {{name}}",
+    "deleteMilestone": "Supprimer {{name}}",
+    "deleteTitle": "Supprimer le jalon ?",
+    "deleteDescription": "{{name}} sera supprimé. Ses tâches restent dans le projet et n'appartiennent plus à aucun jalon.",
+    "overdueCount_one": "{{count}} en retard",
+    "overdueCount_many": "{{count}} en retard",
+    "overdueCount_other": "{{count}} en retard"
   },
   "roadmap": {
     "emptyCta": "Voir les projets",

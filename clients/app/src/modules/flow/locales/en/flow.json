@@ -208,7 +208,9 @@
       "draft": "Draft",
       "merged": "Merged",
       "closed": "Closed"
-    }
+    },
+    "noMilestone": "No milestone",
+    "noMilestonesInProject": "No milestones in this project"
   },
   "time": {
     "add": {
@@ -768,7 +770,14 @@
     "noProjects": "No projects yet",
     "noTasksYet": "No tasks yet",
     "noProjectsGate": "You need a project before you can add a milestone, and your role cannot create one. Ask an admin to create a project first.",
-    "noTasksHint": "Tasks cannot be added to a milestone yet"
+    "noTasksHint": "No tasks yet. Pick this milestone in a task's Milestone field.",
+    "openTasks": "Open the tasks in {{name}}",
+    "editMilestone": "Edit {{name}}",
+    "deleteMilestone": "Delete {{name}}",
+    "deleteTitle": "Delete milestone?",
+    "deleteDescription": "{{name}} will be deleted. Its tasks stay in the project and no longer belong to a milestone.",
+    "overdueCount_one": "{{count}} overdue",
+    "overdueCount_other": "{{count}} overdue"
   },
   "roadmap": {
     "emptyCta": "View projects",

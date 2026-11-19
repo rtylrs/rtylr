@@ -89,7 +89,8 @@
   },
   "milestone": {
     "createFailed": "Failed to create milestone",
-    "updateFailed": "Failed to update milestone"
+    "updateFailed": "Failed to update milestone",
+    "deleteFailed": "Failed to delete milestone"
   },
   "view": {
     "renamed": "View renamed",
@@ -165,5 +166,7 @@
   "link": {
     "addFailed": "Couldn't add the link",
     "removeFailed": "Couldn't remove the link"
-  }
+  },
+  "milestoneUpdated": "Milestone updated",
+  "milestoneDeleted": "Milestone deleted"
 }
