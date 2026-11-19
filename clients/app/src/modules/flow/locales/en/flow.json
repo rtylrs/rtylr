@@ -918,7 +918,29 @@
     "overdue": "Overdue",
     "labourCost": "Labour cost",
     "percentComplete": "{{percent}}% complete",
-    "unassigned": "Unassigned"
+    "unassigned": "Unassigned",
+    "summary": {
+      "recentTitle": "Last 7 days",
+      "created": "Created",
+      "completed": "Completed",
+      "updated": "Updated",
+      "dueSoon": "Due soon",
+      "last7Days": "last 7 days",
+      "next7Days": "next 7 days",
+      "openFiltered": "{{label}}: {{n}} tasks. Open them in the list",
+      "needsAttention": "Needs attention",
+      "overdue": "Overdue",
+      "unassignedInCycle": "Unassigned in {{cycle}}",
+      "allClear": "Nothing overdue and no unassigned work in the active cycle.",
+      "hoursTitle": "Logged vs estimate",
+      "hoursValue": "{{hours}} h",
+      "loggedOf": "logged of {{hours}} h estimated",
+      "openEstimate": "{{hours}} h estimated on open tasks",
+      "unestimated": "{{n}} open without an estimate",
+      "priorityTitle": "Open tasks by priority",
+      "noOpenTasks": "No open tasks.",
+      "workloadDetail": "{{open}} open · {{hours}} h est."
+    }
   },
   "projectCalendar": {
     "pageTitle": "Calendar · rtylr"
@@ -1204,6 +1226,11 @@
       "from": "From",
       "to": "To",
       "range": "{{from}} to {{to}}"
+    },
+    "changed": {
+      "created7d": "Created in the last 7 days",
+      "completed7d": "Completed in the last 7 days",
+      "updated7d": "Updated in the last 7 days"
     },
     "showCompleted": "Show completed",
     "completed": "Completed",
