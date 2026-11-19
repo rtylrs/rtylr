@@ -382,7 +382,7 @@ const Milestones: React.FC = () => {
           </div>
         </div>
       )}
-      <div className="flex-1 overflow-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="flex-1 overflow-auto p-6 grid grid-cols-1 md:grid-cols-2 content-start gap-4">
         {milestones.map((m, i) => (
           <MilestoneCard key={m.id} milestone={m} index={i} />
         ))}

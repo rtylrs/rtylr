@@ -8,7 +8,7 @@ import { DatePicker } from '@voxire/ui';
 import type { ApiMilestone } from '../../shared/services/flowApi';
 import { useUpdateMilestone, useDeleteMilestone } from './useMilestones';
 import { useCanDeleteResource } from '../../shared/lib/currentUser';
-import { withAlpha } from '../../shared/lib/colorUtils';
+import { onTint, withAlpha } from '../../shared/lib/colorUtils';
 import { formatDueDate } from '../../shared/lib/utils';
 import { EMPTY_TASK_FILTERS, serializeTaskFilters } from '../../shared/filters/taskFilters';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
@@ -182,7 +182,7 @@ const MilestoneCard: React.FC<MilestoneCardProps> = ({ milestone: m, index }) =>
                 className="h-8 w-8 shrink-0 rounded-md flex items-center justify-center"
                 style={{ background: withAlpha(accent, 13) }}
               >
-                <MilestoneIcon size={14} style={{ color: accent }} aria-hidden="true" />
+                <MilestoneIcon size={14} style={{ color: onTint(accent) }} aria-hidden="true" />
               </span>
               <span className="min-w-0">
                 <span
