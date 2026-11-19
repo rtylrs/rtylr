@@ -12,6 +12,7 @@ import type { ApiStatus } from '../../../shared/services/flowApi';
 import { cn, formatDueDate, formatShortDate, getInitials } from '../../../shared/lib/utils';
 import PriorityIcon from '../../../shared/components/PriorityIcon';
 import { LabelChip } from '../../../shared/components/LabelChip';
+import { AssigneeAvatar } from '../../../shared/components/AssigneeAvatar';
 import { useLabels } from '../../tasks/useLabels';
 import { useProjectStatuses } from '../useStatuses';
 import { displayStatusName, sortStatuses } from '../statusUtils';
@@ -353,15 +354,18 @@ function AssigneeCell({ task, width, canEdit }: CellProps) {
       canEdit={canEdit}
       editor={(close) => <AssigneeEditor task={task} name={name} onClose={() => close(true)} />}
     >
-      <span
-        role="img"
-        aria-label={name || t('flow.quickCreate.unassigned')}
-        title={name || undefined}
-        className="h-5 w-5 rounded-full flex items-center justify-center text-flow-meta font-bold shrink-0"
-        style={{ background: 'var(--accent-muted)', color: 'var(--accent-on-muted)' }}
-      >
-        {initials}
-      </span>
+      {name ? (
+        // The shared avatar: the person's chosen picture or colour, and their
+        // name on hover (#1650).
+        <AssigneeAvatar name={name} initials={initials} seed={task.assigneeId} size={20} />
+      ) : (
+        <span
+          role="img"
+          aria-label={t('flow.quickCreate.unassigned')}
+          className="h-5 w-5 rounded-full shrink-0"
+          style={{ background: 'var(--accent-muted)' }}
+        />
+      )}
       {width >= 96 && name && (
         <span className="ms-1.5 truncate" style={{ color: 'var(--flow-text)' }}>
           {name}
