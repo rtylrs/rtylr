@@ -1,5 +1,5 @@
 import React from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@voxire/components', () => ({ HelmetContainer: () => null }));
@@ -86,7 +86,9 @@ describe('pager ticket page', () => {
         'Keep this page open with the sound on. Your phone will ring when the order is ready.'
       )
     ).toBeInTheDocument();
-    expect(fakeNavigator.wakeLock.request).toHaveBeenCalledWith('screen');
+    // The alarm is fed from an effect, which can run a moment after the
+    // heading is already in the document.
+    await waitFor(() => expect(fakeNavigator.wakeLock.request).toHaveBeenCalledWith('screen'));
   });
 
   it('says "next" when nobody is ahead', async () => {
@@ -244,7 +246,7 @@ describe('pager ticket page', () => {
     api.getPublicTicket.mockResolvedValue(ready);
     const { unmount } = render(<Ticket />);
     await screen.findByText('Your order is ready!');
-    expect(readyAlarm.getSnapshot().ringing).toBe(true);
+    await waitFor(() => expect(readyAlarm.getSnapshot().ringing).toBe(true));
 
     unmount();
 
