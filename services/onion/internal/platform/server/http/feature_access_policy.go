@@ -314,6 +314,11 @@ func isHRPolicyExemptPath(method, path string) bool {
 		(strings.HasSuffix(path, "/clock-in") || strings.HasSuffix(path, "/clock-out")) {
 		return true
 	}
+	// Setting a clock-in PIN resolves the employee from the caller's session
+	// and ignores any employee id in the body.
+	if method == http.MethodPut && path == "/hr/employees/me/pin" {
+		return true
+	}
 	if path == "/hr/shifts/availability" || strings.HasPrefix(path, "/hr/shifts/availability/") ||
 		path == "/hr/shift/v1/availability" || strings.HasPrefix(path, "/hr/shift/v1/availability/") {
 		return true

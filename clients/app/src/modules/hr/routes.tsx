@@ -261,6 +261,9 @@ export function createHrRoutes<TParent extends AnyRoute>(parent: TParent) {
       ),
   });
 
+  // Time logging and attendance are self-service: the API resolves the caller's
+  // own employee record and never takes another employee's id from the client,
+  // so every HR user reaches them, the same as their sidebar entries.
   const timeRoute = createRoute({
     getParentRoute: () => hrConfigRoute,
     path: '/time',
@@ -270,8 +273,7 @@ export function createHrRoutes<TParent extends AnyRoute>(parent: TParent) {
           <TimeLogging />
         </Suspense>,
         (config) =>
-          config.timeTrackingModel === 'time_logging' || config.timeTrackingModel === 'both',
-        'hr:schedules:manage'
+          config.timeTrackingModel === 'time_logging' || config.timeTrackingModel === 'both'
       ),
   });
 
@@ -318,8 +320,7 @@ export function createHrRoutes<TParent extends AnyRoute>(parent: TParent) {
       wrap(
         <Suspense fallback={<PageLoader />}>
           <AttendanceScreen />
-        </Suspense>,
-        'hr:schedules:manage'
+        </Suspense>
       ),
   });
 
