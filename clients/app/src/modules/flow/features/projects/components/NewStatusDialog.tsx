@@ -1,6 +1,14 @@
 import React, { useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@voxire/ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../../../../shared/components/ui/dialog';
+import { Button } from '../../../../../shared/components/ui/button';
 
 interface NewStatusDialogProps {
   open: boolean;
@@ -32,61 +40,48 @@ const NewStatusDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="portal-flow-dialog max-w-sm">
         <DialogHeader>
-          <DialogTitle className="text-flow-section font-semibold">
-            {t('flow.status.newStatusTitle')}
-          </DialogTitle>
-          <DialogDescription className="text-flow-meta">
-            {t('flow.status.newStatusHint')}
-          </DialogDescription>
+          <DialogTitle>{t('flow.status.newStatusTitle')}</DialogTitle>
+          <DialogDescription>{t('flow.status.newStatusHint')}</DialogDescription>
         </DialogHeader>
         <form
-          className="mt-2"
           onSubmit={(e) => {
             e.preventDefault();
             submit();
           }}
         >
-          <label
-            htmlFor={inputId}
-            className="mb-1 block text-flow-meta"
-            style={{ color: 'var(--flow-text-muted)' }}
-          >
-            {t('flow.status.statusName')}
-          </label>
-          <input
-            id={inputId}
-            autoFocus
-            value={name}
-            maxLength={100}
-            onChange={(e) => setName(e.target.value)}
-            placeholder={t('flow.status.newStatusPlaceholder')}
-            className="w-full rounded-lg px-3 py-2 text-flow-body"
-            style={{
-              background: 'var(--flow-input-bg)',
-              border: '1px solid var(--flow-border-control)',
-              color: 'var(--flow-text)',
-            }}
-          />
-          <div className="mt-4 flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => onOpenChange(false)}
-              className="rounded-lg px-3 py-1.5 text-flow-meta font-medium"
+          <div className="px-6 pb-6">
+            <label
+              htmlFor={inputId}
+              className="mb-1 block text-flow-meta"
               style={{ color: 'var(--flow-text-muted)' }}
             >
-              {t('flow.status.cancel')}
-            </button>
-            <button
-              type="submit"
-              disabled={!name.trim() || pending}
-              className="rounded-lg px-3 py-1.5 text-flow-meta font-semibold disabled:opacity-40"
-              style={{ background: 'var(--flow-action-bg)', color: 'var(--flow-on-accent)' }}
-            >
-              {t('flow.status.addStatus')}
-            </button>
+              {t('flow.status.statusName')}
+            </label>
+            <input
+              id={inputId}
+              autoFocus
+              value={name}
+              maxLength={100}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={t('flow.status.newStatusPlaceholder')}
+              className="w-full rounded-lg px-3 py-2 text-flow-body"
+              style={{
+                background: 'var(--flow-input-bg)',
+                border: '1px solid var(--flow-border-control)',
+                color: 'var(--flow-text)',
+              }}
+            />
           </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              {t('flow.status.cancel')}
+            </Button>
+            <Button type="submit" disabled={!name.trim() || pending}>
+              {t('flow.status.addStatus')}
+            </Button>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

@@ -2,7 +2,14 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation, useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { Menu, PanelLeft, Plus, X } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@voxire/ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../../shared/components/ui/dialog';
 import { FLAG_KEYS, useFeatureFlag } from '@voxire/config';
 import { toast } from 'sonner';
 import { useUserStore } from '../../../shared/stores/userStore';
@@ -296,85 +303,88 @@ export default function FlowLayout({ children }: { children: ReactNode }) {
       </dialog>
       <Dialog open={projectOpen} onOpenChange={setProjectOpen}>
         <DialogContent className="portal-flow-dialog max-w-sm" closeLabel={t('flowCommon.close')}>
-          <DialogTitle>{t('flow.shell.newProject')}</DialogTitle>
-          <DialogDescription className="sr-only">
-            {t('flow.shell.projectNamePlaceholder')}
-          </DialogDescription>
+          <DialogHeader>
+            <DialogTitle>{t('flow.shell.newProject')}</DialogTitle>
+            <DialogDescription className="sr-only">
+              {t('flow.shell.projectNamePlaceholder')}
+            </DialogDescription>
+          </DialogHeader>
           <form
-            className="space-y-3"
             onSubmit={(event) => {
               event.preventDefault();
               submitProject();
             }}
           >
-            <div className="flex gap-2">
-              <input
-                type="color"
-                value={color}
-                onChange={(event) => setColor(event.target.value)}
-                aria-label={t('flow.shell.pickColor')}
-                className="h-10 w-10 rounded-md"
-              />
-              <input
-                autoFocus
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                aria-label={t('flow.shell.projectNamePlaceholder')}
-                placeholder={t('flow.shell.projectNamePlaceholder')}
-                className="min-w-0 flex-1 rounded-lg border border-[var(--flow-border-control)] bg-[var(--flow-input-bg)] px-3 py-2 text-flow-body"
-              />
-            </div>
-            <textarea
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-              aria-label={t('flow.shell.projectDescriptionPlaceholder')}
-              placeholder={t('flow.shell.projectDescriptionPlaceholder')}
-              rows={3}
-              className="w-full rounded-lg border border-[var(--flow-border-control)] bg-[var(--flow-input-bg)] px-3 py-2 text-flow-body"
-            />
-            <fieldset>
-              <legend className="mb-2 text-flow-meta">{t('flow.visibility.label')}</legend>
-              <div className="flex gap-3">
-                {(['private', 'public'] as const).map((value) => (
-                  <label key={value} className="flex items-center gap-2 text-flow-body">
-                    <input
-                      type="radio"
-                      name="visibility"
-                      value={value}
-                      checked={visibility === value}
-                      onChange={() => setVisibility(value)}
-                    />
-                    {t(`flow.visibility.${value}`)}
-                  </label>
-                ))}
+            <div className="space-y-3 px-6 pb-6">
+              <div className="flex gap-2">
+                <input
+                  type="color"
+                  value={color}
+                  onChange={(event) => setColor(event.target.value)}
+                  aria-label={t('flow.shell.pickColor')}
+                  className="h-10 w-10 rounded-md"
+                />
+                <input
+                  autoFocus
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  aria-label={t('flow.shell.projectNamePlaceholder')}
+                  placeholder={t('flow.shell.projectNamePlaceholder')}
+                  className="min-w-0 flex-1 rounded-lg border border-[var(--flow-border-control)] bg-[var(--flow-input-bg)] px-3 py-2 text-flow-body"
+                />
               </div>
-              {visibility === 'public' && (
-                <p className="mt-2 text-flow-meta text-[var(--flow-text-muted)]">
-                  {t('flow.visibility.publicHint')}
-                </p>
-              )}
-            </fieldset>
-            <label className="flex items-start gap-2 text-flow-body">
-              <input
-                type="checkbox"
-                checked={developerMode}
-                onChange={(event) => setDeveloperMode(event.target.checked)}
-                aria-describedby="flow-new-project-software-hint"
-                className="mt-1"
+              <textarea
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                aria-label={t('flow.shell.projectDescriptionPlaceholder')}
+                placeholder={t('flow.shell.projectDescriptionPlaceholder')}
+                rows={3}
+                className="w-full rounded-lg border border-[var(--flow-border-control)] bg-[var(--flow-input-bg)] px-3 py-2 text-flow-body"
               />
-              <span>
-                {t('flow.shell.softwareProject')}
-                <span
-                  id="flow-new-project-software-hint"
-                  className="block text-flow-meta text-[var(--flow-text-muted)]"
-                >
-                  {t('flow.shell.softwareProjectHint')}
+              <fieldset>
+                <legend className="mb-2 text-flow-meta">{t('flow.visibility.label')}</legend>
+                <div className="flex gap-3">
+                  {(['private', 'public'] as const).map((value) => (
+                    <label key={value} className="flex items-center gap-2 text-flow-body">
+                      <input
+                        type="radio"
+                        name="visibility"
+                        value={value}
+                        checked={visibility === value}
+                        onChange={() => setVisibility(value)}
+                      />
+                      {t(`flow.visibility.${value}`)}
+                    </label>
+                  ))}
+                </div>
+                {visibility === 'public' && (
+                  <p className="mt-2 text-flow-meta text-[var(--flow-text-muted)]">
+                    {t('flow.visibility.publicHint')}
+                  </p>
+                )}
+              </fieldset>
+              <label className="flex items-start gap-2 text-flow-body">
+                <input
+                  type="checkbox"
+                  checked={developerMode}
+                  onChange={(event) => setDeveloperMode(event.target.checked)}
+                  aria-describedby="flow-new-project-software-hint"
+                  className="mt-1"
+                />
+                <span>
+                  {t('flow.shell.softwareProject')}
+                  <span
+                    id="flow-new-project-software-hint"
+                    className="block text-flow-meta text-[var(--flow-text-muted)]"
+                  >
+                    {t('flow.shell.softwareProjectHint')}
+                  </span>
                 </span>
-              </span>
-            </label>
-            <GateNotice id="flow-new-project-gate" reason={gateReason} />
-            <div className="flex justify-end gap-2">
-              <Button variant="ghost" onClick={() => setProjectOpen(false)}>
+              </label>
+              <GateNotice id="flow-new-project-gate" reason={gateReason} />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setProjectOpen(false)}>
                 {t('flowCommon.cancel')}
               </Button>
               <Button
@@ -384,7 +394,7 @@ export default function FlowLayout({ children }: { children: ReactNode }) {
               >
                 {createProject.isPending ? t('flow.shell.creating') : t('flowCommon.create')}
               </Button>
-            </div>
+            </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>

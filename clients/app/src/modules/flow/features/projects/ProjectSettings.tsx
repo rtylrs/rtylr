@@ -25,7 +25,15 @@ import {
   useTransferProjectOwnership,
 } from './useProjectMembers';
 import { HelmetContainer } from '@voxire/components';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@voxire/ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../../../shared/components/ui/dialog';
+import { Button } from '../../../../shared/components/ui/button';
 import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
 import GateNotice from '../../shared/components/GateNotice';
@@ -660,41 +668,38 @@ const ProjectSettings: React.FC = () => {
             if (!o) setDeleteTypedName('');
           }}
         >
-          <DialogContent className="max-w-md">
+          <DialogContent className="portal-flow-dialog max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-flow-section font-semibold flex items-center gap-2">
-                <Trash2 size={14} style={{ color: 'var(--flow-danger-fg)' }} />
+              <DialogTitle className="flex items-center gap-2">
+                <Trash2 size={16} style={{ color: 'var(--flow-danger-fg)' }} aria-hidden />
                 {t('flow.projectSettings.deleteDialogTitle')}
               </DialogTitle>
-              <DialogDescription className="text-flow-meta">
+              <DialogDescription>
                 {t('flow.projectSettings.deleteDialogPrefix')} <strong>{project?.name}</strong>
                 {t('flow.projectSettings.deleteDialogSuffix')}
               </DialogDescription>
             </DialogHeader>
-            <input
-              autoFocus
-              type="text"
-              value={deleteTypedName}
-              onChange={(e) => setDeleteTypedName(e.target.value)}
-              placeholder={project?.name ?? ''}
-              className="w-full rounded-lg px-3 py-2 text-flow-body mt-2"
-              style={{
-                background: 'var(--flow-input-bg)',
-                border: '1px solid var(--flow-border-control)',
-                color: 'var(--flow-text)',
-              }}
-            />
-            <div className="flex justify-end gap-2 mt-4">
-              <button
-                type="button"
-                onClick={() => setConfirmDelete(false)}
-                className="px-3 py-1.5 rounded-lg text-flow-meta font-medium"
-                style={{ color: 'var(--flow-text-muted)' }}
-              >
+            <div className="px-6 pb-6">
+              <input
+                autoFocus
+                type="text"
+                value={deleteTypedName}
+                onChange={(e) => setDeleteTypedName(e.target.value)}
+                placeholder={project?.name ?? ''}
+                className="w-full rounded-lg px-3 py-2 text-flow-body"
+                style={{
+                  background: 'var(--flow-input-bg)',
+                  border: '1px solid var(--flow-border-control)',
+                  color: 'var(--flow-text)',
+                }}
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setConfirmDelete(false)}>
                 {t('flowCommon.cancel')}
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="destructive"
                 disabled={
                   deleteTypedName.trim() !== (project?.name ?? '') ||
                   archiveProject.isPending ||
@@ -714,17 +719,12 @@ const ProjectSettings: React.FC = () => {
                     },
                   });
                 }}
-                className="px-3 py-1.5 rounded-lg text-flow-meta font-semibold disabled:opacity-40"
-                style={{
-                  background: 'var(--flow-danger-fill)',
-                  color: 'var(--flow-danger-on-fill)',
-                }}
               >
                 {archiveProject.isPending
                   ? t('flowCommon.saving')
                   : t('flow.projectSettings.archiveConfirm')}
-              </button>
-            </div>
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
