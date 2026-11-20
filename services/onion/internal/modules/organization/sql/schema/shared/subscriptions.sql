@@ -64,6 +64,7 @@ UPDATE plans SET is_active = FALSE WHERE slug IN ('starter', 'enterprise');
 --   Free:   $0 / $0       · 10 seats · 1 location  · all 7 apps · 1,000 AI credits
 --   Pro:    $6.99 / $4.99 · 30 seats · 5 locations · all 7 apps · 10,000 + 500/seat
 --   Scale:  $4.99 / $2.99 · unlimited seats/locations · 50,000 + 1,000/seat
+-- The paid tiers (Pro, Scale) also include Menu and Recruit; Free does not.
 -- Solo plans: single-app starter tiers for individuals.
 
 INSERT INTO plans
@@ -77,13 +78,13 @@ VALUES
     10, 1, 1000, 10, FALSE, FALSE,
     JSON_ARRAY('Up to 10 team members', 'All 7 apps included', '1 location', '0% transaction fees under $10k/mo', '1,000 AI credits / month')),
   ('Pro', 'pro',
-    '["dash","pos","erp","hr","crm","finance","flow","insights"]',
+    '["dash","pos","erp","hr","crm","finance","flow","insights","menu","recruit"]',
     699, 499, 14,
     'Growing teams scaling across multiple locations.',
     30, 5, 10000, 20, FALSE, TRUE,
     JSON_ARRAY('Up to 30 team members', 'Up to 5 locations', '0% transaction fees under $100k/mo', '10,000 AI credits / month + 500 per seat', 'Priority email + chat support')),
   ('Scale', 'scale',
-    '["dash","pos","erp","hr","crm","finance","flow","insights"]',
+    '["dash","pos","erp","hr","crm","finance","flow","insights","menu","recruit"]',
     499, 299, 14,
     'Unlimited seats and every feature unlocked.',
     NULL, NULL, 50000, 30, FALSE, FALSE,
