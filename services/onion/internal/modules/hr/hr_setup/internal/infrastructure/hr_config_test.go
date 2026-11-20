@@ -40,6 +40,15 @@ func TestHRConfigIsKeyedByBusiness(t *testing.T) {
 	if _, err := repo.UpsertHRConfig(ctx, testutil.OtherBusinessID, nil); err != nil {
 		t.Fatalf("second UpsertHRConfig: %v", err)
 	}
+	// A settings-only update carries no marker and must not undo setup.
+	cfg, err = repo.GetHRConfig(ctx, testutil.OtherBusinessID)
+	if err != nil {
+		t.Fatalf("GetHRConfig after marker-less upsert: %v", err)
+	}
+	if cfg.SetupCompletedAt == nil || !cfg.SetupCompletedAt.Equal(completed) {
+		t.Fatalf("setup completion after marker-less upsert = %v, want %v kept", cfg.SetupCompletedAt, completed)
+	}
+
 	var rows int
 	if err := db.QueryRowContext(ctx, "SELECT COUNT(*) FROM hr_configs WHERE business_id = ?", testutil.OtherBusinessID).Scan(&rows); err != nil {
 		t.Fatalf("count: %v", err)
