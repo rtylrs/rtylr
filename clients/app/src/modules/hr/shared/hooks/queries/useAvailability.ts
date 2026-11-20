@@ -43,7 +43,7 @@ const AVAILABILITY_PAGE_SIZE = 200;
 
 /**
  * A window is either a recurring weekly pattern or a single-date override, never
- * both and never neither. `.onk` has no cross-field decorator to say so, so the
+ * both and never neither. The contract declares no cross-field rule to say so, so the
  * contract leans on the onion handler to reject a bad request. This union moves
  * that check to compile time for our own call sites: supplying both keys, or
  * neither, does not typecheck.

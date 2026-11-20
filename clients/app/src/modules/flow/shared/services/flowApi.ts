@@ -364,7 +364,7 @@ const toViewPayload = (data: Partial<ApiView>) => ({
   name: data.name,
   icon: data.icon,
   // The flow/view/v1 contract wire-encodes `filters` as a JSON string (the
-  // .onk model documents it as "JSON-encoded filter criteria"; the generated
+  // .tsp model documents it as "JSON-encoded filter criteria"; the generated
   // Go struct field is `Filters string`) - sending the raw object fails
   // json.Unmarshal server-side and 400s on every request.
   filters: data.filters !== undefined ? JSON.stringify(data.filters) : undefined,

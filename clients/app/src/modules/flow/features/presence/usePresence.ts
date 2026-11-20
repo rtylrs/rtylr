@@ -12,7 +12,7 @@ export function usePresence() {
   return useQuery({
     queryKey: ['presence-today'],
     queryFn: async () => {
-      // /flow/presence/today has no .onk definition, so there is no generated
+      // /flow/presence/today has no .tsp definition, so there is no generated
       // client for it. Parsed at the boundary below (#894).
       const res = await unwrap(rest.get<unknown>('/flow/presence/today'));
       return presenceResponseSchema.parse(res);

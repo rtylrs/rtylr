@@ -39,22 +39,31 @@ const bash = execFileSync('sh', ['-c', 'command -v bash'], { encoding: 'utf8' })
 const git = (repo, args) =>
   execFileSync('git', args, { cwd: repo, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
 
-/** A .onk service declaring two operations. */
-const SERVICE_ONK = `package demo.v1
+/** A TypeSpec service declaring two operations. */
+const SERVICE_TSP = `import "@typespec/http";
+import "@onkt/typespec";
 
-/// DemoService defines demo endpoints.
-service DemoService {
-  /// Reads a widget.
-  getWidget(GetWidgetRequest) -> GetWidgetResponse @get("/widget")
+using TypeSpec.Http;
 
-  /// Writes a widget.
-  putWidget(PutWidgetRequest) -> PutWidgetResponse @put("/widget")
+namespace demo.v1;
+
+/** DemoService defines demo endpoints. */
+interface DemoService {
+  /** Reads a widget. */
+  @get
+  @route("/widget")
+  getWidget(...GetWidgetRequest): GetWidgetResponse;
+
+  /** Writes a widget. */
+  @put
+  @route("/widget")
+  putWidget(...PutWidgetRequest): PutWidgetResponse;
 }
 `;
 
 /**
  * A generated server for the two operations above, in the shape the generator
- * emits. `extra` appends operations that no committed .onk declares, which is
+ * emits. `extra` appends operations that no committed TypeSpec contract declares, which is
  * the orphan-route defect.
  */
 const serverGenGo = (extra = '') =>
@@ -68,7 +77,7 @@ func (o *DemoServiceServer) RegisterService(mux *http.ServeMux) {
 ${extra}}
 `;
 
-/** The orphan: a route and operation that service.onk above never declares. */
+/** The orphan: a route and operation that service.tsp above never declares. */
 const ORPHAN_ROUTE = `	mux.Handle("PATCH /demo/v1/organization/mfa", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	})), RequestMetadata{Service: "DemoService", Method: "updateOrganizationMFAEnforcement", HTTPMethod: "PATCH", Route: "/demo/v1/organization/mfa", AuthSchemes: nil}))`;
 
@@ -86,8 +95,8 @@ function makeRepo({ extra = '', omitGenerated = false } = {}) {
 
   const api = join(repo, 'voxie/api/demo/v1');
   mkdirSync(api, { recursive: true });
-  writeFileSync(join(repo, 'voxie/onekit.toml'), 'schema_root = "api"\n');
-  writeFileSync(join(api, 'service.onk'), SERVICE_ONK);
+  writeFileSync(join(repo, 'voxie/onkt.toml'), 'schema_root = "api"\n');
+  writeFileSync(join(api, 'service.tsp'), SERVICE_TSP);
 
   if (!omitGenerated) {
     const gen = join(repo, 'voxie/gen/go/demo/v1');
@@ -118,7 +127,7 @@ const withRepo = (options, fn) => {
 const runCheck = (repo, args = []) =>
   spawnSync('bash', [script, ...args], { cwd: repo, encoding: 'utf8' });
 
-test('a fresh generated tree matching the .onk sources passes', () => {
+test('a fresh generated tree matching the TypeSpec contract sources passes', () => {
   withRepo({}, (repo) => {
     const result = runCheck(repo);
     assert.equal(result.status, 0, result.stderr);
@@ -143,7 +152,7 @@ test('the stale failure names the remedy', () => {
 
 test('a declared operation missing from the generated server fails', () => {
   withRepo({}, (repo) => {
-    // Drop the putWidget registration: the .onk still declares it.
+    // Drop the putWidget registration: the TypeSpec contract still declares it.
     const gen = join(repo, 'voxie/gen/go/demo/v1/server.gen.go');
     const trimmed = readFileSync(gen, 'utf8')
       .split('\n')
@@ -157,7 +166,7 @@ test('a declared operation missing from the generated server fails', () => {
   });
 });
 
-test('a generated server with no committed .onk fails: an orphan in the other direction', () => {
+test('a generated server with no committed TypeSpec contract fails: an orphan in the other direction', () => {
   withRepo({}, (repo) => {
     // An extra generated package the contracts never declared.
     const orphanGen = join(repo, 'voxie/gen/go/ghost/v1');
@@ -168,7 +177,7 @@ test('a generated server with no committed .onk fails: an orphan in the other di
     assert.equal(result.status, 1, `unbacked generated service was not caught: ${result.stdout}`);
     assert.match(
       result.stderr,
-      /ghost\/v1\/server\.gen\.go is generated but no service\.onk declares it/
+      /ghost\/v1\/server\.gen\.go is generated but no service\.tsp declares it/
     );
   });
 });
@@ -176,7 +185,7 @@ test('a generated server with no committed .onk fails: an orphan in the other di
 test('a declared service with no generated server fails', () => {
   withRepo({}, (repo) => {
     mkdirSync(join(repo, 'voxie/api/other/v1'), { recursive: true });
-    writeFileSync(join(repo, 'voxie/api/other/v1/service.onk'), SERVICE_ONK);
+    writeFileSync(join(repo, 'voxie/api/other/v1/service.tsp'), SERVICE_TSP);
 
     const result = runCheck(repo, ['--no-generate']);
     assert.equal(result.status, 1, `ungenerated service was not caught: ${result.stdout}`);
@@ -195,7 +204,7 @@ test('a tree with no generated output fails instead of passing as a no-op', () =
 test('a missing generator tool is a distinguishable exit 3, not a silent pass', () => {
   withRepo({ extra: `${ORPHAN_ROUTE}\n` }, (repo) => {
     // A PATH carrying everything the parity check needs (git, find, sort, comm,
-    // mktemp, grep, sed, dirname) but not the generator toolchain (make, go, python3).
+    // mktemp, grep, sed, dirname) but not the generator toolchain (make, node, npm, python3).
     // Regeneration is impossible, so the check must say so rather than quietly
     // reporting success.
     const bin = mkdtempSync(join(tmpdir(), 'ensure-contracts-bin-'));
@@ -262,10 +271,10 @@ test('a generator that leaves no output exits 4', () => {
 test('regeneration runs when the tree is stale and the result is re-verified', () => {
   withRepo({ extra: `${ORPHAN_ROUTE}\n` }, (repo) => {
     // A stand-in generator that rewrites the tree the way voxie/Makefile does:
-    // rm -rf first, then emit only what the .onk declares.
+    // rm -rf first, then emit only what the TypeSpec contract declares.
     const genFile = join(repo, 'voxie/gen/go/demo/v1/server.gen.go');
     // A stand-in generator that rewrites the tree the way voxie/Makefile does:
-    // rm -rf first, then emit only what the .onk declares. make runs with
+    // rm -rf first, then emit only what the TypeSpec contract declares. make runs with
     // $(CURDIR) at voxie/, so the fixture source is addressed from there.
     writeFileSync(
       join(repo, 'voxie/Makefile'),

@@ -1,7 +1,0 @@
-package hr.review.v1
-
-service ReviewService {
-  listReviews(ListReviewsRequest) -> ListReviewsResponse @get("/reviews")
-
-  createReview(CreateReviewRequest) -> CreateReviewResponse @post("/reviews")
-}

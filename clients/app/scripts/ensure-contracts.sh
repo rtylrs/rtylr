@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Verifies that the generated Voxie contracts match voxie/api/*.onk.
+# Verifies that the generated Voxie contracts match voxie/api/**/*.tsp.
 #
 # Contract output is generated, not committed (voxie/.gitignore excludes gen/,
 # and git ls-files voxie/gen is empty), so there is no committed tree to diff
@@ -9,9 +9,9 @@
 # A present-but-stale tree is the case this exists for. Advancing across commits
 # leaves the old voxie/gen and clients/packages/contracts/src in place, and an
 # existence check accepts that silently. Here every service declared in a
-# service.onk must register exactly the same operations in the mirrored
+# service.tsp must register exactly the same operations in the mirrored
 # generated server.gen.go, and every generated server.gen.go must correspond to
-# a declared service.onk. An orphan in either direction is an endpoint no
+# a declared service.tsp. An orphan in either direction is an endpoint no
 # committed contract defines, or a contract with no generated server, and either
 # one reaches Go handlers and TypeScript consumers as if it were contracted.
 #
@@ -21,7 +21,7 @@
 # still self-healing a stale tree.
 #
 # mtime is deliberately NOT a staleness signal: a fresh clone gives every file
-# the same checkout time, and checking out an older .onk leaves a *newer* mtime
+# the same checkout time, and checking out an older TypeSpec contract leaves a *newer* mtime
 # on generated output, so an mtime rule both false-fails and false-passes. It is
 # weaker than content parity, which is why parity is the gate.
 set -euo pipefail
@@ -36,11 +36,11 @@ usage() {
   cat <<'EOF'
 Usage: ensure-contracts.sh [--no-generate] [--help]
 
-Ensures voxie/gen and clients/packages/contracts/src match voxie/api/*.onk.
+Ensures voxie/gen and clients/packages/contracts/src match voxie/api/**/*.tsp.
 
 Nothing generated is committed, so a checkout that advanced across commits
 keeps output generated for an older revision. This compares the generated tree
-against the .onk sources directly, per service, and fails if they disagree.
+against the TypeSpec contract sources directly, per service, and fails if they disagree.
 
 Options:
   --no-generate  verify only; never run `make -C voxie generate`. Use this to
@@ -48,7 +48,7 @@ Options:
   --help        show this help.
 
 Exit codes:
-  0  generated contracts match voxie/api/*.onk
+  0  generated contracts match voxie/api/**/*.tsp
   1  contracts are stale, or an operation/service is missing or orphaned
   2  the in-tree voxie contracts are missing or malformed
   3  a required tool is unavailable; the check did not run and was NOT
@@ -59,12 +59,12 @@ How to fix a failure:
   make -C voxie clean generate
 
 That removes voxie/gen and clients/packages/contracts/src and rebuilds them
-from voxie/api/*.onk. It needs a Go toolchain and network access for
-`go install onek`, so run it yourself rather than trusting this check to do it
+from voxie/api/**/*.tsp. It needs Node.js 22+ and network access for
+`npm ci` (the pinned onkt CLI and TypeSpec toolchain), so run it yourself rather than trusting this check to do it
 silently. This script will also run it for you when it is needed and the
 toolchain is present; when it is not, it fails with exit 3 rather than passing.
 
-Never commit voxie/gen or clients/packages/contracts/src - only the .onk sources
+Never commit voxie/gen or clients/packages/contracts/src - only the TypeSpec contract sources
 under voxie/api are tracked.
 EOF
 }
@@ -100,26 +100,26 @@ How to fix:
   make -C voxie clean generate
 
 That removes voxie/gen and clients/packages/contracts/src and rebuilds them
-from voxie/api/*.onk. It needs a Go toolchain and network access for
-`go install onek`, so run it yourself rather than expecting this check to do it.
+from voxie/api/**/*.tsp. It needs Node.js 22+ and network access for
+`npm ci` (the pinned onkt CLI and TypeSpec toolchain), so run it yourself rather than expecting this check to do it.
 To see the drift without regenerating: ./scripts/ensure-contracts.sh --no-generate
 voxie/gen and clients/packages/contracts/src are gitignored output: never
-commit them, only the .onk sources under voxie/api.
+commit them, only the TypeSpec contract sources under voxie/api.
 EOF
 }
 
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
-if [[ -z "$repo_root" || ! -f "$repo_root/voxie/onekit.toml" ]]; then
+if [[ -z "$repo_root" || ! -f "$repo_root/voxie/onkt.toml" ]]; then
   # Git hooks can export worktree variables that make nested commands report
   # their invocation directory as the root. Resolve the monorepo by its
   # contract manifest when that reported root does not contain the source.
   repo_root="$PWD"
-  while [[ "$repo_root" != / && ! -f "$repo_root/voxie/onekit.toml" ]]; do
+  while [[ "$repo_root" != / && ! -f "$repo_root/voxie/onkt.toml" ]]; do
     repo_root="$(dirname "$repo_root")"
   done
 fi
-if [[ ! -f "$repo_root/voxie/onekit.toml" ]]; then
-  fail "$EXIT_LAYOUT" "not inside a git work tree or RTYLR checkout; cannot locate voxie/onekit.toml"
+if [[ ! -f "$repo_root/voxie/onkt.toml" ]]; then
+  fail "$EXIT_LAYOUT" "not inside a git work tree or RTYLR checkout; cannot locate voxie/onkt.toml"
 fi
 
 voxie_dir="$repo_root/voxie"
@@ -127,7 +127,7 @@ contracts_src="$repo_root/clients/packages/contracts/src"
 gen_dir="$voxie_dir/gen"
 gen_go="$gen_dir/go"
 
-if [[ ! -f "$voxie_dir/onekit.toml" ]]; then
+if [[ ! -f "$voxie_dir/onkt.toml" ]]; then
   fail "$EXIT_LAYOUT" "in-tree contracts missing at $voxie_dir"
 fi
 if [[ ! -d "$voxie_dir/api" ]]; then
@@ -147,12 +147,13 @@ done
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 
-# Operation declarations read `  getSecurityState(Req) -> Resp @get("/state")`.
+# Operation declarations read `  getSecurityState(...Req): Resp;` inside an
+# interface, each on one line after its decorators.
 # Operation names are compared rather than HTTP routes because the route prefix
 # is derived by the generator (the package path, or the service's own base_path),
 # which this script must not have to reimplement.
 declared_ops() {
-  grep -oE '^[[:space:]]+[a-zA-Z_][a-zA-Z0-9_]*\([^)]*\)[[:space:]]*->' "$1" |
+  grep -oE '^[[:space:]]+[a-zA-Z_][a-zA-Z0-9_]*\(' "$1" |
     sed -E 's/^[[:space:]]+([a-zA-Z_][a-zA-Z0-9_]*)\(.*/\1/' | LC_ALL=C sort -u || true
 }
 
@@ -168,16 +169,16 @@ parity_services=0
 parity_generated=0
 check_parity() {
   local service_listing gen_listing src pkg_dir gen_server
-  service_listing="$(find "$voxie_dir/api" -type f -name 'service.onk' | LC_ALL=C sort)"
+  service_listing="$(find "$voxie_dir/api" -type f -name 'service.tsp' | LC_ALL=C sort)"
   if [[ -z "$service_listing" ]]; then
-    fail "$EXIT_LAYOUT" "no service.onk contracts under $voxie_dir/api"
+    fail "$EXIT_LAYOUT" "no service.tsp contracts under $voxie_dir/api"
   fi
   gen_listing="$(find "$gen_go" -type f -name 'server.gen.go' | LC_ALL=C sort)"
 
   while IFS= read -r src; do
     parity_services=$((parity_services + 1))
     pkg_dir="${src#"$voxie_dir/api"/}"
-    pkg_dir="${pkg_dir%/service.onk}"
+    pkg_dir="${pkg_dir%/service.tsp}"
     gen_server="$gen_go/$pkg_dir/server.gen.go"
 
     if [[ ! -f "$gen_server" ]]; then
@@ -196,21 +197,21 @@ check_parity() {
     if [[ -n "$orphans" || -n "$missing" ]]; then
       echo "::error::generated server for $pkg_dir does not match $src" >&2
       if [[ -n "$orphans" ]]; then
-        printf '  registered in generated output but declared by no .onk (orphan route): %s\n' \
+        printf '  registered in generated output but declared by no TypeSpec contract (orphan route): %s\n' \
           "$(echo "$orphans" | tr '\n' ' ')" >&2
       fi
       if [[ -n "$missing" ]]; then
-        printf '  declared in .onk but absent from generated output: %s\n' \
+        printf '  declared in TypeSpec contract but absent from generated output: %s\n' \
           "$(echo "$missing" | tr '\n' ' ')" >&2
       fi
       parity_failed=1
     fi
   done <<<"$service_listing"
 
-  # Reverse direction: a generated server with no committed .onk is the same
+  # Reverse direction: a generated server with no committed TypeSpec contract is the same
   # orphan defect seen from the other side, and the forward loop cannot see it.
-  find "$voxie_dir/api" -type f -name 'service.onk' |
-    sed -e "s#^$voxie_dir/api/##" -e 's#/service\.onk$##' | LC_ALL=C sort >"$work/declared_pkgs"
+  find "$voxie_dir/api" -type f -name 'service.tsp' |
+    sed -e "s#^$voxie_dir/api/##" -e 's#/service\.tsp$##' | LC_ALL=C sort >"$work/declared_pkgs"
   if [[ -n "$gen_listing" ]]; then
     echo "$gen_listing" |
       sed -e "s#^$gen_go/##" -e 's#/server\.gen\.go$##' | LC_ALL=C sort >"$work/generated_pkgs"
@@ -219,7 +220,7 @@ check_parity() {
     if [[ -n "$unbacked" ]]; then
       while IFS= read -r pkg_dir; do
         [[ -n "$pkg_dir" ]] || continue
-        echo "::error::$gen_go/$pkg_dir/server.gen.go is generated but no service.onk declares it" >&2
+        echo "::error::$gen_go/$pkg_dir/server.gen.go is generated but no service.tsp declares it" >&2
         parity_failed=1
       done <<<"$unbacked"
     fi
@@ -236,7 +237,7 @@ if [[ $output_present -eq 1 ]]; then
 fi
 
 # Regenerate only when something is actually wrong. Doing it unconditionally
-# would put `go install onek` and a full rebuild in front of every typecheck.
+# would put `npm ci` and a full rebuild in front of every typecheck.
 if [[ $parity_failed -ne 0 || $output_present -eq 0 ]]; then
   if [[ $output_present -eq 0 ]]; then
     echo "::error::generated contracts are missing; expected $gen_go and $contracts_src" >&2
@@ -247,7 +248,7 @@ if [[ $parity_failed -ne 0 || $output_present -eq 0 ]]; then
     exit "$EXIT_STALE"
   fi
 
-  for tool in make go python3; do
+  for tool in make node npm python3; do
     if ! command -v "$tool" >/dev/null 2>&1; then
       fail "$EXIT_TOOLING" "'$tool' is not on PATH; the contracts are stale and cannot be regenerated here, so the check did not run and was not silently skipped"
     fi
