@@ -156,6 +156,14 @@ func (s *Service) UpdateLeaveTypePatch(ctx context.Context, businessID, leaveTyp
 	if err := s.repo.UpdateLeaveTypePatch(ctx, businessID, leaveTypeID, patch); err != nil {
 		return nil, err
 	}
+	if patch.AccrualRule != nil || patch.AccrualAmount != nil || patch.IsActive != nil {
+		// A type that gains an allowance, or is switched back on, must reach
+		// existing employees now rather than on the monthly job's next run.
+		if syncErr := s.refreshLeaveEntitlements(ctx, businessID); syncErr != nil {
+			logger.Ctx(ctx).Error("failed to refresh leave entitlements after a policy change",
+				logger.Any("business_id", businessID), logger.Any("leave_type_id", leaveTypeID), logger.Error(syncErr))
+		}
+	}
 	invalidateHRLeaveScope(ctx, businessID)
 	return s.repo.GetLeaveType(ctx, businessID, leaveTypeID)
 }
