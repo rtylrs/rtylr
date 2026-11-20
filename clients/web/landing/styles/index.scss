@@ -52,8 +52,18 @@
 // generated one. (0,3,0) against (0,1,0) does that on specificity rather than
 // on source order, which is what makes it independent of how Next orders the
 // next/font styles against this stylesheet.
+//
+// The stack is spelled out here, not taken from --rtl-font. A custom property
+// resolves the var() inside it where it is declared, and --font-plex-arabic
+// only exists on this div, so --rtl-font on :root always came out as the
+// sentinel fallbacks and the Arabic face never loaded. Redeclaring
+// --primary-font on the div also gives every descendant that reads it the
+// resolved stack.
 :root[dir='rtl'] .dir-font-scope {
-  font-family: var(--rtl-font);
+  --primary-font: var(--font-dm-sans, 'DM Sans Fallback'),
+    var(--font-plex-arabic, 'IBM Plex Sans Arabic Fallback'), 'Geeza Pro', 'Segoe UI',
+    'Noto Sans Arabic', ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--primary-font);
 }
 
 // Opt-in mirror for a directional glyph: <ArrowRight className="rtl-mirror" />.
