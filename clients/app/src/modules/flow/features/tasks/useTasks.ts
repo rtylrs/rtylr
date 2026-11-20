@@ -97,6 +97,7 @@ export function useCreateTask() {
       effortMinutes?: number;
       estimatedHours?: number;
       labels?: string[];
+      milestoneId?: string;
     }) => {
       return unwrap(flowApi.createTask(data));
     },
@@ -105,6 +106,7 @@ export function useCreateTask() {
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
       qc.invalidateQueries({ queryKey: ['projects'] });
       qc.invalidateQueries({ queryKey: ['projects-v2'] });
+      qc.invalidateQueries({ queryKey: ['milestones'] });
     },
     onError: () => toast.error(t('flowToasts.task.createFailed')),
   });
@@ -121,6 +123,7 @@ export function useUpdateTask() {
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
       qc.invalidateQueries({ queryKey: ['projects'] });
       qc.invalidateQueries({ queryKey: ['projects-v2'] });
+      qc.invalidateQueries({ queryKey: ['milestones'] });
       qc.invalidateQueries({ queryKey: ['task'] });
     },
     onError: () => toast.error(t('flowToasts.task.updateFailed')),
@@ -138,6 +141,7 @@ export function useDeleteTask() {
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
       qc.invalidateQueries({ queryKey: ['projects'] });
       qc.invalidateQueries({ queryKey: ['projects-v2'] });
+      qc.invalidateQueries({ queryKey: ['milestones'] });
     },
     onError: () => toast.error(t('flowToasts.task.deleteFailed')),
   });
@@ -227,6 +231,7 @@ export function useUpdateTaskStatus() {
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
       qc.invalidateQueries({ queryKey: ['projects'] });
       qc.invalidateQueries({ queryKey: ['projects-v2'] });
+      qc.invalidateQueries({ queryKey: ['milestones'] });
       qc.invalidateQueries({ queryKey: ['task'] });
     },
     onError: () => toast.error(t('flowToasts.task.statusUpdateFailed')),
@@ -271,6 +276,7 @@ export function useBulkUpdateStatus() {
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
       qc.invalidateQueries({ queryKey: ['projects'] });
       qc.invalidateQueries({ queryKey: ['projects-v2'] });
+      qc.invalidateQueries({ queryKey: ['milestones'] });
     },
     onSuccess: (res) =>
       reportBulk(res, 'flowToasts.task.bulkUpdated', 'flowToasts.task.bulkUpdateFailed'),
@@ -305,6 +311,7 @@ export function useBulkUpdateArchive() {
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
       qc.invalidateQueries({ queryKey: ['projects'] });
       qc.invalidateQueries({ queryKey: ['projects-v2'] });
+      qc.invalidateQueries({ queryKey: ['milestones'] });
     },
     onSuccess: (res) =>
       reportBulk(res, 'flowToasts.task.bulkUpdated', 'flowToasts.task.bulkUpdateFailed'),
@@ -321,6 +328,7 @@ export function useBulkDelete() {
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
       qc.invalidateQueries({ queryKey: ['projects'] });
       qc.invalidateQueries({ queryKey: ['projects-v2'] });
+      qc.invalidateQueries({ queryKey: ['milestones'] });
     },
     onSuccess: (res) =>
       reportBulk(res, 'flowToasts.task.bulkDeleted', 'flowToasts.task.bulkDeleteFailed'),

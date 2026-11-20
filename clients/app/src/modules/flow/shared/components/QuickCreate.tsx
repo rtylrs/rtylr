@@ -1,7 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useOpenTask } from '../lib/useOpenTask';
 import { toast } from 'sonner';
-import { Calendar, User, CircleUser, FolderInput, Flag, Gauge, Tag, CircleDot } from 'lucide-react';
+import {
+  Calendar,
+  User,
+  CircleUser,
+  FolderInput,
+  Flag,
+  Gauge,
+  Tag,
+  CircleDot,
+  Milestone as MilestoneIcon,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { DatePicker } from '@voxire/ui';
 import {
@@ -29,6 +39,7 @@ import { EFFORT_PRESETS, formatEffortMinutes } from '../lib/effortPresets';
 import { useCreateTask } from '../../features/tasks/useTasks';
 import { useLabels } from '../../features/tasks/useLabels';
 import { useProjectStatuses } from '../../features/projects/useStatuses';
+import { useMilestones } from '../../features/milestones/useMilestones';
 import {
   defaultStatus,
   displayStatusName,
@@ -93,6 +104,8 @@ export const QuickCreate: React.FC = () => {
   const [effortMinutes, setEffortMinutes] = useState<number | undefined>(30);
   const [labelId, setLabelId] = useState('');
   const [statusId, setStatusId] = useState('');
+  const [milestoneId, setMilestoneId] = useState('');
+  const { data: projectMilestones = [] } = useMilestones(quickCreateOpen ? projectId : '');
   const { data: rawStatuses } = useProjectStatuses(quickCreateOpen ? projectId : '');
   const statuses = rawStatuses ? sortStatuses(rawStatuses) : [];
 
@@ -109,6 +122,7 @@ export const QuickCreate: React.FC = () => {
       setAssignToMe(true);
       setEffortMinutes(30);
       setLabelId('');
+      setMilestoneId('');
     }
   }, [quickCreateOpen, currentProjectId]);
 
@@ -147,6 +161,7 @@ export const QuickCreate: React.FC = () => {
         assigneeId: assignToMe ? (uid ?? undefined) : undefined,
         effortMinutes,
         labels: labelId ? [labelId] : undefined,
+        milestoneId: projectMilestones.some((m) => m.id === milestoneId) ? milestoneId : undefined,
       });
       const task = res.task;
       const taskId = String(task.id);
@@ -313,7 +328,15 @@ export const QuickCreate: React.FC = () => {
 
             <FieldRow label={t('flow.time.project')} icon={FolderInput}>
               <div className="-ml-1">
-                <ProjectSelect value={projectId} onChange={setProjectId} allowPersonal />
+                <ProjectSelect
+                  value={projectId}
+                  onChange={(next) => {
+                    setProjectId(next);
+                    // A milestone belongs to one project.
+                    setMilestoneId('');
+                  }}
+                  allowPersonal
+                />
               </div>
             </FieldRow>
 
@@ -335,6 +358,23 @@ export const QuickCreate: React.FC = () => {
                       ),
                     }))}
                     onChange={setStatusId}
+                  />
+                </div>
+              </FieldRow>
+            )}
+
+            {projectMilestones.length > 0 && (
+              <FieldRow label={t('flow.taskDetail.milestone')} icon={MilestoneIcon}>
+                <div className="max-w-[240px]">
+                  <FlowSelect
+                    label={t('flow.taskDetail.milestone')}
+                    value={milestoneId}
+                    options={[
+                      { value: '', label: t('flow.taskDetail.noMilestone') },
+                      ...projectMilestones.map((m) => ({ value: m.id, label: m.name })),
+                    ]}
+                    onChange={setMilestoneId}
+                    muted={!milestoneId}
                   />
                 </div>
               </FieldRow>

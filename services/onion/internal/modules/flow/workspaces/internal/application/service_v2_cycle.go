@@ -52,6 +52,46 @@ func (s *Service) UpdateMilestoneV2(ctx context.Context, input domain.UpdateMile
 	return s.repo.UpdateMilestoneV2(ctx, input)
 }
 
+func (s *Service) DeleteMilestoneV2(ctx context.Context, id, actorID int64) error {
+	return s.repo.DeleteMilestoneV2(ctx, id, actorID)
+}
+
+// MilestoneProjectID returns the milestone's project, or 0 when it does not
+// exist in the business.
+func (s *Service) MilestoneProjectID(ctx context.Context, milestoneID, businessID int64) (int64, error) {
+	return s.repo.MilestoneProjectID(ctx, milestoneID, businessID)
+}
+
+// SetTaskMilestone files the task under milestoneID, or takes it out of its
+// milestone when milestoneID is nil.
+func (s *Service) SetTaskMilestone(ctx context.Context, taskID int64, milestoneID *int64) error {
+	return s.repo.SetTaskMilestone(ctx, taskID, milestoneID)
+}
+
+// AttachMilestoneIDs fills MilestoneID on tasks read from flow_tasks, which
+// has no milestone column; membership lives in flow_milestone_tasks.
+func (s *Service) AttachMilestoneIDs(ctx context.Context, tasks []domain.Task) error {
+	if len(tasks) == 0 {
+		return nil
+	}
+	ids := make([]int64, len(tasks))
+	for i, t := range tasks {
+		ids[i] = t.ID
+	}
+	byTask, err := s.repo.TaskMilestoneIDs(ctx, ids)
+	if err != nil {
+		return err
+	}
+	for i := range tasks {
+		if mid, ok := byTask[tasks[i].ID]; ok {
+			tasks[i].MilestoneID = &mid
+		} else {
+			tasks[i].MilestoneID = nil
+		}
+	}
+	return nil
+}
+
 func (s *Service) CreateMilestoneV2(ctx context.Context, businessID, projectID int64, name, description, targetDate string) (domain.Milestone, error) {
 	var dueDate time.Time
 	if targetDate != "" {

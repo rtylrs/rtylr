@@ -315,7 +315,9 @@ func (a *MilestoneAPIV2) ListMilestones(ctx context.Context, req *flowmilestonev
 		mv2 := &flowmilestonev2.Milestone{
 			Id: m.ID, ProjectId: m.ProjectID, Name: m.Name,
 			DoneCount: int32(m.DoneCount), TaskCount: int32(m.TaskCount), Status: m.Status, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-			Project: mp,
+			OverdueCount: int32(m.OverdueCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+			Description:  m.Description,
+			Project:      mp,
 		}
 		if !m.DueDate.IsZero() {
 			mv2.TargetDate = m.DueDate.Format("2006-01-02")
@@ -377,6 +379,30 @@ func (a *MilestoneAPIV2) UpdateMilestone(ctx context.Context, req *flowmilestone
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update milestone")
 	}
 	return &flowmilestonev2.UpdateMilestoneResponse{}, nil
+}
+
+func (a *MilestoneAPIV2) DeleteMilestone(ctx context.Context, req *flowmilestonev2.DeleteMilestoneRequest) (*flowmilestonev2.DeleteMilestoneResponse, error) {
+	caller, businessID, err := resolveV2(ctx)
+	if err != nil {
+		return nil, err
+	}
+	projectID, err := a.Service.MilestoneProjectID(ctx, req.GetId(), businessID)
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete milestone")
+	}
+	if projectID == 0 {
+		return nil, onekiterrors.New(http.StatusNotFound, "Milestone not found")
+	}
+	if roleErr := a.Service.RequireProjectRole(ctx, projectID, caller.UserID, businessID, domain.FlowRoleAdmin); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	if err := a.Service.DeleteMilestoneV2(ctx, req.GetId(), caller.UserID); err != nil {
+		if errors.Is(err, domain.ErrUnauthorized) {
+			return nil, onekiterrors.PermissionDenied()
+		}
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete milestone")
+	}
+	return &flowmilestonev2.DeleteMilestoneResponse{}, nil
 }
 
 // ─── view/v2 ────────────────────────────────────────────────────────────────

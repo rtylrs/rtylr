@@ -212,7 +212,9 @@
       "draft": "مسودة",
       "merged": "مدموج",
       "closed": "مغلق"
-    }
+    },
+    "noMilestone": "بدون معلم",
+    "noMilestonesInProject": "لا معالم في هذا المشروع"
   },
   "time": {
     "add": {
@@ -792,7 +794,18 @@
     "noProjects": "لا توجد مشاريع بعد",
     "noTasksYet": "لا مهام بعد",
     "noProjectsGate": "تحتاج إلى مشروع قبل إضافة معلم، ودورك لا يسمح بإنشاء واحد. اطلب من مسؤول إنشاء مشروع أولاً.",
-    "noTasksHint": "لا يمكن إضافة مهام إلى المعلم بعد"
+    "noTasksHint": "لا مهام بعد. اختر هذا المعلم في حقل المعلم داخل المهمة.",
+    "openTasks": "فتح مهام {{name}}",
+    "editMilestone": "تعديل {{name}}",
+    "deleteMilestone": "حذف {{name}}",
+    "deleteTitle": "حذف المعلم؟",
+    "deleteDescription": "سيتم حذف {{name}}. تبقى مهامه في المشروع ولن تنتمي إلى أي معلم.",
+    "overdueCount_zero": "لا مهام متأخرة",
+    "overdueCount_one": "مهمة واحدة متأخرة",
+    "overdueCount_two": "مهمتان متأخرتان",
+    "overdueCount_few": "{{count}} مهام متأخرة",
+    "overdueCount_many": "{{count}} مهمة متأخرة",
+    "overdueCount_other": "{{count}} مهمة متأخرة"
   },
   "roadmap": {
     "emptyCta": "عرض المشاريع",
