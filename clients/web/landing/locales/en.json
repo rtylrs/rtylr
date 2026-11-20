@@ -1826,5 +1826,68 @@
         ]
       }
     }
+  },
+  "pager": {
+    "meta": {
+      "title": "{{brand}}: the free pager that rings your customer's phone",
+      "description": "{{brand}} is a free pager for restaurants and cafés, by rtylr. Customers scan a QR at the counter, type their receipt number, and their phone rings when it is ready.",
+      "keywords": "free pager, restaurant pager, QR code pager, digital pager, order ready pager, guest pager, {{brand}}",
+      "schemaDescription": "{{brand}} is a free restaurant pager by rtylr. Customers scan a QR at the counter, type their receipt number and their phone rings when the order is ready."
+    },
+    "tryCta": "Try it now",
+    "hero": {
+      "eyebrow": "{{brand}}, the free pager by rtylr",
+      "title": "The free pager\nthat rings their phone.",
+      "subtitle": "{{brand}} replaces plastic restaurant pagers with the phone your customer already carries. One QR on the counter, and their phone rings when the order is ready. Free for your venue.",
+      "note": "No app, no account, nothing to buy."
+    },
+    "how": {
+      "title": "How it works",
+      "intro": "Three steps for the customer, and nothing to install.",
+      "steps": [
+        {
+          "title": "Scan the QR at the counter",
+          "body": "One printed QR code sits by the till. The customer points their camera at it and the page opens. No app to download, no account to create."
+        },
+        {
+          "title": "Type the receipt number",
+          "body": "They enter the order number printed on their receipt, then sit down, step outside or carry on with their day."
+        },
+        {
+          "title": "Their phone rings when it is ready",
+          "body": "When the order is up, your staff tap that number on the board and the customer's phone rings."
+        }
+      ]
+    },
+    "compare": {
+      "title": "Everything a plastic pager does, without the plastic",
+      "intro": "The customer's phone does the job the buzzer did, so everything the buzzer cost you goes away.",
+      "items": [
+        {
+          "title": "Nothing to buy",
+          "body": "No set of pagers and no spare parts. The customer brings the device."
+        },
+        {
+          "title": "Nothing to charge",
+          "body": "No charging base on the counter and no flat pager in the middle of the rush."
+        },
+        {
+          "title": "Nothing to clean",
+          "body": "No device passing from hand to hand all day, so nothing to wipe down between customers."
+        },
+        {
+          "title": "Nothing to lose",
+          "body": "No pagers leaving in a pocket or a bag."
+        }
+      ]
+    },
+    "free": {
+      "title": "Why is it free?",
+      "body": "rtylr makes a point of sale system. {{brand}} is free because we want restaurant owners to see how we build things, with something they can use at their counter today."
+    },
+    "closing": {
+      "title": "Hear it ring for yourself",
+      "subtitle": "Try the staff board and the customer's phone side by side, right in your browser. No signup needed."
+    }
   }
 }
