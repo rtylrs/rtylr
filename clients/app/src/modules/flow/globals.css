@@ -261,6 +261,13 @@
   letter-spacing: -0.035em;
   font-weight: 600;
 }
+/* The project header is a compact toolbar, so its title sits a step below the
+   page masthead size the rule above gives every Flow h1. */
+.portal-flow-page h1.portal-flow-project-title {
+  font-size: var(--text-flow-title);
+  line-height: var(--text-flow-title--line-height);
+  letter-spacing: -0.015em;
+}
 .portal-flow-sidebar a {
   font-size: 14px;
 }
