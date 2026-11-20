@@ -13,7 +13,7 @@ export function useMyEmployeeId() {
   return useQuery({
     queryKey: ['my-employee-id'],
     queryFn: async () => {
-      // /hr/employees/me has no .onk definition (#894).
+      // /hr/employees/me has no .tsp definition (#894).
       const res = await unwrap(rest.get<unknown>('/hr/employees/me'));
       const parsed = myEmployeeSchema.parse((res as { employee: unknown }).employee);
       return parsed.id;

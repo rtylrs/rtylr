@@ -121,7 +121,7 @@ for (const source of program.getSourceFiles()) {
             severity: 'error',
             code: 'CONTRACT_TYPE_ASSERTION',
             message:
-              'Argument to a OneKit client call uses a type assertion that defeats the .onk contract typing.',
+              'Argument to a OneKit client call uses a type assertion that defeats the TypeSpec contract typing.',
             ...location,
           });
           break;

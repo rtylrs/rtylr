@@ -24,7 +24,7 @@ const dashboardClient = createOneKitClient(DashboardServiceClient, 'crm');
 // ── REST helpers for the calls no contract declares ─────────────────────────
 //
 // Every path below is a literal handler in onion's router, checked rather than
-// guessed. These are the endpoints crm has that were never given a .onk
+// guessed. These are the endpoints crm has that were never given a .tsp
 // definition, which is the general problem tracked in #873.
 
 type Req = Record<string, unknown> | undefined;
