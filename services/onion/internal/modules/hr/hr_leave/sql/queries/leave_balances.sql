@@ -94,3 +94,26 @@ SELECT id, owner_id, business_id, employee_id, leave_type_id, year, entitled_day
 FROM hr_leave_balances
 WHERE business_id = ? AND year = ? AND last_accrual_month < ?
 LIMIT 2000;
+
+-- Creates the zero balance every non-terminated employee is missing for each
+-- active leave type and year. Employees provisioned from a business
+-- membership, or hired before a leave type existed, otherwise have no row and
+-- cannot request leave. Scoped to one employee when employee_id is set.
+-- name: SeedMissingLeaveBalances :execrows
+INSERT IGNORE INTO hr_leave_balances (owner_id, business_id, employee_id, leave_type_id, year)
+SELECT employee.business_id, employee.business_id, employee.id, leave_type.id, sqlc.arg(year)
+FROM hr_employees AS employee
+JOIN hr_leave_types AS leave_type
+  ON leave_type.business_id = employee.business_id
+ AND leave_type.is_active = TRUE
+WHERE employee.business_id = sqlc.arg(business_id)
+  AND employee.status <> 'terminated'
+  AND (sqlc.narg(employee_id) IS NULL OR employee.id = sqlc.narg(employee_id))
+  AND NOT EXISTS (
+      SELECT 1
+      FROM hr_leave_balances AS existing
+      WHERE existing.business_id = employee.business_id
+        AND existing.employee_id = employee.id
+        AND existing.leave_type_id = leave_type.id
+        AND existing.year = sqlc.arg(year)
+  );
