@@ -12,3 +12,4 @@ export { useCashMovementQueueStore } from './cashMovementQueueStore';
 export { useEmployeeSessionStore } from './employeeSessionStore';
 export { useSessionCloseQueueStore } from './sessionCloseQueueStore';
 export { useTerminalContextStore } from './terminalContextStore';
+export { useRegisterSessionStore } from './registerSessionStore';
