@@ -490,10 +490,24 @@ export function buildPagesIndex(pages, generatedAt) {
   };
 }
 
+const pageLine = (page) => {
+  const label = page.title || page.heading || page.path;
+  const desc = page.description ? `: ${page.description}` : '';
+  return `- [${label}](${SITE_URL}${page.path === '/' ? '/' : page.path})${desc}`;
+};
+
 /** llmstxt.org-style index for agents. */
 export function buildLlmsTxt(pages, generatedAt) {
   const sorted = [...pages].sort((a, b) => a.path.localeCompare(b.path));
   const home = sorted.find((page) => page.path === '/');
+  // The blog gets its own sections, index first, then posts and sections, then
+  // topics and authors: an agent looking for what
+  // rtylr has written should not have to pick posts out of the site pages.
+  const isBlog = (page, prefix) => page.path.startsWith(prefix);
+  const byPostsFirst = (a, b) => (a.path.split('/').length - b.path.split('/').length) || a.path.localeCompare(b.path);
+  const site = sorted.filter((p) => !isBlog(p, '/blog/') && !isBlog(p, '/ar/blog/'));
+  const blogEn = sorted.filter((p) => isBlog(p, '/blog/')).sort(byPostsFirst);
+  const blogAr = sorted.filter((p) => isBlog(p, '/ar/blog/')).sort(byPostsFirst);
   const lines = [
     '# rtylr',
     '',
@@ -540,12 +554,22 @@ export function buildLlmsTxt(pages, generatedAt) {
     '',
     '## Pages',
     '',
-    ...sorted.map((page) => {
-      const label = page.title || page.heading || page.path;
-      const desc = page.description ? `: ${page.description}` : '';
-      return `- [${label}](${SITE_URL}${page.path === '/' ? '/' : page.path})${desc}`;
-    }),
+    ...site.map(pageLine),
     '',
+    ...(blogEn.length
+      ? [
+          '## Blog',
+          '',
+          'Guides, comparisons and essays, each written for small businesses, mid-size',
+          'companies, large groups, or on where business software is going.',
+          '',
+          ...blogEn.map(pageLine),
+          '',
+        ]
+      : []),
+    ...(blogAr.length
+      ? ['## Blog in Arabic', '', 'The same posts, written in Arabic.', '', ...blogAr.map(pageLine), '']
+      : []),
   ];
   void generatedAt;
   return lines.join('\n');

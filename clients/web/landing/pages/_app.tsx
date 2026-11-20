@@ -11,7 +11,7 @@ import { CookiesProvider } from 'react-cookie';
 import { DM_Sans, IBM_Plex_Sans_Arabic } from 'next/font/google';
 
 import i18next from '../services/i18next';
-import { localeFromPath, localisePath } from '../lib/locales';
+import { localeFromPath, navPath } from '../lib/locales';
 import { initFeatureVariant } from '../lib/featureVariant';
 import { watchConsentMode } from '../lib/consentMode';
 
@@ -155,7 +155,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                 in rather than looked up inside the shared package - see
                 the note on CookieBannerProps in @voxire/consent. */}
             <CookieBanner
-              privacyUrl={localisePath('/legal/privacy-policy/', locale.code)}
+              privacyUrl={navPath('/legal/privacy-policy/', locale.code)}
               message={
                 <Trans
                   i18n={i18n}
@@ -163,7 +163,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                   components={{
                     privacyLink: (
                       <a
-                        href={localisePath('/legal/privacy-policy/', locale.code)}
+                        href={navPath('/legal/privacy-policy/', locale.code)}
                         style={privacyLinkStyleLight}
                       />
                     ),

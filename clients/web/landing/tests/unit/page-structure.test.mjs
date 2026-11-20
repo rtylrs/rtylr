@@ -421,18 +421,22 @@ describe('sitemap lastmod', () => {
   });
 
   it('each blog post carries the date it declares', () => {
-    const posts = JSON.parse(readFileSync(path.join(REPO, 'lib/blog/posts.json'), 'utf8'));
+    const dir = path.join(REPO, 'content/blog/posts');
+    const posts = globSync('*/*.json', { cwd: dir }).map((f) =>
+      JSON.parse(readFileSync(path.join(dir, f), 'utf8'))
+    );
     assert.ok(posts.length > 0, 'no posts to check');
     const offenders = [];
     for (const post of posts) {
-      const entry = entries.find((e) => e.loc.endsWith(`/blog/${post.slug}/`));
-      assert.ok(entry, `${post.slug} is missing from the sitemap`);
+      const prefix = post.locale === 'en' ? '/blog/' : `/${post.locale}/blog/`;
+      const entry = entries.find((e) => e.loc.endsWith(`${prefix}${post.slug}/`));
+      assert.ok(entry, `${prefix}${post.slug}/ is missing from the sitemap`);
       const expected = new Date(post.dateModified || post.date).toISOString().slice(0, 10);
       if (entry.lastmod.slice(0, 10) !== expected) {
-        offenders.push([post.slug, entry.lastmod, expected]);
+        offenders.push([post.slug, post.locale, entry.lastmod, expected]);
       }
     }
-    assert.deepEqual(offenders, [], 'blog lastmod does not match posts.json');
+    assert.deepEqual(offenders, [], 'blog lastmod does not match the post file');
   });
 });
 
