@@ -59,6 +59,7 @@
     "title": "Leave policies",
     "subtitle": "Create the leave types employees can request.",
     "namePlaceholder": "Annual leave",
+    "annualAllowance": "Days per year",
     "maxCarryover": "Maximum carryover days",
     "minNotice": "Minimum notice days"
   },
