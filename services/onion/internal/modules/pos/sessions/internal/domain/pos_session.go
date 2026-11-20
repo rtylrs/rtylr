@@ -5,7 +5,10 @@ import (
 	"time"
 )
 
-var ErrSessionNotFound = errors.New("session not found")
+var (
+	ErrSessionNotFound    = errors.New("session not found")
+	ErrSessionAlreadyOpen = errors.New("an open session already exists")
+)
 
 type Session struct {
 	ID           int64

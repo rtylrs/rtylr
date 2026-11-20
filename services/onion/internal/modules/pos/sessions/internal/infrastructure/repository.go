@@ -129,7 +129,7 @@ func (r *Repository) Open(ctx context.Context, input domain.OpenSessionInput) (i
 		return 0, err
 	}
 	if exists == 1 {
-		return 0, fmt.Errorf("an open session already exists")
+		return 0, domain.ErrSessionAlreadyOpen
 	}
 
 	var locationID any
