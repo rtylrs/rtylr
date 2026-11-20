@@ -2,6 +2,7 @@ import Link from 'next/link';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { cn } from '../../lib/cn';
 import { blogCollectionSchema } from '../../lib/structured-data';
 import type { BlogPageProps } from '../../lib/blog/pages';
 import { tagLabel } from '../../lib/blog/tags';
@@ -66,12 +67,7 @@ export function BlogListing(props: ListingProps): React.JSX.Element {
       title = t('blog.hero.title');
       metaTitle = t('blog.meta.title');
       metaDescription = t('blog.meta.description');
-      intro = (
-        <>
-          <p className={styles.heroSubtitle}>{t('blog.hero.subtitle')}</p>
-          <p className={styles.heroIntro}>{t('blog.hero.intro')}</p>
-        </>
-      );
+      intro = <p className={styles.heroSubtitle}>{t('blog.hero.subtitle')}</p>;
       break;
     case 'segment':
       rest = `${segmentById(props.segment).slug}/`;
@@ -126,7 +122,9 @@ export function BlogListing(props: ListingProps): React.JSX.Element {
   }
 
   const path = blogPath(locale, rest);
-  const [featured, ...others] = props.kind === 'index' ? posts : [];
+  // The index leads with its newest post inside the masthead; every other
+  // listing is a plain grid.
+  const [lead, ...others] = props.kind === 'index' ? posts : [];
   const grid = props.kind === 'index' ? others : posts;
 
   return (
@@ -150,30 +148,52 @@ export function BlogListing(props: ListingProps): React.JSX.Element {
       />
 
       <div className={styles.page}>
-        <section className={styles.hero}>
-          <span className={props.kind === 'segment' ? styles.label : styles.eyebrow}>{eyebrow}</span>
+        <header
+          className={cn(styles.mast, props.kind === 'segment' && styles[`seg_${props.segment}`])}
+        >
+          <p className={styles.mastLine}>
+            <span className={styles.mastEyebrow}>{eyebrow}</span>
+            {props.alternate && (
+              <Link
+                href={props.alternate}
+                className={styles.otherLanguage}
+                hrefLang={locale === 'en' ? 'ar' : 'en'}
+                lang={locale === 'en' ? 'ar' : 'en'}
+              >
+                {t('blog.sections.otherLanguage')}
+              </Link>
+            )}
+          </p>
           <h1 className={styles.heroTitle}>{title}</h1>
-          {intro}
-          {props.alternate && (
-            <Link
-              href={props.alternate}
-              className={styles.otherLanguage}
-              hrefLang={locale === 'en' ? 'ar' : 'en'}
-              lang={locale === 'en' ? 'ar' : 'en'}
-            >
-              {t('blog.sections.otherLanguage')}
-            </Link>
-          )}
-          <SegmentNav
-            locale={locale}
-            segments={segments}
-            current={props.kind === 'segment' ? props.segment : undefined}
-          />
-        </section>
+          <div className={styles.mastFoot}>
+            <div className={styles.mastIntro}>{intro}</div>
+            <SegmentNav
+              locale={locale}
+              segments={segments}
+              current={props.kind === 'segment' ? props.segment : undefined}
+            />
+          </div>
+        </header>
 
-        {featured && (
-          <section className={styles.featuredSection}>
-            <PostCard post={featured} featured />
+        {lead && (
+          <section className={styles.leadSection}>
+            <PostCard post={lead} variant="lead" />
+          </section>
+        )}
+
+        {grid.length > 0 && (
+          <section className={styles.gridSection}>
+            <h2 className={styles.sectionTitle}>{heading}</h2>
+            <div className={styles.grid}>
+              {grid.map((post, i) => (
+                <PostCard
+                  key={post.slug}
+                  post={post}
+                  // Every third row opens with a wide card, so the grid has rhythm.
+                  variant={i % 5 === 0 && grid.length > 2 ? 'wide' : 'normal'}
+                />
+              ))}
+            </div>
           </section>
         )}
 
@@ -185,7 +205,7 @@ export function BlogListing(props: ListingProps): React.JSX.Element {
                 <Link
                   key={id}
                   href={blogPath(locale, `${segmentById(id).slug}/`)}
-                  className={styles.segmentCard}
+                  className={cn(styles.segmentCard, styles[`seg_${id}`])}
                 >
                   <span className={styles.label}>{t(`blog.segments.${id}.label`)}</span>
                   <h3 className={styles.cardTitle}>{t(`blog.segments.${id}.title`)}</h3>
@@ -197,14 +217,10 @@ export function BlogListing(props: ListingProps): React.JSX.Element {
           </section>
         )}
 
-        {grid.length > 0 && (
-          <section className={styles.gridSection}>
-            <h2 className={styles.sectionTitle}>{heading}</h2>
-            <div className={styles.grid}>
-              {grid.map((post) => (
-                <PostCard key={post.slug} post={post} />
-              ))}
-            </div>
+        {props.kind === 'index' && (
+          <section className={styles.about}>
+            <h2 className={styles.sectionTitle}>{t('blog.sections.about')}</h2>
+            <p>{t('blog.hero.intro')}</p>
           </section>
         )}
       </div>

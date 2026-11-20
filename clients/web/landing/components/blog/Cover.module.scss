@@ -1,7 +1,7 @@
 .frame {
   background:
-    radial-gradient(120% 90% at 100% 0%, rgba(214, 184, 142, 0.22), transparent 60%),
-    var(--bg-surface-b);
+    radial-gradient(120% 90% at 100% 0%, rgba(255, 255, 255, 0.7), transparent 60%),
+    var(--accent-tint, var(--bg-surface-b));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -9,15 +9,8 @@
 }
 
 .card {
-  aspect-ratio: 16 / 10;
-  padding: 22px;
-}
-
-.hero {
-  aspect-ratio: 16 / 6;
-  padding: 28px;
-  border-radius: 14px;
-  border: 1px solid var(--hairline);
+  aspect-ratio: 16 / 9;
+  padding: 18px 22px;
 }
 
 .panel {

@@ -14,15 +14,9 @@ import styles from './Cover.module.scss';
  */
 const BARS = [38, 54, 46, 70, 62, 84, 76];
 
-export function Cover({
-  cover,
-  size = 'card',
-}: {
-  cover: CoverData;
-  size?: 'card' | 'hero';
-}): React.JSX.Element {
+export function Cover({ cover }: { cover: CoverData }): React.JSX.Element {
   return (
-    <div className={cn(styles.frame, styles[size])} aria-hidden="true">
+    <div className={cn(styles.frame, styles.card)} aria-hidden="true">
       <div className={styles.panel}>
         <div className={styles.bar}>
           <span className={styles.dots}>

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { cn } from '../../lib/cn';
 import { blogPostingSchema } from '../../lib/structured-data';
 import {
   authorById,
@@ -14,7 +15,6 @@ import {
 import { tagLabel } from '../../lib/blog/tags';
 import HelmetContainer, { ogImageFor } from '../HelmetContainer';
 import BlogCta from './BlogCta';
-import Cover from './Cover';
 import { Inline, plainText } from './Inline';
 import PostCard from './PostCard';
 import styles from './Blog.module.scss';
@@ -23,6 +23,12 @@ import styles from './Blog.module.scss';
 const TOC_MIN_SECTIONS = 4;
 
 const sectionId = (n: number): string => `section-${n}`;
+
+/** "Abed El-Fattah Amouneh" -> "AA". First and last word, so it works in Arabic too. */
+const initials = (name: string): string => {
+  const words = name.split(/\s+/).filter(Boolean);
+  return words.length ? `${words[0][0]}${words.length > 1 ? words[words.length - 1][0] : ''}` : '';
+};
 
 /**
  * Where the first call to action goes when a post does not place one: right
@@ -185,15 +191,20 @@ export function BlogPost({
         })}
       />
 
-      <article className={styles.post}>
+      <article className={cn(styles.post, styles[`seg_${post.segment}`])}>
         <header className={styles.postHeader}>
           <nav aria-label={t('blog.post.breadcrumb')} className={styles.crumbs}>
             <Link href={blogPath(post.locale)}>{t('blog.post.allPosts')}</Link>
             <span aria-hidden="true">/</span>
             <Link href={blogPath(post.locale, `${segment.slug}/`)}>{segmentLabel}</Link>
           </nav>
+          <span className={styles.label}>{segmentLabel}</span>
           <h1 className={styles.postTitle}>{post.title}</h1>
+          <p className={styles.postExcerpt}>{post.excerpt}</p>
           <p className={styles.postMeta}>
+            <span className={styles.avatar} aria-hidden="true">
+              {initials(t(`blog.authors.${authorKey}.name`))}
+            </span>
             <span>
               {t('blog.post.by')} <Link href={authorPath}>{t(`blog.authors.${authorKey}.name`)}</Link>
             </span>
@@ -221,10 +232,6 @@ export function BlogPost({
             </Link>
           )}
         </header>
-
-        <div className={styles.postCover}>
-          <Cover cover={post.cover} size="hero" />
-        </div>
 
         <div className={styles.postLayout}>
           {sections.length >= TOC_MIN_SECTIONS && (

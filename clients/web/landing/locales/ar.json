@@ -1127,7 +1127,8 @@
       "navLabel": "أقسام المدونة",
       "all": "كل المقالات",
       "browse": "تصفّح",
-      "otherLanguage": "The blog in English"
+      "otherLanguage": "The blog in English",
+      "about": "لمن نكتب"
     },
     "segments": {
       "small": {

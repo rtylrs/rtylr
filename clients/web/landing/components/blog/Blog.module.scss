@@ -2,124 +2,145 @@
 // left) so the Arabic pages mirror without a second stylesheet.
 
 $beige: #d6b88e;
-$beige-ink: #8a6a3d;
-$muted: rgba(19, 19, 19, 0.62);
+$beige-ink: #7a5a2e;
+$ink: #18181b;
+$text: #3f3f46;
+$meta: #52525b;
+$muted: $text;
+
+// One colour per reader, all from the brand: the logo blue (#4583c4, taken
+// one step deeper so white text on it reads at 5:1), the site navy
+// (--primary-color) and ink. --accent is a block colour for white type;
+// --accent-tint is its pale version for light surfaces.
+.seg_small {
+  --accent: #2f6cad;
+  --accent-deep: #1f4f86;
+  --accent-tint: #e3eef9;
+}
+.seg_mid {
+  --accent: #12245a;
+  --accent-deep: #040428;
+  --accent-tint: #e2e6f2;
+}
+.seg_large {
+  --accent: #18181b;
+  --accent-deep: #000000;
+  --accent-tint: #ececef;
+}
+.seg_vision {
+  --accent: #1f5f8f;
+  --accent-deep: #12245a;
+  --accent-tint: #dfedf6;
+}
 
 .page {
   background: var(--app-background);
-  color: var(--ink);
-  padding-block-end: 120px;
+  color: $ink;
+  padding-block-end: 96px;
 }
 
-// ── Listing hero ─────────────────────────────────────────────────────────
+// ── Masthead: oversized type on the page, a magazine cover line ─────────
 
-.hero {
-  max-width: 1280px;
+.mast {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 96px 32px 24px;
-
-  > * {
-    max-width: 820px;
-  }
+  padding: 116px 32px 0;
 }
 
-.eyebrow {
-  display: inline-block;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  color: rgba(19, 19, 19, 0.55);
-  margin-block-end: 22px;
+.mastLine {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  margin: 0 0 18px;
+  padding-block-end: 14px;
+  border-block-end: 2px solid $ink;
 }
 
-.label {
-  display: inline-block;
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.8px;
+.mastEyebrow {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 2px;
   text-transform: uppercase;
-  color: $beige-ink;
-  padding: 4px 11px;
-  border-radius: 999px;
-  background: rgba($beige, 0.16);
-  border: 1px solid rgba($beige, 0.34);
-  margin-block-end: 18px;
+  color: var(--accent, $ink);
 }
 
 .heroTitle {
-  font-size: clamp(2.4rem, 5vw, 4rem);
-  font-weight: 700;
-  line-height: 1.03;
-  letter-spacing: -0.04em;
-  margin: 0 0 22px;
+  font-size: clamp(2.75rem, 7.2vw, 6.25rem);
+  font-weight: 800;
+  line-height: 0.96;
+  letter-spacing: -0.05em;
+  color: $ink;
+  margin: 0 0 28px;
+  max-width: 1100px;
+  text-wrap: balance;
+}
+
+.mastFoot {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 24px 48px;
+  align-items: end;
+  padding-block-end: 28px;
+  border-block-end: 1px solid #d4d4d8;
+}
+
+.mastIntro > :last-child {
+  margin-block-end: 0;
 }
 
 .heroSubtitle {
-  font-size: 1.08rem;
-  line-height: 1.65;
-  color: $muted;
-  margin: 0 0 20px;
-}
-
-.heroIntro {
-  font-size: 0.96rem;
-  line-height: 1.7;
-  color: rgba(19, 19, 19, 0.58);
-  margin: 0 0 24px;
+  font-size: 1.2rem;
+  line-height: 1.55;
+  color: $text;
+  margin: 0 0 12px;
 }
 
 .heroRole {
-  font-weight: 600;
-  margin: -8px 0 16px;
+  font-weight: 700;
+  color: var(--accent, $ink);
+  margin: 0 0 8px;
 }
 
 .authorLinks {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  font-size: 0.9rem;
-  color: $muted;
+  font-size: 0.95rem;
+  color: $text;
+  margin: 0;
 
   a {
-    color: var(--ink);
+    color: $ink;
   }
 }
 
 .otherLanguage {
-  display: inline-block;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--ink);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: $ink;
   text-decoration: underline;
   text-underline-offset: 3px;
-  margin-block-end: 20px;
 }
 
 .segmentNav {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 8px;
-  margin-block-start: 8px;
 
   a {
-    padding: 8px 16px;
+    padding: 9px 16px;
     border-radius: 999px;
-    border: 1px solid var(--hairline);
-    background: var(--bg-surface-a);
-    font-size: 0.88rem;
-    font-weight: 500;
-    color: var(--ink);
+    border: 1.5px solid $ink;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: $ink;
     text-decoration: none;
-    transition: border-color 0.18s ease;
 
-    &:hover {
-      border-color: var(--hairline-strong);
-    }
-
+    &:hover,
     &[aria-current='page'] {
-      background: var(--btn-cream-bg);
-      border-color: transparent;
+      background: $ink;
       color: #fff;
     }
   }
@@ -127,68 +148,82 @@ $muted: rgba(19, 19, 19, 0.62);
 
 // ── Cards ────────────────────────────────────────────────────────────────
 
-.sectionTitle {
-  font-size: clamp(1.4rem, 2.4vw, 1.8rem);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  margin: 0 0 24px;
+.label {
+  display: inline-block;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent, $beige-ink);
+  margin-block-end: 12px;
 }
 
-.featuredSection,
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: $ink;
+  margin: 0 0 24px;
+
+  &::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: $ink;
+  }
+}
+
+.leadSection,
 .segments,
 .gridSection,
-.related {
-  max-width: 1280px;
+.related,
+.about {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 32px 32px 0;
+  padding: 48px 32px 0;
+}
+
+.about p {
+  max-width: 760px;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: $text;
+  margin: 0;
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
+  gap: 40px 28px;
 }
 
-.card,
-.featured,
-.segmentCard {
+.card {
   display: flex;
   flex-direction: column;
-  background: var(--bg-surface-a);
-  border: 1px solid var(--hairline);
-  border-radius: 14px;
-  overflow: hidden;
-  color: var(--ink);
+  color: $ink;
   text-decoration: none;
-  transition:
-    border-color 0.22s ease,
-    transform 0.22s ease;
+
+  // The cover sits in a coloured block; the text sits on the page.
+  > :first-child {
+    border-radius: 14px;
+    transition: transform 0.25s ease;
+  }
 
   &:hover {
-    border-color: var(--hairline-strong);
-    transform: translateY(-2px);
-  }
-}
+    > :first-child {
+      transform: translateY(-4px);
+    }
 
-.featured {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-
-  > :first-child {
-    order: 2;
-    aspect-ratio: auto;
-    height: 100%;
-    border-inline-start: 1px solid var(--hairline);
-  }
-
-  .cardBody {
-    padding: 44px 44px 40px;
-    justify-content: center;
-  }
-
-  .cardTitle {
-    font-size: clamp(1.6rem, 2.8vw, 2.3rem);
-    line-height: 1.1;
+    .cardTitle {
+      text-decoration: underline;
+      text-decoration-color: var(--accent, $ink);
+      text-decoration-thickness: 3px;
+      text-underline-offset: 5px;
+    }
   }
 }
 
@@ -196,120 +231,257 @@ $muted: rgba(19, 19, 19, 0.62);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 24px 24px 22px;
+  padding: 18px 2px 0;
   flex-grow: 1;
 }
 
 .cardTitle {
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.25;
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  color: $ink;
   margin: 0 0 10px;
 }
 
 .cardExcerpt {
-  font-size: 0.92rem;
-  line-height: 1.6;
-  color: $muted;
-  margin: 0 0 18px;
+  font-size: 1.02rem;
+  line-height: 1.55;
+  color: $text;
+  margin: 0 0 14px;
   flex-grow: 1;
 }
 
 .cardMeta {
-  font-size: 0.8rem;
-  color: rgba(19, 19, 19, 0.55);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $meta;
   margin: 0;
 }
 
+.wideCard {
+  grid-column: span 2;
+
+  .cardTitle {
+    font-size: 2rem;
+  }
+}
+
+// The lead story: one full colour block, white type, the cover large.
+.leadCard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  background: var(--accent, $ink);
+  color: #fff;
+  border-radius: 24px;
+  overflow: hidden;
+
+  > :first-child {
+    order: 2;
+    border-radius: 0;
+    aspect-ratio: auto;
+    min-height: 100%;
+    padding: 48px;
+    background:
+      radial-gradient(80% 80% at 70% 30%, rgba(255, 255, 255, 0.22), transparent 70%),
+      var(--accent-deep, #000);
+  }
+
+  .cardBody {
+    padding: 56px 48px;
+    justify-content: center;
+  }
+
+  .label {
+    color: #fff;
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+    border-radius: 999px;
+    padding: 5px 12px;
+    margin-block-end: 22px;
+  }
+
+  .cardTitle {
+    font-size: clamp(2rem, 3.6vw, 3.25rem);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    color: #fff;
+    margin-block-end: 18px;
+  }
+
+  .cardExcerpt {
+    font-size: 1.15rem;
+    color: rgba(255, 255, 255, 0.92);
+  }
+
+  .cardMeta {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  &:hover {
+    > :first-child {
+      transform: none;
+    }
+
+    .cardTitle {
+      text-decoration-color: #fff;
+    }
+  }
+}
+
+// Sections as solid colour blocks.
 .segmentGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px;
+  gap: 24px;
 }
 
 .segmentCard {
-  padding: 28px;
+  display: flex;
+  flex-direction: column;
   align-items: flex-start;
+  padding: 36px;
+  border-radius: 20px;
+  background: var(--accent, $ink);
+  color: #fff;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+  }
+
+  .label {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .cardTitle {
+    font-size: 1.9rem;
+    color: #fff;
+  }
+
+  .cardExcerpt {
+    color: rgba(255, 255, 255, 0.92);
+  }
 }
 
 .more {
-  font-size: 0.88rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
+  color: inherit;
   text-decoration: underline;
-  text-underline-offset: 3px;
+  text-underline-offset: 4px;
 }
 
 // ── Post ─────────────────────────────────────────────────────────────────
 
 .post {
   background: var(--app-background);
-  color: var(--ink);
-  padding: 88px 24px 40px;
+  color: $ink;
+  padding: 0 0 40px;
 }
 
-.postHeader,
-.postCover {
-  max-width: 980px;
-  margin: 0 auto;
+// The post opens on a full-width block in the reader's colour.
+.postHeader {
+  padding: 140px max(24px, calc((100% - 980px) / 2)) 56px;
+  background:
+    radial-gradient(60% 90% at 100% 0%, rgba(255, 255, 255, 0.18), transparent 60%),
+    var(--accent, $ink);
+  color: #fff;
+
+  .label {
+    color: #fff;
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+    border-radius: 999px;
+    padding: 5px 12px;
+    margin-block-end: 22px;
+  }
 }
 
 .crumbs {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  font-size: 0.86rem;
-  color: rgba(19, 19, 19, 0.5);
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.8);
   margin-block-end: 22px;
 
   a {
-    color: rgba(19, 19, 19, 0.7);
+    color: #fff;
     text-decoration: none;
 
     &:hover {
-      color: var(--ink);
+      text-decoration: underline;
     }
   }
 }
 
 .postTitle {
-  font-size: clamp(2.1rem, 4.6vw, 3.4rem);
-  font-weight: 700;
-  line-height: 1.06;
-  letter-spacing: -0.035em;
-  max-width: 900px;
-  margin: 0 0 20px;
+  font-size: clamp(2.5rem, 6vw, 4.75rem);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+  color: #fff;
+  max-width: 940px;
+  margin: 0 0 22px;
+  text-wrap: balance;
+}
+
+.postExcerpt {
+  font-size: 1.3rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.92);
+  max-width: 760px;
+  margin: 0 0 30px;
 }
 
 .postMeta {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 6px 10px;
-  font-size: 0.88rem;
-  color: rgba(19, 19, 19, 0.6);
-  margin: 0 0 16px;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
 
   a {
-    color: var(--ink);
-    font-weight: 600;
+    color: #fff;
+    font-weight: 700;
   }
 }
 
-.postCover {
-  margin-block: 28px 8px;
+.postHeader .otherLanguage {
+  display: inline-block;
+  margin-block-start: 18px;
+  color: #fff;
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--accent, $ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 .postLayout {
   max-width: 980px;
   margin: 0 auto;
+  padding-inline: 24px;
   display: grid;
   grid-template-columns: 220px minmax(0, 1fr);
   gap: 48px;
-  padding-block-start: 32px;
+  padding-block-start: 24px;
 
   > .postBody:only-child {
     grid-column: 1 / -1;
-    max-width: 720px;
+    max-width: 680px;
     margin-inline: auto;
   }
 }
@@ -345,15 +517,16 @@ $muted: rgba(19, 19, 19, 0.62);
   font-weight: 600;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: rgba(19, 19, 19, 0.5);
+  color: $meta;
   margin: 0 0 10px;
 }
 
 .postBody {
   min-width: 0;
-  font-size: 1.075rem;
-  line-height: 1.75;
-  color: rgba(19, 19, 19, 0.84);
+  max-width: 680px;
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: #27272a;
 
   > p {
     margin: 0 0 22px;
@@ -390,13 +563,25 @@ $muted: rgba(19, 19, 19, 0.62);
 }
 
 .quote {
-  margin: 30px 0;
-  padding-block: 4px;
-  padding-inline-start: 22px;
-  border-inline-start: 3px solid rgba($beige, 0.8);
-  font-size: 1.18rem;
-  line-height: 1.6;
-  color: var(--ink);
+  margin: 44px 0;
+  padding: 8px 0 8px 28px;
+  border-inline-start: 6px solid var(--accent, $ink);
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  font-weight: 800;
+  line-height: 1.22;
+  letter-spacing: -0.025em;
+  color: $ink;
+}
+
+// A drop cap on the opening paragraph. Latin only: Arabic letters join,
+// so a dropped first letter breaks the word.
+:global(html[dir='ltr']) .postBody > p:first-child::first-letter {
+  float: left;
+  font-size: 4.4em;
+  line-height: 0.82;
+  font-weight: 800;
+  margin: 6px 12px 0 0;
+  color: var(--accent, $ink);
 }
 
 .list {
@@ -432,7 +617,7 @@ $muted: rgba(19, 19, 19, 0.62);
     text-align: start;
     padding: 14px 16px 4px;
     font-size: 0.82rem;
-    color: rgba(19, 19, 19, 0.6);
+    color: $meta;
   }
 
   th,
@@ -448,8 +633,8 @@ $muted: rgba(19, 19, 19, 0.62);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: rgba(19, 19, 19, 0.6);
-    background: var(--bg-surface-b);
+    color: $meta;
+    background: #f4f4f5;
   }
 
   tbody th {
@@ -477,7 +662,7 @@ $muted: rgba(19, 19, 19, 0.62);
   gap: 8px;
   margin: 40px 0 0;
   font-size: 0.86rem;
-  color: rgba(19, 19, 19, 0.55);
+  color: $meta;
 
   a.tag {
     text-decoration: none;
@@ -509,7 +694,7 @@ $muted: rgba(19, 19, 19, 0.62);
   font-weight: 600;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: rgba(19, 19, 19, 0.5);
+  color: $meta;
 }
 
 .authorName {
@@ -527,7 +712,7 @@ $muted: rgba(19, 19, 19, 0.62);
 
   span {
     font-size: 0.86rem;
-    color: rgba(19, 19, 19, 0.55);
+    color: $meta;
   }
 }
 
@@ -555,11 +740,12 @@ $muted: rgba(19, 19, 19, 0.62);
 }
 
 .ctaInline {
-  margin-block: 32px;
+  margin-block: 36px;
   padding: 24px 26px;
-  background: var(--bg-surface-a);
-  color: var(--ink);
-  border: 1px solid var(--hairline);
+  background: #fff;
+  color: $ink;
+  border: 1px solid #e4e4e7;
+  border-inline-start: 4px solid var(--accent, $ink);
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
@@ -640,22 +826,36 @@ $muted: rgba(19, 19, 19, 0.62);
 // ── Narrow screens ───────────────────────────────────────────────────────
 
 @media (max-width: 1024px) {
-  .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .mastFoot {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .featured {
+  .segmentNav {
+    justify-content: flex-start;
+  }
+
+  .leadCard {
     grid-template-columns: minmax(0, 1fr);
 
     > :first-child {
       order: 0;
-      border-inline-start: none;
+      padding: 32px;
+      aspect-ratio: 16 / 9;
     }
 
     .cardBody {
-      padding: 28px 24px 24px;
+      padding: 32px 28px 36px;
     }
   }
+
+  .wideCard {
+    grid-column: span 2;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
 
   .postLayout {
     grid-template-columns: minmax(0, 1fr);
@@ -677,12 +877,32 @@ $muted: rgba(19, 19, 19, 0.62);
 }
 
 @media (max-width: 640px) {
-  .hero {
-    padding: 72px 16px 16px;
+  .mast {
+    padding: 96px 16px 0;
   }
 
-  .featuredSection,
+  .leadSection {
+    padding-inline: 12px;
+  }
+
+  .wideCard {
+    grid-column: auto;
+
+    .cardTitle {
+      font-size: 1.45rem;
+    }
+  }
+
+  .segmentCard {
+    padding: 28px 24px;
+  }
+
+  .postExcerpt {
+    font-size: 1.1rem;
+  }
+
   .segments,
+  .about,
   .gridSection,
   .related {
     padding-inline: 16px;
@@ -693,12 +913,16 @@ $muted: rgba(19, 19, 19, 0.62);
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .post {
-    padding: 72px 16px 32px;
+  .postHeader {
+    padding: 104px 16px 28px;
+  }
+
+  .postLayout {
+    padding-inline: 16px;
   }
 
   .postBody {
-    font-size: 1.02rem;
+    font-size: 1.0625rem;
   }
 
   .h2 {
