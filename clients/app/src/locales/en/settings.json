@@ -208,6 +208,7 @@
       "funky": "Funky",
       "abstract": "Abstract"
     },
+    "previewDefault": "Your initials, until you pick one",
     "new": "New",
     "shuffle": "Shuffle",
     "by": "by {{author}}",

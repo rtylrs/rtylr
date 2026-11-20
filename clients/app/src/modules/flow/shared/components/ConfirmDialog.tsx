@@ -1,7 +1,15 @@
 import React, { useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@voxire/ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../../../shared/components/ui/dialog';
+import { Button } from '../../../../shared/components/ui/button';
 
 // Drop-in replacement for window.confirm() inside Flow. Two flavors:
 //   - basic: just shows the prompt, primary button enabled immediately
@@ -54,17 +62,17 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="portal-flow-dialog max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-flow-section font-semibold flex items-center gap-2">
-            <AlertTriangle size={14} style={{ color: 'var(--flow-danger-fg)' }} />
+          <DialogTitle className="flex items-center gap-2">
+            <AlertTriangle size={16} style={{ color: 'var(--flow-danger-fg)' }} aria-hidden />
             {title}
           </DialogTitle>
-          <DialogDescription className="text-flow-meta">{description}</DialogDescription>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
         {requireText ? (
-          <div className="mt-2">
+          <div className="px-6 pb-6">
             {/*
               A visible label, doing two jobs at once: it gives the input an
               accessible name, which it had none of, and it states the
@@ -98,25 +106,14 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           </div>
         ) : null}
 
-        <div className="flex justify-end gap-2 mt-4">
-          <button
-            type="button"
-            onClick={() => onOpenChange(false)}
-            className="px-3 py-1.5 rounded-lg text-flow-meta font-medium"
-            style={{ color: 'var(--flow-text-muted)' }}
-          >
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             {cancelLabel ?? t('flow.confirm.cancel')}
-          </button>
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={onConfirm}
-            className="px-3 py-1.5 rounded-lg text-flow-meta font-semibold disabled:opacity-40"
-            style={{ background: 'var(--flow-danger-fill)', color: 'var(--flow-danger-on-fill)' }}
-          >
+          </Button>
+          <Button variant="destructive" disabled={disabled} onClick={onConfirm}>
             {pending ? t('flow.confirm.working') : (confirmLabel ?? t('flow.confirm.delete'))}
-          </button>
-        </div>
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

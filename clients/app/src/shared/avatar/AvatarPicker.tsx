@@ -3,17 +3,16 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Shuffle, Upload } from 'lucide-react';
 import { uploadAsset } from '@voxire/api';
+import { AVATAR_PALETTE, avatarColor, avatarColorAt, avatarColorIndex } from '@voxire/ui';
+import { Button } from '../components/ui/button';
 import {
-  AVATAR_PALETTE,
-  avatarColor,
-  avatarColorAt,
-  avatarColorIndex,
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@voxire/ui';
+} from '../components/ui/dialog';
 import {
   AVATAR_EMOJI,
   AVATAR_STYLE_GROUPS,
@@ -48,7 +47,8 @@ export const AvatarPreview: React.FC<{
   userId: string;
   name?: string;
   size: number;
-}> = ({ avatar, userId, name, size }) => {
+  framed?: boolean;
+}> = ({ avatar, userId, name, size, framed = false }) => {
   const color =
     avatar?.kind === 'initials' && avatar.color !== undefined
       ? avatarColorAt(avatar.color)
@@ -66,7 +66,7 @@ export const AvatarPreview: React.FC<{
       }}
       data-avatar-preview={avatar?.kind ?? 'default'}
     >
-      {picture ? <AvatarPicture avatar={avatar} size={size} /> : initialsOf(name)}
+      {picture ? <AvatarPicture avatar={avatar} size={size} framed={framed} /> : initialsOf(name)}
     </span>
   );
 };
@@ -114,6 +114,15 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
       : defaultColor;
 
   const selectedStyle = useMemo(() => AVATAR_STYLES.find((s) => s.id === style), [style]);
+  const framedStyle = (id: string | undefined): boolean =>
+    !AVATAR_STYLES.find((s) => s.id === id)?.fullBleed;
+  const draftLabel = !draft
+    ? t('settings.avatar.previewDefault')
+    : draft.kind === 'illustrated'
+      ? `${t('settings.avatar.tabs.illustrated')} · ${
+          AVATAR_STYLES.find((s) => s.id === draft.style)?.label ?? ''
+        }`
+      : t(`settings.avatar.tabs.${draft.kind}`);
 
   const save = (next: ChosenAvatar | null): void => {
     update.mutate(next, {
@@ -169,12 +178,12 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
           aria-checked={selected === index}
           aria-label={t('settings.avatar.colourN', { n: index + 1 })}
           onClick={() => onPick(index)}
-          className="h-8 w-8 rounded-full"
+          className="h-9 w-9 rounded-full transition-shadow"
           style={{
             background: hex,
             boxShadow:
               selected === index
-                ? '0 0 0 2px var(--background, #fff), 0 0 0 4px currentColor'
+                ? '0 0 0 2px var(--dash-surface), 0 0 0 4px var(--dash-text)'
                 : undefined,
           }}
         />
@@ -184,7 +193,14 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[640px]">
+      <DialogContent
+        className="max-w-[680px] outline-none"
+        // Start on the dialog rather than ringing the first tab; Tab moves into the tabs.
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          (event.currentTarget as HTMLElement).focus();
+        }}
+      >
         <DialogHeader>
           <DialogTitle>
             {welcome ? t('settings.avatar.welcomeTitle') : t('settings.avatar.dialogTitle')}
@@ -196,12 +212,25 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex items-center gap-4">
-          <AvatarPreview avatar={draft} userId={userId} name={name} size={72} />
+        <div className="space-y-4 px-6">
+          <div className="flex items-center gap-4">
+            <AvatarPreview
+              avatar={draft}
+              userId={userId}
+              name={name}
+              size={64}
+              framed={draft?.kind === 'illustrated' && framedStyle(draft.style)}
+            />
+            <div className="min-w-0">
+              {name && <p className="truncate text-sm font-semibold">{name}</p>}
+              <p className="truncate text-[13px] text-[var(--dash-text-dim)]">{draftLabel}</p>
+            </div>
+          </div>
+
           <div
             role="tablist"
             aria-label={t('settings.avatar.dialogTitle')}
-            className="flex flex-wrap gap-1"
+            className="flex gap-1 rounded-xl bg-[var(--dash-hover)] p-1"
           >
             {TABS.map((id) => (
               <button
@@ -211,8 +240,10 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
                 aria-selected={tab === id}
                 onClick={() => setTab(id)}
                 className={[
-                  'min-h-9 rounded-md px-3 text-sm font-medium',
-                  tab === id ? 'bg-accent/15 text-accent' : 'opacity-70 hover:opacity-100',
+                  'min-h-9 flex-auto rounded-lg px-2.5 text-[13px] font-medium whitespace-nowrap transition-colors sm:flex-1',
+                  tab === id
+                    ? 'bg-[var(--dash-surface)] text-[var(--dash-text)] shadow-[0_1px_2px_rgb(0_0_0/0.08),0_0_0_1px_var(--dash-border)]'
+                    : 'text-[var(--dash-text-dim)] hover:text-[var(--dash-text)]',
                 ].join(' ')}
               >
                 {t(`settings.avatar.tabs.${id}`)}
@@ -221,7 +252,7 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
           </div>
         </div>
 
-        <div role="tabpanel" className="min-h-[300px] pt-2">
+        <div role="tabpanel" className="px-6 pb-6 pt-4">
           {tab === 'photo' &&
             (photo ? (
               <PhotoCropper
@@ -242,11 +273,15 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
                   e.preventDefault();
                   pickFile(e.dataTransfer.files[0]);
                 }}
-                className="flex h-[260px] w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-sm"
+                className="flex h-[240px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[color-mix(in_srgb,var(--dash-text)_20%,transparent)] px-6 text-center text-sm transition-colors hover:bg-[var(--dash-hover)]"
               >
-                <Upload size={20} aria-hidden="true" />
+                <span className="mb-1 grid h-10 w-10 place-items-center rounded-full bg-[var(--dash-hover)]">
+                  <Upload size={18} aria-hidden="true" />
+                </span>
                 <span className="font-medium">{t('settings.avatar.uploadPhoto')}</span>
-                <span className="opacity-70">{t('settings.avatar.photoHint')}</span>
+                <span className="text-[13px] text-[var(--dash-text-dim)]">
+                  {t('settings.avatar.photoHint')}
+                </span>
               </button>
             ))}
           <input
@@ -261,33 +296,45 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
           />
 
           {tab === 'illustrated' && (
-            <div className="space-y-3">
-              {AVATAR_STYLE_GROUPS.map((group) => (
-                <div key={group} className="flex flex-wrap items-center gap-1.5">
-                  <span className="w-24 text-xs font-medium opacity-70">
-                    {t(`settings.avatar.groups.${group}`)}
-                  </span>
-                  {AVATAR_STYLES.filter((s) => s.group === group).map((s) => (
-                    <button
-                      key={s.id}
-                      type="button"
-                      aria-pressed={style === s.id}
-                      onClick={() => setStyle(s.id)}
-                      className={[
-                        'min-h-8 rounded-full border px-2.5 text-xs',
-                        style === s.id ? 'border-accent bg-accent/15 text-accent' : '',
-                      ].join(' ')}
-                    >
-                      {s.label}
-                      {s.isNew && (
-                        <span className="ms-1 opacity-70">· {t('settings.avatar.new')}</span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              ))}
+            <div className="space-y-5">
+              <div className="grid gap-x-3 gap-y-3 sm:grid-cols-[84px_1fr]">
+                {AVATAR_STYLE_GROUPS.map((group) => (
+                  <React.Fragment key={group}>
+                    <span className="text-xs font-medium text-[var(--dash-text-dim)] sm:pt-1.5">
+                      {t(`settings.avatar.groups.${group}`)}
+                    </span>
+                    <div className="-mt-1.5 flex flex-wrap gap-1.5 sm:mt-0">
+                      {AVATAR_STYLES.filter((s) => s.group === group).map((s) => (
+                        <button
+                          key={s.id}
+                          type="button"
+                          aria-pressed={style === s.id}
+                          onClick={() => setStyle(s.id)}
+                          className={[
+                            'inline-flex min-h-7 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors',
+                            style === s.id
+                              ? 'border-transparent bg-[var(--dash-text)] text-[var(--dash-surface)]'
+                              : 'border-[var(--dash-border)] text-[var(--dash-text-dim)] hover:bg-[var(--dash-hover)] hover:text-[var(--dash-text)]',
+                          ].join(' ')}
+                        >
+                          {s.label}
+                          {s.isNew && (
+                            <span
+                              className="h-1.5 w-1.5 rounded-full bg-accent"
+                              title={t('settings.avatar.new')}
+                            >
+                              <span className="sr-only">{t('settings.avatar.new')}</span>
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </React.Fragment>
+                ))}
+              </div>
+
               <div
-                className="grid grid-cols-6 gap-2"
+                className="grid grid-cols-4 gap-3 sm:grid-cols-6"
                 role="listbox"
                 aria-label={selectedStyle?.label}
               >
@@ -307,41 +354,36 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
                           : t('settings.avatar.optionN', { style: selectedStyle?.label })
                       }
                       onClick={() => setDraft(option)}
-                      className="aspect-square overflow-hidden rounded-full"
-                      style={{ boxShadow: selected ? '0 0 0 3px currentColor' : undefined }}
+                      className={[
+                        'aspect-square overflow-hidden rounded-full transition-shadow',
+                        selected
+                          ? 'shadow-[0_0_0_2px_var(--dash-surface),0_0_0_4px_var(--dash-text)]'
+                          : 'hover:shadow-[0_0_0_2px_var(--dash-surface),0_0_0_4px_var(--dash-border)]',
+                      ].join(' ')}
                     >
-                      <AvatarPicture avatar={option} size={64} />
+                      <AvatarPicture avatar={option} size={72} framed={framedStyle(style)} />
                     </button>
                   );
                 })}
               </div>
-              <div className="flex items-center justify-between gap-2">
-                <button
-                  type="button"
-                  hidden={style === MOODS_STYLE_ID}
-                  onClick={() => setSeeds(freshSeeds())}
-                  className="inline-flex min-h-8 items-center gap-1.5 rounded-md border px-2.5 text-sm"
-                >
-                  <Shuffle size={14} aria-hidden="true" />
-                  {t('settings.avatar.shuffle')}
-                </button>
+
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                {style !== MOODS_STYLE_ID && (
+                  <Button variant="outline" size="sm" onClick={() => setSeeds(freshSeeds())}>
+                    <Shuffle aria-hidden="true" />
+                    {t('settings.avatar.shuffle')}
+                  </Button>
+                )}
                 {selectedStyle?.credit && (
-                  <p className="text-xs opacity-70" data-avatar-credit>
-                    <a
-                      href={selectedStyle.credit.workUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="underline"
-                    >
+                  <p
+                    className="ms-auto text-xs text-[var(--dash-text-muted)] [&_a]:underline [&_a]:underline-offset-2 [&_a:hover]:text-[var(--dash-text)]"
+                    data-avatar-credit
+                  >
+                    <a href={selectedStyle.credit.workUrl} target="_blank" rel="noreferrer">
                       {selectedStyle.credit.work}
                     </a>{' '}
                     {t('settings.avatar.by', { author: selectedStyle.credit.author })} ·{' '}
-                    <a
-                      href={selectedStyle.credit.licenseUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="underline"
-                    >
+                    <a href={selectedStyle.credit.licenseUrl} target="_blank" rel="noreferrer">
                       {selectedStyle.credit.license}
                     </a>{' '}
                     · {t('settings.avatar.remix')}
@@ -352,8 +394,10 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
           )}
 
           {tab === 'initials' && (
-            <div className="space-y-3">
-              <p className="text-sm opacity-70">{t('settings.avatar.initialsHint')}</p>
+            <div className="space-y-4">
+              <p className="text-sm text-[var(--dash-text-dim)]">
+                {t('settings.avatar.initialsHint')}
+              </p>
               {swatches(draft?.kind === 'initials' ? colorOf(draft) : -1, (index) =>
                 setDraft({ kind: 'initials', color: index })
               )}
@@ -361,9 +405,9 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
           )}
 
           {tab === 'emoji' && (
-            <div className="space-y-3">
+            <div className="space-y-5">
               <div
-                className="grid grid-cols-12 gap-1"
+                className="grid grid-cols-8 gap-1 sm:grid-cols-12"
                 role="listbox"
                 aria-label={t('settings.avatar.tabs.emoji')}
               >
@@ -377,8 +421,10 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
                       aria-selected={selected}
                       onClick={() => setDraft({ kind: 'emoji', emoji, color: colorOf(draft) })}
                       className={[
-                        'h-9 rounded-md text-xl',
-                        selected ? 'bg-accent/15' : 'hover:bg-accent/10',
+                        'aspect-square rounded-lg text-xl transition-colors',
+                        selected
+                          ? 'bg-[var(--dash-active)] shadow-[inset_0_0_0_2px_var(--dash-text)]'
+                          : 'hover:bg-[var(--dash-hover)]',
                       ].join(' ')}
                     >
                       {emoji}
@@ -397,46 +443,38 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
           )}
         </div>
 
-        <div className="flex items-center justify-between gap-2 border-t pt-3">
+        <DialogFooter className="sticky bottom-0 justify-between bg-[var(--dash-surface)]">
           {welcome ? (
-            <button
-              type="button"
+            <Button
+              variant="ghost"
               onClick={() => {
                 onSkip?.();
                 onOpenChange(false);
               }}
-              className="min-h-9 rounded-md px-3 text-sm opacity-80 hover:opacity-100"
             >
               {t('settings.avatar.skip')}
-            </button>
+            </Button>
           ) : (
-            <button
-              type="button"
+            <Button
+              variant="ghost"
               onClick={() => save(null)}
               disabled={update.isPending || !current}
-              className="min-h-9 rounded-md px-3 text-sm opacity-80 hover:opacity-100 disabled:opacity-40"
             >
               {t('settings.avatar.useDefault')}
-            </button>
+            </Button>
           )}
           <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => onOpenChange(false)}
-              className="min-h-9 rounded-md border px-3 text-sm"
-            >
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
               {t('settings.avatar.cancel')}
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
               onClick={() => save(draft)}
               disabled={update.isPending || !draft || tab === 'photo'}
-              className="min-h-9 rounded-md bg-primary px-3 text-sm font-medium text-white disabled:opacity-50"
             >
               {update.isPending ? t('settings.avatar.saving') : t('settings.avatar.save')}
-            </button>
+            </Button>
           </div>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

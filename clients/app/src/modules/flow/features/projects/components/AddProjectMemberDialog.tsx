@@ -1,7 +1,14 @@
 import React, { useEffect, useId, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@voxire/ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '../../../../../shared/components/ui/dialog';
+import { Button } from '../../../../../shared/components/ui/button';
 import { useInviteProjectMember } from '../useProjectMembers';
 import { projectRoleLabel } from '../../../shared/lib/roleUtils';
 import type { ApiProjectMember } from '../../../shared/services/flowApi';
@@ -97,19 +104,16 @@ const AddProjectMemberDialog: React.FC<AddProjectMemberDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="max-w-md"
-        style={{ background: 'var(--flow-card)', color: 'var(--flow-text)' }}
+        className="portal-flow-dialog max-w-md"
+        // The member suggestions drop below the field; scrolling the frame would clip them.
+        style={{ overflow: 'visible' }}
       >
         <DialogHeader>
-          <DialogTitle style={{ color: 'var(--flow-text)' }}>
-            {t('flow.projectSettings.addMemberHeading')}
-          </DialogTitle>
-          <DialogDescription style={{ color: 'var(--flow-text-muted)' }}>
-            {t('flow.projectSettings.addMemberDescription')}
-          </DialogDescription>
+          <DialogTitle>{t('flow.projectSettings.addMemberHeading')}</DialogTitle>
+          <DialogDescription>{t('flow.projectSettings.addMemberDescription')}</DialogDescription>
         </DialogHeader>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 px-6 pb-6">
           <div className="relative min-w-0 flex-1">
             <input
               autoFocus
@@ -234,15 +238,13 @@ const AddProjectMemberDialog: React.FC<AddProjectMemberDialogProps> = ({
               </option>
             ))}
           </select>
-          <button
-            type="button"
+          <Button
+            size="sm"
             onClick={handleInvite}
             disabled={inviteMember.isPending || !selectedMember}
-            className="min-h-[44px] px-3 rounded-sm text-flow-meta font-semibold disabled:opacity-40 md:min-h-0 md:py-1.5"
-            style={{ background: 'var(--flow-action-bg)', color: 'var(--flow-on-accent)' }}
           >
             {t('flow.projectSettings.invite')}
-          </button>
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
