@@ -17,7 +17,7 @@ export function useChartOfAccounts() {
     queryKey: ['finance', 'chart-of-accounts'],
     queryFn: async () => {
       const res = await accountClient.listAccounts({});
-      return z.array(chartOfAccountSchema).parse(res.accounts);
+      return z.array(chartOfAccountSchema).parse(res.accounts ?? []);
     },
   });
 }

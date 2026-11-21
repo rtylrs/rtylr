@@ -330,3 +330,31 @@ func TestHRSelfServiceRoutesStayUnmapped(t *testing.T) {
 		})
 	}
 }
+
+func TestCrossAppFinanceCustomerReadAccess(t *testing.T) {
+	financeUser := &authPkg.AuthUser{
+		UserID:     35,
+		BusinessID: 10,
+		EffectiveAccess: &authorization.EffectiveAccess{
+			Apps: []authorization.EffectiveAppAccess{{
+				AppID:       authorization.AppFinance,
+				Licensed:    true,
+				HasAccess:   true,
+				Permissions: []string{"finance:invoices:view"},
+			}},
+		},
+	}
+
+	if !hasCrossAppReadAccess(http.MethodGet, "/crm/customer/v1/customers", financeUser) {
+		t.Fatal("expected finance invoice viewer to have read-only access to CRM customer list")
+	}
+	for _, denied := range []struct{ method, path string }{
+		{http.MethodPost, "/crm/customer/v1/customers"},
+		{http.MethodDelete, "/crm/customer/v1/customers/1"},
+		{http.MethodGet, "/crm/customers/export"},
+	} {
+		if hasCrossAppReadAccess(denied.method, denied.path, financeUser) {
+			t.Fatalf("unexpected cross-app access for %s %s", denied.method, denied.path)
+		}
+	}
+}
