@@ -12,3 +12,10 @@ export function pagerJoinPath(slug: string): string {
 export function pagerTicketPath(publicToken: string): string {
   return `/pager/t/${encodeURIComponent(publicToken)}`;
 }
+
+const PUBLIC_PAGER_PATHS = [/^\/[^/]+\/pager\/?$/, /^\/pager\/t\/[^/]+\/?$/];
+
+/** True on the customer's join and ticket pages, never on the staff board. */
+export function isPagerPublicPath(pathname: string): boolean {
+  return PUBLIC_PAGER_PATHS.some((pattern) => pattern.test(pathname));
+}
