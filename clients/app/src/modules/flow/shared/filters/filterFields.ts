@@ -34,7 +34,7 @@ export interface FilterPerson {
   name: string;
 }
 
-export const PRIORITY_KEY: Record<Task['priority'], string> = {
+const PRIORITY_KEY: Record<Task['priority'], string> = {
   urgent: 'flowPriority.urgent',
   high: 'flowPriority.high',
   medium: 'flowPriority.medium',

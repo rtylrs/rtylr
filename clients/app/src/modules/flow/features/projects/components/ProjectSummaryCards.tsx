@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { serializeTaskFilters, type TaskFilters } from '../../../shared/filters/taskFilters';
-import { PRIORITY_KEY } from '../../../shared/filters/filterFields';
+import { PRIORITY_LABEL_KEY } from '../taskGroups';
 import { PRIORITY_COLORS } from '../../../shared/stores/flowStore';
 import type { HoursSummary, ProjectSummaryData, SummaryMetric } from '../projectSummary';
 
@@ -290,7 +290,7 @@ export const PriorityBreakdownCard: React.FC<{
                   style={{ background: PRIORITY_COLORS[priority] }}
                   aria-hidden="true"
                 />
-                {t(PRIORITY_KEY[priority])}
+                {t(PRIORITY_LABEL_KEY[priority])}
                 <span style={{ color: 'var(--flow-text-dim)' }} data-priority-count={priority}>
                   ({metric.count})
                 </span>
