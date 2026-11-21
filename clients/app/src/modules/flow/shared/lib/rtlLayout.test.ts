@@ -53,16 +53,21 @@ describe('Flow RTL layout', () => {
 
   it('keeps the task detail meta rail and its popover logical', () => {
     const detail = source('features/tasks/TaskDetail.tsx');
+    // The comment count badge and the activity timestamps moved here with the
+    // activity tabs (T-603).
+    const activity = source('features/tasks/components/TaskActivityTabs.tsx');
 
     expect(detail).toContain('lg:border-s lg:border-t-0');
     expect(detail).toContain('absolute top-6 start-0');
-    expect(detail).toContain('ms-1.5');
-    expect(detail).toContain('ms-2');
+    expect(activity).toContain('ms-1.5');
+    expect(activity).toContain('ms-2');
 
-    expect(detail).not.toContain('lg:border-l');
-    expect(detail).not.toContain('left-0');
-    expect(detail).not.toContain('text-left');
-    expect(detail).not.toContain('ml-1.5');
-    expect(detail).not.toContain('ml-2');
+    for (const file of [detail, activity]) {
+      expect(file).not.toContain('lg:border-l');
+      expect(file).not.toContain('left-0');
+      expect(file).not.toContain('text-left');
+      expect(file).not.toContain('ml-1.5');
+      expect(file).not.toContain('ml-2');
+    }
   });
 });
