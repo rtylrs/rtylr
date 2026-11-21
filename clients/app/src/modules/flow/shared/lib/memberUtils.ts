@@ -29,3 +29,29 @@ export function memberDisplayName(member: Member | null | undefined): string {
 export function totalTeamCapacity(members: Member[]): number {
   return members.reduce((sum, m) => sum + (m.capacity ?? 0), 0);
 }
+
+export interface AssigneeOption {
+  /** Empty for nobody. */
+  id: string;
+  name: string;
+  initials: string;
+}
+
+/**
+ * Who a task can be assigned to, as the task panel and the List offer it:
+ * nobody first, then the members. Someone still assigned who has since left
+ * the member list stays choosable, so opening the picker never hides them.
+ */
+export function assigneeOptions(
+  members: readonly Member[],
+  current: { id: string; name: string; initials?: string },
+  unassignedLabel: string
+): AssigneeOption[] {
+  return [
+    { id: '', name: unassignedLabel, initials: '' },
+    ...(current.id && !members.some((m) => String(m.id) === current.id)
+      ? [{ id: current.id, name: current.name, initials: current.initials ?? '' }]
+      : []),
+    ...members.map((m) => ({ id: String(m.id), name: m.name, initials: m.initials })),
+  ];
+}
