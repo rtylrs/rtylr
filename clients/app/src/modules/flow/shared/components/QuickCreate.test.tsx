@@ -81,7 +81,12 @@ beforeEach(async () => {
       effectiveAccess: createEffectiveAccess('flow', { isOwner: true }),
     },
   });
-  useFlowStore.setState({ quickCreateOpen: true, quickCreateColumnId: undefined, projects: [] });
+  useFlowStore.setState({
+    quickCreateOpen: true,
+    quickCreateColumnId: undefined,
+    quickCreateCycleId: undefined,
+    projects: [],
+  });
 });
 function fillTitle() {
   fireEvent.change(screen.getByPlaceholderText('Task name'), {
@@ -226,6 +231,18 @@ describe('Quick task creation in Portal', () => {
     await waitFor(() =>
       expect(mocks.create).toHaveBeenCalledWith(
         expect.objectContaining({ projectId: '12', milestoneId: '30' })
+      )
+    );
+  });
+  it('files a task created from a Backlog section into that cycle', async () => {
+    mocks.currentProjectId = '12';
+    useFlowStore.setState({ quickCreateCycleId: '55' });
+    render(<QuickCreate />);
+    fillTitle();
+    create();
+    await waitFor(() =>
+      expect(mocks.create).toHaveBeenCalledWith(
+        expect.objectContaining({ projectId: '12', cycleId: '55' })
       )
     );
   });

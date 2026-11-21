@@ -104,6 +104,13 @@ func (m *Module) SetPresenceSource(source PresenceSource) {
 	m.presence = source
 }
 
+// CycleLeaveSource is the HR leave port behind cycle capacity.
+type CycleLeaveSource = application.CycleLeaveSource
+
+func (m *Module) SetCycleLeaveSource(source CycleLeaveSource) {
+	m.service.SetCycleLeaveSource(source)
+}
+
 // Service exposes the module's application service for callers that need
 // to cross module boundaries — specifically the realtime hub authorizer,
 // which consults workspace/project membership to decide subscription

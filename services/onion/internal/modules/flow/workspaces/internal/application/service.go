@@ -114,6 +114,10 @@ type Service struct {
 	linkPreviewer LinkPreviewer
 
 	github githubIntegration
+
+	// cycleLeave reads approved HR leave for cycle capacity. Optional: nil
+	// counts working days only.
+	cycleLeave CycleLeaveSource
 }
 
 // SetWorkdayRosterSource wires the owner-owned HR and organization directory
@@ -451,6 +455,14 @@ type repository interface {
 	MilestoneProjectID(ctx context.Context, milestoneID, businessID int64) (int64, error)
 	SetTaskMilestone(ctx context.Context, taskID int64, milestoneID *int64) error
 	TaskMilestoneIDs(ctx context.Context, taskIDs []int64) (map[int64]int64, error)
+	GetCycleV2(ctx context.Context, businessID, cycleID int64) (domain.Cycle, error)
+	UpdateCycleV2(ctx context.Context, in domain.UpdateCycleV2Input) error
+	StartCycle(ctx context.Context, in domain.StartCycleInput) error
+	CompleteCycle(ctx context.Context, in domain.CompleteCycleInput) ([]domain.CompletedCycleTask, error)
+	MoveCycleTask(ctx context.Context, in domain.MoveCycleTaskInput) (domain.MovedCycleTask, error)
+	AttachTaskCycles(ctx context.Context, tasks []domain.Task) error
+	CycleMemberLoads(ctx context.Context, businessID, cycleID int64) ([]domain.CycleMemberLoad, error)
+	AssigneeNames(ctx context.Context, businessID int64, userIDs []int64) (map[int64]string, error)
 	UpdateProject(ctx context.Context, input domain.UpdateProjectInput) error
 	UpdateProjectMemberRole(ctx context.Context, input domain.UpdateProjectMemberRoleInput) error
 	UpdateProjectVisibility(ctx context.Context, id, businessID int64, visibility string) error

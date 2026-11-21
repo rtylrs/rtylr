@@ -92,6 +92,11 @@ func (r *Repository) ListCyclesV2(ctx context.Context, projectID, businessID, ca
 		}
 		cycles = append(cycles, cycle)
 	}
+	// Scope and completed come from the bucket-aware totals, so a custom
+	// "done" column counts as done here too.
+	if err := r.enrichCycles(ctx, businessID, cycles); err != nil {
+		return nil, 0, err
+	}
 	return cycles, total, nil
 }
 
@@ -106,6 +111,8 @@ func (r *Repository) CreateCycleV2(ctx context.Context, input domain.CycleInput)
 		Status:     sqlc.NullFlowCyclesStatus{FlowCyclesStatus: sqlc.FlowCyclesStatus(input.Status), Valid: input.Status != ""},
 		StartDate:  sql.NullTime{Time: input.StartDate, Valid: !input.StartDate.IsZero()},
 		EndDate:    sql.NullTime{Time: input.EndDate, Valid: !input.EndDate.IsZero()},
+		Goal:       sql.NullString{String: input.Goal, Valid: input.Goal != ""},
+		CreatedBy:  sql.NullInt64{Int64: input.CreatedBy, Valid: input.CreatedBy != 0},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("CreateCycleV2 failed", logger.Error(err))

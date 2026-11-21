@@ -169,6 +169,9 @@ export interface Task {
   projectName: string;
   labelIds?: string[];
   cycleId?: string;
+  cycleName?: string;
+  /** Rank inside the cycle, or the backlog when cycleId is absent. */
+  planRank?: number;
   milestoneId?: string;
   parentId?: string;
   dependencies?: string[];
@@ -260,11 +263,13 @@ interface FlowState {
   projects: Project[];
   quickCreateOpen: boolean;
   quickCreateColumnId: string | undefined;
+  /** The cycle a task created from the Backlog's inline "+ Create" goes into. */
+  quickCreateCycleId: string | undefined;
   projectCreateOpen: boolean;
   selectedTaskIds: string[];
   setMembers: (members: Member[]) => void;
   setProjects: (projects: Project[]) => void;
-  setQuickCreateOpen: (open: boolean, columnId?: string) => void;
+  setQuickCreateOpen: (open: boolean, columnId?: string, cycleId?: string) => void;
   setProjectCreateOpen: (open: boolean) => void;
   toggleSelectTask: (id: string) => void;
   clearSelection: () => void;
@@ -276,12 +281,17 @@ export const useFlowStore = create<FlowState>()((set) => ({
   projects: [],
   quickCreateOpen: false,
   quickCreateColumnId: undefined,
+  quickCreateCycleId: undefined,
   projectCreateOpen: false,
   selectedTaskIds: [],
   setMembers: (members) => set({ members }),
   setProjects: (projects) => set({ projects }),
-  setQuickCreateOpen: (open, columnId) =>
-    set({ quickCreateOpen: open, quickCreateColumnId: open ? columnId : undefined }),
+  setQuickCreateOpen: (open, columnId, cycleId) =>
+    set({
+      quickCreateOpen: open,
+      quickCreateColumnId: open ? columnId : undefined,
+      quickCreateCycleId: open ? cycleId : undefined,
+    }),
   setProjectCreateOpen: (open) => set({ projectCreateOpen: open }),
   toggleSelectTask: (id) =>
     set((state) => ({

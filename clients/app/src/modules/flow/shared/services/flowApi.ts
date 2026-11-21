@@ -145,6 +145,10 @@ export interface ApiTask {
   dependencies?: string[];
   sectionId?: string;
   cycleId?: string;
+  cycleName?: ContractTask['cycleName'];
+  // Position inside the task's cycle, or inside the unplanned backlog when it
+  // has no cycle. int64 on the wire, so a string; absent when never placed.
+  planRank?: ContractTask['planRank'];
   milestoneId?: string;
   // UI-only fields stored in local store
   effortMinutes?: number;
@@ -283,14 +287,61 @@ export interface ApiMilestone {
   project?: { name: string; color: string };
 }
 
+export interface ApiCycleTotals {
+  backlog?: number;
+  active?: number;
+  done?: number;
+  cancelled?: number;
+}
+
+export interface ApiCycleCarryOver {
+  fromCycleId?: string;
+  fromCycleName?: string;
+  taskIds?: string[];
+}
+
 export interface ApiCycle {
   id: string;
+  projectId?: string;
   name: string;
   startDate: string;
   endDate: string;
   status: 'upcoming' | 'active' | 'completed';
   scope: number;
   completed: number;
+  // Planning fields (T-570). The wire omits zero and empty values, so every
+  // one of these can be absent.
+  goal?: string;
+  startedAt?: string;
+  completedAt?: string;
+  totals?: ApiCycleTotals;
+  estimateMinutes?: number;
+  carriedOver?: ApiCycleCarryOver[];
+}
+
+export interface ApiCycleMemberCapacity {
+  userId?: string;
+  name?: string;
+  workingDays?: number;
+  leaveDays?: number;
+  availableMinutes?: number;
+  committedMinutes?: number;
+  taskCount?: number;
+}
+
+export interface ApiCycleCapacity {
+  members?: ApiCycleMemberCapacity[];
+  leaveApplied?: boolean;
+  minutesPerDay?: number;
+  unassignedMinutes?: number;
+  unassignedCount?: number;
+}
+
+/** What happens to one unfinished task when its cycle is completed. */
+export interface ApiCycleTaskDecision {
+  taskId: string;
+  decision: 'move' | 'backlog' | 'cancel';
+  toCycleId?: string;
 }
 
 export interface ApiProjectColumn {
@@ -430,7 +481,10 @@ const toMilestoneUpdatePayload = (data: Partial<ApiMilestone>) => ({
 const toCycleUpdatePayload = (data: Partial<ApiCycle>) => ({
   name: data.name,
   status: data.status,
+  startDate: data.startDate,
   endDate: data.endDate,
+  // Absent keeps the goal; an empty string clears it.
+  goal: data.goal,
 });
 
 const toViewPayload = (data: Partial<ApiView>) => ({
@@ -812,6 +866,7 @@ export const flowApi = {
     labels?: string[];
     milestoneId?: string;
     fieldValues?: ApiTaskFieldValueInput[];
+    cycleId?: string;
   }) =>
     flowResult<{ task: ApiTask }>(() => {
       const payload = toTaskCreatePayload(data);
@@ -830,6 +885,7 @@ export const flowApi = {
         labels: payload.labels,
         milestoneId: data.milestoneId || undefined,
         fieldValues: data.fieldValues?.length ? data.fieldValues : undefined,
+        cycleId: data.cycleId || undefined,
       });
     }),
 
@@ -871,6 +927,8 @@ export const flowApi = {
           decisionNote: data.decisionNote,
           // Empty string removes the task from its milestone ('0' on the wire).
           milestoneId: data.milestoneId !== undefined ? data.milestoneId || '0' : undefined,
+          // Empty string returns the task to the backlog ('0' on the wire).
+          cycleId: data.cycleId !== undefined ? data.cycleId || '0' : undefined,
         },
       })
     ),
@@ -1204,6 +1262,7 @@ export const flowApi = {
         name: data.name ?? '',
         startDate: data.startDate,
         endDate: data.endDate,
+        goal: data.goal,
       })
     ),
 
@@ -1211,6 +1270,42 @@ export const flowApi = {
     flowResult<{ message: string }>(() =>
       cycleV2.updateCycle({ id, ...toCycleUpdatePayload(data) })
     ),
+
+  getCycle: (id: string) => flowResult<{ cycle: ApiCycle }>(() => cycleV2.getCycle({ id })),
+
+  // Answers 409 when the project already has an active cycle.
+  startCycle: (id: string, data: { lengthWeeks: number; goal?: string; startDate?: string }) =>
+    flowResult<{ cycle: ApiCycle }>(() =>
+      cycleV2.startCycle({
+        id,
+        lengthWeeks: data.lengthWeeks,
+        goal: data.goal,
+        startDate: data.startDate,
+      })
+    ),
+
+  completeCycle: (id: string, decisions: ApiCycleTaskDecision[]) =>
+    flowResult<{ cycle: ApiCycle }>(() => cycleV2.completeCycle({ id, decisions })),
+
+  // One write behind drag and drop on the Backlog: an empty cycleId is the
+  // unplanned backlog; give at most one anchor.
+  moveCycleTask: (data: {
+    taskId: string;
+    cycleId?: string;
+    beforeTaskId?: string;
+    afterTaskId?: string;
+  }) =>
+    flowResult<{ cycleId?: string; planRank?: string }>(() =>
+      cycleV2.moveCycleTask({
+        taskId: data.taskId,
+        cycleId: data.cycleId || undefined,
+        beforeTaskId: data.beforeTaskId,
+        afterTaskId: data.afterTaskId,
+      })
+    ),
+
+  getCycleCapacity: (id: string) =>
+    flowResult<ApiCycleCapacity>(() => cycleV2.getCycleCapacity({ id })),
 
   // -- Views --------------------------------------------------------------
 

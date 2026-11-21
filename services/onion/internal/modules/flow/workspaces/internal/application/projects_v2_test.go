@@ -28,6 +28,7 @@ func v2Svc(t *testing.T) (*Service, context.Context, *sql.DB) {
 	// Wipe everything this suite created under its business so prior runs never
 	// leak rows into current assertions (persistent DB, shared across suites).
 	for _, stmt := range []string{
+		"DELETE FROM flow_cycle_carryovers WHERE business_id = ?",
 		"DELETE ct FROM flow_cycle_tasks ct JOIN flow_cycles c ON c.id = ct.cycle_id WHERE c.business_id = ?",
 		"DELETE FROM flow_cycles WHERE business_id = ?",
 		"DELETE mt FROM flow_milestone_tasks mt JOIN flow_milestones m ON m.id = mt.milestone_id WHERE m.business_id = ?",

@@ -99,10 +99,12 @@ export function useCreateTask() {
       labels?: string[];
       milestoneId?: string;
       fieldValues?: ApiTaskFieldValueInput[];
+      cycleId?: string;
     }) => {
       return unwrap(flowApi.createTask(data));
     },
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['cycles'] });
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
       qc.invalidateQueries({ queryKey: ['projects'] });
@@ -125,6 +127,7 @@ export function useUpdateTask() {
       qc.invalidateQueries({ queryKey: ['projects'] });
       qc.invalidateQueries({ queryKey: ['projects-v2'] });
       qc.invalidateQueries({ queryKey: ['milestones'] });
+      qc.invalidateQueries({ queryKey: ['cycles'] });
       qc.invalidateQueries({ queryKey: ['task'] });
     },
     onError: () => toast.error(t('flowToasts.task.updateFailed')),
