@@ -170,4 +170,16 @@ describe('Register Feature Component', () => {
       '/verify?email=alex%40acme.com&sent=1&redirect=dash&returnTo=%2Fpager%2Fsetup',
     ]);
   });
+
+  it('starts with the business name and email a sign-up link carries, still editable', () => {
+    captureRedirectLocation('?businessName=Brio+Coffee&email=owner%40brio.example');
+    render(<Register />);
+
+    const business = screen.getByPlaceholderText(/my coffee shop/i);
+    expect(business).toHaveValue('Brio Coffee');
+    expect(screen.getByPlaceholderText(/you@company.com/i)).toHaveValue('owner@brio.example');
+    expect(screen.getAllByPlaceholderText(/characters/i)[0]).toHaveValue('');
+    fireEvent.change(business, { target: { value: 'Brio' } });
+    expect(business).toHaveValue('Brio');
+  });
 });
