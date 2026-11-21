@@ -6,10 +6,10 @@ import {
   Calendar,
   Clock,
   GitBranch,
-  IterationCw,
   MessageSquare,
   Milestone,
   Paperclip,
+  Timer,
 } from 'lucide-react';
 import { Task, useFlowStore } from '../stores/flowStore';
 import { useLabels } from '../../features/tasks/useLabels';
@@ -259,7 +259,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                 className="flex min-w-0 max-w-full items-center gap-1 text-flow-meta"
                 style={{ color: 'var(--flow-text-muted)' }}
               >
-                <IterationCw size={10} aria-hidden="true" className="shrink-0" />
+                <Timer size={10} aria-hidden="true" className="shrink-0" />
                 <span className="truncate">{cycleName}</span>
               </span>
             )}
