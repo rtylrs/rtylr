@@ -5,6 +5,7 @@ import { serializeTaskFilters, type TaskFilters } from '../../../shared/filters/
 import { PRIORITY_LABEL_KEY } from '../taskGroups';
 import { PRIORITY_COLORS } from '../../../shared/stores/flowStore';
 import type { HoursSummary, ProjectSummaryData, SummaryMetric } from '../projectSummary';
+import { formatHours } from '../../../../insights/shared/lib/format';
 
 /**
  * The cards on the project dashboard. Every number the summary computes is a
@@ -195,8 +196,12 @@ export const BreakdownBar: React.FC<{
   );
 };
 
-const fmtHours = (value: number, locale: string): string =>
-  new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(value);
+/**
+ * Hours to one decimal with Latin digits, through the formatter the Insights
+ * panel at the top of the dashboard uses, so both read the same.
+ */
+export const fmtHours = (hours: number, language: string): string =>
+  formatHours(hours * 60, language);
 
 /** Created, completed, updated in the last 7 days and due in the next 7. */
 export const RecentChangeTiles: React.FC<{

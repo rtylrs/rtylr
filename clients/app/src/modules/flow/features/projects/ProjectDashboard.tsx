@@ -23,6 +23,7 @@ import { computeProjectSummary } from './projectSummary';
 import {
   BreakdownBar,
   FilteredListLink,
+  fmtHours,
   HoursVsEstimateCard,
   NeedsAttentionCard,
   PriorityBreakdownCard,
@@ -259,9 +260,7 @@ const ProjectDashboard: React.FC = () => {
                 const label = a.name || t('flow.projectDashboard.unassigned');
                 const detail = t('flow.projectDashboard.summary.workloadDetail', {
                   open: a.open,
-                  hours: new Intl.NumberFormat(i18n.language, {
-                    maximumFractionDigits: 1,
-                  }).format(a.openEstimateHours),
+                  hours: fmtHours(a.openEstimateHours, i18n.language),
                 });
                 const row = (
                   <>
