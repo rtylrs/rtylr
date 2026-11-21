@@ -4,6 +4,7 @@ import { Search, X } from 'lucide-react';
 import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 import { isUnscheduled } from '../../shared/lib/calendarSpans';
 import { isClosedTask } from '../../shared/filters/useShowCompleted';
+import { normalizeSearchText } from '../../shared/filters/taskFilters';
 import type { CalendarScheduling } from './useCalendarScheduling';
 import type { GridTask } from './PlanningGrid';
 
@@ -54,9 +55,11 @@ export function UnscheduledPanel<T extends GridTask & { status?: string; archive
 
   const unscheduled = useMemo(() => tasks.filter(needsScheduling), [tasks]);
   const shown = useMemo(() => {
-    const needle = query.trim().toLocaleLowerCase();
+    // The filter bar's normalisation, so "cafe" finds "Café" and harakat do not
+    // hide an Arabic title here either.
+    const needle = normalizeSearchText(query.trim());
     if (!needle) return unscheduled;
-    return unscheduled.filter((task) => task.title.toLocaleLowerCase().includes(needle));
+    return unscheduled.filter((task) => normalizeSearchText(task.title).includes(needle));
   }, [unscheduled, query]);
 
   const draggable = layout === 'side';
