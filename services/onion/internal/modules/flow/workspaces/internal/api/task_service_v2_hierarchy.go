@@ -112,14 +112,3 @@ func (a *TaskAPIV2) ListEpicRollups(ctx context.Context, req *flowtaskv2.ListEpi
 	}
 	return &flowtaskv2.ListEpicRollupsResponse{Epics: out}, nil
 }
-
-func clampInt32(v int64) int32 {
-	const maxInt32 = int64(1<<31 - 1)
-	if v > maxInt32 {
-		return int32(maxInt32)
-	}
-	if v < 0 {
-		return 0
-	}
-	return int32(v) // #nosec G115 -- Bounded to the int32 range above.
-}
