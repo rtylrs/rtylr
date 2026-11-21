@@ -8,6 +8,7 @@ import './pager.css';
 const Join = React.lazy(() => import('./screens/Public/Join'));
 const Ticket = React.lazy(() => import('./screens/Public/Ticket'));
 const Board = React.lazy(() => import('./screens/Staff/Board'));
+const Poster = React.lazy(() => import('./screens/Staff/Poster'));
 
 /**
  * The customer's side of the pager: public and unauthenticated, mounted on the
@@ -48,25 +49,47 @@ export function createPagerPublicRoutes<TParent extends AnyRoute>(rootRoute: TPa
   ];
 }
 
-/** The staff board, inside the signed-in Portal shell. Reachable by URL only. */
+function StaffScreen({ children }: { children: React.ReactNode }): React.JSX.Element {
+  return (
+    <AppFlagGuard flag={FLAG_KEYS.APP_PAGER}>
+      <ErrorBoundary>
+        <Suspense
+          fallback={
+            <div className="flex min-h-48 items-center justify-center">
+              <Spinner />
+            </div>
+          }
+        >
+          {children}
+        </Suspense>
+      </ErrorBoundary>
+    </AppFlagGuard>
+  );
+}
+
+/**
+ * The staff board and its counter poster, inside the signed-in Portal shell.
+ * Reachable by URL only; the poster is linked from the board.
+ */
 export function createPagerStaffRoutes<TParent extends AnyRoute>(parent: TParent) {
-  return createRoute({
-    getParentRoute: () => parent,
-    path: 'pager',
-    component: () => (
-      <AppFlagGuard flag={FLAG_KEYS.APP_PAGER}>
-        <ErrorBoundary>
-          <Suspense
-            fallback={
-              <div className="flex min-h-48 items-center justify-center">
-                <Spinner />
-              </div>
-            }
-          >
-            <Board />
-          </Suspense>
-        </ErrorBoundary>
-      </AppFlagGuard>
-    ),
-  });
+  return [
+    createRoute({
+      getParentRoute: () => parent,
+      path: 'pager',
+      component: () => (
+        <StaffScreen>
+          <Board />
+        </StaffScreen>
+      ),
+    }),
+    createRoute({
+      getParentRoute: () => parent,
+      path: 'pager/poster',
+      component: () => (
+        <StaffScreen>
+          <Poster />
+        </StaffScreen>
+      ),
+    }),
+  ] as const;
 }

@@ -1,0 +1,72 @@
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { QRCode } from 'react-qrcode-logo';
+import { QrCodeTemplates } from '../../../../features/qr-codes/templates';
+
+// The qr-codes feature's plain black-on-white template: it scans best from
+// across a counter.
+const QR_STYLE = QrCodeTemplates[0];
+
+const POSTER_LANGUAGES = ['en', 'ar'] as const;
+type PosterLanguage = (typeof POSTER_LANGUAGES)[number];
+
+function PosterSteps({ lng }: { lng: PosterLanguage }): React.JSX.Element {
+  const { t } = useTranslation('pager', { lng });
+  const steps = [
+    ['scan', t('pager.poster.stepScan')],
+    ['type', t('pager.poster.stepType')],
+    ['wait', t('pager.poster.stepWait')],
+  ] as const;
+  return (
+    <section lang={lng} dir={lng === 'ar' ? 'rtl' : 'ltr'} className="pager-poster__lang">
+      <h2>{t('pager.join.heading')}</h2>
+      <ol>
+        {steps.map(([key, step], index) => (
+          <li key={key}>
+            <span className="pager-poster__step" aria-hidden="true">
+              {index + 1}
+            </span>
+            <span>{step}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+interface CounterPosterProps {
+  venueName: string;
+  joinUrl: string;
+  qrSize: number;
+}
+
+/** The counter poster: English and Arabic, whatever language the Portal is in. */
+export function CounterPoster({
+  venueName,
+  joinUrl,
+  qrSize,
+}: CounterPosterProps): React.JSX.Element {
+  return (
+    <article className="pager-poster">
+      {venueName && <p className="pager-poster__venue">{venueName}</p>}
+      <div className="pager-poster__qr">
+        <QRCode
+          value={joinUrl}
+          size={qrSize}
+          fgColor={QR_STYLE.fgColor}
+          bgColor={QR_STYLE.bgColor}
+          eyeRadius={QR_STYLE.eyeRadius}
+          qrStyle={QR_STYLE.qrStyle}
+        />
+      </div>
+      <p className="pager-poster__url" dir="ltr">
+        {joinUrl}
+      </p>
+      <div className="pager-poster__langs">
+        {POSTER_LANGUAGES.map((lng) => (
+          <PosterSteps key={lng} lng={lng} />
+        ))}
+      </div>
+    </article>
+  );
+}

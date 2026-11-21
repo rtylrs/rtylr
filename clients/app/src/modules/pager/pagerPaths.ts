@@ -1,7 +1,11 @@
 /**
  * Canonical in-app paths for the pager. Shapes (see `routes.tsx`):
- * `/$slug/pager`, `/pager/t/$token` and the staff board at `/pager`.
+ * `/$slug/pager`, `/pager/t/$token`, the staff board at `/pager` and its
+ * counter poster at `/pager/poster`.
  */
+
+export const PAGER_BOARD_PATH = '/pager';
+export const PAGER_POSTER_PATH = '/pager/poster';
 
 /** `/{slug}/pager` - where the venue's QR poster points. */
 export function pagerJoinPath(slug: string): string {

@@ -41,6 +41,7 @@ vi.mock('./modules/public-menu/screens/Public/SlugLanding/SlugLanding', () => ({
 vi.mock('./modules/pager/screens/Public/Join', () => ({ default: () => <h1>Pager join</h1> }));
 vi.mock('./modules/pager/screens/Public/Ticket', () => ({ default: () => <h1>Pager ticket</h1> }));
 vi.mock('./modules/pager/screens/Staff/Board', () => ({ default: () => <h1>Pager board</h1> }));
+vi.mock('./modules/pager/screens/Staff/Poster', () => ({ default: () => <h1>Pager poster</h1> }));
 const locales = path.resolve(import.meta.dirname, 'locales');
 const publicMenuLocales = path.resolve(import.meta.dirname, 'modules/public-menu/locales');
 beforeEach(async () => {
@@ -146,6 +147,7 @@ describe('Pager routes', () => {
         '/pager-public/$slug/pager',
         '/pager-public/pager/t/$token',
         '/business/pager',
+        '/business/pager/poster',
       ])
     );
   });
@@ -154,6 +156,7 @@ describe('Pager routes', () => {
     ['/some-business/pager', 'Pager join'],
     ['/pager/t/tok-1', 'Pager ticket'],
     ['/pager', 'Pager board'],
+    ['/pager/poster', 'Pager poster'],
   ])('serves %s', async (url, heading) => {
     const router = await open(url);
     expect(await screen.findByRole('heading', { name: heading })).toBeVisible();
