@@ -11,6 +11,7 @@ import {
   Tag,
   CircleDot,
   Milestone as MilestoneIcon,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { DatePicker } from '@voxire/ui';
@@ -46,7 +47,14 @@ import {
   sortStatuses,
 } from '../../features/projects/statusUtils';
 import FlowSelect from './FlowSelect';
+import CustomFieldInput from './CustomFieldInput';
 import { withAlpha } from '../lib/colorUtils';
+import { useProjectFields } from '../../features/projects/useFields';
+import { useProjectMembers } from '../../features/projects/useProjectMembers';
+import type { ApiField, ApiTaskFieldValue } from '../services/flowApi';
+import { initialFieldValues, missingRequiredFields, toFieldValueInputs } from '../lib/customFields';
+
+const NO_FIELDS: ApiField[] = [];
 
 function FieldRow({
   label,
@@ -108,6 +116,13 @@ export const QuickCreate: React.FC = () => {
   const { data: projectMilestones = [] } = useMilestones(quickCreateOpen ? projectId : '');
   const { data: rawStatuses } = useProjectStatuses(quickCreateOpen ? projectId : '');
   const statuses = rawStatuses ? sortStatuses(rawStatuses) : [];
+  // A stable empty list: a fresh `[]` each render would re-run the reset below forever.
+  const projectFields = useProjectFields(quickCreateOpen ? projectId : '').data ?? NO_FIELDS;
+  const { data: projectMembers = [] } = useProjectMembers(
+    quickCreateOpen && projectFields.some((f) => f.type === 'person') ? projectId : undefined
+  );
+  const [fieldValues, setFieldValues] = useState<Record<string, ApiTaskFieldValue>>({});
+  const [missingFields, setMissingFields] = useState<string[]>([]);
 
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
@@ -125,6 +140,14 @@ export const QuickCreate: React.FC = () => {
       setMilestoneId('');
     }
   }, [quickCreateOpen, currentProjectId]);
+
+  // Custom fields belong to the project, so a new project starts from its
+  // own defaults rather than carrying values the next one cannot hold.
+  useEffect(() => {
+    if (!quickCreateOpen) return;
+    setFieldValues(initialFieldValues(projectFields));
+    setMissingFields([]);
+  }, [quickCreateOpen, projectFields]);
 
   // The status follows the project: a board column's own status when the
   // dialog was opened from that column, otherwise the project's default.
@@ -146,6 +169,13 @@ export const QuickCreate: React.FC = () => {
       return;
     }
     if (!canCreate || createTaskMutation.isPending) return;
+    const missing = missingRequiredFields(projectFields, fieldValues);
+    if (missing.length > 0) {
+      const names = missing.map((f) => f.name).join(', ');
+      setMissingFields(missing.map((f) => f.id));
+      toast.error(t('flow.fields.requiredMissing', { names }));
+      return;
+    }
 
     const uid = getCurrentUserId();
 
@@ -162,6 +192,7 @@ export const QuickCreate: React.FC = () => {
         effortMinutes,
         labels: labelId ? [labelId] : undefined,
         milestoneId: projectMilestones.some((m) => m.id === milestoneId) ? milestoneId : undefined,
+        fieldValues: toFieldValueInputs(projectFields, fieldValues),
       });
       const task = res.task;
       const taskId = String(task.id);
@@ -379,6 +410,38 @@ export const QuickCreate: React.FC = () => {
                 </div>
               </FieldRow>
             )}
+
+            {projectFields.map((field) => {
+              const missing = missingFields.includes(field.id);
+              return (
+                <FieldRow
+                  key={field.id}
+                  label={field.required ? `${field.name} *` : field.name}
+                  icon={SlidersHorizontal}
+                >
+                  <div className="max-w-[240px]" data-quick-create-field={field.id}>
+                    <CustomFieldInput
+                      field={field}
+                      value={fieldValues[field.id]}
+                      people={projectMembers.map((m) => ({ id: String(m.userId), name: m.name }))}
+                      onChange={(next) => {
+                        setFieldValues((current) => ({ ...current, [field.id]: next }));
+                        setMissingFields((current) => current.filter((id) => id !== field.id));
+                      }}
+                    />
+                    {missing && (
+                      <p
+                        role="alert"
+                        className="mt-1 text-flow-meta"
+                        style={{ color: 'var(--flow-danger-fg)' }}
+                      >
+                        {t('flow.fields.required')}
+                      </p>
+                    )}
+                  </div>
+                </FieldRow>
+              );
+            })}
 
             <FieldRow label={t('flowCommon.priority')} icon={Flag}>
               <div className="flex items-center gap-1 flex-wrap">
