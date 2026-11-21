@@ -99,3 +99,28 @@ export function createdTerminalId(terminalId: string): number {
 
   return id;
 }
+
+const TERMINAL_DEVICE_ID_KEY = 'rtylr.pos.deviceId';
+
+export function getOrCreateTerminalDeviceId(storage?: Pick<Storage, 'getItem' | 'setItem'>): string {
+  const store = storage ?? (typeof window !== 'undefined' ? window.localStorage : undefined);
+  try {
+    const existing = store?.getItem(TERMINAL_DEVICE_ID_KEY)?.trim();
+    if (existing) return existing;
+  } catch {
+    // Ignore storage read failures in restricted environments.
+  }
+
+  const generated =
+    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? `pos-${crypto.randomUUID()}`
+      : `pos-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+  try {
+    store?.setItem(TERMINAL_DEVICE_ID_KEY, generated);
+  } catch {
+    // Ignore storage write failures in restricted environments.
+  }
+
+  return generated;
+}

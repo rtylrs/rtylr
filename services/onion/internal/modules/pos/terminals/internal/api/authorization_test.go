@@ -93,3 +93,35 @@ func TestHeartbeatTerminal_ReturnsNotFoundForStaleTerminal(t *testing.T) {
 		t.Fatalf("HeartbeatTerminal status = %d, want %d; error: %v", got, http.StatusNotFound, err)
 	}
 }
+
+func TestCashierCanListTerminalsButCannotManageThem(t *testing.T) {
+	restoreScopeResolver := tenant.SetScopeResolver(terminalScopeResolver{})
+	defer restoreScopeResolver()
+
+	ctx := authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{
+		BusinessID: 9,
+		UserID:     31,
+		EffectiveAccess: &authorization.EffectiveAccess{
+			Apps: []authorization.EffectiveAppAccess{{
+				AppID:       authorization.AppPOS,
+				Licensed:    true,
+				HasAccess:   true,
+				Permissions: []string{"pos:orders:view", "pos:orders:create"},
+				PermissionScopes: map[string][]authorization.Scope{
+					"pos:orders:view": {{Type: "pos_location", ID: "1"}},
+				},
+			}},
+		},
+	})
+	api := NewTerminalAPI(application.NewService(ctx, heartbeatRepo{}))
+
+	if _, err := api.ListTerminals(ctx, &posterminalv1.ListTerminalsRequest{}); err != nil {
+		t.Fatalf("ListTerminals returned unexpected error for cashier: %v", err)
+	}
+	if _, err := api.CreateTerminal(ctx, &posterminalv1.CreateTerminalRequest{}); terminalStatus(err) != http.StatusForbidden {
+		t.Fatalf("CreateTerminal status = %d, want 403 for cashier", terminalStatus(err))
+	}
+	if _, err := api.UpdateTerminal(ctx, &posterminalv1.UpdateTerminalRequest{}); terminalStatus(err) != http.StatusForbidden {
+		t.Fatalf("UpdateTerminal status = %d, want 403 for cashier", terminalStatus(err))
+	}
+}

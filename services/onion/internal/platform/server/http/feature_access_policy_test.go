@@ -70,6 +70,26 @@ func TestPOSCatalogAndMenuAdministrationUseSeparatePermissions(t *testing.T) {
 	}
 }
 
+func TestPOSTerminalsSeparateReadAndManagePermissions(t *testing.T) {
+	for _, request := range []struct {
+		method, path string
+		app          authorization.AppID
+		permission   string
+	}{
+		{http.MethodGet, "/pos/terminal/v1/terminals", authorization.AppPOS, "pos:orders:view"},
+		{http.MethodPost, "/pos/terminal/v1/terminals", authorization.AppPOS, "pos:terminals:manage"},
+		{http.MethodPut, "/pos/terminal/v1/terminals/7", authorization.AppPOS, "pos:terminals:manage"},
+		{http.MethodPost, "/pos/terminal/v1/terminals/heartbeat", authorization.AppPOS, "pos:terminals:manage"},
+	} {
+		t.Run(request.method+" "+request.path, func(t *testing.T) {
+			app, permission, ok := featurePermissionForRequest(request.method, request.path)
+			if !ok || app != request.app || permission != request.permission {
+				t.Fatalf("mapping = %s:%s,%t, want %s:%s,true", app, permission, ok, request.app, request.permission)
+			}
+		})
+	}
+}
+
 func TestInsightsSettingsSeparateReadAndWritePermissions(t *testing.T) {
 	for _, request := range []struct {
 		method     string
