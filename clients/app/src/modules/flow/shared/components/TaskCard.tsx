@@ -19,6 +19,7 @@ import { formatDueDate, cn } from '../lib/utils';
 import PriorityIcon from './PriorityIcon';
 import AssigneeAvatar from './AssigneeAvatar';
 import LabelChip from './LabelChip';
+import BlockedBadge from './BlockedBadge';
 import { TaskContextMenu, ContextMenuState } from './TaskContextMenu';
 import { withAlpha, onTint } from '../lib/colorUtils';
 import { displayStatusName } from '../../features/projects/statusUtils';
@@ -194,6 +195,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               >
                 {displayStatusName(task.statusName, t)}
               </span>
+            )}
+            {fields.blocked && (task.blockerCount ?? 0) > 0 && (
+              <BlockedBadge taskId={String(task.id)} count={task.blockerCount ?? 0} />
             )}
           </div>
           {/* Hover, and focus-within so the keyboard path survives. The drag

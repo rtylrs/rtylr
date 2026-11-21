@@ -9,6 +9,7 @@ import { formatDueDate, cn } from '../lib/utils';
 import PriorityIcon from './PriorityIcon';
 import StatusIcon from './StatusIcon';
 import AssigneeAvatar from './AssigneeAvatar';
+import BlockedBadge from './BlockedBadge';
 import { Check } from 'lucide-react';
 import { TaskContextMenu, ContextMenuState } from './TaskContextMenu';
 import { withAlpha, onTint } from '../lib/colorUtils';
@@ -148,6 +149,9 @@ export const TaskRow: React.FC<TaskRowProps> = ({
             </p>
           )}
         </div>
+        {(task.blockerCount ?? 0) > 0 && (
+          <BlockedBadge taskId={String(task.id)} count={task.blockerCount ?? 0} />
+        )}
         {showProject && project && (
           <span
             className="text-flow-meta px-2 py-0.5 rounded-sm shrink-0 font-medium"
