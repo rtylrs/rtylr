@@ -1,16 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Calendar, Check } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@voxire/ui';
+import { Calendar } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@voxire/ui';
 import { useFlowStore, type Task } from '../../../shared/stores/flowStore';
 import type { ApiStatus } from '../../../shared/services/flowApi';
 import { cn, formatDueDate, formatShortDate, getInitials } from '../../../shared/lib/utils';
 import PriorityIcon from '../../../shared/components/PriorityIcon';
+import { FLOW_MENU_SURFACE, FlowMenuItem } from '../../../shared/components/FlowSelect';
 import { LabelChip } from '../../../shared/components/LabelChip';
 import { AssigneeAvatar } from '../../../shared/components/AssigneeAvatar';
 import { useLabels } from '../../tasks/useLabels';
@@ -129,49 +125,11 @@ function CellMenu({
         aria-label={label}
         onCloseAutoFocus={(event) => event.preventDefault()}
         className="max-h-[260px] min-w-[180px] overflow-y-auto"
-        style={{
-          background: 'var(--flow-card)',
-          border: '1px solid var(--flow-border)',
-          boxShadow: 'var(--flow-shadow)',
-        }}
+        style={FLOW_MENU_SURFACE}
       >
         {children}
       </DropdownMenuContent>
     </DropdownMenu>
-  );
-}
-
-function MenuOption({
-  label,
-  icon,
-  selected,
-  checkable = false,
-  onSelect,
-}: {
-  label: string;
-  icon?: React.ReactNode;
-  selected: boolean;
-  /** Several can be on at once, and choosing one keeps the menu open. */
-  checkable?: boolean;
-  onSelect: () => void;
-}) {
-  return (
-    <DropdownMenuItem
-      // Spread only when set: an explicit undefined would wipe Radix's own role.
-      {...(checkable
-        ? { role: 'menuitemcheckbox', 'aria-checked': selected }
-        : { 'aria-current': selected ? ('true' as const) : undefined })}
-      onSelect={(event) => {
-        if (checkable) event.preventDefault();
-        onSelect();
-      }}
-      className="text-flow-meta"
-      style={{ color: 'var(--flow-text)' }}
-    >
-      {icon}
-      <span className="min-w-0 flex-1 truncate">{label}</span>
-      {selected && <Check size={13} aria-hidden="true" className="shrink-0" />}
-    </DropdownMenuItem>
   );
 }
 
@@ -258,7 +216,7 @@ function PriorityEditor({ task, onClose }: { task: Task; onClose: () => void }) 
   return (
     <CellMenu label={t(listColumn('priority').labelKey)} onClose={onClose}>
       {PRIORITY_ORDER.map((priority) => (
-        <MenuOption
+        <FlowMenuItem
           key={priority}
           label={t(PRIORITY_LABEL_KEY[priority])}
           icon={<PriorityIcon priority={priority} size={12} />}
@@ -324,7 +282,7 @@ function StatusEditor({
   return (
     <CellMenu label={t(listColumn('status').labelKey)} onClose={onClose}>
       {statuses.map((status) => (
-        <MenuOption
+        <FlowMenuItem
           key={status.id}
           label={displayStatusName(status.name, t)}
           icon={<StatusDot color={status.color} />}
@@ -399,7 +357,7 @@ function AssigneeEditor({
   return (
     <CellMenu label={t(listColumn('assignee').labelKey)} onClose={onClose}>
       {options.map((option) => (
-        <MenuOption
+        <FlowMenuItem
           key={option.id || '_none'}
           label={option.name}
           selected={option.id === current}
@@ -558,7 +516,7 @@ function LabelsEditor({ task, onClose }: { task: Task; onClose: () => void }) {
         const id = String(label.id);
         const on = selected.includes(id);
         return (
-          <MenuOption
+          <FlowMenuItem
             key={id}
             checkable
             label={label.name}
