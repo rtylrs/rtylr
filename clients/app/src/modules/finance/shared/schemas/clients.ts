@@ -16,7 +16,13 @@ export const clientSchema = z
 
 export const clientsResponseSchema = z.union([
   z.array(clientSchema),
-  z.object({ customers: z.array(clientSchema).default([]) }),
+  z.object({
+    customers: z
+      .array(clientSchema)
+      .nullable()
+      .optional()
+      .transform((value) => value ?? []),
+  }),
 ]);
 
 export const parseClientsResponse = (response: unknown) => {

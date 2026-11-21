@@ -84,4 +84,14 @@ describe('ClientSelect CRM load states', () => {
 
     expect(await screen.findByText('No clients found')).toBeInTheDocument();
   });
+
+  it('treats omitted or null customers array as an empty directory instead of an error', async () => {
+    listCrmCustomersMock.mockResolvedValue({ customers: null, total: '0' });
+    render(<ClientSelect value={null} onChange={vi.fn()} />);
+
+    openPicker();
+
+    expect(await screen.findByText('No clients found')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
 });
