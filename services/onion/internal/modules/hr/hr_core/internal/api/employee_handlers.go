@@ -32,14 +32,18 @@ func employeeToProto(e domain.EmployeeRecord, includeSensitive bool) *hrstaffv1.
 		Phone:                 e.Phone,
 		EmploymentType:        e.EmploymentType,
 		Status:                e.Status,
-		StartDate:             e.StartDate.Format("2006-01-02"),
-		EndDate:               e.EndDate.Format("2006-01-02"),
 		Address:               e.Address,
 		EmergencyContactName:  e.EmergencyContactName,
 		EmergencyContactPhone: e.EmergencyContactPhone,
 		Notes:                 e.Notes,
 		CreatedAt:             e.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:             e.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+	}
+	if !e.StartDate.IsZero() {
+		staff.StartDate = e.StartDate.Format("2006-01-02")
+	}
+	if !e.EndDate.IsZero() {
+		staff.EndDate = e.EndDate.Format("2006-01-02")
 	}
 	if includeSensitive {
 		staff.Salary = money.CentsToDollars(e.SalaryCents)

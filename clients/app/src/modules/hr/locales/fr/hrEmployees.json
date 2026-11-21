@@ -21,13 +21,16 @@
   "contractTypes": {
     "full_time": "Temps plein",
     "part_time": "Temps partiel",
-    "freelancer": "Freelance"
+    "freelancer": "Freelance",
+    "contractor": "Prestataire",
+    "intern": "Stagiaire"
   },
   "statuses": {
     "active": "Actif",
     "probation": "Période d'essai",
     "inactive": "Inactif",
-    "terminated": "Licencié"
+    "terminated": "Licencié",
+    "invited": "Invité"
   },
   "form": {
     "title": "Nouvel employé",

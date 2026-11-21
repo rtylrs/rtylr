@@ -21,13 +21,16 @@
   "contractTypes": {
     "full_time": "دوام كامل",
     "part_time": "دوام جزئي",
-    "freelancer": "مستقل"
+    "freelancer": "مستقل",
+    "contractor": "متعاقد",
+    "intern": "متدرب"
   },
   "statuses": {
     "active": "نشط",
     "probation": "تحت التجربة",
     "inactive": "غير نشط",
-    "terminated": "منهي الخدمة"
+    "terminated": "منهي الخدمة",
+    "invited": "مدعو"
   },
   "form": {
     "title": "موظف جديد",

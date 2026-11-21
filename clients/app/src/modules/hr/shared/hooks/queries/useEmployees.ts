@@ -30,6 +30,65 @@ export interface CreateEmployeePayload {
   startDate: string;
 }
 
+// /hr/employees returns hr.staff.v1.Staff (firstName/lastName/employmentType/startDate)
+// while older callers typed it as EmployeePayload (jobTitle/contractType/hireDate).
+export interface EmployeeRecord extends EmployeePayload {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  employmentType?: string;
+  startDate?: string;
+  salary?: number;
+  displayName?: string;
+}
+
+export interface NormalizedListEmployeesResponse extends Omit<ListEmployeesResponse, 'employees'> {
+  employees: EmployeeRecord[];
+}
+
+export const KNOWN_CONTRACT_TYPES = new Set([
+  'full_time',
+  'part_time',
+  'freelancer',
+  'contractor',
+  'intern',
+]);
+
+export const KNOWN_EMPLOYEE_STATUSES = new Set([
+  'active',
+  'probation',
+  'inactive',
+  'terminated',
+  'invited',
+]);
+
+function cleanDate(value?: string): string {
+  if (!value || value.startsWith('0001-01-01')) return '';
+  return value;
+}
+
+export function normalizeEmployeeRecord(raw: EmployeeRecord): EmployeeRecord {
+  const fullName = `${raw.firstName ?? ''} ${raw.lastName ?? ''}`.trim();
+  const displayName = fullName || raw.jobTitle?.trim() || raw.email?.trim() || '';
+  const contractType = raw.contractType || raw.employmentType || '';
+  const hireDate = cleanDate(raw.hireDate || raw.startDate);
+  const monthlySalary =
+    raw.monthlySalary !== undefined
+      ? raw.monthlySalary
+      : raw.salary !== undefined && raw.salary > 0
+        ? raw.salary
+        : undefined;
+
+  return {
+    ...raw,
+    displayName,
+    jobTitle: raw.jobTitle || displayName,
+    contractType,
+    hireDate,
+    monthlySalary,
+  };
+}
+
 export const toCreateEmployeePayload = (data: EmployeeFormData): CreateEmployeePayload => ({
   userId: data.userId || undefined,
   departmentId: data.departmentId,
@@ -45,23 +104,29 @@ export const toCreateEmployeePayload = (data: EmployeeFormData): CreateEmployeeP
 });
 
 export const useListEmployees = (params: ListEmployeesParams) => {
-  return useQuery<ListEmployeesResponse>({
+  return useQuery<NormalizedListEmployeesResponse>({
     queryKey: ['hr', 'employees', 'filter', params],
-    queryFn: async (): Promise<ListEmployeesResponse> => {
-      const res = await unwrap(hrTransport.get<ListEmployeesResponse>('/hr/employees', { params }));
-      return res as ListEmployeesResponse;
+    queryFn: async (): Promise<NormalizedListEmployeesResponse> => {
+      const res = await unwrap(
+        hrTransport.get<NormalizedListEmployeesResponse>('/hr/employees', { params })
+      );
+      const body = res as NormalizedListEmployeesResponse;
+      return {
+        ...body,
+        employees: (body.employees ?? []).map(normalizeEmployeeRecord),
+      };
     },
   });
 };
 
 export const useGetEmployee = (id: number | undefined) => {
-  return useQuery<EmployeePayload>({
+  return useQuery<EmployeeRecord>({
     queryKey: ['hr', 'employee', id],
-    queryFn: async (): Promise<EmployeePayload> => {
+    queryFn: async (): Promise<EmployeeRecord> => {
       const res = await unwrap(
-        hrTransport.get<{ employee: EmployeePayload }>(`/hr/employees/${id}`)
+        hrTransport.get<{ employee: EmployeeRecord }>(`/hr/employees/${id}`)
       );
-      return (res as { employee: EmployeePayload }).employee;
+      return normalizeEmployeeRecord((res as { employee: EmployeeRecord }).employee);
     },
     enabled: !!id,
   });

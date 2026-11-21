@@ -9,6 +9,16 @@ import { useGetEmployee } from '../../shared/hooks/queries/useEmployees';
 import { canViewCompensation } from '../../shared/lib/hrPermissions';
 import DocumentVault from '../documents/DocumentVault';
 
+const KNOWN_CONTRACT_TYPES = new Set([
+  'full_time',
+  'part_time',
+  'freelancer',
+  'contractor',
+  'intern',
+]);
+
+const KNOWN_STATUSES = new Set(['active', 'probation', 'inactive', 'terminated', 'invited']);
+
 type Tab = 'personal' | 'employment' | 'documents';
 
 const EmployeeDetail = (): React.JSX.Element => {
@@ -90,7 +100,7 @@ const EmployeeDetail = (): React.JSX.Element => {
           </button>
           <div>
             <h1 className="text-lg font-semibold" style={{ color: 'var(--hr-text)' }}>
-              {employee.jobTitle}
+              {employee.displayName || employee.jobTitle || employee.email || `#${employee.id}`}
             </h1>
             <span
               className="rounded-full px-2 py-0.5 text-xs font-medium"
@@ -100,7 +110,9 @@ const EmployeeDetail = (): React.JSX.Element => {
                 color: employee.status === 'active' ? '#22c55e' : 'var(--hr-text-muted)',
               }}
             >
-              {t(`hrEmployees.statuses.${employee.status}` as const)}
+              {employee.status && KNOWN_STATUSES.has(employee.status)
+                ? t(`hrEmployees.statuses.${employee.status}` as const)
+                : employee.status || '-'}
             </span>
           </div>
         </div>
@@ -135,8 +147,10 @@ const EmployeeDetail = (): React.JSX.Element => {
         >
           {activeTab === 'personal' && (
             <div className="flex flex-col">
+              {employee.displayName && infoRow(t('hrCommon.name'), employee.displayName)}
+              {employee.email && infoRow(t('hrEmployees.form.email'), employee.email)}
               {infoRow(t('hrEmployees.form.userId'), employee.userId)}
-              {infoRow(t('hrEmployees.form.jobTitle'), employee.jobTitle)}
+              {employee.jobTitle && infoRow(t('hrEmployees.form.jobTitle'), employee.jobTitle)}
               {infoRow(t('hrEmployees.form.currency'), employee.currency)}
             </div>
           )}
@@ -145,7 +159,9 @@ const EmployeeDetail = (): React.JSX.Element => {
             <div className="flex flex-col">
               {infoRow(
                 t('hrEmployees.contractType'),
-                t(`hrEmployees.contractTypes.${employee.contractType}` as const)
+                employee.contractType && KNOWN_CONTRACT_TYPES.has(employee.contractType)
+                  ? t(`hrEmployees.contractTypes.${employee.contractType}` as const)
+                  : '-'
               )}
               {infoRow(t('hrEmployees.hireDate'), employee.hireDate)}
               {infoRow(t('hrEmployees.form.probationEndDate'), employee.probationEndDate)}
