@@ -48,7 +48,6 @@ const CreateDepartmentForm = ({
           toast.success(t('hrDepartments.created'));
           onClose();
         },
-        onError: () => toast.error(t('hrErrors.generic')),
       }
     );
   };
