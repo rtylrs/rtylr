@@ -56,6 +56,12 @@
     "notFoundTitle": "التذكرة غير موجودة",
     "notFoundDescription": "هذا الرابط لم يعد صالحًا. امسح الرمز عند الكاونتر من جديد."
   },
+  "push": {
+    "readyTitle": "الطلب {{number}} جاهز",
+    "readyBody": "استلمه من كاونتر {{venue}}.",
+    "remindTitle": "الطلب {{number}} بانتظارك",
+    "remindBody": "{{venue}} ينادي رقمك مرة أخرى."
+  },
   "board": {
     "pageTitle": "الجرس · rtylr",
     "heading": "الجرس",
