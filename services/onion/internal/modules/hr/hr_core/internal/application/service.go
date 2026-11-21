@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr/hr_core/internal/domain"
@@ -123,6 +124,16 @@ func (s *Service) GetEmployeeIDByUserID(ctx context.Context, ownerID, userID int
 func (s *Service) EnsureEmployeeForUser(ctx context.Context, businessID, userID int64, firstName, lastName, email string) error {
 	if businessID <= 0 || userID <= 0 {
 		return fmt.Errorf("employee provisioning requires positive business and user IDs")
+	}
+	firstName = strings.TrimSpace(firstName)
+	lastName = strings.TrimSpace(lastName)
+	email = strings.TrimSpace(email)
+	if firstName == "" && lastName == "" && email != "" {
+		if local, _, ok := strings.Cut(email, "@"); ok && strings.TrimSpace(local) != "" {
+			firstName = strings.TrimSpace(local)
+		} else {
+			firstName = email
+		}
 	}
 	defer invalidateHRCoreScope(ctx, businessID)
 	return s.repo.EnsureEmployeeForUser(ctx, businessID, userID, firstName, lastName, email)
