@@ -1,5 +1,6 @@
 import type { Task } from '../stores/flowStore';
 import { addDays, toLocalIso } from '../lib/dateUtils';
+import { epicKeyOf } from '../lib/taskHierarchy';
 
 /**
  * The filter model every task list in Flow shares: the board, the list, the
@@ -56,13 +57,23 @@ export interface TaskFilters {
   cycles: string[];
   milestones: string[];
   projects: string[];
+  /** Epic ids, or NO_EPIC. An epic matches its own id (see epicKeyOf). */
+  epics: string[];
   /** Free text matched against title, identifier, description and label names. */
   query: string;
 }
 
 /** The fields the Filter popover can list; `query` has its own box. */
 export type FilterField =
-  'assignees' | 'priorities' | 'labels' | 'due' | 'statuses' | 'cycles' | 'milestones' | 'projects';
+  | 'assignees'
+  | 'priorities'
+  | 'labels'
+  | 'due'
+  | 'statuses'
+  | 'cycles'
+  | 'milestones'
+  | 'projects'
+  | 'epics';
 
 export type ListField = Exclude<FilterField, 'due'>;
 
@@ -78,6 +89,7 @@ export const EMPTY_TASK_FILTERS: TaskFilters = {
   cycles: [],
   milestones: [],
   projects: [],
+  epics: [],
   query: '',
 };
 
@@ -89,6 +101,7 @@ const LIST_FIELDS: ListField[] = [
   'cycles',
   'milestones',
   'projects',
+  'epics',
 ];
 
 export interface FilterContext {
@@ -223,6 +236,7 @@ export function matchesTaskFilters(task: Task, filters: TaskFilters, ctx: Filter
     return false;
   }
   if (filters.projects.length > 0 && !filters.projects.includes(task.projectId)) return false;
+  if (filters.epics.length > 0 && !filters.epics.includes(epicKeyOf(task))) return false;
   if (!matchesDue(task, filters, ctx.today)) return false;
   if (!matchesChanged(task, filters, ctx.today)) return false;
   return matchesQuery(task, filters.query, ctx);
@@ -300,6 +314,7 @@ export function parseTaskFilters(value: unknown): TaskFilters {
     cycles: stringList(raw.cycles),
     milestones: stringList(raw.milestones),
     projects: stringList(raw.projects),
+    epics: stringList(raw.epics),
     query: typeof raw.query === 'string' ? raw.query : '',
   };
 }

@@ -105,6 +105,22 @@ func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInpu
 	// preserves the existing value when the param is NULL, and every nullable param
 	// above is left NULL when the request omits that field. The completed_at CASE only
 	// fires when a non-NULL status is explicitly supplied.
+	if input.TaskType != "" {
+		builder = builder.Set("task_type", input.TaskType)
+		// The colour belongs to the epic, so it goes when the task stops
+		// being one.
+		if input.TaskType != domain.TaskTypeEpic {
+			builder = builder.Set("epic_color", nil)
+		}
+	}
+	if input.EpicColor != nil && (input.TaskType == "" || input.TaskType == domain.TaskTypeEpic) {
+		if *input.EpicColor == "" {
+			builder = builder.Set("epic_color", nil)
+		} else {
+			builder = builder.Set("epic_color", *input.EpicColor)
+		}
+	}
+
 	if input.ClearDescription {
 		builder = builder.Set("description", "")
 	} else {
@@ -310,15 +326,8 @@ func (r *Repository) UpdateTaskStatus(ctx context.Context, input domain.UpdateTa
 }
 
 func (r *Repository) DeleteTask(ctx context.Context, taskID, businessID int64) error {
-	err := r.queries.DeleteTask(ctx, sqlc.DeleteTaskParams{
-		ID:         taskID,
-		BusinessID: businessID,
-	})
-	if err != nil {
-		logger.Ctx(ctx).Error("DeleteTask failed", logger.Error(err))
-		return err
-	}
-	return nil
+	_, err := r.DeleteTaskDetachingEpicTasks(ctx, taskID, businessID)
+	return err
 }
 
 // ─────────────────────────────────────────────

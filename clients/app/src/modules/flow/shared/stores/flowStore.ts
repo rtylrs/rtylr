@@ -151,6 +151,8 @@ export interface CustomFieldDefinition {
   order: number;
 }
 
+export type TaskType = 'task' | 'bug' | 'feature' | 'epic';
+
 export interface Task {
   id: string;
   projectId: string;
@@ -183,7 +185,15 @@ export interface Task {
   /** Rank inside the cycle, or the backlog when cycleId is absent. */
   planRank?: number;
   milestoneId?: string;
+  /** The parent task, on a subtask only. A task under an epic has epicId instead. */
   parentId?: string;
+  /** task, bug, feature or epic (T-380, T-573). */
+  taskType?: TaskType;
+  /** The epic this task sits under; a subtask reports its parent's. Absent on an epic. */
+  epicId?: string;
+  epicTitle?: string;
+  /** On an epic its own colour, otherwise the colour of the epic it sits under. */
+  epicColor?: string;
   dependencies?: string[];
   archived?: boolean;
   createdAt: string;

@@ -52,10 +52,12 @@ import {
   DUE_LANES,
   PRIORITY_LABEL_KEY,
   PRIORITY_ORDER,
+  epicLanes,
   isValueGroupKey,
   laneKeysFor,
   valueLanes,
 } from './taskGroups';
+import { EpicFilterContext } from '../../shared/components/EpicChip';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import type { BoardGroupKey } from '../../shared/lib/boardUtils';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
@@ -248,6 +250,8 @@ function buildLaneIndex(
 
   if (groupBy === 'due') return DUE_LANES;
 
+  if (groupBy === 'epic') return epicLanes(tasks);
+
   // assignee - build from data, keep stable order by first-seen. These labels
   // are people's names, so they carry `label` and are never translated.
   const seen = new Map<string, string>();
@@ -366,9 +370,16 @@ const ProjectBoard: React.FC = () => {
   // Precompute the ordered lane index across all tasks so every column
   // renders the same rows in the same order - otherwise empty columns
   // would silently skip lanes and the swimlane grid misaligns.
+  // Epic lanes come from every task, not only the shown ones: filtering to an
+  // epic's tasks must not drop the lane of the epic they belong to.
   const laneIndex = useMemo(
-    () => buildLaneIndex(boardTasks, groupBy, laneOptions),
-    [boardTasks, groupBy, laneOptions]
+    () => buildLaneIndex(groupBy === 'epic' ? tasks : boardTasks, groupBy, laneOptions),
+    [tasks, boardTasks, groupBy, laneOptions]
+  );
+  // An epic chip on a card narrows the board to that epic.
+  const filterByEpic = useCallback(
+    (epicId: string) => filterState.setFilters((current) => ({ ...current, epics: [epicId] })),
+    [filterState]
   );
 
   const cycleNames = useMemo(() => new Map(cycles.map((c) => [String(c.id), c.name])), [cycles]);
@@ -719,230 +730,235 @@ const ProjectBoard: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <HelmetContainer title={t('flow.board.pageTitle')} />
-      <ProjectViewTabs
-        project={project}
-        projectId={projectId}
-        taskCount={tasks.length}
-        onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
-        rightSlot={
-          <div className="flex items-center gap-1.5">
-            <GroupByPicker groupBy={groupBy} onChange={setGroupBy} />
-            {canManageBoard && (
+    <EpicFilterContext.Provider value={filterByEpic}>
+      <div className="flex flex-col h-full">
+        <HelmetContainer title={t('flow.board.pageTitle')} />
+        <ProjectViewTabs
+          project={project}
+          projectId={projectId}
+          taskCount={tasks.length}
+          onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
+          rightSlot={
+            <div className="flex items-center gap-1.5">
+              <GroupByPicker groupBy={groupBy} onChange={setGroupBy} />
+              {canManageBoard && (
+                <button
+                  type="button"
+                  onClick={() => setStatusSettingsOpen(true)}
+                  aria-label={t('flow.status.openSettings')}
+                  className="flow-focus flex h-[44px] w-[44px] items-center justify-center rounded-md md:h-8 md:w-8"
+                  style={{ color: 'var(--flow-text-muted)' }}
+                >
+                  <ListChecks size={14} aria-hidden="true" />
+                </button>
+              )}
               <button
                 type="button"
-                onClick={() => setStatusSettingsOpen(true)}
-                aria-label={t('flow.status.openSettings')}
+                onClick={() => setBoardSettingsOpen(true)}
+                aria-label={t('flow.board.openSettings')}
                 className="flow-focus flex h-[44px] w-[44px] items-center justify-center rounded-md md:h-8 md:w-8"
                 style={{ color: 'var(--flow-text-muted)' }}
               >
-                <ListChecks size={14} aria-hidden="true" />
+                <Settings2 size={14} aria-hidden="true" />
               </button>
-            )}
-            <button
-              type="button"
-              onClick={() => setBoardSettingsOpen(true)}
-              aria-label={t('flow.board.openSettings')}
-              className="flow-focus flex h-[44px] w-[44px] items-center justify-center rounded-md md:h-8 md:w-8"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
-              <Settings2 size={14} aria-hidden="true" />
-            </button>
-          </div>
-        }
-      />
+            </div>
+          }
+        />
 
-      <FilterBar
-        state={filterState}
-        currentUserId={currentUserId}
-        fields={filterFields}
-        people={people}
-        visible={matchingIds?.size ?? tasks.length}
-        total={tasks.length}
-        savingView={saveAsView.pending}
-        onSaveAsView={() =>
-          saveAsView.save(
-            t('flow.filters.savedViewName', { project: project.name }),
-            projectFiltersForView(filters, projectId, columns)
-          )
-        }
-      />
+        <FilterBar
+          state={filterState}
+          currentUserId={currentUserId}
+          fields={filterFields}
+          people={people}
+          visible={matchingIds?.size ?? tasks.length}
+          total={tasks.length}
+          savingView={saveAsView.pending}
+          onSaveAsView={() =>
+            saveAsView.save(
+              t('flow.filters.savedViewName', { project: project.name }),
+              projectFiltersForView(filters, projectId, columns)
+            )
+          }
+        />
 
-      <BoardSettingsPanel
-        open={boardSettingsOpen}
-        onClose={() => setBoardSettingsOpen(false)}
-        columns={columns}
-        canManage={canManageBoard}
-        settings={viewSettings}
-        onSettingsChange={updateViewSettings}
-        onResetSettings={resetViewSettings}
-        onManageStatuses={() => {
-          setBoardSettingsOpen(false);
-          setStatusSettingsOpen(true);
-        }}
-      />
+        <BoardSettingsPanel
+          open={boardSettingsOpen}
+          onClose={() => setBoardSettingsOpen(false)}
+          columns={columns}
+          canManage={canManageBoard}
+          settings={viewSettings}
+          onSettingsChange={updateViewSettings}
+          onResetSettings={resetViewSettings}
+          onManageStatuses={() => {
+            setBoardSettingsOpen(false);
+            setStatusSettingsOpen(true);
+          }}
+        />
 
-      <StatusSettingsPanel
-        open={statusSettingsOpen}
-        onClose={() => setStatusSettingsOpen(false)}
-        projectId={projectId}
-        canManage={canManageBoard}
-      />
+        <StatusSettingsPanel
+          open={statusSettingsOpen}
+          onClose={() => setStatusSettingsOpen(false)}
+          projectId={projectId}
+          canManage={canManageBoard}
+        />
 
-      {/* Tightened kanban canvas - the previous p-6 / gap-4 combo wasted
+        {/* Tightened kanban canvas - the previous p-6 / gap-4 combo wasted
           too much room on laptop screens. These values stay reasonable
           down to narrow viewports because the column snaps to 248px. */}
-      <div className="min-h-0 flex-1 overflow-auto">
-        <div
-          data-board-width={viewSettings.columnWidth}
-          className={
-            viewSettings.columnWidth === 'flexible'
-              ? // Columns share the width; past their minimum the board scrolls.
-                'flex h-full w-fit min-w-full gap-2 px-3 py-3'
-              : 'flex h-full min-w-max gap-2 px-3 py-3'
-          }
-        >
-          {shownColumns.map(({ col, index: i }) => (
-            <KanbanColumn
-              key={String(col.id)}
-              col={col}
-              lanes={buildLanes(laneIndex, tasksForColumn(col, i), groupBy, knownLaneIds)}
-              flexible={viewSettings.columnWidth === 'flexible'}
-              cardDisplay={cardDisplay}
-              dimmedIds={dimmedIds}
-              groupBy={groupBy}
-              isOver={dragOver === String(col.id)}
-              selectedTaskIds={selectedTaskIds}
-              canEdit={canEdit}
-              canCreate={canCreate}
-              canManage={canManageBoard}
-              draggingTaskId={draggingTaskId}
-              moveTargets={moveTargets}
-              registerRef={(el) => columnRefs.current.set(String(col.id), el)}
-              registerList={(el) => listRefs.current.set(String(col.id), el)}
-              reorder={canReorder}
-              placeholder={placeholderFor(String(col.id))}
-              onMoveTask={(taskId, columnId) => moveTask.mutate({ taskId, columnId })}
-              onDragPointerDown={handleDragPointerDown}
-              onDragPointerEnd={endCardPointer}
-              onSelect={toggleSelectTask}
-              onAddTask={() => useFlowStore.getState().setQuickCreateOpen(true, String(col.id))}
-              hiddenCount={olderTasksForColumn(col, i).length}
-              onShowOlder={() => setShowOlder((prev) => new Set(prev).add(col.id))}
-              onRename={(name) => writeStatus(col, { name })}
-              onRecolor={(color) => writeStatus(col, { color })}
-              onInsert={(side) => setInsertAt(side === 'before' ? i : i + 1)}
-              canMoveBefore={i > 0}
-              canMoveAfter={i < columns.length - 1}
-              onMove={(side) => {
-                const ids = movedStatusIds(columns, i, side === 'before' ? i - 1 : i + 1);
-                if (ids) reorderStatuses.mutate(ids);
-              }}
-              deleteBlocked={isOnlyDoneStatus(col, columns)}
-              onDelete={() => setPendingDeleteColumn(col)}
-            />
-          ))}
-
-          {/* Add column */}
-          {canManageBoard && (
-            <div className="w-[248px] shrink-0">
-              {addingColumn ? (
-                <div
-                  className="rounded-md p-2"
-                  style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
-                >
-                  <input
-                    autoFocus
-                    value={newColumnName}
-                    onChange={(e) => setNewColumnName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleAddColumn();
-                      if (e.key === 'Escape') setAddingColumn(false);
-                    }}
-                    placeholder={t('flow.board.columnName')}
-                    className="w-full bg-transparent text-flow-meta font-medium mb-1.5"
-                    style={{ color: 'var(--flow-text)' }}
-                  />
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={handleAddColumn}
-                      disabled={!newColumnName.trim() || createStatus.isPending}
-                      className="h-6 px-2.5 rounded-sm text-flow-meta font-semibold disabled:opacity-40"
-                      style={{
-                        background: 'var(--flow-action-bg)',
-                        color: 'var(--flow-on-accent)',
-                      }}
-                    >
-                      {t('flow.taskDetail.add')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAddingColumn(false)}
-                      className="h-6 px-2 rounded-sm text-flow-meta hover:bg-[var(--flow-hover)]"
-                      style={{ color: 'var(--flow-text-muted)' }}
-                    >
-                      {t('flowCommon.cancel')}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setAddingColumn(true)}
-                  className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-flow-meta transition-colors hover:bg-[var(--flow-hover)]"
-                  style={{
-                    color: 'var(--flow-text-dim)',
-                    border: '1px dashed var(--flow-border)',
-                  }}
-                >
-                  <Plus size={12} />
-                  {t('flow.board.addColumn')}
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-      <DeleteStatusDialog
-        projectId={projectId}
-        status={pendingDeleteColumn}
-        statuses={columns}
-        onClose={() => setPendingDeleteColumn(null)}
-      />
-      <NewStatusDialog
-        open={insertAt !== null}
-        onOpenChange={(open) => !open && setInsertAt(null)}
-        onCreate={insertStatus}
-        pending={createStatus.isPending}
-      />
-      {ghost &&
-        createPortal(
-          // The copy that follows the pointer. It is positioned straight on the
-          // element by the move handler, so a drag costs no React render per move.
+        <div className="min-h-0 flex-1 overflow-auto">
           <div
-            ref={(el) => {
-              ghostRef.current = el;
-              if (el) positionGhost();
-            }}
-            aria-hidden="true"
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: ghost.width,
-              zIndex: 1000,
-              pointerEvents: 'none',
-              willChange: 'transform',
-              filter: 'drop-shadow(0 12px 24px rgba(0, 0, 0, 0.28))',
-            }}
+            data-board-width={viewSettings.columnWidth}
+            className={
+              viewSettings.columnWidth === 'flexible'
+                ? // Columns share the width; past their minimum the board scrolls.
+                  'flex h-full w-fit min-w-full gap-2 px-3 py-3'
+                : 'flex h-full min-w-max gap-2 px-3 py-3'
+            }
           >
-            <TaskCard task={ghost.task} {...cardDisplay(ghost.task)} />
-          </div>,
-          document.body
-        )}
-    </div>
+            {shownColumns.map(({ col, index: i }) => (
+              <KanbanColumn
+                key={String(col.id)}
+                col={col}
+                lanes={buildLanes(laneIndex, tasksForColumn(col, i), groupBy, knownLaneIds)}
+                flexible={viewSettings.columnWidth === 'flexible'}
+                cardDisplay={cardDisplay}
+                dimmedIds={dimmedIds}
+                groupBy={groupBy}
+                isOver={dragOver === String(col.id)}
+                selectedTaskIds={selectedTaskIds}
+                canEdit={canEdit}
+                canCreate={canCreate}
+                canManage={canManageBoard}
+                draggingTaskId={draggingTaskId}
+                moveTargets={moveTargets}
+                registerRef={(el) => columnRefs.current.set(String(col.id), el)}
+                registerList={(el) => listRefs.current.set(String(col.id), el)}
+                reorder={canReorder}
+                placeholder={placeholderFor(String(col.id))}
+                onMoveTask={(taskId, columnId) => moveTask.mutate({ taskId, columnId })}
+                onDragPointerDown={handleDragPointerDown}
+                onDragPointerEnd={endCardPointer}
+                onSelect={toggleSelectTask}
+                onAddTask={() => useFlowStore.getState().setQuickCreateOpen(true, String(col.id))}
+                hiddenCount={olderTasksForColumn(col, i).length}
+                onShowOlder={() => setShowOlder((prev) => new Set(prev).add(col.id))}
+                onRename={(name) => writeStatus(col, { name })}
+                onRecolor={(color) => writeStatus(col, { color })}
+                onInsert={(side) => setInsertAt(side === 'before' ? i : i + 1)}
+                canMoveBefore={i > 0}
+                canMoveAfter={i < columns.length - 1}
+                onMove={(side) => {
+                  const ids = movedStatusIds(columns, i, side === 'before' ? i - 1 : i + 1);
+                  if (ids) reorderStatuses.mutate(ids);
+                }}
+                deleteBlocked={isOnlyDoneStatus(col, columns)}
+                onDelete={() => setPendingDeleteColumn(col)}
+              />
+            ))}
+
+            {/* Add column */}
+            {canManageBoard && (
+              <div className="w-[248px] shrink-0">
+                {addingColumn ? (
+                  <div
+                    className="rounded-md p-2"
+                    style={{
+                      background: 'var(--flow-card)',
+                      border: '1px solid var(--flow-border)',
+                    }}
+                  >
+                    <input
+                      autoFocus
+                      value={newColumnName}
+                      onChange={(e) => setNewColumnName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleAddColumn();
+                        if (e.key === 'Escape') setAddingColumn(false);
+                      }}
+                      placeholder={t('flow.board.columnName')}
+                      className="w-full bg-transparent text-flow-meta font-medium mb-1.5"
+                      style={{ color: 'var(--flow-text)' }}
+                    />
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={handleAddColumn}
+                        disabled={!newColumnName.trim() || createStatus.isPending}
+                        className="h-6 px-2.5 rounded-sm text-flow-meta font-semibold disabled:opacity-40"
+                        style={{
+                          background: 'var(--flow-action-bg)',
+                          color: 'var(--flow-on-accent)',
+                        }}
+                      >
+                        {t('flow.taskDetail.add')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAddingColumn(false)}
+                        className="h-6 px-2 rounded-sm text-flow-meta hover:bg-[var(--flow-hover)]"
+                        style={{ color: 'var(--flow-text-muted)' }}
+                      >
+                        {t('flowCommon.cancel')}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setAddingColumn(true)}
+                    className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-flow-meta transition-colors hover:bg-[var(--flow-hover)]"
+                    style={{
+                      color: 'var(--flow-text-dim)',
+                      border: '1px dashed var(--flow-border)',
+                    }}
+                  >
+                    <Plus size={12} />
+                    {t('flow.board.addColumn')}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+        <DeleteStatusDialog
+          projectId={projectId}
+          status={pendingDeleteColumn}
+          statuses={columns}
+          onClose={() => setPendingDeleteColumn(null)}
+        />
+        <NewStatusDialog
+          open={insertAt !== null}
+          onOpenChange={(open) => !open && setInsertAt(null)}
+          onCreate={insertStatus}
+          pending={createStatus.isPending}
+        />
+        {ghost &&
+          createPortal(
+            // The copy that follows the pointer. It is positioned straight on the
+            // element by the move handler, so a drag costs no React render per move.
+            <div
+              ref={(el) => {
+                ghostRef.current = el;
+                if (el) positionGhost();
+              }}
+              aria-hidden="true"
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: ghost.width,
+                zIndex: 1000,
+                pointerEvents: 'none',
+                willChange: 'transform',
+                filter: 'drop-shadow(0 12px 24px rgba(0, 0, 0, 0.28))',
+              }}
+            >
+              <TaskCard task={ghost.task} {...cardDisplay(ghost.task)} />
+            </div>,
+            document.body
+          )}
+      </div>
+    </EpicFilterContext.Provider>
   );
 };
 

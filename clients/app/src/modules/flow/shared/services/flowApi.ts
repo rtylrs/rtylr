@@ -1,4 +1,4 @@
-import type { FlowTask as ContractTask } from '@voxire/voxie/flow/task/v2/types';
+import type { EpicRollup, FlowTask as ContractTask } from '@voxire/voxie/flow/task/v2/types';
 import type { Status as ContractStatus } from '@voxire/voxie/flow/status/v2/types';
 
 import { oneKitResult } from '@voxire/api';
@@ -148,6 +148,14 @@ export interface ApiTask {
   // has no cycle. int64 on the wire, so a string; absent when never placed.
   planRank?: ContractTask['planRank'];
   milestoneId?: string;
+  // T-573 hierarchy, pinned to the contract like archived above. parentTaskId
+  // is set only on a subtask; a task under an epic carries epicId instead, and
+  // a subtask reports its parent's epic. On an epic, epicColor is its own.
+  parentTaskId?: ContractTask['parentTaskId'];
+  taskType?: ContractTask['taskType'];
+  epicId?: ContractTask['epicId'];
+  epicTitle?: ContractTask['epicTitle'];
+  epicColor?: ContractTask['epicColor'];
   // UI-only fields stored in local store
   effortMinutes?: number;
   waitingOn?: string;
@@ -155,6 +163,12 @@ export interface ApiTask {
   focusPin?: boolean;
   customFieldValues?: Record<string, string | number>;
 }
+
+/**
+ * One epic's progress. The counts are int32 on the wire, so they arrive as
+ * numbers; absent means zero (omitempty).
+ */
+export type ApiEpicRollup = EpicRollup;
 
 export interface ApiLabel {
   id: number;
@@ -796,6 +810,10 @@ export const flowApi = {
     estimatedHours?: number;
     labels?: string[];
     milestoneId?: string;
+    /** An epic or a task: the new task goes under it (see setTaskParent). */
+    parentTaskId?: string;
+    taskType?: string;
+    epicColor?: string;
     cycleId?: string;
   }) =>
     flowResult<{ task: ApiTask }>(() => {
@@ -814,6 +832,9 @@ export const flowApi = {
         estimatedHours: payload.estimated_hours,
         labels: payload.labels,
         milestoneId: data.milestoneId || undefined,
+        parentTaskId: data.parentTaskId || undefined,
+        taskType: data.taskType || undefined,
+        epicColor: data.epicColor || undefined,
         cycleId: data.cycleId || undefined,
       });
     }),
@@ -856,13 +877,30 @@ export const flowApi = {
           decisionNote: data.decisionNote,
           // Empty string removes the task from its milestone ('0' on the wire).
           milestoneId: data.milestoneId !== undefined ? data.milestoneId || '0' : undefined,
+          taskType: data.taskType || undefined,
+          // An empty string clears an epic's colour, so it is sent as is.
+          epicColor: data.epicColor,
+          // Empty string moves the task to the top level ('0' on the wire).
+          parentTaskId: data.parentTaskId !== undefined ? data.parentTaskId || '0' : undefined,
           // Empty string returns the task to the backlog ('0' on the wire).
           cycleId: data.cycleId !== undefined ? data.cycleId || '0' : undefined,
         },
       })
     ),
 
-  deleteTask: (id: string) => flowResult<{ message: string }>(() => taskV2.deleteTask({ id })),
+  // detachedChildren counts the tasks a deleted epic left behind with no epic.
+  deleteTask: (id: string) =>
+    flowResult<{ message: string; detachedChildren?: number }>(() => taskV2.deleteTask({ id })),
+
+  // Moves a task under an epic or a task in its project, or to the top level
+  // when parentId is empty. The server enforces epic > task > subtask.
+  setTaskParent: (id: string, parentId: string) =>
+    flowResult<{ task: ApiTask }>(() =>
+      taskV2.setTaskParent({ id, body: { parentId: parentId || undefined } })
+    ),
+
+  listEpicRollups: (projectId: string) =>
+    flowResult<{ epics: ApiEpicRollup[] }>(() => taskV2.listEpicRollups({ projectId })),
 
   addTaskDependency: (taskId: string, dependsOnTaskId: string) =>
     flowResult<{ message: string }>(() =>

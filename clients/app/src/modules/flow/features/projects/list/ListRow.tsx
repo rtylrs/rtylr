@@ -9,6 +9,7 @@ import { apiTaskToTask } from '../../../shared/lib/taskMapper';
 import { useOpenTask } from '../../../shared/lib/useOpenTask';
 import { useCanEditTask } from '../../../shared/lib/currentUser';
 import { TaskContextMenu, type ContextMenuState } from '../../../shared/components/TaskContextMenu';
+import EpicChip from '../../../shared/components/EpicChip';
 import type { RowProps } from '../../../../../shared/hooks/useVirtualRows';
 import { useToggleDone } from '../../tasks/useToggleDone';
 import { useTaskDetail } from '../../tasks/useTasks';
@@ -135,6 +136,7 @@ function TitleCell({
       >
         {task.title}
       </button>
+      <EpicChip task={task} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import type { Task } from '../stores/flowStore';
 import type { ApiTask } from '../services/flowApi';
 import { getInitials } from './utils';
+import { toTaskType } from './taskHierarchy';
 
 function normalizePriority(
   priority: ApiTask['priority'] | 'none' | null | undefined
@@ -98,5 +99,12 @@ export function apiTaskToTask(t: ApiTask): Task {
     statusId: t.statusId || undefined,
     statusName: t.statusName || undefined,
     statusColor: t.statusColor || undefined,
+    // int64 ids are strings on the wire already. An empty or zero id is no
+    // link at all, and a missing type is a plain task (omitempty).
+    parentId: t.parentTaskId && t.parentTaskId !== '0' ? String(t.parentTaskId) : undefined,
+    taskType: toTaskType(t.taskType),
+    epicId: t.epicId && t.epicId !== '0' ? String(t.epicId) : undefined,
+    epicTitle: t.epicTitle || undefined,
+    epicColor: t.epicColor || undefined,
   };
 }

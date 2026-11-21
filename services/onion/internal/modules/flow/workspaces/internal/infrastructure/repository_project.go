@@ -80,6 +80,9 @@ func (r *Repository) CreateTask(ctx context.Context, input domain.TaskInput) (in
 		EffortMinutes:  effortMinutes,
 		InitialStatus:  input.Status,
 		SectionID:      nullInt64Ptr(input.SectionID),
+		TaskType:       taskTypeOrDefault(input.TaskType),
+		EpicID:         nullInt64Ptr(input.EpicID),
+		EpicColor:      sql.NullString{String: input.EpicColor, Valid: input.EpicColor != ""},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("CreateTask failed", logger.Error(err))
@@ -121,7 +124,7 @@ func taskListConditions(scopeCol string, scopeVal int64, filter domain.ListTasks
 	if filter.Priority != "" {
 		conds = append(conds, sq.Eq{"t.priority": filter.Priority})
 	}
-	return conds
+	return append(conds, taskHierarchyConditions(filter)...)
 }
 
 // countTasks runs a COUNT(*) over flow_tasks using the given conditions. The
@@ -203,7 +206,10 @@ func (r *Repository) GetTaskByID(ctx context.Context, taskID int64) (domain.Task
 
 // dynamic-query: squirrel
 func (r *Repository) GetSubtasks(ctx context.Context, parentTaskID, limit, offset int64) ([]domain.Task, int64, error) {
-	conds := sq.And{sq.Eq{"t.parent_task_id": parentTaskID}}
+	// An epic's tasks hang off epic_id, so asking an epic for its subtasks
+	// returns those. Only an epic is ever referenced through epic_id, which
+	// keeps the second branch empty for every other task.
+	conds := sq.And{sq.Or{sq.Eq{"t.parent_task_id": parentTaskID}, sq.Eq{"t.epic_id": parentTaskID}}}
 
 	total, err := r.countTasks(ctx, conds)
 	if err != nil {

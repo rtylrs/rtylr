@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import type { Task } from '../../shared/stores/flowStore';
-import { NO_VALUE_LANE, laneKeysFor, valueLanes } from './taskGroups';
+import { NO_EPIC } from '../../shared/lib/taskHierarchy';
+import { NO_VALUE_LANE, epicLanes, laneKeyFor, laneKeysFor, valueLanes } from './taskGroups';
 
-const task = (extra: Partial<Task>): Task => ({
+const task = (extra: Partial<Task> = {}): Task => ({
   id: '1',
   projectId: '2',
   title: 'Task',
@@ -71,5 +72,28 @@ describe('valueLanes', () => {
     expect(valueLanes([task({ cycleId: '4' })], 'cycle', [{ id: '4', name: 'Sprint 4' }])).toEqual([
       { key: '4', label: 'Sprint 4' },
     ]);
+  });
+});
+
+describe('epic swimlanes', () => {
+  const epic = task({ id: '10', taskType: 'epic', title: 'Payments', epicColor: '#22c55e' });
+  const child = task({ id: '11', epicId: '10' });
+  const loose = task({ id: '12' });
+
+  it('gives each epic a lane, in board order, then No epic', () => {
+    expect(epicLanes([loose, epic, child])).toEqual([
+      { key: '10', label: 'Payments', color: '#22c55e' },
+      { key: NO_EPIC, labelKey: 'flow.epics.noEpic' },
+    ]);
+  });
+
+  it('puts an epic and its tasks in the epic lane and the rest in No epic', () => {
+    expect(laneKeyFor(epic, 'epic')).toBe('10');
+    expect(laneKeyFor(child, 'epic')).toBe('10');
+    expect(laneKeyFor(loose, 'epic')).toBe(NO_EPIC);
+  });
+
+  it('still has a No epic lane on a board without epics', () => {
+    expect(epicLanes([loose])).toEqual([{ key: NO_EPIC, labelKey: 'flow.epics.noEpic' }]);
   });
 });

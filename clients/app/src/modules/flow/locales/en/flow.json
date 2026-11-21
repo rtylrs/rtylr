@@ -700,7 +700,8 @@
       "due": "Due window",
       "label": "Label",
       "cycle": "Cycle",
-      "milestone": "Milestone"
+      "milestone": "Milestone",
+      "epic": "Epic"
     },
     "moveTask": "Move {{title}} to another column",
     "moveTaskMenu": "Move to column",
@@ -944,7 +945,8 @@
       "assignee": "Assignee",
       "priority": "Priority",
       "due": "Due date",
-      "none": "None"
+      "none": "None",
+      "epic": "Epic"
     },
     "empty": "No tasks in this project yet.",
     "columns": "Columns",
@@ -1301,7 +1303,8 @@
       "status": "Status",
       "cycle": "Cycle",
       "milestone": "Milestone",
-      "project": "Project"
+      "project": "Project",
+      "epic": "Epic"
     },
     "due": {
       "overdue": "Overdue",
@@ -1330,6 +1333,38 @@
     "summary": "{{tasks}} open tasks across {{people}} people",
     "emptyTitle": "No tasks to show",
     "emptyDescription": "Tasks in projects you can see will appear here, grouped by person."
+  },
+  "taskType": {
+    "label": "Type",
+    "task": "Task",
+    "bug": "Bug",
+    "feature": "Feature",
+    "epic": "Epic"
+  },
+  "epics": {
+    "noEpic": "No epic",
+    "filterBy": "Show only {{name}}",
+    "parent": "Parent",
+    "changeParent": "Change parent",
+    "noParent": "No parent",
+    "color": "Epic colour",
+    "noColor": "No colour",
+    "progress": "Epic progress",
+    "progressMode": "Progress by",
+    "mode": {
+      "count": "Task count",
+      "estimate": "Estimate",
+      "hours": "Hours logged"
+    },
+    "countSummary": "{{done}} of {{total}} tasks done",
+    "estimateSummary": "{{done}} of {{total}} estimated done",
+    "hoursSummary": "{{done}} logged of {{total}} estimated",
+    "noEstimate": "No estimates yet",
+    "progressLabel": "Progress of {{name}}",
+    "tasksInEpic": "Tasks in this epic",
+    "dashboardTitle": "Epics",
+    "deleteKeepsChildren_one": "Its {{count}} task stays in the project, with no epic.",
+    "deleteKeepsChildren_other": "Its {{count}} tasks stay in the project, with no epic."
   },
   "backlog": {
     "pageTitle": "Backlog",

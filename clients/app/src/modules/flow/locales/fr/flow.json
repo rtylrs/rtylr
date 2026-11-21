@@ -704,7 +704,8 @@
       "due": "Échéance",
       "label": "Étiquette",
       "cycle": "Itération",
-      "milestone": "Jalon"
+      "milestone": "Jalon",
+      "epic": "Épopée"
     },
     "moveTask": "Déplacer {{title}} vers une autre colonne",
     "moveTaskMenu": "Déplacer vers une colonne",
@@ -954,7 +955,8 @@
       "assignee": "Responsable",
       "priority": "Priorité",
       "due": "Échéance",
-      "none": "Aucun"
+      "none": "Aucun",
+      "epic": "Épopée"
     },
     "empty": "Aucune tâche dans ce projet pour le moment.",
     "columns": "Colonnes",
@@ -1314,7 +1316,8 @@
       "status": "Statut",
       "cycle": "Itération",
       "milestone": "Jalon",
-      "project": "Projet"
+      "project": "Projet",
+      "epic": "Épopée"
     },
     "due": {
       "overdue": "En retard",
@@ -1343,6 +1346,39 @@
     "summary": "{{tasks}} tâches ouvertes pour {{people}} personnes",
     "emptyTitle": "Aucune tâche à afficher",
     "emptyDescription": "Les tâches des projets que vous pouvez voir apparaîtront ici, regroupées par personne."
+  },
+  "taskType": {
+    "label": "Type de tâche",
+    "task": "Tâche",
+    "bug": "Bogue",
+    "feature": "Fonctionnalité",
+    "epic": "Épopée"
+  },
+  "epics": {
+    "noEpic": "Sans épopée",
+    "filterBy": "Afficher seulement {{name}}",
+    "parent": "Tâche parente",
+    "changeParent": "Changer de parent",
+    "noParent": "Aucun parent",
+    "color": "Couleur de l'épopée",
+    "noColor": "Aucune couleur",
+    "progress": "Avancement de l'épopée",
+    "progressMode": "Avancement par",
+    "mode": {
+      "count": "Nombre de tâches",
+      "estimate": "Estimation",
+      "hours": "Heures saisies"
+    },
+    "countSummary": "{{done}} tâches terminées sur {{total}}",
+    "estimateSummary": "{{done}} terminées sur {{total}} estimées",
+    "hoursSummary": "{{done}} saisies sur {{total}} estimées",
+    "noEstimate": "Pas encore d'estimation",
+    "progressLabel": "Avancement de {{name}}",
+    "tasksInEpic": "Tâches de cette épopée",
+    "dashboardTitle": "Épopées",
+    "deleteKeepsChildren_one": "Sa tâche ({{count}}) reste dans le projet, sans épopée.",
+    "deleteKeepsChildren_many": "Ses {{count}} tâches restent dans le projet, sans épopée.",
+    "deleteKeepsChildren_other": "Ses {{count}} tâches restent dans le projet, sans épopée."
   },
   "backlog": {
     "pageTitle": "Carnet",

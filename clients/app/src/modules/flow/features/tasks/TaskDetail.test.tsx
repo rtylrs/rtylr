@@ -60,6 +60,8 @@ vi.mock('./useTasks', () => ({
   useTasks: () => ({ data: [], isLoading: false, isError: false }),
   useAddTaskDependency: () => ({ mutate: vi.fn(), isPending: false }),
   useRemoveTaskDependency: () => ({ mutate: vi.fn(), isPending: false }),
+  useSetTaskParent: () => ({ mutate: vi.fn(), isPending: false }),
+  useEpicRollups: () => ({ data: [] }),
   useUpdateTask: () => ({ mutate: updateTaskMutate, isPending: false }),
   useDeleteTask: () => ({ mutate: deleteTaskMutate, isPending: false }),
   useAddComment: () => ({ mutate: vi.fn(), isPending: false }),
@@ -531,6 +533,55 @@ describe('TaskDetail deletion confirmation (#1056)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'confirm-delete' }));
 
     expect(deleteTaskMutate).toHaveBeenCalledWith('t-1', expect.any(Object));
+  });
+});
+
+describe('TaskDetail epics (T-573)', () => {
+  it('says an epic keeps its tasks when it is deleted, and a plain task does not', () => {
+    taskDetailData.data = {
+      task: apiTask({ title: 'Payments', taskType: 'epic' }),
+      subtasks: [apiTask({ id: 'c1' }), apiTask({ id: 'c2' })],
+      comments: [],
+      activity: [],
+    } as unknown as ApiTaskDetail;
+    renderTaskDetail();
+
+    fireEvent.click(screen.getByRole('button', { name: 'flow.taskDetail.delete' }));
+
+    expect(
+      within(screen.getByRole('dialog')).getByText(/flow\.epics\.deleteKeepsChildren/)
+    ).toBeInTheDocument();
+    // The tasks under an epic are listed under their own heading.
+    expect(screen.getByText('flow.epics.tasksInEpic')).toBeInTheDocument();
+  });
+
+  it('leaves the epic note out for a task that is not an epic', () => {
+    taskDetailData.data = {
+      task: apiTask({ title: 'Plain' }),
+      subtasks: [],
+      comments: [],
+      activity: [],
+    } as unknown as ApiTaskDetail;
+    renderTaskDetail();
+
+    fireEvent.click(screen.getByRole('button', { name: 'flow.taskDetail.delete' }));
+
+    expect(
+      within(screen.getByRole('dialog')).queryByText(/flow\.epics\.deleteKeepsChildren/)
+    ).not.toBeInTheDocument();
+  });
+
+  it('puts the epic between the project and the task in the breadcrumb', () => {
+    taskDetailData.data = {
+      task: apiTask({ title: 'Card form', epicId: '77', epicTitle: 'Payments' }),
+      subtasks: [],
+      comments: [],
+      activity: [],
+    } as unknown as ApiTaskDetail;
+    renderTaskDetail();
+
+    // The Breadcrumbs stub joins the crumb labels.
+    expect(screen.getByText(/ \/ Payments \/ /)).toBeInTheDocument();
   });
 });
 

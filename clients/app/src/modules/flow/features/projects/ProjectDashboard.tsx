@@ -17,6 +17,12 @@ import { useProjectLabourCost } from '../../shared/hooks/queries/useProjectLabou
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import ProjectDashboardPanel from '../../../insights/shared/components/ProjectDashboardPanel';
+import { useEpicRollups } from '../tasks/useTasks';
+import { useOpenTask } from '../../shared/lib/useOpenTask';
+import EpicProgressBar, {
+  EpicProgressModeSelect,
+  useEpicProgressMode,
+} from '../../shared/components/EpicProgressBar';
 import { useProjectStatuses } from './useStatuses';
 import { useCycles } from '../cycles/useCycles';
 import { computeProjectSummary } from './projectSummary';
@@ -65,6 +71,9 @@ const ProjectDashboard: React.FC = () => {
   const { data: apiTasks = [] } = tasksQuery;
   const tasksLoadFailed = hasQueryFailed(tasksQuery);
   const tasksLoading = tasksQuery.isPending && !tasksLoadFailed;
+  const { data: epicRollups = [] } = useEpicRollups(projectId);
+  const [epicMode, setEpicMode] = useEpicProgressMode();
+  const openTask = useOpenTask();
   const { data: statuses = [] } = useProjectStatuses(projectId);
   const { data: cycles = [] } = useCycles(projectId);
 
@@ -197,6 +206,40 @@ const ProjectDashboard: React.FC = () => {
           </div>
         )}
 
+        {/* Epics, each with its progress in the chosen mode */}
+        {epicRollups.length > 0 && (
+          <SummaryCard
+            title={t('flow.epics.dashboardTitle')}
+            action={
+              <div className="w-[140px]">
+                <EpicProgressModeSelect mode={epicMode} onChange={setEpicMode} />
+              </div>
+            }
+          >
+            <div className="space-y-3">
+              {epicRollups.map((epic) => (
+                <div key={String(epic.epicId)} className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => openTask(String(epic.epicId))}
+                    className="flow-focus flex w-[160px] shrink-0 items-center gap-1.5 truncate text-start text-flow-meta hover:underline"
+                    style={{ color: 'var(--flow-text)' }}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="h-2 w-2 shrink-0 rounded-full"
+                      style={{ background: epic.color || project.color }}
+                    />
+                    <span className="truncate">{epic.title}</span>
+                  </button>
+                  <div className="min-w-0 flex-1">
+                    <EpicProgressBar rollup={epic} mode={epicMode} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </SummaryCard>
+        )}
         <RecentChangeTiles projectId={projectId} recent={summary.recent} />
 
         <div className="grid gap-5 md:grid-cols-2">

@@ -184,6 +184,16 @@ func toTaskV2(t domain.Task) *flowtaskv2.FlowTask {
 	if t.Archived {
 		out.Archived = true
 	}
+	out.TaskType = t.TaskType
+	if out.TaskType == "" {
+		out.TaskType = domain.TaskTypeTask
+	}
+	if t.EpicID != nil {
+		v := *t.EpicID
+		out.EpicId = &v
+	}
+	out.EpicTitle = t.EpicTitle
+	out.EpicColor = t.EpicColor
 	return out
 }
 
@@ -215,6 +225,16 @@ func (a *TaskAPIV2) ListTasks(ctx context.Context, req *flowtaskv2.ListTasksRequ
 		v := req.GetAssigneeId()
 		filter.AssigneeID = &v
 	}
+	taskTypes, err := parseTaskTypeFilter(req.GetTaskType())
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, domain.ErrInvalidTaskType.Error())
+	}
+	filter.TaskTypes = taskTypes
+	if req.GetEpicId() != 0 {
+		v := req.GetEpicId()
+		filter.EpicID = &v
+	}
+	filter.NoEpic = req.GetNoEpic()
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
 	filter.Limit, filter.Offset = int64(limit), offset
 

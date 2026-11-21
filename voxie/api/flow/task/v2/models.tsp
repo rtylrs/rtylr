@@ -187,6 +187,32 @@ model FlowTask {
    */
   @Onkt.encode("string")
   dependencies: int64[];
+
+  /**
+   * What kind of work this is: task, bug, feature or epic. Every task that
+   * predates types reads as task.
+   */
+  task_type: string;
+
+  /**
+   * The epic this task sits under, if any. A subtask reports its parent's
+   * epic. Absent on an epic and on a task with no epic. Write it through
+   * setTaskParent, parent_task_id on update, or parent_task_id on create.
+   *
+   * This is separate from parent_task_id on purpose: parent_task_id is set
+   * only on a subtask, so a task under an epic is still a top-level task.
+   */
+  @encode(string)
+  epic_id?: int64;
+
+  /** Title of the epic identified by epic_id. Empty when epic_id is absent. */
+  epic_title: string;
+
+  /**
+   * On an epic, its own colour. On any other task, the colour of the epic
+   * identified by epic_id. Empty when there is none.
+   */
+  epic_color: string;
 }
 
 model TaskComment {
@@ -366,6 +392,25 @@ model ListTasksRequest {
   /** The sort direction ("asc" or "desc"). */
   @query("sort_dir")
   sort_dir: string;
+
+  /**
+   * task_type narrows results to one type, or several separated by commas
+   * ("task,bug,feature" lists everything except epics).
+   */
+  @query("task_type")
+  task_type: string;
+
+  /** epic_id narrows results to the tasks directly under one epic. */
+  @query("epic_id")
+  @encode(string)
+  epic_id?: int64;
+
+  /**
+   * no_epic narrows results to tasks that sit under no epic. Epics themselves
+   * are left out. Ignored when epic_id is set.
+   */
+  @query("no_epic")
+  no_epic: boolean;
 }
 
 model ListTasksResponse {
@@ -443,9 +488,21 @@ model CreateTaskRequest {
   @encode(string)
   project_id: int64;
 
-  /** parent_task_id is the parent task id value for this contract. */
+  /**
+   * parent_task_id is the epic or the task to create this under. An epic
+   * makes the new task one of the epic's tasks (it comes back with epic_id
+   * set and no parent_task_id); a task makes it a subtask. The parent must be
+   * in the same project, must not itself be a subtask, and an epic cannot be
+   * given one.
+   */
   @encode(string)
   parent_task_id?: int64;
+
+  /** task_type is task, bug, feature or epic; empty means task. */
+  task_type: string;
+
+  /** epic_color is the colour of a new epic. Rejected for any other type. */
+  epic_color: string;
 
   /** title is the title value for this contract. */
   @Onkt.required
@@ -626,6 +683,27 @@ model UpdateTaskBody {
   milestone_id?: int64;
 
   /**
+   * New type: task, bug, feature or epic. Empty leaves it untouched. A task
+   * that has a parent, an epic or subtasks cannot become an epic, and an epic
+   * that still has tasks cannot stop being one.
+   */
+  task_type: string;
+
+  /**
+   * Colour of an epic. Absent leaves untouched; empty string clears. Rejected
+   * on a task that is not an epic.
+   */
+  epic_color?: string;
+
+  /**
+   * Moves the task under an epic or a task in the same project. Absent leaves
+   * it where it is; 0 clears both links, leaving a top-level task with no
+   * epic. Same rules as setTaskParent.
+   */
+  @encode(string)
+  parent_task_id?: int64;
+
+  /**
    * Cycle to move the task to, at the end of that cycle. Absent leaves it
    * untouched; 0 returns the task to the unplanned backlog. Must be an upcoming
    * or active cycle of the task's project.
@@ -682,6 +760,108 @@ model DeleteTaskRequest {
 model DeleteTaskResponse {
   /** message is a human-readable result message. */
   message: string;
+
+  /**
+   * How many tasks were detached from a deleted epic. They are kept, with no
+   * epic. Zero when the deleted task was not an epic.
+   */
+  detached_children: int32;
+}
+
+model SetTaskParentBody {
+  /**
+   * parent_id is the epic or the task to move this task under. An epic makes
+   * it one of the epic's tasks; a task makes it a subtask. Absent or zero
+   * clears both, leaving a top-level task with no epic.
+   */
+  @encode(string)
+  parent_id?: int64;
+}
+
+model SetTaskParentRequest {
+  /** id is the task being moved. */
+  @minValueExclusive(0)
+  @encode(string)
+  id: int64;
+
+  /** body carries the new parent bound from the HTTP payload. */
+  @body
+  body: SetTaskParentBody;
+}
+
+model SetTaskParentResponse {
+  /**
+   * task is the task after the move, with parent_task_id and the epic fields
+   * as they now stand.
+   */
+  task: FlowTask;
+}
+
+/**
+ * EpicRollup summarises the tasks directly under one epic. Archived tasks are
+ * left out of every number.
+ */
+model EpicRollup {
+  /** epic_id is the epic's task id. */
+  @encode(string)
+  epic_id: int64;
+
+  /** Human-readable identifier of the epic, like "T-42". */
+  identifier: string;
+
+  /** title is the epic's title. */
+  title: string;
+
+  /** color is the epic's colour. Empty when none is set. */
+  color: string;
+
+  /** status is the epic's own built-in lifecycle status. */
+  status: string;
+
+  /** Number of tasks directly under the epic. Subtasks are not counted. */
+  total_tasks: int32;
+
+  /** Direct tasks whose status is in the backlog bucket. */
+  backlog_tasks: int32;
+
+  /** Direct tasks whose status is in the active bucket. */
+  active_tasks: int32;
+
+  /** Direct tasks whose status is in the done bucket. */
+  done_tasks: int32;
+
+  /** Direct tasks whose status is in the cancelled bucket. */
+  cancelled_tasks: int32;
+
+  /**
+   * Sum of the direct tasks' estimates in minutes. A task's effort_minutes
+   * is used when set, otherwise its estimated_hours. Subtask estimates are
+   * not added, since a subtask breaks down its parent's estimate.
+   */
+  estimate_minutes: int32;
+
+  /** The part of estimate_minutes that sits on tasks in the done bucket. */
+  done_estimate_minutes: int32;
+
+  /** Minutes logged on the direct tasks and on their subtasks. */
+  logged_minutes: int32;
+}
+
+model ListEpicRollupsRequest {
+  /** project_id is the project whose epics to summarise. */
+  @Onkt.required
+  @minValueExclusive(0)
+  @query("project_id")
+  @encode(string)
+  project_id?: int64;
+}
+
+model ListEpicRollupsResponse {
+  /**
+   * epics lists every unarchived epic in the project, in board order,
+   * including epics with no tasks yet.
+   */
+  epics: EpicRollup[];
 }
 
 model CreateSubtaskRequest {
