@@ -34,8 +34,6 @@ import { HelmetContainer } from '@voxire/components';
 import { useTask } from './useTask';
 import {
   useTasks,
-  useAddTaskDependency,
-  useRemoveTaskDependency,
   useUpdateTask,
   useDeleteTask,
   useAddComment,
@@ -90,6 +88,7 @@ import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import DevelopmentSection from './components/DevelopmentSection';
 import { useIsDeveloperProject } from '../projects-v2/useDeveloperMode';
 import LinksSection from './components/LinksSection';
+import RelationsSection from './components/RelationsSection';
 import TaskCustomFields from './components/TaskCustomFields';
 import TaskHierarchyFields from './components/TaskHierarchyFields';
 import EpicProgressSection from './components/EpicProgressSection';
@@ -166,8 +165,6 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const addSubtaskMut = useAddSubtask();
   const toggleSubtaskMut = useToggleSubtask();
   const setTaskLabelsMut = useSetTaskLabels();
-  const addDependency = useAddTaskDependency();
-  const removeDependency = useRemoveTaskDependency();
 
   const { data: taskActivityData = [] } = useTaskActivity(id ?? '');
   const { data: taskAttachmentData } = useTaskAttachments(id);
@@ -179,6 +176,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const { project: taskProject } = useCurrentProject(taskProjectId);
   const { data: projectMembers = [] } = useProjectMembers(taskProjectId);
   const { data: allLabels = [] } = useLabels();
+  // The parent crumb and the change parent picker choose among these.
   const tasksQuery = useTasks({});
   const allTasks = (tasksQuery.data ?? []).map(apiTaskToTask).filter((task) => !task.archived);
   const { data: cycles = [] } = useCycles(taskProjectId);
@@ -215,8 +213,6 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const addSubtask = (taskId: string, title: string) => {
     addSubtaskMut.mutate({ taskId, title });
   };
-
-  const [depId, setDepId] = useState('');
 
   if (isLoading) {
     return (
@@ -351,10 +347,6 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   ];
   // Deleting an epic keeps its tasks, which the confirmation says in numbers.
   const epicChildCount = taskIsEpic ? (detail?.subtasks ?? []).length : 0;
-  const dependencyTasks = allTasks.filter((ot) => task.dependencies?.includes(ot.id));
-  const dependencyCandidates = allTasks.filter(
-    (ot) => ot.id !== task.id && !task.dependencies?.includes(ot.id)
-  );
   const apiAttachments: Attachment[] = (taskAttachmentData?.attachments ?? []).map(
     (attachment) => ({
       id: String(attachment.id),
@@ -1026,83 +1018,22 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           />
         )}
 
-        <DetailField icon={Link2} label={t('flow.taskDetail.dependencies')}>
-          <div className="space-y-1.5">
-            {hasQueryFailed(tasksQuery) && (
-              <ListLoadFailed onRetry={() => void tasksQuery.refetch()} />
-            )}
-            {dependencyTasks.map((dt) => (
-              <div key={dt.id} className="flex items-center justify-between gap-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    // In the drawer, following a dependency swaps which task the
-                    // drawer shows. On the standalone page there is no drawer to
-                    // swap, so it navigates (rtylr#1079).
-                    if (taskId !== undefined) {
-                      openTask(String(dt.id));
-                      return;
-                    }
-                    void navigate({ to: '/flow/task/$id', params: { id: String(dt.id) } });
-                  }}
-                  className="text-flow-meta text-start truncate flex-1 hover:underline"
-                  style={{ color: 'var(--accent)' }}
-                >
-                  {dt.identifier} · {dt.title}
-                </button>
-                {canEdit && (
-                  <button
-                    type="button"
-                    className="text-flow-meta shrink-0"
-                    style={{ color: 'var(--flow-text-dim)' }}
-                    disabled={removeDependency.isPending}
-                    onClick={() =>
-                      removeDependency.mutate({ taskId: task.id, dependsOnTaskId: dt.id })
-                    }
-                  >
-                    {t('flow.taskDetail.remove')}
-                  </button>
-                )}
-              </div>
-            ))}
-            {dependencyCandidates.length > 0 && canEdit && (
-              <div className="flex gap-1 pt-1">
-                <div className="min-w-0 flex-1">
-                  <FlowSelect
-                    label={t('flow.taskDetail.addDependency')}
-                    value={depId}
-                    placeholder={t('flow.taskDetail.addDependency')}
-                    options={[
-                      { value: '', label: t('flow.taskDetail.addDependency') },
-                      ...dependencyCandidates.map((c) => ({
-                        value: String(c.id),
-                        label: `${c.identifier} ${c.title}`,
-                      })),
-                    ]}
-                    onChange={setDepId}
-                    muted
-                  />
-                </div>
-                <button
-                  type="button"
-                  disabled={!depId || addDependency.isPending}
-                  onClick={() => {
-                    if (!depId) return;
-                    addDependency.mutate(
-                      { taskId: task.id, dependsOnTaskId: depId },
-                      {
-                        onSuccess: () => setDepId(''),
-                      }
-                    );
-                  }}
-                  className="text-flow-meta px-1.5 py-0.5 rounded-sm font-semibold disabled:opacity-40"
-                  style={{ background: 'var(--flow-action-bg)', color: 'var(--flow-on-accent)' }}
-                >
-                  {t('flow.taskDetail.add')}
-                </button>
-              </div>
-            )}
-          </div>
+        <DetailField icon={Link2} label={t('flow.taskDetail.relations')}>
+          <RelationsSection
+            taskId={String(task.id)}
+            identifier={task.identifier ?? String(task.id)}
+            canEdit={canEdit}
+            onOpenTask={(relatedId) => {
+              // In the drawer, following a relation swaps which task the
+              // drawer shows. On the standalone page there is no drawer to
+              // swap, so it navigates (rtylr#1079).
+              if (taskId !== undefined) {
+                openTask(relatedId);
+                return;
+              }
+              void navigate({ to: '/flow/task/$id', params: { id: relatedId } });
+            }}
+          />
         </DetailField>
 
         <DetailField icon={Tag} label={t('flow.taskDetail.labels')}>

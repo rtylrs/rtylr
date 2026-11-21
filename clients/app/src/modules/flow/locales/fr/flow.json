@@ -92,10 +92,17 @@
     "topItems": "Navigation principale",
     "yourReports": "Vos rapports"
   },
+  "blockedBadge": {
+    "text": "Bloquée",
+    "label_one": "Bloquée par {{count}} tâche ouverte",
+    "label_other": "Bloquée par {{count}} tâches ouvertes",
+    "tooltipTitle_one": "Bloquée par {{count}} tâche ouverte",
+    "tooltipTitle_other": "Bloquée par {{count}} tâches ouvertes",
+    "loading": "Chargement des blocages…"
+  },
   "taskDetail": {
     "activity": "Activité",
     "add": "Ajouter",
-    "addDependency": "Ajouter une dépendance…",
     "addLabel": "+ Ajouter une étiquette",
     "addShort": "+ Ajouter",
     "archive": "Archiver",
@@ -114,7 +121,6 @@
     "decision": "Décision",
     "decisionPlaceholder": "Pourquoi cette approche (une ligne)",
     "delete": "Supprimer",
-    "dependencies": "Dépendances",
     "descriptionFormat": {
       "bold": "Gras",
       "bulletList": "Liste à puces",
@@ -225,6 +231,27 @@
     },
     "noMilestone": "Aucun jalon",
     "noMilestonesInProject": "Aucun jalon dans ce projet",
+    "relations": "Relations",
+    "relationType": "Type de relation",
+    "relationSearch": "Rechercher par clé ou titre",
+    "relationResults": "Tâches correspondantes",
+    "relationNoMatch": "Aucune tâche correspondante",
+    "removeRelation": "Retirer la relation avec {{identifier}}",
+    "relationConflict": "Ces tâches sont déjà liées ainsi, ou ce lien les ferait se bloquer mutuellement.",
+    "relationSelf": "Une tâche ne peut pas être liée à elle-même.",
+    "relationKinds": {
+      "blocks": "Bloque",
+      "blocked_by": "Bloquée par",
+      "relates_to": "Liée à",
+      "duplicates": "Duplique",
+      "duplicated_by": "Dupliquée par",
+      "clones": "Clone",
+      "cloned_by": "Clonée par"
+    },
+    "closeDuplicateTitle": "Fermer {{identifier}} comme doublon ?",
+    "closeDuplicateDescription": "Elle passe en Annulée. Le lien reste, pour retrouver la tâche conservée.",
+    "closeDuplicateConfirm": "Fermer le doublon",
+    "closeDuplicateKeepOpen": "Laisser ouverte",
     "noCycle": "Carnet (aucun cycle)",
     "noCyclesInProject": "Aucun cycle ouvert"
   },
@@ -678,7 +705,8 @@
       "dueDate": "Date d'échéance",
       "estimate": "Estimation",
       "cycle": "Itération",
-      "milestone": "Jalon"
+      "milestone": "Jalon",
+      "blocked": "Badge Bloquée"
     },
     "groupByHeading": "Grouper par",
     "scopeExplained": "Ces réglages n'appartiennent qu'à vous et sont conservés par projet dans ce navigateur. Les modifier ne change le tableau de personne d'autre.",

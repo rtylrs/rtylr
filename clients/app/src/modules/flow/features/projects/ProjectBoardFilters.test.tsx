@@ -82,6 +82,10 @@ vi.mock('./useProjectMembers', () => ({
 }));
 vi.mock('../cycles/useCycles', () => ({ useCycles: () => ({ data: [] }) }));
 vi.mock('../milestones/useMilestones', () => ({ useMilestones: () => ({ data: [] }) }));
+// Cards render the blocked badge, whose relations hook reads the Flow API.
+vi.mock('../tasks/useTaskRelations', () => ({
+  useTaskRelations: () => ({ data: undefined, isPending: true }),
+}));
 vi.mock('../tasks/useLabels', () => ({
   useLabels: () => ({ data: [{ id: 7, name: 'Design', color: '#f00', createdAt: '' }] }),
 }));

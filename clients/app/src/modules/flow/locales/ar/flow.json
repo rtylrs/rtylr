@@ -92,10 +92,25 @@
     "topItems": "التنقل العلوي",
     "yourReports": "تقاريرك"
   },
+  "blockedBadge": {
+    "text": "معاقة",
+    "label_zero": "معاقة بواسطة {{count}} مهمة مفتوحة",
+    "label_one": "معاقة بواسطة مهمة مفتوحة واحدة",
+    "label_two": "معاقة بواسطة مهمتين مفتوحتين",
+    "label_few": "معاقة بواسطة {{count}} مهام مفتوحة",
+    "label_many": "معاقة بواسطة {{count}} مهمة مفتوحة",
+    "label_other": "معاقة بواسطة {{count}} مهمة مفتوحة",
+    "tooltipTitle_zero": "معاقة بواسطة {{count}} مهمة مفتوحة",
+    "tooltipTitle_one": "معاقة بواسطة مهمة مفتوحة واحدة",
+    "tooltipTitle_two": "معاقة بواسطة مهمتين مفتوحتين",
+    "tooltipTitle_few": "معاقة بواسطة {{count}} مهام مفتوحة",
+    "tooltipTitle_many": "معاقة بواسطة {{count}} مهمة مفتوحة",
+    "tooltipTitle_other": "معاقة بواسطة {{count}} مهمة مفتوحة",
+    "loading": "جارٍ تحميل المهام المعيقة…"
+  },
   "taskDetail": {
     "activity": "النشاط",
     "add": "إضافة",
-    "addDependency": "إضافة تبعية…",
     "addLabel": "+ إضافة تسمية",
     "addShort": "+ إضافة",
     "archive": "أرشفة",
@@ -114,7 +129,6 @@
     "decision": "القرار",
     "decisionPlaceholder": "لماذا هذا الأسلوب (سطر واحد)",
     "delete": "حذف",
-    "dependencies": "التبعيات",
     "descriptionFormat": {
       "bold": "غامق",
       "bulletList": "قائمة نقطية",
@@ -228,6 +242,27 @@
     },
     "noMilestone": "بدون معلم",
     "noMilestonesInProject": "لا معالم في هذا المشروع",
+    "relations": "العلاقات",
+    "relationType": "نوع العلاقة",
+    "relationSearch": "ابحث بالمعرّف أو العنوان",
+    "relationResults": "المهام المطابقة",
+    "relationNoMatch": "لا توجد مهام مطابقة",
+    "removeRelation": "إزالة العلاقة مع {{identifier}}",
+    "relationConflict": "هاتان المهمتان مرتبطتان بهذه الطريقة مسبقًا، أو أن الربط سيجعل كلًّا منهما تعيق الأخرى.",
+    "relationSelf": "لا يمكن ربط مهمة بنفسها.",
+    "relationKinds": {
+      "blocks": "تعيق",
+      "blocked_by": "معاقة بواسطة",
+      "relates_to": "مرتبطة بـ",
+      "duplicates": "تكرّر",
+      "duplicated_by": "مكرّرة في",
+      "clones": "نسخة من",
+      "cloned_by": "منسوخة في"
+    },
+    "closeDuplicateTitle": "إغلاق {{identifier}} كمهمة مكرّرة؟",
+    "closeDuplicateDescription": "ستنتقل إلى ملغاة. يبقى الرابط حتى يصل من يجدها إلى المهمة المعتمدة.",
+    "closeDuplicateConfirm": "إغلاق المكرّرة",
+    "closeDuplicateKeepOpen": "إبقاؤها مفتوحة",
     "noCycle": "قائمة الأعمال (بدون دورة)",
     "noCyclesInProject": "لا توجد دورات مفتوحة"
   },
@@ -690,7 +725,8 @@
       "dueDate": "تاريخ الاستحقاق",
       "estimate": "التقدير",
       "cycle": "الدورة",
-      "milestone": "المرحلة"
+      "milestone": "المرحلة",
+      "blocked": "شارة المهمة المعاقة"
     },
     "groupByHeading": "التجميع حسب",
     "scopeExplained": "هذه الإعدادات خاصة بك وتُحفظ لكل مشروع في هذا المتصفح. تغييرها لا يغيّر لوحة أي شخص آخر.",

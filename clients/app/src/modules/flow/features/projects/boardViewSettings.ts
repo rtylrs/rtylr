@@ -45,6 +45,7 @@ export const CARD_FIELDS = [
   'estimate',
   'cycle',
   'milestone',
+  'blocked',
 ] as const;
 
 export type CardField = (typeof CARD_FIELDS)[number];
@@ -61,6 +62,8 @@ export const DEFAULT_CARD_FIELDS: CardFields = {
   estimate: false,
   cycle: false,
   milestone: false,
+  // A warning rather than a detail, so it starts on.
+  blocked: true,
 };
 
 export const HIDE_DONE_CHOICES = [1, 7, 14, 30, null] as const;

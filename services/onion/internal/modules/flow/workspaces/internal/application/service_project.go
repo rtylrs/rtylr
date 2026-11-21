@@ -169,11 +169,14 @@ func (s *Service) GetTaskDetail(ctx context.Context, taskID int64) (domain.TaskD
 	}
 
 	// One query covers the task and its subtasks.
-	withValues := append([]domain.Task{task}, subtasks...)
-	if err := s.attachFieldValues(ctx, task.BusinessID, withValues); err != nil {
+	withSubtasks := append([]domain.Task{task}, subtasks...)
+	if err := s.applyBlockedState(ctx, task.BusinessID, withSubtasks); err != nil {
 		return domain.TaskDetail{}, err
 	}
-	task, subtasks = withValues[0], withValues[1:]
+	if err := s.attachFieldValues(ctx, task.BusinessID, withSubtasks); err != nil {
+		return domain.TaskDetail{}, err
+	}
+	task, subtasks = withSubtasks[0], withSubtasks[1:]
 
 	return domain.TaskDetail{
 		Task:     task,
@@ -320,9 +323,16 @@ func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, 
 		}
 	}
 
+	// Both a status and a column write can close the task.
+	announceUnblocked := func(int64) {}
+	if input.Status != "" || input.SectionID != nil {
+		announceUnblocked = s.watchUnblocks(ctx, input.BusinessID, input.ID)
+	}
+
 	if updateErr := s.repo.UpdateTask(ctx, input); updateErr != nil {
 		return updateErr
 	}
+	announceUnblocked(userID)
 	if input.FocusPin != nil {
 		if pinErr := s.repo.SetTaskFocusPin(ctx, input.ID, userID, input.BusinessID, *input.FocusPin); pinErr != nil {
 			return pinErr

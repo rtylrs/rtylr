@@ -44,6 +44,9 @@ func (s *Service) ListTasksV2(ctx context.Context, callerID, businessID int64, f
 	if err != nil {
 		return nil, 0, err
 	}
+	if err := s.applyBlockedState(ctx, businessID, tasks); err != nil {
+		return nil, 0, err
+	}
 	// One extra query for the page, whatever its size.
 	if err := s.attachFieldValues(ctx, businessID, tasks); err != nil {
 		return nil, 0, err
@@ -54,7 +57,14 @@ func (s *Service) ListTasksV2(ctx context.Context, callerID, businessID int64, f
 // SearchTasksV2 is business-wide fulltext search under the same visibility
 // clause as listing.
 func (s *Service) SearchTasksV2(ctx context.Context, callerID, businessID int64, q string, limit, offset int64) ([]domain.Task, int64, error) {
-	return s.repo.SearchTasksV2(ctx, businessID, callerID, false, q, limit, offset)
+	tasks, total, err := s.repo.SearchTasksV2(ctx, businessID, callerID, false, q, limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	if err := s.applyBlockedState(ctx, businessID, tasks); err != nil {
+		return nil, 0, err
+	}
+	return tasks, total, nil
 }
 
 // EnsureAssigneeMembership implements ruling T1: assigning work to someone
@@ -111,7 +121,13 @@ func (s *Service) EnsureAssigneeMembership(ctx context.Context, projectID, busin
 // Ruling T2 keeps dependencies cross-project but within the business, so the
 // blocker is checked to belong to the same business rather than trusted from the
 // request.
+//
+// It is the "blocks" relation under its older name, so it refuses the same
+// self link and blocking cycle AddTaskRelation does. A repeat add stays a no-op.
 func (s *Service) AddTaskDependency(ctx context.Context, taskID, dependsOnTaskID, businessID int64) error {
+	if taskID == dependsOnTaskID {
+		return domain.ErrRelationSelf
+	}
 	// Validated through the blocker's project, not through task.BusinessID:
 	// enrichedTaskSelect does not select business_id, so a task read back here
 	// always reports BusinessID 0 and a direct comparison could never pass.
@@ -123,6 +139,13 @@ func (s *Service) AddTaskDependency(ctx context.Context, taskID, dependsOnTaskID
 	}
 	if _, projErr := s.repo.GetProjectV2ByID(ctx, blocker.ProjectID, businessID); projErr != nil {
 		return domain.ErrUnauthorized
+	}
+	cycle, err := s.repo.HasBlockingPath(ctx, dependsOnTaskID, taskID, businessID)
+	if err != nil {
+		return err
+	}
+	if cycle {
+		return domain.ErrRelationCycle
 	}
 	return s.repo.AddTaskDependency(ctx, domain.AddTaskDependencyInput{
 		TaskID:          taskID,

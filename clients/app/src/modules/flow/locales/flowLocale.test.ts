@@ -106,6 +106,10 @@ describe('flow locale parity', () => {
       // projectOverview.health.onTrack and .recentComments, both differ, which
       // is the check that this is a cognate rather than a missed translation.
       'projectOverview.total',
+      // "Relations" is the same word in French. Every relation kind under it
+      // (taskDetail.relationKinds) differs, which is the check that this is a
+      // cognate rather than a missed translation.
+      'taskDetail.relations',
     ]);
 
     const copied = keyPaths(en).filter((path) => {

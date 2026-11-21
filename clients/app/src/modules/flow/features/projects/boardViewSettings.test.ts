@@ -34,7 +34,14 @@ describe('board view defaults', () => {
       estimate: false,
       cycle: false,
       milestone: false,
+      // New with task relations, on so a blocked card says so out of the box.
+      blocked: true,
     });
+  });
+
+  it('turns the blocked badge on for boards saved before it existed', () => {
+    const parsed = parseBoardViewSettings({ cardFields: { estimate: true } });
+    expect(parsed.cardFields.blocked).toBe(true);
   });
 });
 

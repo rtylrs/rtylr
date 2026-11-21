@@ -135,7 +135,7 @@ func (a *TaskAPIV2) AddTaskDependency(ctx context.Context, req *flowtaskv2.AddTa
 		return nil, onekiterrors.New(http.StatusBadRequest, "depends_on_task_id is required")
 	}
 	if err := a.Service.AddTaskDependency(ctx, req.GetTaskId(), body.GetDependsOnTaskId(), businessID); err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to add dependency")
+		return nil, relationError(err, "Failed to add dependency")
 	}
 	return &flowtaskv2.AddTaskDependencyResponse{Message: "Dependency added"}, nil
 }

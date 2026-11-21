@@ -308,6 +308,16 @@ type repository interface {
 	customFieldStore
 	AddProjectMember(ctx context.Context, input domain.AddProjectMemberInput) error
 	AddTaskDependency(ctx context.Context, input domain.AddTaskDependencyInput) error
+	AddTaskRelation(ctx context.Context, edge domain.TaskRelationEdge, businessID int64) (int64, error)
+	TaskRelationExists(ctx context.Context, taskID, otherTaskID int64, linkType string, businessID int64) (bool, error)
+	GetTaskRelation(ctx context.Context, id, businessID int64) (domain.TaskRelationEdge, error)
+	DeleteTaskRelation(ctx context.Context, id, businessID int64) error
+	ListTaskRelations(ctx context.Context, taskID, businessID int64) ([]domain.TaskRelation, error)
+	HasBlockingPath(ctx context.Context, fromTaskID, toTaskID, businessID int64) (bool, error)
+	CountOpenBlockers(ctx context.Context, taskIDs []int64, businessID int64) (map[int64]int32, error)
+	ListOpenBlockerIDs(ctx context.Context, taskIDs []int64, businessID int64) ([]int64, error)
+	ListOpenBlockerIDsByStatus(ctx context.Context, statusID, businessID int64) ([]int64, error)
+	ListUnblockedTasks(ctx context.Context, blockerIDs []int64, businessID int64) ([]domain.UnblockedTask, error)
 	AddWorkspaceMember(ctx context.Context, input domain.AddWorkspaceMemberInput) error
 	ArchiveProject(ctx context.Context, id, businessID int64, purgeAt *time.Time) error
 	CountWorkTypeChildren(ctx context.Context, businessID, parentID int64) (int64, error)

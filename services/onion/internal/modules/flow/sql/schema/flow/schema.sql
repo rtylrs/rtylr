@@ -367,10 +367,11 @@ CREATE TABLE IF NOT EXISTS `flow_task_dependencies` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `task_id` bigint NOT NULL,
   `depends_on_task_id` bigint NOT NULL,
+  `link_type` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'blocks',
   `business_id` bigint NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_flow_task_dependencies` (`task_id`,`depends_on_task_id`),
+  UNIQUE KEY `uq_flow_task_dependencies` (`task_id`,`depends_on_task_id`,`link_type`),
   KEY `idx_flow_task_dependencies_task` (`task_id`,`business_id`),
   KEY `idx_flow_task_dependencies_depends_on` (`depends_on_task_id`,`business_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

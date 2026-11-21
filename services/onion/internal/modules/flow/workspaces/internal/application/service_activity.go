@@ -327,9 +327,11 @@ func (s *Service) UpdateTaskStatus(ctx context.Context, input domain.UpdateTaskS
 		}
 	}
 
+	announceUnblocked := s.watchUnblocks(ctx, existing.BusinessID, input.ID)
 	if updateErr := s.repo.UpdateTaskStatus(ctx, input); updateErr != nil {
 		return updateErr
 	}
+	announceUnblocked(userID)
 
 	if existing.Status != input.Status {
 		notificationTask := existing

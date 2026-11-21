@@ -192,26 +192,6 @@ export function useEpicRollups(projectId: string | undefined) {
   });
 }
 
-export function useAddTaskDependency() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ taskId, dependsOnTaskId }: { taskId: string; dependsOnTaskId: string }) =>
-      unwrap(flowApi.addTaskDependency(taskId, dependsOnTaskId)),
-    onSuccess: (_data, { taskId }) => qc.invalidateQueries({ queryKey: ['task', taskId] }),
-    onError: () => toast.error(t('flowToasts.task.updateFailed')),
-  });
-}
-
-export function useRemoveTaskDependency() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ taskId, dependsOnTaskId }: { taskId: string; dependsOnTaskId: string }) =>
-      unwrap(flowApi.removeTaskDependency(taskId, dependsOnTaskId)),
-    onSuccess: (_data, { taskId }) => qc.invalidateQueries({ queryKey: ['task', taskId] }),
-    onError: () => toast.error(t('flowToasts.task.updateFailed')),
-  });
-}
-
 export function useTaskAttachments(taskId: string | undefined) {
   return useQuery<{ attachments: ApiAttachment[] }>({
     queryKey: ['task-attachments', taskId],

@@ -55,6 +55,20 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 			response, err := NewTaskAPI(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).CreateTask(ctx, &flowtaskv1.CreateTaskRequest{AssigneeId: &assignedUserID})
 			return response, err
 		}},
+		// Task relations. Fixture tasks 7302 and 7303 share a project with
+		// relation 7304 between them (70_direct_authorization.sql).
+		{Name: "flow task relations view", App: authorization.AppFlow, Permission: "flow:tasks:view", Call: func(ctx context.Context) (any, error) {
+			response, err := NewTaskAPIV2(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).ListTaskRelations(ctx, &flowtaskv2.ListTaskRelationsRequest{TaskId: 7303})
+			return response, err
+		}},
+		{Name: "flow task relations add", App: authorization.AppFlow, Permission: "flow:tasks:edit", Call: func(ctx context.Context) (any, error) {
+			response, err := NewTaskAPIV2(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).AddTaskRelation(ctx, &flowtaskv2.AddTaskRelationRequest{TaskId: 7302, Body: &flowtaskv2.AddTaskRelationBody{OtherTaskId: 7303, Type: "relates"}})
+			return response, err
+		}},
+		{Name: "flow task relations remove", App: authorization.AppFlow, Permission: "flow:tasks:edit", Call: func(ctx context.Context) (any, error) {
+			response, err := NewTaskAPIV2(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).RemoveTaskRelation(ctx, &flowtaskv2.RemoveTaskRelationRequest{TaskId: 7303, RelationId: 7304})
+			return response, err
+		}},
 		{Name: "flow tasks set parent", App: authorization.AppFlow, Permission: "flow:tasks:edit", Call: func(ctx context.Context) (any, error) {
 			response, err := NewTaskAPIV2(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).SetTaskParent(ctx, &flowtaskv2.SetTaskParentRequest{Id: 1, Body: &flowtaskv2.SetTaskParentBody{}})
 			return response, err

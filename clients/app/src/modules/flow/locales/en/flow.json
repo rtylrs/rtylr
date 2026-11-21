@@ -92,10 +92,17 @@
     "topItems": "Top navigation",
     "yourReports": "Your reports"
   },
+  "blockedBadge": {
+    "text": "Blocked",
+    "label_one": "Blocked by {{count}} open task",
+    "label_other": "Blocked by {{count}} open tasks",
+    "tooltipTitle_one": "Blocked by {{count}} open task",
+    "tooltipTitle_other": "Blocked by {{count}} open tasks",
+    "loading": "Loading blockers…"
+  },
   "taskDetail": {
     "activity": "Activity",
     "add": "Add",
-    "addDependency": "Add dependency…",
     "addLabel": "+ Add label",
     "addShort": "+ Add",
     "archive": "Archive",
@@ -114,7 +121,6 @@
     "decision": "Decision",
     "decisionPlaceholder": "Why this approach (one line)",
     "delete": "Delete",
-    "dependencies": "Dependencies",
     "descriptionFormat": {
       "bold": "Bold",
       "bulletList": "Bulleted list",
@@ -224,6 +230,27 @@
     },
     "noMilestone": "No milestone",
     "noMilestonesInProject": "No milestones in this project",
+    "relations": "Relations",
+    "relationType": "Relation type",
+    "relationSearch": "Search by key or title",
+    "relationResults": "Matching tasks",
+    "relationNoMatch": "No matching tasks",
+    "removeRelation": "Remove relation with {{identifier}}",
+    "relationConflict": "These tasks are already linked this way, or the link would make them block each other.",
+    "relationSelf": "A task cannot be linked to itself.",
+    "relationKinds": {
+      "blocks": "Blocks",
+      "blocked_by": "Blocked by",
+      "relates_to": "Relates to",
+      "duplicates": "Duplicates",
+      "duplicated_by": "Duplicated by",
+      "clones": "Clones",
+      "cloned_by": "Cloned by"
+    },
+    "closeDuplicateTitle": "Close {{identifier}} as a duplicate?",
+    "closeDuplicateDescription": "It moves to Cancelled. The link stays, so anyone who finds it can follow it to the task being kept.",
+    "closeDuplicateConfirm": "Close duplicate",
+    "closeDuplicateKeepOpen": "Keep open",
     "noCycle": "Backlog (no cycle)",
     "noCyclesInProject": "No open cycles"
   },
@@ -674,7 +701,8 @@
       "dueDate": "Due date",
       "estimate": "Estimate",
       "cycle": "Cycle",
-      "milestone": "Milestone"
+      "milestone": "Milestone",
+      "blocked": "Blocked badge"
     },
     "groupByHeading": "Group by",
     "scopeExplained": "These settings are yours alone and kept per project in this browser. Changing them changes nobody else's board.",

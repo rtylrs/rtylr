@@ -93,6 +93,10 @@ const plans = vi.hoisted(() => ({
 }));
 vi.mock('../cycles/useCycles', () => ({ useCycles: () => plans.cycles }));
 vi.mock('../milestones/useMilestones', () => ({ useMilestones: () => plans.milestones }));
+// Cards render the blocked badge, whose relations hook reads the Flow API.
+vi.mock('../tasks/useTaskRelations', () => ({
+  useTaskRelations: () => ({ data: undefined, isPending: true }),
+}));
 vi.mock('../tasks/useLabels', () => ({ useLabels: () => plans.labels }));
 vi.mock('./useColumns', () => ({ useMoveTaskToColumn: () => mutation }));
 

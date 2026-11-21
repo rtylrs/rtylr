@@ -58,8 +58,6 @@ const updateTaskMutate = vi.hoisted(() => vi.fn());
 const deleteTaskMutate = vi.hoisted(() => vi.fn());
 vi.mock('./useTasks', () => ({
   useTasks: () => ({ data: [], isLoading: false, isError: false }),
-  useAddTaskDependency: () => ({ mutate: vi.fn(), isPending: false }),
-  useRemoveTaskDependency: () => ({ mutate: vi.fn(), isPending: false }),
   useSetTaskParent: () => ({ mutate: vi.fn(), isPending: false }),
   useEpicRollups: () => ({ data: [] }),
   useUpdateTask: () => ({ mutate: updateTaskMutate, isPending: false }),
@@ -109,6 +107,7 @@ vi.mock('../projects-v2/useDeveloperMode', () => ({
   useIsDeveloperProject: () => developerProjectMock(),
 }));
 vi.mock('./components/LinksSection', () => ({ default: () => null }));
+vi.mock('./components/RelationsSection', () => ({ default: () => null }));
 vi.mock('./useTaskLinks', () => ({ useTaskLinks: () => ({ data: [] }) }));
 vi.mock('../projects/useCurrentProject', () => ({
   useCurrentProject: useCurrentProjectSpy,

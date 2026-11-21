@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/domain"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 // F-A: per-project custom statuses.
@@ -99,7 +100,23 @@ func (s *Service) DeleteProjectStatus(ctx context.Context, id, moveToID, callerI
 	if roleErr := s.RequireProjectRole(ctx, existing.ProjectID, callerID, businessID, domain.FlowRoleAdmin); roleErr != nil {
 		return 0, domain.ErrUnauthorized
 	}
-	return s.repo.DeleteStatus(ctx, id, businessID, moveToID)
+	// Deleting a status moves every task on it in one statement, which can
+	// close many blockers at once.
+	var blockers []int64
+	if moveToID != 0 {
+		if blockers, err = s.repo.ListOpenBlockerIDsByStatus(ctx, id, businessID); err != nil {
+			logger.Ctx(ctx).Error("DeleteProjectStatus: failed to read open blockers, no unblock notification will be sent",
+				logger.Error(err))
+		}
+	}
+	moved, err := s.repo.DeleteStatus(ctx, id, businessID, moveToID)
+	if err != nil {
+		return 0, err
+	}
+	if len(blockers) > 0 {
+		s.announceUnblocked(ctx, businessID, callerID, blockers)
+	}
+	return moved, nil
 }
 
 // SetTaskStatus applies a custom status to a task, or clears it when statusID is
@@ -125,9 +142,11 @@ func (s *Service) SetTaskStatus(ctx context.Context, taskID, statusID, callerID,
 		if err != nil {
 			return "", err
 		}
+		announceUnblocked := s.watchUnblocks(ctx, businessID, taskID)
 		if err := s.repo.SetTaskStatusID(ctx, taskID, businessID, 0, task.Status); err != nil {
 			return "", err
 		}
+		announceUnblocked(callerID)
 		return task.Status, nil
 	}
 
@@ -143,9 +162,11 @@ func (s *Service) SetTaskStatus(ctx context.Context, taskID, statusID, callerID,
 		return "", domain.ErrUnauthorized
 	}
 
+	announceUnblocked := s.watchUnblocks(ctx, businessID, taskID)
 	if err := s.repo.SetTaskStatusID(ctx, taskID, businessID, statusID, status.LegacyStatus); err != nil {
 		return "", err
 	}
+	announceUnblocked(callerID)
 	if task.Status != status.LegacyStatus {
 		task.Status = status.LegacyStatus
 		s.announceStatusChange(ctx, task, callerID, status.LegacyStatus)

@@ -124,6 +124,13 @@ func taskListConditions(scopeCol string, scopeVal int64, filter domain.ListTasks
 	if filter.Priority != "" {
 		conds = append(conds, sq.Eq{"t.priority": filter.Priority})
 	}
+	if filter.Blocked != nil {
+		if *filter.Blocked {
+			conds = append(conds, sq.Expr(openBlockerExistsSQL))
+		} else {
+			conds = append(conds, sq.Expr("NOT "+openBlockerExistsSQL))
+		}
+	}
 	return append(conds, taskHierarchyConditions(filter)...)
 }
 

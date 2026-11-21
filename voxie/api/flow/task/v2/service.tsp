@@ -129,6 +129,27 @@ interface TaskService {
   ): RemoveTaskDependencyResponse;
 
   /**
+   * addTaskRelation links two tasks with a typed relation: blocks, relates,
+   * duplicates or clones. A self link is 400, an existing relation is 409 and
+   * a blocks relation that would close a cycle is 409.
+   */
+  @post
+  @route("/tasks/{task_id}/relations")
+  addTaskRelation(...AddTaskRelationRequest): AddTaskRelationResponse;
+
+  /**
+   * listTaskRelations returns a task's relations grouped by type and
+   * direction. addTaskDependency rows appear here as blocked_by.
+   */
+  @get
+  @route("/tasks/{task_id}/relations")
+  listTaskRelations(...ListTaskRelationsRequest): ListTaskRelationsResponse;
+
+  @delete
+  @route("/tasks/{task_id}/relations/{relation_id}")
+  removeTaskRelation(...RemoveTaskRelationRequest): RemoveTaskRelationResponse;
+
+  /**
    * setTaskParent moves a task under an epic or a task, or clears both. The
    * hierarchy is epic, task, subtask: the parent must be in the same project,
    * an epic takes no parent, and nothing may sit under a subtask.
