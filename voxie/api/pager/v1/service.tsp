@@ -6,9 +6,10 @@ using TypeSpec.Http;
 namespace pager.v1;
 
 /**
- * The order pager: a customer scans the venue's poster, enters the number on
- * the receipt and is rung when the staff mark that number ready. A venue is
- * an ordinary business.
+ * The order pager: a customer scans the venue's QR and gets a short code, the
+ * cashier labels that phone's ticket with the order number or the customer's
+ * name, and the phone rings when the staff mark it ready. A venue is an
+ * ordinary business.
  */
 @route("/pager/v1")
 interface PagerService {
@@ -20,11 +21,11 @@ interface PagerService {
   @Onkt.meta("rate_limit", "60/m")
   getPublicVenue(...GetPublicVenueRequest): GetPublicVenueResponse;
 
-  /** Follows the ticket with this number, creating it unless the venue is strict. */
+  /** Opens a waiting ticket for the phone that scanned the venue's QR. */
   @post
-  @route("/public/venues/{slug}/join")
+  @route("/public/venues/{slug}/scan")
   @Onkt.meta("rate_limit", "60/m")
-  joinTicket(...JoinTicketRequest): JoinTicketResponse;
+  scanTicket(...ScanTicketRequest): ScanTicketResponse;
 
   /** Returns the ticket a phone is following. Polled every few seconds. */
   @get
@@ -51,15 +52,15 @@ interface PagerService {
   subscribePush(...SubscribePushRequest): SubscribePushResponse;
 
   // Staff routes act on the signed-in caller's business.
-  /** Lists the open tickets, oldest first. */
+  /** Lists the open tickets, labelled or not, oldest first. */
   @get
   @route("/tickets")
   listTickets(...ListTicketsRequest): ListTicketsResponse;
 
-  /** Enters a number. Returns the existing ticket when the number is already open. */
+  /** Labels a waiting ticket with the order number or the customer's name. */
   @post
-  @route("/tickets")
-  createTicket(...CreateTicketRequest): CreateTicketResponse;
+  @route("/tickets/{id}/label")
+  labelTicket(...LabelTicketRequest): LabelTicketResponse;
 
   /** Marks a waiting ticket ready, which rings the phones following it. */
   @post
