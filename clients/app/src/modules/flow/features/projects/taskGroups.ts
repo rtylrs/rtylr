@@ -1,6 +1,8 @@
 import type { Task } from '../../shared/stores/flowStore';
 import type { BoardGroupKey } from '../../shared/lib/boardUtils';
 import { addDays, todayIso } from '../../shared/lib/dateUtils';
+import type { ApiField } from '../../shared/services/flowApi';
+import { fieldIdFromKey, fieldKey, fieldValueParts } from '../../shared/lib/customFields';
 
 export const PRIORITY_ORDER: Task['priority'][] = [
   'urgent',
@@ -29,7 +31,32 @@ export const DUE_LANES: { key: string; labelKey: string }[] = [
   { key: 'No due date', labelKey: 'flow.board.dueLane.noDueDate' },
 ];
 
+/** The lane of tasks with no value in the field the board is grouped by. */
+export const NO_FIELD_LANE = '_no_value';
+
+/** Custom fields a board can be grouped by: single selects, one lane per option. */
+export function groupableFields(fields: readonly ApiField[]): ApiField[] {
+  return fields.filter((f) => f.type === 'select');
+}
+
+/** A grouped-by field's lanes in option order, then "No value". */
+export function fieldLanes(field: ApiField): { key: string; label?: string; labelKey?: string }[] {
+  return [
+    ...field.options.map((o) => ({ key: o.id, label: o.label })),
+    { key: NO_FIELD_LANE, labelKey: 'flow.fields.noValue' },
+  ];
+}
+
+/** The group-by choices a project's fields add after the built-in ones. */
+export function fieldGroupOptions(
+  fields: readonly ApiField[]
+): { key: BoardGroupKey; label: string }[] {
+  return groupableFields(fields).map((f) => ({ key: fieldKey(f.id), label: f.name }));
+}
+
 export function laneKeyFor(t: Task, groupBy: BoardGroupKey): string {
+  const fieldId = fieldIdFromKey(groupBy);
+  if (fieldId !== null) return fieldValueParts(t.fieldValues?.[fieldId])[0] ?? NO_FIELD_LANE;
   if (groupBy === 'assignee') return t.assignee || 'Unassigned';
   if (groupBy === 'priority') return t.priority;
   if (groupBy === 'due') {

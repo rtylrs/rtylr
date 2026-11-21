@@ -26,6 +26,8 @@ interface BoardSettingsPanelProps {
   /** Project creator or admin. A viewer sees the panel read-only with the reason. */
   canManage: boolean;
   groupBy: BoardGroupKey;
+  /** The project's select fields, offered after the built-in groupings. */
+  fieldGroupOptions?: readonly { key: BoardGroupKey; label: string }[];
   onGroupByChange: (next: BoardGroupKey) => void;
   /** Columns are statuses, edited in the statuses panel. */
   onManageStatuses: () => void;
@@ -44,6 +46,7 @@ const BoardSettingsPanel = ({
   columns,
   canManage,
   groupBy,
+  fieldGroupOptions = [],
   onGroupByChange,
   onManageStatuses,
 }: BoardSettingsPanelProps): React.JSX.Element | null => {
@@ -185,7 +188,10 @@ const BoardSettingsPanel = ({
             {t('flow.board.scopeExplained')}
           </p>
           <div role="radiogroup" aria-label={t('flow.board.groupByHeading')} className="space-y-1">
-            {GROUP_KEYS.map((key) => (
+            {[
+              ...GROUP_KEYS.map((key) => ({ key, label: t(`flow.board.groupBy.${key}`) })),
+              ...fieldGroupOptions,
+            ].map(({ key, label }) => (
               <button
                 key={key}
                 type="button"
@@ -202,7 +208,7 @@ const BoardSettingsPanel = ({
                   className="h-1.5 w-1.5 shrink-0 rounded-full"
                   style={{ background: groupBy === key ? 'var(--accent)' : 'transparent' }}
                 />
-                {t(`flow.board.groupBy.${key}`)}
+                {label}
               </button>
             ))}
           </div>

@@ -48,7 +48,18 @@ import {
   sortStatuses,
   statusIdOf,
 } from './statusUtils';
-import { DUE_LANES, PRIORITY_LABEL_KEY, PRIORITY_ORDER, laneKeyFor } from './taskGroups';
+import {
+  DUE_LANES,
+  PRIORITY_LABEL_KEY,
+  PRIORITY_ORDER,
+  fieldGroupOptions,
+  fieldLanes,
+  groupableFields,
+  laneKeyFor,
+} from './taskGroups';
+import { useProjectFields } from './useFields';
+import { fieldIdFromKey } from '../../shared/lib/customFields';
+import type { ApiField } from '../../shared/services/flowApi';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import type { BoardGroupKey } from '../../shared/lib/boardUtils';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
@@ -164,8 +175,10 @@ const measureSlots = (list: HTMLElement | null | undefined): CardSlot[] => {
 /** Re-exported name kept local for readability; the type lives in boardUtils. */
 type GroupKey = BoardGroupKey;
 
-// labelKey, not label: module scope, so it cannot call `t` itself.
-const GROUP_OPTIONS: { key: GroupKey; labelKey: string }[] = [
+// labelKey, not label: module scope, so it cannot call `t` itself. A custom
+// field option carries its own name as `label` instead.
+type GroupOption = { key: GroupKey; labelKey?: string; label?: string };
+const GROUP_OPTIONS: GroupOption[] = [
   { key: 'none', labelKey: 'flow.board.groupBy.none' },
   { key: 'assignee', labelKey: 'flow.board.groupBy.assignee' },
   { key: 'priority', labelKey: 'flow.board.groupBy.priority' },
@@ -216,9 +229,16 @@ function buildLanes(
  */
 function buildLaneIndex(
   tasks: Task[],
-  groupBy: GroupKey
+  groupBy: GroupKey,
+  fields: readonly ApiField[]
 ): { key: string; label?: string; labelKey?: string }[] {
   if (groupBy === 'none') return [{ key: '_all', label: '' }];
+
+  const fieldId = fieldIdFromKey(groupBy);
+  if (fieldId !== null) {
+    const field = fields.find((f) => f.id === fieldId);
+    return field ? fieldLanes(field) : [{ key: '_all', label: '' }];
+  }
 
   if (groupBy === 'priority') {
     return PRIORITY_ORDER.map((p) => ({ key: p, labelKey: PRIORITY_LABEL_KEY[p] }));
@@ -242,6 +262,7 @@ function loadGroupBy(projectId: string): GroupKey {
     if (raw === 'none' || raw === 'assignee' || raw === 'priority' || raw === 'due') {
       return raw;
     }
+    if (raw && /^field:\d+$/.test(raw)) return raw as GroupKey;
   } catch {
     // localStorage unavailable (SSR / private mode) - fall through.
   }
@@ -301,7 +322,7 @@ const ProjectBoard: React.FC = () => {
   const dragOver = dragView?.slot?.columnId ?? null; // column id
   const [addingColumn, setAddingColumn] = useState(false);
   const [newColumnName, setNewColumnName] = useState('');
-  const [groupBy, setGroupByState] = useState<GroupKey>('none');
+  const [storedGroupBy, setGroupByState] = useState<GroupKey>('none');
   const [pendingDeleteColumn, setPendingDeleteColumn] = useState<ApiStatus | null>(null);
   // Where a status named in the dialog is inserted; null while it is closed.
   const [insertAt, setInsertAt] = useState<number | null>(null);
@@ -314,6 +335,20 @@ const ProjectBoard: React.FC = () => {
   useEffect(() => {
     if (projectId) setGroupByState(loadGroupBy(projectId));
   }, [projectId]);
+
+  // Grouping by a custom field needs that field to still be a select of this
+  // project; a deleted one falls back to no grouping rather than hiding cards.
+  const fieldsQuery = useProjectFields(projectId ?? '');
+  const groupFields = useMemo(() => groupableFields(fieldsQuery.data ?? []), [fieldsQuery.data]);
+  const groupOptions = useMemo(
+    () => [...GROUP_OPTIONS, ...fieldGroupOptions(groupFields)],
+    [groupFields]
+  );
+  const groupFieldId = fieldIdFromKey(storedGroupBy);
+  const groupBy: GroupKey =
+    groupFieldId !== null && !groupFields.some((f) => f.id === groupFieldId)
+      ? 'none'
+      : storedGroupBy;
 
   const setGroupBy = (k: GroupKey): void => {
     setGroupByState(k);
@@ -350,7 +385,10 @@ const ProjectBoard: React.FC = () => {
   // Precompute the ordered lane index across all tasks so every column
   // renders the same rows in the same order - otherwise empty columns
   // would silently skip lanes and the swimlane grid misaligns.
-  const laneIndex = useMemo(() => buildLaneIndex(boardTasks, groupBy), [boardTasks, groupBy]);
+  const laneIndex = useMemo(
+    () => buildLaneIndex(boardTasks, groupBy, groupFields),
+    [boardTasks, groupBy, groupFields]
+  );
 
   // Every column is a move destination for the non-drag path (B2).
   const moveTargets: MoveTarget[] = useMemo(
@@ -691,7 +729,7 @@ const ProjectBoard: React.FC = () => {
         onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
         rightSlot={
           <div className="flex items-center gap-1.5">
-            <GroupByPicker groupBy={groupBy} onChange={setGroupBy} />
+            <GroupByPicker groupBy={groupBy} options={groupOptions} onChange={setGroupBy} />
             {canManageBoard && (
               <button
                 type="button"
@@ -738,6 +776,7 @@ const ProjectBoard: React.FC = () => {
         columns={columns}
         canManage={canManageBoard}
         groupBy={groupBy}
+        fieldGroupOptions={fieldGroupOptions(groupFields)}
         onGroupByChange={setGroupBy}
         onManageStatuses={() => {
           setBoardSettingsOpen(false);
@@ -1411,8 +1450,9 @@ const DropPlaceholder: React.FC<{ height: number; color: string }> = ({ height, 
 
 const GroupByPicker: React.FC<{
   groupBy: GroupKey;
+  options: GroupOption[];
   onChange: (k: GroupKey) => void;
-}> = ({ groupBy, onChange }) => {
+}> = ({ groupBy, options, onChange }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -1420,7 +1460,8 @@ const GroupByPicker: React.FC<{
   const close = useCallback((): void => setOpen(false), []);
   useClickOutside(ref, close);
 
-  const current = GROUP_OPTIONS.find((o) => o.key === groupBy)!;
+  const current = options.find((o) => o.key === groupBy) ?? GROUP_OPTIONS[0]!;
+  const optionLabel = (o: GroupOption): string => (o.labelKey ? t(o.labelKey) : (o.label ?? ''));
 
   return (
     <div ref={ref} className="relative">
@@ -1435,7 +1476,7 @@ const GroupByPicker: React.FC<{
         }}
       >
         <span style={{ color: 'var(--flow-text-dim)' }}>{t('flow.board.groupByLabel')}</span>
-        <span style={{ color: 'var(--flow-text)' }}>{t(current.labelKey)}</span>
+        <span style={{ color: 'var(--flow-text)' }}>{optionLabel(current)}</span>
         <ChevronDown size={11} />
       </button>
       {open && (
@@ -1446,7 +1487,7 @@ const GroupByPicker: React.FC<{
             border: '1px solid var(--flow-border)',
           }}
         >
-          {GROUP_OPTIONS.map((o) => (
+          {options.map((o) => (
             <button
               type="button"
               key={o.key}
@@ -1460,7 +1501,7 @@ const GroupByPicker: React.FC<{
                 fontWeight: o.key === groupBy ? 600 : 400,
               }}
             >
-              {t(o.labelKey)}
+              {optionLabel(o)}
             </button>
           ))}
         </div>
