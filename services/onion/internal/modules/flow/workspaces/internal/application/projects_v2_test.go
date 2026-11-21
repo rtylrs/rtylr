@@ -34,6 +34,8 @@ func v2Svc(t *testing.T) (*Service, context.Context, *sql.DB) {
 		"DELETE FROM flow_milestones WHERE business_id = ?",
 		"DELETE a FROM flow_task_attachments a JOIN flow_tasks t ON t.id = a.task_id WHERE t.business_id = ?",
 		"DELETE FROM flow_task_links WHERE business_id = ?",
+		"DELETE FROM flow_task_field_values WHERE business_id = ?",
+		"DELETE FROM flow_custom_fields WHERE business_id = ?",
 		"DELETE tl FROM flow_time_logs tl JOIN flow_tasks t ON t.id = tl.task_id WHERE t.business_id = ?",
 		"DELETE c FROM flow_task_comments c JOIN flow_tasks t ON t.id = c.task_id WHERE t.business_id = ?",
 		"DELETE act FROM flow_task_activity act JOIN flow_tasks t ON t.id = act.task_id WHERE t.business_id = ?",
