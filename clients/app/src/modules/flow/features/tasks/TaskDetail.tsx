@@ -87,6 +87,9 @@ import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import DevelopmentSection from './components/DevelopmentSection';
 import { useIsDeveloperProject } from '../projects-v2/useDeveloperMode';
 import LinksSection from './components/LinksSection';
+import TaskHierarchyFields from './components/TaskHierarchyFields';
+import EpicProgressSection from './components/EpicProgressSection';
+import { isEpic } from '../../shared/lib/taskHierarchy';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -363,8 +366,44 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
     );
   }
 
-  const { assignee, assigneeInitials } = apiTaskToTask(task);
+  const mappedTask = apiTaskToTask(task);
+  const { assignee, assigneeInitials } = mappedTask;
+  const taskIsEpic = isEpic(mappedTask);
   const project = taskProject ?? projects.find((p) => p.id === task.projectId);
+  // In the drawer a crumb swaps which task the drawer shows; on the standalone
+  // page it navigates, the same as following a dependency.
+  const goToTask = (targetId: string): void => {
+    if (taskId !== undefined) {
+      openTask(targetId);
+      return;
+    }
+    void navigate({ to: '/flow/task/$id', params: { id: targetId } });
+  };
+  // Project / Epic / Task / Subtask. A subtask's epic is its parent's.
+  const parentTask = mappedTask.parentId
+    ? allTasks.find((other) => other.id === mappedTask.parentId)
+    : undefined;
+  const hierarchyCrumbs = [
+    ...(mappedTask.epicId
+      ? [
+          {
+            label: mappedTask.epicTitle ?? mappedTask.epicId,
+            color: mappedTask.epicColor,
+            onClick: () => goToTask(mappedTask.epicId ?? ''),
+          },
+        ]
+      : []),
+    ...(mappedTask.parentId
+      ? [
+          {
+            label: parentTask?.identifier ?? `T-${mappedTask.parentId}`,
+            onClick: () => goToTask(mappedTask.parentId ?? ''),
+          },
+        ]
+      : []),
+  ];
+  // Deleting an epic keeps its tasks, which the confirmation says in numbers.
+  const epicChildCount = taskIsEpic ? (detail?.subtasks ?? []).length : 0;
   const dependencyTasks = allTasks.filter((ot) => task.dependencies?.includes(ot.id));
   const dependencyCandidates = allTasks.filter(
     (ot) => ot.id !== task.id && !task.dependencies?.includes(ot.id)
@@ -463,6 +502,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
                   label: project?.name || task.projectName || t('flow.taskDetail.project'),
                   to: `/flow/p/${task.projectId}`,
                 },
+                ...hierarchyCrumbs,
                 { label: task.identifier ?? task.id },
               ]}
             />
@@ -563,7 +603,11 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
               disabled={!canEdit}
             />
 
-            {/* Subtasks */}
+            {taskIsEpic && task.projectId && (
+              <EpicProgressSection epicId={String(task.id)} projectId={String(task.projectId)} />
+            )}
+
+            {/* Subtasks, or on an epic the tasks under it */}
             <section className="mb-8">
               <div className="flex items-center gap-2 mb-3">
                 <GitBranch size={12} style={{ color: 'var(--flow-text-muted)' }} />
@@ -571,7 +615,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
                   className="text-flow-meta font-semibold uppercase tracking-wider"
                   style={{ color: 'var(--flow-text-muted)' }}
                 >
-                  {t('flow.taskDetail.subtasks')}
+                  {taskIsEpic ? t('flow.epics.tasksInEpic') : t('flow.taskDetail.subtasks')}
                 </h3>
               </div>
               <SubtaskList
@@ -704,6 +748,13 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           background: 'var(--flow-surface)',
         }}
       >
+        <TaskHierarchyFields
+          task={mappedTask}
+          allTasks={allTasks}
+          canEdit={canEdit}
+          Field={DetailField}
+        />
+
         <DetailField icon={CircleDot} label={t('flow.taskDetail.status')}>
           {projectStatuses.length > 0 ? (
             <FlowSelect
@@ -1163,6 +1214,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           <>
             {t('flow.taskMenu.deleteConfirmPrefix')} <strong>{task.title}</strong>
             {t('flow.taskMenu.deleteConfirmSuffix')}
+            {taskIsEpic && <> {t('flow.epics.deleteKeepsChildren', { count: epicChildCount })}</>}
           </>
         }
         confirmLabel={t('flowCommon.delete')}
@@ -1173,8 +1225,13 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           // navigating away: on failure the user would otherwise see a success
           // toast, leave the page, and the task would still be alive in cache.
           deleteTaskMut.mutate(task.id, {
-            onSuccess: () => {
-              toast.success(t('flowToasts.task.deleted'));
+            onSuccess: (result) => {
+              const detached = Number(result?.detachedChildren ?? 0);
+              toast.success(
+                detached > 0
+                  ? t('flowToasts.task.epicDeleted', { count: detached })
+                  : t('flowToasts.task.deleted')
+              );
               setConfirmingDelete(false);
               closeTask();
             },
