@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useState } from 'react';
 import { useUserStore } from '../../../shared/stores/userStore';
-import { loadListPrefs, saveListPrefs, type ListColumnPrefs } from './listColumns';
+import { useUserProjectPref } from '../../../shared/lib/userProjectStorage';
+import { LIST_COLUMNS_PREF, normalizeListPrefs, type ListColumnPrefs } from './listColumns';
+
+const fromStored = (stored: unknown): ListColumnPrefs => normalizeListPrefs(stored ?? null);
 
 /**
  * The List's columns, widths and sort for the signed-in user on one project.
- * Kept in this browser (see listPrefsStorageKey); with no user id yet the
+ * Kept in this browser (see userProjectStorage); with no user id yet the
  * defaults apply and nothing is written.
  */
 export function useListPrefs(
@@ -15,22 +17,5 @@ export function useListPrefs(
   const userId = useUserStore((state) =>
     state.user?.id === undefined ? null : String(state.user.id)
   );
-  const [prefs, setPrefs] = useState<ListColumnPrefs>(() => loadListPrefs(userId, projectId));
-
-  useEffect(() => {
-    setPrefs(loadListPrefs(userId, projectId));
-  }, [userId, projectId]);
-
-  const update = useCallback(
-    (change: (prefs: ListColumnPrefs) => ListColumnPrefs) => {
-      setPrefs((current) => {
-        const next = change(current);
-        if (next !== current) saveListPrefs(userId, projectId, next);
-        return next;
-      });
-    },
-    [userId, projectId]
-  );
-
-  return [prefs, update];
+  return useUserProjectPref(LIST_COLUMNS_PREF, userId, projectId, fromStored);
 }

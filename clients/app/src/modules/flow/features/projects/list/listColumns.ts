@@ -1,5 +1,10 @@
 import type { Task } from '../../../shared/stores/flowStore';
 import type { ApiStatus } from '../../../shared/services/flowApi';
+import {
+  readUserProjectPref,
+  userProjectStorageKey,
+  writeUserProjectPref,
+} from '../../../shared/lib/userProjectStorage';
 import { PRIORITY_ORDER } from '../taskGroups';
 import { defaultStatus, sortStatuses, statusIdOf } from '../statusUtils';
 
@@ -213,21 +218,16 @@ export function normalizeListPrefs(raw: unknown): ListColumnPrefs {
 }
 
 /**
- * Per user and per project, in this browser only: there is no server side
- * store for view preferences yet.
+ * The name these preferences are kept under: per user and per project, in
+ * this browser only (see userProjectStorage).
  */
+export const LIST_COLUMNS_PREF = 'list:columns';
+
 export const listPrefsStorageKey = (userId: string, projectId: string): string =>
-  `flow:list:columns:${userId}:${projectId}`;
+  userProjectStorageKey(LIST_COLUMNS_PREF, userId, projectId);
 
 export function loadListPrefs(userId: string | null, projectId: string): ListColumnPrefs {
-  if (!userId || !projectId) return normalizeListPrefs(null);
-  try {
-    const raw = localStorage.getItem(listPrefsStorageKey(userId, projectId));
-    return normalizeListPrefs(raw ? JSON.parse(raw) : null);
-  } catch {
-    // Storage blocked or the value is not JSON: start from the defaults.
-    return normalizeListPrefs(null);
-  }
+  return normalizeListPrefs(readUserProjectPref(LIST_COLUMNS_PREF, userId, projectId) ?? null);
 }
 
 export function saveListPrefs(
@@ -235,12 +235,7 @@ export function saveListPrefs(
   projectId: string,
   prefs: ListColumnPrefs
 ): void {
-  if (!userId || !projectId) return;
-  try {
-    localStorage.setItem(listPrefsStorageKey(userId, projectId), JSON.stringify(prefs));
-  } catch {
-    // A preference that cannot be stored still applies for this visit.
-  }
+  writeUserProjectPref(LIST_COLUMNS_PREF, userId, projectId, prefs);
 }
 
 /** Shows or hides a column. The title cannot be hidden. */
