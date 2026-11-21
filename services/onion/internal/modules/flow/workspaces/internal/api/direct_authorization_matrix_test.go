@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/testutil"
 	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"
 	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
+	flowtaskv2 "github.com/voxire/voxie/gen/go/flow/task/v2"
 	flowworkspacev1 "github.com/voxire/voxie/gen/go/flow/workspace/v1"
 )
 
@@ -47,6 +48,14 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 		}},
 		{Name: "flow tasks assign", App: authorization.AppFlow, Permission: "flow:tasks:assign", Extra: []string{"flow:tasks:create"}, Call: func(ctx context.Context) (any, error) {
 			response, err := NewTaskAPI(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).CreateTask(ctx, &flowtaskv1.CreateTaskRequest{AssigneeId: &assignedUserID})
+			return response, err
+		}},
+		{Name: "flow tasks set parent", App: authorization.AppFlow, Permission: "flow:tasks:edit", Call: func(ctx context.Context) (any, error) {
+			response, err := NewTaskAPIV2(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).SetTaskParent(ctx, &flowtaskv2.SetTaskParentRequest{Id: 1, Body: &flowtaskv2.SetTaskParentBody{}})
+			return response, err
+		}},
+		{Name: "flow epic rollups view", App: authorization.AppFlow, Permission: "flow:tasks:view", Call: func(ctx context.Context) (any, error) {
+			response, err := NewTaskAPIV2(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).ListEpicRollups(ctx, &flowtaskv2.ListEpicRollupsRequest{ProjectId: testutil.Int64Ptr(7301)})
 			return response, err
 		}},
 		{Name: "flow team manage", App: authorization.AppFlow, Permission: "flow:team:manage", Call: func(ctx context.Context) (any, error) {
