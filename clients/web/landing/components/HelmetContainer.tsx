@@ -1,7 +1,13 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 
-import { DEFAULT_LOCALE, findLocale, localeFromPath, localisePath } from '../lib/locales';
+import {
+  DEFAULT_LOCALE,
+  findLocale,
+  inServedSection,
+  localeFromPath,
+  localisePath,
+} from '../lib/locales';
 
 interface HelmetContainerProps {
   title?: string;
@@ -61,9 +67,15 @@ const DEFAULT_OG_IMAGE = `${OG_BASE}/og-default.png`;
  * mapping wrong and a test fails rather than a share silently rendering
  * a broken preview.
  */
-function ogImageFor(canonicalUrl: string): string {
+export function ogImageFor(canonicalUrl: string): string {
   if (!canonicalUrl.startsWith(OG_BASE)) return DEFAULT_OG_IMAGE;
   let segments = canonicalUrl.slice(OG_BASE.length).split('/').filter(Boolean);
+  // A section a locale serves on its own (the Arabic blog) is written per
+  // locale, so its image carries its own headline and keeps the prefix.
+  const prefix = segments.length > 0 ? findLocale(segments[0]) : undefined;
+  if (prefix && inServedSection(`/${segments.slice(1).join('/')}/`, prefix)) {
+    return `${OG_BASE}/og/${segments.join('-')}.png`;
+  }
   // Strip a locale prefix before deriving the slug. The OG images are
   // generated once per route, not once per route per locale, so /ar/pricing/
   // shares pricing.png. Without this it would ask for ar-pricing.png and get

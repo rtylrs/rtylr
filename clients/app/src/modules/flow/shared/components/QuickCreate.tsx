@@ -1,9 +1,27 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useOpenTask } from '../lib/useOpenTask';
 import { toast } from 'sonner';
-import { Calendar, User, CircleUser, FolderInput, Flag, Gauge, Tag, CircleDot } from 'lucide-react';
+import {
+  Calendar,
+  User,
+  CircleUser,
+  FolderInput,
+  Flag,
+  Gauge,
+  Tag,
+  CircleDot,
+  Milestone as MilestoneIcon,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { DatePicker, Dialog, DialogContent, DialogTitle, DialogDescription } from '@voxire/ui';
+import { DatePicker } from '@voxire/ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../../../shared/components/ui/dialog';
 import { useParams, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useProjects } from '../../features/projects/useProjects';
 import { apiProjectToProject } from '../lib/projectMapper';
@@ -21,6 +39,7 @@ import { EFFORT_PRESETS, formatEffortMinutes } from '../lib/effortPresets';
 import { useCreateTask } from '../../features/tasks/useTasks';
 import { useLabels } from '../../features/tasks/useLabels';
 import { useProjectStatuses } from '../../features/projects/useStatuses';
+import { useMilestones } from '../../features/milestones/useMilestones';
 import {
   defaultStatus,
   displayStatusName,
@@ -85,6 +104,8 @@ export const QuickCreate: React.FC = () => {
   const [effortMinutes, setEffortMinutes] = useState<number | undefined>(30);
   const [labelId, setLabelId] = useState('');
   const [statusId, setStatusId] = useState('');
+  const [milestoneId, setMilestoneId] = useState('');
+  const { data: projectMilestones = [] } = useMilestones(quickCreateOpen ? projectId : '');
   const { data: rawStatuses } = useProjectStatuses(quickCreateOpen ? projectId : '');
   const statuses = rawStatuses ? sortStatuses(rawStatuses) : [];
 
@@ -101,6 +122,7 @@ export const QuickCreate: React.FC = () => {
       setAssignToMe(true);
       setEffortMinutes(30);
       setLabelId('');
+      setMilestoneId('');
     }
   }, [quickCreateOpen, currentProjectId]);
 
@@ -139,6 +161,7 @@ export const QuickCreate: React.FC = () => {
         assigneeId: assignToMe ? (uid ?? undefined) : undefined,
         effortMinutes,
         labels: labelId ? [labelId] : undefined,
+        milestoneId: projectMilestones.some((m) => m.id === milestoneId) ? milestoneId : undefined,
       });
       const task = res.task;
       const taskId = String(task.id);
@@ -161,7 +184,7 @@ export const QuickCreate: React.FC = () => {
   return (
     <Dialog open={quickCreateOpen} onOpenChange={(open) => setQuickCreateOpen(open)}>
       <DialogContent
-        className="portal-flow-dialog flex max-h-[calc(100dvh-32px)] flex-col gap-0 overflow-hidden p-0 sm:max-w-lg"
+        className="portal-flow-dialog flex flex-col sm:max-w-lg"
         dir={i18n.dir()}
         closeLabel={t('flowCommon.close')}
         onOpenAutoFocus={(event) => {
@@ -181,29 +204,13 @@ export const QuickCreate: React.FC = () => {
           target?.focus();
         }}
       >
-        {/* Header */}
-        <div
-          className="flex items-center justify-between gap-3 px-4 py-3 shrink-0"
-          style={{ borderBottom: '1px solid var(--flow-border)' }}
-        >
-          <div className="min-w-0">
-            <DialogTitle
-              className="text-flow-body font-semibold"
-              style={{ color: 'var(--flow-text)' }}
-            >
-              {t('flow.quickCreate.title')}
-            </DialogTitle>
-            <DialogDescription
-              className="text-flow-meta mt-0.5"
-              style={{ color: 'var(--flow-text-dim)' }}
-            >
-              {t('flow.quickCreate.subtitle')}
-            </DialogDescription>
-          </div>
-        </div>
+        <DialogHeader className="shrink-0">
+          <DialogTitle>{t('flow.quickCreate.title')}</DialogTitle>
+          <DialogDescription>{t('flow.quickCreate.subtitle')}</DialogDescription>
+        </DialogHeader>
 
         {/* Body */}
-        <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3">
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6">
           <textarea
             ref={titleRef}
             value={title}
@@ -321,7 +328,15 @@ export const QuickCreate: React.FC = () => {
 
             <FieldRow label={t('flow.time.project')} icon={FolderInput}>
               <div className="-ml-1">
-                <ProjectSelect value={projectId} onChange={setProjectId} allowPersonal />
+                <ProjectSelect
+                  value={projectId}
+                  onChange={(next) => {
+                    setProjectId(next);
+                    // A milestone belongs to one project.
+                    setMilestoneId('');
+                  }}
+                  allowPersonal
+                />
               </div>
             </FieldRow>
 
@@ -343,6 +358,23 @@ export const QuickCreate: React.FC = () => {
                       ),
                     }))}
                     onChange={setStatusId}
+                  />
+                </div>
+              </FieldRow>
+            )}
+
+            {projectMilestones.length > 0 && (
+              <FieldRow label={t('flow.taskDetail.milestone')} icon={MilestoneIcon}>
+                <div className="max-w-[240px]">
+                  <FlowSelect
+                    label={t('flow.taskDetail.milestone')}
+                    value={milestoneId}
+                    options={[
+                      { value: '', label: t('flow.taskDetail.noMilestone') },
+                      ...projectMilestones.map((m) => ({ value: m.id, label: m.name })),
+                    ]}
+                    onChange={setMilestoneId}
+                    muted={!milestoneId}
                   />
                 </div>
               </FieldRow>
@@ -421,12 +453,8 @@ export const QuickCreate: React.FC = () => {
           </div>
         </div>
 
-        {/* Footer */}
-        <div
-          className="flex items-center justify-end gap-2 px-4 py-3 shrink-0"
-          style={{ borderTop: '1px solid var(--flow-border)' }}
-        >
-          <Button variant="ghost" onClick={() => setQuickCreateOpen(false)}>
+        <DialogFooter className="shrink-0">
+          <Button variant="outline" onClick={() => setQuickCreateOpen(false)}>
             {t('flowCommon.cancel')}
           </Button>
           <Button
@@ -437,7 +465,7 @@ export const QuickCreate: React.FC = () => {
               ? t('flow.quickCreate.creating')
               : t('flow.quickCreate.createTask')}
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

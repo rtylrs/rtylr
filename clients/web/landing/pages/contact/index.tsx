@@ -41,9 +41,19 @@ const CONTACT_CHANNELS = [
   { icon: Mail, id: 'email', href: 'mailto:info@voxire.com' },
 ];
 
+/** Topics a link can preselect with ?topic=, from the blog's calls to action. */
+const TOPICS = ['investors', 'sales'] as const;
+type Topic = (typeof TOPICS)[number];
+
+const SUBJECT_PREFIX: Record<Topic, string> = {
+  investors: 'Investor inquiry',
+  sales: 'Sales inquiry',
+};
+
 const ContactPage = (): React.JSX.Element => {
   const router = useRouter();
   const { t } = useTranslation();
+  const topic = TOPICS.find((x) => x === router.query.topic) ?? null;
   const [form, setForm] = useState<ContactForm>({ name: '', email: '', company: '', message: '' });
   const [errors, setErrors] = useState<ContactFormErrors>({});
   const [submitted, setSubmitted] = useState(false);
@@ -80,13 +90,13 @@ const ContactPage = (): React.JSX.Element => {
     e.preventDefault();
     if (!validate()) return;
     const subject = encodeURIComponent(
-      `Contact from ${form.name}${form.company ? ` at ${form.company}` : ''}`
+      `${topic ? SUBJECT_PREFIX[topic] : 'Contact'} from ${form.name}${form.company ? ` at ${form.company}` : ''}`
     );
     const body = encodeURIComponent(
       `Name: ${form.name}\nEmail: ${form.email}${form.company ? `\nCompany: ${form.company}` : ''}\n\n${form.message}`
     );
     window.location.href = `mailto:info@voxire.com?subject=${subject}&body=${body}`;
-    track(EV_GENERATE_LEAD, { form: 'contact' });
+    track(EV_GENERATE_LEAD, { form: 'contact', topic: topic ?? 'general' });
     setSubmitted(true);
   };
 
@@ -231,6 +241,7 @@ const ContactPage = (): React.JSX.Element => {
                 ) : (
                   <form onSubmit={handleSubmit} onInput={markFormStart} className={styles.form} noValidate>
                     <h2 className={styles.formTitle}>{t('contact.form.title')}</h2>
+                    {topic && <p className={styles.formTopic}>{t(`contact.topic.${topic}`)}</p>}
 
                     <div className={styles.fieldRow}>
                       <div className={cn(styles.field, errors.name && styles.fieldError)}>

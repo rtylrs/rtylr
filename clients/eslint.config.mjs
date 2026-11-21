@@ -46,5 +46,35 @@ export default tseslint.config(
       '@typescript-eslint/no-non-null-assertion': 'off',
     },
   },
+  {
+    // Portal dialogs go through the portal's own Dialog (shared/components/ui/dialog),
+    // which adds its frame, spacing and translated close label.
+    files: ['app/src/**/*.{ts,tsx}', 'app/entrypoints/**/*.{ts,tsx}'],
+    ignores: ['app/src/shared/components/ui/dialog.tsx', '**/*.test.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@voxire/ui',
+              importNames: [
+                'Dialog',
+                'DialogContent',
+                'DialogHeader',
+                'DialogTitle',
+                'DialogDescription',
+                'DialogTrigger',
+                'DialogClose',
+                'DialogPortal',
+                'DialogOverlay',
+              ],
+              message: "Use the Portal's Dialog from shared/components/ui instead.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   prettier
 );

@@ -446,6 +446,10 @@ type repository interface {
 	UpdateLabel(ctx context.Context, id, actorID, businessID int64, input domain.LabelInput) error
 	UpdateMilestone(ctx context.Context, input domain.UpdateMilestoneInput) error
 	UpdateMilestoneV2(ctx context.Context, input domain.UpdateMilestoneInput) error
+	DeleteMilestoneV2(ctx context.Context, id, actorID int64) error
+	MilestoneProjectID(ctx context.Context, milestoneID, businessID int64) (int64, error)
+	SetTaskMilestone(ctx context.Context, taskID int64, milestoneID *int64) error
+	TaskMilestoneIDs(ctx context.Context, taskIDs []int64) (map[int64]int64, error)
 	UpdateProject(ctx context.Context, input domain.UpdateProjectInput) error
 	UpdateProjectMemberRole(ctx context.Context, input domain.UpdateProjectMemberRoleInput) error
 	UpdateProjectVisibility(ctx context.Context, id, businessID int64, visibility string) error

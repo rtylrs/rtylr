@@ -76,6 +76,13 @@ const FONTS = {
   body: 'Inter-Regular.ttf',
 };
 
+// The Arabic blog's headlines. Neither face above has Arabic glyphs, so
+// without this they fall back per glyph to whatever the machine has. Kept
+// under scripts/ rather than public/ because no page uses it: it exists for
+// the images only. SIL Open Font License, see og-fonts/OFL.txt.
+const ARABIC_FONT = path.join(HERE, 'og-fonts/IBMPlexSansArabic-Bold.ttf');
+const hasArabic = (s) => /[\u0600-\u06FF]/.test(s);
+
 // ---------------------------------------------------------------------------
 // Page discovery, from the build output
 // ---------------------------------------------------------------------------
@@ -155,7 +162,7 @@ function readHeadline({ file, route }) {
 // ---------------------------------------------------------------------------
 
 function fontDataUri(fileName) {
-  const p = path.join(APP, 'public/fonts', fileName);
+  const p = path.isAbsolute(fileName) ? fileName : path.join(APP, 'public/fonts', fileName);
   if (!existsSync(p)) throw new Error(`vendored font missing: ${p}`);
   return `data:font/ttf;base64,${readFileSync(p).toString('base64')}`;
 }
@@ -170,6 +177,8 @@ const escapeHtml = (s) =>
 function template({ headline, label, breakFont = false }) {
   const bold = breakFont ? 'data:font/ttf;base64,' : fontDataUri(FONTS.bold);
   const body = breakFont ? 'data:font/ttf;base64,' : fontDataUri(FONTS.body);
+  const rtl = hasArabic(headline);
+  const arabic = rtl ? (breakFont ? 'data:font/ttf;base64,' : fontDataUri(ARABIC_FONT)) : '';
 
   // Long headlines get a smaller size rather than an overflow. Measured
   // in characters, which is crude and good enough for two or three lines
@@ -182,6 +191,7 @@ function template({ headline, label, breakFont = false }) {
 <style>
   @font-face { font-family: 'OGBold'; src: url('${bold}') format('truetype'); }
   @font-face { font-family: 'OGBody'; src: url('${body}') format('truetype'); }
+  ${rtl ? `@font-face { font-family: 'OGArabic'; src: url('${arabic}') format('truetype'); }` : ''}
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: ${WIDTH}px; height: ${HEIGHT}px; }
   body {
@@ -219,6 +229,11 @@ function template({ headline, label, breakFont = false }) {
     letter-spacing: -0.035em;
     max-width: 15.5em;
   }
+  h1[dir='rtl'] {
+    font-family: 'OGArabic', 'OGBold';
+    letter-spacing: 0;
+    line-height: 1.3;
+  }
   .rule { height: 3px; background: #131313; width: 96px; margin-bottom: 28px; }
   .foot {
     display: flex;
@@ -236,7 +251,7 @@ function template({ headline, label, breakFont = false }) {
   </div>
   <div>
     <div class="rule"></div>
-    <h1>${escapeHtml(headline)}</h1>
+    <h1${rtl ? " dir='rtl'" : ''}>${escapeHtml(headline)}</h1>
   </div>
   <div class="foot">
     <span>rtylr.com</span>
@@ -374,7 +389,16 @@ async function verifyFont() {
     );
     process.exit(1);
   }
-  console.log('\n[og-images] font check passed: the embedded face is what renders.');
+  const arabicLine = 'كيف تدير شركتك من مكان واحد';
+  const [realAr, brokenAr] = await withPage(async (page) => [
+    await shoot(page, template({ headline: arabicLine, label: 'font check' })),
+    await shoot(page, template({ headline: arabicLine, label: 'font check', breakFont: true })),
+  ]);
+  if (realAr.equals(brokenAr)) {
+    console.error('\n[og-images] FAIL: the Arabic face is not being used either.');
+    process.exit(1);
+  }
+  console.log('\n[og-images] font check passed: the embedded faces are what render.');
 }
 
 const arg = process.argv[2];

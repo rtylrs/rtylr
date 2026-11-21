@@ -15,7 +15,7 @@ This is `rtylrs/rtylr`, a pnpm monorepo. Inspect the current checkout, branch, s
 | `clients/web/docs/` | Product documentation site                                                                  |
 | `clients/mcp/` | MCP server and tool integration                                                             |
 | `clients/packages/` | Shared `@voxire/*` libraries and the generated contracts package; changes can affect multiple products |
-| `voxie/`           | API contracts (`.onk`) and the generated Go/TypeScript/OpenAPI output consumed on both sides  |
+| `voxie/`           | API contracts (TypeSpec `.tsp`, compiled by onekit's `onkt`) and the generated Go/TypeScript/OpenAPI output consumed on both sides  |
 | `services/onion/`  | Go backend: modules, platform packages, sqlc, worker                                         |
 | `.github/`         | Release and deployment automation                                                            |
 

@@ -1,0 +1,313 @@
+/**
+ * Customer-facing pager pages. Everything is scoped under `.pager-root`, and
+ * spacing uses logical properties so the Arabic layout mirrors by itself.
+ */
+
+.pager-root {
+  --pager-ink: #0f172a;
+  --pager-muted: #475569;
+  --pager-line: #cbd5e1;
+  --pager-bg: #ffffff;
+  --pager-danger: #b91c1c;
+  --pager-ready: #166534;
+
+  /* Always light, whatever the Portal theme. */
+  color-scheme: light;
+  /* The Portal's globals set html/body/#root to overflow:hidden. */
+  height: 100dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--pager-bg);
+  color: var(--pager-ink);
+  font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+}
+
+.pager-root *,
+.pager-root *::before,
+.pager-root *::after {
+  box-sizing: border-box;
+}
+
+.pager-screen {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.pager-screen--ready {
+  background: var(--pager-ready);
+  color: #ffffff;
+}
+
+/*
+ * The Portal's cookie banner is fixed over the bottom of the screen for a
+ * first-time visitor, which nearly every customer is. Content therefore starts
+ * at the top, and the bottom padding lets the page scroll clear of the banner.
+ */
+.pager-page {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 12px 20px 184px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pager-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+}
+
+.pager-venue {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pager-venue img {
+  height: 28px;
+  width: auto;
+  max-width: 72px;
+  object-fit: contain;
+}
+
+.pager-languages {
+  display: flex;
+  gap: 4px;
+  margin-inline-start: auto;
+}
+
+.pager-language {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pager-language[aria-pressed='true'] {
+  border-color: currentColor;
+}
+
+.pager-heading {
+  margin: 12px 0 0;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.pager-text {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--pager-muted);
+}
+
+.pager-screen--ready .pager-text {
+  color: #ffffff;
+}
+
+.pager-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pager-label {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.pager-number-input {
+  width: 100%;
+  min-height: 84px;
+  padding: 8px 12px;
+  border: 2px solid var(--pager-line);
+  border-radius: 16px;
+  background: #ffffff;
+  color: var(--pager-ink);
+  font: inherit;
+  /* Outranks the Portal's 16px !important on phone-width inputs. */
+  font-size: 44px !important;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+.pager-number-input:focus-visible {
+  outline: 3px solid var(--pager-ink);
+  outline-offset: 2px;
+}
+
+.pager-number-input[aria-invalid='true'] {
+  border-color: var(--pager-danger);
+}
+
+.pager-button {
+  width: 100%;
+  min-height: 60px;
+  padding: 12px 20px;
+  border: 2px solid var(--pager-ink);
+  border-radius: 16px;
+  background: var(--pager-ink);
+  color: #ffffff;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.pager-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pager-button:focus-visible,
+.pager-language:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 2px;
+}
+
+.pager-button--secondary {
+  background: transparent;
+  color: var(--pager-ink);
+}
+
+.pager-screen--ready .pager-button {
+  border-color: #ffffff;
+  background: #ffffff;
+  color: var(--pager-ready);
+}
+
+.pager-screen--ready .pager-button--secondary {
+  background: transparent;
+  color: #ffffff;
+}
+
+.pager-error {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--pager-danger);
+}
+
+.pager-screen--ready .pager-error {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.pager-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 2px solid var(--pager-line);
+  border-radius: 16px;
+}
+
+.pager-screen--ready .pager-panel {
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.pager-panel-title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.3;
+  font-weight: 800;
+}
+
+.pager-ticket {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding-block: 16px 4px;
+  text-align: center;
+}
+
+.pager-order {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 100%;
+}
+
+.pager-order-label {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+/* Sized to be read from arm's length, and to shrink for a twelve-character number. */
+.pager-order-number {
+  max-width: 100%;
+  font-size: clamp(64px, 30vw, 168px);
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+
+.pager-order-number--long {
+  font-size: clamp(28px, 10.5vw, 72px);
+}
+
+.pager-status {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.3;
+  font-weight: 800;
+}
+
+.pager-screen--ready .pager-status {
+  font-size: 30px;
+}
+
+.pager-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pager-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pager-screen--ringing {
+    animation: pager-pulse 1s ease-in-out infinite;
+  }
+}
+
+@keyframes pager-pulse {
+  50% {
+    background: #15803d;
+  }
+}

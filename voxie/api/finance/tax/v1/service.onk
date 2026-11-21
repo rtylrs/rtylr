@@ -1,9 +1,0 @@
-package finance.tax.v1
-
-service TaxService {
-  getTaxConfig(GetTaxConfigRequest) -> GetTaxConfigResponse @get("/tax")
-
-  updateTaxConfig(UpdateTaxConfigRequest) -> UpdateTaxConfigResponse @put("/tax")
-
-  getPLReport(GetPLReportRequest) -> GetPLReportResponse @get("/pl")
-}

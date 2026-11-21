@@ -16,7 +16,11 @@ FROM hr_configs
 WHERE business_id = ?
 LIMIT 1;
 
+-- A NULL marker means the caller did not send one (a settings-only update),
+-- so the stored completion time is kept.
 -- name: UpsertHRConfig :exec
 INSERT INTO hr_configs (owner_id, business_id, setup_completed_at)
 VALUES (sqlc.arg('business_id'), sqlc.arg('business_id'), sqlc.arg('setup_completed_at'))
-ON DUPLICATE KEY UPDATE setup_completed_at = VALUES(setup_completed_at), updated_at = NOW();
+ON DUPLICATE KEY UPDATE
+    setup_completed_at = COALESCE(VALUES(setup_completed_at), setup_completed_at),
+    updated_at = NOW();

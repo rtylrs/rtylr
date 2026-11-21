@@ -1,13 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { DatePicker } from '@voxire/ui';
 import {
-  DatePicker,
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@voxire/ui';
+} from '../../../../shared/components/ui/dialog';
+import { Button } from '../../../../shared/components/ui/button';
 import GateNotice from '../../shared/components/GateNotice';
 import type { LeaveTypePayload } from './useLeave';
 import { useCreateLeaveRequest } from './useLeave';
@@ -104,19 +106,16 @@ const RequestLeaveDialog: React.FC<RequestLeaveDialogProps> = ({
       }}
     >
       <DialogContent
-        className="max-w-lg"
-        style={{ background: 'var(--flow-card)', color: 'var(--flow-text)' }}
+        className="portal-flow-dialog max-w-lg"
+        // The date pickers open their calendar inline; scrolling the frame would clip it.
+        style={{ overflow: 'visible' }}
       >
         <DialogHeader>
-          <DialogTitle style={{ color: 'var(--flow-text)' }}>
-            {t('flow.leave.newRequest')}
-          </DialogTitle>
-          <DialogDescription style={{ color: 'var(--flow-text-muted)' }}>
-            {t('flow.leave.newRequestDescription')}
-          </DialogDescription>
+          <DialogTitle>{t('flow.leave.newRequest')}</DialogTitle>
+          <DialogDescription>{t('flow.leave.newRequestDescription')}</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 px-6 pb-6">
           <div>
             <label
               htmlFor="leave-type"
@@ -210,29 +209,21 @@ const RequestLeaveDialog: React.FC<RequestLeaveDialogProps> = ({
               style={inputStyle}
             />
           </div>
-
-          <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => onOpenChange(false)}
-              className="flow-focus min-h-[44px] rounded-sm px-3 text-flow-body font-medium md:min-h-0 md:py-2"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
-              {t('flowCommon.cancel')}
-            </button>
-            <button
-              type="button"
-              onClick={submit}
-              disabled={!canSubmit || createRequest.isPending}
-              title={noLeaveTypesReason || undefined}
-              aria-describedby={noLeaveTypesReason ? 'leave-type-gate' : undefined}
-              className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-sm px-4 text-flow-body font-semibold disabled:cursor-not-allowed disabled:opacity-40 md:min-h-0 md:py-2.5"
-              style={{ background: 'var(--flow-action-bg)', color: 'var(--flow-on-accent)' }}
-            >
-              {t('flow.leave.submit')}
-            </button>
-          </div>
         </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            {t('flowCommon.cancel')}
+          </Button>
+          <Button
+            onClick={submit}
+            disabled={!canSubmit || createRequest.isPending}
+            title={noLeaveTypesReason || undefined}
+            aria-describedby={noLeaveTypesReason ? 'leave-type-gate' : undefined}
+          >
+            {t('flow.leave.submit')}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

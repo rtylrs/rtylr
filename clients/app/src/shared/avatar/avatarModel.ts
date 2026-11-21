@@ -30,6 +30,8 @@ export interface AvatarStyle {
   credit?: AvatarStyleCredit;
   /** Released by DiceBear in 2026. */
   isNew?: boolean;
+  /** Paints its own background, so the picker shows it edge to edge instead of inset. */
+  fullBleed?: boolean;
 }
 
 const CC_BY = 'https://creativecommons.org/licenses/by/4.0/';
@@ -69,7 +71,7 @@ export const AVATAR_STYLES: readonly AvatarStyle[] = [
     },
   },
   { id: 'cameo', label: 'Cameo', group: 'professional', isNew: true },
-  { id: 'shadows', label: 'Shadows', group: 'professional', isNew: true },
+  { id: 'shadows', label: 'Shadows', group: 'professional', isNew: true, fullBleed: true },
   {
     id: 'avataaars',
     label: 'Avataaars',
@@ -106,10 +108,10 @@ export const AVATAR_STYLES: readonly AvatarStyle[] = [
       licenseUrl: CC_BY,
     },
   },
-  { id: 'voxel-art', label: 'Voxel Art', group: 'cool', isNew: true },
+  { id: 'voxel-art', label: 'Voxel Art', group: 'cool', isNew: true, fullBleed: true },
   { id: 'cutouts', label: 'Cutouts', group: 'cool', isNew: true },
-  { id: 'line-face', label: 'Line Face', group: 'cool', isNew: true },
-  { id: 'thumbs', label: 'Thumbs', group: 'funky' },
+  { id: 'line-face', label: 'Line Face', group: 'cool', isNew: true, fullBleed: true },
+  { id: 'thumbs', label: 'Thumbs', group: 'funky', fullBleed: true },
   {
     id: 'croodles',
     label: 'Croodles',
@@ -122,14 +124,14 @@ export const AVATAR_STYLES: readonly AvatarStyle[] = [
       licenseUrl: CC_BY,
     },
   },
-  { id: 'voxel-bot', label: 'Voxel Bot', group: 'funky', isNew: true },
+  { id: 'voxel-bot', label: 'Voxel Bot', group: 'funky', isNew: true, fullBleed: true },
   { id: 'gaze', label: 'Gaze', group: 'funky', isNew: true },
   // Drawn for RTYLR and owned by Voxire: see moods.ts.
-  { id: 'rtylr-moods', label: 'RTYLR Moods', group: 'funky', isNew: true },
-  { id: 'glass', label: 'Glass', group: 'abstract' },
-  { id: 'slice', label: 'Slice', group: 'abstract', isNew: true },
-  { id: 'stack', label: 'Stack', group: 'abstract', isNew: true },
-  { id: 'patchwork', label: 'Patchwork', group: 'abstract', isNew: true },
+  { id: 'rtylr-moods', label: 'RTYLR Moods', group: 'funky', isNew: true, fullBleed: true },
+  { id: 'glass', label: 'Glass', group: 'abstract', fullBleed: true },
+  { id: 'slice', label: 'Slice', group: 'abstract', isNew: true, fullBleed: true },
+  { id: 'stack', label: 'Stack', group: 'abstract', isNew: true, fullBleed: true },
+  { id: 'patchwork', label: 'Patchwork', group: 'abstract', isNew: true, fullBleed: true },
 ];
 
 export const AVATAR_STYLE_GROUPS: readonly AvatarStyleGroup[] = [

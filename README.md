@@ -66,7 +66,7 @@ pnpm -C clients --filter @rtylr/portal typecheck
 | `clients/mcp/` | The MCP server — gives AI agents access to Flow, CRM, Finance, ERP. |
 | `clients/pos/` | POS terminal: Vite web app plus the Tauri desktop shell in `core/`. |
 | `clients/packages/` | Shared `@voxire/*` library layer and the generated contracts package. |
-| `voxie/` | API contracts (`.onk`) plus generated Go and OpenAPI output. In-tree, single source of truth. |
+| `voxie/` | API contracts (TypeSpec `.tsp`) plus generated Go and OpenAPI output. In-tree, single source of truth. |
 | `services/onion/` | The Go backend: modules, platform packages, sqlc, worker. |
 
 `rtylrs/infra` and `rtylrs/pipelines` stay separate — infrastructure and the
@@ -86,22 +86,23 @@ same declaration files, not the same versions.
 
 **Stack:** React 19, Vite 7, Next.js 15 (landing and docs), TypeScript 5.9 in
 strict mode, Tailwind CSS, TanStack Query v5, Zustand, neverthrow, motion.
-Backend is Go with MySQL, sqlc, and Protocol Buffer contracts.
+Backend is Go with MySQL, sqlc, and TypeSpec contracts compiled by onekit.
 
 ### Contract-first
 
-API request and response types are Protocol Buffers in `voxie/proto`, shared
-between frontend and backend as the single source of truth.
+API request and response types are TypeSpec contracts in `voxie/api`, compiled
+by [onekit](https://github.com/1homsi/onekit)'s `onkt` CLI and shared between
+frontend and backend as the single source of truth.
 
 ```
-voxie/proto/
-  common/v1/   # pagination, errors, timestamps
-  auth/v1/     # login, register, password reset
-  hub/v1/      # team, business, apps, dashboard, billing, developer
+voxie/api/
+  common/v1/        # pagination, errors, timestamps
+  hub/business/v1/  # team, business, apps, dashboard, billing, developer
+  ...
 ```
 
-Change a `.onk` file, regenerate, and every consumer moves with it in one
-commit. Generated TypeScript is committed.
+Change a `.tsp` file, run `make -C voxie generate`, and every consumer moves
+with it in one commit. Generated output is gitignored, never committed.
 
 ### Errors as values
 

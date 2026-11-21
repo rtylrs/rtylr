@@ -139,6 +139,7 @@ func (r *Repository) ListMilestonesV2(ctx context.Context, businessID int64, pro
 		milestone := domain.Milestone{
 			ID: m.ID, ProjectID: m.ProjectID, Name: m.Name, Description: m.Description,
 			Status: string(m.Status), DoneCount: int(m.DoneCount), TaskCount: int(m.TaskCount),
+			OverdueCount: int(m.OverdueCount),
 		}
 		if m.TargetDate.Valid {
 			milestone.DueDate = m.TargetDate.Time

@@ -11,7 +11,6 @@ import { CycleServiceClient as CycleServiceV2 } from '@voxire/voxie/flow/cycle/v
 import { ViewServiceClient as ViewServiceV2 } from '@voxire/voxie/flow/view/v2/client';
 import { InsightsServiceClient as InsightsServiceV2 } from '@voxire/voxie/flow/insights/v2/client';
 import { TimeServiceClient as TimeServiceV2 } from '@voxire/voxie/flow/time/v2/client';
-import { ProfileServiceClient as ProfileClient } from '@voxire/voxie/flow/profile/v1/client';
 import { StatusServiceClient } from '@voxire/voxie/flow/status/v2/client';
 
 export const businessClient = createOneKitClient(BusinessServiceClient, 'flow');
@@ -27,7 +26,6 @@ export const cycleV2 = createOneKitClient(CycleServiceV2, 'flow');
 export const viewV2 = createOneKitClient(ViewServiceV2, 'flow');
 export const insightsV2 = createOneKitClient(InsightsServiceV2, 'flow');
 export const timeV2 = createOneKitClient(TimeServiceV2, 'flow');
-export const profileClient = createOneKitClient(ProfileClient, 'flow');
 export const statusClient = createOneKitClient(StatusServiceClient, 'flow');
 export const rest = createRestRouteClient('flow');
 

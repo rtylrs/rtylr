@@ -1,9 +1,0 @@
-package flow.insights.v1
-
-service InsightsService {
-  getInsights(GetInsightsRequest) -> GetInsightsResponse @get("/overview")
-
-  getTeamWorkload(GetTeamWorkloadRequest) -> GetTeamWorkloadResponse @get("/team/workload")
-
-  getRoadmap(GetRoadmapRequest) -> GetRoadmapResponse @get("/roadmap")
-}

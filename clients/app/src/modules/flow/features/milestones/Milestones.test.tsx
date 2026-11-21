@@ -57,9 +57,24 @@ vi.mock('@voxire/auth', () => ({
 
 const milestonesState = vi.hoisted(() => ({ data: [] as Array<Record<string, unknown>> }));
 
+const updateMilestoneSpy = vi.fn();
+const deleteMilestoneSpy = vi.fn();
+const navigateSpy = vi.fn();
+const deleteAccess = vi.hoisted(() => ({ canDelete: false }));
+
 vi.mock('./useMilestones', () => ({
   useMilestones: () => ({ data: milestonesState.data, isLoading: false }),
   useCreateMilestone: () => ({ mutate: mutateSpy, isPending: false }),
+  useUpdateMilestone: () => ({ mutate: updateMilestoneSpy, isPending: false }),
+  useDeleteMilestone: () => ({ mutate: deleteMilestoneSpy, isPending: false }),
+}));
+
+vi.mock('@tanstack/react-router', () => ({
+  useNavigate: () => navigateSpy,
+}));
+
+vi.mock('../../shared/lib/currentUser', () => ({
+  useCanDeleteResource: () => deleteAccess.canDelete,
 }));
 
 vi.mock('../../shared/stores/flowStore', () => ({
@@ -124,7 +139,7 @@ describe('Milestones create form', () => {
   });
 });
 
-describe('Milestones show no progress until a task can be attached (#1064)', () => {
+describe('Milestone cards show the tasks filed under them', () => {
   function milestone(over: Record<string, unknown> = {}): Record<string, unknown> {
     return {
       id: 'm-1',
@@ -134,57 +149,95 @@ describe('Milestones show no progress until a task can be attached (#1064)', () 
       targetDate: '2026-09-30',
       taskCount: 0,
       doneCount: 0,
+      overdueCount: 0,
       ...over,
     };
   }
 
   beforeEach(() => {
     milestonesState.data = [];
+    deleteAccess.canDelete = false;
+    navigateSpy.mockClear();
+    updateMilestoneSpy.mockClear();
+    deleteMilestoneSpy.mockClear();
   });
 
   afterEach(() => {
     milestonesState.data = [];
   });
 
-  // The five cases that were here covered the progress bar's arithmetic:
-  // an empty track for unknown progress, the clamp above 100, and a full
-  // track only when done. They were correct, and #1160 fixed a real defect
-  // in that markup. The bar itself is gone until a task can be put into a
-  // milestone, so they are replaced rather than deleted: milestoneProgress
-  // keeps its own unit tests in milestoneUtils.test.ts, which is where the
-  // arithmetic lives and where it will still be when the bar returns.
-  // rtylr#1064 and REQ-R15.
-
-  it('renders no progress track', () => {
-    milestonesState.data = [milestone()];
-    const { container } = render(<Milestones />);
-    expect(container.querySelector('.rounded-full.overflow-hidden')).toBeNull();
+  it('shows how much of the milestone is done', () => {
+    milestonesState.data = [milestone({ taskCount: 4, doneCount: 1 })];
+    render(<Milestones />);
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '25');
+    expect(screen.getByText('25%')).toBeInTheDocument();
+    expect(screen.getByText('flow.milestones.taskCount')).toBeInTheDocument();
   });
 
-  it('claims no percentage', () => {
-    milestonesState.data = [milestone({ computedProgress: 40 })];
+  it('flags overdue tasks only when there are some', () => {
+    milestonesState.data = [milestone({ id: 'm-1', taskCount: 3, overdueCount: 2 })];
+    const { unmount } = render(<Milestones />);
+    expect(screen.getByText('flow.milestones.overdueCount')).toBeInTheDocument();
+    unmount();
+
+    milestonesState.data = [milestone({ taskCount: 3, overdueCount: 0 })];
     render(<Milestones />);
-    expect(screen.queryByText(/%$/)).not.toBeInTheDocument();
-    expect(screen.queryByText('flow.milestones.progress')).not.toBeInTheDocument();
+    expect(screen.queryByText('flow.milestones.overdueCount')).not.toBeInTheDocument();
   });
 
-  it('says why there is nothing to show', () => {
+  it('explains how to add tasks to an empty milestone instead of an empty bar', () => {
     milestonesState.data = [milestone()];
     render(<Milestones />);
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
     expect(screen.getByText('flow.milestones.noTasksHint')).toBeInTheDocument();
   });
 
-  it('reports no task count, since it can only ever be zero of zero', () => {
-    milestonesState.data = [milestone({ taskCount: 0, doneCount: 0 })];
-    render(<Milestones />);
-    expect(screen.queryByText('flow.milestones.taskCount')).not.toBeInTheDocument();
-  });
-
-  it('still shows the milestone and its target date', () => {
+  it('opens the project list filtered to the milestone', () => {
     milestonesState.data = [milestone()];
     render(<Milestones />);
+    fireEvent.click(screen.getByRole('button', { name: 'flow.milestones.openTasks' }));
+    expect(navigateSpy).toHaveBeenCalledWith({
+      to: '/flow/p/$projectId/list',
+      params: { projectId: 'p-1' },
+      search: { filter: { milestones: ['m-1'] } },
+    });
+  });
+
+  it('edits the name, date and status from the card', () => {
+    milestonesState.data = [milestone()];
+    render(<Milestones />);
+    fireEvent.click(screen.getByRole('button', { name: 'flow.milestones.editMilestone' }));
+    fireEvent.change(screen.getByLabelText('flow.milestones.namePlaceholder'), {
+      target: { value: 'Launch v2' },
+    });
+    fireEvent.click(screen.getByText('flowCommon.save'));
+    expect(updateMilestoneSpy).toHaveBeenCalledTimes(1);
+    expect(updateMilestoneSpy.mock.calls[0][0]).toEqual({
+      id: 'm-1',
+      data: { name: 'Launch v2', targetDate: '2026-09-30', status: 'active' },
+    });
+  });
+
+  it('offers delete only to someone who may delete in the project', () => {
+    milestonesState.data = [milestone()];
+    const { unmount } = render(<Milestones />);
+    expect(
+      screen.queryByRole('button', { name: 'flow.milestones.deleteMilestone' })
+    ).not.toBeInTheDocument();
+    unmount();
+
+    deleteAccess.canDelete = true;
+    render(<Milestones />);
+    fireEvent.click(screen.getByRole('button', { name: 'flow.milestones.deleteMilestone' }));
+    fireEvent.click(screen.getByRole('button', { name: 'flowCommon.delete' }));
+    expect(deleteMilestoneSpy).toHaveBeenCalledWith('m-1', expect.anything());
+  });
+
+  it('still renders a milestone whose status this screen does not offer', () => {
+    milestonesState.data = [milestone({ status: 'upcoming' })];
+    render(<Milestones />);
     expect(screen.getByText('Launch')).toBeInTheDocument();
-    expect(screen.getByText(/flow\.milestones\.target/)).toBeInTheDocument();
+    expect(screen.getByText('flow.milestones.status.planning')).toBeInTheDocument();
   });
 });
 

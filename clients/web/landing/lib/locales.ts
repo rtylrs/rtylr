@@ -46,6 +46,12 @@ export interface Locale {
    * that the copy exists, not a feature flag.
    */
   shipped: boolean;
+  /**
+   * Route prefixes served in this locale while the rest of the site is not.
+   * Each prefix owns its content and its own route files, so the pages
+   * behind `shipped` (home, pricing, legal) stay out of the export.
+   */
+  sections?: string[];
 }
 
 /**
@@ -76,6 +82,10 @@ export const LOCALES: Locale[] = [
     // reader has confirmed the register and idiom choices, and the RTL
     // rendering has been checked at 390px.
     shipped: false,
+    // The blog is the exception, decided 2026-11-19: its Arabic posts are
+    // written per post rather than read out of ar.json, and they ship on the
+    // automated gates in tests/unit/blog.test.mjs.
+    sections: ['/blog/'],
   },
   {
     code: 'fr',
@@ -89,6 +99,16 @@ export const LOCALES: Locale[] = [
 ];
 
 export const shippedLocales = (): Locale[] => LOCALES.filter((l) => l.shipped);
+
+const withSlash = (path: string): string => (path.endsWith('/') ? path : `${path}/`);
+
+/** Whether a bare route sits inside a section this locale serves on its own. */
+export const inServedSection = (path: string, locale: Locale): boolean =>
+  (locale.sections ?? []).some((prefix) => withSlash(path).startsWith(prefix));
+
+/** Locales that serve a given section, the default first. */
+export const localesServing = (path: string): Locale[] =>
+  LOCALES.filter((l) => l.shipped || inServedSection(path, l));
 
 /**
  * The routes a non-default locale actually covers.
@@ -134,12 +154,16 @@ export const findLocale = (code: string): Locale | undefined =>
  *
  * Only shipped locales are recognised. An unshipped prefix is not a locale
  * route, so `/ar/pricing/` reads as the default locale, which is correct:
- * that route does not exist and should not be claimed.
+ * that route does not exist and should not be claimed. A locale that serves
+ * one section is recognised inside that section and nowhere else.
  */
 export function localeFromPath(pathname: string): Locale {
-  const first = pathname.split('/').filter(Boolean)[0];
-  const hit = first ? shippedLocales().find((l) => l.code === first) : undefined;
-  return hit ?? (findLocale(DEFAULT_LOCALE) as Locale);
+  const clean = pathname.split(/[?#]/)[0];
+  const [first, ...rest] = clean.split('/').filter(Boolean);
+  const candidate = first ? LOCALES.find((l) => l.code === first) : undefined;
+  const served =
+    candidate && (candidate.shipped || inServedSection(`/${rest.join('/')}/`, candidate));
+  return served ? candidate : (findLocale(DEFAULT_LOCALE) as Locale);
 }
 
 /**
@@ -164,7 +188,15 @@ export function localisePath(path: string, code: string): string {
  * page that does not exist in that locale.
  */
 export function navPath(path: string, code: string): string {
-  return isLocalisedRoute(path) ? localisePath(path, code) : path;
+  const locale = findLocale(code);
+  if (!locale) return path;
+  const [route, query = ''] = path.split('?');
+  const suffix = query ? `?${query}` : '';
+  // A locale that serves one section has no translated home or pricing page
+  // to link to, so everything outside that section keeps its English path.
+  if (inServedSection(route, locale)) return localisePath(withSlash(route), code) + suffix;
+  if (!locale.shipped) return path;
+  return isLocalisedRoute(route) ? localisePath(route, code) + suffix : path;
 }
 
 /**

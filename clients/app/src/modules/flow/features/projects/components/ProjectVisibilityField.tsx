@@ -1,6 +1,5 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { QueryClientContext } from '@tanstack/react-query';
 import { Check, Globe, Lock } from 'lucide-react';
 import GateNotice from '../../../shared/components/GateNotice';
 import { ListLoadFailed } from '../../../shared/components/ListLoadFailed';
@@ -46,8 +45,6 @@ const ProjectVisibilityField = ({
     refetch,
   } = useProject(projectId);
   const setVisibility = useSetProjectVisibility();
-  const queryClient = React.useContext(QueryClientContext);
-  const previousSuccess = React.useRef(false);
 
   const loadFailed = isError === true || (isPaused === true && failureCount > 0);
   const isPersonal = project?.isPersonal === true;
@@ -59,16 +56,6 @@ const ProjectVisibilityField = ({
       : '';
   const disabled =
     reason !== '' || isLoading || isPending || !project || loadFailed || setVisibility.isPending;
-
-  React.useEffect(() => {
-    const succeeded = setVisibility.isSuccess === true;
-    if (succeeded && !previousSuccess.current && queryClient) {
-      void queryClient.invalidateQueries({
-        queryKey: project?.ownerId ? ['profile', project.ownerId] : ['profile'],
-      });
-    }
-    previousSuccess.current = succeeded;
-  }, [project?.ownerId, queryClient, setVisibility.isSuccess]);
 
   if (loadFailed) {
     return <ListLoadFailed onRetry={() => void refetch()} />;

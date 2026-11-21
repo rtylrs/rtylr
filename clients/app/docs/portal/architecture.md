@@ -57,6 +57,15 @@ The public, unauthenticated customer menu lives in `src/modules/public-menu`. It
 
 Business slugs equal to a Portal route name would be shadowed by that route, so they are reserved: the backend business module rejects them and `clients/packages/config/src/publicMenu.ts` mirrors the list for the settings form. `/menu` (a single segment) is the authenticated admin editor; `/<slug>/menu` is the public page.
 
+## Pager
+
+The order pager lives in `src/modules/pager`. Its customer pages are registered on the Portal's `rootRoute` like the public menu and need no auth cookie:
+
+- `/$slug/pager` - join page, where a venue's QR poster points
+- `/pager/t/$token` - the ticket a phone is following
+
+The staff board is `/pager` inside the signed-in shell, with no navigation entry. The tap on the join page unlocks the sound the ticket page plays later (`src/shared/alarm`), so moving between the two has to stay a router navigation: a full page load discards the unlocked audio.
+
 ## Release order
 
 1. Provision the Portal Pages project and `portal.rtylr.com` custom domain in infra.
