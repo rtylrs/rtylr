@@ -37,13 +37,16 @@ const syncSpy = vi.hoisted(() => vi.fn());
 vi.mock('../../../../shared/alarm/readyAlarm', () => ({
   readyAlarm: { unlock: vi.fn(), sync: syncSpy, release: vi.fn(), silence: vi.fn() },
 }));
+// Unlocked unless a test needs the ticket's "Alert me" tap on screen.
+const alarmState = vi.hoisted(() => ({ ringing: false, unlocked: true }));
 vi.mock('../../../../shared/alarm/useAlarm', () => ({
-  useAlarm: () => ({ ringing: false, unlocked: true }),
+  useAlarm: () => alarmState,
 }));
 vi.mock('../../../../shared/services/i18next', () => ({ selectLanguage: vi.fn() }));
 
 import Try from './Try';
 import { TICKET_POLL_INTERVAL_MS } from '../../shared/lib/ticketPoller';
+import { installFakePushBrowser } from '../../shared/testing/fakePushBrowser';
 import { initTestI18n } from '../../shared/testing/i18n';
 
 // Both screens poll, as they do against the API.
@@ -59,6 +62,7 @@ beforeAll(async () => {
 beforeEach(() => {
   vi.useFakeTimers({ shouldAdvanceTime: true });
   syncSpy.mockReset();
+  alarmState.unlocked = true;
 });
 
 afterEach(() => {
@@ -85,6 +89,31 @@ describe('pager demo', () => {
     expect(syncSpy).toHaveBeenLastCalledWith(
       expect.objectContaining({ ringKey: expect.any(String) })
     );
+  });
+
+  it('never asks for notification permission, even on a browser with Web Push', async () => {
+    // Demo tickets exist only in this page, so the server has nothing to push.
+    // Any call to the real API, the push key included, throws above.
+    const pushBrowser = installFakePushBrowser();
+    alarmState.unlocked = false;
+    try {
+      render(<Try />);
+      const phone = screen.getByRole('region', { name: "Your customer's phone" });
+
+      fireEvent.change(await within(phone).findByLabelText('Order number'), {
+        target: { value: '42' },
+      });
+      fireEvent.click(within(phone).getByRole('button', { name: "Ring me when it's ready" }));
+      expect(await within(phone).findByText("We're preparing your order")).toBeInTheDocument();
+      fireEvent.click(within(phone).getByRole('button', { name: 'Alert me' }));
+      await nextPoll();
+
+      expect(pushBrowser.requestPermission).not.toHaveBeenCalled();
+      expect(pushBrowser.register).not.toHaveBeenCalled();
+      expect(pushBrowser.subscribe).not.toHaveBeenCalled();
+    } finally {
+      pushBrowser.restore();
+    }
   });
 
   it('lets the visitor change the demo venue settings', async () => {
