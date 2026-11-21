@@ -71,6 +71,10 @@ const taskData = vi.hoisted(() => ({ rows: [] as unknown[] }));
 vi.mock('../tasks/useTasks', () => ({
   useTasks: () => ({ isLoading: false, isError: false, data: taskData.rows }),
 }));
+// Cards render the blocked badge, whose relations hook reads the Flow API.
+vi.mock('../tasks/useTaskRelations', () => ({
+  useTaskRelations: () => ({ data: undefined, isPending: true }),
+}));
 vi.mock('../tasks/useLabels', () => ({ useLabels: () => ({ data: [] }) }));
 vi.mock('./useColumns', () => ({ useMoveTaskToColumn: () => mutation }));
 vi.mock('./useProjectTaskFilters', () => ({
