@@ -176,7 +176,7 @@ func (r *UpsertHRConfigRequest) UnmarshalJSON(data []byte) error {
 		FiscalMonthSnake      int32            `json:"fiscal_year_start_month"`
 		CurrencySnake         string           `json:"default_currency"`
 		TimezoneSnake         string           `json:"default_timezone"`
-		ScheduleSnake         int64            `json:"default_work_schedule_id"`
+		ScheduleSnake         *json.RawMessage `json:"default_work_schedule_id"`
 		OvertimeEnabledSnake  bool             `json:"overtime_enabled"`
 		MultiplierSnake       float64          `json:"overtime_multiplier"`
 		DirectorySnake        bool             `json:"directory_enabled"`
@@ -202,7 +202,7 @@ func (r *UpsertHRConfigRequest) UnmarshalJSON(data []byte) error {
 	var fiscalMonthCamel int32
 	var currencyCamel string
 	var timezoneCamel string
-	var scheduleCamel int64
+	var scheduleCamel *json.RawMessage
 	var overtimeEnabledCamel bool
 	var multiplierCamel float64
 	var directoryCamel bool
@@ -221,8 +221,8 @@ func (r *UpsertHRConfigRequest) UnmarshalJSON(data []byte) error {
 	if err := decode("defaultTimezone", &timezoneCamel); err != nil {
 		return err
 	}
-	if err := decode("defaultWorkScheduleId", &scheduleCamel); err != nil {
-		return err
+	if raw, ok := fields["defaultWorkScheduleId"]; ok {
+		scheduleCamel = &raw
 	}
 	if err := decode("overtimeEnabled", &overtimeEnabledCamel); err != nil {
 		return err
@@ -243,13 +243,26 @@ func (r *UpsertHRConfigRequest) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("setup_completed_at: %w", err)
 	}
 
+	scheduleRaw := payload.ScheduleSnake
+	if scheduleRaw == nil {
+		scheduleRaw = scheduleCamel
+	}
+	schedulePtr, err := parseOptionalInt64(scheduleRaw)
+	if err != nil {
+		return fmt.Errorf("default_work_schedule_id: %w", err)
+	}
+	var scheduleID int64
+	if schedulePtr != nil {
+		scheduleID = *schedulePtr
+	}
+
 	*r = UpsertHRConfigRequest{
 		SetupCompletedAt:      setupCompletedAt,
 		CompanyName:           firstString(payload.CompanyNameSnake, companyNameCamel),
 		FiscalYearStartMonth:  firstInt32(payload.FiscalMonthSnake, fiscalMonthCamel),
 		DefaultCurrency:       firstString(payload.CurrencySnake, currencyCamel),
 		DefaultTimezone:       firstString(payload.TimezoneSnake, timezoneCamel),
-		DefaultWorkScheduleID: firstInt64(payload.ScheduleSnake, scheduleCamel),
+		DefaultWorkScheduleID: scheduleID,
 		OvertimeEnabled:       payload.OvertimeEnabledSnake || overtimeEnabledCamel,
 		OvertimeMultiplier:    firstFloat64(payload.MultiplierSnake, multiplierCamel),
 		DirectoryEnabled:      payload.DirectorySnake || directoryCamel,
@@ -268,12 +281,16 @@ func (r *UpsertHRConfigRequest) UnmarshalJSON(data []byte) error {
 }
 
 func parseOptionalInt64(raw *json.RawMessage) (*int64, error) {
-	if raw == nil {
+	if raw == nil || len(*raw) == 0 || string(*raw) == "null" {
 		return nil, nil
 	}
 	var stringValue string
 	if err := json.Unmarshal(*raw, &stringValue); err == nil {
-		value, err := strconv.ParseInt(strings.TrimSpace(stringValue), 10, 64)
+		trimmed := strings.TrimSpace(stringValue)
+		if trimmed == "" {
+			return nil, nil
+		}
+		value, err := strconv.ParseInt(trimmed, 10, 64)
 		if err != nil {
 			return nil, err
 		}
@@ -294,13 +311,6 @@ func firstString(snake, camel string) string {
 }
 
 func firstInt32(snake, camel int32) int32 {
-	if snake != 0 {
-		return snake
-	}
-	return camel
-}
-
-func firstInt64(snake, camel int64) int64 {
 	if snake != 0 {
 		return snake
 	}

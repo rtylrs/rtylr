@@ -8,6 +8,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrsetupv1 "github.com/voxire/voxie/gen/go/hr/setup/v1"
 )
 
@@ -24,8 +25,12 @@ func (a *SetupAPI) CompleteSetupStep(ctx context.Context, req *hrsetupv1.Complet
 	if device.IsAnonymous || device.User == nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	if err := a.Service.CompleteSetupStep(ctx, device.User.UserID, req.GetStepKey()); err != nil {
-		logger.Ctx(ctx).Error("failed to complete setup step", logger.Any("owner_id", device.User.UserID), logger.String("step_key", req.GetStepKey()), logger.Error(err))
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	if err := a.Service.CompleteSetupStep(ctx, businessID, req.GetStepKey()); err != nil {
+		logger.Ctx(ctx).Error("failed to complete setup step", logger.Any("business_id", businessID), logger.String("step_key", req.GetStepKey()), logger.Error(err))
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to complete setup step")
 	}
 	return &hrsetupv1.CompleteSetupStepResponse{}, nil

@@ -236,7 +236,8 @@ const toTrainingPayload = (task: Omit<OnboardingTask, 'id' | 'completed'>) => ({
   isRequired: true,
 });
 
-const toSettingsPayload = (patch: Partial<HrSettings>): Partial<HrSettings> => ({
+const toSettingsPayload = (patch: Partial<HrSettings>) => ({
+  ...(patch.currency ? { defaultCurrency: patch.currency } : {}),
   workWeekStart: patch.workWeekStart,
   overtimeAfterHours: patch.overtimeAfterHours,
   ptoPolicyDays: patch.ptoPolicyDays,

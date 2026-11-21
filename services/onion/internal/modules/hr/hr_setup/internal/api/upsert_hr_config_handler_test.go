@@ -178,3 +178,21 @@ func TestMergeCoreConfigInputTurnsDirectoryOff(t *testing.T) {
 		t.Fatal("an explicit directory_enabled=false must turn the directory off")
 	}
 }
+
+// The HR setup wizard's Work Schedule step receives schedule.id as a string
+// from the OneKit client and PUTs {defaultWorkScheduleId: "9"} to /hr/config.
+func TestUpsertHRConfigRequestParsesStringWorkScheduleID(t *testing.T) {
+	for _, raw := range []string{
+		`{"defaultWorkScheduleId":"9"}`,
+		`{"default_work_schedule_id":"14"}`,
+		`{"defaultWorkScheduleId":21}`,
+	} {
+		var req UpsertHRConfigRequest
+		if err := json.Unmarshal([]byte(raw), &req); err != nil {
+			t.Fatalf("Unmarshal(%s): %v", raw, err)
+		}
+		if !req.coreFieldPresent("default_work_schedule_id") || req.DefaultWorkScheduleID <= 0 {
+			t.Fatalf("Unmarshal(%s) got id=%d present=%v", raw, req.DefaultWorkScheduleID, req.coreFieldPresent("default_work_schedule_id"))
+		}
+	}
+}
