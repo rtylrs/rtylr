@@ -173,5 +173,14 @@
     "removeFailed": "Impossible de retirer le lien"
   },
   "milestoneUpdated": "Jalon mis à jour",
-  "milestoneDeleted": "Jalon supprimé"
+  "milestoneDeleted": "Jalon supprimé",
+  "field": {
+    "created": "Champ ajouté",
+    "updated": "Champ enregistré",
+    "saveFailed": "Impossible d'enregistrer le champ",
+    "deleted_one": "Champ supprimé. {{count}} tâche a perdu sa valeur.",
+    "deleted_other": "Champ supprimé. {{count}} tâches ont perdu leur valeur.",
+    "deleteFailed": "Impossible de supprimer le champ",
+    "valueSaveFailed": "Impossible d'enregistrer la valeur"
+  }
 }
