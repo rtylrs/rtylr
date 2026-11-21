@@ -83,7 +83,7 @@ describe('Rennili landing page', () => {
     expect(menuButton).toHaveFocus();
   });
 
-  it('rings the hero simulator, shuffles bilingual codes, and toggles FAQ disclosures', async () => {
+  it('rings the hero simulator, shows the next match code, and toggles FAQ disclosures', async () => {
     render(<Landing />);
 
     // Hero interactive Tap Ready control
@@ -95,10 +95,10 @@ describe('Rennili landing page', () => {
       'true'
     );
 
-    // Bento interactive emoji-word shuffler
-    const shuffleButton = screen.getByRole('button', { name: 'Shuffle code' });
-    fireEvent.click(shuffleButton);
-    expect(await screen.findByText(/Panda/)).toBeInTheDocument();
+    // Bento interactive match code shuffler
+    const nextCode = screen.getByRole('button', { name: 'Next code' });
+    fireEvent.click(nextCode);
+    expect(await screen.findByText('318')).toBeInTheDocument();
 
     // Bento interactive mini board toggle
     const markReady = screen.getByRole('button', { name: 'Mark ready' });

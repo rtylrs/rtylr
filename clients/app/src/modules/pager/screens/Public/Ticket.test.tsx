@@ -1,5 +1,5 @@
 import React from 'react';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@voxire/components', () => ({ HelmetContainer: () => null }));
@@ -45,8 +45,7 @@ const { bell, navigator: fakeNavigator } = (
 ).fakeAlarm;
 
 const scanned = {
-  word: 'panda',
-  color: 2,
+  code: '427',
   status: 'waiting',
   venueName: 'Acme Cafe',
   serverTime: '2026-11-19T09:58:00.000Z',
@@ -99,12 +98,8 @@ describe('pager ticket page', () => {
     api.getPublicTicket.mockResolvedValue(scanned);
     render(<Ticket />);
 
-    // The word in the page language, and in Arabic for a cashier who reads it.
-    expect(
-      await screen.findByRole('heading', { name: 'Your code Panda باندا' })
-    ).toBeInTheDocument();
-    expect(screen.getByText('🐼', { exact: false })).toBeInTheDocument();
-    expect(screen.getByText('Show this code to the cashier')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Your code 427' })).toBeInTheDocument();
+    expect(screen.getByText('Show this number to the cashier')).toBeInTheDocument();
     expect(screen.queryByText(/ahead of you|You're next/)).not.toBeInTheDocument();
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
     // Kept awake and followed by push before the customer taps anything.
@@ -131,14 +126,15 @@ describe('pager ticket page', () => {
       .mockResolvedValueOnce(scanned)
       .mockResolvedValue({ ...waiting, label: 'Sara', labelKind: 'name' });
     render(<Ticket />);
-    await screen.findByRole('heading', { name: /^Your code Panda/ });
+    await screen.findByRole('heading', { name: 'Your code 427' });
 
     await nextPoll();
 
     expect(await screen.findByRole('heading', { name: 'Sara' })).toBeInTheDocument();
     expect(screen.getByText("We're preparing your order")).toBeInTheDocument();
     expect(screen.getByText('2 orders ahead of you')).toBeInTheDocument();
-    expect(screen.queryByText('Show this code to the cashier')).not.toBeInTheDocument();
+    expect(screen.queryByText('Show this number to the cashier')).not.toBeInTheDocument();
+    expect(screen.queryByText('427')).not.toBeInTheDocument();
   });
 
   it('names the customer in the lock-screen text when the label is a name', async () => {
@@ -349,20 +345,26 @@ describe('pager ticket page', () => {
     expect(await screen.findByText('Ticket not found')).toBeInTheDocument();
   });
 
-  it('shows the word with its number, in Arabic with English beside it', async () => {
+  // The cashier's screen may be in another language: both read the same digits.
+  it('shows the number in Western digits, left to right, on the Arabic page', async () => {
     await initTestI18n('ar');
-    api.getPublicTicket.mockResolvedValue({ ...scanned, word: 'goat', wordNumber: 2 });
+    api.getPublicTicket.mockResolvedValue(scanned);
     render(<Ticket />);
 
-    expect(await screen.findByRole('heading', { name: /غوت 2 GOAT 2$/ })).toBeInTheDocument();
+    const heading = await screen.findByRole('heading', { name: 'رمزك 427' });
+    expect(within(heading).getByText('427')).toHaveAttribute('dir', 'ltr');
+    expect(screen.getByText('أرِ هذا الرقم للكاشير')).toBeInTheDocument();
   });
 
-  it('still shows the two character code of a phone that scanned before the words', async () => {
-    api.getPublicTicket.mockResolvedValue({ ...scanned, word: undefined, code: 'A7' });
-    render(<Ticket />);
+  it.each(['A7', 'PANDA2'])(
+    'still shows the code of a phone that scanned before the numbers (%s)',
+    async (code) => {
+      api.getPublicTicket.mockResolvedValue({ ...scanned, code });
+      render(<Ticket />);
 
-    expect(await screen.findByRole('heading', { name: 'Your code A7' })).toBeInTheDocument();
-  });
+      expect(await screen.findByRole('heading', { name: `Your code ${code}` })).toBeInTheDocument();
+    }
+  );
 
   it('waits calmly through a deploy, then offers a retry, and recovers', async () => {
     api.getPublicTicket.mockRejectedValue({ statusCode: 503 });

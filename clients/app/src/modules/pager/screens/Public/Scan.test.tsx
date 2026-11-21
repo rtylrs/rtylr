@@ -19,7 +19,7 @@ import Scan from './Scan';
 import { initTestI18n } from '../../shared/testing/i18n';
 
 const STORAGE_KEY = 'pager:scan:acme';
-const scanned = { publicToken: 'tok-1', word: 'panda', color: 2, status: 'waiting' };
+const scanned = { publicToken: 'tok-1', code: '427', status: 'waiting' };
 
 beforeAll(async () => {
   await initTestI18n('en');
@@ -57,7 +57,7 @@ describe('pager scan page', () => {
 
   it('keeps the same ticket and code when the page is reloaded', async () => {
     window.sessionStorage.setItem(STORAGE_KEY, 'tok-old');
-    api.getPublicTicket.mockResolvedValue({ status: 'waiting', word: 'slay' });
+    api.getPublicTicket.mockResolvedValue({ status: 'waiting', code: '318' });
     render(<Scan />);
 
     await waitFor(() =>

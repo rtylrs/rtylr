@@ -77,20 +77,24 @@ describe('pager demo', () => {
 
     // The phone has "scanned": a code and nothing to type.
     const heading = await within(phone).findByRole('heading', { name: /^Your code / });
-    // The board names the card by the same word the phone shows.
-    const word = (heading.querySelector('bdi')?.childNodes[1]?.textContent ?? '').trim();
-    expect(word).not.toBe('');
-    expect(within(phone).getByText('Show this code to the cashier')).toBeInTheDocument();
+    // The board names the card by the same number the phone shows.
+    const code = heading.querySelector('bdi')?.textContent ?? '';
+    expect(code).toMatch(/^[1-9]\d{2}$/);
+    expect(within(phone).getByText('Show this number to the cashier')).toBeInTheDocument();
     expect(within(phone).queryByRole('textbox')).not.toBeInTheDocument();
 
     await nextPoll();
-    fireEvent.change(await within(counter).findByLabelText(`Order number or name for code ${word}`), {
-      target: { value: '42' },
-    });
+    fireEvent.change(
+      await within(counter).findByLabelText(`Order number or name for code ${code}`),
+      {
+        target: { value: '42' },
+      }
+    );
     fireEvent.click(within(counter).getByRole('button', { name: 'Save' }));
     await nextPoll();
 
     expect(await within(phone).findByRole('heading', { name: 'Order 42' })).toBeInTheDocument();
+    expect(within(phone).queryByText(code)).not.toBeInTheDocument();
     expect(within(phone).getByText("We're preparing your order")).toBeInTheDocument();
     fireEvent.click(await within(counter).findByRole('button', { name: 'Ready: 42' }));
     await nextPoll();
@@ -110,7 +114,7 @@ describe('pager demo', () => {
       render(<Try />);
       const phone = screen.getByRole('region', { name: "Your customer's phone" });
 
-      expect(await within(phone).findByText('Show this code to the cashier')).toBeInTheDocument();
+      expect(await within(phone).findByText('Show this number to the cashier')).toBeInTheDocument();
       fireEvent.click(within(phone).getByRole('button', { name: "Notify me when it's ready" }));
       await nextPoll();
 
@@ -151,7 +155,9 @@ describe('pager demo', () => {
     expect(second.textContent).not.toBe(firstCode);
     await nextPoll();
     const counter = screen.getByRole('region', { name: 'Your counter' });
-    expect(await within(counter).findByRole('heading', { name: 'New phones (2)' })).toBeInTheDocument();
+    expect(
+      await within(counter).findByRole('heading', { name: 'New phones (2)' })
+    ).toBeInTheDocument();
   });
 
   it('sends the visitor to the ordinary sign-up, returning to the pager setup', () => {
