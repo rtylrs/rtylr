@@ -75,6 +75,8 @@ type Task struct {
 	StatusName        string
 	StatusColor       string
 	Dependencies      []int64
+	// FieldValues holds the task's custom field values keyed by field id.
+	FieldValues map[int64]FieldValue
 
 	// TaskType is task, bug, feature or epic. EpicColor is the epic's own
 	// colour on an epic and the colour of the epic a task sits under otherwise.
@@ -164,6 +166,8 @@ type TaskInput struct {
 	StartDate      *time.Time
 	EstimatedHours *float64
 	Labels         []int64
+	// FieldValues are custom field values to store with the new task.
+	FieldValues []FieldValueInput
 	// ParentTaskID may name an epic or a task on the way in. The service
 	// resolves it, so the repository only ever sees a task parent here and an
 	// epic in EpicID.
@@ -233,6 +237,9 @@ type ListTasksFilter struct {
 	Compact     bool
 	Limit       int64
 	Offset      int64
+	// Custom field clauses, already validated against the project's fields.
+	FieldFilters []TaskFieldFilter
+	FieldSort    *TaskFieldSort
 	// TaskTypes narrows to the listed types. EpicID narrows to one epic's
 	// tasks; NoEpic to tasks that sit under no epic and are not epics.
 	TaskTypes []string

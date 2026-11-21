@@ -202,5 +202,18 @@
     "removeFailed": "تعذرت إزالة الرابط"
   },
   "milestoneUpdated": "تم تحديث المرحلة",
-  "milestoneDeleted": "تم حذف المرحلة"
+  "milestoneDeleted": "تم حذف المرحلة",
+  "field": {
+    "created": "تمت إضافة الحقل",
+    "updated": "تم حفظ الحقل",
+    "saveFailed": "تعذّر حفظ الحقل",
+    "deleted_zero": "تم حذف الحقل. لم تفقد أي مهمة قيمتها.",
+    "deleted_one": "تم حذف الحقل. فقدت مهمة واحدة قيمتها.",
+    "deleted_two": "تم حذف الحقل. فقدت مهمتان قيمتيهما.",
+    "deleted_few": "تم حذف الحقل. فقدت {{count}} مهام قيمها.",
+    "deleted_many": "تم حذف الحقل. فقدت {{count}} مهمة قيمها.",
+    "deleted_other": "تم حذف الحقل. فقدت {{count}} مهمة قيمها.",
+    "deleteFailed": "تعذّر حذف الحقل",
+    "valueSaveFailed": "تعذّر حفظ القيمة"
+  }
 }

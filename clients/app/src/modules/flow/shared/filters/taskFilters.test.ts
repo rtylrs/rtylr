@@ -2,14 +2,17 @@ import { describe, it, expect } from 'vitest';
 import type { Task } from '../stores/flowStore';
 import {
   EMPTY_TASK_FILTERS,
+  NO_FIELD_VALUE,
   UNASSIGNED,
   activeFieldCount,
   hasActiveTaskFilters,
   isOnlyMine,
   matchesTaskFilters,
   parseTaskFilters,
+  selectedValues,
   serializeTaskFilters,
   toggleOnlyMine,
+  withSelectedValues,
   type TaskFilters,
 } from './taskFilters';
 
@@ -217,6 +220,40 @@ describe('serialising', () => {
     expect(parsed.labels).toEqual(['7', 'x']);
     expect(parsed.assignees).toEqual([]);
     expect(parseTaskFilters(null)).toEqual(EMPTY_TASK_FILTERS);
+  });
+});
+
+describe('custom field filters', () => {
+  const withValues = (fieldValues: Task['fieldValues']): Task => task({ fieldValues });
+
+  it('matches any picked value, and "No value" matches a task without one', () => {
+    const filters = withSelectedValues(EMPTY_TASK_FILTERS, 'field:5', ['high', NO_FIELD_VALUE]);
+    expect(matchesTaskFilters(withValues({ '5': { value: 'high' } }), filters, ctx)).toBe(true);
+    expect(matchesTaskFilters(withValues({}), filters, ctx)).toBe(true);
+    expect(matchesTaskFilters(withValues({ '5': { value: 'low' } }), filters, ctx)).toBe(false);
+  });
+
+  it('matches a multi value holding any of the picked ones', () => {
+    const filters = withSelectedValues(EMPTY_TASK_FILTERS, 'field:8', ['api']);
+    expect(matchesTaskFilters(withValues({ '8': { values: ['ui', 'api'] } }), filters, ctx)).toBe(
+      true
+    );
+    expect(matchesTaskFilters(withValues({ '8': { values: ['ui'] } }), filters, ctx)).toBe(false);
+  });
+
+  it('counts each narrowing field once and clears with the rest', () => {
+    const filters = withSelectedValues(f({ priorities: ['high'] }), 'field:5', ['high']);
+    expect(activeFieldCount(filters)).toBe(2);
+    expect(selectedValues(filters, 'field:5')).toEqual(['high']);
+    expect(withSelectedValues(filters, 'field:5', []).fields).toEqual({});
+  });
+
+  it('survives the URL and drops anything that is not a field id', () => {
+    const filters = withSelectedValues(EMPTY_TASK_FILTERS, 'field:5', ['a', 'b']);
+    const out = serializeTaskFilters(filters);
+    expect(out).toEqual({ fields: { '5': ['a', 'b'] } });
+    expect(parseTaskFilters(out)).toEqual(filters);
+    expect(parseTaskFilters({ fields: { x: ['a'], '6': 'b', '7': [] } }).fields).toEqual({});
   });
 });
 

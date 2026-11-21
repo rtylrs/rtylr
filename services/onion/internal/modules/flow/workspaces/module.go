@@ -19,6 +19,7 @@ import (
 	flowcyclev2 "github.com/voxire/voxie/gen/go/flow/cycle/v2"
 	flowdashboardv1 "github.com/voxire/voxie/gen/go/flow/dashboard/v1"
 	flowdashboardv2 "github.com/voxire/voxie/gen/go/flow/dashboard/v2"
+	flowfieldv2 "github.com/voxire/voxie/gen/go/flow/field/v2"
 	flowgithubv2 "github.com/voxire/voxie/gen/go/flow/github/v2"
 	flowinsightsv1 "github.com/voxire/voxie/gen/go/flow/insights/v1"
 	flowinsightsv2 "github.com/voxire/voxie/gen/go/flow/insights/v2"
@@ -185,6 +186,12 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 		flowstatusv2.WithMux(mux),
 	); err != nil {
 		panic(fmt.Errorf("register flow status v2: %w", err))
+	}
+	if err := flowfieldv2.RegisterFieldServiceServer(
+		api.NewFieldAPIV2(m.service),
+		flowfieldv2.WithMux(mux),
+	); err != nil {
+		panic(fmt.Errorf("register flow field v2: %w", err))
 	}
 	if err := flowgithubv2.RegisterGitHubServiceServer(
 		api.NewGitHubAPIV2(m.service),

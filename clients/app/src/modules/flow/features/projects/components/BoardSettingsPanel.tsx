@@ -6,6 +6,7 @@ import { Switch } from '@voxire/ui';
 import GateNotice from '../../../shared/components/GateNotice';
 import { useDialogBehavior } from '../../../shared/lib/useDialogBehavior';
 import { displayStatusName } from '../statusUtils';
+import type { BoardGroupKey } from '../../../shared/lib/boardUtils';
 import {
   BOARD_GROUP_KEYS,
   CARD_FIELDS,
@@ -24,6 +25,8 @@ interface BoardSettingsPanelProps {
   canManage: boolean;
   /** The viewer's own settings for this board. */
   settings: BoardViewSettings;
+  /** The project's select fields, offered after the built-in groupings. */
+  fieldGroupOptions?: readonly { key: BoardGroupKey; label: string }[];
   onSettingsChange: (patch: Partial<BoardViewSettings>) => void;
   onResetSettings: () => void;
   /** Columns are statuses, edited in the statuses panel. */
@@ -93,6 +96,7 @@ const BoardSettingsPanel = ({
   columns,
   canManage,
   settings,
+  fieldGroupOptions = [],
   onSettingsChange,
   onResetSettings,
   onManageStatuses,
@@ -153,9 +157,11 @@ const BoardSettingsPanel = ({
           </h4>
           <Choices
             label={t('flow.board.groupByHeading')}
-            options={BOARD_GROUP_KEYS}
+            options={[...BOARD_GROUP_KEYS, ...fieldGroupOptions.map((o) => o.key)]}
             value={settings.groupBy}
-            optionLabel={(key) => t(`flow.board.groupBy.${key}`)}
+            optionLabel={(key) =>
+              fieldGroupOptions.find((o) => o.key === key)?.label ?? t(`flow.board.groupBy.${key}`)
+            }
             onChange={(groupBy) => onSettingsChange({ groupBy })}
           />
         </section>

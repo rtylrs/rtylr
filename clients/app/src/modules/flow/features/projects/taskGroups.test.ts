@@ -1,7 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import type { Task } from '../../shared/stores/flowStore';
+import type { ApiField } from '../../shared/services/flowApi';
 import { NO_EPIC } from '../../shared/lib/taskHierarchy';
-import { NO_VALUE_LANE, epicLanes, laneKeyFor, laneKeysFor, valueLanes } from './taskGroups';
+import {
+  NO_FIELD_LANE,
+  NO_VALUE_LANE,
+  epicLanes,
+  fieldGroupOptions,
+  fieldLanes,
+  laneKeyFor,
+  laneKeysFor,
+  valueLanes,
+} from './taskGroups';
 
 const task = (extra: Partial<Task> = {}): Task => ({
   id: '1',
@@ -72,6 +82,39 @@ describe('valueLanes', () => {
     expect(valueLanes([task({ cycleId: '4' })], 'cycle', [{ id: '4', name: 'Sprint 4' }])).toEqual([
       { key: '4', label: 'Sprint 4' },
     ]);
+  });
+});
+
+const severity: ApiField = {
+  id: '5',
+  projectId: '12',
+  name: 'Severity',
+  type: 'select',
+  options: [
+    { id: 'a', label: 'Low', color: '#0f0' },
+    { id: 'b', label: 'High', color: '#f00' },
+  ],
+  required: false,
+  defaultValue: '',
+  defaultValues: [],
+  sortOrder: 0,
+  valueCount: 0,
+};
+
+describe('grouping the board by a custom field', () => {
+  it('offers single selects only', () => {
+    expect(
+      fieldGroupOptions([severity, { ...severity, id: '6', name: 'Tags', type: 'multi_select' }])
+    ).toEqual([{ key: 'field:5', label: 'Severity' }]);
+  });
+
+  it('puts each task in its option lane, or "No value"', () => {
+    expect(laneKeyFor(task({ fieldValues: { '5': { value: 'b' } } }), 'field:5')).toBe('b');
+    expect(laneKeyFor(task({}), 'field:5')).toBe(NO_FIELD_LANE);
+  });
+
+  it('lists lanes in option order with "No value" last', () => {
+    expect(fieldLanes(severity).map((l) => l.key)).toEqual(['a', 'b', NO_FIELD_LANE]);
   });
 });
 

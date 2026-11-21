@@ -40,7 +40,15 @@ func (s *Service) IsProjectMemberOrBypass(ctx context.Context, userID, businessI
 func (s *Service) ListTasksV2(ctx context.Context, callerID, businessID int64, filter domain.ListTasksFilter) ([]domain.Task, int64, error) {
 	filter.BusinessID = businessID
 	includeAll := s.opensProject(ctx, filter.ProjectID, callerID, businessID)
-	return s.repo.GetTasksByBusinessV2(ctx, filter, callerID, includeAll)
+	tasks, total, err := s.repo.GetTasksByBusinessV2(ctx, filter, callerID, includeAll)
+	if err != nil {
+		return nil, 0, err
+	}
+	// One extra query for the page, whatever its size.
+	if err := s.attachFieldValues(ctx, businessID, tasks); err != nil {
+		return nil, 0, err
+	}
+	return tasks, total, nil
 }
 
 // SearchTasksV2 is business-wide fulltext search under the same visibility

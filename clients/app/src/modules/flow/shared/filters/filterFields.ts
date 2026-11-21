@@ -2,7 +2,15 @@ import type { TFunction } from 'i18next';
 import type { Task } from '../stores/flowStore';
 import { initialsFromName } from '../lib/memberUtils';
 import { statusLabelKey } from '../lib/statusLabels';
-import { PRIORITIES, UNASSIGNED, type ListField } from './taskFilters';
+import type { ApiField } from '../services/flowApi';
+import { fieldKey, isListFilterable } from '../lib/customFields';
+import {
+  NO_FIELD_VALUE,
+  PRIORITIES,
+  UNASSIGNED,
+  type CustomFilterField,
+  type ListField,
+} from './taskFilters';
 import { NO_EPIC, type EpicSummary } from '../lib/taskHierarchy';
 
 const BUILT_IN_STATUSES: Task['status'][] = [
@@ -25,7 +33,7 @@ export interface FilterOption {
 }
 
 export interface FilterFieldConfig {
-  field: ListField;
+  field: ListField | CustomFilterField;
   label: string;
   options: FilterOption[];
 }
@@ -149,4 +157,43 @@ export function peopleFrom(
     }
   }
   return [...byId].map(([id, name]) => ({ id, name }));
+}
+
+/**
+ * A project's custom fields that filter as a checklist: selects, people and
+ * checkboxes. Each lists its values plus "No value", so a task missing the
+ * field can be found as easily as one holding it.
+ */
+export function customFieldFilters(
+  fields: readonly ApiField[],
+  people: readonly FilterPerson[],
+  t: TFunction
+): FilterFieldConfig[] {
+  const none = { value: NO_FIELD_VALUE, label: t('flow.fields.noValue') };
+  return fields
+    .filter((f) => isListFilterable(f.type))
+    .map((f) => {
+      let options: FilterOption[];
+      if (f.type === 'checkbox') {
+        options = [
+          { value: 'true', label: t('flow.fields.checked') },
+          { value: NO_FIELD_VALUE, label: t('flow.fields.unchecked') },
+        ];
+      } else if (f.type === 'person') {
+        options = [
+          ...people.map((p) => ({
+            value: p.id,
+            label: p.name,
+            initials: initialsFromName(p.name),
+          })),
+          none,
+        ];
+      } else {
+        options = [
+          ...f.options.map((o) => ({ value: o.id, label: o.label, color: o.color })),
+          none,
+        ];
+      }
+      return { field: fieldKey(f.id), label: f.name, options };
+    });
 }

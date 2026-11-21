@@ -11,6 +11,7 @@ import (
 	flowcyclev2 "github.com/voxire/voxie/gen/go/flow/cycle/v2"
 	flowdashboardv1 "github.com/voxire/voxie/gen/go/flow/dashboard/v1"
 	flowdashboardv2 "github.com/voxire/voxie/gen/go/flow/dashboard/v2"
+	flowfieldv2 "github.com/voxire/voxie/gen/go/flow/field/v2"
 	flowinsightsv1 "github.com/voxire/voxie/gen/go/flow/insights/v1"
 	flowinsightsv2 "github.com/voxire/voxie/gen/go/flow/insights/v2"
 	flowlabelv1 "github.com/voxire/voxie/gen/go/flow/label/v1"
@@ -39,6 +40,7 @@ var (
 	_ flowlabelv1.LabelServiceServer               = (*LabelAPI)(nil)
 	_ flowlabelv2.LabelServiceServer               = (*LabelAPIV2)(nil)
 	_ flowstatusv2.StatusServiceServer             = (*StatusAPIV2)(nil)
+	_ flowfieldv2.FieldServiceServer               = (*FieldAPIV2)(nil)
 	_ flowtaskv1.TaskServiceServer                 = (*TaskAPI)(nil)
 	_ flowtaskv2.TaskServiceServer                 = (*TaskAPIV2)(nil)
 	_ flowdashboardv1.DashboardServiceServer       = (*DashboardAPI)(nil)

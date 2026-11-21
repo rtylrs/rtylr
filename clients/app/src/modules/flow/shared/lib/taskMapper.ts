@@ -99,6 +99,7 @@ export function apiTaskToTask(t: ApiTask): Task {
     statusId: t.statusId || undefined,
     statusName: t.statusName || undefined,
     statusColor: t.statusColor || undefined,
+    fieldValues: t.fieldValues,
     // int64 ids are strings on the wire already. An empty or zero id is no
     // link at all, and a missing type is a plain task (omitempty).
     parentId: t.parentTaskId && t.parentTaskId !== '0' ? String(t.parentTaskId) : undefined,

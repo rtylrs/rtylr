@@ -88,6 +88,11 @@ describe('flow locale parity', () => {
       'settings.appearance.density.compact',
       // A URL placeholder is intentionally identical in every locale.
       'sidebar.externalUrlPlaceholder',
+      'fields.placeholder.url',
+      // "Type" and "Date" are the ordinary French words, as for leave.leaveType
+      // and time.date above.
+      'fields.type',
+      'fields.types.date',
       // "Public" is the same word in French too. Its counterpart
       // visibility.private ("Privé") does differ, which is the check that this
       // is a cognate rather than an untranslated string.

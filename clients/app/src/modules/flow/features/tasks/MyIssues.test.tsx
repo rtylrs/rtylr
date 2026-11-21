@@ -4,6 +4,11 @@ import { useUserStore } from '../../shared/stores/userStore';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+// Custom fields come from their own query; none are defined here.
+vi.mock('../projects/useFields', () => ({
+  useProjectFields: () => ({ data: [] }),
+  useSetTaskFieldValues: () => ({ mutate: vi.fn(), isPending: false }),
+}));
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));

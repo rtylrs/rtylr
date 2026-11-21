@@ -53,10 +53,16 @@ import {
   PRIORITY_LABEL_KEY,
   PRIORITY_ORDER,
   epicLanes,
+  fieldGroupOptions,
+  fieldLanes,
+  groupableFields,
   isValueGroupKey,
   laneKeysFor,
   valueLanes,
 } from './taskGroups';
+import { useProjectFields } from './useFields';
+import { fieldIdFromKey } from '../../shared/lib/customFields';
+import type { ApiField } from '../../shared/services/flowApi';
 import { EpicFilterContext } from '../../shared/components/EpicChip';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import type { BoardGroupKey } from '../../shared/lib/boardUtils';
@@ -238,9 +244,16 @@ function buildLanes(
 function buildLaneIndex(
   tasks: Task[],
   groupBy: GroupKey,
-  options: LaneOptions
+  options: LaneOptions,
+  fields: readonly ApiField[]
 ): { key: string; label?: string; labelKey?: string }[] {
   if (groupBy === 'none') return [{ key: '_all', label: '' }];
+
+  const fieldId = fieldIdFromKey(groupBy);
+  if (fieldId !== null) {
+    const field = fields.find((f) => f.id === fieldId);
+    return field ? fieldLanes(field) : [{ key: '_all', label: '' }];
+  }
 
   if (isValueGroupKey(groupBy)) return valueLanes(tasks, groupBy, options[groupBy]);
 
@@ -351,9 +364,20 @@ const ProjectBoard: React.FC = () => {
     update: updateViewSettings,
     reset: resetViewSettings,
   } = useBoardViewSettings(projectId, currentUserId);
-  const { groupBy, cardFields, hideDoneAfterDays } = viewSettings;
+  const { groupBy: storedGroupBy, cardFields, hideDoneAfterDays } = viewSettings;
   const setGroupBy = (k: GroupKey): void => updateViewSettings({ groupBy: k });
   const { data: labels = [] } = useLabels();
+
+  // Grouping by a custom field needs that field to still be a select of this
+  // project; a deleted one falls back to no grouping rather than hiding cards.
+  const fieldsQuery = useProjectFields(projectId ?? '');
+  const groupFields = useMemo(() => groupableFields(fieldsQuery.data ?? []), [fieldsQuery.data]);
+  const groupOptions = useMemo(() => fieldGroupOptions(groupFields), [groupFields]);
+  const groupFieldId = fieldIdFromKey(storedGroupBy);
+  const groupBy: GroupKey =
+    groupFieldId !== null && !groupFields.some((f) => f.id === groupFieldId)
+      ? 'none'
+      : storedGroupBy;
 
   const laneOptions: LaneOptions = useMemo(
     () => ({ label: labels, cycle: cycles, milestone: milestones }),
@@ -373,8 +397,9 @@ const ProjectBoard: React.FC = () => {
   // Epic lanes come from every task, not only the shown ones: filtering to an
   // epic's tasks must not drop the lane of the epic they belong to.
   const laneIndex = useMemo(
-    () => buildLaneIndex(groupBy === 'epic' ? tasks : boardTasks, groupBy, laneOptions),
-    [tasks, boardTasks, groupBy, laneOptions]
+    () =>
+      buildLaneIndex(groupBy === 'epic' ? tasks : boardTasks, groupBy, laneOptions, groupFields),
+    [tasks, boardTasks, groupBy, laneOptions, groupFields]
   );
   // An epic chip on a card narrows the board to that epic.
   const filterByEpic = useCallback(
@@ -740,7 +765,7 @@ const ProjectBoard: React.FC = () => {
           onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
           rightSlot={
             <div className="flex items-center gap-1.5">
-              <GroupByPicker groupBy={groupBy} onChange={setGroupBy} />
+              <GroupByPicker groupBy={groupBy} fieldOptions={groupOptions} onChange={setGroupBy} />
               {canManageBoard && (
                 <button
                   type="button"
@@ -787,6 +812,7 @@ const ProjectBoard: React.FC = () => {
           columns={columns}
           canManage={canManageBoard}
           settings={viewSettings}
+          fieldGroupOptions={groupOptions}
           onSettingsChange={updateViewSettings}
           onResetSettings={resetViewSettings}
           onManageStatuses={() => {
@@ -1487,9 +1513,14 @@ const DropPlaceholder: React.FC<{ height: number; color: string }> = ({ height, 
 
 const GroupByPicker: React.FC<{
   groupBy: GroupKey;
+  /** The project's select fields, after the built-in groupings. */
+  fieldOptions: readonly { key: GroupKey; label: string }[];
   onChange: (k: GroupKey) => void;
-}> = ({ groupBy, onChange }) => {
+}> = ({ groupBy, fieldOptions, onChange }) => {
   const { t } = useTranslation();
+  // A custom field carries its own name; the built-in groupings are translated.
+  const optionLabel = (key: GroupKey): string =>
+    fieldOptions.find((o) => o.key === key)?.label ?? t(`flow.board.groupBy.${key}`);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -1509,7 +1540,7 @@ const GroupByPicker: React.FC<{
         }}
       >
         <span style={{ color: 'var(--flow-text-dim)' }}>{t('flow.board.groupByLabel')}</span>
-        <span style={{ color: 'var(--flow-text)' }}>{t(`flow.board.groupBy.${groupBy}`)}</span>
+        <span style={{ color: 'var(--flow-text)' }}>{optionLabel(groupBy)}</span>
         <ChevronDown size={11} />
       </button>
       {open && (
@@ -1520,7 +1551,7 @@ const GroupByPicker: React.FC<{
             border: '1px solid var(--flow-border)',
           }}
         >
-          {BOARD_GROUP_KEYS.map((key) => (
+          {[...BOARD_GROUP_KEYS, ...fieldOptions.map((o) => o.key)].map((key) => (
             <button
               type="button"
               key={key}
@@ -1534,7 +1565,7 @@ const GroupByPicker: React.FC<{
                 fontWeight: key === groupBy ? 600 : 400,
               }}
             >
-              {t(`flow.board.groupBy.${key}`)}
+              {optionLabel(key)}
             </button>
           ))}
         </div>
