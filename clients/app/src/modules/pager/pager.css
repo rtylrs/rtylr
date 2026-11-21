@@ -589,3 +589,12 @@
     width: min(46vw, 80dvh) !important;
   }
 }
+
+/* The venue's logo in the board's settings. */
+.pager-board-logo {
+  height: 44px;
+  width: auto;
+  max-width: 120px;
+  object-fit: contain;
+  border-radius: 8px;
+}
