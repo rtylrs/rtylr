@@ -101,8 +101,8 @@ vi.mock('../tasks/useLabels', () => ({
   }),
   useSetTaskLabels: () => ({ mutateAsync: remote.setLabels }),
 }));
-vi.mock('./list/listCsv', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('./list/listCsv')>()),
+vi.mock('../../../../shared/lib/csv', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../../../shared/lib/csv')>()),
   downloadCsv: remote.download,
 }));
 
