@@ -5,6 +5,7 @@ export const routeKeys: Record<string, string> = {
   '/menus': 'menus',
   '/orders': 'orders',
   '/qr-codes': 'qrCodes',
+  '/pager': 'pager',
   '/design': 'design',
   '/menu': 'menu',
   '/create-item': 'createItem',
