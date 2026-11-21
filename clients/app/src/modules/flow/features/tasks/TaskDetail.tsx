@@ -77,6 +77,7 @@ import LabelChip from '../../shared/components/LabelChip';
 import DueDatePicker from '../../shared/components/DueDatePicker';
 import { getInitials } from '../../shared/lib/utils';
 import { displayUserName } from '../../shared/lib/userDisplay';
+import { priorityLabelKey } from '../../shared/lib/priorityLabels';
 import { displayDescription } from '../../shared/lib/stringUtils';
 import { EFFORT_PRESETS, formatEffortMinutes } from '../../shared/lib/effortPresets';
 import { TASK_STATUSES, STATUS_LABEL_KEYS } from '../../shared/lib/constantsFlow';
@@ -1105,10 +1106,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
             },
             {
               label: t('flow.taskDetail.priority'),
-              value:
-                task.priority === 'no_priority'
-                  ? t('flow.taskDetail.noPriority')
-                  : t(`flowPriority.${task.priority}`),
+              value: t(priorityLabelKey(task.priority)),
             },
             {
               label: t('flow.taskDetail.assignee'),
