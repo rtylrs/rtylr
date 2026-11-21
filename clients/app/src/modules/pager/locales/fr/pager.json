@@ -150,7 +150,11 @@
     "claim": "Obtenir mon bipeur gratuit",
     "haveAccount": "Vous utilisez déjà rtylr ?",
     "signIn": "Connectez-vous pour l'activer",
-    "anotherPhone": "Scanner avec un autre téléphone"
+    "anotherPhone": "Scanner avec un autre téléphone",
+    "startOver": "Recommencer",
+    "backToLanding": "Retour à $t(pager.brand.name)",
+    "doneBanner": "C’est aussi simple que ça. Prêt à l’activer à votre comptoir ?",
+    "mobileSwitcherLabel": "Changer de vue"
   },
   "setup": {
     "pageTitle": "Configurer votre bipeur · $t(pager.brand.name)",
@@ -168,69 +172,371 @@
   },
   "landing": {
     "meta": {
-      "title": "$t(pager.brand.name) : le bipeur gratuit pour restaurants, sans appli",
-      "description": "$t(pager.brand.name) est un bipeur gratuit pour restaurants et cafés, par rtylr. Le client scanne un QR au comptoir, montre son code en caisse et son téléphone sonne quand c’est prêt.",
+      "title": "$t(pager.brand.name) : le bipeur gratuit qui fait sonner le téléphone de vos clients",
+      "description": "$t(pager.brand.name) est un bipeur gratuit pour restaurants et cafés, par RTYLR. Le client scanne un QR au comptoir, montre son code en caisse et son téléphone sonne quand c’est prêt.",
       "keywords": "bipeur gratuit, bipeur restaurant, pager restaurant, bipeur QR code, appel client restaurant, $t(pager.brand.name)",
-      "schemaDescription": "$t(pager.brand.name) est un bipeur gratuit pour restaurants, par rtylr. Le client scanne un QR au comptoir, montre son code au caissier et son téléphone sonne quand la commande est prête."
+      "schemaDescription": "$t(pager.brand.name) est un bipeur gratuit pour restaurants, par RTYLR. Le client scanne un QR au comptoir, montre son code au caissier et son téléphone sonne quand la commande est prête."
     },
-    "tryCta": "Essayer maintenant",
+    "nav": {
+      "label": "Navigation principale",
+      "home": "Accueil",
+      "how": "Fonctionnement",
+      "features": "Atouts",
+      "why": "Comparer",
+      "free": "Gratuit",
+      "rtylr": "Par RTYLR",
+      "faq": "FAQ",
+      "tryCta": "Essayer la démo",
+      "menuOpen": "Ouvrir le menu",
+      "menuClose": "Fermer le menu",
+      "backHome": "Accueil $t(pager.brand.name)"
+    },
     "hero": {
-      "eyebrow": "$t(pager.brand.name), le bipeur gratuit de rtylr",
-      "title": "Le bipeur gratuit\nqui fait sonner leur téléphone.",
-      "subtitle": "$t(pager.brand.name) remplace les bipeurs en plastique par le téléphone que votre client a déjà en poche. Un QR sur le comptoir, et son téléphone sonne quand la commande est prête. Gratuit pour votre établissement.",
-      "note": "Pas d’appli, pas de compte, rien à acheter."
+      "eyebrow": "Bipeur de commande QR gratuit pour cafés et restaurants",
+      "title": "Fini les bipeurs plastique.\nFaites sonner leur téléphone.",
+      "subtitle": "Remplacez les boîtiers et bipeurs de restaurant par un seul QR au comptoir. Le client scanne, s’installe où il veut, et son téléphone sonne dès que sa commande est prête.",
+      "primaryCta": "Essayer la démo",
+      "secondaryCta": "Voir comment ça marche",
+      "note": "Sans appli · Sans compte · Zéro boîtier à acheter ou recharger",
+      "demoVenue": "Café du Cèdre",
+      "toastTitle": "La commande 42 est prête",
+      "toastBody": "À récupérer au comptoir",
+      "simLabel": "Tableau comptoir",
+      "simOrder": "Commande #42",
+      "simTapReady": "Sonner Prête",
+      "simReset": "Réinitialiser",
+      "simHint": "Cliquez pour faire sonner le téléphone",
+      "simRung": "Le téléphone sonne",
+      "islandWaiting": "Commande #42 · En cours",
+      "islandReady": "Commande #42 prête",
+      "qrStandLabel": "Sur votre comptoir",
+      "qrStandCaption": "Scannez pour être appelé",
+      "strip": ["0 Mo à installer", "1 QR au comptoir", "Safari & Chrome", "Toujours gratuit"]
+    },
+    "venues": {
+      "kicker": "Qui utilise $t(pager.brand.name)",
+      "title": "Conçu pour chaque comptoir qui appelle ses commandes",
+      "intro": "Partout où vos clients commandent au comptoir et attendent leur tour, leur téléphone remplace les cris et les bipeurs en plastique.",
+      "items": [
+        {
+          "id": "cafes",
+          "title": "Cafés & coffee shops",
+          "body": "Les clients s’installent tranquillement en salle au lieu d’encombrer le comptoir espresso."
+        },
+        {
+          "id": "restaurants",
+          "title": "Restauration rapide & casual",
+          "body": "Appelez les commandes clairement au coup de feu sans crier les numéros dans la salle."
+        },
+        {
+          "id": "bakeries",
+          "title": "Boulangeries & pâtisseries",
+          "body": "Préparez viennoiseries chaudes et boîtes sur mesure pendant que vos clients patientent à l’aise."
+        },
+        {
+          "id": "trucks",
+          "title": "Food trucks & kiosques",
+          "body": "Aucune base de recharge électrique et zéro bipeur perdu dans les espaces extérieurs."
+        },
+        {
+          "id": "desserts",
+          "title": "Bars à jus & glaciers",
+          "body": "Gérez les préparations minute et les files du week-end sans jamais manquer de boîtiers."
+        },
+        {
+          "id": "foodCourts",
+          "title": "Food courts & vente à emporter",
+          "body": "Vos clients s’assoient à n’importe quelle table et reviennent dès que leur téléphone sonne."
+        }
+      ]
     },
     "how": {
-      "title": "Comment ça marche",
-      "intro": "Le client scanne et attend. Rien à installer, rien à saisir.",
+      "title": "Quatre étapes, du scan au comptoir",
+      "intro": "Aucune appli à installer, aucun numéro à saisir. Parcourez chaque écran du parcours client.",
+      "qrCaption": "Scannez pour être appelé",
+      "chapters": ["Scanner", "Code", "Attente", "Sonnerie"],
       "steps": [
         {
-          "title": "Scanner le QR au comptoir",
-          "body": "Un seul QR imprimé près de la caisse. Le client le vise avec l’appareil photo de son téléphone et la page s’ouvre. Pas d’appli à télécharger, pas de compte à créer."
+          "title": "Scanner un seul QR au comptoir",
+          "body": "Posez l’affiche imprimée ou l’écran du comptoir près de la caisse. Le client vise avec son appareil photo et son ticket s’ouvre directement dans le navigateur."
         },
         {
           "title": "Montrer le code au caissier",
-          "body": "Son téléphone affiche un code court. Le caissier y associe le numéro de commande ou son nom, et le client s’assoit, sort prendre l’air ou continue sa journée."
+          "body": "Son écran affiche un code court avec emoji et mot en deux langues. Votre caissier touche cette carte sur le tableau et saisit le numéro ou le prénom."
         },
         {
-          "title": "Le téléphone sonne quand c’est prêt",
-          "body": "Quand la commande est prête, votre équipe touche Prête sur le tableau et le téléphone du client sonne."
+          "title": "Attendre où l’on veut et voir la file",
+          "body": "Le client s’assoit en salle ou sort prendre l’air. Sa page affiche sa commande et combien de commandes passent avant la sienne."
+        },
+        {
+          "title": "Un geste fait sonner son téléphone",
+          "body": "Dès que la commande est prête, votre équipe touche Prête. Son téléphone sonne, vibre et passe en plein écran vert avec Je l’ai et Couper le son."
         }
       ]
     },
+    "bento": {
+      "title": "Pensé pour les comptoirs animés",
+      "intro": "Chaque détail remplace les boîtiers plastique par un outil plus rapide, plus clair, déjà dans la main du client.",
+      "shuffler": {
+        "kicker": "Codes bilingues",
+        "title": "Aucune confusion en caisse",
+        "body": "Chaque téléphone reçoit une couleur franche, un emoji et un mot affiché en deux langues pour que caissier et client lisent toujours le même code.",
+        "action": "Autre code"
+      },
+      "miniBoard": {
+        "kicker": "Vue équipe",
+        "title": "Un geste depuis le tableau",
+        "body": "Associez la commande, puis touchez Prête. Zéro formation.",
+        "order": "Commande #42",
+        "statusWaiting": "En attente",
+        "statusReady": "Prête",
+        "tapReady": "Marquer prête",
+        "tapUndo": "Réinitialiser"
+      },
+      "poster": {
+        "kicker": "Mise en place",
+        "title": "Un QR et vous êtes prêt",
+        "body": "Imprimez l’affiche intégrée ou ouvrez l’écran QR en direct sur une tablette."
+      },
+      "browser": {
+        "kicker": "Page web instantanée",
+        "title": "Sans appli, sans compte",
+        "body": "S’ouvre aussitôt dans Safari ou Chrome. Rien à installer, aucun numéro demandé.",
+        "stat": "0 Mo"
+      },
+      "platforms": {
+        "kicker": "Alertes transparentes",
+        "title": "Conçu pour iPhone et Android",
+        "androidTitle": "Android Chrome",
+        "androidDesc": "Sonnerie, vibration, écran actif et push verrouillé",
+        "iphoneTitle": "iPhone Safari",
+        "iphoneDesc": "Sonnerie forte (même en silencieux) et écran actif"
+      },
+      "rush": {
+        "kicker": "Coups de feu",
+        "title": "Commandes illimitées aux heures de pointe",
+        "body": "Impossible de manquer de bipeurs quand la file s’allonge. Chaque client a son propre écran.",
+        "cta": "Tester la démo interactive",
+        "badge": "∞ commandes"
+      }
+    },
     "compare": {
-      "title": "Tout ce que fait un bipeur en plastique, sans le plastique",
-      "intro": "Le téléphone du client fait le travail du bipeur, et tout ce que le bipeur vous coûtait disparaît.",
-      "items": [
-        {
-          "title": "Rien à acheter",
-          "body": "Pas de lot de bipeurs, pas de pièces de rechange. Le client apporte l’appareil."
-        },
-        {
-          "title": "Rien à recharger",
-          "body": "Pas de socle de charge sur le comptoir, pas de bipeur à plat en plein coup de feu."
-        },
-        {
-          "title": "Rien à nettoyer",
-          "body": "Aucun appareil qui passe de main en main toute la journée, donc rien à désinfecter entre deux clients."
-        },
-        {
-          "title": "Rien à perdre",
-          "body": "Plus de bipeurs qui repartent dans une poche ou un sac."
-        }
+      "title": "Bipeurs plastique ou téléphone du client\u00a0?",
+      "intro": "Vos clients portent déjà un écran plus lumineux et un haut-parleur plus clair que n’importe quel boîtier.",
+      "oldTitle": "Socle de bipeurs plastique",
+      "oldBadge": "Matériel daté",
+      "oldItems": [
+        "Un lot à acheter d’avance et des boîtiers cassés à remplacer",
+        "Un socle de charge sur le comptoir et des batteries à plat en plein coup de feu",
+        "Passe de main en main toute la journée et demande un nettoyage constant",
+        "Repart par erreur dans une poche ou un sac",
+        "Plus aucun bipeur disponible dès que la file s’allonge"
+      ],
+      "newTitle": "$t(pager.brand.name)",
+      "newBadge": "Comptoir moderne",
+      "newItems": [
+        "Rien à acheter : le client apporte l’appareil",
+        "Toujours chargé et déjà dans sa main",
+        "Aucun boîtier partagé qui circule au comptoir",
+        "Rien à perdre, faire tomber ou réclamer",
+        "Commandes illimitées même aux heures de pointe"
       ]
     },
     "free": {
-      "title": "Pourquoi c’est gratuit ?",
-      "body": "rtylr fabrique un logiciel de caisse. $t(pager.brand.name) est gratuit parce que nous voulons que les restaurateurs voient comment nous construisons nos produits, avec un outil qu’ils peuvent utiliser au comptoir dès aujourd’hui."
+      "badge": "Toujours gratuit",
+      "title": "Gratuit pour votre établissement.",
+      "figure": "Gratuit",
+      "figureSub": "Sans forfait · Sans essai limité · Sans carte",
+      "whyTitle": "Pourquoi RTYLR l’offre gratuitement\u00a0?",
+      "whyBody": "RTYLR conçoit un logiciel de caisse pour restaurants et cafés. Nous offrons $t(pager.brand.name) pour que les restaurateurs découvrent notre qualité d’exécution avec un outil utile au comptoir dès aujourd’hui.",
+      "primaryCta": "Configurer mon établissement",
+      "secondaryCta": "Essayer la démo",
+      "included": [
+        "Commandes illimitées",
+        "Affiche comptoir imprimable",
+        "Écran QR en direct",
+        "Arabe, français et anglais"
+      ]
+    },
+    "faq": {
+      "kicker": "Questions fréquentes",
+      "title": "Questions des gérants",
+      "intro": "Des réponses simples sur le fonctionnement de $t(pager.brand.name) au comptoir.",
+      "items": [
+        {
+          "q": "Le client doit-il télécharger une application ou créer un compte ?",
+          "a": "Non. Il vise le QR code du comptoir avec son appareil photo et son ticket s’ouvre aussitôt dans le navigateur. Sans appli, sans compte et sans rien à saisir."
+        },
+        {
+          "q": "Est-ce compatible avec ma caisse actuelle, ou sans caisse ?",
+          "a": "Oui dans les deux cas. $t(pager.brand.name) s’ouvre dans n’importe quel navigateur sur téléphone, tablette ou ordinateur à côté de votre caisse, avec votre logiciel actuel ou seul."
+        },
+        {
+          "q": "Que se passe-t-il sur iPhone par rapport à Android ?",
+          "a": "Après le scan, le client touche une fois Me prévenir. Sur Android Chrome, cela active la sonnerie, la vibration, le maintien de l’écran et les notifications sur écran verrouillé même s’il change d’application. Sur iPhone Safari, les onglets web ne gèrent ni les notifications push ni la vibration : ce geste débloque donc la sonnerie (même en mode silencieux) et garde l’écran allumé tant que la page reste ouverte."
+        },
+        {
+          "q": "Et si un client n’a pas de téléphone ou plus de batterie ?",
+          "a": "Rien ne vous oblige à passer chaque commande par le bipeur. Donnez-lui simplement son ticket ou appelez son nom comme d’habitude pendant que les autres scannent."
+        },
+        {
+          "q": "Est-ce vraiment gratuit ? Où est le piège ?",
+          "a": "Vraiment gratuit, sans période d’essai, sans abonnement et sans limite de commandes. RTYLR crée une plateforme de caisse et offre $t(pager.brand.name) pour montrer son savoir-faire."
+        },
+        {
+          "q": "Comment démarrer dans mon établissement ?",
+          "a": "Créez votre compte avec le nom et le téléphone de votre établissement, activez le bipeur, puis imprimez votre affiche ou ouvrez l’écran QR. Vous pouvez d’abord tout tester dans la démo en direct."
+        }
+      ]
     },
     "closing": {
       "title": "Écoutez-le sonner vous-même",
-      "subtitle": "Essayez le tableau de l’équipe et le téléphone du client côte à côte, dans votre navigateur. Sans inscription."
+      "subtitle": "Testez le tableau du comptoir et le téléphone du client côte à côte dans votre navigateur. Sans inscription.",
+      "primaryCta": "Essayer la démo",
+      "secondaryCta": "Configurer mon établissement",
+      "signIn": "Vous avez déjà un tableau ?",
+      "signInLink": "Se connecter"
     },
-    "signIn": "Vous avez déjà un tableau ?",
-    "signInLink": "Se connecter",
-    "footer": "Un bipeur gratuit pour restaurants et cafés."
+    "footer": {
+      "contactTitle": "Parler à l’équipe RTYLR",
+      "channels": {
+        "whatsapp": {
+          "label": "WhatsApp",
+          "hint": "Le plus rapide pour nous joindre"
+        },
+        "phone": {
+          "label": "Téléphone",
+          "hint": "Appelez notre équipe directement"
+        },
+        "email": {
+          "label": "E-mail",
+          "hint": "Écrivez-nous quand vous voulez"
+        }
+      },
+      "tagline": "Un bipeur gratuit sur téléphone pour restaurants et cafés, par RTYLR.",
+      "terms": "Conditions",
+      "privacy": "Confidentialité",
+      "security": "Sécurité",
+      "builtBy": "Conçu par Voxire",
+      "copyright": "© RTYLR {{year}}"
+    },
+    "pages": {
+      "how": {
+        "metaTitle": "Fonctionnement · $t(pager.brand.name), bipeur QR gratuit pour restaurants",
+        "metaDescription": "Découvrez comment $t(pager.brand.name) remplace les bipeurs plastique en quatre étapes simples, du scan d’un seul QR au comptoir jusqu’à la sonnerie du téléphone.",
+        "kicker": "Comment fonctionne $t(pager.brand.name)",
+        "heading": "D’un seul QR au comptoir jusqu’à la sonnerie en quelques secondes",
+        "intro": "Aucune appli à télécharger, aucun numéro de téléphone demandé et zéro boîtier plastique à acheter ou recharger.",
+        "setupKicker": "Prêt en quelques minutes",
+        "setupTitle": "Mettez-le en place à votre comptoir en quatre étapes",
+        "setupIntro": "Tout fonctionne directement dans n’importe quel navigateur sur tablette, ordinateur ou téléphone près de la caisse.",
+        "setupSteps": [
+          {
+            "title": "Créez votre tableau gratuit",
+            "body": "Inscrivez le nom et le téléphone de votre établissement, puis activez le bipeur en un geste."
+          },
+          {
+            "title": "Imprimez l’affiche ou ouvrez l’écran QR",
+            "body": "Posez votre QR unique près de la caisse pour que chaque client scanne en commandant."
+          },
+          {
+            "title": "Associez le téléphone en une seconde",
+            "body": "Le client montre son code bilingue avec emoji ; votre caissier saisit le numéro ou le prénom."
+          },
+          {
+            "title": "Touchez Prête et faites sonner",
+            "body": "Dès que la commande sort, un clic passe son écran au vert et fait sonner son téléphone."
+          }
+        ]
+      },
+      "features": {
+        "metaTitle": "Atouts & comparatif · $t(pager.brand.name) face aux bipeurs plastique",
+        "metaDescription": "Comparez $t(pager.brand.name) aux bipeurs et boîtiers plastique classiques : codes bilingues, 0 Mo sans appli, alertes iPhone et Android, toujours gratuit.",
+        "kicker": "Atouts & comparatif",
+        "heading": "Tout ce qu’on attend d’un bipeur de comptoir, sans le plastique",
+        "intro": "Pensé pour les cafés rapides et restaurants animés qui veulent appeler leurs clients clairement sans gérer de boîtiers."
+      },
+      "faq": {
+        "metaTitle": "FAQ · $t(pager.brand.name), bipeur gratuit sur téléphone",
+        "metaDescription": "Toutes les réponses sur $t(pager.brand.name) : alertes iPhone vs Android, compatibilité caisse, clients sans téléphone et gratuité offerte par RTYLR.",
+        "kicker": "Foire aux questions",
+        "heading": "Des réponses claires pour les équipes pressées",
+        "intro": "Tout ce qu’il faut savoir avant de poser $t(pager.brand.name) sur votre comptoir."
+      }
+    },
+    "rtylr": {
+      "metaTitle": "Découvrir RTYLR · Caisse POS, menu QR, stocks, RH & finance pour votre établissement",
+      "metaDescription": "$t(pager.brand.name) est conçu par RTYLR. Découvrez toute la plateforme RTYLR : caisse POS, menu QR, gestion des stocks ERP, finance, RH, CRM, tâches et analyses.",
+      "metaKeywords": "RTYLR POS, caisse restaurant, caisse café, menu QR, gestion stock restaurant, logiciel restauration, $t(pager.brand.name)",
+      "eyebrow": "Conçu par RTYLR",
+      "teaserTitle": "Vous aimez $t(pager.brand.name) ? Pilotez tout votre établissement sur RTYLR.",
+      "teaserBody": "$t(pager.brand.name) reste gratuit pour toujours. Quand vous souhaitez relier votre caisse POS, votre menu QR, vos stocks, vos plannings et vos finances au même endroit, RTYLR est conçu par la même équipe.",
+      "teaserCta": "Découvrir les services RTYLR",
+      "heading": "Une plateforme unifiée pour tout votre établissement",
+      "intro": "Démarrez gratuitement avec $t(pager.brand.name) à votre comptoir aujourd’hui, et activez le reste de RTYLR au rythme de votre restaurant, café ou commerce.",
+      "visitWorkspace": "Explorer l’espace RTYLR",
+      "bookDemo": "Réserver une démo RTYLR",
+      "hardwareCta": "Voir le matériel POS",
+      "suiteKicker": "La plateforme RTYLR",
+      "suiteTitle": "Tous les outils de votre équipe sous un même toit",
+      "suiteIntro": "Chaque module travaille ensemble pour garder ventes, stocks, équipes et finances parfaitement alignés.",
+      "bridgeKicker": "Votre point de départ gratuit",
+      "bridgeSub": "Bipeur gratuit · Zéro engagement",
+      "bridgeTitle": "Jugez notre savoir-faire à votre comptoir",
+      "bridgeBody": "Vous n’avez pas besoin de changer de caisse pour utiliser $t(pager.brand.name). Gardez-le gratuit à vie et contactez-nous quand vous voudrez découvrir la caisse RTYLR et ses outils de gestion.",
+      "benefits": [
+        "Un seul compte du comptoir au back-office",
+        "Pensé pour les équipes en français, arabe et anglais",
+        "Prêt pour le multi-établissements",
+        "Accompagnement direct par l’équipe RTYLR"
+      ],
+      "services": {
+        "pos": {
+          "title": "Caisse enregistreuse (POS)",
+          "short": "Encaissement comptoir & salle rapide",
+          "body": "Prenez vos commandes sur place ou à emporter avec envoi cuisine, options, tickets et matériel dédié."
+        },
+        "menu": {
+          "title": "Menu QR & commande",
+          "short": "Menus mobiles en FR, AR & EN",
+          "body": "Publiez des menus numériques toujours synchronisés avec vos prix, catégories et disponibilités."
+        },
+        "erp": {
+          "title": "Stocks & opérations (ERP)",
+          "short": "Ingrédients, recettes & fournisseurs",
+          "body": "Suivez vos stocks, fiches techniques, transferts, fournisseurs et bons de commande en temps réel."
+        },
+        "finance": {
+          "title": "Finance & comptabilité",
+          "short": "Factures, dépenses & trésorerie",
+          "body": "Maîtrisez vos clôtures quotidiennes, factures fournisseurs, frais et bilans sur chaque point de vente."
+        },
+        "hr": {
+          "title": "Équipe & plannings (RH)",
+          "short": "Shifts, présences & paie",
+          "body": "Organisez les plannings de comptoir, suivez les présences et congés, et simplifiez la paie."
+        },
+        "crm": {
+          "title": "Clients & fidélité (CRM)",
+          "short": "Profils clients & visites",
+          "body": "Reconnaissez vos habitués, segmentez votre clientèle et encouragez les retours dans votre établissement."
+        },
+        "flow": {
+          "title": "Workflows & checklists",
+          "short": "Ouverture, fermeture & tâches",
+          "body": "Coordonnez les préparations, checklists d’ouverture et tâches d’équipe sans rien oublier au rush."
+        },
+        "insights": {
+          "title": "Analyses & tableaux live",
+          "short": "Ventes en direct & heures de pointe",
+          "body": "Suivez vos meilleurs produits, vos créneaux chargés et la performance de chaque site depuis votre mobile."
+        }
+      }
+    },
+    "mobileBar": {
+      "tryCta": "Essayer la démo",
+      "whatsappLabel": "Contacter RTYLR sur WhatsApp"
+    }
   },
   "staff": {
     "portal": "Ouvrir RTYLR"
