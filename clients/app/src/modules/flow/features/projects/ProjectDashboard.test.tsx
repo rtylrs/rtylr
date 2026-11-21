@@ -331,6 +331,20 @@ describe('ProjectDashboard: project summary (T-591)', () => {
     });
   });
 
+  it('links a priority legend entry and a status legend entry that has tasks', () => {
+    render(<ProjectDashboard />);
+    const priority = document.querySelector('[data-priority-count="no_priority"]') as HTMLElement;
+    expect(priority.textContent).toBe('(2)');
+    expect(JSON.parse(link(priority).dataset.filter ?? 'null')).toEqual({
+      priorities: ['no_priority'],
+      statuses: ['10'],
+    });
+    const todo = screen.getByText('flow.taskDetail.todo');
+    expect(JSON.parse(link(todo).dataset.filter ?? 'null')).toEqual({ statuses: ['10'] });
+    // Nothing is done, so its entry is plain text rather than a link to nothing.
+    expect(screen.getByText('flow.taskDetail.done').closest('a')).toBeNull();
+  });
+
   it('hides the hours card when nothing is estimated', () => {
     tasksState.data = tasksState.data.map((t) => ({ ...t, estimatedHours: undefined }));
     render(<ProjectDashboard />);
