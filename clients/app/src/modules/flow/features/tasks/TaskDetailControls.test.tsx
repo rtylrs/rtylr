@@ -18,8 +18,6 @@ const state = vi.hoisted(() => ({
 const setStatus = vi.hoisted(() => vi.fn());
 const createStatus = vi.hoisted(() => vi.fn());
 const update = vi.hoisted(() => vi.fn());
-const addDependency = vi.hoisted(() => vi.fn());
-const removeDependency = vi.hoisted(() => vi.fn());
 vi.mock('@tanstack/react-router', () => ({
   useParams: () => ({ id: '1' }),
   useNavigate: () => vi.fn(),
@@ -30,8 +28,6 @@ vi.mock('./useTask', () => ({ useTask: () => ({ data: state.detail, isLoading: f
 vi.mock('./useTasks', () => ({
   useTasks: () => ({ data: state.tasks, isLoading: false }),
   useUpdateTask: () => ({ mutate: update }),
-  useAddTaskDependency: () => ({ mutate: addDependency }),
-  useRemoveTaskDependency: () => ({ mutate: removeDependency }),
   useDeleteTask: () => ({ mutate: vi.fn() }),
   useAddComment: () => ({ mutate: vi.fn() }),
   useUpdateComment: () => ({ mutate: vi.fn() }),
@@ -53,6 +49,7 @@ vi.mock('../projects/useStatuses', () => ({
 }));
 vi.mock('../projects-v2/useDeveloperMode', () => ({ useIsDeveloperProject: () => false }));
 vi.mock('./components/LinksSection', () => ({ default: () => null }));
+vi.mock('./components/RelationsSection', () => ({ default: () => null }));
 vi.mock('../projects/useCurrentProject', () => ({
   useCurrentProject: () => ({ project: undefined }),
 }));
@@ -166,25 +163,6 @@ describe('Task detail persistence controls', () => {
     renderDetail();
     fireEvent.click(screen.getByRole('button', { name: flow.quickCreate.noEffort }));
     expect(update).toHaveBeenCalledWith({ id: '1', data: { effortMinutes: 0, estimate: 0 } });
-  });
-
-  it('links a remote task and removes existing links through the dependency endpoints', async () => {
-    const rendered = renderDetail();
-    await chooseFlowOption(flow.taskDetail.addDependency, /Remote blocker/);
-    fireEvent.click(screen.getByRole('button', { name: flow.taskDetail.add, exact: true }));
-    expect(addDependency).toHaveBeenCalledWith(
-      { taskId: '1', dependsOnTaskId: '2' },
-      expect.any(Object)
-    );
-    state.detail!.task.dependencies = ['2'];
-    rendered.rerender(
-      <I18nextProvider i18n={i18n}>
-        <TaskDetail />
-      </I18nextProvider>
-    );
-    expect(screen.getByText(/Remote blocker/)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: flow.taskDetail.remove, exact: true }));
-    expect(removeDependency).toHaveBeenCalledWith({ taskId: '1', dependsOnTaskId: '2' });
   });
 
   it('picks the status from the project statuses and has no separate section field', async () => {
