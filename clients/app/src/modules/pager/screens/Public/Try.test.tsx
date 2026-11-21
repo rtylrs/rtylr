@@ -97,6 +97,14 @@ describe('pager demo', () => {
     expect(within(counter).queryByText(/Only owners and admins/)).not.toBeInTheDocument();
   });
 
+  it('gives the demo counter no customer link and no poster link', async () => {
+    render(<Try />);
+    const counter = screen.getByRole('region', { name: 'Your counter' });
+    await within(counter).findByRole('switch', { name: 'Only numbers entered here' });
+    expect(within(counter).queryByText('Customer link')).not.toBeInTheDocument();
+    expect(screen.queryByText('Print the counter poster')).not.toBeInTheDocument();
+  });
+
   it('sends the visitor to the ordinary sign-up, returning to the pager setup', () => {
     render(<Try />);
     const claim = new URL(
