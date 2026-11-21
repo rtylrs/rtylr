@@ -24,14 +24,15 @@ type repository interface {
 	Settings(ctx context.Context, businessID int64) (domain.Settings, error)
 	SaveSettings(ctx context.Context, businessID int64, settings domain.Settings) error
 
-	// CreateTicket opens an unlabelled ticket. It returns domain.ErrCodeTaken
-	// when another open unlabelled ticket of the business shows the code,
-	// whatever its age.
+	// CreateTicket opens an unlabelled ticket showing ticket.Code as its match
+	// word. It returns domain.ErrCodeTaken when another open unlabelled ticket
+	// of the business shows the word, whatever its age.
 	CreateTicket(ctx context.Context, ticket domain.Ticket) (domain.Ticket, error)
-	// OpenMatchCodes lists the codes of the business's open unlabelled tickets.
+	// OpenMatchCodes lists what the business's open unlabelled tickets show:
+	// words, and the two character codes of tickets opened before them.
 	OpenMatchCodes(ctx context.Context, businessID int64, unlabelledSince time.Time) ([]string, error)
 	// ExpireStaleUnlabelled closes the unlabelled tickets older than
-	// unlabelledSince, which frees their codes.
+	// unlabelledSince, which frees their words.
 	ExpireStaleUnlabelled(ctx context.Context, businessID int64, unlabelledSince time.Time) error
 	// ExpireStaleTicket closes the open ticket holding number if it is older
 	// than openSince, which frees the number.
@@ -106,12 +107,13 @@ func (s *Service) PublicVenue(ctx context.Context, slug string) (domain.Venue, d
 	return venue, settings, nil
 }
 
-// matchCodeAttempts bounds the retries when two scans draw the same free code
-// at the same moment.
-const matchCodeAttempts = 5
+// matchCodeAttempts bounds the retries when scans at the same moment draw the
+// same free word. There are only a few dozen words, so a rush of phones at one
+// venue does collide; each retry reads the taken words again.
+const matchCodeAttempts = 10
 
 // Scan opens a waiting, unlabelled ticket for the phone that scanned the
-// venue's QR, with a match code no other open unlabelled ticket shows.
+// venue's QR, with a match word no other open unlabelled ticket shows.
 func (s *Service) Scan(ctx context.Context, slug string) (domain.Ticket, error) {
 	venue, _, err := s.PublicVenue(ctx, slug)
 	if err != nil {
@@ -119,24 +121,24 @@ func (s *Service) Scan(ctx context.Context, slug string) (domain.Ticket, error) 
 	}
 	now := s.clock()
 	unlabelledSince := domain.UnlabelledSince(now)
-	// A ticket past its lifetime reads as expired but still holds its code in
+	// A ticket past its lifetime reads as expired but still holds its word in
 	// storage until it is closed.
 	if err := s.repo.ExpireStaleUnlabelled(ctx, venue.BusinessID, unlabelledSince); err != nil {
 		return domain.Ticket{}, err
 	}
-	codes, err := s.repo.OpenMatchCodes(ctx, venue.BusinessID, unlabelledSince)
-	if err != nil {
-		return domain.Ticket{}, err
-	}
-	if len(codes) >= domain.MaxOpenUnlabelledTickets {
-		return domain.Ticket{}, domain.ErrTooManyOpenTickets
-	}
-	used := make(map[string]bool, len(codes))
-	for _, code := range codes {
-		used[code] = true
-	}
 	for range matchCodeAttempts {
-		code, err := freeMatchCode(used)
+		codes, err := s.repo.OpenMatchCodes(ctx, venue.BusinessID, unlabelledSince)
+		if err != nil {
+			return domain.Ticket{}, err
+		}
+		if len(codes) >= domain.MaxOpenUnlabelledTickets {
+			return domain.Ticket{}, domain.ErrTooManyOpenTickets
+		}
+		used := make(map[string]bool, len(codes))
+		for _, code := range codes {
+			used[code] = true
+		}
+		code, err := freeMatchWord(used)
 		if err != nil {
 			return domain.Ticket{}, err
 		}
@@ -152,7 +154,6 @@ func (s *Service) Scan(ctx context.Context, slug string) (domain.Ticket, error) 
 			CreatedAt:   now,
 		})
 		if errors.Is(err, domain.ErrCodeTaken) {
-			used[code] = true
 			continue
 		}
 		return ticket, err
@@ -160,25 +161,27 @@ func (s *Service) Scan(ctx context.Context, slug string) (domain.Ticket, error) 
 	return domain.Ticket{}, domain.ErrTooManyOpenTickets
 }
 
-// freeMatchCode draws a random code that is not in used.
-func freeMatchCode(used map[string]bool) (string, error) {
-	alphabet := domain.MatchCodeAlphabet
-	free := make([]string, 0, len(alphabet)*len(alphabet)-len(used))
-	for i := range len(alphabet) {
-		for j := range len(alphabet) {
-			if code := string([]byte{alphabet[i], alphabet[j]}); !used[code] {
+// freeMatchWord draws a random word that is not in used: a key on its own
+// while any is free, then the keys with the lowest number still free ("panda2",
+// then "panda3").
+func freeMatchWord(used map[string]bool) (string, error) {
+	for number := 1; number <= domain.MaxOpenUnlabelledTickets; number++ {
+		free := make([]string, 0, len(domain.MatchWords))
+		for _, key := range domain.MatchWords {
+			if code := domain.MatchWordCode(key, number); !used[code] {
 				free = append(free, code)
 			}
 		}
+		if len(free) == 0 {
+			continue
+		}
+		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(free))))
+		if err != nil {
+			return "", fmt.Errorf("draw pager match word: %w", err)
+		}
+		return free[n.Int64()], nil
 	}
-	if len(free) == 0 {
-		return "", domain.ErrTooManyOpenTickets
-	}
-	n, err := rand.Int(rand.Reader, big.NewInt(int64(len(free))))
-	if err != nil {
-		return "", fmt.Errorf("draw pager match code: %w", err)
-	}
-	return free[n.Int64()], nil
+	return "", domain.ErrTooManyOpenTickets
 }
 
 // Label gives a waiting ticket of the business its order number or customer

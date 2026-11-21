@@ -39,10 +39,12 @@ func (a *PagerAPI) ScanTicket(ctx context.Context, req *pagerv1.ScanTicketReques
 	if err != nil {
 		return nil, publicError(ctx, "scan ticket", err)
 	}
+	match := showMatch(ticket)
 	return &pagerv1.ScanTicketResponse{
 		PublicToken: ticket.PublicToken,
-		Code:        ticket.Code,
-		Color:       int32(domain.MatchColor(ticket.Code)),
+		Word:        match.word,
+		WordNumber:  match.number,
+		Color:       match.color,
 		Status:      ticket.Status,
 	}, nil
 }
@@ -52,11 +54,14 @@ func (a *PagerAPI) GetPublicTicket(ctx context.Context, req *pagerv1.GetPublicTi
 	if err != nil {
 		return nil, publicError(ctx, "get public ticket", err)
 	}
+	match := showMatch(view.Ticket)
 	return &pagerv1.GetPublicTicketResponse{
 		Label:          view.Ticket.Label,
 		LabelKind:      view.Ticket.LabelKind,
-		Code:           matchCode(view.Ticket),
-		Color:          int32(domain.MatchColor(view.Ticket.Code)),
+		Word:           match.word,
+		WordNumber:     match.number,
+		Code:           match.code,
+		Color:          match.color,
 		Status:         view.Ticket.Status,
 		VenueName:      view.VenueName,
 		Ahead:          int32(view.Ahead),
@@ -205,12 +210,15 @@ func staffBusinessID(ctx context.Context) (int64, error) {
 }
 
 func toTicket(ticket domain.Ticket) *pagerv1.Ticket {
+	match := showMatch(ticket)
 	return &pagerv1.Ticket{
 		Id:             ticket.ID,
 		Label:          ticket.Label,
 		LabelKind:      ticket.LabelKind,
-		Code:           matchCode(ticket),
-		Color:          int32(domain.MatchColor(ticket.Code)),
+		Word:           match.word,
+		WordNumber:     match.number,
+		Code:           match.code,
+		Color:          match.color,
 		Status:         ticket.Status,
 		CreatedAt:      timestamp(ticket.CreatedAt),
 		ReadyAt:        timestamp(ticket.ReadyAt),
@@ -219,13 +227,26 @@ func toTicket(ticket domain.Ticket) *pagerv1.Ticket {
 	}
 }
 
-// matchCode is the code to show for a ticket: only until it is labelled, after
-// which another phone may be showing the same code.
-func matchCode(ticket domain.Ticket) string {
+// match is what a phone shows the cashier: a word, or on a ticket opened
+// before words, a two character code.
+type match struct {
+	word   string
+	number int32
+	code   string
+	color  int32
+}
+
+// showMatch is the match to show for a ticket: only until it is labelled,
+// after which another phone may be showing the same word.
+func showMatch(ticket domain.Ticket) match {
 	if ticket.Labelled() {
-		return ""
+		return match{}
 	}
-	return ticket.Code
+	color := int32(domain.MatchColor(ticket.Code))
+	if key, number, ok := domain.ParseMatchWord(ticket.Code); ok {
+		return match{word: key, number: int32(number), color: color}
+	}
+	return match{code: ticket.Code, color: color}
 }
 
 // timestamp formats a time as RFC 3339 UTC with milliseconds, and a time that

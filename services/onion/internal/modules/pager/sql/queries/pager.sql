@@ -12,18 +12,29 @@ VALUES (?, ?, ?)
 ON DUPLICATE KEY UPDATE enabled = VALUES(enabled), label_mode = VALUES(label_mode);
 
 -- name: CreateTicket :execresult
-INSERT INTO pager_tickets (business_id, match_code, status, source, public_token, phone_linked, created_at)
+INSERT INTO pager_tickets (business_id, match_word, status, source, public_token, phone_linked, created_at)
 VALUES (?, ?, 'waiting', 'customer', ?, TRUE, ?);
 
 -- name: ListOpenMatchCodes :many
-SELECT match_code
+SELECT COALESCE(match_word, match_code, '') AS code
 FROM pager_tickets
-WHERE business_id = ? AND open_match_code IS NOT NULL AND created_at >= sqlc.arg(unlabelled_since);
+WHERE business_id = ? AND status IN ('waiting', 'ready') AND label_kind IS NULL
+  AND created_at >= sqlc.arg(unlabelled_since);
 
--- name: ExpireStaleUnlabelledTickets :exec
+-- Expiring goes through a plain read first: an UPDATE over the venue's range
+-- of open tickets would lock it against the scans inserting into it, and a
+-- rush of scans then deadlocks.
+-- name: ListStaleUnlabelledTicketIDs :many
+SELECT id
+FROM pager_tickets
+WHERE business_id = ? AND status IN ('waiting', 'ready') AND label_kind IS NULL
+  AND created_at < sqlc.arg(unlabelled_since);
+
+-- name: ExpireStaleUnlabelledTicket :exec
 UPDATE pager_tickets
 SET status = 'expired'
-WHERE business_id = ? AND open_match_code IS NOT NULL AND created_at < sqlc.arg(unlabelled_since);
+WHERE id = ? AND business_id = ? AND status IN ('waiting', 'ready') AND label_kind IS NULL
+  AND created_at < sqlc.arg(unlabelled_since);
 
 -- name: ExpireStaleTicket :exec
 UPDATE pager_tickets
@@ -31,7 +42,7 @@ SET status = 'expired'
 WHERE business_id = ? AND open_number = ? AND created_at < sqlc.arg(open_since);
 
 -- name: ListOpenTickets :many
-SELECT id, business_id, label, label_kind, match_code, status, public_token,
+SELECT id, business_id, label, label_kind, match_code, match_word, status, public_token,
        created_at, ready_at, reminded_at, acknowledged_at
 FROM pager_tickets
 WHERE business_id = ? AND status IN ('waiting', 'ready') AND created_at >= sqlc.arg(open_since)
@@ -39,13 +50,13 @@ WHERE business_id = ? AND status IN ('waiting', 'ready') AND created_at >= sqlc.
 ORDER BY id;
 
 -- name: GetTicket :one
-SELECT id, business_id, label, label_kind, match_code, status, public_token,
+SELECT id, business_id, label, label_kind, match_code, match_word, status, public_token,
        created_at, ready_at, reminded_at, acknowledged_at
 FROM pager_tickets
 WHERE id = ? AND business_id = ?;
 
 -- name: GetTicketByToken :one
-SELECT id, business_id, label, label_kind, match_code, status, public_token,
+SELECT id, business_id, label, label_kind, match_code, match_word, status, public_token,
        created_at, ready_at, reminded_at, acknowledged_at
 FROM pager_tickets
 WHERE public_token = ?;

@@ -26,34 +26,95 @@ func TestScanOpensAnUnlabelledTicketTheBoardShowsAtOnce(t *testing.T) {
 		h.enable(h.a)
 
 		scan := h.want(h.scan(h.a), http.StatusOK, "")
-		code := scan.text("code")
-		if len(code) != 2 || strings.Trim(code, domain.MatchCodeAlphabet) != "" || scan.text("status") != domain.StatusWaiting {
+		word := wordOf(scan.body)
+		if _, number, ok := domain.ParseMatchWord(word); !ok || number != 0 || scan.body["code"] != nil ||
+			scan.text("status") != domain.StatusWaiting {
 			h.Fatalf("scan = %v", scan.body)
 		}
-		if color, _ := scan.body["color"].(float64); int(color) != domain.MatchColor(code) {
-			h.Fatalf("scan colour = %v, want %d for %s", scan.body["color"], domain.MatchColor(code), code)
+		if color, _ := scan.body["color"].(float64); int(color) != domain.MatchColor(word) {
+			h.Fatalf("scan colour = %v, want %d for %s", scan.body["color"], domain.MatchColor(word), word)
 		}
 
 		// The very next board poll has the phone, before anyone touches it.
 		open := h.open(h.a)
-		if len(open) != 1 || open[0]["code"] != code || open[0]["label"] != nil ||
+		if len(open) != 1 || wordOf(open[0]) != word || open[0]["label"] != nil ||
 			open[0]["status"] != domain.StatusWaiting || open[0]["created_at"] != "2026-11-19T12:00:00.000Z" {
 			h.Fatalf("board after a scan = %v", open)
 		}
-		// The phone shows the code and no queue position until it has a label.
+		// The phone shows the word and no queue position until it has a label.
 		followed := h.want(h.publicTicket(scan.text("public_token")), http.StatusOK, "")
-		if followed.text("code") != code || followed.text("label") != "" || followed.body["ahead"] != nil {
+		if wordOf(followed.body) != word || followed.text("label") != "" || followed.body["ahead"] != nil {
 			h.Fatalf("phone before labelling = %v", followed.body)
 		}
 
-		// Every phone waiting to be labelled shows its own code.
-		codes := map[string]bool{code: true}
+		// Every phone waiting to be labelled shows its own word.
+		words := map[string]bool{word: true}
 		for range 40 {
-			next := h.want(h.scan(h.a), http.StatusOK, "").text("code")
-			if codes[next] {
-				h.Fatalf("code %s handed to two waiting phones", next)
+			next := wordOf(h.want(h.scan(h.a), http.StatusOK, "").body)
+			if words[next] {
+				h.Fatalf("word %s handed to two waiting phones", next)
 			}
-			codes[next] = true
+			words[next] = true
+		}
+	})
+}
+
+// Once every word is on a waiting phone, the next phones get the words again
+// with a number, still one phone per word and number.
+func TestScanNumbersTheWordsOnceEveryWordIsTaken(t *testing.T) {
+	eachBackend(t, func(h *harness) {
+		h.enable(h.a)
+		seen := map[string]bool{}
+		for i := range len(domain.MatchWords) + 10 {
+			word := wordOf(h.want(h.scan(h.a), http.StatusOK, "").body)
+			_, number, ok := domain.ParseMatchWord(word)
+			wantNumber := 0
+			if i >= len(domain.MatchWords) {
+				wantNumber = 2
+			}
+			if !ok || seen[word] || number != wantNumber {
+				h.Fatalf("scan %d shows %q (number %d), want number %d once and only once", i+1, word, number, wantNumber)
+			}
+			seen[word] = true
+		}
+
+		// Labelling a phone frees its word for the next phone, without a number.
+		labelledWord := ""
+		for _, ticket := range h.open(h.a) {
+			if word := wordOf(ticket); !strings.ContainsAny(word, "0123456789") {
+				labelledWord = word
+				h.want(h.label(h.a.member, ticket["id"], "42"), http.StatusOK, "")
+				break
+			}
+		}
+		if next := wordOf(h.want(h.scan(h.a), http.StatusOK, "").body); next != labelledWord {
+			h.Fatalf("after labelling %s the next phone shows %s", labelledWord, next)
+		}
+	})
+}
+
+// Phones that scanned before the words keep their two character code until
+// they are labelled or expire.
+func TestTicketsFromBeforeTheWordsStillShowTheirCode(t *testing.T) {
+	eachBackend(t, func(h *harness) {
+		h.enable(h.a)
+		token := h.legacyTicket(h.a, "A7")
+
+		open := h.open(h.a)
+		color, _ := open[0]["color"].(float64)
+		if len(open) != 1 || open[0]["code"] != "A7" || open[0]["word"] != nil || int(color) != domain.MatchColor("A7") {
+			h.Fatalf("board with an old ticket = %v", open)
+		}
+		phone := h.want(h.publicTicket(token), http.StatusOK, "")
+		if phone.text("code") != "A7" || phone.body["word"] != nil || phone.text("status") != domain.StatusWaiting {
+			h.Fatalf("old phone = %v", phone.body)
+		}
+
+		// New phones get words beside it, and it is labelled as before.
+		h.scanned(h.a)
+		h.want(h.label(h.a.member, open[0]["id"], "42"), http.StatusOK, "")
+		if phone := h.want(h.publicTicket(token), http.StatusOK, ""); phone.text("label") != "42" || phone.body["code"] != nil {
+			h.Fatalf("old phone after labelling = %v", phone.body)
 		}
 	})
 }
@@ -65,11 +126,11 @@ func TestCashierLabelsAPhoneWithANumberOrAName(t *testing.T) {
 
 		// Either mode, the default: Arabic-Indic digits are a number.
 		labelled := h.want(h.label(h.a.member, ticket["id"], " ٤٢ "), http.StatusOK, "").ticket()
-		if labelled["label"] != "42" || labelled["label_kind"] != domain.LabelNumber || labelled["code"] != nil {
+		if labelled["label"] != "42" || labelled["label_kind"] != domain.LabelNumber || labelled["word"] != nil {
 			h.Fatalf("labelled = %v", labelled)
 		}
 		phone := h.want(h.publicTicket(token), http.StatusOK, "")
-		if phone.text("label") != "42" || phone.text("label_kind") != domain.LabelNumber || phone.text("code") != "" {
+		if phone.text("label") != "42" || phone.text("label_kind") != domain.LabelNumber || phone.body["word"] != nil {
 			h.Fatalf("phone after labelling = %v", phone.body)
 		}
 
@@ -86,9 +147,9 @@ func TestCashierLabelsAPhoneWithANumberOrAName(t *testing.T) {
 		h.want(h.label(h.a.member, third["id"], "17"), http.StatusOK, "")
 		_, fourth := h.scanned(h.a)
 		h.want(h.label(h.a.member, fourth["id"], "17"), http.StatusConflict, "label_taken")
-		// The refused ticket is still waiting for a label, code and all.
+		// The refused ticket is still waiting for a label, word and all.
 		for _, open := range h.open(h.a) {
-			if open["id"] == fourth["id"] && (open["label"] != nil || open["code"] == nil) {
+			if open["id"] == fourth["id"] && (open["label"] != nil || open["word"] == nil) {
 				h.Fatalf("a refused label changed the ticket: %v", open)
 			}
 		}
@@ -149,7 +210,7 @@ func TestUnlabelledTicketsExpireAfterFifteenMinutes(t *testing.T) {
 		h.want(h.label(h.a.member, ticket["id"], "43"), http.StatusConflict, "invalid_transition")
 		h.want(h.move(h.a.member, ticket["id"], "collect"), http.StatusConflict, "invalid_transition")
 
-		// Its code is free for the next phone, and its phone stays expired.
+		// Its word is free for the next phone, and its phone stays expired.
 		h.want(h.scan(h.a), http.StatusOK, "")
 		if got := h.want(h.publicTicket(token), http.StatusOK, "").text("status"); got != domain.StatusExpired {
 			h.Fatalf("the expired phone reads %q after the next scan", got)
@@ -292,7 +353,7 @@ func TestOnlyOwnersAndAdminsChangeSettings(t *testing.T) {
 	})
 }
 
-// A rush of phones scanning at the same moment each get their own code, and
+// A rush of phones scanning at the same moment each get their own word, and
 // two cashiers typing the same number on two phones leave it on one ticket.
 func TestConcurrentScansAndLabelsKeepCodesAndNumbersUnique(t *testing.T) {
 	eachBackend(t, func(h *harness) {
@@ -309,7 +370,7 @@ func TestConcurrentScansAndLabelsKeepCodesAndNumbersUnique(t *testing.T) {
 				defer wg.Done()
 				<-start
 				r := h.scan(h.a)
-				statuses[i], codes[i] = r.status, r.text("code")
+				statuses[i], codes[i] = r.status, wordOf(r.body)
 			}()
 		}
 		close(start)
@@ -359,7 +420,7 @@ func TestConcurrentScansAndLabelsKeepCodesAndNumbersUnique(t *testing.T) {
 }
 
 // The rules live in the database, not only in the service: a second open
-// unlabelled ticket with a code, or a second open ticket with a number, is
+// unlabelled ticket with a word, or a second open ticket with a number, is
 // refused even when written directly.
 func TestDatabaseRefusesDuplicateOpenCodesAndNumbers(t *testing.T) {
 	db := testutil.OpenDB(t)
@@ -372,28 +433,34 @@ func TestDatabaseRefusesDuplicateOpenCodesAndNumbers(t *testing.T) {
 		_, _ = db.Exec("DELETE FROM pager_tickets WHERE business_id IN (?, ?)", businessID, businessID+1)
 	})
 	seq := 0
-	scan := func(businessID int64, code string) (domain.Ticket, error) {
+	scan := func(businessID int64, word string) (domain.Ticket, error) {
 		seq++
-		return repo.CreateTicket(ctx, domain.Ticket{BusinessID: businessID, Code: code, PublicToken: fmt.Sprintf("t%d-%d", businessID, seq), CreatedAt: now})
+		return repo.CreateTicket(ctx, domain.Ticket{BusinessID: businessID, Code: word, PublicToken: fmt.Sprintf("t%d-%d", businessID, seq), CreatedAt: now})
 	}
 
-	first, err := scan(businessID, "A7")
+	first, err := scan(businessID, "panda")
 	if err != nil {
 		t.Fatalf("scan: %v", err)
 	}
-	if _, err := scan(businessID, "A7"); !errors.Is(err, domain.ErrCodeTaken) {
-		t.Fatalf("second open ticket with the code: err = %v, want ErrCodeTaken", err)
+	if _, err := scan(businessID, "panda"); !errors.Is(err, domain.ErrCodeTaken) {
+		t.Fatalf("second open ticket with the word: err = %v, want ErrCodeTaken", err)
 	}
-	if _, err := scan(businessID+1, "A7"); err != nil {
-		t.Fatalf("same code at another business: %v", err)
+	if _, err := scan(businessID, "panda2"); err != nil {
+		t.Fatalf("the word with a number: %v", err)
 	}
-	// Labelling frees the code.
+	if _, err := scan(businessID, "panda2"); !errors.Is(err, domain.ErrCodeTaken) {
+		t.Fatalf("second open ticket with the word and number: err = %v, want ErrCodeTaken", err)
+	}
+	if _, err := scan(businessID+1, "panda"); err != nil {
+		t.Fatalf("same word at another business: %v", err)
+	}
+	// Labelling frees the word.
 	if err := repo.Label(ctx, businessID, first.ID, "42", domain.LabelNumber, openSince, unlabelledSince); err != nil {
 		t.Fatal(err)
 	}
-	second, err := scan(businessID, "A7")
+	second, err := scan(businessID, "panda")
 	if err != nil {
-		t.Fatalf("code of a labelled ticket: %v", err)
+		t.Fatalf("word of a labelled ticket: %v", err)
 	}
 
 	if err := repo.Label(ctx, businessID, second.ID, "42", domain.LabelNumber, openSince, unlabelledSince); !errors.Is(err, domain.ErrLabelTaken) {
@@ -406,7 +473,7 @@ func TestDatabaseRefusesDuplicateOpenCodesAndNumbers(t *testing.T) {
 	if err := repo.MarkReady(ctx, businessID, first.ID, now, openSince); err != nil {
 		t.Fatal(err)
 	}
-	third, err := scan(businessID, "B8")
+	third, err := scan(businessID, "lion")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -443,7 +510,7 @@ func TestPublicRepliesNeverCarryTheTicketID(t *testing.T) {
 		}
 
 		scanned := h.want(h.scan(h.a), http.StatusOK, "")
-		allowed("scan", scanned, "public_token", "code", "color", "status")
+		allowed("scan", scanned, "public_token", "word", "word_number", "color", "status")
 		token := scanned.text("public_token")
 		// 32 base64url characters carry 192 random bits.
 		if len(token) != 32 {
@@ -457,7 +524,7 @@ func TestPublicRepliesNeverCarryTheTicketID(t *testing.T) {
 		h.want(h.label(h.a.member, id, "42"), http.StatusOK, "")
 
 		followed := h.want(h.publicTicket(token), http.StatusOK, "")
-		allowed("ticket", followed, "label", "label_kind", "code", "color", "status", "venue_name", "ahead", "ready_at", "reminded_at", "acknowledged_at", "server_time")
+		allowed("ticket", followed, "label", "label_kind", "word", "word_number", "code", "color", "status", "venue_name", "ahead", "ready_at", "reminded_at", "acknowledged_at", "server_time")
 		if followed.text("venue_name") != "Cedar Café" || followed.text("server_time") != "2026-11-19T12:00:00.000Z" {
 			h.Fatalf("ticket = %v", followed.body)
 		}
