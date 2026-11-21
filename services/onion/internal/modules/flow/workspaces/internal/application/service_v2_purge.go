@@ -40,13 +40,27 @@ func (s *Service) IsProjectMemberOrBypass(ctx context.Context, userID, businessI
 func (s *Service) ListTasksV2(ctx context.Context, callerID, businessID int64, filter domain.ListTasksFilter) ([]domain.Task, int64, error) {
 	filter.BusinessID = businessID
 	includeAll := s.opensProject(ctx, filter.ProjectID, callerID, businessID)
-	return s.repo.GetTasksByBusinessV2(ctx, filter, callerID, includeAll)
+	tasks, total, err := s.repo.GetTasksByBusinessV2(ctx, filter, callerID, includeAll)
+	if err != nil {
+		return nil, 0, err
+	}
+	if err := s.applyBlockedState(ctx, businessID, tasks); err != nil {
+		return nil, 0, err
+	}
+	return tasks, total, nil
 }
 
 // SearchTasksV2 is business-wide fulltext search under the same visibility
 // clause as listing.
 func (s *Service) SearchTasksV2(ctx context.Context, callerID, businessID int64, q string, limit, offset int64) ([]domain.Task, int64, error) {
-	return s.repo.SearchTasksV2(ctx, businessID, callerID, false, q, limit, offset)
+	tasks, total, err := s.repo.SearchTasksV2(ctx, businessID, callerID, false, q, limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	if err := s.applyBlockedState(ctx, businessID, tasks); err != nil {
+		return nil, 0, err
+	}
+	return tasks, total, nil
 }
 
 // EnsureAssigneeMembership implements ruling T1: assigning work to someone

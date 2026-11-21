@@ -145,6 +145,13 @@ func (s *Service) GetTaskDetail(ctx context.Context, taskID int64) (domain.TaskD
 		task.Dependencies = []int64{}
 	}
 
+	// One query covers the task and its subtasks.
+	withSubtasks := append([]domain.Task{task}, subtasks...)
+	if err := s.applyBlockedState(ctx, task.BusinessID, withSubtasks); err != nil {
+		return domain.TaskDetail{}, err
+	}
+	task, subtasks = withSubtasks[0], withSubtasks[1:]
+
 	return domain.TaskDetail{
 		Task:     task,
 		Subtasks: subtasks,

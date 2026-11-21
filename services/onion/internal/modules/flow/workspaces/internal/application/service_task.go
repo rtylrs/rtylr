@@ -81,7 +81,14 @@ func (s *Service) getMyTasks(ctx context.Context, userID, businessID, page, limi
 	if err != nil {
 		return nil, 0, err
 	}
-	return result.Tasks, result.Total, nil
+	// Outside the cached page on purpose: a task becomes blocked or unblocked
+	// when someone else's task changes, which never evicts this user's cache.
+	// Applied to a copy so the cached page itself is never written to.
+	tasks := append([]domain.Task(nil), result.Tasks...)
+	if blockedErr := s.applyBlockedState(ctx, businessID, tasks); blockedErr != nil {
+		return nil, 0, blockedErr
+	}
+	return tasks, result.Total, nil
 }
 
 func (s *Service) SearchTasks(ctx context.Context, workspaceID int64, q string, limit, offset int64) ([]domain.Task, int64, error) {
