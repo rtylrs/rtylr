@@ -171,7 +171,7 @@ describe('pager scan page', () => {
     expect(navigateSpy).not.toHaveBeenCalled();
     await act(() => vi.advanceTimersByTimeAsync(4_000));
 
-    expect(navigateSpy).toHaveBeenCalledWith({ to: '/pager/t/tok-1', replace: true });
+    expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-1', replace: true });
     expect(api.scanTicket).toHaveBeenCalledTimes(4);
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
@@ -193,7 +193,7 @@ describe('pager scan page', () => {
     api.scanTicket.mockResolvedValue(scanned);
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
     await act(() => vi.advanceTimersByTimeAsync(0));
-    expect(navigateSpy).toHaveBeenCalledWith({ to: '/pager/t/tok-1', replace: true });
+    expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-1', replace: true });
   });
 
   it('does not retry a venue without a pager', async () => {
