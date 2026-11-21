@@ -39,16 +39,12 @@
   color: #ffffff;
 }
 
-/*
- * The Portal's cookie banner is fixed over the bottom of the screen for a
- * first-time visitor, which nearly every customer is. Content therefore starts
- * at the top, and the bottom padding lets the page scroll clear of the banner.
- */
+/* The Portal's cookie banner stays off these pages (`PortalCookieBanner`). */
 .pager-page {
   width: 100%;
   max-width: 480px;
   margin: 0 auto;
-  padding: 12px 20px 184px;
+  padding: 12px 20px 32px;
   flex: 1;
   display: flex;
   flex-direction: column;
