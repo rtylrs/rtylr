@@ -2,7 +2,8 @@
 // "your order is ready" push on a locked phone. It has no fetch handler, so it
 // never serves or caches pages. The ticket page stores the notification text
 // in the visitor's language before it subscribes; see
-// src/modules/pager/shared/lib/pushAlerts.ts.
+// src/modules/pager/shared/lib/pushAlerts.ts. Served from rennili.rtylr.com,
+// so subscriptions belong to that origin.
 
 const PUSH_TEXT_CACHE = 'pager-push-text';
 const VIBRATION = [600, 250, 600, 250, 600, 250, 600];
@@ -11,7 +12,7 @@ self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
 
 function ticketPath(token) {
-  return `/pager/t/${token}`;
+  return `/t/${token}`;
 }
 
 async function textFor(message) {

@@ -8,6 +8,7 @@ import { SearchX } from 'lucide-react';
 import { readyAlarm } from '../../../../shared/alarm/readyAlarm';
 import { useAlarm } from '../../../../shared/alarm/useAlarm';
 import LanguageSwitch from '../../shared/components/LanguageSwitch';
+import { ByRtylr, RenniliLogo, RenniliMark } from '../../shared/components/RenniliLogo';
 import MatchBadge from '../../shared/components/MatchBadge';
 import { DEPLOY_GAP_PATIENCE_MS } from '../../shared/lib/apiError';
 import { matchName, matchOf } from '../../shared/lib/matchWords';
@@ -230,6 +231,8 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
 
           {ready && (
             <div role="alert">
+              {/* Keyed on the ring, so a call again shakes it once more. */}
+              <RenniliMark key={ringMark} size={56} wiggle className="pager-ready-mark" />
               <p className="pager-status">{t('pager.ticket.ready')}</p>
               <p className="pager-text">
                 {acknowledged ? t('pager.ticket.acknowledged') : t('pager.ticket.readyHint')}
@@ -308,6 +311,11 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
             {t('pager.ticket.connectionLost')}
           </p>
         )}
+
+        <footer className="pager-footer">
+          <RenniliLogo size={20} />
+          <ByRtylr />
+        </footer>
       </main>
     </div>
   );

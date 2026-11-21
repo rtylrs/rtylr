@@ -4,7 +4,9 @@ import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import { FullScreenLoader } from '@voxire/components';
 import { ErrorBoundary, Spinner } from '@voxire/ui';
 import './pager.css';
+import './rennili.css';
 
+const Landing = React.lazy(() => import('./screens/Public/Landing'));
 const Scan = React.lazy(() => import('./screens/Public/Scan'));
 const Ticket = React.lazy(() => import('./screens/Public/Ticket'));
 const Try = React.lazy(() => import('./screens/Public/Try'));
@@ -12,17 +14,18 @@ const Board = React.lazy(() => import('./screens/Staff/Board'));
 const Display = React.lazy(() => import('./screens/Staff/Display'));
 const Poster = React.lazy(() => import('./screens/Staff/Poster'));
 const Setup = React.lazy(() => import('./screens/Staff/Setup'));
+// The account checks and the Portal code behind them load only for staff.
+const StaffGate = React.lazy(() => import('./shared/components/RenniliStaffGate'));
 
 /**
- * The customer's side of the pager: public and unauthenticated, mounted on the
- * Portal's root route next to the public menu so it bypasses `BusinessRoute`.
- * The scan screen hands over to the ticket screen by a router navigation, so
- * the ticket keeps the document the QR opened.
+ * Rennili's public pages: the landing, the venue page a QR opens, the ticket
+ * and the demo. No sign in. The venue page hands over to the ticket by a
+ * router navigation, so the ticket keeps the document the QR opened.
  */
-export function createPagerPublicRoutes<TParent extends AnyRoute>(rootRoute: TParent) {
+function createPublicRoutes<TParent extends AnyRoute>(rootRoute: TParent) {
   const layoutRoute = createRoute({
     getParentRoute: () => rootRoute,
-    id: 'pager-public',
+    id: 'rennili-public',
     component: () => (
       <ErrorBoundary>
         <Suspense fallback={<FullScreenLoader />}>
@@ -36,25 +39,12 @@ export function createPagerPublicRoutes<TParent extends AnyRoute>(rootRoute: TPa
     ),
   });
 
-  return [
-    layoutRoute.addChildren([
-      createRoute({
-        getParentRoute: () => layoutRoute,
-        path: '/$slug/pager',
-        component: Scan,
-      }),
-      createRoute({
-        getParentRoute: () => layoutRoute,
-        path: '/pager/t/$token',
-        component: Ticket,
-      }),
-      createRoute({
-        getParentRoute: () => layoutRoute,
-        path: '/pager/try',
-        component: Try,
-      }),
-    ]),
-  ];
+  return layoutRoute.addChildren([
+    createRoute({ getParentRoute: () => layoutRoute, path: '/', component: Landing }),
+    createRoute({ getParentRoute: () => layoutRoute, path: '/try', component: Try }),
+    createRoute({ getParentRoute: () => layoutRoute, path: '/t/$token', component: Ticket }),
+    createRoute({ getParentRoute: () => layoutRoute, path: '/$slug', component: Scan }),
+  ]);
 }
 
 function StaffScreen({ children }: { children: React.ReactNode }): React.JSX.Element {
@@ -76,51 +66,39 @@ function StaffScreen({ children }: { children: React.ReactNode }): React.JSX.Ele
 }
 
 /**
- * The staff board, its counter poster and counter display, inside the
- * signed-in Portal shell. Reachable by URL only; the other two are linked from
- * the board.
+ * The staff board, its counter display and poster, and the sign-up's last
+ * step. They need the signed-in business, checked the way the Portal checks it.
  */
-export function createPagerStaffRoutes<TParent extends AnyRoute>(parent: TParent) {
-  return [
-    createRoute({
-      getParentRoute: () => parent,
-      path: 'pager',
-      component: () => (
-        <StaffScreen>
-          <Board />
-        </StaffScreen>
-      ),
-    }),
-    createRoute({
-      getParentRoute: () => parent,
-      path: 'pager/display',
-      component: () => (
-        <StaffScreen>
-          <Display />
-        </StaffScreen>
-      ),
-    }),
-    createRoute({
-      getParentRoute: () => parent,
-      path: 'pager/poster',
-      component: () => (
-        <StaffScreen>
-          <Poster />
-        </StaffScreen>
-      ),
-    }),
-  ] as const;
-}
-
-/** The last step of the pager sign-up, where a new venue switches its pager on. */
-export function createPagerSetupRoute<TParent extends AnyRoute>(parent: TParent) {
-  return createRoute({
-    getParentRoute: () => parent,
-    path: 'pager/setup',
+function createStaffRoutes<TParent extends AnyRoute>(rootRoute: TParent) {
+  const layoutRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    id: 'rennili-staff',
     component: () => (
-      <StaffScreen>
-        <Setup />
-      </StaffScreen>
+      <Suspense fallback={<FullScreenLoader />}>
+        <StaffGate />
+      </Suspense>
     ),
   });
+
+  const staffPage = (path: string, Screen: React.ComponentType) =>
+    createRoute({
+      getParentRoute: () => layoutRoute,
+      path,
+      component: () => (
+        <StaffScreen>
+          <Screen />
+        </StaffScreen>
+      ),
+    });
+
+  return layoutRoute.addChildren([
+    staffPage('/board', Board),
+    staffPage('/display', Display),
+    staffPage('/poster', Poster),
+    staffPage('/setup', Setup),
+  ]);
+}
+
+export function createRenniliRoutes<TParent extends AnyRoute>(rootRoute: TParent) {
+  return [createPublicRoutes(rootRoute), createStaffRoutes(rootRoute)] as const;
 }

@@ -6,6 +6,7 @@ import Board from '../Staff/Board';
 import Scan from './Scan';
 import Ticket from './Ticket';
 import LanguageSwitch from '../../shared/components/LanguageSwitch';
+import { ByRtylr, RenniliLogo } from '../../shared/components/RenniliLogo';
 import { pagerClaimUrl } from '../../pagerPaths';
 import { PagerClientsProvider } from '../../shared/lib/pagerClients';
 import { createSandboxPager } from '../../shared/lib/sandboxPager';
@@ -41,7 +42,10 @@ const Try = (): React.JSX.Element => {
         <div className="pager-try">
           <header className="pager-try-header">
             <div className="pager-topbar">
-              <p className="pager-venue">{t('pager.try.brand')}</p>
+              <div className="pager-venue">
+                <RenniliLogo size={26} />
+                <ByRtylr />
+              </div>
               <LanguageSwitch />
             </div>
             <h1 className="pager-heading">{t('pager.try.heading')}</h1>

@@ -1,32 +1,54 @@
-import { resolveAuthUrl } from '@voxire/config';
+import { RENNILI_URL, resolveAuthUrl } from '@voxire/config';
 
 /**
- * Canonical in-app paths for the pager. Shapes (see `routes.tsx`):
- * `/$slug/pager`, `/pager/t/$token`, the demo at `/pager/try`, the staff board
- * at `/pager`, its counter poster at `/pager/poster`, its counter display at
- * `/pager/display` and the sign-up's last step at `/pager/setup`.
+ * Paths on the Rennili origin (rennili.rtylr.com), where the whole pager lives.
+ * Shapes (see `routes.tsx`): the landing at `/`, the venue page the QR opens
+ * at `/$slug`, the ticket at `/t/$token`, the demo at `/try`, and the staff
+ * board at `/board` with its `/display`, `/poster` and `/setup`.
+ *
+ * The Portal paths these replaced (`/$slug/pager`, `/pager/t/$token`,
+ * `/pager`...) redirect here from `clients/app/public/_redirects`, because
+ * printed posters point at them.
  */
 
-export const PAGER_BOARD_PATH = '/pager';
-export const PAGER_POSTER_PATH = '/pager/poster';
-export const PAGER_DISPLAY_PATH = '/pager/display';
-export const PAGER_SETUP_PATH = '/pager/setup';
+export const PAGER_LANDING_PATH = '/';
+export const PAGER_TRY_PATH = '/try';
+export const PAGER_BOARD_PATH = '/board';
+export const PAGER_POSTER_PATH = '/poster';
+export const PAGER_DISPLAY_PATH = '/display';
+export const PAGER_SETUP_PATH = '/setup';
+export const PAGER_TICKET_PREFIX = '/t/';
 
-/** `/{slug}/pager` - where the venue's one QR points. */
+/** `/{slug}` - where the venue's one QR points. */
 export function pagerJoinPath(slug: string): string {
-  return `/${encodeURIComponent(slug)}/pager`;
+  return `/${encodeURIComponent(slug)}`;
 }
 
-/** `/pager/t/{token}` - the ticket a phone is following. */
+/** The absolute venue link a QR, poster or display carries. */
+export function pagerJoinUrl(slug: string): string {
+  return `${RENNILI_URL}${pagerJoinPath(slug)}`;
+}
+
+/** `/t/{token}` - the ticket a phone is following. */
 export function pagerTicketPath(publicToken: string): string {
-  return `/pager/t/${encodeURIComponent(publicToken)}`;
+  return `${PAGER_TICKET_PREFIX}${encodeURIComponent(publicToken)}`;
 }
 
-const PUBLIC_PAGER_PATHS = [/^\/[^/]+\/pager\/?$/, /^\/pager\/t\/[^/]+\/?$/];
+/**
+ * The Portal path a Rennili staff page used to live at. The sign-in app sends
+ * a signed-in user back to the Portal origin only, so the staff pages hand it
+ * this path; the Portal's `_redirects` then forwards it to Rennili.
+ */
+const PORTAL_STAFF_PATHS: Record<string, string> = {
+  [PAGER_BOARD_PATH]: '/pager',
+  [PAGER_DISPLAY_PATH]: '/pager/display',
+  [PAGER_POSTER_PATH]: '/pager/poster',
+  [PAGER_SETUP_PATH]: '/pager/setup',
+};
 
-/** True on the customer's scan and ticket pages, never on the staff board. */
-export function isPagerPublicPath(pathname: string): boolean {
-  return PUBLIC_PAGER_PATHS.some((pattern) => pattern.test(pathname));
+export function portalPathForStaffPage(pathname: string): string {
+  const clean = pathname.replace(/\/+$/, '') || '/';
+  return PORTAL_STAFF_PATHS[clean] ?? '/pager';
 }
 
 /**
@@ -36,6 +58,6 @@ export function isPagerPublicPath(pathname: string): boolean {
 export function pagerClaimUrl(mode: 'register' | 'signIn'): string {
   const url = new URL(mode === 'register' ? '/register' : '/', resolveAuthUrl());
   url.searchParams.set('redirect', 'dash');
-  url.searchParams.set('returnTo', PAGER_SETUP_PATH);
+  url.searchParams.set('returnTo', portalPathForStaffPage(PAGER_SETUP_PATH));
   return url.href;
 }
