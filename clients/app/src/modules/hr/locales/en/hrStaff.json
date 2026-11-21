@@ -7,6 +7,10 @@
     "title": "No staff members",
     "description": "Adjust filters or invite someone to your team."
   },
+  "restricted": {
+    "title": "Staff directory is not available",
+    "description": "The company directory is turned off or restricted by an administrator."
+  },
   "profile": {
     "notFoundTitle": "Employee not found",
     "notFoundDescription": "The employee you're looking for may have been removed.",

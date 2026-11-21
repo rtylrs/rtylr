@@ -21,13 +21,16 @@
   "contractTypes": {
     "full_time": "Full-time",
     "part_time": "Part-time",
-    "freelancer": "Freelancer"
+    "freelancer": "Freelancer",
+    "contractor": "Contractor",
+    "intern": "Intern"
   },
   "statuses": {
     "active": "Active",
     "probation": "Probation",
     "inactive": "Inactive",
-    "terminated": "Terminated"
+    "terminated": "Terminated",
+    "invited": "Invited"
   },
   "form": {
     "title": "New Employee",
