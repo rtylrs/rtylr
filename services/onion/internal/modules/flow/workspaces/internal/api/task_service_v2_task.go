@@ -61,11 +61,15 @@ func (a *TaskAPIV2) DeleteTask(ctx context.Context, req *flowtaskv2.DeleteTaskRe
 	if existing, fetchErr := a.Service.GetTaskDetail(ctx, req.GetId()); fetchErr == nil {
 		projectID = existing.Task.ProjectID
 	}
-	if err := a.Service.DeleteTask(ctx, req.GetId(), businessID); err != nil {
+	detached, err := a.Service.DeleteTaskDetachingEpicTasks(ctx, req.GetId(), businessID)
+	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete task")
 	}
 	publishTaskEventByProject("task.deleted", projectID, req.GetId(), caller.UserID)
-	return &flowtaskv2.DeleteTaskResponse{Message: "Task deleted successfully"}, nil
+	return &flowtaskv2.DeleteTaskResponse{
+		Message:          "Task deleted successfully",
+		DetachedChildren: int32(detached), // #nosec G115 -- An epic's task count is far below the int32 range.
+	}, nil
 }
 
 func (a *TaskAPIV2) CreateSubtask(ctx context.Context, req *flowtaskv2.CreateSubtaskRequest) (*flowtaskv2.CreateSubtaskResponse, error) {
@@ -121,6 +125,9 @@ func (a *TaskAPIV2) CreateSubtask(ctx context.Context, req *flowtaskv2.CreateSub
 		EstimatedHours: req.EstimatedHours,
 	})
 	if createErr != nil {
+		if mapped := hierarchyError(createErr); mapped != nil {
+			return nil, mapped
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create subtask")
 	}
 	return &flowtaskv2.CreateSubtaskResponse{TaskId: task.ID, Message: "Subtask created successfully"}, nil

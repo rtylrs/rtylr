@@ -127,10 +127,15 @@ func (a *TaskAPIV2) CreateTask(ctx context.Context, req *flowtaskv2.CreateTaskRe
 		StartDate:      startDate,
 		EstimatedHours: req.EstimatedHours,
 		Labels:         req.GetLabels(),
+		TaskType:       req.GetTaskType(),
+		EpicColor:      req.GetEpicColor(),
 	}
 
 	task, createErr := a.Service.CreateTask(ctx, input)
 	if createErr != nil {
+		if mapped := hierarchyError(createErr); mapped != nil {
+			return nil, mapped
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create task")
 	}
 	if req.MilestoneId != nil {
@@ -270,9 +275,29 @@ func (a *TaskAPIV2) UpdateTask(ctx context.Context, req *flowtaskv2.UpdateTaskRe
 		ClearDescription: body.Description != nil && body.GetDescription() == "",
 		ClearDueDate:     body.DueDate != nil && dueDate == nil,
 		ClearStartDate:   body.StartDate != nil && startDate == nil,
+		TaskType:         body.GetTaskType(),
+		EpicColor:        body.EpicColor,
+	}
+
+	// The move runs first so a task can leave its parent and become an epic
+	// in one request. It has its own transaction and the same rules as
+	// setTaskParent.
+	if body.ParentTaskId != nil {
+		if _, err := a.Service.SetTaskParent(ctx, input.ID, caller.UserID, businessID, body.ParentTaskId); err != nil {
+			if mapped := hierarchyError(err); mapped != nil {
+				return nil, mapped
+			}
+			if errors.Is(err, domain.ErrUnauthorized) {
+				return nil, onekiterrors.PermissionDenied()
+			}
+			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update task")
+		}
 	}
 
 	if err := a.Service.UpdateTask(ctx, input, caller.UserID); err != nil {
+		if mapped := hierarchyError(err); mapped != nil {
+			return nil, mapped
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update task")
 	}
 	if body.MilestoneId != nil {
