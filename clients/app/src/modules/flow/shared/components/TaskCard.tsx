@@ -166,7 +166,6 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           border: selected ? '1px solid var(--accent)' : '1px solid var(--flow-border)',
           boxShadow: selected ? '0 0 0 3px var(--accent-muted)' : 'var(--flow-shadow-card)',
         }}
-        whileHover={{ y: -1 }}
       >
         {/* Header row */}
         <div className="flex items-start justify-between gap-2 mb-2">
