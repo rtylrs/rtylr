@@ -7,9 +7,10 @@ import { PRIORITY_COLORS } from '../../../shared/stores/flowStore';
 import type { HoursSummary, ProjectSummaryData, SummaryMetric } from '../projectSummary';
 
 /**
- * The widgets T-591 adds to the project dashboard. Every number is a link to
- * the project's List view, filtered through the shared filter engine's URL
- * `filter` param, so a lead can go from "3 overdue" to those three tasks.
+ * The cards on the project dashboard. Every number the summary computes is a
+ * link to the project's List view, filtered through the shared filter
+ * engine's URL `filter` param, so a lead can go from "3 overdue" to those
+ * three tasks. The dashboard's own tiles and cards use the same pieces.
  */
 
 /** Opens the project's list filtered to `filters`. */
@@ -34,6 +35,7 @@ export const FilteredListLink: React.FC<{
   </Link>
 );
 
+/** A titled dashboard card. */
 export const SummaryCard: React.FC<{
   title: string;
   children: React.ReactNode;
@@ -52,6 +54,146 @@ export const SummaryCard: React.FC<{
     {children}
   </section>
 );
+
+const TILE_BOX: React.CSSProperties = {
+  background: 'var(--flow-card)',
+  border: '1px solid var(--flow-border)',
+};
+
+/**
+ * One number with its label and an optional hint. With `link` the whole tile
+ * opens the project's list filtered to the tasks it counts.
+ */
+export const StatTile: React.FC<{
+  label: string;
+  value: React.ReactNode;
+  hint?: string;
+  /** Colour of the hint; muted when absent. */
+  tint?: string;
+  link?: { projectId: string; filters: TaskFilters; 'aria-label'?: string };
+  /** Marks the value with `data-summary-count`. */
+  countKey?: string;
+}> = ({ label, value, hint, tint, link, countKey }) => {
+  const body = (
+    <>
+      <span
+        className="block text-flow-meta font-semibold uppercase tracking-wider mb-1"
+        style={{ color: 'var(--flow-text-dim)' }}
+      >
+        {label}
+      </span>
+      <span className="flex items-baseline gap-2">
+        <span
+          className="text-flow-screen font-bold tabular-nums"
+          style={{ color: 'var(--flow-text)' }}
+          data-summary-count={countKey}
+        >
+          {value}
+        </span>
+        {hint && (
+          <span className="text-flow-meta" style={{ color: tint ?? 'var(--flow-text-muted)' }}>
+            {hint}
+          </span>
+        )}
+      </span>
+    </>
+  );
+  return link ? (
+    <FilteredListLink
+      projectId={link.projectId}
+      filters={link.filters}
+      aria-label={link['aria-label']}
+      className="block rounded-md p-3 transition-colors hover:bg-[var(--flow-hover)]"
+      style={TILE_BOX}
+    >
+      {body}
+    </FilteredListLink>
+  ) : (
+    <div className="rounded-md p-3" style={TILE_BOX}>
+      {body}
+    </div>
+  );
+};
+
+export interface BreakdownSegment {
+  key: string;
+  label: string;
+  count: number;
+  color: string;
+  /** Makes the legend entry a link to these tasks. */
+  filters?: TaskFilters;
+}
+
+/**
+ * A stacked bar with a legend underneath: the status and priority breakdowns.
+ * Segments with no tasks are left out of the bar but stay in the legend.
+ */
+export const BreakdownBar: React.FC<{
+  projectId: string;
+  segments: readonly BreakdownSegment[];
+  /** Data attribute set on each legend count, e.g. `data-priority-count`. */
+  countAttr?: string;
+}> = ({ projectId, segments, countAttr }) => {
+  const total = segments.reduce((sum, s) => sum + s.count, 0);
+  return (
+    <>
+      <div
+        className="flex h-6 rounded-md overflow-hidden"
+        style={{ background: 'var(--flow-hover)' }}
+        aria-hidden="true"
+      >
+        {segments.map((s) =>
+          s.count > 0 ? (
+            <div
+              key={s.key}
+              style={{ width: `${(s.count / total) * 100}%`, background: s.color }}
+              title={`${s.label}: ${s.count}`}
+            />
+          ) : null
+        )}
+      </div>
+      <div className="flex flex-wrap gap-2 mt-3 text-flow-meta">
+        {segments.map((s) => {
+          const content = (
+            <>
+              <span
+                className="h-2 w-2 rounded-full"
+                style={{ background: s.color }}
+                aria-hidden="true"
+              />
+              {s.label}
+              <span
+                style={{ color: 'var(--flow-text-dim)' }}
+                {...(countAttr ? { [countAttr]: s.key } : {})}
+              >
+                ({s.count})
+              </span>
+            </>
+          );
+          return s.filters ? (
+            <FilteredListLink
+              key={s.key}
+              projectId={projectId}
+              filters={s.filters}
+              className="flex items-center gap-1.5 rounded-sm px-1.5 py-0.5 transition-colors hover:bg-[var(--flow-hover)]"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              {content}
+            </FilteredListLink>
+          ) : (
+            <span
+              key={s.key}
+              className="flex items-center gap-1.5 px-1.5 py-0.5"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              {content}
+            </span>
+          );
+        })}
+      </div>
+    </>
+  );
+};
 
 const fmtHours = (value: number, locale: string): string =>
   new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(value);
@@ -94,36 +236,21 @@ export const RecentChangeTiles: React.FC<{
       className="grid grid-cols-2 md:grid-cols-4 gap-3"
     >
       {tiles.map((tile) => (
-        <FilteredListLink
+        <StatTile
           key={tile.key}
-          projectId={projectId}
-          filters={tile.metric.filters}
-          aria-label={t('flow.projectDashboard.summary.openFiltered', {
-            label: `${tile.label} (${tile.hint})`,
-            n: tile.metric.count,
-          })}
-          className="block rounded-md p-3 transition-colors hover:bg-[var(--flow-hover)]"
-          style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
-        >
-          <span
-            className="block text-flow-meta font-semibold uppercase tracking-wider mb-1"
-            style={{ color: 'var(--flow-text-dim)' }}
-          >
-            {tile.label}
-          </span>
-          <span className="flex items-baseline gap-2">
-            <span
-              className="text-flow-screen font-bold tabular-nums"
-              style={{ color: 'var(--flow-text)' }}
-              data-summary-count={tile.key}
-            >
-              {tile.metric.count}
-            </span>
-            <span className="text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>
-              {tile.hint}
-            </span>
-          </span>
-        </FilteredListLink>
+          label={tile.label}
+          value={tile.metric.count}
+          hint={tile.hint}
+          countKey={tile.key}
+          link={{
+            projectId,
+            filters: tile.metric.filters,
+            'aria-label': t('flow.projectDashboard.summary.openFiltered', {
+              label: `${tile.label} (${tile.hint})`,
+              n: tile.metric.count,
+            }),
+          }}
+        />
       ))}
     </section>
   );
@@ -258,46 +385,17 @@ export const PriorityBreakdownCard: React.FC<{
           {t('flow.projectDashboard.summary.noOpenTasks')}
         </p>
       ) : (
-        <>
-          <div
-            className="flex h-6 rounded-md overflow-hidden"
-            style={{ background: 'var(--flow-hover)' }}
-            aria-hidden="true"
-          >
-            {priorities.map(({ priority, metric }) =>
-              metric.count > 0 ? (
-                <div
-                  key={priority}
-                  style={{
-                    width: `${(metric.count / total) * 100}%`,
-                    background: PRIORITY_COLORS[priority],
-                  }}
-                />
-              ) : null
-            )}
-          </div>
-          <div className="flex flex-wrap gap-1 mt-3 text-flow-meta">
-            {priorities.map(({ priority, metric }) => (
-              <FilteredListLink
-                key={priority}
-                projectId={projectId}
-                filters={metric.filters}
-                className="flex items-center gap-1.5 rounded-sm px-1.5 py-0.5 transition-colors hover:bg-[var(--flow-hover)]"
-                style={{ color: 'var(--flow-text-muted)' }}
-              >
-                <span
-                  className="h-2 w-2 rounded-full"
-                  style={{ background: PRIORITY_COLORS[priority] }}
-                  aria-hidden="true"
-                />
-                {t(PRIORITY_LABEL_KEY[priority])}
-                <span style={{ color: 'var(--flow-text-dim)' }} data-priority-count={priority}>
-                  ({metric.count})
-                </span>
-              </FilteredListLink>
-            ))}
-          </div>
-        </>
+        <BreakdownBar
+          projectId={projectId}
+          countAttr="data-priority-count"
+          segments={priorities.map(({ priority, metric }) => ({
+            key: priority,
+            label: t(PRIORITY_LABEL_KEY[priority]),
+            count: metric.count,
+            color: PRIORITY_COLORS[priority],
+            filters: metric.filters,
+          }))}
+        />
       )}
     </SummaryCard>
   );

@@ -21,11 +21,14 @@ import { useProjectStatuses } from './useStatuses';
 import { useCycles } from '../cycles/useCycles';
 import { computeProjectSummary } from './projectSummary';
 import {
+  BreakdownBar,
   FilteredListLink,
   HoursVsEstimateCard,
   NeedsAttentionCard,
   PriorityBreakdownCard,
   RecentChangeTiles,
+  StatTile,
+  SummaryCard,
 } from './components/ProjectSummaryCards';
 
 /**
@@ -201,7 +204,7 @@ const ProjectDashboard: React.FC = () => {
         </div>
 
         {/* Status breakdown bar */}
-        <Card title={t('flow.projectDashboard.statusBreakdown')}>
+        <SummaryCard title={t('flow.projectDashboard.statusBreakdown')}>
           {stats.total === 0 ? (
             <EmptyState
               icon={ListTodo}
@@ -214,77 +217,32 @@ const ProjectDashboard: React.FC = () => {
               size="compact"
             />
           ) : (
-            <>
-              <div
-                className="flex h-6 rounded-md overflow-hidden"
-                style={{ background: 'var(--flow-hover)' }}
-              >
-                {(
-                  ['done', 'in_progress', 'in_review', 'todo', 'cancelled', 'backlog'] as const
-                ).map((status) => {
-                  const n = stats.statusCounts[status] ?? 0;
-                  if (!n) return null;
-                  return (
-                    <div
-                      key={status}
-                      style={{
-                        width: `${(n / stats.total) * 100}%`,
-                        background: STATUS_COLORS[status],
-                      }}
-                      title={`${status}: ${n}`}
-                    />
-                  );
-                })}
-              </div>
-              <div className="flex flex-wrap gap-3 mt-3 text-flow-meta">
-                {(
-                  ['done', 'in_progress', 'in_review', 'todo', 'cancelled', 'backlog'] as const
-                ).map((status) => {
-                  const content = (
-                    <>
-                      <span
-                        className="h-2 w-2 rounded-full"
-                        style={{ background: STATUS_COLORS[status] }}
-                      />
-                      {t(STATUS_LABEL_KEYS[status])}
-                      <span style={{ color: 'var(--flow-text-dim)' }}>
-                        ({stats.statusCounts[status] ?? 0})
-                      </span>
-                    </>
-                  );
-                  const filters = summary.statusFilters[status];
-                  // A legend entry opens the list on the project statuses
-                  // that map to it, when the project has any.
-                  return filters && stats.statusCounts[status] ? (
-                    <FilteredListLink
-                      key={status}
-                      projectId={projectId}
-                      filters={filters}
-                      className="flex items-center gap-1.5 rounded-sm px-1.5 py-0.5 transition-colors hover:bg-[var(--flow-hover)]"
-                      style={{ color: 'var(--flow-text-muted)' }}
-                    >
-                      {content}
-                    </FilteredListLink>
-                  ) : (
-                    <span
-                      key={status}
-                      className="flex items-center gap-1.5 px-1.5 py-0.5"
-                      style={{ color: 'var(--flow-text-muted)' }}
-                    >
-                      {content}
-                    </span>
-                  );
-                })}
-              </div>
-            </>
+            <BreakdownBar
+              projectId={projectId}
+              segments={(
+                ['done', 'in_progress', 'in_review', 'todo', 'cancelled', 'backlog'] as const
+              ).map((status) => {
+                const count = stats.statusCounts[status] ?? 0;
+                // A legend entry opens the list on the project statuses that
+                // map to it, when the project has any.
+                const filters = summary.statusFilters[status];
+                return {
+                  key: status,
+                  label: t(STATUS_LABEL_KEYS[status]),
+                  count,
+                  color: STATUS_COLORS[status],
+                  filters: filters && count ? filters : undefined,
+                };
+              })}
+            />
           )}
-        </Card>
+        </SummaryCard>
 
         <PriorityBreakdownCard projectId={projectId} priorities={summary.priorities} />
 
         {/* Workload per person: share of the project's tasks, open tasks and
             the hours estimated on them. A row opens that person's open tasks. */}
-        <Card title={t('flow.projectDashboard.byAssignee')}>
+        <SummaryCard title={t('flow.projectDashboard.byAssignee')}>
           {summary.workload.length === 0 ? (
             <EmptyState
               icon={ListTodo}
@@ -358,63 +316,10 @@ const ProjectDashboard: React.FC = () => {
               })}
             </div>
           )}
-        </Card>
+        </SummaryCard>
       </div>
     </div>
   );
 };
-
-const StatTile: React.FC<{
-  label: string;
-  value: number;
-  tint: string;
-  hint?: string;
-}> = ({ label, value, tint, hint }) => (
-  <div
-    className="rounded-md p-3"
-    style={{
-      background: 'var(--flow-card)',
-      border: '1px solid var(--flow-border)',
-    }}
-  >
-    <div
-      className="text-flow-meta font-semibold uppercase tracking-wider mb-1"
-      style={{ color: 'var(--flow-text-dim)' }}
-    >
-      {label}
-    </div>
-    <div className="flex items-baseline gap-2">
-      <span
-        className="text-flow-screen font-bold tabular-nums"
-        style={{ color: 'var(--flow-text)' }}
-      >
-        {value}
-      </span>
-      {hint && (
-        <span className="text-flow-meta" style={{ color: tint }}>
-          {hint}
-        </span>
-      )}
-    </div>
-  </div>
-);
-
-const Card: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-  <section
-    className="rounded-md p-4"
-    style={{
-      background: 'var(--flow-card)',
-      border: '1px solid var(--flow-border)',
-    }}
-  >
-    <h3
-      className="text-flow-meta font-semibold uppercase tracking-wider mb-3"
-      style={{ color: 'var(--flow-text-dim)' }}
-    >
-      {title}
-    </h3>
-    {children}
-  </section>
-);
 
 export default ProjectDashboard;
