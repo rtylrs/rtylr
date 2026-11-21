@@ -28,11 +28,7 @@ const LABEL_MODES = ['either', 'number', 'name'] as const;
 type LabelMode = (typeof LABEL_MODES)[number];
 
 type BoardError =
-  | 'invalidLabel'
-  | 'labelTaken'
-  | 'invalidTransition'
-  | 'settingsAdminOnly'
-  | 'actionFailed';
+  'invalidLabel' | 'labelTaken' | 'invalidTransition' | 'settingsAdminOnly' | 'actionFailed';
 
 function boardErrorFor(error: unknown): BoardError {
   switch (errorCode(error)) {
@@ -104,7 +100,7 @@ function NewPhoneCard({
 
   return (
     <li className="space-y-2 rounded-lg p-3" style={{ border: '1px solid var(--dash-border)' }}>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         {match && (
           <MatchBadge
             match={match}
@@ -113,12 +109,15 @@ function NewPhoneCard({
             otherClassName="text-xs font-semibold"
           />
         )}
-        <span className="flex-1 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-          {minutes < 1 ? t('pager.board.scannedNow') : t('pager.board.scannedAgo', { count: minutes })}
+        <span className="min-w-[5rem] flex-1 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+          {minutes < 1
+            ? t('pager.board.scannedNow')
+            : t('pager.board.scannedAgo', { count: minutes })}
         </span>
         <Button
           size="sm"
           variant="ghost"
+          className="ms-auto"
           aria-label={t('pager.board.removePhone', { code })}
           disabled={busy}
           onClick={onRemove}
@@ -317,8 +316,8 @@ const Board = (): React.JSX.Element => {
             <bdi
               className={
                 ticket.labelKind === 'number'
-                  ? 'text-2xl font-bold tabular-nums'
-                  : 'break-all text-xl font-bold'
+                  ? 'text-2xl font-bold tabular-nums [overflow-wrap:anywhere]'
+                  : 'text-xl font-bold [overflow-wrap:anywhere]'
               }
               style={{ color: 'var(--dash-text)' }}
             >
@@ -336,7 +335,8 @@ const Board = (): React.JSX.Element => {
   return (
     <>
       <HelmetContainer title={t('pager.board.pageTitle')} />
-      <div className="w-full min-w-0 space-y-5">
+      {/* Laid out by its own width, not the window's: the demo shows it beside a phone. */}
+      <div className="@container w-full min-w-0 space-y-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
@@ -379,19 +379,26 @@ const Board = (): React.JSX.Element => {
 
         {/* On a phone the order is QR, tickets, settings; on a wide screen the
             tickets take the second column beside the other two. */}
-        <div className="grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)] lg:grid-rows-[auto_1fr]">
+        <div className="grid gap-5 @4xl:grid-cols-[260px_minmax(0,1fr)] @4xl:grid-rows-[auto_1fr]">
           {customerLink ? (
             <section
-              className="flex flex-col items-center gap-2 rounded-xl p-4 text-center lg:col-start-1 lg:row-start-1"
+              className="flex flex-col items-center gap-2 rounded-xl p-4 text-center @xl:grid @xl:grid-cols-[auto_minmax(0,22rem)] @xl:grid-rows-[1fr_auto_auto_auto_1fr] @xl:items-start @xl:justify-center @xl:gap-x-6 @xl:gap-y-1 @xl:text-start @4xl:col-start-1 @4xl:row-start-1 @4xl:flex @4xl:items-center @4xl:gap-2 @4xl:text-center"
               style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
             >
-              <h2 className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+              {/* Beside the QR on a tablet in portrait, so the tickets start higher. */}
+              <h2
+                className="text-sm font-semibold @xl:col-start-2 @xl:row-start-2"
+                style={{ color: 'var(--dash-text)' }}
+              >
                 {t('pager.board.qrHeading')}
               </h2>
-              <div className="rounded-lg bg-white p-2">
+              <div className="rounded-lg bg-white p-2 @xl:col-start-1 @xl:row-span-5 @xl:row-start-1 @xl:self-center">
                 <VenueQr url={customerLink} size={180} />
               </div>
-              <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+              <p
+                className="text-xs @xl:col-start-2 @xl:row-start-3"
+                style={{ color: 'var(--dash-text-dim)' }}
+              >
                 {t('pager.board.qrHint')}
               </p>
               <a
@@ -399,17 +406,17 @@ const Board = (): React.JSX.Element => {
                 target="_blank"
                 rel="noreferrer"
                 dir="ltr"
-                className="break-all text-xs underline"
+                className="break-all text-xs underline @xl:col-start-2 @xl:row-start-4"
                 style={{ color: 'var(--dash-text)' }}
               >
                 {customerLink}
               </a>
             </section>
           ) : (
-            <span className="hidden lg:block" />
+            <span className="hidden @4xl:block" />
           )}
 
-          <div className="min-w-0 space-y-3 lg:col-start-2 lg:row-start-1 lg:row-span-2">
+          <div className="@container min-w-0 space-y-3 @4xl:col-start-2 @4xl:row-span-2 @4xl:row-start-1">
             {tickets.isPending && (
               <p className="text-sm" role="status" style={{ color: 'var(--dash-text-dim)' }}>
                 {t('pager.board.loading')}
@@ -429,7 +436,8 @@ const Board = (): React.JSX.Element => {
               </p>
             )}
             {tickets.data && (
-              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              // New phones gets the most room: its cards hold an input.
+              <div className="grid gap-3 @md:grid-cols-2 @2xl:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,1fr)]">
                 {columnShell(
                   t('pager.board.newColumn'),
                   newPhones.length,
@@ -444,7 +452,9 @@ const Board = (): React.JSX.Element => {
                       onLabel={(label, done) =>
                         labelTicket.mutate({ id: ticket.id ?? '', label }, { onSuccess: done })
                       }
-                      onRemove={() => changeTicket.mutate({ id: ticket.id ?? '', action: 'collect' })}
+                      onRemove={() =>
+                        changeTicket.mutate({ id: ticket.id ?? '', action: 'collect' })
+                      }
                     />
                   ))
                 )}
@@ -475,7 +485,7 @@ const Board = (): React.JSX.Element => {
             )}
           </div>
 
-          <section className="space-y-3 lg:col-start-1 lg:row-start-2">
+          <section className="space-y-3 @4xl:col-start-1 @4xl:row-start-2">
             <h2 className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
               {t('pager.board.settingsHeading')}
             </h2>
