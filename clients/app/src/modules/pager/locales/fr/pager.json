@@ -168,7 +168,11 @@
     "claimFailed": "Impossible de configurer le bipeur. Réessayez.",
     "adminOnly": "Seul le propriétaire ou un administrateur de cette entreprise peut configurer le bipeur.",
     "loadFailed": "Impossible de charger votre entreprise.",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "slugLabel": "Votre lien client",
+    "slugHint": "Votre QR ouvre {{link}}. Lettres minuscules, chiffres et tirets.",
+    "slugInvalid": "Utilisez des lettres minuscules, des chiffres et des tirets, en commençant et en finissant par une lettre ou un chiffre.",
+    "slugTaken": "Ce lien est déjà pris. Choisissez-en un autre."
   },
   "landing": {
     "meta": {
