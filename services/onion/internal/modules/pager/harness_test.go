@@ -111,8 +111,12 @@ type reply struct {
 	body   map[string]any
 }
 
-// code is the stable error code of a failed reply.
+// code is the stable error code of a failed reply. A successful scan's code
+// is its match code, read with text("code").
 func (r reply) code() string {
+	if r.status < http.StatusBadRequest {
+		return ""
+	}
 	code, _ := r.body["code"].(string)
 	return code
 }
@@ -165,29 +169,52 @@ func (h *harness) want(r reply, status int, code string) reply {
 }
 
 // enable turns a venue's pager on.
-func (h *harness) enable(v venue, strict bool) {
+func (h *harness) enable(v venue) {
 	h.Helper()
-	h.want(h.call(v.owner, http.MethodPut, "/pager/v1/settings", fmt.Sprintf(`{"enabled":true,"strict":%t}`, strict)), http.StatusOK, "")
+	h.want(h.call(v.owner, http.MethodPut, "/pager/v1/settings", `{"enabled":true}`), http.StatusOK, "")
 }
 
-func (h *harness) join(v venue, number string) reply {
+// labelMode sets what a venue's cashier labels tickets with.
+func (h *harness) labelMode(v venue, mode string) {
 	h.Helper()
-	return h.call(nil, http.MethodPost, "/pager/v1/public/venues/"+v.slug+"/join", h.numberBody(number))
+	h.want(h.call(v.owner, http.MethodPut, "/pager/v1/settings", fmt.Sprintf(`{"label_mode":%q}`, mode)), http.StatusOK, "")
 }
 
-// create enters a number from the staff board and returns the ticket.
-func (h *harness) create(v venue, number string) map[string]any {
+// scan is a phone scanning the venue's QR.
+func (h *harness) scan(v venue) reply {
 	h.Helper()
-	return h.want(h.call(v.member, http.MethodPost, "/pager/v1/tickets", h.numberBody(number)), http.StatusOK, "").ticket()
+	return h.call(nil, http.MethodPost, "/pager/v1/public/venues/"+v.slug+"/scan", "")
 }
 
-func (h *harness) numberBody(number string) string {
+// scanned scans as a phone and returns its token and the staff's ticket for it.
+func (h *harness) scanned(v venue) (string, map[string]any) {
 	h.Helper()
-	body, err := json.Marshal(map[string]string{"number": number})
+	r := h.want(h.scan(v), http.StatusOK, "")
+	for _, ticket := range h.open(v) {
+		if ticket["code"] == r.text("code") {
+			return r.text("public_token"), ticket
+		}
+	}
+	h.Fatalf("scanned code %q is not on the board", r.text("code"))
+	return "", nil
+}
+
+// label is the cashier typing a label on a ticket's card.
+func (h *harness) label(user *authPkg.AuthUser, id any, label string) reply {
+	h.Helper()
+	body, err := json.Marshal(map[string]string{"label": label})
 	if err != nil {
 		h.Fatal(err)
 	}
-	return string(body)
+	return h.call(user, http.MethodPost, fmt.Sprintf("/pager/v1/tickets/%v/label", id), string(body))
+}
+
+// labelled scans a phone and labels its ticket, returning the token and id.
+func (h *harness) labelled(v venue, label string) (string, any) {
+	h.Helper()
+	token, ticket := h.scanned(v)
+	h.want(h.label(v.member, ticket["id"], label), http.StatusOK, "")
+	return token, ticket["id"]
 }
 
 func (h *harness) move(user *authPkg.AuthUser, id any, action string) reply {

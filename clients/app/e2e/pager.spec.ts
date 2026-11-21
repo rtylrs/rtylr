@@ -6,12 +6,12 @@ import { PORTAL_URL, stubPortalSession } from './portal-session';
  * route, so they need no auth cookie; the staff board sits inside the
  * signed-in shell.
  *
- * What only a browser can show: the join tap and the later ring happen in the
- * same document, with the bell unlocked by that tap. A full page load between
- * the two would throw the unlocked audio element away.
+ * What only a browser can show: the scan opens the ticket with no tap, the
+ * one "notify me" tap and the later ring happen in the same document, with the
+ * bell unlocked by that tap, and a reload keeps the same ticket.
  */
 
-type TicketState = 'waiting' | 'ready' | 'acknowledged';
+type TicketState = 'scanned' | 'waiting' | 'ready' | 'acknowledged';
 
 interface BellPlay {
   muted: boolean;
@@ -52,28 +52,31 @@ const bellPlays = (page: Page): Promise<BellPlay[]> => page.evaluate(() => windo
 const audiblePlays = async (page: Page): Promise<number> =>
   (await bellPlays(page)).filter((play) => !play.muted && play.outcome === 'played').length;
 
-async function stubPublicPager(page: Page): Promise<{ ticket: TicketState }> {
-  const state: { ticket: TicketState } = { ticket: 'waiting' };
+async function stubPublicPager(page: Page): Promise<{ ticket: TicketState; scans: number }> {
+  const state: { ticket: TicketState; scans: number } = { ticket: 'scanned', scans: 0 };
 
-  await page.route('**/pager/v1/public/venues/acme', (route) =>
-    route.fulfill({ json: { name: 'Acme Cafe', enabled: true, strict: false } })
-  );
-  await page.route('**/pager/v1/public/venues/acme/join', (route) =>
-    route.fulfill({ json: { public_token: 'tok-e2e', number: '42', status: 'waiting' } })
-  );
-  await page.route('**/pager/v1/public/tickets/tok-e2e', (route) =>
-    route.fulfill({
+  await page.route('**/pager/v1/public/venues/acme/scan', (route) => {
+    state.scans += 1;
+    return route.fulfill({
+      json: { public_token: 'tok-e2e', code: 'A7', color: 2, status: 'waiting' },
+    });
+  });
+  await page.route('**/pager/v1/public/tickets/tok-e2e', (route) => {
+    const labelled = state.ticket !== 'scanned';
+    const waiting = state.ticket === 'scanned' || state.ticket === 'waiting';
+    return route.fulfill({
       json: {
-        number: '42',
-        status: state.ticket === 'waiting' ? 'waiting' : 'ready',
+        ...(labelled ? { label: '42', label_kind: 'number' } : { code: 'A7' }),
+        color: 2,
+        status: waiting ? 'waiting' : 'ready',
         venue_name: 'Acme Cafe',
-        ahead: state.ticket === 'waiting' ? 2 : 0,
-        ...(state.ticket === 'waiting' ? {} : { ready_at: '2026-11-19T10:05:00.000Z' }),
+        ...(state.ticket === 'waiting' ? { ahead: 2 } : {}),
+        ...(waiting ? {} : { ready_at: '2026-11-19T10:05:00.000Z' }),
         ...(state.ticket === 'acknowledged' ? { acknowledged_at: '2026-11-19T10:05:20.000Z' } : {}),
         server_time: new Date().toISOString(),
       },
-    })
-  );
+    });
+  });
   await page.route('**/pager/v1/public/tickets/tok-e2e/acknowledge', (route) => {
     state.ticket = 'acknowledged';
     return route.fulfill({ json: {} });
@@ -83,41 +86,51 @@ async function stubPublicPager(page: Page): Promise<{ ticket: TicketState }> {
 }
 
 test.describe('Pager (customer)', () => {
-  test('the join tap unlocks the bell, which rings in the same document once the order is ready', async ({
+  test('the scan opens a code with nothing to type; the one tap unlocks the bell, which rings once the order is ready', async ({
     page,
   }) => {
     await recordBellPlays(page);
     const state = await stubPublicPager(page);
 
     await page.goto(`${PORTAL_URL}/acme/pager`);
-    await expect(page.getByText('Acme Cafe')).toBeVisible();
-    await page.evaluate(() => {
-      window.__pagerDocument = 'join';
-    });
 
-    const number = page.getByLabel('Order number');
-    await expect(number).toHaveAttribute('inputmode', 'numeric');
-    await number.fill('42');
-    await page.getByRole('button', { name: "Ring me when it's ready" }).click();
-
+    // The ticket exists before any tap: the scan itself opened it.
     await expect(page).toHaveURL(`${PORTAL_URL}/pager/t/tok-e2e`);
-    await expect(page.getByRole('heading', { name: 'Order 42' })).toBeVisible();
-    await expect(page.getByText("We're preparing your order")).toBeVisible();
-    await expect(page.getByText('2 orders ahead of you')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Your code A7' })).toBeVisible();
+    await expect(page.getByText('Show this code to the cashier')).toBeVisible();
+    await expect(page.getByRole('textbox')).toHaveCount(0);
+    expect(state.scans).toBe(1);
 
-    // Still the document the tap happened in, with the bell primed silently.
-    expect(await page.evaluate(() => window.__pagerDocument)).toBe('join');
+    // A reload keeps the same ticket and code.
+    await page.reload();
+    await expect(page.getByRole('heading', { name: 'Your code A7' })).toBeVisible();
+    await page.goto(`${PORTAL_URL}/acme/pager`);
+    await expect(page).toHaveURL(`${PORTAL_URL}/pager/t/tok-e2e`);
+    expect(state.scans).toBe(1);
+
+    await page.evaluate(() => {
+      window.__pagerDocument = 'ticket';
+    });
+    await page.getByRole('button', { name: "Notify me when it's ready" }).click();
     await expect
       .poll(async () => (await bellPlays(page))[0])
       .toEqual({ muted: true, outcome: 'played' });
     expect(await audiblePlays(page)).toBe(0);
-    await expect(page.getByRole('button', { name: 'Alert me' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: "Notify me when it's ready" })).toHaveCount(0);
+
+    // The cashier labels the phone.
+    state.ticket = 'waiting';
+    await expect(page.getByRole('heading', { name: 'Order 42' })).toBeVisible();
+    await expect(page.getByText("We're preparing your order")).toBeVisible();
+    await expect(page.getByText('2 orders ahead of you')).toBeVisible();
 
     state.ticket = 'ready';
 
     await expect(page.getByRole('alert')).toContainText('Your order is ready!');
     await expect.poll(() => audiblePlays(page)).toBeGreaterThan(0);
     await expect(page.getByRole('button', { name: 'Stop sound' })).toBeVisible();
+    // Still the document the tap happened in.
+    expect(await page.evaluate(() => window.__pagerDocument)).toBe('ticket');
 
     await page.getByRole('button', { name: 'I have it' }).click();
 
@@ -131,26 +144,8 @@ test.describe('Pager (customer)', () => {
     expect(await audiblePlays(page)).toBe(rungSoFar);
   });
 
-  test('a ticket opened without the join tap asks for one', async ({ page }) => {
-    await recordBellPlays(page);
-    await stubPublicPager(page);
-
-    await page.goto(`${PORTAL_URL}/pager/t/tok-e2e`);
-
-    await expect(page.getByRole('heading', { name: 'Order 42' })).toBeVisible();
-    const alertMe = page.getByRole('button', { name: 'Alert me' });
-    await expect(alertMe).toBeVisible();
-
-    await alertMe.click();
-
-    await expect(alertMe).toHaveCount(0);
-    await expect
-      .poll(async () => (await bellPlays(page))[0])
-      .toEqual({ muted: true, outcome: 'played' });
-  });
-
-  test('a venue without a pager shows a dead end, not a form', async ({ page }) => {
-    await page.route('**/pager/v1/public/venues/nowhere', (route) =>
+  test('a venue without a pager shows a dead end', async ({ page }) => {
+    await page.route('**/pager/v1/public/venues/nowhere/scan', (route) =>
       route.fulfill({
         status: 404,
         json: { code: 'venue_not_found', message: 'venue not found' },
@@ -160,22 +155,34 @@ test.describe('Pager (customer)', () => {
     await page.goto(`${PORTAL_URL}/nowhere/pager`);
 
     await expect(page.getByText("This pager isn't available")).toBeVisible();
-    await expect(page.getByLabel('Order number')).toHaveCount(0);
+    await expect(page.getByRole('textbox')).toHaveCount(0);
   });
 });
 
 test.describe('Pager (staff board)', () => {
-  test('a member who is not an admin marks a waiting order ready', async ({ page, context }) => {
+  test('a member who is not an admin labels a new phone and marks it ready', async ({
+    page,
+    context,
+  }) => {
     await stubPortalSession(page, context);
-    const tickets = [
-      { id: '1', number: '41', status: 'waiting', source: 'staff', phone_linked: true },
-      { id: '2', number: '42', status: 'waiting', source: 'customer', phone_linked: true },
+    const tickets: Record<string, unknown>[] = [
+      { id: '1', label: '41', label_kind: 'number', status: 'waiting' },
+      { id: '2', code: 'A7', color: 2, status: 'waiting', created_at: new Date().toISOString() },
     ];
+    const labelCalls: unknown[] = [];
     const readyCalls: string[] = [];
 
     await page.route('**/pager/v1/tickets', (route) =>
       route.fulfill({ json: { tickets, server_time: new Date().toISOString() } })
     );
+    await page.route('**/pager/v1/tickets/*/label', (route) => {
+      const id = route.request().url().split('/').at(-2) ?? '';
+      const body = route.request().postDataJSON() as { label: string };
+      labelCalls.push({ id, ...body });
+      const ticket = tickets.find((candidate) => candidate.id === id);
+      if (ticket) Object.assign(ticket, { label: body.label, label_kind: 'number', code: undefined });
+      return route.fulfill({ json: { ticket } });
+    });
     await page.route('**/pager/v1/tickets/*/ready', (route) => {
       const id = route.request().url().split('/').at(-2) ?? '';
       readyCalls.push(id);
@@ -184,19 +191,29 @@ test.describe('Pager (staff board)', () => {
       return route.fulfill({ json: { ticket } });
     });
     await page.route('**/pager/v1/settings', (route) =>
-      route.fulfill({ json: { enabled: true, strict: false } })
+      route.fulfill({ json: { enabled: true, label_mode: 'number' } })
     );
 
     await page.goto(`${PORTAL_URL}/pager`);
 
-    await expect(page.getByRole('heading', { name: 'Waiting (2)' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'New phones (1)' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Waiting (1)' })).toBeVisible();
     await expect(page.getByRole('switch', { name: 'Pager on' })).toBeChecked();
     await expect(page.getByRole('switch', { name: 'Pager on' })).toBeDisabled();
 
-    await page.getByRole('button', { name: 'Ready: order 41' }).click();
+    const label = page.getByLabel('Order number or name for code A7');
+    await expect(label).toHaveAttribute('inputmode', 'numeric');
+    await label.fill('42');
+    await page.getByRole('button', { name: 'Save' }).click();
+
+    await expect(page.getByRole('heading', { name: 'Waiting (2)' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'New phones (0)' })).toBeVisible();
+    expect(labelCalls).toEqual([{ id: '2', label: '42' }]);
+
+    await page.getByRole('button', { name: 'Ready: 42' }).click();
 
     await expect(page.getByRole('heading', { name: 'Ready (1)' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Call again: order 41' })).toBeVisible();
-    expect(readyCalls).toEqual(['1']);
+    await expect(page.getByRole('button', { name: 'Call again: 42' })).toBeVisible();
+    expect(readyCalls).toEqual(['2']);
   });
 });

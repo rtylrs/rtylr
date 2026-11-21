@@ -6,26 +6,79 @@ function sandbox() {
   return createSandboxPager({ venueName: () => 'Demo Café', now: () => new Date((tick += 1000)) });
 }
 
+async function scanAndLabel(pager: ReturnType<typeof sandbox>, label: string) {
+  const { publicToken } = await pager.scanTicket({ slug: 'demo' });
+  const tickets = (await pager.listTickets({})).tickets ?? [];
+  const id = tickets[tickets.length - 1]?.id;
+  await pager.labelTicket({ id, label });
+  return { publicToken, id };
+}
+
 describe('sandbox pager', () => {
-  it('links the phone and the board to one ticket, whichever side enters the number first', async () => {
+  it('gives each scanned phone its own code until the board labels it', async () => {
     const pager = sandbox();
-    const joined = await pager.joinTicket({ slug: 'demo', number: '٤٢' });
-    expect(joined).toMatchObject({ number: '42', status: 'waiting' });
+    const codes = new Set<string>();
+    for (let i = 0; i < 30; i += 1) {
+      const scanned = await pager.scanTicket({ slug: 'demo' });
+      expect(scanned.code).toMatch(/^[2-9A-HJ-NP-Z]{2}$/);
+      codes.add(scanned.code ?? '');
+    }
+    expect(codes.size).toBe(30);
 
-    const fromBoard = await pager.createTicket({ number: '42' });
-    expect(fromBoard.ticket).toMatchObject({ number: '42', phoneLinked: true, source: 'customer' });
-    expect(fromBoard.ticket).not.toHaveProperty('publicToken');
+    const { publicToken } = await pager.scanTicket({ slug: 'demo' });
+    const phone = await pager.getPublicTicket({ publicToken });
+    expect(phone).toMatchObject({ status: 'waiting', ahead: 0 });
+    expect(phone.label).toBeUndefined();
 
-    const again = await pager.joinTicket({ slug: 'demo', number: '42' });
-    expect(again.publicToken).toBe(joined.publicToken);
-    expect((await pager.listTickets({})).tickets).toHaveLength(1);
+    const id = (await pager.listTickets({})).tickets?.at(-1)?.id;
+    const { ticket } = await pager.labelTicket({ id, label: ' ٤٢ ' });
+    expect(ticket).toMatchObject({ label: '42', labelKind: 'number' });
+    expect(ticket).not.toHaveProperty('publicToken');
+    expect(ticket?.code).toBeUndefined();
+    expect(await pager.getPublicTicket({ publicToken })).toMatchObject({
+      label: '42',
+      labelKind: 'number',
+    });
+  });
+
+  it('follows the label mode, and keeps an open number on one ticket', async () => {
+    const pager = sandbox();
+    await scanAndLabel(pager, '17');
+    const { publicToken } = await pager.scanTicket({ slug: 'demo' });
+    const id = (await pager.listTickets({})).tickets?.at(-1)?.id;
+
+    await expect(pager.labelTicket({ id, label: '17' })).rejects.toMatchObject({
+      statusCode: 409,
+      code: 'label_taken',
+    });
+    expect((await pager.labelTicket({ id, label: 'Sara  Haddad' })).ticket).toMatchObject({
+      label: 'Sara Haddad',
+      labelKind: 'name',
+    });
+
+    await pager.updateSettings({ labelMode: 'number' });
+    await expect(pager.labelTicket({ id, label: 'Sara' })).rejects.toMatchObject({
+      statusCode: 400,
+      code: 'invalid_label',
+    });
+    await pager.updateSettings({ labelMode: 'name' });
+    expect((await pager.labelTicket({ id, label: '17' })).ticket).toMatchObject({
+      labelKind: 'name',
+    });
+    expect((await pager.getPublicTicket({ publicToken })).label).toBe('17');
   });
 
   it('rings the phone on ready and on every call again, until the customer answers', async () => {
     const pager = sandbox();
-    const { publicToken } = await pager.joinTicket({ slug: 'demo', number: '7' });
+    const scanned = await pager.scanTicket({ slug: 'demo' });
     const id = (await pager.listTickets({})).tickets?.[0]?.id;
+    const { publicToken } = scanned;
 
+    await expect(pager.markReady({ id })).rejects.toMatchObject({
+      statusCode: 409,
+      code: 'invalid_transition',
+    });
+    await pager.labelTicket({ id, label: '7' });
     await pager.markReady({ id });
     const ready = await pager.getPublicTicket({ publicToken });
     expect(ready).toMatchObject({ status: 'ready', venueName: 'Demo Café' });
@@ -44,11 +97,12 @@ describe('sandbox pager', () => {
     expect((await pager.listTickets({})).tickets).toEqual([]);
   });
 
-  it('counts the waiting orders entered before this one', async () => {
+  it('counts the labelled waiting orders that scanned before this one', async () => {
     const pager = sandbox();
-    await pager.createTicket({ number: '1' });
-    await pager.createTicket({ number: '2' });
-    const { publicToken } = await pager.joinTicket({ slug: 'demo', number: '3' });
+    await scanAndLabel(pager, '1');
+    await pager.scanTicket({ slug: 'demo' });
+    await scanAndLabel(pager, '2');
+    const { publicToken } = await scanAndLabel(pager, '3');
     expect((await pager.getPublicTicket({ publicToken })).ahead).toBe(2);
 
     const first = (await pager.listTickets({})).tickets?.[0]?.id;
@@ -56,27 +110,10 @@ describe('sandbox pager', () => {
     expect((await pager.getPublicTicket({ publicToken })).ahead).toBe(1);
   });
 
-  it('answers with the API error codes the screens act on', async () => {
+  it('answers not found once the demo venue switches its pager off', async () => {
     const pager = sandbox();
-    await expect(pager.joinTicket({ slug: 'demo', number: '--' })).rejects.toMatchObject({
-      statusCode: 400,
-      code: 'invalid_number',
-    });
-
-    const { ticket } = await pager.createTicket({ number: '5' });
-    await expect(pager.remindTicket({ id: ticket?.id })).rejects.toMatchObject({
-      statusCode: 409,
-      code: 'invalid_transition',
-    });
-
-    await pager.updateSettings({ strict: true });
-    await expect(pager.joinTicket({ slug: 'demo', number: '6' })).rejects.toMatchObject({
-      statusCode: 404,
-      code: 'ticket_not_found',
-    });
-
     await pager.updateSettings({ enabled: false });
-    await expect(pager.getPublicVenue({ slug: 'demo' })).rejects.toMatchObject({
+    await expect(pager.scanTicket({ slug: 'demo' })).rejects.toMatchObject({
       statusCode: 404,
       code: 'venue_not_found',
     });
