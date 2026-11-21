@@ -9,6 +9,7 @@ import { readyAlarm } from '../../../../shared/alarm/readyAlarm';
 import { useAlarm } from '../../../../shared/alarm/useAlarm';
 import LanguageSwitch from '../../shared/components/LanguageSwitch';
 import { publicPagerClient } from '../../shared/lib/clients';
+import { askPushPermission, followTicketByPush, usePushKey } from '../../shared/lib/pushAlerts';
 import { ticketAlarmState } from '../../shared/lib/ticketAlarm';
 import { createTicketPoller, isOpenStatus, type TicketPoller } from '../../shared/lib/ticketPoller';
 
@@ -18,10 +19,13 @@ const POLL_TIMEOUT_MS = 10_000;
 const LONG_NUMBER_LENGTH = 5;
 
 const Ticket = (): React.JSX.Element => {
-  const { t } = useTranslation('pager');
+  const { t, i18n } = useTranslation('pager');
   const { token: rawToken } = useParams({ strict: false });
   const token = rawToken ?? '';
   const alarm = useAlarm(readyAlarm);
+  const pushKey = usePushKey();
+  // Bumped by the "alert me" tap so a permission granted there subscribes.
+  const [pushAsked, setPushAsked] = useState(0);
 
   const [ticket, setTicket] = useState<GetPublicTicketResponse | null>(null);
   const [notFound, setNotFound] = useState(token === '');
@@ -56,6 +60,25 @@ const Ticket = (): React.JSX.Element => {
     readyAlarm.sync(ticketAlarmState(notFound ? null : ticket, readyTitle));
   }, [ticket, notFound, readyTitle]);
   useEffect(() => () => readyAlarm.release(), []);
+
+  const open = isOpenStatus(ticket?.status);
+  const venueName = ticket?.venueName ?? '';
+  useEffect(() => {
+    if (!open || !pushKey) return;
+    const text = {
+      ready: {
+        title: t('pager.push.readyTitle', { number }),
+        body: t('pager.push.readyBody', { venue: venueName }),
+      },
+      remind: {
+        title: t('pager.push.remindTitle', { number }),
+        body: t('pager.push.remindBody', { venue: venueName }),
+      },
+    };
+    // The bell on the page does not depend on this, so a failure stays quiet.
+    followTicketByPush({ publicKey: pushKey, token, text }).catch(() => undefined);
+    // i18n.language: a language switch stores the notification text again.
+  }, [open, pushKey, token, number, venueName, pushAsked, i18n.language, t]);
 
   if (notFound) {
     return (
@@ -211,7 +234,15 @@ const Ticket = (): React.JSX.Element => {
         {isOpenStatus(status) && !acknowledged && !alarm.unlocked && (
           <div className="pager-panel">
             <p className="pager-text">{t('pager.ticket.alertMeHint')}</p>
-            <button type="button" className="pager-button" onClick={() => readyAlarm.unlock()}>
+            <button
+              type="button"
+              className="pager-button"
+              onClick={() => {
+                readyAlarm.unlock();
+                askPushPermission(pushKey);
+                setPushAsked((count) => count + 1);
+              }}
+            >
               {t('pager.ticket.alertMe')}
             </button>
           </div>
