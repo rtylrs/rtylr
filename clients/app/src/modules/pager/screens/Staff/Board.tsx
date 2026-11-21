@@ -6,13 +6,12 @@ import { Alert, Switch } from '@voxire/ui';
 import type { ListTicketsResponse, Ticket } from '@voxire/voxie/pager/v1/types';
 import { BellRing, Delete, Smartphone } from 'lucide-react';
 import { Badge, Button } from '../../../../shared/components/ui';
-import { configClient } from '../../../../shared/lib/clients';
 import { useUserStore } from '../../../../shared/stores/userStore';
-import { pagerJoinPath } from '../../pagerPaths';
 import { PAGER_ERROR, errorCode, errorStatus } from '../../shared/lib/apiError';
 import { staffPagerClient } from '../../shared/lib/clients';
 import { normaliseTicketNumber } from '../../shared/lib/ticketNumber';
 import { TICKET_POLL_INTERVAL_MS, isStaleAnswer } from '../../shared/lib/ticketPoller';
+import { usePagerVenue } from '../../shared/lib/usePagerVenue';
 
 const TICKETS_KEY = ['pager', 'tickets'] as const;
 const SETTINGS_KEY = ['pager', 'settings'] as const;
@@ -42,18 +41,6 @@ const TICKET_ACTIONS: Record<TicketAction, (id: string) => Promise<unknown>> = {
   undo: (id) => staffPagerClient.undoReady({ id }),
   collect: (id) => staffPagerClient.collectTicket({ id }),
 };
-
-function useCustomerLink(): string {
-  const user = useUserStore((state) => state.user);
-  const knownSlug = user?.businessSlug?.trim() || user?.business_slug?.trim() || '';
-  const config = useQuery({
-    queryKey: ['pager', 'business-slug'],
-    enabled: knownSlug === '',
-    queryFn: async () => (await configClient.getConfig({})).business?.slug?.trim() ?? '',
-  });
-  const slug = knownSlug || config.data || '';
-  return slug ? `${window.location.origin}${pagerJoinPath(slug)}` : '';
-}
 
 const Board = (): React.JSX.Element => {
   const { t } = useTranslation('pager');
@@ -120,7 +107,7 @@ const Board = (): React.JSX.Element => {
     onError: onChangeFailed,
   });
 
-  const customerLink = useCustomerLink();
+  const customerLink = usePagerVenue().joinUrl;
   // The server refuses a settings change from anyone else; this only saves
   // them the round trip.
   const canEditSettings = useUserStore(
