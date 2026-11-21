@@ -24,6 +24,7 @@ const ProjectSettings = React.lazy(() => import('./features/projects/ProjectSett
 const ProjectTimeline = React.lazy(() => import('./features/projects/ProjectTimeline'));
 const ProjectCalendar = React.lazy(() => import('./features/projects/ProjectCalendar'));
 const ProjectDashboard = React.lazy(() => import('./features/projects/ProjectDashboard'));
+const ProjectBacklog = React.lazy(() => import('./features/projects/ProjectBacklog'));
 const Inbox = React.lazy(() => import('./features/inbox/Inbox'));
 const MyDay = React.lazy(() => import('./features/time/MyDay'));
 const LeaveScreen = React.lazy(() => import('./features/leave/LeaveScreen'));
@@ -154,6 +155,12 @@ export function createFlowRoutes<TParent extends AnyRoute>(parent: TParent) {
     getParentRoute: () => rootRoute,
     path: '/p/$projectId/dashboard',
     component: () => withLayout(<ProjectDashboard />),
+  });
+
+  const projectBacklogRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/p/$projectId/backlog',
+    component: () => withLayout(<ProjectBacklog />),
   });
 
   const projectSettingsRoute = createRoute({
@@ -330,6 +337,7 @@ export function createFlowRoutes<TParent extends AnyRoute>(parent: TParent) {
     projectTimelineRoute,
     projectCalendarRoute,
     projectDashboardRoute,
+    projectBacklogRoute,
     projectSettingsRoute,
     taskDetailRoute,
     myIssuesRoute,
