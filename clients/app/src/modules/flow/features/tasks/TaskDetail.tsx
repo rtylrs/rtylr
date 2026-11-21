@@ -33,6 +33,7 @@ import { HelmetContainer } from '@voxire/components';
 
 import { useTask } from './useTask';
 import {
+  useTasks,
   useUpdateTask,
   useDeleteTask,
   useAddComment,
@@ -173,6 +174,9 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const { project: taskProject } = useCurrentProject(taskProjectId);
   const { data: projectMembers = [] } = useProjectMembers(taskProjectId);
   const { data: allLabels = [] } = useLabels();
+  // The parent crumb and the change parent picker choose among these.
+  const tasksQuery = useTasks({});
+  const allTasks = (tasksQuery.data ?? []).map(apiTaskToTask).filter((task) => !task.archived);
   const { data: cycles = [] } = useCycles(taskProjectId);
   const milestonesQuery = useMilestones(taskProjectId ?? '');
   const { data: milestones = [] } = milestonesQuery;
