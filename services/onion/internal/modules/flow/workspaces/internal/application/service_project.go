@@ -294,9 +294,16 @@ func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, 
 		}
 	}
 
+	// Both a status and a column write can close the task.
+	announceUnblocked := func(int64) {}
+	if input.Status != "" || input.SectionID != nil {
+		announceUnblocked = s.watchUnblocks(ctx, input.BusinessID, input.ID)
+	}
+
 	if updateErr := s.repo.UpdateTask(ctx, input); updateErr != nil {
 		return updateErr
 	}
+	announceUnblocked(userID)
 	if input.FocusPin != nil {
 		if pinErr := s.repo.SetTaskFocusPin(ctx, input.ID, userID, input.BusinessID, *input.FocusPin); pinErr != nil {
 			return pinErr

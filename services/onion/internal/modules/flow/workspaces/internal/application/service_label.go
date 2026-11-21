@@ -338,11 +338,22 @@ func (s *Service) MoveTaskToColumn(ctx context.Context, taskID, columnID, actorI
 		defer invalidateUserScope(ctx, assigneeID(existing.AssigneeID))
 	}
 
+	announceUnblocked := s.watchColumnUnblocks(ctx, existing, err)
 	if err := s.repo.MoveTaskToColumn(ctx, taskID, columnID, actorID); err != nil {
 		return err
 	}
+	announceUnblocked(actorID)
 	s.recordColumnStatusChange(ctx, existing, err, actorID)
 	return nil
+}
+
+// watchColumnUnblocks is watchUnblocks for a board move, where the task was
+// read without a business to scope by. existingErr is the error from that read.
+func (s *Service) watchColumnUnblocks(ctx context.Context, existing domain.Task, existingErr error) func(actorID int64) {
+	if existingErr != nil {
+		return func(int64) {}
+	}
+	return s.watchUnblocks(ctx, existing.BusinessID, existing.ID)
 }
 
 // recordColumnStatusChange logs and announces the status change a board move
@@ -387,9 +398,11 @@ func (s *Service) MoveTaskToColumnOrdered(ctx context.Context, taskID, columnID,
 		defer invalidateUserScope(ctx, assigneeID(existing.AssigneeID))
 	}
 
+	announceUnblocked := s.watchColumnUnblocks(ctx, existing, err)
 	if err := s.repo.MoveTaskToColumnOrdered(ctx, taskID, columnID, actorID, orderedTaskIDs); err != nil {
 		return err
 	}
+	announceUnblocked(actorID)
 	s.recordColumnStatusChange(ctx, existing, err, actorID)
 	return nil
 }
