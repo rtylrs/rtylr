@@ -508,7 +508,7 @@ function LabelsEditor({ task, onClose }: { task: Task; onClose: () => void }) {
     <CellMenu label={t(listColumn('labels').labelKey)} onClose={onClose}>
       {labels.length === 0 && (
         <p className="px-3 py-2 text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>
-          {t('flow.projectList.noLabels')}
+          {t('flow.taskDetail.noLabels')}
         </p>
       )}
       {labels.map((label) => {
