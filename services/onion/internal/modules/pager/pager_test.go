@@ -524,7 +524,7 @@ func TestPublicRepliesNeverCarryTheTicketID(t *testing.T) {
 		h.want(h.label(h.a.member, id, "42"), http.StatusOK, "")
 
 		followed := h.want(h.publicTicket(token), http.StatusOK, "")
-		allowed("ticket", followed, "label", "label_kind", "word", "word_number", "code", "color", "status", "venue_name", "ahead", "ready_at", "reminded_at", "acknowledged_at", "server_time")
+		allowed("ticket", followed, "label", "label_kind", "word", "word_number", "code", "color", "status", "venue_name", "venue_logo_url", "ahead", "ready_at", "reminded_at", "acknowledged_at", "server_time")
 		if followed.text("venue_name") != "Cedar Café" || followed.text("server_time") != "2026-11-19T12:00:00.000Z" {
 			h.Fatalf("ticket = %v", followed.body)
 		}
@@ -739,7 +739,8 @@ func TestVenueIsTheBusinessBehindTheMenuSlug(t *testing.T) {
 	ctx := context.Background()
 	businessID := time.Now().UnixMicro()
 	slug := fmt.Sprintf("pager-test-%d", businessID)
-	if _, err := db.Exec("INSERT INTO businesses (id, name, owner_id, slug) VALUES (?, ?, ?, ?)", businessID, "Pager Test "+slug, businessID, slug); err != nil {
+	logo := "https://cdn.example.test/" + slug + ".png"
+	if _, err := db.Exec("INSERT INTO businesses (id, name, owner_id, slug, logo_url) VALUES (?, ?, ?, ?, ?)", businessID, "Pager Test "+slug, businessID, slug, logo); err != nil {
 		t.Fatalf("seed business: %v", err)
 	}
 	t.Cleanup(func() {
@@ -768,8 +769,13 @@ func TestVenueIsTheBusinessBehindTheMenuSlug(t *testing.T) {
 		t.Fatalf("venue = %v", found.body)
 	}
 	token := h.want(h.call(nil, http.MethodPost, "/pager/v1/public/venues/"+slug+"/scan", ""), http.StatusOK, "").text("public_token")
-	if got := h.want(h.publicTicket(token), http.StatusOK, "").text("venue_name"); got != "Pager Test "+slug {
+	followed := h.want(h.publicTicket(token), http.StatusOK, "")
+	if got := followed.text("venue_name"); got != "Pager Test "+slug {
 		t.Fatalf("venue_name = %q", got)
+	}
+	// The ticket page shows the venue's logo; the phone never sees the venue reply.
+	if got := followed.text("venue_logo_url"); got != logo {
+		t.Fatalf("venue_logo_url = %q, want %q", got, logo)
 	}
 
 	// A deactivated business has no pager, whatever its settings say.

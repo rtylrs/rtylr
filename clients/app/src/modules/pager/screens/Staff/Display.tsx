@@ -9,6 +9,7 @@ import { readyAlarm } from '../../../../shared/alarm/readyAlarm';
 import { PAGER_BOARD_PATH } from '../../pagerPaths';
 import { usePagerVenue } from '../../shared/lib/usePagerVenue';
 import { RenniliLogo } from '../../shared/components/RenniliLogo';
+import { VenueLogo } from '../../shared/components/VenueLogo';
 import { VenueQr } from './VenueQr';
 
 const DISPLAY_LANGUAGES = ['en', 'ar'] as const;
@@ -29,7 +30,7 @@ function ScanLine({ lng }: { lng: (typeof DISPLAY_LANGUAGES)[number] }): React.J
  */
 const Display = (): React.JSX.Element => {
   const { t } = useTranslation('pager');
-  const { name, joinUrl, loading } = usePagerVenue();
+  const { name, logoUrl, joinUrl, loading } = usePagerVenue();
 
   // The alarm's wake lock, with nothing to ring.
   useEffect(() => {
@@ -49,6 +50,7 @@ const Display = (): React.JSX.Element => {
           >
             <X size={22} aria-hidden="true" />
           </Link>
+          <VenueLogo src={logoUrl} className="pager-display__logo" />
           {name && <p className="pager-display__venue">{name}</p>}
           {joinUrl ? (
             <div className="pager-display__qr">

@@ -27,6 +27,7 @@ const getConfig = vi.hoisted(() => vi.fn());
 vi.mock('../../../../shared/lib/clients', () => ({ configClient: { getConfig } }));
 
 import Poster from './Poster';
+import { useConfigStore } from '../../../../shared/stores/configStore';
 import { useUserStore } from '../../../../shared/stores/userStore';
 import { initTestI18n } from '../../shared/testing/i18n';
 import { RENNILI_URL } from '@voxire/config';
@@ -53,6 +54,7 @@ beforeEach(() => {
   qrValues.length = 0;
   getConfig.mockReset().mockResolvedValue({ business: { slug: 'acme', name: 'Acme Coffee' } });
   useUserStore.setState({ user: { businessSlug: 'acme', businessName: 'Acme Coffee' } });
+  useConfigStore.setState({ websiteData: null });
 });
 
 afterEach(() => {
@@ -68,6 +70,19 @@ describe('pager counter poster', () => {
     const poster = screen.getAllByRole('article')[0];
     expect(within(poster).getByText('Acme Coffee')).toBeInTheDocument();
     expect(within(poster).getByText(joinUrl)).toBeInTheDocument();
+  });
+
+  it("puts the business's logo above its name on the poster and the printed copy", () => {
+    useConfigStore.setState({ websiteData: { logoUrl: 'https://cdn.example.test/acme.png' } });
+    renderPoster();
+
+    const logos = screen
+      .getAllByRole('article')
+      .map((poster) => poster.querySelector('img.pager-poster__logo'));
+    expect(logos).toHaveLength(2);
+    for (const logo of logos) {
+      expect(logo).toHaveAttribute('src', 'https://cdn.example.test/acme.png');
+    }
   });
 
   it('carries the three steps in English and Arabic', () => {

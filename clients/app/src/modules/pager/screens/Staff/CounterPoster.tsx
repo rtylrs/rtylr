@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { RenniliLogo } from '../../shared/components/RenniliLogo';
+import { ByRtylr, RenniliLogo } from '../../shared/components/RenniliLogo';
+import { VenueLogo } from '../../shared/components/VenueLogo';
 import { VenueQr } from './VenueQr';
 
 const POSTER_LANGUAGES = ['en', 'ar'] as const;
@@ -32,6 +33,7 @@ function PosterSteps({ lng }: { lng: PosterLanguage }): React.JSX.Element {
 
 interface CounterPosterProps {
   venueName: string;
+  logoUrl?: string;
   joinUrl: string;
   qrSize: number;
 }
@@ -39,11 +41,13 @@ interface CounterPosterProps {
 /** The counter poster: English and Arabic, whatever language the Portal is in. */
 export function CounterPoster({
   venueName,
+  logoUrl,
   joinUrl,
   qrSize,
 }: CounterPosterProps): React.JSX.Element {
   return (
     <article className="pager-poster">
+      <VenueLogo src={logoUrl} className="pager-poster__logo" />
       {venueName && <p className="pager-poster__venue">{venueName}</p>}
       <div className="pager-poster__qr">
         <VenueQr url={joinUrl} size={qrSize} />
@@ -58,6 +62,7 @@ export function CounterPoster({
       </div>
       <div className="pager-poster__brand">
         <RenniliLogo size={22} />
+        <ByRtylr />
       </div>
     </article>
   );

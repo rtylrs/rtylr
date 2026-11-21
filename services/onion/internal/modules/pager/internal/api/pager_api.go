@@ -64,6 +64,7 @@ func (a *PagerAPI) GetPublicTicket(ctx context.Context, req *pagerv1.GetPublicTi
 		Color:          match.color,
 		Status:         view.Ticket.Status,
 		VenueName:      view.VenueName,
+		VenueLogoUrl:   view.VenueLogoURL,
 		Ahead:          int32(view.Ahead),
 		ReadyAt:        timestamp(view.Ticket.ReadyAt),
 		RemindedAt:     timestamp(view.Ticket.RemindedAt),

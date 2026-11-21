@@ -9,6 +9,7 @@ import { readyAlarm } from '../../../../shared/alarm/readyAlarm';
 import { useAlarm } from '../../../../shared/alarm/useAlarm';
 import LanguageSwitch from '../../shared/components/LanguageSwitch';
 import { ByRtylr, RenniliLogo, RenniliMark } from '../../shared/components/RenniliLogo';
+import { VenueLogo } from '../../shared/components/VenueLogo';
 import MatchBadge from '../../shared/components/MatchBadge';
 import { DEPLOY_GAP_PATIENCE_MS } from '../../shared/lib/apiError';
 import { matchName, matchOf } from '../../shared/lib/matchWords';
@@ -96,7 +97,17 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
     // The bell on the page does not depend on this, so a failure stays quiet.
     followTicketByPush({ publicKey: pushKey, token, text }).catch(() => undefined);
     // i18n.language: a language switch stores the notification text again.
-  }, [open, pushKey, token, readyPushTitle, remindPushTitle, venueName, pushAsked, i18n.language, t]);
+  }, [
+    open,
+    pushKey,
+    token,
+    readyPushTitle,
+    remindPushTitle,
+    venueName,
+    pushAsked,
+    i18n.language,
+    t,
+  ]);
 
   if (notFound) {
     return (
@@ -178,7 +189,10 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
       />
       <main className="pager-page">
         <div className="pager-topbar">
-          <p className="pager-venue">{ticket.venueName}</p>
+          <p className="pager-venue">
+            <VenueLogo src={ticket.venueLogoUrl} />
+            <span>{ticket.venueName}</span>
+          </p>
           <LanguageSwitch />
         </div>
 

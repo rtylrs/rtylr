@@ -1,6 +1,7 @@
 import React, { useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { resolveAppUrl } from '@voxire/config';
 import { HelmetContainer } from '@voxire/components';
 import { Alert, Switch } from '@voxire/ui';
 import type { ListTicketsResponse, Ticket } from '@voxire/voxie/pager/v1/types';
@@ -20,6 +21,7 @@ import {
 import { normaliseTicketNumber } from '../../shared/lib/ticketNumber';
 import { TICKET_POLL_INTERVAL_MS, isStaleAnswer } from '../../shared/lib/ticketPoller';
 import { usePagerVenue } from '../../shared/lib/usePagerVenue';
+import { VenueLogo } from '../../shared/components/VenueLogo';
 import { VenueQr } from './VenueQr';
 
 const TICKETS_KEY = ['pager', 'tickets'] as const;
@@ -229,7 +231,8 @@ const Board = (): React.JSX.Element => {
     onError: onChangeFailed,
   });
 
-  const customerLink = usePagerVenue().joinUrl;
+  const venue = usePagerVenue();
+  const customerLink = venue.joinUrl;
   // The server refuses a settings change from anyone else; this only saves
   // them the round trip. In the demo the visitor plays the owner.
   const isOwnerOrAdmin = useUserStore(
@@ -545,6 +548,29 @@ const Board = (): React.JSX.Element => {
                     {t('pager.board.labelModeHint')}
                   </p>
                 </div>
+                {/* The logo is the business's own, set where the Portal sets it. */}
+                {!sandbox && (
+                  <div className="space-y-1">
+                    <p
+                      className="text-xs font-semibold"
+                      style={{ color: 'var(--dash-text-muted)' }}
+                    >
+                      {t('pager.board.logoLabel')}
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <VenueLogo src={venue.logoUrl} className="pager-board-logo" />
+                      <a
+                        href={new URL('/settings/businesses', resolveAppUrl('dash')).href}
+                        className="portal-button portal-button--outline portal-button--sm"
+                      >
+                        {venue.logoUrl ? t('pager.board.logoChange') : t('pager.board.logoAdd')}
+                      </a>
+                    </div>
+                    <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+                      {t('pager.board.logoHint')}
+                    </p>
+                  </div>
+                )}
                 {!canEditSettings && (
                   <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
                     {t('pager.board.settingsAdminOnly')}
