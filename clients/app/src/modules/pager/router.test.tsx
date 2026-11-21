@@ -22,6 +22,12 @@ vi.mock('../../shared/utils/BusinessRoute', async () => {
   };
 });
 vi.mock('./screens/Public/Landing', () => ({ default: () => <h1>Rennili landing</h1> }));
+vi.mock('./screens/Public/HowItWorksPage', () => ({
+  default: () => <h1>Rennili how it works</h1>,
+}));
+vi.mock('./screens/Public/FeaturesPage', () => ({ default: () => <h1>Rennili features</h1> }));
+vi.mock('./screens/Public/FaqPage', () => ({ default: () => <h1>Rennili FAQ</h1> }));
+vi.mock('./screens/Public/RtylrServicesPage', () => ({ default: () => <h1>RTYLR services</h1> }));
 vi.mock('./screens/Public/Scan', () => ({ default: () => <h1>Pager scan</h1> }));
 vi.mock('./screens/Public/Ticket', () => ({ default: () => <h1>Pager ticket</h1> }));
 vi.mock('./screens/Public/Try', () => ({ default: () => <h1>Pager demo</h1> }));
@@ -43,6 +49,10 @@ async function open(url: string) {
 describe('Rennili routes', () => {
   it.each([
     ['/', 'Rennili landing'],
+    ['/how-it-works', 'Rennili how it works'],
+    ['/features', 'Rennili features'],
+    ['/faq', 'Rennili FAQ'],
+    ['/rtylr', 'RTYLR services'],
     ['/acme', 'Pager scan'],
     ['/t/tok-1', 'Pager ticket'],
     ['/try', 'Pager demo'],

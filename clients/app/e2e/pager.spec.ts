@@ -87,6 +87,30 @@ async function stubPublicPager(page: Page): Promise<{ ticket: TicketState; scans
   return state;
 }
 
+test.describe('Pager (landing)', () => {
+  test('renders the landing page, toggles FAQ items and reaches /try', async ({ page }) => {
+    await page.goto(`${RENNILI_URL}/`);
+
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+
+    // Open a closed FAQ accordion item by keyboard.
+    const faqTrigger = page.locator('#faq button[aria-expanded="false"]').first();
+    await faqTrigger.focus();
+    await page.keyboard.press('Enter');
+    await expect(faqTrigger).toHaveAttribute('aria-expanded', 'true');
+
+    // Dedicated nav route reaches the RTYLR services upsell page.
+    await page.getByRole('link', { name: 'By RTYLR' }).first().click();
+    await expect(page).toHaveURL(`${RENNILI_URL}/rtylr`);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+
+    // Primary CTA reaches the live demo without calling any real API.
+    await page.getByRole('link', { name: 'Try the live demo' }).first().click();
+    await expect(page).toHaveURL(`${RENNILI_URL}/try`);
+    await expect(page.getByRole('region', { name: "Your customer's phone" })).toBeVisible();
+  });
+});
+
 test.describe('Pager (customer)', () => {
   test('the scan opens a code with nothing to type; the one tap unlocks the bell, which rings once the order is ready', async ({
     page,
@@ -182,7 +206,8 @@ test.describe('Pager (staff board)', () => {
       const body = route.request().postDataJSON() as { label: string };
       labelCalls.push({ id, ...body });
       const ticket = tickets.find((candidate) => candidate.id === id);
-      if (ticket) Object.assign(ticket, { label: body.label, label_kind: 'number', code: undefined });
+      if (ticket)
+        Object.assign(ticket, { label: body.label, label_kind: 'number', code: undefined });
       return route.fulfill({ json: { ticket } });
     });
     await page.route('**/pager/v1/tickets/*/ready', (route) => {
