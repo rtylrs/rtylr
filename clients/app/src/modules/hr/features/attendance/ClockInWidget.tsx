@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LogIn, LogOut, QrCode, KeyRound, MapPin, Delete, Settings } from 'lucide-react';
+import { LogIn, LogOut, QrCode, KeyRound, MapPin, Delete, Settings, Coffee } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUserStore } from '../../../../shared/stores/userStore';
 import {
@@ -9,6 +9,7 @@ import {
   useClockOut,
   useSetPin,
 } from '../../shared/hooks/queries/useAttendance';
+import { useBreaks, useEndBreak, useStartBreak } from '../../shared/hooks/useHrExtras';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 import type { AttendanceRecordPayload } from '@voxire/voxie/hr/attendance/v1/types';
 import { Card, Button, Pill, Modal, ACCENT } from '../../shared/components/ui';
@@ -236,7 +237,14 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
   const [pendingNewPin, setPendingNewPin] = useState('');
   const [gpsLoading, setGpsLoading] = useState(false);
 
-  const isClockedIn = activeRecord && !activeRecord.clockOutAt;
+  const isClockedIn = Boolean(activeRecord && !activeRecord.clockOutAt);
+  const activeEmployeeId = activeRecord?.employeeId ? Number(activeRecord.employeeId) : 0;
+  const { data: breaks = [] } = useBreaks({ enabled: isClockedIn });
+  const startBreak = useStartBreak();
+  const endBreak = useEndBreak();
+  const activeBreak = breaks.find(
+    (b) => !b.end && (activeEmployeeId <= 0 || !b.employeeId || b.employeeId === activeEmployeeId)
+  );
 
   const enabledMethods = config?.clockInMethods ?? ['app'];
   const isAppEnabled = enabledMethods.includes('app');
@@ -254,6 +262,19 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
     if (!activeRecord?.id) return;
     clockOut.mutate({ attendanceRecordId: activeRecord.id });
   }, [activeRecord, clockOut]);
+
+  const handleToggleBreak = useCallback((): void => {
+    if (activeBreak) {
+      endBreak.mutate(activeBreak.id, {
+        onSuccess: () => toast.success(t('hrOperations.toasts.breakEnded')),
+      });
+      return;
+    }
+    startBreak.mutate(
+      { type: 'Lunch' },
+      { onSuccess: () => toast.success(t('hrOperations.toasts.breakStarted')) }
+    );
+  }, [activeBreak, endBreak, startBreak, t]);
 
   /* ── PIN flow ─────────────────────────────────────────────── */
 
@@ -358,9 +379,11 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
             {t('hrAttendance.clockWidget.title')}
           </span>
           <Pill color={isClockedIn ? 'var(--hr-status-active)' : 'var(--hr-status-inactive)'}>
-            {isClockedIn
-              ? t('hrAttendance.clockWidget.clockedIn')
-              : t('hrAttendance.clockWidget.clockedOut')}
+            {activeBreak
+              ? t('hrAttendance.clockWidget.onBreak')
+              : isClockedIn
+                ? t('hrAttendance.clockWidget.clockedIn')
+                : t('hrAttendance.clockWidget.clockedOut')}
           </Pill>
         </div>
 
@@ -376,14 +399,26 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
                 </Pill>
               )}
             </div>
-            <Button
-              variant="danger"
-              onClick={handleClockOut}
-              disabled={clockOut.isPending}
-              icon={<LogOut size={14} />}
-            >
-              {t('hrAttendance.clockWidget.clockOutBtn')}
-            </Button>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <Button
+                variant="secondary"
+                onClick={handleToggleBreak}
+                disabled={startBreak.isPending || endBreak.isPending}
+                icon={<Coffee size={14} />}
+              >
+                {activeBreak
+                  ? t('hrAttendance.clockWidget.endBreakBtn')
+                  : t('hrAttendance.clockWidget.startBreakBtn')}
+              </Button>
+              <Button
+                variant="danger"
+                onClick={handleClockOut}
+                disabled={clockOut.isPending}
+                icon={<LogOut size={14} />}
+              >
+                {t('hrAttendance.clockWidget.clockOutBtn')}
+              </Button>
+            </div>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

@@ -548,13 +548,14 @@ export function useCreateSwap() {
   });
 }
 
-export function useBreaks() {
+export function useBreaks(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ['hr', 'breaks'],
+    enabled: options?.enabled,
     queryFn: async () => {
       const res = await unwrap(hrExtras.listBreaks());
-      const raw = res ?? [];
-      return z.array(breakLogSchema).parse(Array.isArray(raw) ? raw : []);
+      const raw = Array.isArray(res) ? res : (res?.breaks ?? []);
+      return z.array(breakLogSchema).parse(raw);
     },
   });
 }
@@ -564,16 +565,16 @@ export function useStartBreak() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({
-      staffId,
-      staffName,
-      type,
+      staffId = 0,
+      staffName = '',
+      type = 'Lunch',
     }: {
-      staffId: number;
-      staffName: string;
-      type: 'Lunch' | 'Short' | 'Other';
+      staffId?: number;
+      staffName?: string;
+      type?: 'Lunch' | 'Short' | 'Other';
     }) => unwrap(hrExtras.startBreak(staffId, staffName, type)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['hr', 'breaks'] }),
-    onError: () => toast.error(t('hrErrors.startBreak')),
+    onError: (err) => toast.error(getOneKitErrorMessage(err, t('hrErrors.startBreak'))),
   });
 }
 
@@ -583,7 +584,7 @@ export function useEndBreak() {
   return useMutation({
     mutationFn: (id: number) => unwrap(hrExtras.endBreak(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['hr', 'breaks'] }),
-    onError: () => toast.error(t('hrErrors.endBreak')),
+    onError: (err) => toast.error(getOneKitErrorMessage(err, t('hrErrors.endBreak'))),
   });
 }
 

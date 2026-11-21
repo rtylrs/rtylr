@@ -80,6 +80,7 @@ hr_performance/schema.sql	internal/modules/hr/sql/schema/hr_performance/schema.s
 hr_setup/schema.sql	internal/modules/hr/sql/schema/hr_setup/schema.sql
 hr_shifts/schema.sql	internal/modules/hr/sql/schema/hr_shifts/schema.sql
 hr_shifts/zz_hr_staff_availability.sql	internal/modules/hr/sql/schema/hr_shifts/zz_hr_staff_availability.sql
+hr_shifts/zz_hr_breaks.sql	internal/modules/hr/sql/schema/hr_shifts/zz_hr_breaks.sql
 hr_time/schema.sql	internal/modules/hr/sql/schema/hr_time/schema.sql
 hr_time/zz_hr_billable_export_reference.sql	internal/modules/hr/sql/schema/hr_time/zz_hr_billable_export_reference.sql
 hr_time/zz_hr_time_owner_identity.sql	internal/modules/hr/sql/schema/hr_time/zz_hr_time_owner_identity.sql

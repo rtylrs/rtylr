@@ -38,6 +38,13 @@ type repository interface {
 	UpsertAvailability(ctx context.Context, businessID int64, entry domain.AvailabilityRecord) (*domain.AvailabilityRecord, error)
 	DeleteAvailability(ctx context.Context, businessID, id int64) error
 	ListAvailabilityForStaffDate(ctx context.Context, businessID, staffID int64, date string, dayOfWeek int32) ([]domain.AvailabilityRecord, error)
+
+	ListBreaks(ctx context.Context, businessID int64, params domain.ListBreaksParams) ([]domain.BreakRecord, error)
+	GetBreak(ctx context.Context, businessID, id int64) (*domain.BreakRecord, error)
+	GetOpenBreakByEmployee(ctx context.Context, businessID, employeeID int64) (*domain.BreakRecord, error)
+	GetOpenBreakByStaff(ctx context.Context, businessID, staffID int64) (*domain.BreakRecord, error)
+	CreateBreak(ctx context.Context, businessID int64, input domain.StartBreakInput) (*domain.BreakRecord, error)
+	EndBreak(ctx context.Context, businessID, id int64) (*domain.BreakRecord, error)
 }
 
 type Service struct {

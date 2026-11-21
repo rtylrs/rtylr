@@ -359,13 +359,15 @@ export const hrExtras = {
     }),
 
   // Breaks
-  listBreaks: () => hrTransport.get<BreakLog[]>('/hr/shifts', { params: { view: 'breaks' } }),
-  startBreak: (staffId: number, _staffName: string, _type: BreakLog['type']) =>
-    hrTransport.post<BreakLog>('/hr/staff/clock-in', {
-      staffId,
+  listBreaks: () => hrTransport.get<{ breaks: BreakLog[] }>('/hr/shifts/breaks'),
+  startBreak: (staffId: number, staffName: string, type: BreakLog['type']) =>
+    hrTransport.post<{ break: BreakLog }>('/hr/shifts/breaks', {
+      ...(staffId > 0 ? { staff_id: staffId } : {}),
+      ...(staffName ? { staff_name: staffName } : {}),
+      type,
     }),
   endBreak: (id: number) =>
-    hrTransport.post<{ success: boolean }>('/hr/staff/clock-out', { staffId: id }),
+    hrTransport.post<{ break?: BreakLog; success: boolean }>(`/hr/shifts/breaks/${id}/end`, {}),
 
   // Overtime
   listOvertimeAlerts: () =>
