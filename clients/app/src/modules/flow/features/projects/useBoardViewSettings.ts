@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useUserProjectPref } from '../../shared/lib/userProjectStorage';
 import {
+  BOARD_VIEW_PREF,
   DEFAULT_BOARD_VIEW_SETTINGS,
-  loadBoardViewSettings,
-  saveBoardViewSettings,
+  boardViewSettingsFrom,
   type BoardViewSettings,
 } from './boardViewSettings';
 
@@ -23,28 +23,13 @@ export function useBoardViewSettings(
   projectId: string,
   userId: string | null
 ): BoardViewSettingsState {
-  const scope = `${userId ?? ''}:${projectId}`;
-  const [state, setState] = useState(() => ({
-    scope,
-    settings: loadBoardViewSettings(userId, projectId),
-  }));
-
-  // Another project, or the user became known: read that scope's settings
-  // during render, so the board never paints one frame with the old ones.
-  let settings = state.settings;
-  if (state.scope !== scope) {
-    settings = loadBoardViewSettings(userId, projectId);
-    setState({ scope, settings });
-  }
-
-  const write = (next: BoardViewSettings): void => {
-    setState({ scope, settings: next });
-    saveBoardViewSettings(userId, projectId, next);
-  };
+  const [settings, change] = useUserProjectPref(BOARD_VIEW_PREF, userId, projectId, (stored) =>
+    boardViewSettingsFrom(stored, projectId)
+  );
 
   return {
     settings,
-    update: (patch) => write({ ...settings, ...patch }),
-    reset: () => write(DEFAULT_BOARD_VIEW_SETTINGS),
+    update: (patch) => change((current) => ({ ...current, ...patch })),
+    reset: () => change(() => DEFAULT_BOARD_VIEW_SETTINGS),
   };
 }

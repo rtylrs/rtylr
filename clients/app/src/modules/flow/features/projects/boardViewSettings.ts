@@ -1,15 +1,18 @@
 import type { BoardGroupKey } from '../../shared/lib/boardUtils';
+import {
+  readUserProjectPref,
+  userProjectStorageKey,
+  writeUserProjectPref,
+} from '../../shared/lib/userProjectStorage';
 import { CLOSED_WINDOW_DAYS } from './statusUtils';
 
 /**
  * One person's view of one project board: how it groups, what each card shows,
  * how long finished cards stay on it and how wide its columns are.
  *
- * These are personal. Flow has no server store for a per-user, per-project
- * board preference (the user settings contract carries notification switches
- * and a sidebar blob only), so they live in this browser under the user id and
- * the project id. Someone hiding done cards after a day leaves everyone else's
- * board as it was.
+ * These are personal, kept in this browser under the user id and the project
+ * id (see userProjectStorage). Someone hiding done cards after a day leaves
+ * everyone else's board as it was.
  */
 export interface BoardViewSettings {
   groupBy: BoardGroupKey;
@@ -74,8 +77,11 @@ export const DEFAULT_BOARD_VIEW_SETTINGS: BoardViewSettings = {
   columnWidth: 'fixed',
 };
 
+/** The name these settings are kept under (see userProjectStorage). */
+export const BOARD_VIEW_PREF = 'board:view';
+
 export function boardViewStorageKey(userId: string, projectId: string): string {
-  return `flow:board:view:${userId}:${projectId}`;
+  return userProjectStorageKey(BOARD_VIEW_PREF, userId, projectId);
 }
 
 /** Group-by was kept per project, for whoever used the browser, before this. */
@@ -114,23 +120,25 @@ export function parseBoardViewSettings(raw: unknown): BoardViewSettings {
 }
 
 /**
- * This person's settings for this project. Before the user is known there is
- * nothing to key them by, so the board shows the defaults (with any group-by
- * this browser remembered for the project) until it is.
+ * Settings from what this person has stored for the project (undefined when
+ * nothing). With nothing stored, or before the user is known, the board shows
+ * the defaults with any group-by this browser remembered for the project.
  */
-export function loadBoardViewSettings(userId: string | null, projectId: string): BoardViewSettings {
+export function boardViewSettingsFrom(stored: unknown, projectId: string): BoardViewSettings {
   if (!projectId) return DEFAULT_BOARD_VIEW_SETTINGS;
+  if (stored !== undefined) return parseBoardViewSettings(stored);
   try {
-    if (userId) {
-      const stored = localStorage.getItem(boardViewStorageKey(userId, projectId));
-      if (stored !== null) return parseBoardViewSettings(JSON.parse(stored));
-    }
     const legacy = localStorage.getItem(legacyGroupByKey(projectId));
     if (isGroupKey(legacy)) return { ...DEFAULT_BOARD_VIEW_SETTINGS, groupBy: legacy };
   } catch {
-    // Storage blocked or the stored value is not JSON: the defaults stand.
+    // Storage blocked: the defaults stand.
   }
   return DEFAULT_BOARD_VIEW_SETTINGS;
+}
+
+/** This person's settings for this project. */
+export function loadBoardViewSettings(userId: string | null, projectId: string): BoardViewSettings {
+  return boardViewSettingsFrom(readUserProjectPref(BOARD_VIEW_PREF, userId, projectId), projectId);
 }
 
 export function saveBoardViewSettings(
@@ -138,10 +146,5 @@ export function saveBoardViewSettings(
   projectId: string,
   settings: BoardViewSettings
 ): void {
-  if (!userId || !projectId) return;
-  try {
-    localStorage.setItem(boardViewStorageKey(userId, projectId), JSON.stringify(settings));
-  } catch {
-    // Storage full or blocked: the choice still applies until the page reloads.
-  }
+  writeUserProjectPref(BOARD_VIEW_PREF, userId, projectId, settings);
 }
