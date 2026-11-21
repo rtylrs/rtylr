@@ -137,6 +137,25 @@ func TestOwnClockInPINRouteIsSelfServiceExempt(t *testing.T) {
 	}
 }
 
+func TestHRBreakRoutesAreSelfServiceExempt(t *testing.T) {
+	cases := []struct {
+		method string
+		path   string
+	}{
+		{http.MethodGet, "/hr/shifts/breaks"},
+		{http.MethodPost, "/hr/shifts/breaks"},
+		{http.MethodPost, "/hr/shifts/breaks/12/end"},
+		{http.MethodGet, "/hr/shift/v1/breaks"},
+		{http.MethodPost, "/hr/shift/v1/breaks"},
+		{http.MethodPost, "/hr/shift/v1/breaks/12/end"},
+	}
+	for _, tc := range cases {
+		if appID, permission, ok := featurePermissionForRequest(tc.method, tc.path); ok {
+			t.Fatalf("%s %s mapped to %q:%q, want self-service exemption", tc.method, tc.path, appID, permission)
+		}
+	}
+}
+
 func TestAttendanceClockInRoutesAreSelfServiceExempt(t *testing.T) {
 	for _, path := range []string{
 		"/hr/attendance/clock-in",
