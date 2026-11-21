@@ -197,9 +197,15 @@ func (a *CycleAPIV2) ListCycles(ctx context.Context, req *flowcyclev2.ListCycles
 }
 
 func (a *CycleAPIV2) CreateCycle(ctx context.Context, req *flowcyclev2.CreateCycleRequest) (*flowcyclev2.CreateCycleResponse, error) {
-	_, businessID, err := resolveV2(ctx)
+	caller, businessID, err := resolveV2(ctx)
 	if err != nil {
 		return nil, err
+	}
+	// Creating a cycle writes to the project, so it takes the same member tier
+	// as creating a task there. Without it anyone in the business could add
+	// cycles to a project they cannot even open.
+	if roleErr := a.Service.RequireProjectRole(ctx, req.GetProjectId(), caller.UserID, businessID, domain.FlowRoleMember); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
 	}
 	cycle, err := a.Service.CreateCycleV2(ctx, businessID, req.GetProjectId(), req.GetName(), req.GetStartDate(), req.GetEndDate())
 	if err != nil {
