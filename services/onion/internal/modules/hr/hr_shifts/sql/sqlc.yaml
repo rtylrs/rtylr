@@ -36,6 +36,7 @@ sql:
       - "../../../organization/sql/schema/shared/zz_subscriptions_paddle_events.sql"
       - "../../sql/schema/hr_shifts/schema.sql"
       - "../../sql/schema/hr_shifts/zz_hr_staff_availability.sql"
+      - "../../sql/schema/hr_shifts/zz_hr_breaks.sql"
     gen:
       go:
         package: "sqlc"
