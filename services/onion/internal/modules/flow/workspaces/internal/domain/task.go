@@ -70,6 +70,8 @@ type Task struct {
 	StatusName        string
 	StatusColor       string
 	Dependencies      []int64
+	// FieldValues holds the task's custom field values keyed by field id.
+	FieldValues map[int64]FieldValue
 }
 
 type ProjectColumn struct {
@@ -151,6 +153,8 @@ type TaskInput struct {
 	StartDate      *time.Time
 	EstimatedHours *float64
 	Labels         []int64
+	// FieldValues are custom field values to store with the new task.
+	FieldValues []FieldValueInput
 }
 
 type UpdateTaskInput struct {
@@ -210,6 +214,9 @@ type ListTasksFilter struct {
 	Compact     bool
 	Limit       int64
 	Offset      int64
+	// Custom field clauses, already validated against the project's fields.
+	FieldFilters []TaskFieldFilter
+	FieldSort    *TaskFieldSort
 }
 
 type Label struct {
