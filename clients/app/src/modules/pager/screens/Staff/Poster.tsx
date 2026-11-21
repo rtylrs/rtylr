@@ -12,7 +12,7 @@ import { CounterPoster } from './CounterPoster';
 
 const Poster = (): React.JSX.Element => {
   const { t } = useTranslation('pager');
-  const { name, joinUrl, loading } = usePagerVenue();
+  const { name, logoUrl, joinUrl, loading } = usePagerVenue();
 
   return (
     <>
@@ -45,12 +45,12 @@ const Poster = (): React.JSX.Element => {
 
         {joinUrl ? (
           <>
-            <CounterPoster venueName={name} joinUrl={joinUrl} qrSize={220} />
+            <CounterPoster venueName={name} logoUrl={logoUrl} joinUrl={joinUrl} qrSize={220} />
             {/* The printed copy sits outside the Portal shell, so the print
                 rules in pager.css can hide everything else on the page. */}
             {createPortal(
               <div className="pager-poster-print">
-                <CounterPoster venueName={name} joinUrl={joinUrl} qrSize={360} />
+                <CounterPoster venueName={name} logoUrl={logoUrl} joinUrl={joinUrl} qrSize={360} />
               </div>,
               document.body
             )}

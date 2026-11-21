@@ -348,6 +348,16 @@
   text-align: center;
 }
 
+.pager-poster__logo {
+  display: block;
+  height: 72px;
+  width: auto;
+  max-width: 220px;
+  object-fit: contain;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
 .pager-poster__venue {
   margin: 0;
   font-size: 28px;
@@ -470,6 +480,11 @@
     font-size: 40px;
   }
 
+  .pager-poster-print .pager-poster__logo {
+    height: 110px;
+    max-width: 320px;
+  }
+
   .pager-poster-print .pager-poster__langs {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 32px;
@@ -516,6 +531,15 @@
   height: 44px;
   border-radius: 999px;
   color: #475569;
+}
+
+.pager-display__logo {
+  display: block;
+  justify-self: center;
+  height: clamp(56px, 10dvh, 120px);
+  width: auto;
+  max-width: min(60vw, 320px);
+  object-fit: contain;
 }
 
 .pager-display__venue {
