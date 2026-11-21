@@ -7,6 +7,7 @@ import './pager.css';
 
 const Join = React.lazy(() => import('./screens/Public/Join'));
 const Ticket = React.lazy(() => import('./screens/Public/Ticket'));
+const Try = React.lazy(() => import('./screens/Public/Try'));
 const Board = React.lazy(() => import('./screens/Staff/Board'));
 const Poster = React.lazy(() => import('./screens/Staff/Poster'));
 
@@ -44,6 +45,11 @@ export function createPagerPublicRoutes<TParent extends AnyRoute>(rootRoute: TPa
         getParentRoute: () => layoutRoute,
         path: '/pager/t/$token',
         component: Ticket,
+      }),
+      createRoute({
+        getParentRoute: () => layoutRoute,
+        path: '/pager/try',
+        component: Try,
       }),
     ]),
   ];
