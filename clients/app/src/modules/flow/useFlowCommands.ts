@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { canEffectiveAccess } from '@voxire/permissions';
@@ -6,25 +5,18 @@ import { FolderKanban, ListTodo } from 'lucide-react';
 import type { StoredUser } from '../../shared/stores/userStore';
 import type { PortalCommand } from '../../shell/command-palette/commands';
 import { flowApi } from './shared/services/flowApi';
+import { useTaskSearch } from './shared/hooks/queries/useTaskSearch';
 
 export function useFlowCommands(user: StoredUser | null, enabled: boolean, query: string) {
-  const [search, setSearch] = useState(query);
-  useEffect(() => {
-    const timer = setTimeout(() => setSearch(query.trim()), 250);
-    return () => clearTimeout(timer);
-  }, [query]);
   const projects = useQuery({
     queryKey: ['projects'],
     queryFn: async () => (await unwrap(flowApi.getProjects())).projects ?? [],
     enabled: enabled && canEffectiveAccess(user?.effectiveAccess, 'flow:projects:view', 'flow'),
   });
-  const tasks = useQuery({
-    queryKey: ['tasks', 'command-search', search],
-    queryFn: async () =>
-      (await unwrap(search.length >= 3 ? flowApi.searchTasks(search) : flowApi.getTasks({})))
-        .tasks ?? [],
-    enabled: enabled && canEffectiveAccess(user?.effectiveAccess, 'flow:tasks:view', 'flow'),
-  });
+  const tasks = useTaskSearch(
+    query,
+    enabled && canEffectiveAccess(user?.effectiveAccess, 'flow:tasks:view', 'flow')
+  );
   const commands: PortalCommand[] = enabled
     ? [
         ...(projects.data ?? []).map((project): PortalCommand => ({
