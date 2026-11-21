@@ -10,11 +10,10 @@ namespace pager.v1;
 // collected and expired.
 //
 // A ticket starts when a phone scans the venue's QR: it is waiting, has no
-// label yet and shows a match word, such as "panda". The customer says the word,
-// the cashier finds it on the board and gives the ticket its label, the order
-// number or the customer's name. The server sends only the word's key; the
-// client shows its emoji and its word in the page's language. An unlabelled ticket expires after 15 minutes, a labelled one after 6
-// hours.
+// label yet and shows a match code: a number such as "427". The customer shows
+// the number, the cashier finds it on the board and gives the ticket its label,
+// the order number or the customer's name. An unlabelled ticket expires after
+// 15 minutes, a labelled one after 6 hours.
 //
 // Errors carry a stable `code` next to `message`: venue_not_found (404),
 // ticket_not_found (404), invalid_label (400), label_taken (409),
@@ -33,26 +32,13 @@ model Ticket {
   label_kind: string;
 
   /**
-   * The key of the word the phone shows, such as "panda": lower case
-   * letters. With word_number it is unique among the venue's open unlabelled
-   * tickets. Absent once the ticket is labelled.
-   */
-  word: string;
-
-  /**
-   * 2 or more when every word is taken and this phone shows "Panda 2";
-   * absent for the word on its own.
-   */
-  word_number: int32;
-
-  /**
-   * Only on a ticket opened before words: its two character code, shown as
-   * it is. Absent once the ticket is labelled.
+   * The match code the phone shows, to be shown exactly as sent: three ASCII
+   * digits such as "427", four if every three digit number is taken. Unique
+   * among the venue's open unlabelled tickets. A ticket opened before the
+   * numbers sends its old code in capitals ("PANDA2", "A7"). Absent once the
+   * ticket is labelled.
    */
   code: string;
-
-  /** 0 to 5: the colour shown behind the word, so it is easier to match. */
-  color: int32;
 
   /** One of waiting, ready, collected, expired. */
   status: string;
@@ -92,13 +78,9 @@ model ScanTicketResponse {
   /** Opaque credential for this ticket, the only one the phone holds. */
   public_token: string;
 
-  /** The key of the word the customer says to the cashier. */
-  word: string;
+  /** The match code the customer shows the cashier, as on Ticket. */
+  code: string;
 
-  /** 2 or more when the word needs a number; absent otherwise. */
-  word_number: int32;
-
-  color: int32;
   status: string;
 }
 
@@ -107,21 +89,14 @@ model GetPublicTicketRequest {
 }
 
 model GetPublicTicketResponse {
-  /** Absent until the cashier labels the ticket; until then show the word. */
+  /** Absent until the cashier labels the ticket; until then show the code. */
   label: string;
 
   /** number or name; absent while the ticket has no label. */
   label_kind: string;
 
-  /** The match word's key, as on Ticket. Absent once the ticket is labelled. */
-  word: string;
-
-  word_number: int32;
-
-  /** Only on a ticket opened before words, as on Ticket. */
+  /** The match code, as on Ticket. Absent once the ticket is labelled. */
   code: string;
-
-  color: int32;
   status: string;
   venue_name: string;
 
