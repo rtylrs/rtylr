@@ -5,6 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@voxire/
 import { useFlowStore, type Task } from '../../../shared/stores/flowStore';
 import type { ApiStatus } from '../../../shared/services/flowApi';
 import { cn, formatDueDate, formatShortDate, getInitials } from '../../../shared/lib/utils';
+import { formatDuration } from '../../../shared/lib/durationUtils';
 import { assigneeOptions } from '../../../shared/lib/memberUtils';
 import PriorityIcon from '../../../shared/components/PriorityIcon';
 import { FLOW_MENU_SURFACE, FlowMenuItem } from '../../../shared/components/FlowSelect';
@@ -425,7 +426,7 @@ function DateEditor({
 }
 
 function EstimateCell({ task, width, canEdit }: CellProps) {
-  const { t } = useTranslation();
+  // In Flow's compact duration form (durationUtils): 45m, 2h, 1h 30m.
   const hours = task.estimate != null && task.estimate > 0 ? task.estimate : null;
   return (
     <CellFrame
@@ -436,7 +437,7 @@ function EstimateCell({ task, width, canEdit }: CellProps) {
       editor={(close) => <EstimateEditor task={task} hours={hours} close={close} />}
     >
       <span className="tabular-nums">
-        {hours == null ? '-' : t('flow.projectList.estimateValue', { hours })}
+        {hours == null ? '-' : formatDuration(Math.round(hours * 60))}
       </span>
     </CellFrame>
   );
