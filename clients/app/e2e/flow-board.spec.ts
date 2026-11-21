@@ -103,6 +103,9 @@ async function primeAuthCookie(context: import('@playwright/test').BrowserContex
       sameSite: 'Lax',
       secure: false,
     },
+    // Answer the cookie banner up front: at 390px it covers the bottom of the
+    // screen, including the move menu this file clicks through.
+    { name: 'rtylr-consent', value: 'denied', domain: 'localhost', path: '/', sameSite: 'Lax' },
   ]);
 }
 
@@ -456,7 +459,14 @@ test.describe('Flow - Project Board', () => {
       const priorityOpt = page.getByRole('button', { name: 'Priority' }).first();
       if (await priorityOpt.isVisible({ timeout: 2000 })) {
         await priorityOpt.click();
-        const storedValue = await page.evaluate(() => localStorage.getItem('flow:board:groupBy:1'));
+        // Board settings are stored per user and project under
+        // flow:board:view:<userId>:<projectId>, with the grouping inside.
+        const storedValue = await page.evaluate(() => {
+          const key = Object.keys(localStorage).find(
+            (k) => k.startsWith('flow:board:view:') && k.endsWith(':1')
+          );
+          return key ? JSON.parse(localStorage.getItem(key) ?? '{}').groupBy : null;
+        });
         expect(storedValue).toBe('priority');
       }
     }

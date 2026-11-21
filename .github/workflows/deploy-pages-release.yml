@@ -93,7 +93,17 @@ jobs:
           filter: blob:none
 
       # Generated contracts are gitignored, so they must be produced from the
-      # release tag before the app builds. The onek release binary generates
+      # release tag before the app builds. Releases cut after the TypeSpec move
+      # (voxie/onkt.toml) pin onkt in voxie/package-lock.json and need only
+      # Node.js 22+; `make generate` installs and runs it.
+      - name: Set up Node.js for contracts
+        if: hashFiles('voxie/onkt.toml') != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Releases cut before the TypeSpec move (voxie/onekit.toml) use onek. The
+      # onek release binary generates
       # the same output as `go install`, which compiled onek on every deploy;
       # it is checked against the checksum voxie/Makefile pins, and
       # `make generate` skips its install when this version is on PATH.
@@ -129,7 +139,7 @@ jobs:
           go-version-file: voxie/go.mod
 
       - name: Generate contracts
-        if: hashFiles('voxie/onekit.toml') != ''
+        if: hashFiles('voxie/onkt.toml') != '' || hashFiles('voxie/onekit.toml') != ''
         run: make -C voxie generate
 
       - name: Setup pnpm

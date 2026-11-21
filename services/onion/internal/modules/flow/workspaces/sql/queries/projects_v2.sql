@@ -172,9 +172,13 @@ SELECT m.id, m.project_id, m.name,
        COALESCE(m.status, 'upcoming') AS status,
        COALESCE(m.description, '') AS description,
        p.name AS project_name, p.color AS project_color,
-       (SELECT COUNT(*) FROM flow_milestone_tasks mt WHERE mt.milestone_id = m.id) AS task_count,
        (SELECT COUNT(*) FROM flow_milestone_tasks mt JOIN flow_tasks t ON t.id = mt.task_id
-        WHERE mt.milestone_id = m.id AND t.status = 'done') AS done_count
+        WHERE mt.milestone_id = m.id AND COALESCE(t.archived, 0) = 0) AS task_count,
+       (SELECT COUNT(*) FROM flow_milestone_tasks mt JOIN flow_tasks t ON t.id = mt.task_id
+        WHERE mt.milestone_id = m.id AND COALESCE(t.archived, 0) = 0 AND t.status = 'done') AS done_count,
+       (SELECT COUNT(*) FROM flow_milestone_tasks mt JOIN flow_tasks t ON t.id = mt.task_id
+        WHERE mt.milestone_id = m.id AND COALESCE(t.archived, 0) = 0
+          AND t.status NOT IN ('done', 'cancelled') AND t.due_date < CURDATE()) AS overdue_count
 FROM flow_milestones m
 LEFT JOIN flow_projects p ON p.id = m.project_id
 WHERE m.business_id = ?

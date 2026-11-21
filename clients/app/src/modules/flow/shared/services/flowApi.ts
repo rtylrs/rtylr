@@ -108,12 +108,12 @@ export interface ApiTask {
   // value is already there; pinned to the contract like archived below.
   reporterId?: ContractTask['reporterId'];
   dueDate: string;
-  // Write path only for now. The wire carries start_date on both Task and
-  // UpdateTaskBody, but the response mapping never populates it, so reading
-  // this off a fetched task still yields undefined (see ProjectTimeline).
-  // It exists here so updateTask can forward a caller-supplied value instead
-  // of hardcoding a placeholder.
-  startDate?: string;
+  // Read and written. flow.task.v2 carries start_date on FlowTask and on
+  // UpdateTaskBody, onion's list and detail reads select and map it, and the
+  // generated client decodes it to `startDate`. A note here used to say the
+  // response never populated it; that predates the v2 task reads. Absent means
+  // no start date (omitempty). Pinned to the contract like `archived` below.
+  startDate?: ContractTask['startDate'];
   subtaskCount: number;
   completedSubtasks?: number;
   commentCount?: number;
@@ -208,6 +208,7 @@ export interface ApiMilestone {
   computedProgress: number;
   doneCount: number;
   taskCount: number;
+  overdueCount?: number;
   status: 'planning' | 'active' | 'at_risk' | 'completed';
   description?: string;
   project?: { name: string; color: string };
@@ -367,7 +368,7 @@ const toViewPayload = (data: Partial<ApiView>) => ({
   name: data.name,
   icon: data.icon,
   // The flow/view/v1 contract wire-encodes `filters` as a JSON string (the
-  // .onk model documents it as "JSON-encoded filter criteria"; the generated
+  // .tsp model documents it as "JSON-encoded filter criteria"; the generated
   // Go struct field is `Filters string`) - sending the raw object fails
   // json.Unmarshal server-side and 400s on every request.
   filters: data.filters !== undefined ? JSON.stringify(data.filters) : undefined,
@@ -740,6 +741,7 @@ export const flowApi = {
     effortMinutes?: number;
     estimatedHours?: number;
     labels?: string[];
+    milestoneId?: string;
   }) =>
     flowResult<{ task: ApiTask }>(() => {
       const payload = toTaskCreatePayload(data);
@@ -756,6 +758,7 @@ export const flowApi = {
         startDate: payload.start_date,
         estimatedHours: payload.estimated_hours,
         labels: payload.labels,
+        milestoneId: data.milestoneId || undefined,
       });
     }),
 
@@ -795,6 +798,8 @@ export const flowApi = {
           focusPin: data.focusPin,
           waitingOn: data.waitingOn,
           decisionNote: data.decisionNote,
+          // Empty string removes the task from its milestone ('0' on the wire).
+          milestoneId: data.milestoneId !== undefined ? data.milestoneId || '0' : undefined,
         },
       })
     ),
@@ -1060,6 +1065,9 @@ export const flowApi = {
     flowResult<{ message: string }>(() =>
       milestoneV2.updateMilestone({ id, ...toMilestoneUpdatePayload(data) })
     ),
+
+  deleteMilestone: (id: string) =>
+    flowResult<Record<string, never>>(() => milestoneV2.deleteMilestone({ id })),
 
   // -- Cycles -------------------------------------------------------------
 

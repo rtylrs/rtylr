@@ -5,17 +5,19 @@ import { cachedIllustration, renderIllustration } from './illustrated';
 
 /**
  * The picture for a chosen avatar that is not plain initials: a photo, an
- * illustration or an emoji. Fills its parent circle.
+ * illustration or an emoji. Fills its parent circle; `framed` insets an
+ * illustration so a large circle does not clip its head.
  */
-export const AvatarPicture: React.FC<{ avatar: ChosenAvatar; size: number }> = ({
+export const AvatarPicture: React.FC<{ avatar: ChosenAvatar; size: number; framed?: boolean }> = ({
   avatar,
   size,
+  framed = false,
 }) => {
   if (avatar.kind === 'photo' && avatar.url) {
     return <PhotoPicture url={avatar.url} />;
   }
   if (avatar.kind === 'illustrated' && avatar.style && avatar.seed) {
-    return <Illustration style={avatar.style} seed={avatar.seed} />;
+    return <Illustration style={avatar.style} seed={avatar.seed} framed={framed} />;
   }
   if (avatar.kind === 'emoji' && avatar.emoji) {
     const color = avatarColorAt(avatar.color ?? 0);
@@ -51,7 +53,11 @@ const PhotoPicture: React.FC<{ url: string }> = ({ url }) => {
 
 const ILLUSTRATION_GROUND = '#EEF0F3';
 
-const Illustration: React.FC<{ style: string; seed: string }> = ({ style, seed }) => {
+const Illustration: React.FC<{ style: string; seed: string; framed: boolean }> = ({
+  style,
+  seed,
+  framed,
+}) => {
   const [uri, setUri] = useState(() => cachedIllustration(style, seed));
   useEffect(() => {
     let live = true;
@@ -80,7 +86,7 @@ const Illustration: React.FC<{ style: string; seed: string }> = ({ style, seed }
       alt=""
       draggable={false}
       className="h-full w-full object-cover"
-      style={{ background: ILLUSTRATION_GROUND }}
+      style={{ background: ILLUSTRATION_GROUND, padding: framed ? '9%' : undefined }}
     />
   );
 };

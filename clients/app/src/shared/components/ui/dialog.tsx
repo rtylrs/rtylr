@@ -12,14 +12,17 @@ import { cn } from '../../lib/utils';
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof SharedDialogContent>,
-  React.ComponentPropsWithoutRef<typeof SharedDialogContent>
->(({ className, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<typeof SharedDialogContent> & {
+    /** Leave out the form-dialog frame, for surfaces that draw their own (drawers, the command palette). */
+    bare?: boolean;
+  }
+>(({ className, bare = false, ...props }, ref) => {
   const { t } = useTranslation();
   return (
     <SharedDialogContent
       ref={ref}
       closeLabel={t('common.closeDialog')}
-      className={cn('portal-form-dialog', className)}
+      className={cn(!bare && 'portal-form-dialog', className)}
       {...props}
     />
   );

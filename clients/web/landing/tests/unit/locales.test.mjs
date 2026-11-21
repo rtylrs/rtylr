@@ -16,6 +16,8 @@ import {
   localeFromPath,
   localisePath,
   alternatesFor,
+  inServedSection,
+  navPath,
 } from '../../lib/locales.ts';
 
 // ---------------------------------------------------------------------------
@@ -88,11 +90,17 @@ describe('shipped means the copy exists', () => {
     }
   });
 
+  // A locale may serve one section (the Arabic blog) while the rest of it
+  // stays unpublished. Inside that section is allowed; anything else is the
+  // doorway case these two tests exist for.
+  const outsideSections = (l, rel) => !inServedSection(`/${rel.replace(/^[a-z]{2}\//, '')}`, l);
+
   it('every unshipped locale is genuinely absent from the export', () => {
     if (!existsSync(OUT)) return; // build-output checks are covered elsewhere
-    const unshipped = LOCALES.filter((l) => !l.shipped).map((l) => l.code);
-    const leaked = unshipped.filter((code) =>
-      globSync(`${code}/**/index.html`, { cwd: OUT }).length > 0
+    const leaked = LOCALES.filter((l) => !l.shipped).flatMap((l) =>
+      globSync(`${l.code}/**/index.html`, { cwd: OUT })
+        .map((f) => f.replace(/index\.html$/, ''))
+        .filter((rel) => outsideSections(l, rel))
     );
     assert.deepEqual(leaked, [], 'routes exported for a locale that has no copy');
   });
@@ -100,13 +108,11 @@ describe('shipped means the copy exists', () => {
   it('every unshipped locale is absent from the sitemap', () => {
     const f = path.join(OUT, 'sitemap-0.xml');
     if (!existsSync(f)) return;
-    const xml = readFileSync(f, 'utf8');
-    for (const l of LOCALES.filter((x) => !x.shipped)) {
-      assert.ok(
-        !xml.includes(`https://rtylr.com/${l.code}/`),
-        `${l.code} is advertised in the sitemap with no route behind it`
-      );
-    }
+    const locs = [...readFileSync(f, 'utf8').matchAll(/<loc>https:\/\/rtylr\.com\/([^<]*)<\/loc>/g)];
+    const leaked = LOCALES.filter((l) => !l.shipped).flatMap((l) =>
+      locs.map((m) => m[1]).filter((rel) => rel.startsWith(`${l.code}/`) && outsideSections(l, rel))
+    );
+    assert.deepEqual(leaked, [], 'an unshipped locale is advertised with no route behind it');
   });
 });
 
@@ -151,6 +157,33 @@ describe('localeFromPath', () => {
   it('never returns undefined', () => {
     for (const p of ['', '/', '//', '/xx/', '/pricing/', '/ar/', '/fr/deep/path/']) {
       assert.ok(localeFromPath(p), `no locale resolved for ${JSON.stringify(p)}`);
+    }
+  });
+});
+
+describe('a locale that serves one section', () => {
+  const sectioned = LOCALES.filter((l) => !l.shipped && l.sections?.length);
+
+  it('is recognised inside its section and nowhere else', () => {
+    for (const l of sectioned) {
+      for (const section of l.sections) {
+        assert.equal(localeFromPath(`/${l.code}${section}`).code, l.code);
+        assert.equal(localeFromPath(`/${l.code}${section}some-post/`).code, l.code);
+      }
+      assert.equal(localeFromPath(`/${l.code}/pricing/`).code, DEFAULT_LOCALE);
+      assert.equal(localeFromPath(`/${l.code}/`).code, DEFAULT_LOCALE);
+    }
+  });
+
+  it('keeps nav links outside its section on their English paths', () => {
+    // An Arabic blog page links to /pricing/, not to an /ar/pricing/ that
+    // was never exported.
+    for (const l of sectioned) {
+      assert.equal(navPath('/pricing', l.code), '/pricing');
+      assert.equal(navPath('/contact?topic=sales', l.code), '/contact?topic=sales');
+      for (const section of l.sections) {
+        assert.equal(navPath(section.replace(/\/$/, ''), l.code), `/${l.code}${section}`);
+      }
     }
   });
 });
@@ -239,9 +272,22 @@ describe('coverage is per page, not just per locale', () => {
       // bare route. Without it every shipped locale's own URLs failed
       // this check while actually being correct - see basePathOf's own
       // docblock, which names this exact bug.
-      if (!isLocalisedRoute(basePathOf(p))) offenders.push(p);
+      const base = basePathOf(p);
+      const inSection = LOCALES.some((l) => inServedSection(base, l));
+      if (!isLocalisedRoute(base) && !inSection) offenders.push(p);
     }
     assert.deepEqual(offenders, [], 'sitemap advertises alternates for untranslated routes');
+  });
+
+  it('every advertised alternate is an exported page', () => {
+    // The blog's set is read off the export, so this is what keeps it honest.
+    const f = path.join(OUT, 'sitemap-0.xml');
+    if (!existsSync(f)) return;
+    const xml = readFileSync(f, 'utf8');
+    const missing = [...xml.matchAll(/<xhtml:link[^>]*href="https:\/\/rtylr\.com([^"]*)"/g)]
+      .map((m) => m[1])
+      .filter((p) => !existsSync(path.join(OUT, p, 'index.html')));
+    assert.deepEqual([...new Set(missing)], [], 'hreflang points at pages that were not exported');
   });
 });
 

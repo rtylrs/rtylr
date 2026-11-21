@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dialog, DialogContent, DialogTitle } from '@voxire/ui';
+import { Dialog, DialogContent, DialogTitle } from '../../../../shared/components/ui/dialog';
 
 import type { RecruitCareer } from '../../shared/lib/types';
 import FormFieldsEditor from './FormFieldsEditor';
@@ -92,6 +92,7 @@ const CareerEditor: React.FC<Props> = ({ career, pending = false, onClose, onSav
       }}
     >
       <DialogContent
+        bare
         aria-describedby={undefined}
         closeLabel={t('recruitAdmin.careerEditor.cancel')}
         className="left-auto right-0 top-0 h-dvh max-w-2xl translate-x-0 translate-y-0 rounded-none p-0"

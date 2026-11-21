@@ -1,5 +1,0 @@
-package pos.orders.items.v1
-
-service OrderItemService {
-  updateOrderItemStatus(UpdateOrderItemStatusRequest) -> UpdateOrderItemStatusResponse @put("/orders/{order_id}/items/{item_id}/status") @body("body")
-}

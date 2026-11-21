@@ -1,7 +1,7 @@
 import React, { Suspense, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
-import { Dialog, DialogContent, DialogTitle } from '@voxire/ui';
+import { Dialog, DialogContent, DialogTitle } from '../../../../shared/components/ui/dialog';
 import { useUserStore } from '../stores/userStore';
 import { canFlowPermission } from '../lib/roleUtils';
 
@@ -32,6 +32,7 @@ export const TaskDrawer: React.FC = () => {
       }}
     >
       <DialogContent
+        bare
         className="portal-flow-dialog portal-flow-task-drawer"
         style={{ translate: 'none' }}
         dir={i18n.dir()}

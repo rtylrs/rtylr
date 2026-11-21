@@ -2,7 +2,12 @@ import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { ArrowUpRight, CornerDownLeft, Search, X } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@voxire/ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '../../shared/components/ui/dialog';
 import { FLAG_KEYS, useFeatureFlag } from '@voxire/config';
 import { useCaretStore } from '@voxire/caret';
 import { useCaretChatCommands } from '../../features/caret/useCaretChatCommands';
@@ -115,6 +120,7 @@ export default function CommandPalette() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
+        bare
         className="portal-command-dialog"
         overlayClassName="portal-command-overlay"
         closeLabel={t('common.closeDialog')}

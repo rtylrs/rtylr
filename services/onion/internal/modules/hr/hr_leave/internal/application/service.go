@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr/hr_leave/internal/domain"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 const (
@@ -86,6 +87,12 @@ func (s *Service) CreateLeaveType(ctx context.Context, businessID int64, lt doma
 	}
 	rec, err := s.repo.CreateLeaveType(ctx, businessID, lt)
 	if err == nil {
+		// The type is saved either way; a failed seed is retried the next time
+		// balances are read or leave is requested.
+		if seedErr := s.ensureLeaveBalances(ctx, businessID, 0); seedErr != nil {
+			logger.Ctx(ctx).Error("failed to seed balances for new leave type",
+				logger.Any("business_id", businessID), logger.Any("leave_type_id", rec.ID), logger.Error(seedErr))
+		}
 		invalidateHRLeaveScope(ctx, businessID)
 	}
 	return rec, err
@@ -149,6 +156,14 @@ func (s *Service) UpdateLeaveTypePatch(ctx context.Context, businessID, leaveTyp
 	if err := s.repo.UpdateLeaveTypePatch(ctx, businessID, leaveTypeID, patch); err != nil {
 		return nil, err
 	}
+	if patch.AccrualRule != nil || patch.AccrualAmount != nil || patch.IsActive != nil {
+		// A type that gains an allowance, or is switched back on, must reach
+		// existing employees now rather than on the monthly job's next run.
+		if syncErr := s.refreshLeaveEntitlements(ctx, businessID); syncErr != nil {
+			logger.Ctx(ctx).Error("failed to refresh leave entitlements after a policy change",
+				logger.Any("business_id", businessID), logger.Any("leave_type_id", leaveTypeID), logger.Error(syncErr))
+		}
+	}
 	invalidateHRLeaveScope(ctx, businessID)
 	return s.repo.GetLeaveType(ctx, businessID, leaveTypeID)
 }
@@ -207,6 +222,10 @@ func (s *Service) CreateLeaveRequest(ctx context.Context, ownerID, callerUserID 
 	req.Status = "pending"
 	req.CurrentApprovalLevel = 0
 
+	if err := s.ensureLeaveBalances(ctx, ownerID, req.EmployeeID); err != nil {
+		return nil, err
+	}
+
 	created, err := s.repo.CreateLeaveRequestWithBalance(ctx, ownerID, req, allocations)
 	if err != nil {
 		return nil, err
@@ -234,6 +253,7 @@ type repository interface {
 	ListLeaveCalendar(ctx context.Context, businessID, locationID int64, dateFrom, dateTo string) ([]domain.LeaveRequestRecord, error)
 	ListLeaveRequests(ctx context.Context, ownerID int64, params domain.ListLeaveRequestsParams) ([]domain.LeaveRequestRecord, int64, error)
 	ListLeaveTypes(ctx context.Context, ownerID int64, params domain.ListLeaveTypesParams) ([]domain.LeaveTypeRecord, int64, error)
+	SeedMissingLeaveBalances(ctx context.Context, businessID, employeeID int64, year int32) (int64, error)
 	RejectLeaveRequestWithBalance(ctx context.Context, ownerID, requestID, employeeID, leaveTypeID int64, allocations []domain.LeaveDayAllocation, reason string) (err error)
 	UpdateLeaveType(ctx context.Context, ownerID int64, lt domain.LeaveTypeRecord) error
 	UpdateLeaveTypePatch(ctx context.Context, ownerID, leaveTypeID int64, patch domain.LeaveTypePatch) error

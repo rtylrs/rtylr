@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import { FaGoogle } from 'react-icons/fa';
-import { APP_CONFIG, APP_URLS, PORTAL_URL } from '@voxire/config';
+import { APP_CONFIG, APP_URLS, PORTAL_URL, resolvePortalReturn } from '@voxire/config';
 
 import notify from '../../shared/lib/notify/notify';
 import { useUserStore } from '../../shared/stores/userStore';
@@ -35,8 +35,18 @@ function getRedirectAppId(value: string | null): RedirectableAppId | null {
   return null;
 }
 
-function getRedirectUrl(appId: RedirectableAppId | null): string {
+// A Portal page to come back to rides along as `returnTo`, as it does on sign-in.
+function getRedirectUrl(appId: RedirectableAppId | null, returnTo: string | null): string {
+  if (appId === 'dash') return resolvePortalReturn(returnTo);
   return appId ? (APP_URLS[appId] as string) : PORTAL_URL;
+}
+
+function signInPath(redirect: string | null, returnTo: string | null): string {
+  const params = new URLSearchParams();
+  if (redirect) params.set('redirect', redirect);
+  if (returnTo) params.set('returnTo', returnTo);
+  const query = params.toString();
+  return query ? `/?${query}` : '/';
 }
 
 // ── Register ────────────────────────────────────────────────────────────────
@@ -80,6 +90,10 @@ const Register: React.FC = (): React.JSX.Element => {
     const params = new URLSearchParams(window.location.search);
     return getRedirectAppId(params.get('redirect'));
   }, []);
+  const returnTo = useMemo(
+    (): string | null => new URLSearchParams(window.location.search).get('returnTo'),
+    []
+  );
 
   // The store flips to signed-in while the mutation settles. Without this the
   // already-signed-in redirect below would beat the verification screen to the
@@ -103,7 +117,12 @@ const Register: React.FC = (): React.JSX.Element => {
       {
         // A new account stays on sign-in until its email is verified.
         onSuccess: () => {
-          window.location.href = verifyEmailPath({ email, sent: true, redirect: redirectParam });
+          window.location.href = verifyEmailPath({
+            email,
+            sent: true,
+            redirect: redirectParam,
+            returnTo,
+          });
         },
         onError: () => {
           registeringRef.current = false;
@@ -118,7 +137,7 @@ const Register: React.FC = (): React.JSX.Element => {
       return;
     }
     try {
-      await startGoogleLogin(redirectParam, businessName.trim());
+      await startGoogleLogin(redirectParam, businessName.trim(), returnTo);
     } catch {
       notify.error('Social sign-in is currently unavailable');
     }
@@ -131,9 +150,9 @@ const Register: React.FC = (): React.JSX.Element => {
   useEffect((): void => {
     if (registeringRef.current) return;
     if (isAuthenticated && getCookie('token')) {
-      window.location.href = getRedirectUrl(redirectParam);
+      window.location.href = getRedirectUrl(redirectParam, returnTo);
     }
-  }, [isAuthenticated, redirectParam]);
+  }, [isAuthenticated, redirectParam, returnTo]);
 
   const errorMessage =
     error &&
@@ -153,7 +172,7 @@ const Register: React.FC = (): React.JSX.Element => {
             <button
               type="button"
               className={authLinkClass}
-              onClick={() => navigate({ to: redirectParam ? `/?redirect=${redirectParam}` : '/' })}
+              onClick={() => navigate({ to: signInPath(redirectParam, returnTo) })}
             >
               {t('auth.common.signIn')}
             </button>

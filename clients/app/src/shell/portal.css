@@ -291,21 +291,82 @@
   bottom: auto;
 }
 .portal-profile-identity {
-  padding: 4px 7px 12px;
+  padding: 2px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid var(--dash-border);
+}
+/* Your avatar: opens the avatar picker. */
+.portal-profile-avatar {
+  position: relative;
+  flex-shrink: 0;
+  margin-inline-start: 3px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+}
+.portal-profile-avatar-edit {
+  position: absolute;
+  inset-block-end: -2px;
+  inset-inline-end: -2px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid var(--dash-surface);
+  background: var(--dash-text);
+  color: var(--dash-surface);
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.portal-profile-avatar:hover .portal-profile-avatar-edit,
+.portal-profile-avatar:focus-visible .portal-profile-avatar-edit {
+  opacity: 1;
+}
+/* Name and email: open Account settings. */
+.portal-profile-identity-link {
+  position: relative;
+  min-width: 0;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  border-bottom: 1px solid var(--dash-border);
-  overflow: hidden;
+  gap: 2px;
+  padding: 6px 24px 6px 7px;
+  border-radius: 8px;
+  color: var(--dash-text);
+  text-decoration: none;
 }
-.portal-profile-identity strong {
+.portal-profile-identity-link:hover {
+  background: var(--dash-hover);
+}
+.portal-profile-identity-link strong {
   font-size: 13px;
   font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.portal-profile-identity span {
+.portal-profile-identity-link span {
   font-size: 12px;
   color: var(--dash-text-dim);
   overflow-wrap: anywhere;
+}
+.portal-profile-identity-chevron {
+  position: absolute;
+  inset-inline-end: 6px;
+  top: 50%;
+  translate: 0 -50%;
+  color: var(--dash-text-dim);
+}
+[dir='rtl'] .portal-profile-identity-chevron {
+  scale: -1 1;
+}
+.portal-profile-link {
+  margin-top: 4px;
 }
 .portal-profile-menu > a,
 .portal-signout {

@@ -217,6 +217,9 @@ func (a *TaskAPIV2) ListTasks(ctx context.Context, req *flowtaskv2.ListTasksRequ
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list tasks")
 	}
+	if err := a.Service.AttachMilestoneIDs(ctx, tasks); err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list tasks")
+	}
 	return &flowtaskv2.ListTasksResponse{
 		Tasks:      tasksToProtoV2(tasks),
 		Pagination: buildPagination(page, limit, total, len(tasks)),

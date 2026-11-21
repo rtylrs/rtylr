@@ -78,6 +78,7 @@ import DueDatePicker from '../../shared/components/DueDatePicker';
 import { getInitials } from '../../shared/lib/utils';
 import { displayUserName } from '../../shared/lib/userDisplay';
 import { priorityLabelKey } from '../../shared/lib/priorityLabels';
+import { assigneeOptions } from '../../shared/lib/memberUtils';
 import { displayDescription } from '../../shared/lib/stringUtils';
 import { EFFORT_PRESETS, formatEffortMinutes } from '../../shared/lib/effortPresets';
 import { TASK_STATUSES, STATUS_LABEL_KEYS } from '../../shared/lib/constantsFlow';
@@ -727,14 +728,11 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
                 size={18}
               />
             }
-            options={[
-              { value: '', label: t('flow.quickCreate.unassigned') },
-              ...(task.assigneeId &&
-              !members.some((member) => String(member.id) === String(task.assigneeId))
-                ? [{ value: String(task.assigneeId), label: assignee }]
-                : []),
-              ...members.map((m) => ({ value: String(m.id), label: m.name })),
-            ]}
+            options={assigneeOptions(
+              members,
+              { id: task.assigneeId ? String(task.assigneeId) : '', name: assignee },
+              t('flow.quickCreate.unassigned')
+            ).map((option) => ({ value: option.id, label: option.name }))}
             onChange={(value) => {
               const m = members.find((m) => String(m.id) === value);
               updateTask(task.id, {
@@ -925,13 +923,24 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
             </button>
           </div>
         ) : (
-          milestone && (
-            <DetailField icon={MilestoneIcon} label={t('flow.taskDetail.milestone')}>
-              <span className="text-flow-meta" style={{ color: 'var(--flow-text)' }}>
-                {milestone.name}
-              </span>
-            </DetailField>
-          )
+          <DetailField icon={MilestoneIcon} label={t('flow.taskDetail.milestone')}>
+            <FlowSelect
+              label={t('flow.taskDetail.milestone')}
+              value={milestone?.id ?? ''}
+              options={
+                milestones.length === 0
+                  ? []
+                  : [
+                      { value: '', label: t('flow.taskDetail.noMilestone') },
+                      ...milestones.map((m) => ({ value: m.id, label: m.name })),
+                    ]
+              }
+              onChange={(milestoneId) => updateTask(task.id, { milestoneId })}
+              disabled={!canEdit || milestones.length === 0}
+              placeholder={t('flow.taskDetail.noMilestonesInProject')}
+              muted={!milestone}
+            />
+          </DetailField>
         )}
 
         <DetailField icon={Link2} label={t('flow.taskDetail.dependencies')}>

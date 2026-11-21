@@ -13,6 +13,7 @@ const modules = import.meta.glob<{ default: Record<string, unknown> }>(
     '../../modules/hr/locales/**/*.json',
     '../../modules/recruit/locales/**/*.json',
     '../../modules/public-menu/locales/**/*.json',
+    '../../modules/pager/locales/**/*.json',
   ],
   {
     eager: true,

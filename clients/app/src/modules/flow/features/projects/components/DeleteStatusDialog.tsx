@@ -1,7 +1,15 @@
 import React, { useEffect, useId, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@voxire/ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../../../../shared/components/ui/dialog';
+import { Button } from '../../../../../shared/components/ui/button';
 import type { ApiStatus } from '../../../shared/services/flowApi';
 import { useTasks } from '../../tasks/useTasks';
 import { useDeleteStatus } from '../useStatuses';
@@ -61,15 +69,15 @@ const DeleteStatusDialog = ({
 
   return (
     <Dialog open={status !== null} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="portal-flow-dialog max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-flow-section font-semibold">
-            <AlertTriangle size={14} style={{ color: 'var(--flow-danger-fg)' }} aria-hidden />
+          <DialogTitle className="flex items-center gap-2">
+            <AlertTriangle size={16} style={{ color: 'var(--flow-danger-fg)' }} aria-hidden />
             {t('flow.status.deleteTitle', {
               name: status ? displayStatusName(status.name, t) : '',
             })}
           </DialogTitle>
-          <DialogDescription className="text-flow-meta">
+          <DialogDescription>
             {protectedDone
               ? t('flow.status.lastDoneProtected')
               : taskCount > 0
@@ -81,7 +89,7 @@ const DeleteStatusDialog = ({
         </DialogHeader>
 
         {needsTarget && !protectedDone && (
-          <div className="mt-2">
+          <div className="px-6 pb-6">
             <label
               htmlFor={selectId}
               className="mb-1 block text-flow-meta"
@@ -110,27 +118,20 @@ const DeleteStatusDialog = ({
           </div>
         )}
 
-        <div className="mt-4 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg px-3 py-1.5 text-flow-meta font-medium"
-            style={{ color: 'var(--flow-text-muted)' }}
-          >
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
             {t('flow.status.cancel')}
-          </button>
+          </Button>
           {!protectedDone && (
-            <button
-              type="button"
+            <Button
+              variant="destructive"
               disabled={(needsTarget && !target) || deleteStatus.isPending}
               onClick={confirm}
-              className="rounded-lg px-3 py-1.5 text-flow-meta font-semibold disabled:opacity-40"
-              style={{ background: 'var(--flow-danger-fill)', color: 'var(--flow-danger-on-fill)' }}
             >
               {deleteStatus.isPending ? t('flow.confirm.working') : t('flow.status.deleteConfirm')}
-            </button>
+            </Button>
           )}
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

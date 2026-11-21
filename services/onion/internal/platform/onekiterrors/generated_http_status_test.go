@@ -21,6 +21,14 @@ func (statusAwareUserServer) UpdateProfile(context.Context, *hubuserv1.UpdatePro
 	return &hubuserv1.UpdateProfileResponse{}, nil
 }
 
+func (statusAwareUserServer) UpdateAvatar(context.Context, *hubuserv1.UpdateAvatarRequest) (*hubuserv1.UpdateAvatarResponse, error) {
+	return &hubuserv1.UpdateAvatarResponse{}, nil
+}
+
+func (statusAwareUserServer) ListBusinessAvatars(context.Context, *hubuserv1.ListBusinessAvatarsRequest) (*hubuserv1.ListBusinessAvatarsResponse, error) {
+	return &hubuserv1.ListBusinessAvatarsResponse{}, nil
+}
+
 func (statusAwareUserServer) ChangePassword(context.Context, *hubuserv1.ChangePasswordRequest) (*hubuserv1.ChangePasswordResponse, error) {
 	return &hubuserv1.ChangePasswordResponse{}, nil
 }

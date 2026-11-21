@@ -31,6 +31,14 @@ func (r *Repository) ListLeaveBalances(ctx context.Context, ownerID, employeeID 
 	return balances, nil
 }
 
+func (r *Repository) SeedMissingLeaveBalances(ctx context.Context, businessID, employeeID int64, year int32) (int64, error) {
+	return r.queries.SeedMissingLeaveBalances(ctx, sqlc.SeedMissingLeaveBalancesParams{
+		Year:       year,
+		BusinessID: businessID,
+		EmployeeID: nullInt64Value(employeeID),
+	})
+}
+
 func (r *Repository) CountLeaveBalances(ctx context.Context, ownerID, employeeID int64, year int32) (int64, error) {
 	return r.queries.CountLeaveBalances(ctx, sqlc.CountLeaveBalancesParams{
 		BusinessID: ownerID,

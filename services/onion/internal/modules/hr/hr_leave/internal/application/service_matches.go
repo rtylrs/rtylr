@@ -76,6 +76,13 @@ func (s *Service) GetLeaveBalancesWithTotal(ctx context.Context, businessID, cal
 	}
 	res, err := cacher.Of[result]().GetOrComputeSingle(ctx, key+"|domain=v2",
 		func(ctx context.Context) (result, error) {
+			if year == currentLeaveYear() {
+				// Reading balances must still work when the repair cannot run.
+				if seedErr := s.ensureLeaveBalances(ctx, businessID, scopedEmployeeID); seedErr != nil {
+					logger.Ctx(ctx).Error("failed to seed missing leave balances",
+						logger.Any("business_id", businessID), logger.Any("employee_id", scopedEmployeeID), logger.Error(seedErr))
+				}
+			}
 			items, listErr := s.repo.ListLeaveBalances(ctx, businessID, scopedEmployeeID, year)
 			if listErr != nil {
 				return result{}, listErr
@@ -128,6 +135,37 @@ func normalizeLeaveCalendarParams(params domain.LeaveCalendarParams) (domain.Lea
 		DateFrom:   from,
 		DateTo:     to,
 	}, nil
+}
+
+func currentLeaveYear() int32 {
+	return int32(time.Now().UTC().Year()) // #nosec G115 -- calendar years returned by the application clock fit the int32 contract field.
+}
+
+// ensureLeaveBalances gives every active employee of the business (or just
+// employeeID when it is non-zero) a current-year balance for each active leave
+// type. Rows it creates start at zero, so it then applies the accrual the
+// monthly job would otherwise only grant on its next run; that accrual is
+// guarded by last_accrual_month and never double-counts existing rows.
+func (s *Service) ensureLeaveBalances(ctx context.Context, businessID, employeeID int64) error {
+	now := time.Now().UTC()
+	year := int32(now.Year()) // #nosec G115 -- calendar years returned by the application clock fit the int32 contract field.
+	seeded, err := s.repo.SeedMissingLeaveBalances(ctx, businessID, employeeID, year)
+	if err != nil || seeded == 0 {
+		return err
+	}
+	return s.accrueForOwner(ctx, businessID, year, int32(now.Month())) // #nosec G115 -- time.Month is bounded to the twelve calendar months.
+}
+
+// refreshLeaveEntitlements seeds any missing current-year balances for the
+// business and then applies the accrual owed so far, whether or not a row was
+// created. Accrual never repeats for a balance that already received it.
+func (s *Service) refreshLeaveEntitlements(ctx context.Context, businessID int64) error {
+	now := time.Now().UTC()
+	year := int32(now.Year()) // #nosec G115 -- calendar years returned by the application clock fit the int32 contract field.
+	if _, err := s.repo.SeedMissingLeaveBalances(ctx, businessID, 0, year); err != nil {
+		return err
+	}
+	return s.accrueForOwner(ctx, businessID, year, int32(now.Month())) // #nosec G115 -- time.Month is bounded to the twelve calendar months.
 }
 
 // --- Background Job: Monthly Accrual ---

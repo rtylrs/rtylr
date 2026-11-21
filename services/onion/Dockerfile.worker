@@ -9,7 +9,7 @@
 # downloads an amd64 sqlc, which can't run under arm64 emulation).
 FROM --platform=$BUILDPLATFORM golang:1.27.3-alpine3.24 AS builder
 WORKDIR /src
-RUN apk add --no-cache ca-certificates curl bash
+RUN apk add --no-cache ca-certificates curl bash nodejs npm
 # sqlc: the worker imports the email package, whose generated query code is
 # produced by scripts/generate_sqlc.sh (gitignored, regenerated per build).
 RUN set -eux; \
@@ -22,18 +22,19 @@ RUN set -eux; \
     fi; \
     rm -f /tmp/sqlc.tar.gz; \
     sqlc version
-# The onek CLI, kept apart from the contracts so editing them doesn't
-# recompile it.
-RUN GOBIN=/usr/local/bin go install github.com/1homsi/onekit/cmd/onek@v0.36.3
+# The onkt CLI and TypeSpec toolchain pinned in voxie's lockfile, kept apart
+# from the contracts so editing them doesn't reinstall it.
+COPY voxie/package.json voxie/package-lock.json /src/voxie/
+RUN cd /src/voxie && npm ci --no-audit --no-fund && npx --no-install onkt --version
 # Module downloads depend only on the module files, so source edits reuse them.
 COPY voxie/go.mod voxie/go.sum ./voxie/
 COPY services/onion/go.mod services/onion/go.sum ./services/onion/
 WORKDIR /src/services/onion
 RUN go mod download && go mod verify
-# Generated contract output is gitignored, so produce it from the pinned onek
+# Generated contract output is gitignored, so produce it from the pinned onkt
 # release before Go compiles against it.
 COPY voxie/ /src/voxie/
-RUN cd /src/voxie && onek build .
+RUN cd /src/voxie && npx --no-install onkt build
 COPY services/onion/ ./
 RUN set -eux; \
     test -f /src/voxie/go.mod; \

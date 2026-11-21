@@ -102,6 +102,7 @@ import (
 	"github.com/voxire/onion/internal/modules/organization/subscriptions"
 	"github.com/voxire/onion/internal/modules/organization/team"
 	"github.com/voxire/onion/internal/modules/organization/user"
+	"github.com/voxire/onion/internal/modules/pager"
 	"github.com/voxire/onion/internal/modules/portal"
 	"github.com/voxire/onion/internal/modules/pos/audit"
 	"github.com/voxire/onion/internal/modules/pos/cashmovements"
@@ -397,6 +398,7 @@ type apiModules struct {
 	Notifications         *notifications.Module
 	OAuth                 *oauth.Module
 	OneOnOnes             *oneonones.Module
+	Pager                 *pager.Module
 	Payroll               *payroll.Module
 	PosAudit              *audit.Module
 	PosCashMovements      *cashmovements.Module

@@ -52,7 +52,7 @@ Automations uses `/automations` and `/automations/new?id=…`, with legacy CRM l
 
 ## API Contracts (voxie)
 
-API request/response types are defined as `.onk` contracts in `voxie/api/`, shared between frontend and backend as the single source of truth.
+API request/response types are defined as TypeSpec (`.tsp`) contracts in `voxie/api/`, shared between frontend and backend as the single source of truth.
 
 ```
 voxie/api/
@@ -71,7 +71,7 @@ make -C ../../voxie generate   # gen/ is generated, not committed
 ### Updating contracts
 
 ```bash
-# Edit .onk files under voxie/api/, regenerate, and prove it end-to-end in the
+# Edit .tsp files under voxie/api/, regenerate, and prove it end-to-end in the
 # same change. Contracts, generated consumers and Go handlers land together:
 make -C ../../voxie generate
 pnpm typecheck

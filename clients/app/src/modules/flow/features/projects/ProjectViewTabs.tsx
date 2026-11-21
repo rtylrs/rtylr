@@ -126,7 +126,7 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
           style={{ color: project.color }}
         />
         <h1
-          className="text-flow-section font-semibold truncate"
+          className="portal-flow-project-title min-w-0 font-semibold truncate"
           style={{ color: 'var(--flow-text)' }}
         >
           {project.name}

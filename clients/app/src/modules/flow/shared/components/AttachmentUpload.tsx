@@ -1,7 +1,12 @@
 import React, { useRef, useState } from 'react';
 import { uploadAsset } from '@voxire/api';
 import { getCdnBaseUrl } from '@voxire/config';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@voxire/ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '../../../../shared/components/ui/dialog';
 import { ExternalLink, Upload, FileText, Image as ImageIcon, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Attachment, useFlowStore } from '../stores/flowStore';
@@ -302,12 +307,14 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
         </p>
       )}
       <Dialog open={preview !== null} onOpenChange={(next) => !next && setPreview(null)}>
-        <DialogContent className="max-w-[min(96vw,1100px)] p-3 sm:p-4">
-          <DialogTitle className="pe-8 text-sm font-medium truncate">{preview?.name}</DialogTitle>
-          <DialogDescription className="sr-only">
-            {t('flow.taskDetail.attachmentPreview')}
-          </DialogDescription>
-          {preview && <PreviewBody url={preview.url} name={preview.name} />}
+        <DialogContent className="portal-flow-dialog max-w-[min(96vw,1100px)]">
+          <div className="p-3 sm:p-4">
+            <DialogTitle className="pe-8 text-sm font-medium truncate">{preview?.name}</DialogTitle>
+            <DialogDescription className="sr-only">
+              {t('flow.taskDetail.attachmentPreview')}
+            </DialogDescription>
+            {preview && <PreviewBody url={preview.url} name={preview.name} />}
+          </div>
         </DialogContent>
       </Dialog>
       <input

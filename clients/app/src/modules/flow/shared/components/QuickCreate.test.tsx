@@ -16,6 +16,7 @@ const mocks = vi.hoisted(() => ({
   currentProjectId: undefined as string | undefined,
   labels: [] as Array<{ id: number; name: string }>,
   statuses: [] as ApiStatus[],
+  milestones: [] as Array<{ id: string; name: string }>,
 }));
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => mocks.navigate,
@@ -34,6 +35,9 @@ vi.mock('../../features/tasks/useTasks', () => ({
   useCreateTask: () => ({ mutateAsync: mocks.create, isPending: false }),
 }));
 vi.mock('../../features/tasks/useLabels', () => ({ useLabels: () => ({ data: mocks.labels }) }));
+vi.mock('../../features/milestones/useMilestones', () => ({
+  useMilestones: (projectId: string) => ({ data: projectId ? mocks.milestones : undefined }),
+}));
 vi.mock('../../features/projects/useStatuses', () => ({
   useProjectStatuses: (projectId: string) => ({ data: projectId ? mocks.statuses : undefined }),
 }));
@@ -55,6 +59,7 @@ beforeEach(async () => {
   await initTestI18n();
   mocks.currentProjectId = undefined;
   mocks.labels = [];
+  mocks.milestones = [];
   mocks.statuses = [status('3', 'To Do', 10, true), status('4', 'Doing', 20)];
   mocks.create.mockResolvedValue({
     task: { id: '101', identifier: 'FLOW-101', title: 'Ship the thing' },
@@ -201,6 +206,24 @@ describe('Quick task creation in Portal', () => {
         expect.objectContaining({ projectId: '12', sectionId: '4' })
       )
     );
+  });
+  it('files the new task under the milestone picked for its project', async () => {
+    mocks.currentProjectId = '12';
+    mocks.milestones = [{ id: '30', name: 'Phase one live' }];
+    render(<QuickCreate />);
+    await chooseFlowOption('Milestone', 'Phase one live');
+    fillTitle();
+    create();
+    await waitFor(() =>
+      expect(mocks.create).toHaveBeenCalledWith(
+        expect.objectContaining({ projectId: '12', milestoneId: '30' })
+      )
+    );
+  });
+  it('offers no milestone field when the project has none', () => {
+    mocks.currentProjectId = '12';
+    render(<QuickCreate />);
+    expect(screen.queryByRole('button', { name: /^Milestone(:|$)/ })).toBeNull();
   });
   it('lands a task created from a board column in that column', async () => {
     mocks.currentProjectId = '12';

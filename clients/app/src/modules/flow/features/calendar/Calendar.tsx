@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useOpenTask } from '../../shared/lib/useOpenTask';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@voxire/utils';
@@ -11,12 +11,19 @@ import { useLabels } from '../tasks/useLabels';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import PriorityIcon from '../../shared/components/PriorityIcon';
 import type { ApiTask } from '../../shared/services/flowApi';
-import { toLocalIso, todayIso } from '../../shared/lib/dateUtils';
-import { monthCells, tasksByLocalDay, agendaDays } from '../../shared/lib/monthGrid';
+import { todayIso } from '../../shared/lib/dateUtils';
+import { tasksByLocalDay, agendaDays, type MonthCell } from '../../shared/lib/monthGrid';
+import { taskRange } from '../../shared/lib/calendarSpans';
+import { useCanEditTaskIn } from '../../shared/lib/currentUser';
 import { CalendarAgenda } from '../../shared/components/CalendarAgenda';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
-import { withAlpha, onTint } from '../../shared/lib/colorUtils';
+import { useCalendarView } from './useCalendarView';
+import { useCalendarScheduling } from './useCalendarScheduling';
+import { useCalendarPlanning } from './useCalendarPlanning';
+import { PlanningGrid } from './PlanningGrid';
+import { UnscheduledPanel, needsScheduling } from './UnscheduledPanel';
+import { CalendarControls } from './CalendarControls';
 
 const ACCENT_VAR = 'var(--accent)';
 
@@ -32,6 +39,9 @@ const ACCENT_VAR = 'var(--accent)';
  */
 const WIDE = '(min-width: 768px)';
 
+/** Room for the Unscheduled panel beside the grid; below it the panel starts closed. */
+const LARGE = '(min-width: 1024px)';
+
 interface CreateModal {
   date: string;
 }
@@ -40,6 +50,7 @@ const Calendar: React.FC = () => {
   const { t, i18n } = useTranslation();
   const openTask = useOpenTask();
   const isWide = useMediaQuery(WIDE);
+  const isLarge = useMediaQuery(LARGE);
   const tasksQuery = useTasks({});
   const { data: apiTasks = [] } = tasksQuery;
   const tasks = apiTasks as ApiTask[];
@@ -48,23 +59,23 @@ const Calendar: React.FC = () => {
   const projects = useFlowStore((state) => state.projects);
   const { data: labels = [] } = useLabels();
   const createTask = useCreateTask();
-  const [cursor, setCursor] = useState(() => new Date());
   const [createModal, setCreateModal] = useState<CreateModal | null>(null);
   const [newTitle, setNewTitle] = useState('');
   const [newProjectId, setNewProjectId] = useState('');
   const [newLabelId, setNewLabelId] = useState('');
+  // null until the user chooses, so the default can follow the width.
+  const [panelChoice, setPanelChoice] = useState<boolean | null>(null);
+  const panelOpen = panelChoice ?? isLarge;
 
   React.useEffect(() => {
     if (!newLabelId && labels.length > 0) setNewLabelId(String(labels[0].id));
   }, [labels, newLabelId]);
 
-  const { days, monthLabel } = useMemo(
-    () => ({
-      days: monthCells(cursor),
-      monthLabel: cursor.toLocaleString(i18n.language, { month: 'long', year: 'numeric' }),
-    }),
-    [cursor, i18n.language]
-  );
+  const calendar = useCalendarView(i18n.language);
+  const { view, cells, from, to } = calendar;
+
+  const scheduling = useCalendarScheduling(tasks);
+  const shownTasks = scheduling.tasks;
 
   // One lookup for the whole grid rather than a find() per pill per cell.
   const projectColorById = useMemo(
@@ -72,16 +83,46 @@ const Calendar: React.FC = () => {
     [projects]
   );
 
-  const tasksByDate = useMemo(() => tasksByLocalDay(tasks), [tasks]);
+  // Every project with a task here decides that task's drag; the ones with work
+  // on screen come first for cycles, which are fetched per project and capped.
+  const { taskProjectIds, cycleProjectIds } = useMemo(() => {
+    const onScreen = new Set<string>();
+    const all = new Set<string>();
+    for (const task of shownTasks) {
+      const id = String(task.projectId ?? '');
+      if (!id) continue;
+      all.add(id);
+      const range = taskRange(task);
+      if (range && range.start <= to && range.end >= from) onScreen.add(id);
+    }
+    const ordered = [...onScreen];
+    for (const project of projects) {
+      const id = String(project.id);
+      if (!onScreen.has(id)) ordered.push(id);
+    }
+    return { taskProjectIds: [...all], cycleProjectIds: ordered };
+  }, [shownTasks, projects, from, to]);
 
-  const agenda = useMemo(() => agendaDays(days, tasksByDate), [days, tasksByDate]);
+  const canEditIn = useCanEditTaskIn(taskProjectIds);
+  const canEdit = (task: ApiTask): boolean => canEditIn(String(task.projectId));
+  const planning = useCalendarPlanning({
+    cycleProjectIds,
+    milestoneProjectId: undefined,
+    from,
+    to,
+  });
+
+  const tasksByDate = useMemo(() => tasksByLocalDay(shownTasks), [shownTasks]);
+  const agenda = useMemo(() => agendaDays(cells, tasksByDate), [cells, tasksByDate]);
+  const unscheduledCount = useMemo(() => tasks.filter(needsScheduling).length, [tasks]);
 
   const today = todayIso();
+  const taskTone = (task: ApiTask): string | undefined =>
+    projectColorById.get(String(task.projectId));
 
-  const openCreate = (date: Date, inMonth: boolean) => {
-    if (!inMonth) return;
-    const iso = toLocalIso(date);
-    setCreateModal({ date: iso });
+  const openCreate = (cell: MonthCell) => {
+    if (!cell.inMonth) return;
+    setCreateModal({ date: cell.iso });
     setNewTitle('');
     setNewProjectId(projects[0]?.id ?? '');
     setNewLabelId(labels[0] ? String(labels[0].id) : '');
@@ -120,11 +161,23 @@ const Calendar: React.FC = () => {
     );
   };
 
+  const panel = (layout: 'side' | 'stacked') => (
+    <UnscheduledPanel
+      tasks={shownTasks}
+      tone={taskTone}
+      canEdit={canEdit}
+      onOpen={(task) => openTask(String(task.id))}
+      onClose={() => setPanelChoice(false)}
+      scheduling={scheduling}
+      layout={layout}
+    />
+  );
+
   return (
     <div className="flex flex-col h-full">
       <HelmetContainer title={`${t('flow.calendar.heading')} · Flow`} />
       <div
-        className="flex items-center justify-between px-6 py-4 shrink-0"
+        className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 shrink-0"
         style={{ borderBottom: '1px solid var(--flow-border)' }}
       >
         <div>
@@ -135,46 +188,22 @@ const Calendar: React.FC = () => {
             {t('flow.calendar.subtitle')}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))}
-            aria-label={t('flow.calendar.prevMonthLabel')}
-            className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
-            style={{ color: 'var(--flow-text-muted)' }}
-          >
-            <ChevronLeft size={13} />
-          </button>
-          <span
-            className="text-flow-meta font-semibold w-[128px] text-center"
-            style={{ color: 'var(--flow-text)' }}
-          >
-            {monthLabel}
-          </span>
-          <button
-            type="button"
-            onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}
-            aria-label={t('flow.calendar.nextMonthLabel')}
-            className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
-            style={{ color: 'var(--flow-text-muted)' }}
-          >
-            <ChevronRight size={13} />
-          </button>
-          <button
-            type="button"
-            onClick={() => setCursor(new Date())}
-            className="text-flow-meta px-2 py-1 rounded-sm hover:bg-[var(--flow-hover)] font-medium"
-            style={{ color: 'var(--flow-text-muted)' }}
-          >
-            {t('flow.calendar.today')}
-          </button>
-        </div>
+        <CalendarControls
+          view={view}
+          onView={calendar.setView}
+          label={calendar.label}
+          onStep={calendar.step}
+          onToday={calendar.goToday}
+          unscheduledCount={unscheduledCount}
+          unscheduledOpen={panelOpen}
+          onToggleUnscheduled={() => setPanelChoice(!panelOpen)}
+        />
       </div>
 
       {/* At 390px a seven-column month gives each day about 55px, which truncates
           a title to two or three characters and leaves the pills too small to
-          hit (rtylr#1215, S-10). The month navigation above is shared; only the
-          body swaps. */}
+          hit (rtylr#1215, S-10). The navigation above is shared; only the body
+          swaps. */}
       {tasksFailed && (
         <div className="flex-1 overflow-auto p-4">
           <ListLoadFailed onRetry={() => void tasksQuery.refetch()} />
@@ -188,12 +217,13 @@ const Calendar: React.FC = () => {
 
       {!tasksFailed && !tasksLoading && !isWide && (
         <div className="flex-1 overflow-auto">
+          {panelOpen && panel('stacked')}
           <CalendarAgenda
             entries={agenda}
             todayIso={today}
             taskId={(task) => String(task.id)}
             taskTitle={(task) => task.title}
-            taskTone={(task) => projectColorById.get(String(task.projectId))}
+            taskTone={taskTone}
             onOpen={(task) => openTask(String(task.id))}
             leading={(task) => <PriorityIcon priority={task.priority} size={11} />}
           />
@@ -201,118 +231,26 @@ const Calendar: React.FC = () => {
       )}
 
       {!tasksFailed && !tasksLoading && isWide && (
-        <div className="flex-1 overflow-auto p-4">
-          <div className="grid grid-cols-7 gap-px" style={{ background: 'var(--flow-border)' }}>
-            {days.slice(0, 7).map((c) => (
-              <div
-                key={c.date.toISOString()}
-                className="py-1.5 text-center text-flow-meta font-semibold uppercase"
-                style={{ background: 'var(--flow-bg)', color: 'var(--flow-text-dim)' }}
-              >
-                {new Intl.DateTimeFormat(i18n.language, { weekday: 'short' }).format(c.date)}
-              </div>
-            ))}
-            {days.map((c, i) => {
-              const iso = c.iso;
-              const dayTasks = tasksByDate.get(iso) ?? [];
-              const isToday = iso === today;
-              return (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0 }}
-                  // The out-of-month dimming rides on `animate` rather than
-                  // sitting in `style` beside it. A style opacity pins the value
-                  // and the animation stops running; on TaskCard the same
-                  // conflict left every board card invisible (rtylr#1078). Here
-                  // the style always resolved to a number, so the cells showed
-                  // and only the entrance was dead.
-                  animate={{ opacity: c.inMonth ? 1 : 0.4 }}
-                  transition={{ duration: 0.1, delay: i * 0.002 }}
-                  onClick={() => openCreate(c.date, c.inMonth)}
-                  className="min-h-[100px] p-1.5 cursor-pointer group"
-                  style={{ background: 'var(--flow-bg)' }}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span
-                      className="text-flow-meta font-semibold h-5 w-5 flex items-center justify-center rounded-full"
-                      style={{
-                        background: isToday ? 'var(--flow-active)' : 'transparent',
-                        color: isToday ? 'var(--accent-on-muted)' : 'var(--flow-text-muted)',
-                      }}
-                    >
-                      {c.date.getDate()}
-                    </span>
-                    {c.inMonth && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openCreate(c.date, c.inMonth);
-                        }}
-                        aria-label={t('flow.calendar.addTaskLabel', {
-                          date: c.date.toLocaleDateString(i18n.language, {
-                            month: 'long',
-                            day: 'numeric',
-                            year: 'numeric',
-                          }),
-                        })}
-                        className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm text-flow-meta opacity-0 group-hover:opacity-60 group-focus-within:opacity-60 focus:opacity-100 transition-opacity focus:focus-visible:ring-1 focus-visible:ring-[var(--accent)] md:h-8 md:w-8"
-                        style={{ color: 'var(--flow-text-dim)' }}
-                      >
-                        {t('flow.calendar.addHint')}
-                      </button>
-                    )}
-                  </div>
-                  <div className="space-y-0.5">
-                    {dayTasks.slice(0, 3).map((t) => {
-                      // Tinted by project. This calendar mixes every project
-                      // together, so a single card colour left no way to tell
-                      // whose work a day was full of (#1087). Falls back to the
-                      // card surface when the project is not in the store yet.
-                      const tone = projectColorById.get(String(t.projectId));
-                      return (
-                        <button
-                          type="button"
-                          key={t.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openTask(String(t.id));
-                          }}
-                          className="w-full text-left px-1.5 py-0.5 rounded-sm text-flow-meta truncate flex items-center gap-1 hover:bg-[var(--flow-hover)]"
-                          style={{
-                            // The tone appears once. Both the tint and the
-                            // foreground read it back, and a test can see it:
-                            // happy-dom drops any color-mix() set through the
-                            // style property, so the two derived values below are
-                            // invisible to the suite (rtylr#1249).
-                            ...(tone ? { ['--tone' as string]: tone } : {}),
-                            background: tone ? withAlpha('var(--tone)', 13) : 'var(--flow-card)',
-                            color: tone ? onTint('var(--tone)') : 'var(--flow-text)',
-                          }}
-                        >
-                          <PriorityIcon priority={t.priority} size={9} />
-                          {/* dir="auto" so a right-to-left title truncates at its
-                            own end rather than clipping the start of it. */}
-                          <span dir="auto" className="truncate">
-                            {t.title}
-                          </span>
-                        </button>
-                      );
-                    })}
-                    {dayTasks.length > 3 && (
-                      <span
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-flow-meta px-1"
-                        style={{ color: 'var(--flow-text-dim)' }}
-                      >
-                        {t('flow.calendar.moreCount', { count: dayTasks.length - 3 })}
-                      </span>
-                    )}
-                  </div>
-                </motion.div>
-              );
-            })}
+        <div className="flex flex-1 min-h-0">
+          <div className="flex flex-1 min-w-0 flex-col p-4">
+            <PlanningGrid
+              cells={cells}
+              view={view}
+              tasks={shownTasks}
+              cycles={planning.cycles}
+              milestones={planning.milestones}
+              leave={planning.leave}
+              today={today}
+              tone={taskTone}
+              cycleTone={(cycle) => projectColorById.get(cycle.projectId)}
+              leading={(task) => <PriorityIcon priority={task.priority} size={9} />}
+              canEdit={canEdit}
+              onOpen={(task) => openTask(String(task.id))}
+              onCreate={openCreate}
+              scheduling={scheduling}
+            />
           </div>
+          {panelOpen && panel('side')}
         </div>
       )}
 
