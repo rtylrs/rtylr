@@ -2,7 +2,8 @@
 export const PAGER_ERROR = {
   venueNotFound: 'venue_not_found',
   ticketNotFound: 'ticket_not_found',
-  invalidNumber: 'invalid_number',
+  invalidLabel: 'invalid_label',
+  labelTaken: 'label_taken',
   invalidTransition: 'invalid_transition',
   tooManyOpenTickets: 'too_many_open_tickets',
 } as const;

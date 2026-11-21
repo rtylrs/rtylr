@@ -8,6 +8,7 @@ import { SearchX } from 'lucide-react';
 import { readyAlarm } from '../../../../shared/alarm/readyAlarm';
 import { useAlarm } from '../../../../shared/alarm/useAlarm';
 import LanguageSwitch from '../../shared/components/LanguageSwitch';
+import { matchColor } from '../../shared/lib/matchCode';
 import { usePublicPagerClient } from '../../shared/lib/pagerClients';
 import { askPushPermission, followTicketByPush, usePushKey } from '../../shared/lib/pushAlerts';
 import { ticketAlarmState } from '../../shared/lib/ticketAlarm';
@@ -16,7 +17,7 @@ import { createTicketPoller, isOpenStatus, type TicketPoller } from '../../share
 // Shorter than the client's default so one stuck request on a weak signal
 // cannot hold up the polls behind it for half a minute.
 const POLL_TIMEOUT_MS = 10_000;
-const LONG_NUMBER_LENGTH = 5;
+const LONG_LABEL_LENGTH = 5;
 
 const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Element => {
   const { t, i18n } = useTranslation('pager');
@@ -55,8 +56,13 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
     return () => created.stop();
   }, [token, publicPagerClient]);
 
-  const number = ticket?.number ?? '';
-  const readyTitle = t('pager.ticket.readyTitle', { number });
+  const label = ticket?.label ?? '';
+  // A name reads "Sara, your order is ready"; a number "Order 42 is ready".
+  const byKind = (key: string): string =>
+    t(ticket?.labelKind === 'name' ? `${key}Name` : key, { label });
+  const readyTitle = byKind('pager.ticket.readyTitle');
+  const readyPushTitle = byKind('pager.push.readyTitle');
+  const remindPushTitle = byKind('pager.push.remindTitle');
   useEffect(() => {
     readyAlarm.sync(ticketAlarmState(notFound ? null : ticket, readyTitle));
   }, [ticket, notFound, readyTitle]);
@@ -68,18 +74,18 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
     if (!open || !pushKey) return;
     const text = {
       ready: {
-        title: t('pager.push.readyTitle', { number }),
+        title: readyPushTitle,
         body: t('pager.push.readyBody', { venue: venueName }),
       },
       remind: {
-        title: t('pager.push.remindTitle', { number }),
+        title: remindPushTitle,
         body: t('pager.push.remindBody', { venue: venueName }),
       },
     };
     // The bell on the page does not depend on this, so a failure stays quiet.
     followTicketByPush({ publicKey: pushKey, token, text }).catch(() => undefined);
     // i18n.language: a language switch stores the notification text again.
-  }, [open, pushKey, token, number, venueName, pushAsked, i18n.language, t]);
+  }, [open, pushKey, token, readyPushTitle, remindPushTitle, venueName, pushAsked, i18n.language, t]);
 
   if (notFound) {
     return (
@@ -125,6 +131,8 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
   const ringMark = `${ticket.readyAt ?? ''}|${ticket.remindedAt ?? ''}`;
   const acknowledged = Boolean(ticket.acknowledgedAt) || answeredRing === ringMark;
   const ahead = ticket.ahead ?? 0;
+  const labelled = Boolean(ticket.labelKind);
+  const code = ticket.code ?? '';
 
   const acknowledge = async (): Promise<void> => {
     readyAlarm.silence();
@@ -151,7 +159,11 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
 
   return (
     <div className={screenClass}>
-      <HelmetContainer title={t('pager.ticket.pageTitle', { number })} />
+      <HelmetContainer
+        title={
+          labelled ? byKind('pager.ticket.pageTitle') : t('pager.ticket.pageTitleCode', { code })
+        }
+      />
       <main className="pager-page">
         <div className="pager-topbar">
           <p className="pager-venue">{ticket.venueName}</p>
@@ -159,20 +171,39 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
         </div>
 
         <div className="pager-ticket">
-          <h1 className="pager-order">
-            <span className="pager-order-label">{t('pager.ticket.orderLabel')}</span>{' '}
-            <bdi
-              className={
-                number.length > LONG_NUMBER_LENGTH
-                  ? 'pager-order-number pager-order-number--long'
-                  : 'pager-order-number'
-              }
-            >
-              {number}
-            </bdi>
-          </h1>
+          {labelled ? (
+            <h1 className="pager-order">
+              {ticket.labelKind === 'number' && (
+                <>
+                  <span className="pager-order-label">{t('pager.ticket.orderLabel')}</span>{' '}
+                </>
+              )}
+              <bdi
+                className={
+                  label.length > LONG_LABEL_LENGTH
+                    ? 'pager-order-number pager-order-number--long'
+                    : 'pager-order-number'
+                }
+              >
+                {label}
+              </bdi>
+            </h1>
+          ) : (
+            <h1 className="pager-order">
+              <span className="pager-order-label">{t('pager.ticket.codeLabel')}</span>{' '}
+              <bdi className="pager-code" style={{ background: matchColor(ticket.color) }}>
+                {code}
+              </bdi>
+            </h1>
+          )}
 
-          {status === 'waiting' && (
+          {status === 'waiting' && !labelled && (
+            <p className="pager-status" role="status">
+              {t('pager.ticket.showCode')}
+            </p>
+          )}
+
+          {status === 'waiting' && labelled && (
             <div role="status">
               <p className="pager-status">{t('pager.ticket.waiting')}</p>
               <p className="pager-text">
@@ -198,8 +229,12 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
 
           {status === 'expired' && (
             <div role="status">
-              <p className="pager-status">{t('pager.ticket.expired')}</p>
-              <p className="pager-text">{t('pager.ticket.expiredHint')}</p>
+              <p className="pager-status">
+                {labelled ? t('pager.ticket.expired') : t('pager.ticket.codeExpired')}
+              </p>
+              <p className="pager-text">
+                {labelled ? t('pager.ticket.expiredHint') : t('pager.ticket.codeExpiredHint')}
+              </p>
             </div>
           )}
         </div>
@@ -231,10 +266,11 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
           </div>
         )}
 
-        {/* A reload or a shared link arrives without the tap that unlocks sound. */}
+        {/* The browser lets a page ring, buzz or ask to notify only after a tap,
+            and the scan gave none, so this is the one tap the customer makes. */}
         {isOpenStatus(status) && !acknowledged && !alarm.unlocked && (
           <div className="pager-panel">
-            <p className="pager-text">{t('pager.ticket.alertMeHint')}</p>
+            <p className="pager-text">{t('pager.ticket.notifyHint')}</p>
             <button
               type="button"
               className="pager-button"
@@ -244,7 +280,7 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
                 setPushAsked((count) => count + 1);
               }}
             >
-              {t('pager.ticket.alertMe')}
+              {t('pager.ticket.notify')}
             </button>
           </div>
         )}

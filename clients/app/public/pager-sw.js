@@ -24,7 +24,7 @@ async function textFor(message) {
   } catch {
     // Fall through to the plain text the push itself carries.
   }
-  return { title: message.number, body: message.venue || '' };
+  return { title: message.label, body: message.venue || '' };
 }
 
 self.addEventListener('push', (event) => {

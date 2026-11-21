@@ -4,13 +4,13 @@ import { publicPagerClient, staffPagerClient } from './clients';
 
 export type PublicPagerClient = Pick<
   PagerServiceClient,
-  'getPublicVenue' | 'joinTicket' | 'getPublicTicket' | 'acknowledgeTicket'
+  'scanTicket' | 'getPublicTicket' | 'acknowledgeTicket'
 >;
 
 export type StaffPagerClient = Pick<
   PagerServiceClient,
   | 'listTickets'
-  | 'createTicket'
+  | 'labelTicket'
   | 'markReady'
   | 'remindTicket'
   | 'undoReady'

@@ -5,18 +5,19 @@ import { FullScreenLoader } from '@voxire/components';
 import { ErrorBoundary, Spinner } from '@voxire/ui';
 import './pager.css';
 
-const Join = React.lazy(() => import('./screens/Public/Join'));
+const Scan = React.lazy(() => import('./screens/Public/Scan'));
 const Ticket = React.lazy(() => import('./screens/Public/Ticket'));
 const Try = React.lazy(() => import('./screens/Public/Try'));
 const Board = React.lazy(() => import('./screens/Staff/Board'));
+const Display = React.lazy(() => import('./screens/Staff/Display'));
 const Poster = React.lazy(() => import('./screens/Staff/Poster'));
 const Setup = React.lazy(() => import('./screens/Staff/Setup'));
 
 /**
  * The customer's side of the pager: public and unauthenticated, mounted on the
  * Portal's root route next to the public menu so it bypasses `BusinessRoute`.
- * The join and ticket screens share one document on purpose: the tap on the
- * join screen unlocks the sound the ticket screen plays later.
+ * The scan screen hands over to the ticket screen by a router navigation, so
+ * the ticket keeps the document the QR opened.
  */
 export function createPagerPublicRoutes<TParent extends AnyRoute>(rootRoute: TParent) {
   const layoutRoute = createRoute({
@@ -40,7 +41,7 @@ export function createPagerPublicRoutes<TParent extends AnyRoute>(rootRoute: TPa
       createRoute({
         getParentRoute: () => layoutRoute,
         path: '/$slug/pager',
-        component: Join,
+        component: Scan,
       }),
       createRoute({
         getParentRoute: () => layoutRoute,
@@ -75,8 +76,9 @@ function StaffScreen({ children }: { children: React.ReactNode }): React.JSX.Ele
 }
 
 /**
- * The staff board and its counter poster, inside the signed-in Portal shell.
- * Reachable by URL only; the poster is linked from the board.
+ * The staff board, its counter poster and counter display, inside the
+ * signed-in Portal shell. Reachable by URL only; the other two are linked from
+ * the board.
  */
 export function createPagerStaffRoutes<TParent extends AnyRoute>(parent: TParent) {
   return [
@@ -86,6 +88,15 @@ export function createPagerStaffRoutes<TParent extends AnyRoute>(parent: TParent
       component: () => (
         <StaffScreen>
           <Board />
+        </StaffScreen>
+      ),
+    }),
+    createRoute({
+      getParentRoute: () => parent,
+      path: 'pager/display',
+      component: () => (
+        <StaffScreen>
+          <Display />
         </StaffScreen>
       ),
     }),
