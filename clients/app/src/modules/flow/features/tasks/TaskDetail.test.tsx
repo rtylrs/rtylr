@@ -147,7 +147,12 @@ vi.mock('../../shared/components/Breadcrumbs', () => ({
     <>{items.map((item) => item.label).join(' / ')}</>
   ),
 }));
-vi.mock('../../shared/components/CommentList', () => ({ default: () => null }));
+// The thread itself is stubbed; the print view still renders comment text
+// through the real renderCommentBody.
+vi.mock('../../shared/components/CommentList', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../shared/components/CommentList')>()),
+  default: () => null,
+}));
 vi.mock('../../shared/components/CommentInput', () => ({ default: () => null }));
 vi.mock('../../shared/components/SubtaskList', () => ({ default: () => null }));
 vi.mock('../../shared/components/AttachmentUpload', () => ({ default: () => null }));
@@ -740,7 +745,18 @@ describe('TaskDetail print (T-603)', () => {
     taskDetailData.data = {
       task: apiTask({ identifier: 'FLOW-603', title: 'Printable task' }),
       subtasks: [{ id: 's-1', title: 'Write the print view', status: 'done' }],
-      comments: [],
+      comments: [
+        {
+          id: 'c-1',
+          taskId: 'task-1',
+          userId: '7',
+          actorName: 'Abed Amouneh',
+          content: 'Looks **ready** to ship',
+          isEdited: false,
+          createdAt: '2026-11-20T10:00:00Z',
+          updatedAt: '2026-11-20T10:00:00Z',
+        },
+      ],
       activity: [],
     };
     renderTaskDetail();
@@ -752,6 +768,10 @@ describe('TaskDetail print (T-603)', () => {
     expect(document.documentElement).toHaveClass('flow-printing');
     expect(within(page as HTMLElement).getByText('Printable task')).toBeInTheDocument();
     expect(within(page as HTMLElement).getByText('Write the print view')).toBeInTheDocument();
+    // The comment prints the way the thread shows it, not as raw Markdown.
+    const bold = within(page as HTMLElement).getByText('ready');
+    expect(bold.tagName).toBe('STRONG');
+    expect(page?.textContent).not.toContain('**ready**');
 
     vi.runAllTimers();
     expect(print).toHaveBeenCalledTimes(1);
