@@ -12,6 +12,10 @@ import { RENNILI_URL, resolveAuthUrl } from '@voxire/config';
  */
 
 export const PAGER_LANDING_PATH = '/';
+export const PAGER_HOW_PATH = '/how-it-works';
+export const PAGER_FEATURES_PATH = '/features';
+export const PAGER_FAQ_PATH = '/faq';
+export const PAGER_RTYLR_PATH = '/rtylr';
 export const PAGER_TRY_PATH = '/try';
 export const PAGER_BOARD_PATH = '/board';
 export const PAGER_POSTER_PATH = '/poster';
