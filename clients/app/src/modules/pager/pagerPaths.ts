@@ -55,13 +55,46 @@ export function portalPathForStaffPage(pathname: string): string {
   return PORTAL_STAFF_PATHS[clean] ?? '/pager';
 }
 
+/** What a setup link may fill in for the owner, who still confirms it. */
+const SETUP_PREFILL_KEYS = ['name', 'slug', 'email'] as const;
+
 /**
  * The sign-in app's sign-up or sign-in page, set to come back to the pager
- * setup once the account is signed in and its email verified.
+ * setup once the account is signed in and its email verified. A setup link's
+ * venue name, slug and email ride along: the sign-up form starts with the name
+ * and email, and the setup with the slug.
  */
-export function pagerClaimUrl(mode: 'register' | 'signIn'): string {
+export function pagerClaimUrl(mode: 'register' | 'signIn', setupSearch = ''): string {
   const url = new URL(mode === 'register' ? '/register' : '/', resolveAuthUrl());
+  const given = new URLSearchParams(setupSearch);
+  const prefill = new URLSearchParams();
+  for (const key of SETUP_PREFILL_KEYS) {
+    const value = given.get(key)?.trim();
+    if (value) prefill.set(key, value);
+  }
+  const query = prefill.toString();
   url.searchParams.set('redirect', 'dash');
-  url.searchParams.set('returnTo', portalPathForStaffPage(PAGER_SETUP_PATH));
+  url.searchParams.set(
+    'returnTo',
+    portalPathForStaffPage(PAGER_SETUP_PATH) + (query ? `?${query}` : '')
+  );
+  if (mode === 'register') {
+    const email = prefill.get('email');
+    const name = prefill.get('name');
+    if (email) url.searchParams.set('email', email);
+    if (name) url.searchParams.set('businessName', name);
+  }
   return url.href;
+}
+
+/**
+ * A setup link sent to a new venue (`/setup?name=&slug=&email=`) opens the
+ * sign-up, not the sign-in, for a visitor who is not signed in yet.
+ */
+export function pagerSignedOutUrl(pathname: string, search: string): string | null {
+  const clean = pathname.replace(/\/+$/, '') || '/';
+  if (clean !== PAGER_SETUP_PATH) return null;
+  const params = new URLSearchParams(search);
+  if (!SETUP_PREFILL_KEYS.some((key) => params.get(key)?.trim())) return null;
+  return pagerClaimUrl('register', search);
 }

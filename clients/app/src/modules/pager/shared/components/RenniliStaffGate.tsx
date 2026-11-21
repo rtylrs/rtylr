@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
 import { resolveAppUrl } from '@voxire/config';
 import { BusinessRoute, type StandaloneSurface } from '../../../../shared/utils/BusinessRoute';
-import { PAGER_BOARD_PATH, portalPathForStaffPage } from '../../pagerPaths';
+import { PAGER_BOARD_PATH, pagerSignedOutUrl, portalPathForStaffPage } from '../../pagerPaths';
 import { ByRtylr, RenniliLogo } from './RenniliLogo';
 
 function StaffShell({ page }: { page: React.ReactNode }): React.JSX.Element {
@@ -28,6 +28,7 @@ function StaffShell({ page }: { page: React.ReactNode }): React.JSX.Element {
 const STAFF_SURFACE: StandaloneSurface = {
   portalPath: portalPathForStaffPage,
   shell: (page) => <StaffShell page={page} />,
+  signedOutUrl: pagerSignedOutUrl,
 };
 
 /** The Portal's account and access checks around Rennili's staff pages. */
