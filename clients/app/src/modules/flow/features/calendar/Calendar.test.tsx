@@ -43,9 +43,22 @@ const tasksData = vi.hoisted(() => ({
 }));
 const createTaskState = vi.hoisted(() => ({ isPending: false }));
 const createTaskMutate = vi.hoisted(() => vi.fn());
+const updateTaskMutate = vi.hoisted(() => vi.fn());
 vi.mock('../tasks/useTasks', () => ({
   useTasks: () => tasksData,
   useCreateTask: () => ({ mutate: createTaskMutate, isPending: createTaskState.isPending }),
+  useUpdateTask: () => ({ mutate: updateTaskMutate }),
+}));
+
+// Which projects the user may edit in; a set of ids, or every project.
+const editableProjects = vi.hoisted(() => ({ value: null as Set<string> | null }));
+vi.mock('../../shared/lib/currentUser', () => ({
+  useCanEditTaskIn: () => (projectId: string) =>
+    editableProjects.value === null || editableProjects.value.has(projectId),
+}));
+
+vi.mock('./useCalendarPlanning', () => ({
+  useCalendarPlanning: () => ({ cycles: [], milestones: [], leave: new Map() }),
 }));
 
 const labelsData = vi.hoisted(() => ({ data: [] as { id: number; name: string }[] }));
@@ -91,6 +104,7 @@ beforeEach(() => {
   createTaskState.isPending = false;
   labelsData.data = [];
   storeProjects.value = [{ id: 'p-9', name: 'Web' }];
+  editableProjects.value = null;
 });
 
 describe('Calendar per-day add-task control', () => {
@@ -403,5 +417,66 @@ describe('Calendar at the 390px floor (#1215)', () => {
     // The updater is a function, so that opening a task cannot discard the
     // filters the screen underneath already has in its query string.
     expect(call.search({ view: 'month' })).toEqual({ view: 'month', openTask: 't1' });
+  });
+});
+
+describe('Calendar planning (T-612)', () => {
+  const today = new Date();
+  const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+  afterEach(() => {
+    resetViewport();
+    tasksData.data = [];
+  });
+
+  it('lists open tasks with no dates in the Unscheduled panel at desktop width', () => {
+    setViewportWidth(DESKTOP_WIDTH);
+    tasksData.data = [
+      { id: 'u1', title: 'No date yet', projectId: 'p-9', priority: 'medium', status: 'todo' },
+      { id: 't1', title: 'Due today', projectId: 'p-9', dueDate: iso, priority: 'medium' },
+    ];
+    render(<Calendar />);
+
+    const panel = screen.getByRole('complementary', { name: 'flow.calendar.unscheduled.title' });
+    expect(panel).toHaveTextContent('No date yet');
+    expect(panel).not.toHaveTextContent('Due today');
+    expect(
+      screen.getByRole('button', { name: /flow\.calendar\.unscheduled\.toggle/ })
+    ).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('starts with the panel closed on a phone and opens it on request', () => {
+    setViewportWidth(MOBILE_WIDTH);
+    tasksData.data = [
+      { id: 'u1', title: 'No date yet', projectId: 'p-9', priority: 'medium', status: 'todo' },
+    ];
+    render(<Calendar />);
+
+    expect(screen.queryByRole('complementary')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /flow\.calendar\.unscheduled\.toggle/ }));
+    expect(screen.getByRole('complementary')).toHaveTextContent('No date yet');
+  });
+
+  it('switches to a week of seven days', () => {
+    setViewportWidth(DESKTOP_WIDTH);
+    const { container } = render(<Calendar />);
+    expect(container.querySelectorAll('[data-day]').length).toBeGreaterThan(7);
+
+    fireEvent.click(screen.getByRole('button', { name: 'flow.calendar.week' }));
+    expect(container.querySelectorAll('[data-day]')).toHaveLength(7);
+    expect(screen.getByRole('button', { name: 'flow.calendar.prevWeekLabel' })).toBeInTheDocument();
+  });
+
+  it('lets a task be dragged only in a project the user may edit', () => {
+    setViewportWidth(DESKTOP_WIDTH);
+    editableProjects.value = new Set(['p-1']);
+    tasksData.data = [
+      { id: 't1', title: 'Mine to move', projectId: 'p-1', dueDate: iso, priority: 'medium' },
+      { id: 't2', title: 'Read only', projectId: 'p-2', dueDate: iso, priority: 'medium' },
+    ];
+    render(<Calendar />);
+
+    expect(screen.getByTitle('Mine to move')).toHaveAttribute('draggable', 'true');
+    expect(screen.getByTitle('Read only')).toHaveAttribute('draggable', 'false');
   });
 });

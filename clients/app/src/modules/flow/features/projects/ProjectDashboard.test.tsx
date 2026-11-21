@@ -4,15 +4,43 @@ import { afterEach, describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ApiTask } from '../../shared/services/flowApi';
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }),
 }));
 
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
 }));
 
+// Summary links render as anchors carrying the filter they would open.
 vi.mock('@tanstack/react-router', () => ({
   useParams: () => ({ projectId: 'p1' }),
+  Link: ({
+    children,
+    search,
+    params: _params,
+    to,
+    ...rest
+  }: {
+    children: React.ReactNode;
+    search?: { filter?: unknown };
+    params?: unknown;
+    to: string;
+  }) => (
+    <a href={to} data-filter={JSON.stringify(search?.filter ?? null)} {...rest}>
+      {children}
+    </a>
+  ),
+}));
+
+const summaryState = vi.hoisted(() => ({
+  statuses: [] as Array<{ id: string; bucket: string; legacyStatus: string }>,
+  cycles: [] as Array<{ id: number; name: string; status: string }>,
+}));
+vi.mock('./useStatuses', () => ({
+  useProjectStatuses: () => ({ data: summaryState.statuses }),
+}));
+vi.mock('../cycles/useCycles', () => ({
+  useCycles: () => ({ data: summaryState.cycles }),
 }));
 
 vi.mock('../../shared/lib/useProjectRealtime', () => ({
@@ -80,6 +108,8 @@ import { useFlowStore } from '../../shared/stores/flowStore';
 
 beforeEach(() => {
   panelState.available = false;
+  summaryState.statuses = [];
+  summaryState.cycles = [];
   tasksState.data = [];
   tasksState.isPending = false;
   tasksState.isLoading = false;
@@ -222,5 +252,105 @@ describe('ProjectDashboard: by assignee', () => {
     expect(screen.getByText('Abed Amouneh')).toBeInTheDocument();
     expect(screen.getByText('flow.projectDashboard.unassigned')).toBeInTheDocument();
     expect(screen.queryByText('Unassigned')).not.toBeInTheDocument();
+  });
+});
+
+describe('ProjectDashboard: project summary (T-591)', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-11-18T12:00:00Z'));
+    summaryState.statuses = [
+      { id: '10', bucket: 'active', legacyStatus: 'todo' },
+      { id: '12', bucket: 'done', legacyStatus: 'done' },
+    ];
+    summaryState.cycles = [{ id: 7, name: 'Sprint 7', status: 'active' }];
+    tasksState.data = [
+      {
+        id: '1',
+        title: 'Late',
+        status: 'todo',
+        statusId: '10',
+        dueDate: '2026-11-10',
+        assigneeId: 'u1',
+        assigneeName: 'Ahmed',
+        estimatedHours: 4,
+        actualHours: 1,
+        createdAt: '2026-11-17T12:00:00Z',
+        updatedAt: '2026-11-17T12:00:00Z',
+      },
+      {
+        id: '2',
+        title: 'Nobody on it',
+        status: 'todo',
+        statusId: '10',
+        cycleId: 7,
+        createdAt: '2026-10-01T12:00:00Z',
+        updatedAt: '2026-10-01T12:00:00Z',
+      },
+    ] as unknown as ApiTask[];
+  });
+
+  const link = (el: HTMLElement): HTMLAnchorElement => el.closest('a') as HTMLAnchorElement;
+
+  it('opens the list filtered to what each recent card counts', () => {
+    render(<ProjectDashboard />);
+    const created = document.querySelector('[data-summary-count="created"]') as HTMLElement;
+    expect(created.textContent).toBe('1');
+    expect(link(created).getAttribute('href')).toBe('/flow/p/$projectId/list');
+    expect(JSON.parse(link(created).dataset.filter ?? 'null')).toEqual({
+      changed: ['created_7d'],
+    });
+  });
+
+  it('lists overdue and unassigned work in the active cycle under Needs attention', () => {
+    render(<ProjectDashboard />);
+    expect(screen.getByText('flow.projectDashboard.summary.needsAttention')).toBeInTheDocument();
+    const overdue = document.querySelector('[data-attention-count="overdue"]') as HTMLElement;
+    expect(overdue.textContent).toBe('1');
+    expect(JSON.parse(link(overdue).dataset.filter ?? 'null')).toEqual({
+      due: ['overdue'],
+      statuses: ['10'],
+    });
+    const gap = document.querySelector('[data-attention-count="cycle:7"]') as HTMLElement;
+    expect(gap.textContent).toBe('1');
+    expect(JSON.parse(link(gap).dataset.filter ?? 'null')).toEqual({
+      assignees: ['none'],
+      cycles: ['7'],
+      statuses: ['10'],
+    });
+  });
+
+  it('shows logged hours against the estimate and each person their open work', () => {
+    render(<ProjectDashboard />);
+    expect(screen.getByText('flow.projectDashboard.summary.hoursTitle')).toBeInTheDocument();
+    const person = document.querySelector('[data-workload-detail="u1"]') as HTMLElement;
+    expect(JSON.parse(link(person).dataset.filter ?? 'null')).toEqual({
+      assignees: ['u1'],
+      statuses: ['10'],
+    });
+  });
+
+  it('links a priority legend entry and a status legend entry that has tasks', () => {
+    render(<ProjectDashboard />);
+    const priority = document.querySelector('[data-priority-count="no_priority"]') as HTMLElement;
+    expect(priority.textContent).toBe('(2)');
+    expect(JSON.parse(link(priority).dataset.filter ?? 'null')).toEqual({
+      priorities: ['no_priority'],
+      statuses: ['10'],
+    });
+    const todo = screen.getByText('flow.taskDetail.todo');
+    expect(JSON.parse(link(todo).dataset.filter ?? 'null')).toEqual({ statuses: ['10'] });
+    // Nothing is done, so its entry is plain text rather than a link to nothing.
+    expect(screen.getByText('flow.taskDetail.done').closest('a')).toBeNull();
+  });
+
+  it('hides the hours card when nothing is estimated', () => {
+    tasksState.data = tasksState.data.map((t) => ({ ...t, estimatedHours: undefined }));
+    render(<ProjectDashboard />);
+    expect(screen.queryByText('flow.projectDashboard.summary.hoursTitle')).not.toBeInTheDocument();
   });
 });

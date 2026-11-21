@@ -644,7 +644,7 @@
     "settingsTitle": "Réglages du tableau",
     "openSettings": "Ouvrir les réglages du tableau",
     "closeSettings": "Fermer les réglages du tableau",
-    "readOnlyReason": "Vous pouvez voir la configuration de ce tableau mais pas la modifier. Les réglages de colonnes et de cartes nécessitent la gestion du projet.",
+    "readOnlyReason": "Vous pouvez voir la configuration de ce tableau mais pas la modifier. Les réglages de colonnes nécessitent la gestion du projet.",
     "columns": "Colonnes",
     "columnName": "Nom du statut",
     "addColumn": "Ajouter un statut",
@@ -652,20 +652,44 @@
     "promptsForHoursFor": "{{name}} demande les heures",
     "promptsForHoursBlocked": "La colonne qui demande les heures ne peut pas encore être enregistrée : une colonne n'a pas d'indicateur pour cela, la demande resterait donc liée à la colonne nommée Done.",
     "onTheCard": "Sur la carte",
-    "cardFieldsBlocked": "Les champs de carte ne peuvent pas encore être enregistrés. Ce sont des réglages que toute votre équipe voit, et il n'existe aucun endroit partagé pour les conserver.",
+    "yourView": "Votre affichage",
+    "boardSetup": "Configuration du tableau",
     "cardField": {
-      "loggedTime": "Temps saisi",
+      "key": "Clé",
+      "priority": "Priorité",
+      "labels": "Étiquettes",
+      "assignee": "Responsable",
+      "subtasks": "Résumé des sous-tâches",
+      "dueDate": "Date d'échéance",
       "estimate": "Estimation",
-      "overEstimate": "Alerte de dépassement d'estimation",
-      "assignee": "Responsable"
+      "cycle": "Itération",
+      "milestone": "Jalon"
     },
     "groupByHeading": "Grouper par",
-    "scopeExplained": "Le groupement n'appartient qu'à vous et vous suit projet par projet. Les colonnes et les champs de carte sont partagés : les modifier change ce que votre équipe voit.",
+    "scopeExplained": "Ces réglages n'appartiennent qu'à vous et sont conservés par projet dans ce navigateur. Les modifier ne change le tableau de personne d'autre.",
+    "hideDoneHeading": "Masquer les cartes terminées",
+    "hideDoneExplained": "Les cartes terminées et annulées quittent le tableau après ce délai. « Afficher les plus anciennes » les fait revenir.",
+    "hideDone": {
+      "days1": "Après 1 jour",
+      "days7": "Après 7 jours",
+      "days14": "Après 14 jours",
+      "days30": "Après 30 jours",
+      "never": "Jamais"
+    },
+    "columnWidthHeading": "Largeur des colonnes",
+    "columnWidth": {
+      "fixed": "Fixe",
+      "flexible": "Souple"
+    },
+    "resetView": "Réinitialiser mon affichage",
     "groupBy": {
       "none": "Aucun",
       "assignee": "Responsable",
       "priority": "Priorité",
       "due": "Échéance",
+      "label": "Étiquette",
+      "cycle": "Itération",
+      "milestone": "Jalon",
       "epic": "Épopée"
     },
     "moveTask": "Déplacer {{title}} vers une autre colonne",
@@ -683,6 +707,9 @@
     "addTask": "Ajouter une tâche",
     "emptyColumn": "Rien ici pour le moment.",
     "emptyLane": "Aucune",
+    "noLabel": "Sans étiquette",
+    "noCycle": "Sans itération",
+    "noMilestone": "Sans jalon",
     "columnsAreStatuses": "Chaque colonne est l'un des statuts de ce projet. Renommez-les, changez leur couleur, réordonnez-les et ajoutez-en dans Statuts.",
     "columnMenu": "Actions pour {{name}}",
     "renameStatus": "Renommer",
@@ -744,7 +771,27 @@
     "creating": "Création…",
     "prevMonthLabel": "Mois précédent",
     "nextMonthLabel": "Mois suivant",
-    "agendaEmpty": "Aucune tâche à échéance ce mois-ci."
+    "agendaEmpty": "Aucune tâche à échéance ce mois-ci.",
+    "prevWeekLabel": "Semaine précédente",
+    "nextWeekLabel": "Semaine suivante",
+    "viewLabel": "Vue du calendrier",
+    "month": "Mois",
+    "week": "Semaine",
+    "cycleTitle": "Cycle : {{name}}",
+    "milestoneTitle": "Jalon : {{name}}",
+    "leaveCount": "{{count}} en congé",
+    "resizeStart": "Faites glisser pour changer la date de début",
+    "resizeEnd": "Faites glisser pour changer la date d'échéance",
+    "unscheduled": {
+      "title": "Non planifiées",
+      "toggle": "Non planifiées ({{count}})",
+      "hide": "Masquer les tâches non planifiées",
+      "search": "Rechercher les tâches non planifiées",
+      "hint": "Faites glisser une tâche sur un jour pour fixer son échéance.",
+      "readOnly": "Vous pouvez ouvrir ces tâches mais pas les planifier.",
+      "empty": "Toutes les tâches ouvertes ont une date.",
+      "noMatches": "Aucune tâche non planifiée ne correspond."
+    }
   },
   "milestones": {
     "heading": "Jalons",
@@ -896,7 +943,29 @@
       "none": "Aucun",
       "epic": "Épopée"
     },
-    "empty": "Aucune tâche dans ce projet pour le moment."
+    "empty": "Aucune tâche dans ce projet pour le moment.",
+    "columns": "Colonnes",
+    "resetColumns": "Réinitialiser les colonnes",
+    "moveColumnEarlier": "Déplacer {{column}} avant",
+    "moveColumnLater": "Déplacer {{column}} après",
+    "resizeColumn": "Redimensionner {{column}}",
+    "exportCsv": "Exporter en CSV",
+    "gridLabel": "Tâches de {{project}}",
+    "showSubtasks_one": "Afficher {{count}} sous-tâche",
+    "showSubtasks_other": "Afficher {{count}} sous-tâches",
+    "hideSubtasks": "Masquer les sous-tâches",
+    "subtasksLoading": "Chargement des sous-tâches…",
+    "subtasksFailed": "Impossible de charger les sous-tâches",
+    "column": {
+      "priority": "Priorité",
+      "status": "Statut",
+      "assignee": "Responsable",
+      "startDate": "Date de début",
+      "estimate": "Estimation",
+      "labels": "Étiquettes",
+      "key": "Clé",
+      "created": "Créée le"
+    }
   },
   "projectOverview": {
     "pageTitle": "Aperçu · rtylr",
@@ -932,7 +1001,29 @@
     "overdue": "En retard",
     "labourCost": "Coût de main-d'œuvre",
     "percentComplete": "{{percent}} % terminé",
-    "unassigned": "Non assignée"
+    "unassigned": "Non assignée",
+    "summary": {
+      "recentTitle": "7 derniers jours",
+      "created": "Créées",
+      "completed": "Terminées",
+      "updated": "Modifiées",
+      "dueSoon": "Échéance proche",
+      "last7Days": "7 derniers jours",
+      "next7Days": "7 prochains jours",
+      "openFiltered": "{{label}} : {{n}} tâches. Les ouvrir dans la liste",
+      "needsAttention": "À surveiller",
+      "overdue": "En retard",
+      "unassignedInCycle": "Non assignées dans {{cycle}}",
+      "allClear": "Rien en retard et aucune tâche non assignée dans le cycle actif.",
+      "hoursTitle": "Temps saisi et estimation",
+      "hoursValue": "{{hours}} h",
+      "loggedOf": "saisies sur {{hours}} h estimées",
+      "openEstimate": "{{hours}} h estimées sur les tâches ouvertes",
+      "unestimated": "{{n}} ouvertes sans estimation",
+      "priorityTitle": "Tâches ouvertes par priorité",
+      "noOpenTasks": "Aucune tâche ouverte.",
+      "workloadDetail": "{{open}} ouvertes · {{hours}} h estimées"
+    }
   },
   "projectCalendar": {
     "pageTitle": "Calendrier · rtylr"
@@ -1222,6 +1313,11 @@
       "from": "Du",
       "to": "Au",
       "range": "du {{from}} au {{to}}"
+    },
+    "changed": {
+      "created7d": "Créées ces 7 derniers jours",
+      "completed7d": "Terminées ces 7 derniers jours",
+      "updated7d": "Modifiées ces 7 derniers jours"
     },
     "showCompleted": "Afficher les terminées",
     "completed": "Terminées",

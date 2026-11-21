@@ -1,12 +1,14 @@
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 import { useUserStore } from '../stores/userStore';
+import { useFlowStore } from '../stores/flowStore';
 import {
   useCanCreateTask,
   useCanEditTask,
+  useCanEditTaskIn,
   useCanDeleteResource,
   useCurrentProjectRole,
   isTaskMine,
@@ -195,5 +197,83 @@ describe('Flow project opened without a roster seat', () => {
     mocks.project.mockReturnValue(undefined);
     const { result } = renderHook(() => useCurrentProjectRole('p1'), { wrapper });
     expect(result.current).toBeUndefined();
+  });
+});
+
+// The Plan calendar decides each task's drag by its project. It must answer as
+// useCanEditTask would for that project, because both read resolveProjectRole.
+describe('Flow task edits across several projects', () => {
+  let client: QueryClient;
+  const shared = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={client}>{children}</QueryClientProvider>
+  );
+  // Waits for the roster read, so a false answer is the roster's, not a load.
+  const rosterLoaded = () => waitFor(() => expect(client.getQueryData(['members'])).toBeDefined());
+
+  beforeEach(() => {
+    client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    useFlowStore.setState({ projects: [] });
+  });
+
+  it('lets a project member edit there', async () => {
+    const { result } = renderHook(() => useCanEditTaskIn(['p1']), { wrapper });
+    await waitFor(() => expect(result.current('p1')).toBe(true));
+  });
+
+  it('keeps a viewer read only', async () => {
+    mocks.members.mockReturnValue([{ userId: '7', role: 'viewer' }]);
+    const { result } = renderHook(() => useCanEditTaskIn(['p1']), { wrapper: shared });
+    await rosterLoaded();
+    expect(result.current('p1')).toBe(false);
+  });
+
+  it('treats the project owner off the roster as admin', async () => {
+    mocks.members.mockReturnValue([{ userId: '9', role: 'admin' }]);
+    useFlowStore.setState({
+      projects: [{ id: 'p1', ownerId: '7' }] as unknown as ReturnType<
+        typeof useFlowStore.getState
+      >['projects'],
+    });
+    const { result } = renderHook(() => useCanEditTaskIn(['p1']), { wrapper });
+    await waitFor(() => expect(result.current('p1')).toBe(true));
+  });
+
+  it('fails closed for someone off the roster who does not own the project', async () => {
+    mocks.members.mockReturnValue([{ userId: '9', role: 'admin' }]);
+    useFlowStore.setState({
+      projects: [{ id: 'p1', ownerId: '9' }] as unknown as ReturnType<
+        typeof useFlowStore.getState
+      >['projects'],
+    });
+    const { result } = renderHook(() => useCanEditTaskIn(['p1']), { wrapper: shared });
+    await rosterLoaded();
+    expect(result.current('p1')).toBe(false);
+  });
+
+  it.each([{ isOwner: true }, { isAdmin: true }])('lets %j edit without a roster', (role) => {
+    mocks.members.mockClear();
+    useUserStore.setState({
+      user: {
+        id: 7,
+        effectiveAccess: createEffectiveAccess('flow', {
+          ...role,
+          permissions: ['flow:tasks:edit', 'flow:projects:view'],
+        }),
+      },
+    });
+    const { result } = renderHook(() => useCanEditTaskIn(['p1']), { wrapper });
+    expect(result.current('p1')).toBe(true);
+    expect(mocks.members).not.toHaveBeenCalled();
+  });
+
+  it('refuses everything without task write access', () => {
+    useUserStore.setState({
+      user: {
+        id: 7,
+        effectiveAccess: createEffectiveAccess('flow', { permissions: ['flow:projects:view'] }),
+      },
+    });
+    const { result } = renderHook(() => useCanEditTaskIn(['p1']), { wrapper });
+    expect(result.current('p1')).toBe(false);
   });
 });

@@ -15,6 +15,8 @@ type memoryRepository struct {
 	mu       sync.Mutex
 	tickets  []*domain.Ticket
 	settings map[int64]domain.Settings
+	pushes   []pushRow
+	pushSeq  int64
 }
 
 func newMemoryRepository() *memoryRepository {

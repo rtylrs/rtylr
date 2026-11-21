@@ -105,12 +105,12 @@ export interface ApiTask {
   assigneeId?: string;
   assigneeInitials: string;
   dueDate: string;
-  // Write path only for now. The wire carries start_date on both Task and
-  // UpdateTaskBody, but the response mapping never populates it, so reading
-  // this off a fetched task still yields undefined (see ProjectTimeline).
-  // It exists here so updateTask can forward a caller-supplied value instead
-  // of hardcoding a placeholder.
-  startDate?: string;
+  // Read and written. flow.task.v2 carries start_date on FlowTask and on
+  // UpdateTaskBody, onion's list and detail reads select and map it, and the
+  // generated client decodes it to `startDate`. A note here used to say the
+  // response never populated it; that predates the v2 task reads. Absent means
+  // no start date (omitempty). Pinned to the contract like `archived` below.
+  startDate?: ContractTask['startDate'];
   subtaskCount: number;
   completedSubtasks?: number;
   commentCount?: number;

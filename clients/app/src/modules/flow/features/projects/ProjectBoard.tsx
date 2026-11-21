@@ -48,12 +48,23 @@ import {
   sortStatuses,
   statusIdOf,
 } from './statusUtils';
-import { DUE_LANES, PRIORITY_LABEL_KEY, PRIORITY_ORDER, epicLanes, laneKeyFor } from './taskGroups';
+import {
+  DUE_LANES,
+  PRIORITY_LABEL_KEY,
+  PRIORITY_ORDER,
+  epicLanes,
+  isValueGroupKey,
+  laneKeysFor,
+  valueLanes,
+} from './taskGroups';
 import { EpicFilterContext } from '../../shared/components/EpicChip';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import type { BoardGroupKey } from '../../shared/lib/boardUtils';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import TaskCard from '../../shared/components/TaskCard';
+import { useLabels } from '../tasks/useLabels';
+import { BOARD_GROUP_KEYS, type CardFields } from './boardViewSettings';
+import { useBoardViewSettings } from './useBoardViewSettings';
 import ProjectViewTabs from './ProjectViewTabs';
 import MoveToColumnMenu, { type MoveTarget } from './components/MoveToColumnMenu';
 import {
@@ -159,20 +170,25 @@ const measureSlots = (list: HTMLElement | null | undefined): CardSlot[] => {
 // ── Group-by (swimlanes) ────────────────────────────────────────────────
 // "None" = plain kanban columns. Any other value partitions each column's
 // tasks into horizontal lanes keyed by that attribute (assignee, priority,
-// etc.). The choice persists per-project in localStorage so switching
-// projects doesn't reset it.
+// label, etc.). The choice is part of the viewer's own board settings, kept
+// per user and per project (see boardViewSettings).
 
 /** Re-exported name kept local for readability; the type lives in boardUtils. */
 type GroupKey = BoardGroupKey;
 
-// labelKey, not label: module scope, so it cannot call `t` itself.
-const GROUP_OPTIONS: { key: GroupKey; labelKey: string }[] = [
-  { key: 'none', labelKey: 'flow.board.groupBy.none' },
-  { key: 'assignee', labelKey: 'flow.board.groupBy.assignee' },
-  { key: 'priority', labelKey: 'flow.board.groupBy.priority' },
-  { key: 'due', labelKey: 'flow.board.groupBy.due' },
-  { key: 'epic', labelKey: 'flow.board.groupBy.epic' },
-];
+/** What a card shows on this board: the viewer's fields and its plan names. */
+interface CardDisplay {
+  fields: CardFields;
+  cycleName?: string;
+  milestoneName?: string;
+}
+
+/** The project's labels, cycles and milestones, which name the value lanes. */
+interface LaneOptions {
+  label: readonly { id: string | number; name: string }[];
+  cycle: readonly { id: string | number; name: string }[];
+  milestone: readonly { id: string | number; name: string }[];
+}
 
 interface Lane {
   key: string;
@@ -191,17 +207,20 @@ interface Lane {
 function buildLanes(
   allLaneKeys: { key: string; label?: string; labelKey?: string }[],
   columnTasks: Task[],
-  groupBy: GroupKey
+  groupBy: GroupKey,
+  known?: ReadonlySet<string>
 ): Lane[] {
   if (groupBy === 'none') {
     return [{ key: '_all', label: '', tasks: columnTasks }];
   }
   const byKey = new Map<string, Task[]>();
   for (const t of columnTasks) {
-    const k = laneKeyFor(t, groupBy);
-    const bucket = byKey.get(k) ?? [];
-    bucket.push(t);
-    byKey.set(k, bucket);
+    // A card with two labels sits in both label lanes.
+    for (const k of laneKeysFor(t, groupBy, known)) {
+      const bucket = byKey.get(k) ?? [];
+      bucket.push(t);
+      byKey.set(k, bucket);
+    }
   }
   return allLaneKeys.map(({ key, label, labelKey }) => ({
     key,
@@ -218,9 +237,12 @@ function buildLanes(
  */
 function buildLaneIndex(
   tasks: Task[],
-  groupBy: GroupKey
+  groupBy: GroupKey,
+  options: LaneOptions
 ): { key: string; label?: string; labelKey?: string }[] {
   if (groupBy === 'none') return [{ key: '_all', label: '' }];
+
+  if (isValueGroupKey(groupBy)) return valueLanes(tasks, groupBy, options[groupBy]);
 
   if (groupBy === 'priority') {
     return PRIORITY_ORDER.map((p) => ({ key: p, labelKey: PRIORITY_LABEL_KEY[p] }));
@@ -234,36 +256,11 @@ function buildLaneIndex(
   // are people's names, so they carry `label` and are never translated.
   const seen = new Map<string, string>();
   for (const t of tasks) {
-    const k = laneKeyFor(t, groupBy);
-    if (!seen.has(k)) seen.set(k, k);
+    for (const k of laneKeysFor(t, groupBy)) {
+      if (!seen.has(k)) seen.set(k, k);
+    }
   }
   return Array.from(seen.values()).map((k) => ({ key: k, label: k }));
-}
-
-function loadGroupBy(projectId: string): GroupKey {
-  try {
-    const raw = localStorage.getItem(`flow:board:groupBy:${projectId}`);
-    if (
-      raw === 'none' ||
-      raw === 'assignee' ||
-      raw === 'priority' ||
-      raw === 'due' ||
-      raw === 'epic'
-    ) {
-      return raw;
-    }
-  } catch {
-    // localStorage unavailable (SSR / private mode) - fall through.
-  }
-  return 'none';
-}
-
-function saveGroupBy(projectId: string, key: GroupKey): void {
-  try {
-    localStorage.setItem(`flow:board:groupBy:${projectId}`, key);
-  } catch {
-    // ignore
-  }
 }
 
 const ProjectBoard: React.FC = () => {
@@ -311,7 +308,6 @@ const ProjectBoard: React.FC = () => {
   const dragOver = dragView?.slot?.columnId ?? null; // column id
   const [addingColumn, setAddingColumn] = useState(false);
   const [newColumnName, setNewColumnName] = useState('');
-  const [groupBy, setGroupByState] = useState<GroupKey>('none');
   const [pendingDeleteColumn, setPendingDeleteColumn] = useState<ApiStatus | null>(null);
   // Where a status named in the dialog is inserted; null while it is closed.
   const [insertAt, setInsertAt] = useState<number | null>(null);
@@ -319,16 +315,6 @@ const ProjectBoard: React.FC = () => {
   const [showOlder, setShowOlder] = useState<ReadonlySet<string>>(new Set());
   const [boardSettingsOpen, setBoardSettingsOpen] = useState(false);
   const [statusSettingsOpen, setStatusSettingsOpen] = useState(false);
-
-  // Hydrate group-by from localStorage once the project id is known.
-  useEffect(() => {
-    if (projectId) setGroupByState(loadGroupBy(projectId));
-  }, [projectId]);
-
-  const setGroupBy = (k: GroupKey): void => {
-    setGroupByState(k);
-    if (projectId) saveGroupBy(projectId, k);
-  };
 
   // Tasks mapped to Task shape for TaskCard. Computed BEFORE any early
   // return so the useMemo below always runs in the same hook slot on
@@ -352,10 +338,34 @@ const ProjectBoard: React.FC = () => {
     matchingIds,
     shownTasks: boardTasks,
     dimmedIds,
+    cycles = [],
+    milestones = [],
   } = useProjectTaskFilters(projectId, tasks);
   const { filters, dim } = filterState;
   const saveAsView = useSaveFiltersAsView();
   const hideUnmatched = matchingIds !== null && !dim;
+
+  // This viewer's own board: grouping, card fields, done window, column width.
+  const {
+    settings: viewSettings,
+    update: updateViewSettings,
+    reset: resetViewSettings,
+  } = useBoardViewSettings(projectId, currentUserId);
+  const { groupBy, cardFields, hideDoneAfterDays } = viewSettings;
+  const setGroupBy = (k: GroupKey): void => updateViewSettings({ groupBy: k });
+  const { data: labels = [] } = useLabels();
+
+  const laneOptions: LaneOptions = useMemo(
+    () => ({ label: labels, cycle: cycles, milestone: milestones }),
+    [labels, cycles, milestones]
+  );
+  // Ids that name a lane. A label or cycle the project no longer has puts the
+  // card under "No label" or "No cycle", which is what the card itself shows.
+  const knownLaneIds = useMemo(
+    () =>
+      isValueGroupKey(groupBy) ? new Set(laneOptions[groupBy].map((o) => String(o.id))) : undefined,
+    [groupBy, laneOptions]
+  );
 
   // Precompute the ordered lane index across all tasks so every column
   // renders the same rows in the same order - otherwise empty columns
@@ -363,13 +373,27 @@ const ProjectBoard: React.FC = () => {
   // Epic lanes come from every task, not only the shown ones: filtering to an
   // epic's tasks must not drop the lane of the epic they belong to.
   const laneIndex = useMemo(
-    () => buildLaneIndex(groupBy === 'epic' ? tasks : boardTasks, groupBy),
-    [tasks, boardTasks, groupBy]
+    () => buildLaneIndex(groupBy === 'epic' ? tasks : boardTasks, groupBy, laneOptions),
+    [tasks, boardTasks, groupBy, laneOptions]
   );
   // An epic chip on a card narrows the board to that epic.
   const filterByEpic = useCallback(
     (epicId: string) => filterState.setFilters((current) => ({ ...current, epics: [epicId] })),
     [filterState]
+  );
+
+  const cycleNames = useMemo(() => new Map(cycles.map((c) => [String(c.id), c.name])), [cycles]);
+  const milestoneNames = useMemo(
+    () => new Map(milestones.map((m) => [String(m.id), m.name])),
+    [milestones]
+  );
+  const cardDisplay = useCallback(
+    (task: Task): CardDisplay => ({
+      fields: cardFields,
+      cycleName: task.cycleId ? cycleNames.get(task.cycleId) : undefined,
+      milestoneName: task.milestoneId ? milestoneNames.get(task.milestoneId) : undefined,
+    }),
+    [cardFields, cycleNames, milestoneNames]
   );
 
   // Every column is a move destination for the non-drag path (B2).
@@ -438,8 +462,12 @@ const ProjectBoard: React.FC = () => {
 
   /** The cards a closed column hides until "Show older" is chosen. */
   function olderTasksForColumn(col: ApiStatus, colIndex: number): Task[] {
-    if (!isClosedBucket(col.bucket) || showOlder.has(col.id)) return [];
-    return allTasksForColumn(col, colIndex).filter((t) => !closedRecently(t, col.bucket, now));
+    if (hideDoneAfterDays === null || !isClosedBucket(col.bucket) || showOlder.has(col.id)) {
+      return [];
+    }
+    return allTasksForColumn(col, colIndex).filter(
+      (t) => !closedRecently(t, col.bucket, now, hideDoneAfterDays)
+    );
   }
 
   function tasksForColumn(col: ApiStatus, colIndex: number): Task[] {
@@ -758,8 +786,9 @@ const ProjectBoard: React.FC = () => {
           onClose={() => setBoardSettingsOpen(false)}
           columns={columns}
           canManage={canManageBoard}
-          groupBy={groupBy}
-          onGroupByChange={setGroupBy}
+          settings={viewSettings}
+          onSettingsChange={updateViewSettings}
+          onResetSettings={resetViewSettings}
           onManageStatuses={() => {
             setBoardSettingsOpen(false);
             setStatusSettingsOpen(true);
@@ -777,12 +806,22 @@ const ProjectBoard: React.FC = () => {
           too much room on laptop screens. These values stay reasonable
           down to narrow viewports because the column snaps to 248px. */}
         <div className="min-h-0 flex-1 overflow-auto">
-          <div className="flex h-full min-w-max gap-2 px-3 py-3">
+          <div
+            data-board-width={viewSettings.columnWidth}
+            className={
+              viewSettings.columnWidth === 'flexible'
+                ? // Columns share the width; past their minimum the board scrolls.
+                  'flex h-full w-fit min-w-full gap-2 px-3 py-3'
+                : 'flex h-full min-w-max gap-2 px-3 py-3'
+            }
+          >
             {shownColumns.map(({ col, index: i }) => (
               <KanbanColumn
                 key={String(col.id)}
                 col={col}
-                lanes={buildLanes(laneIndex, tasksForColumn(col, i), groupBy)}
+                lanes={buildLanes(laneIndex, tasksForColumn(col, i), groupBy, knownLaneIds)}
+                flexible={viewSettings.columnWidth === 'flexible'}
+                cardDisplay={cardDisplay}
                 dimmedIds={dimmedIds}
                 groupBy={groupBy}
                 isOver={dragOver === String(col.id)}
@@ -914,7 +953,7 @@ const ProjectBoard: React.FC = () => {
                 filter: 'drop-shadow(0 12px 24px rgba(0, 0, 0, 0.28))',
               }}
             >
-              <TaskCard task={ghost.task} />
+              <TaskCard task={ghost.task} {...cardDisplay(ghost.task)} />
             </div>,
             document.body
           )}
@@ -930,6 +969,10 @@ type Side = 'before' | 'after';
 const KanbanColumn: React.FC<{
   col: ApiStatus;
   lanes: Lane[];
+  /** Columns share the board's width instead of a fixed one. */
+  flexible: boolean;
+  /** The fields this viewer chose and the names a card shows. */
+  cardDisplay: (task: Task) => CardDisplay;
   /** Cards that do not match the filters, faded in "Dim instead of hide". */
   dimmedIds?: ReadonlySet<string> | null;
   groupBy: GroupKey;
@@ -966,6 +1009,8 @@ const KanbanColumn: React.FC<{
 }> = ({
   col,
   lanes,
+  flexible,
+  cardDisplay,
   dimmedIds = null,
   groupBy,
   isOver,
@@ -1068,6 +1113,7 @@ const KanbanColumn: React.FC<{
         >
           <TaskCard
             task={task}
+            {...cardDisplay(task)}
             controls={renderCardControls(task.id, task.title)}
             dimmed={!reorder && draggingTaskId === task.id}
             selected={selectedTaskIds.includes(task.id)}
@@ -1084,14 +1130,13 @@ const KanbanColumn: React.FC<{
     return out;
   };
 
-  // Total count for the column header pill (stays accurate regardless
-  // of group-by - it's the sum of tasks across all lanes).
-  const colTaskCount = lanes.reduce((n, l) => n + l.tasks.length, 0);
+  // Total count for the column header pill. Counted by id, not summed over
+  // lanes: grouped by label, a card with two labels sits in two lanes.
+  const columnIds = new Set(lanes.flatMap((l) => l.tasks.map((task) => task.id)));
+  const colTaskCount = columnIds.size;
   // While dimming, the pill reads "matching/all" so the column still says how
   // much of it the filter picked out.
-  const colMatchCount = dimmedIds
-    ? lanes.reduce((n, l) => n + l.tasks.filter((task) => !dimmedIds.has(task.id)).length, 0)
-    : null;
+  const colMatchCount = dimmedIds ? [...columnIds].filter((id) => !dimmedIds.has(id)).length : null;
 
   return (
     <div
@@ -1102,7 +1147,12 @@ const KanbanColumn: React.FC<{
       // the row beside it (rtylr#1078, S-08). The viewport clamp stays, so a
       // 390px phone still gets one full-width column rather than a horizontal
       // scrollbar on the page itself.
-      className="flex w-[min(296px,calc(100vw-1.5rem))] min-w-[min(296px,calc(100vw-1.5rem))] flex-col rounded-md p-1.5 sm:w-[296px] sm:min-w-[296px]"
+      className={
+        flexible
+          ? // Flexible: an equal share of the board, never narrower than the fixed width.
+            'flex min-w-[min(296px,calc(100vw-1.5rem))] flex-1 basis-0 flex-col rounded-md p-1.5 sm:min-w-[296px]'
+          : 'flex w-[min(296px,calc(100vw-1.5rem))] min-w-[min(296px,calc(100vw-1.5rem))] flex-col rounded-md p-1.5 sm:w-[296px] sm:min-w-[296px]'
+      }
       style={{
         background: isOver ? withAlpha(col.color, 5) : 'transparent',
         border: isOver ? `1px dashed ${col.color}` : '1px solid transparent',
@@ -1228,6 +1278,7 @@ const KanbanColumn: React.FC<{
                   <TaskCard
                     key={task.id}
                     task={task}
+                    {...cardDisplay(task)}
                     controls={renderCardControls(task.id, task.title)}
                     dimmed={draggingTaskId === task.id}
                     selected={selectedTaskIds.includes(task.id)}
@@ -1445,8 +1496,6 @@ const GroupByPicker: React.FC<{
   const close = useCallback((): void => setOpen(false), []);
   useClickOutside(ref, close);
 
-  const current = GROUP_OPTIONS.find((o) => o.key === groupBy)!;
-
   return (
     <div ref={ref} className="relative">
       <button
@@ -1460,7 +1509,7 @@ const GroupByPicker: React.FC<{
         }}
       >
         <span style={{ color: 'var(--flow-text-dim)' }}>{t('flow.board.groupByLabel')}</span>
-        <span style={{ color: 'var(--flow-text)' }}>{t(current.labelKey)}</span>
+        <span style={{ color: 'var(--flow-text)' }}>{t(`flow.board.groupBy.${groupBy}`)}</span>
         <ChevronDown size={11} />
       </button>
       {open && (
@@ -1471,21 +1520,21 @@ const GroupByPicker: React.FC<{
             border: '1px solid var(--flow-border)',
           }}
         >
-          {GROUP_OPTIONS.map((o) => (
+          {BOARD_GROUP_KEYS.map((key) => (
             <button
               type="button"
-              key={o.key}
+              key={key}
               onClick={() => {
-                onChange(o.key);
+                onChange(key);
                 setOpen(false);
               }}
               className="w-full text-start px-2.5 py-1.5 text-flow-meta transition-colors hover:bg-[var(--flow-hover)]"
               style={{
-                color: o.key === groupBy ? 'var(--flow-text)' : 'var(--flow-text-muted)',
-                fontWeight: o.key === groupBy ? 600 : 400,
+                color: key === groupBy ? 'var(--flow-text)' : 'var(--flow-text-muted)',
+                fontWeight: key === groupBy ? 600 : 400,
               }}
             >
-              {t(o.labelKey)}
+              {t(`flow.board.groupBy.${key}`)}
             </button>
           ))}
         </div>

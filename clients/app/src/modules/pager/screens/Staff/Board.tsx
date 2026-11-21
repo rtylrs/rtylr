@@ -10,7 +10,11 @@ import { Badge, Button } from '../../../../shared/components/ui';
 import { useUserStore } from '../../../../shared/stores/userStore';
 import { PAGER_POSTER_PATH } from '../../pagerPaths';
 import { PAGER_ERROR, errorCode, errorStatus } from '../../shared/lib/apiError';
-import { staffPagerClient } from '../../shared/lib/clients';
+import {
+  type StaffPagerClient,
+  usePagerSandbox,
+  useStaffPagerClient,
+} from '../../shared/lib/pagerClients';
 import { normaliseTicketNumber } from '../../shared/lib/ticketNumber';
 import { TICKET_POLL_INTERVAL_MS, isStaleAnswer } from '../../shared/lib/ticketPoller';
 import { usePagerVenue } from '../../shared/lib/usePagerVenue';
@@ -37,12 +41,22 @@ function boardErrorFor(error: unknown): BoardError {
 
 type TicketAction = 'ready' | 'remind' | 'undo' | 'collect';
 
-const TICKET_ACTIONS: Record<TicketAction, (id: string) => Promise<unknown>> = {
-  ready: (id) => staffPagerClient.markReady({ id }),
-  remind: (id) => staffPagerClient.remindTicket({ id }),
-  undo: (id) => staffPagerClient.undoReady({ id }),
-  collect: (id) => staffPagerClient.collectTicket({ id }),
-};
+function runTicketAction(
+  client: StaffPagerClient,
+  action: TicketAction,
+  id: string
+): Promise<unknown> {
+  switch (action) {
+    case 'ready':
+      return client.markReady({ id });
+    case 'remind':
+      return client.remindTicket({ id });
+    case 'undo':
+      return client.undoReady({ id });
+    case 'collect':
+      return client.collectTicket({ id });
+  }
+}
 
 const Board = (): React.JSX.Element => {
   const { t } = useTranslation('pager');
@@ -53,6 +67,8 @@ const Board = (): React.JSX.Element => {
   const [number, setNumber] = useState('');
   const [boardError, setBoardError] = useState<BoardError | null>(null);
   const shown = useRef<ListTicketsResponse | null>(null);
+  const staffPagerClient = useStaffPagerClient();
+  const sandbox = usePagerSandbox();
 
   const tickets = useQuery({
     queryKey: TICKETS_KEY,
@@ -95,7 +111,7 @@ const Board = (): React.JSX.Element => {
 
   const changeTicket = useMutation({
     mutationFn: ({ id, action }: { id: string; action: TicketAction }) =>
-      TICKET_ACTIONS[action](id),
+      runTicketAction(staffPagerClient, action, id),
     onMutate: beforeChange,
     onError: onChangeFailed,
     onSettled: afterChange,
@@ -111,11 +127,12 @@ const Board = (): React.JSX.Element => {
 
   const customerLink = usePagerVenue().joinUrl;
   // The server refuses a settings change from anyone else; this only saves
-  // them the round trip.
-  const canEditSettings = useUserStore(
+  // them the round trip. In the demo the visitor plays the owner.
+  const isOwnerOrAdmin = useUserStore(
     (state) =>
       Boolean(state.user?.effectiveAccess?.isOwner) || Boolean(state.user?.effectiveAccess?.isAdmin)
   );
+  const canEditSettings = sandbox || isOwnerOrAdmin;
 
   if (errorStatus(tickets.error) === 403 || errorStatus(settings.error) === 403) {
     return (
@@ -223,14 +240,17 @@ const Board = (): React.JSX.Element => {
               {t('pager.board.subheading')}
             </p>
           </div>
-          {/* The Portal's Button renders a <button> only, so the link wears its classes. */}
-          <Link
-            to={PAGER_POSTER_PATH}
-            className="portal-button portal-button--outline portal-button--sm"
-          >
-            <Printer size={16} aria-hidden="true" />
-            {t('pager.board.posterLink')}
-          </Link>
+          {/* The demo has no venue to print a poster for, and the poster page needs a sign in. */}
+          {!sandbox && (
+            // The Portal's Button renders a <button> only, so the link wears its classes.
+            <Link
+              to={PAGER_POSTER_PATH}
+              className="portal-button portal-button--outline portal-button--sm"
+            >
+              <Printer size={16} aria-hidden="true" />
+              {t('pager.board.posterLink')}
+            </Link>
+          )}
         </div>
 
         {boardError && <Alert variant="destructive">{t(`pager.board.${boardError}`)}</Alert>}

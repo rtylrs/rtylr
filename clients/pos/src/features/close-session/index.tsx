@@ -7,6 +7,7 @@ import ScreenLayout from '../../layouts/ScreenLayout';
 import ConfirmModal from '../../shared/components/ConfirmModal';
 import { formatCurrency } from '../../shared/utils/format';
 import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
+import { useRegisterSessionStore } from '../../shared/stores/registerSessionStore';
 import { useDaySummary } from '../day-summary/useDaySummary';
 import { useSessionCloseQueueStore } from '../../shared/stores/sessionCloseQueueStore';
 import { buildCloseSessionPayload, closeSessionWithFallback } from './closeSessionWorkflow';
@@ -59,6 +60,8 @@ const CloseSessionScreen: React.FC = () => {
       if (result.status === 'queued') {
         toast.warning('Session close saved locally and will sync later');
       } else {
+        // Leaving the summary now asks for a new opening float.
+        useRegisterSessionStore.getState().setStatus('none');
         toast.success('Session closed');
       }
       navigate('/day-summary');

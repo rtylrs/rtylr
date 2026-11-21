@@ -70,3 +70,58 @@ export function laneKeyFor(t: Task, groupBy: BoardGroupKey): string {
   }
   return '_all';
 }
+
+/** The lane for cards with no label, cycle or milestone. */
+export const NO_VALUE_LANE = '_none';
+
+/** Groupings whose lanes are this project's labels, cycles or milestones. */
+export type ValueGroupKey = Extract<BoardGroupKey, 'label' | 'cycle' | 'milestone'>;
+
+export const NO_VALUE_LABEL_KEY: Record<ValueGroupKey, string> = {
+  label: 'flow.board.noLabel',
+  cycle: 'flow.board.noCycle',
+  milestone: 'flow.board.noMilestone',
+};
+
+export const isValueGroupKey = (groupBy: BoardGroupKey): groupBy is ValueGroupKey =>
+  groupBy === 'label' || groupBy === 'cycle' || groupBy === 'milestone';
+
+/**
+ * Every lane a card belongs in. One, except for labels: a card sits in the
+ * lane of each label it carries. An id the board does not know (a label,
+ * cycle or milestone since deleted) counts as no value, as it does on the card.
+ */
+export function laneKeysFor(
+  t: Task,
+  groupBy: BoardGroupKey,
+  known?: ReadonlySet<string>
+): string[] {
+  if (!isValueGroupKey(groupBy)) return [laneKeyFor(t, groupBy)];
+  const raw =
+    groupBy === 'label'
+      ? (t.labelIds ?? []).map(String)
+      : [(groupBy === 'cycle' ? t.cycleId : t.milestoneId) ?? ''];
+  const ids = [...new Set(raw.filter((id) => id !== '' && (!known || known.has(id))))];
+  return ids.length > 0 ? ids : [NO_VALUE_LANE];
+}
+
+/**
+ * The lanes for a label, cycle or milestone grouping: the options some card
+ * uses, in the options' own order, then "No ..." when a card has none. Lanes
+ * nobody uses are left out, as the assignee grouping leaves out people.
+ */
+export function valueLanes(
+  tasks: readonly Task[],
+  groupBy: ValueGroupKey,
+  options: readonly { id: string | number; name: string }[]
+): { key: string; label?: string; labelKey?: string }[] {
+  const known = new Set(options.map((o) => String(o.id)));
+  const used = new Set(tasks.flatMap((t) => laneKeysFor(t, groupBy, known)));
+  const lanes: { key: string; label?: string; labelKey?: string }[] = options
+    .filter((o) => used.has(String(o.id)))
+    .map((o) => ({ key: String(o.id), label: o.name }));
+  if (used.has(NO_VALUE_LANE)) {
+    lanes.push({ key: NO_VALUE_LANE, labelKey: NO_VALUE_LABEL_KEY[groupBy] });
+  }
+  return lanes;
+}

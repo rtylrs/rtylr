@@ -91,11 +91,13 @@ export function columnLabel(status: TaskStatus): string {
 
 /**
  * How a board partitions each column into horizontal lanes. `none` is a plain
- * kanban board.
+ * kanban board. `label` puts a card in the lane of every label it carries, so
+ * a card with two labels shows in both.
  *
  * Defined here rather than in either component: the board renders the settings
  * panel, so the panel cannot import the type from the board without a cycle, and
  * two local copies typecheck against each other only while they happen to be
  * identical. Adding a value to one and not the other would compile.
  */
-export type BoardGroupKey = 'none' | 'assignee' | 'priority' | 'due' | 'epic';
+export type BoardGroupKey =
+  'none' | 'assignee' | 'priority' | 'due' | 'label' | 'cycle' | 'milestone' | 'epic';

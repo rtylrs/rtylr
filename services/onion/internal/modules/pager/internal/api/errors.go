@@ -31,6 +31,8 @@ var (
 	errInvalidNumber      = &codedError{http.StatusBadRequest, "invalid_number", "The order number must be 1 to 12 letters and digits"}
 	errInvalidTransition  = &codedError{http.StatusConflict, "invalid_transition", "The ticket is no longer in a state that allows this"}
 	errTooManyOpenTickets = &codedError{http.StatusTooManyRequests, "too_many_open_tickets", "This venue has too many open tickets right now"}
+	errInvalidPush        = &codedError{http.StatusBadRequest, "invalid_push_subscription", "This browser's push subscription is not accepted"}
+	errTooManyPushes      = &codedError{http.StatusTooManyRequests, "too_many_push_subscriptions", "Too many browsers are following this ticket"}
 )
 
 // publicError maps a service failure to what the client is told. Anything
@@ -47,6 +49,10 @@ func publicError(ctx context.Context, action string, err error) error {
 		return errInvalidTransition
 	case errors.Is(err, domain.ErrTooManyOpenTickets):
 		return errTooManyOpenTickets
+	case errors.Is(err, domain.ErrInvalidPushSubscription):
+		return errInvalidPush
+	case errors.Is(err, domain.ErrTooManyPushSubscriptions):
+		return errTooManyPushes
 	}
 	logger.Ctx(ctx).Error("pager request failed", logger.String("action", action), logger.Error(err))
 	return onekiterrors.New(http.StatusInternalServerError, "Something went wrong, please try again")

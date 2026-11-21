@@ -2,7 +2,15 @@ import React, { useState } from 'react';
 import { useOpenTask } from '../lib/useOpenTask';
 import { dueState } from '../lib/dateUtils';
 import { motion } from 'motion/react';
-import { Calendar, MessageSquare, Paperclip, GitBranch } from 'lucide-react';
+import {
+  Calendar,
+  Clock,
+  GitBranch,
+  MessageSquare,
+  Milestone,
+  Paperclip,
+  Timer,
+} from 'lucide-react';
 import { Task, useFlowStore } from '../stores/flowStore';
 import { useLabels } from '../../features/tasks/useLabels';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +23,8 @@ import EpicChip from './EpicChip';
 import { TaskContextMenu, ContextMenuState } from './TaskContextMenu';
 import { withAlpha, onTint } from '../lib/colorUtils';
 import { displayStatusName } from '../../features/projects/statusUtils';
+import { DEFAULT_CARD_FIELDS, type CardFields } from '../../features/projects/boardViewSettings';
+import { formatDuration } from '../lib/durationUtils';
 
 interface TaskCardProps {
   task: Task;
@@ -33,6 +43,14 @@ interface TaskCardProps {
   onDragPointerDown?: (e: React.PointerEvent, taskId: string) => void;
   onDragPointerMove?: (e: React.PointerEvent) => void;
   onDragPointerEnd?: (e: React.PointerEvent) => boolean;
+  /**
+   * Which optional fields the card shows. Left out, the card shows what it
+   * always has; the board passes the viewer's own choice.
+   */
+  fields?: CardFields;
+  /** The task's cycle and milestone names, shown when those fields are on. */
+  cycleName?: string;
+  milestoneName?: string;
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({
@@ -46,6 +64,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   onDragPointerDown,
   onDragPointerMove,
   onDragPointerEnd,
+  fields = DEFAULT_CARD_FIELDS,
+  cycleName,
+  milestoneName,
 }) => {
   const { t } = useTranslation();
   const openTask = useOpenTask();
@@ -59,6 +80,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   const draggedRef = React.useRef(false);
 
   const due = dueState(task.dueDate);
+  const estimateMinutes =
+    fields.estimate && task.estimate != null && task.estimate > 0
+      ? Math.round(task.estimate * 60)
+      : 0;
+  const planName = (fields.cycle && cycleName) || (fields.milestone && milestoneName);
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -144,13 +170,15 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         {/* Header row */}
         <div className="flex items-start justify-between gap-2 mb-2">
           <div className="flex min-w-0 items-center gap-2">
-            <PriorityIcon priority={task.priority} />
-            <span
-              className="text-flow-meta font-mono shrink-0"
-              style={{ color: 'var(--flow-text-dim)' }}
-            >
-              {task.identifier}
-            </span>
+            {fields.priority && <PriorityIcon priority={task.priority} />}
+            {fields.key && (
+              <span
+                className="text-flow-meta font-mono shrink-0"
+                style={{ color: 'var(--flow-text-dim)' }}
+              >
+                {task.identifier}
+              </span>
+            )}
             {task.statusName && (
               <span
                 className="min-w-0 max-w-[7rem] shrink-0 truncate rounded-sm px-1.5 py-0.5 text-flow-meta font-semibold"
@@ -214,7 +242,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         <EpicChip task={task} className="mb-2" />
 
         {/* Labels */}
-        {taskLabels.length > 0 && (
+        {fields.labels && taskLabels.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-2">
             {taskLabels.slice(0, 3).map((l) => (
               <LabelChip
@@ -226,16 +254,44 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           </div>
         )}
 
+        {/* Cycle and milestone, only when the viewer turned them on. */}
+        {planName && (
+          <div className="mb-2 flex min-w-0 flex-wrap gap-x-2 gap-y-1">
+            {fields.cycle && cycleName && (
+              <span
+                data-card-field="cycle"
+                className="flex min-w-0 max-w-full items-center gap-1 text-flow-meta"
+                style={{ color: 'var(--flow-text-muted)' }}
+              >
+                <Timer size={10} aria-hidden="true" className="shrink-0" />
+                <span className="truncate">{cycleName}</span>
+              </span>
+            )}
+            {fields.milestone && milestoneName && (
+              <span
+                data-card-field="milestone"
+                className="flex min-w-0 max-w-full items-center gap-1 text-flow-meta"
+                style={{ color: 'var(--flow-text-muted)' }}
+              >
+                <Milestone size={10} aria-hidden="true" className="shrink-0" />
+                <span className="truncate">{milestoneName}</span>
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Footer */}
         <div className="flex items-center justify-between mt-1">
           <div className="flex items-center gap-2">
-            <AssigneeAvatar
-              name={task.assignee}
-              initials={task.assigneeInitials}
-              seed={task.assigneeId || undefined}
-              size={18}
-            />
-            {task.subtaskCount > 0 && (
+            {fields.assignee && (
+              <AssigneeAvatar
+                name={task.assignee}
+                initials={task.assigneeInitials}
+                seed={task.assigneeId || undefined}
+                size={18}
+              />
+            )}
+            {fields.subtasks && task.subtaskCount > 0 && (
               <span
                 className="flex items-center gap-0.5 text-flow-meta"
                 style={{ color: 'var(--flow-text-dim)' }}
@@ -262,9 +318,20 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                 {attachmentCount}
               </span>
             )}
+            {estimateMinutes > 0 && (
+              <span
+                data-card-field="estimate"
+                className="flex items-center gap-0.5 text-flow-meta"
+                style={{ color: 'var(--flow-text-muted)' }}
+                title={t('flow.taskDetail.estimate')}
+              >
+                <Clock size={10} aria-hidden="true" />
+                {formatDuration(estimateMinutes)}
+              </span>
+            )}
           </div>
 
-          {task.dueDate && (
+          {fields.dueDate && task.dueDate && (
             <span
               className="flex items-center gap-1 text-flow-meta"
               // The same three states as TaskRow. This card kept --flow-text-dim

@@ -101,6 +101,9 @@ func (a *SessionAPI) OpenSession(ctx context.Context, req *possessionv1.OpenSess
 		OpeningFloat: req.GetOpeningFloat(),
 	})
 	if openErr != nil {
+		if errors.Is(openErr, domain.ErrSessionAlreadyOpen) {
+			return nil, onekiterrors.New(http.StatusConflict, "A register session is already open")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to open session")
 	}
 	return &possessionv1.OpenSessionResponse{SessionId: id, Message: "Session opened successfully"}, nil

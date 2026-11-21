@@ -10,6 +10,7 @@ import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { TaskCard } from './TaskCard';
 import { EpicFilterContext } from './EpicChip';
 import type { Task } from '../stores/flowStore';
+import { DEFAULT_CARD_FIELDS } from '../../features/projects/boardViewSettings';
 
 vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>();
@@ -232,5 +233,80 @@ describe('TaskCard epic chip (T-573)', () => {
 
     expect(screen.queryByRole('button', { name: 'flow.epics.filterBy' })).not.toBeInTheDocument();
     expect(screen.queryByText('flow.taskType.epic')).not.toBeInTheDocument();
+  });
+});
+
+describe('TaskCard fields (board view settings)', () => {
+  const full: Task = {
+    ...baseTask,
+    assignee: 'Abed Amouneh',
+    assigneeInitials: 'AA',
+    assigneeId: '1',
+    dueDate: '2026-12-01',
+    subtaskCount: 3,
+    completedSubtasks: 1,
+    labelIds: ['7'],
+    estimate: 1.5,
+    cycleId: '4',
+    milestoneId: '5',
+  };
+
+  beforeEach(() => {
+    labelsQuery.data = [{ id: 7, name: 'Design', color: '#f00' }];
+  });
+
+  it('renders the same card with the default fields as with none passed', () => {
+    const { container: plain } = render(<TaskCard task={full} />);
+    const { container: withDefaults } = render(
+      <TaskCard
+        task={full}
+        fields={DEFAULT_CARD_FIELDS}
+        cycleName="Sprint 4"
+        milestoneName="Beta"
+      />
+    );
+    expect(withDefaults.innerHTML).toBe(plain.innerHTML);
+  });
+
+  it('drops the key, priority, labels, assignee, subtasks and due date when turned off', () => {
+    const off = {
+      ...DEFAULT_CARD_FIELDS,
+      key: false,
+      priority: false,
+      labels: false,
+      assignee: false,
+      subtasks: false,
+      dueDate: false,
+    };
+    render(<TaskCard task={full} fields={off} />);
+    expect(screen.queryByText('FLOW-1')).toBeNull();
+    expect(screen.queryByText('Design')).toBeNull();
+    expect(screen.queryByText('1/3')).toBeNull();
+    expect(screen.queryByText('AA')).toBeNull();
+    expect(screen.getByText('Ship the thing')).toBeInTheDocument();
+  });
+
+  it('adds the estimate, cycle and milestone when turned on', () => {
+    const { container } = render(
+      <TaskCard
+        task={full}
+        fields={{ ...DEFAULT_CARD_FIELDS, estimate: true, cycle: true, milestone: true }}
+        cycleName="Sprint 4"
+        milestoneName="Beta"
+      />
+    );
+    expect(container.querySelector('[data-card-field="estimate"]')?.textContent).toBe('1h 30m');
+    expect(container.querySelector('[data-card-field="cycle"]')?.textContent).toBe('Sprint 4');
+    expect(container.querySelector('[data-card-field="milestone"]')?.textContent).toBe('Beta');
+  });
+
+  it('shows nothing for a field that is on but empty', () => {
+    const { container } = render(
+      <TaskCard
+        task={{ ...baseTask }}
+        fields={{ ...DEFAULT_CARD_FIELDS, estimate: true, cycle: true, milestone: true }}
+      />
+    );
+    expect(container.querySelector('[data-card-field]')).toBeNull();
   });
 });

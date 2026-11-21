@@ -77,7 +77,16 @@ vi.mock('../../shared/stores/flowStore', () => ({
   },
 }));
 const tasksData = vi.hoisted(() => ({ data: [] as Record<string, unknown>[] }));
-vi.mock('../tasks/useTasks', () => ({ useTasks: () => ({ ...tasksData, refetch: vi.fn() }) }));
+const updateTaskMutate = vi.hoisted(() => vi.fn());
+vi.mock('../tasks/useTasks', () => ({
+  useTasks: () => ({ ...tasksData, refetch: vi.fn() }),
+  useUpdateTask: () => ({ mutate: updateTaskMutate }),
+}));
+const canEditState = vi.hoisted(() => ({ value: true }));
+vi.mock('../../shared/lib/currentUser', () => ({ useCanEditTask: () => canEditState.value }));
+vi.mock('../calendar/useCalendarPlanning', () => ({
+  useCalendarPlanning: () => ({ cycles: [], milestones: [], leave: new Map() }),
+}));
 vi.mock('../../shared/lib/useProjectRealtime', () => ({ useProjectRealtime: () => undefined }));
 vi.mock('./ProjectViewTabs', () => ({ default: () => null }));
 const currentProjectState = vi.hoisted(() => ({
@@ -293,5 +302,46 @@ describe('ProjectCalendar at the 390px floor (#1215)', () => {
 
     const title = screen.getByText('Doing');
     expect(title.style.getPropertyValue('--tone')).toContain('flow-info-fg');
+  });
+});
+
+describe('ProjectCalendar planning (T-612)', () => {
+  beforeEach(() => {
+    language.value = 'en-US';
+    setViewportWidth(DESKTOP_WIDTH);
+  });
+
+  afterEach(() => {
+    resetViewport();
+    tasksData.data = [];
+    canEditState.value = true;
+    filterStub.matching = null;
+  });
+
+  it('keeps the project filter on the Unscheduled panel too', () => {
+    filterStub.matching = new Set(['u1']);
+    tasksData.data = [
+      { id: 'u1', title: 'Matches', status: 'todo', priority: 'medium' },
+      { id: 'u2', title: 'Filtered out', status: 'todo', priority: 'medium' },
+    ];
+    render(<ProjectCalendar />);
+
+    const panel = screen.getByRole('complementary');
+    expect(panel).toHaveTextContent('Matches');
+    expect(panel).not.toHaveTextContent('Filtered out');
+  });
+
+  it('does not let a viewer drag a task', () => {
+    canEditState.value = false;
+    const today = new Date();
+    const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    tasksData.data = [
+      { id: 't1', title: 'Look only', status: 'todo', dueDate: iso, priority: 'medium' },
+      { id: 'u1', title: 'Undated', status: 'todo', priority: 'medium' },
+    ];
+    render(<ProjectCalendar />);
+
+    expect(screen.getByTitle('Look only')).toHaveAttribute('draggable', 'false');
+    expect(screen.getByTitle('Undated')).toHaveAttribute('draggable', 'false');
   });
 });

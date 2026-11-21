@@ -1,5 +1,5 @@
 import type { Task } from '../stores/flowStore';
-import { addDays } from '../lib/dateUtils';
+import { addDays, toLocalIso } from '../lib/dateUtils';
 import { epicKeyOf } from '../lib/taskHierarchy';
 
 /**
@@ -15,6 +15,15 @@ export const UNASSIGNED = 'none';
 
 export const DUE_WINDOWS = ['overdue', 'today', 'next_7', 'next_30', 'no_date'] as const;
 export type DueWindow = (typeof DUE_WINDOWS)[number];
+
+/**
+ * "Created, completed or updated in the last 7 days", counting today. Rolling,
+ * so a link opened next week still means the last 7 days. The project
+ * dashboard's cards open the list with one of these; the Filter popover does
+ * not offer them, and the bar shows each as a chip that removes it.
+ */
+export const CHANGE_WINDOWS = ['created_7d', 'completed_7d', 'updated_7d'] as const;
+export type ChangeWindow = (typeof CHANGE_WINDOWS)[number];
 
 export const PRIORITIES: readonly Task['priority'][] = [
   'urgent',
@@ -34,6 +43,11 @@ export interface TaskFilters {
   /** Inclusive custom range, `YYYY-MM-DD`. Either end may be open. */
   dueFrom?: string;
   dueTo?: string;
+  /**
+   * Recent change windows, OR'd like due windows. Optional so filter sets
+   * built before it existed (saved views, stored filters) stay valid.
+   */
+  changed?: ChangeWindow[];
   /**
    * Status keys. On a project they are status ids (the board's columns); on a
    * cross-project page they are the built-in status names. The caller says
@@ -70,6 +84,7 @@ export const EMPTY_TASK_FILTERS: TaskFilters = {
   due: [],
   dueFrom: undefined,
   dueTo: undefined,
+  changed: [],
   statuses: [],
   cycles: [],
   milestones: [],
@@ -110,6 +125,7 @@ export function hasDueFilter(filters: TaskFilters): boolean {
 export function activeFieldCount(filters: TaskFilters): number {
   let n = LIST_FIELDS.filter((field) => filters[field].length > 0).length;
   if (hasDueFilter(filters)) n += 1;
+  if ((filters.changed ?? []).length > 0) n += 1;
   return n;
 }
 
@@ -162,6 +178,34 @@ function matchesDue(task: Task, filters: TaskFilters, today: string): boolean {
   return false;
 }
 
+/** The reader's own calendar day of a server timestamp, or '' when there is none. */
+function localDayOf(stamp: string | undefined): string {
+  if (!stamp) return '';
+  const at = new Date(stamp);
+  return Number.isNaN(at.getTime()) ? '' : toLocalIso(at);
+}
+
+function changeStamp(task: Task, window: ChangeWindow): string | undefined {
+  switch (window) {
+    case 'created_7d':
+      return task.createdAt;
+    case 'completed_7d':
+      return task.completedAt;
+    case 'updated_7d':
+      return task.updatedAt;
+  }
+}
+
+function matchesChanged(task: Task, filters: TaskFilters, today: string): boolean {
+  const windows = filters.changed ?? [];
+  if (windows.length === 0) return true;
+  const from = addDays(today, -6);
+  return windows.some((w) => {
+    const day = localDayOf(changeStamp(task, w));
+    return day !== '' && day >= from && day <= today;
+  });
+}
+
 function matchesQuery(task: Task, query: string, ctx: FilterContext): boolean {
   const tokens = normalizeSearchText(query).split(/\s+/).filter(Boolean);
   if (tokens.length === 0) return true;
@@ -194,6 +238,7 @@ export function matchesTaskFilters(task: Task, filters: TaskFilters, ctx: Filter
   if (filters.projects.length > 0 && !filters.projects.includes(task.projectId)) return false;
   if (filters.epics.length > 0 && !filters.epics.includes(epicKeyOf(task))) return false;
   if (!matchesDue(task, filters, ctx.today)) return false;
+  if (!matchesChanged(task, filters, ctx.today)) return false;
   return matchesQuery(task, filters.query, ctx);
 }
 
@@ -229,6 +274,7 @@ export function serializeTaskFilters(filters: TaskFilters): SerializedTaskFilter
   if (filters.due.length > 0) out.due = filters.due;
   if (filters.dueFrom) out.dueFrom = filters.dueFrom;
   if (filters.dueTo) out.dueTo = filters.dueTo;
+  if (filters.changed && filters.changed.length > 0) out.changed = filters.changed;
   if (filters.query.trim() !== '') out.query = filters.query;
   return Object.keys(out).length > 0 ? (out as SerializedTaskFilters) : undefined;
 }
@@ -261,6 +307,9 @@ export function parseTaskFilters(value: unknown): TaskFilters {
     ),
     dueFrom: day(raw.dueFrom),
     dueTo: day(raw.dueTo),
+    changed: stringList(raw.changed).filter((c): c is ChangeWindow =>
+      (CHANGE_WINDOWS as readonly string[]).includes(c)
+    ),
     statuses: stringList(raw.statuses),
     cycles: stringList(raw.cycles),
     milestones: stringList(raw.milestones),

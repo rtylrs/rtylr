@@ -11,6 +11,7 @@ vi.mock('react-i18next', () => ({
 }));
 
 import BoardSettingsPanel from './BoardSettingsPanel';
+import { DEFAULT_BOARD_VIEW_SETTINGS } from '../boardViewSettings';
 
 const COLUMNS = [
   { id: '1', name: 'Backlog' },
@@ -25,8 +26,9 @@ function renderPanel(props: Partial<React.ComponentProps<typeof BoardSettingsPan
       onClose={vi.fn()}
       columns={COLUMNS}
       canManage
-      groupBy="none"
-      onGroupByChange={vi.fn()}
+      settings={DEFAULT_BOARD_VIEW_SETTINGS}
+      onSettingsChange={vi.fn()}
+      onResetSettings={vi.fn()}
       onManageStatuses={vi.fn()}
       {...props}
     />
@@ -59,23 +61,76 @@ describe('BoardSettingsPanel: what has no field to persist', () => {
     ).toBeDisabled();
     expect(screen.getByText('flow.board.promptsForHoursBlocked')).toBeInTheDocument();
   });
-
-  it('disables the card-field toggles and names the missing field', () => {
-    renderPanel();
-
-    expect(screen.getByRole('switch', { name: 'flow.board.cardField.loggedTime' })).toBeDisabled();
-    expect(screen.getByText('flow.board.cardFieldsBlocked')).toBeInTheDocument();
-  });
 });
 
-describe('BoardSettingsPanel: group by', () => {
-  it('changes the grouping', () => {
-    const onGroupByChange = vi.fn();
-    renderPanel({ onGroupByChange });
+describe('BoardSettingsPanel: your view', () => {
+  it('changes the grouping, including labels, cycles and milestones', () => {
+    const onSettingsChange = vi.fn();
+    renderPanel({ onSettingsChange });
 
     fireEvent.click(screen.getByRole('radio', { name: 'flow.board.groupBy.assignee' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'flow.board.groupBy.label' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'flow.board.groupBy.cycle' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'flow.board.groupBy.milestone' }));
 
-    expect(onGroupByChange).toHaveBeenCalledWith('assignee');
+    expect(onSettingsChange.mock.calls.map(([patch]) => patch.groupBy)).toEqual([
+      'assignee',
+      'label',
+      'cycle',
+      'milestone',
+    ]);
+  });
+
+  it('starts the card toggles on the card as it is today', () => {
+    renderPanel();
+
+    expect(screen.getByRole('switch', { name: 'flow.board.cardField.key' })).toBeChecked();
+    expect(screen.getByRole('switch', { name: 'flow.board.cardField.assignee' })).toBeChecked();
+    expect(screen.getByRole('switch', { name: 'flow.board.cardField.estimate' })).not.toBeChecked();
+    expect(screen.getByRole('switch', { name: 'flow.board.cardField.cycle' })).not.toBeChecked();
+  });
+
+  it('turns one card field on and keeps the others', () => {
+    const onSettingsChange = vi.fn();
+    renderPanel({ onSettingsChange });
+
+    fireEvent.click(screen.getByRole('switch', { name: 'flow.board.cardField.estimate' }));
+
+    expect(onSettingsChange).toHaveBeenCalledWith({
+      cardFields: { ...DEFAULT_BOARD_VIEW_SETTINGS.cardFields, estimate: true },
+    });
+  });
+
+  it('offers 1, 7, 14 and 30 days or never for done cards, starting at 14', () => {
+    const onSettingsChange = vi.fn();
+    renderPanel({ onSettingsChange });
+    const group = screen.getByRole('radiogroup', { name: 'flow.board.hideDoneHeading' });
+
+    expect(
+      screen.getByRole('radio', { name: 'flow.board.hideDone.days14' }).getAttribute('aria-checked')
+    ).toBe('true');
+    expect(group.querySelectorAll('[role="radio"]')).toHaveLength(5);
+    fireEvent.click(screen.getByRole('radio', { name: 'flow.board.hideDone.never' }));
+
+    expect(onSettingsChange).toHaveBeenCalledWith({ hideDoneAfterDays: null });
+  });
+
+  it('switches the columns between fixed and flexible', () => {
+    const onSettingsChange = vi.fn();
+    renderPanel({ onSettingsChange });
+
+    fireEvent.click(screen.getByRole('radio', { name: 'flow.board.columnWidth.flexible' }));
+
+    expect(onSettingsChange).toHaveBeenCalledWith({ columnWidth: 'flexible' });
+  });
+
+  it('resets the view', () => {
+    const onResetSettings = vi.fn();
+    renderPanel({ onResetSettings });
+
+    fireEvent.click(screen.getByRole('button', { name: 'flow.board.resetView' }));
+
+    expect(onResetSettings).toHaveBeenCalledOnce();
   });
 
   it('says which settings are yours and which your team sees', () => {
@@ -95,13 +150,17 @@ describe('BoardSettingsPanel: a viewer', () => {
     ).toBeDisabled();
   });
 
-  it('still lets a viewer change their own grouping, which is their preference alone', () => {
-    const onGroupByChange = vi.fn();
-    renderPanel({ canManage: false, onGroupByChange });
+  it('still lets a viewer change their own view, which is their preference alone', () => {
+    const onSettingsChange = vi.fn();
+    renderPanel({ canManage: false, onSettingsChange });
 
     fireEvent.click(screen.getByRole('radio', { name: 'flow.board.groupBy.priority' }));
+    fireEvent.click(screen.getByRole('switch', { name: 'flow.board.cardField.milestone' }));
 
-    expect(onGroupByChange).toHaveBeenCalledWith('priority');
+    expect(onSettingsChange).toHaveBeenCalledWith({ groupBy: 'priority' });
+    expect(onSettingsChange).toHaveBeenCalledWith({
+      cardFields: { ...DEFAULT_BOARD_VIEW_SETTINGS.cardFields, milestone: true },
+    });
   });
 });
 
@@ -127,9 +186,10 @@ describe('BoardSettingsPanel: dismissal and height', () => {
   it('bounds the panel height and lets it scroll', () => {
     // Measured at 1242px in a 900px viewport, centred by the overlay so its
     // own title sat at -171px, with overflow-y visible and nothing to scroll.
+    // Now a side panel: the full viewport height, scrolling inside.
     const { container } = renderPanel();
     const panel = container.querySelector('[role="dialog"] > div');
-    expect(panel?.className).toContain('max-h-[calc(100dvh-64px)]');
+    expect(panel?.className).toContain('max-h-dvh');
     expect(panel?.className).toContain('overflow-y-auto');
   });
 

@@ -9,6 +9,7 @@ import {
   toggleOnlyMine,
   toggleValue,
   UNASSIGNED,
+  type ChangeWindow,
   type FilterField,
   type TaskFilters,
 } from './taskFilters';
@@ -347,6 +348,12 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   );
 };
 
+const CHANGE_LABEL_KEY: Record<ChangeWindow, string> = {
+  created_7d: 'flow.filters.changed.created7d',
+  completed_7d: 'flow.filters.changed.completed7d',
+  updated_7d: 'flow.filters.changed.updated7d',
+};
+
 /**
  * One chip per selected value. The search text has no chip because its box
  * shows it. Person chips are flagged so the bar can hide them where the avatar
@@ -386,6 +393,14 @@ export function buildChips(
         to: filters.dueTo ?? '…',
       })}`,
       next: { ...filters, dueFrom: undefined, dueTo: undefined },
+    });
+  }
+  const changed = filters.changed ?? [];
+  for (const window of changed) {
+    chips.push({
+      id: `changed:${window}`,
+      label: t(CHANGE_LABEL_KEY[window]),
+      next: { ...filters, changed: changed.filter((w) => w !== window) },
     });
   }
   return chips;

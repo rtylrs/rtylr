@@ -108,6 +108,7 @@ func (s *LeaveService) CreateLeaveType(ctx context.Context, req *hrleavev1.Creat
 		IsPaid:                         req.GetIsPaid(),
 		RequiresApproval:               req.GetRequiresApproval(),
 		AccrualRule:                    req.GetAccrualRule(),
+		AccrualAmount:                  req.GetAccrualAmount(),
 		MaxCarryoverDays:               req.GetMaxCarryoverDays(),
 		MinNoticeDays:                  req.GetMinNoticeDays(),
 		RequiresDocumentationAfterDays: req.GetRequiresDocumentationAfterDays(),
@@ -149,6 +150,7 @@ func updateLeaveTypeRequestFromProto(id int64, body *hrleavev1.UpdateLeaveTypeBo
 	in.IsPaid = body.IsPaid
 	in.RequiresApproval = body.RequiresApproval
 	in.AccrualRule = body.AccrualRule
+	in.AccrualAmount = body.AccrualAmount
 	in.MaxCarryoverDays = body.MaxCarryoverDays
 	in.MinNoticeDays = body.MinNoticeDays
 	in.RequiresDocumentationAfterDays = body.RequiresDocumentationAfterDays
