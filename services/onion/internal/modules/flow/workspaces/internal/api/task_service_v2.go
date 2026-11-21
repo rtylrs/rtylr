@@ -171,6 +171,11 @@ func toTaskV2(t domain.Task) *flowtaskv2.FlowTask {
 	if t.CycleID != nil {
 		v := *t.CycleID
 		out.CycleId = &v
+		out.CycleName = t.CycleName
+	}
+	if t.PlanRank != nil {
+		v := *t.PlanRank
+		out.PlanRank = &v
 	}
 	if t.MilestoneID != nil {
 		v := *t.MilestoneID
@@ -217,7 +222,7 @@ func (a *TaskAPIV2) ListTasks(ctx context.Context, req *flowtaskv2.ListTasksRequ
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list tasks")
 	}
-	if err := a.Service.AttachMilestoneIDs(ctx, tasks); err != nil {
+	if err := a.Service.AttachTaskMemberships(ctx, tasks); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list tasks")
 	}
 	return &flowtaskv2.ListTasksResponse{
