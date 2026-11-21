@@ -81,6 +81,21 @@ VALUES
     (7301, 0, 1001, 1001, 'Direct Authorization Project', 'public', 1001)
 ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), owner_id = VALUES(owner_id), visibility = VALUES(visibility);
 
+-- Two tasks in that project and one relation between them, for the task
+-- relation endpoints: list and add read both tasks, remove deletes 7304.
+INSERT INTO flow_tasks
+    (id, project_id, workspace_id, owner_id, business_id, title, status, reporter_id)
+VALUES
+    (7302, 7301, 0, 1001, 1001, 'Direct Authorization Blocker', 'todo', 1001),
+    (7303, 7301, 0, 1001, 1001, 'Direct Authorization Blocked', 'todo', 1001)
+ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), project_id = VALUES(project_id);
+
+INSERT INTO flow_task_dependencies
+    (id, task_id, depends_on_task_id, link_type, business_id)
+VALUES
+    (7304, 7303, 7302, 'blocks', 1001)
+ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), link_type = VALUES(link_type);
+
 INSERT INTO pos_orders
     (id, owner_id, business_id, session_id, table_id, location_id, order_number, type, status, payment_status, customer_name, staff_id, subtotal, total, amount_paid)
 VALUES

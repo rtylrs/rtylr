@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/testutil"
 	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"
 	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
+	flowtaskv2 "github.com/voxire/voxie/gen/go/flow/task/v2"
 	flowworkspacev1 "github.com/voxire/voxie/gen/go/flow/workspace/v1"
 )
 
@@ -47,6 +48,20 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 		}},
 		{Name: "flow tasks assign", App: authorization.AppFlow, Permission: "flow:tasks:assign", Extra: []string{"flow:tasks:create"}, Call: func(ctx context.Context) (any, error) {
 			response, err := NewTaskAPI(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).CreateTask(ctx, &flowtaskv1.CreateTaskRequest{AssigneeId: &assignedUserID})
+			return response, err
+		}},
+		// Task relations. Fixture tasks 7302 and 7303 share a project with
+		// relation 7304 between them (70_direct_authorization.sql).
+		{Name: "flow task relations view", App: authorization.AppFlow, Permission: "flow:tasks:view", Call: func(ctx context.Context) (any, error) {
+			response, err := NewTaskAPIV2(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).ListTaskRelations(ctx, &flowtaskv2.ListTaskRelationsRequest{TaskId: 7303})
+			return response, err
+		}},
+		{Name: "flow task relations add", App: authorization.AppFlow, Permission: "flow:tasks:edit", Call: func(ctx context.Context) (any, error) {
+			response, err := NewTaskAPIV2(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).AddTaskRelation(ctx, &flowtaskv2.AddTaskRelationRequest{TaskId: 7302, Body: &flowtaskv2.AddTaskRelationBody{OtherTaskId: 7303, Type: "relates"}})
+			return response, err
+		}},
+		{Name: "flow task relations remove", App: authorization.AppFlow, Permission: "flow:tasks:edit", Call: func(ctx context.Context) (any, error) {
+			response, err := NewTaskAPIV2(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).RemoveTaskRelation(ctx, &flowtaskv2.RemoveTaskRelationRequest{TaskId: 7303, RelationId: 7304})
 			return response, err
 		}},
 		{Name: "flow team manage", App: authorization.AppFlow, Permission: "flow:team:manage", Call: func(ctx context.Context) (any, error) {
