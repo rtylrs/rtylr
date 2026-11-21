@@ -76,6 +76,7 @@ import PriorityIcon from '../../shared/components/PriorityIcon';
 import LabelChip from '../../shared/components/LabelChip';
 import DueDatePicker from '../../shared/components/DueDatePicker';
 import { getInitials } from '../../shared/lib/utils';
+import { displayUserName } from '../../shared/lib/userDisplay';
 import { displayDescription } from '../../shared/lib/stringUtils';
 import { EFFORT_PRESETS, formatEffortMinutes } from '../../shared/lib/effortPresets';
 import { TASK_STATUSES, STATUS_LABEL_KEYS } from '../../shared/lib/constantsFlow';
@@ -232,8 +233,9 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const currentUserId = user?.id === undefined ? undefined : String(user.id);
   // The signed-in person is not always on either list (no team-view access,
   // not a project member yet), yet they are often the reporter.
-  if (currentUserId !== undefined && user?.fullName && !peopleNames[currentUserId]) {
-    peopleNames[currentUserId] = user.fullName;
+  const currentUserName = displayUserName(user);
+  if (currentUserId !== undefined && currentUserName && !peopleNames[currentUserId]) {
+    peopleNames[currentUserId] = currentUserName;
   }
   // The people a comment here can mention: the project's members, who are the
   // ones the server notifies when their name follows an "@".
@@ -298,12 +300,11 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const canAssignToMe =
     canEdit && currentUserId !== undefined && String(task.assigneeId ?? '') !== currentUserId;
   const assignToMe = (): void => {
-    if (!user || currentUserId === undefined) return;
-    const name = user.fullName ?? '';
+    if (currentUserId === undefined) return;
     updateTask(task.id, {
       assigneeId: currentUserId,
-      assignee: name,
-      assigneeInitials: getInitials(name),
+      assignee: currentUserName,
+      assigneeInitials: getInitials(currentUserName),
     });
   };
   const project = taskProject ?? projects.find((p) => p.id === task.projectId);
