@@ -25,6 +25,7 @@ export const FLAG_KEYS = {
   APP_FINANCE: 'app.finance',
   APP_INSIGHTS: 'app.insights',
   APP_MENU: 'app.menu',
+  APP_PAGER: 'app.pager',
   APP_POS: 'app.pos',
   APP_RECRUIT_FILE_UPLOAD: 'app.recruit.fileUpload',
   /**
@@ -50,6 +51,8 @@ export const FLAG_PROD_DEFAULTS: Record<FlagKey, boolean> = {
   [FLAG_KEYS.APP_FINANCE]: true,
   [FLAG_KEYS.APP_INSIGHTS]: true,
   [FLAG_KEYS.APP_MENU]: true,
+  // A venue's pager answers only once its staff switch it on, so the server is the gate.
+  [FLAG_KEYS.APP_PAGER]: true,
   [FLAG_KEYS.APP_POS]: true,
   [FLAG_KEYS.APP_RECRUIT_FILE_UPLOAD]: true, // storage & presigned R2 upload wired
   [FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES]: false, // off until screens render real data
@@ -67,5 +70,6 @@ export const FLAG_ENV_OVERRIDES: Partial<Record<FlagKey, string>> = {
   [FLAG_KEYS.APP_FINANCE]: 'VITE_APP_FINANCE_ENABLED',
   [FLAG_KEYS.APP_INSIGHTS]: 'VITE_APP_INSIGHTS_ENABLED',
   [FLAG_KEYS.APP_MENU]: 'VITE_APP_MENU_ENABLED',
+  [FLAG_KEYS.APP_PAGER]: 'VITE_APP_PAGER_ENABLED',
   [FLAG_KEYS.APP_POS]: 'VITE_APP_POS_ENABLED',
 };

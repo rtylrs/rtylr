@@ -1,5 +1,6 @@
 import { createRecruitRoutes } from './modules/recruit/routes';
 import { createPublicMenuRoutes } from './modules/public-menu/routes';
+import { createPagerPublicRoutes, createPagerStaffRoutes } from './modules/pager/routes';
 import React, { Suspense } from 'react';
 import { z } from 'zod';
 import {
@@ -323,6 +324,7 @@ const routeTree = rootRoute.addChildren([
     createFinanceRoutes(businessRoute),
     createHrRoutes(businessRoute),
     createRecruitRoutes(businessRoute),
+    createPagerStaffRoutes(businessRoute),
     dashboardRoute,
     automationsRoute,
     automationWebhooksRoute,
@@ -360,6 +362,7 @@ const routeTree = rootRoute.addChildren([
   standalonePosDeepLinkRoute,
   standalonePosSettingsRoute,
   ...createPublicMenuRoutes(rootRoute),
+  ...createPagerPublicRoutes(rootRoute),
   notFoundRoute,
 ]);
 

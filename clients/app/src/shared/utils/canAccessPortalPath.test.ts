@@ -106,3 +106,14 @@ describe('standalone Automations access', () => {
     ).toBe(false);
   });
 });
+
+describe('pager staff board', () => {
+  it('opens for any member of the business, whatever apps they hold', () => {
+    const user = {
+      effectiveAccess: createEffectiveAccess('insights', { permissions: [] }),
+    };
+    expect(canAccessPortalPath(user, '/pager')).toBe(true);
+    expect(canAccessPortalPath(user, '/pager/')).toBe(true);
+    expect(canAccessPortalPath(null, '/pager')).toBe(false);
+  });
+});
