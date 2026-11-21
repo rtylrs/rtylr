@@ -19,6 +19,15 @@ type Cycle struct {
 	Completed   int // done tasks in cycle
 	CreatedBy   int64
 	CreatedAt   time.Time
+
+	// Planning figures (T-570). Filled by the v2 reads only.
+	BusinessID      int64
+	Goal            string
+	StartedAt       *time.Time
+	CompletedAt     *time.Time
+	Totals          CycleTotals
+	EstimateMinutes int64
+	CarriedOver     []CycleCarryOver
 }
 
 type CycleInput struct {
@@ -31,6 +40,7 @@ type CycleInput struct {
 	EndDate     time.Time
 	CreatedBy   int64
 	Status      string
+	Goal        string
 }
 
 type UpdateCycleInput struct {
