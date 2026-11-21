@@ -163,8 +163,8 @@ INSERT INTO flow_labels (workspace_id, business_id, name, color) VALUES (0, ?, ?
 --
 -- 0 is the same value a v2 project carries. The column is dropped in Phase 4,
 -- at which point this literal comes out with it.
-INSERT INTO flow_cycles (business_id, workspace_id, project_id, name, start_date, end_date, status)
-VALUES (?, 0, ?, ?, ?, ?, ?);
+INSERT INTO flow_cycles (business_id, workspace_id, project_id, name, start_date, end_date, status, goal, created_by)
+VALUES (?, 0, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: ListMilestonesByBusiness :many
 SELECT m.id, m.project_id, m.name,
