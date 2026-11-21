@@ -231,8 +231,9 @@ func (r *Repository) SetTaskFocusPin(ctx context.Context, taskID, userID, busine
 	return err
 }
 
-// AddTaskDependency records that taskID is blocked by dependsOnTaskID. The
-// unique key on (task_id, depends_on_task_id) makes a repeat add a no-op.
+// AddTaskDependency records that taskID is blocked by dependsOnTaskID: a
+// "blocks" relation. The unique key on (task_id, depends_on_task_id,
+// link_type) makes a repeat add a no-op.
 //
 // input.BusinessID is written as a plain column value here, not a WHERE
 // guard, so this method trusts the caller to have already confirmed both
@@ -241,8 +242,8 @@ func (r *Repository) SetTaskFocusPin(ctx context.Context, taskID, userID, busine
 // before calling in.
 func (r *Repository) AddTaskDependency(ctx context.Context, input domain.AddTaskDependencyInput) error {
 	_, err := r.pool.ExecContext(ctx,
-		"INSERT IGNORE INTO flow_task_dependencies (task_id, depends_on_task_id, business_id) VALUES (?, ?, ?)",
-		input.TaskID, input.DependsOnTaskID, input.BusinessID,
+		"INSERT IGNORE INTO flow_task_dependencies (task_id, depends_on_task_id, link_type, business_id) VALUES (?, ?, ?, ?)",
+		input.TaskID, input.DependsOnTaskID, domain.RelationBlocks, input.BusinessID,
 	)
 	if err != nil {
 		logger.Ctx(ctx).Error("AddTaskDependency failed", logger.Error(err))
@@ -252,8 +253,8 @@ func (r *Repository) AddTaskDependency(ctx context.Context, input domain.AddTask
 
 func (r *Repository) RemoveTaskDependency(ctx context.Context, input domain.RemoveTaskDependencyInput) error {
 	_, err := r.pool.ExecContext(ctx,
-		"DELETE FROM flow_task_dependencies WHERE task_id = ? AND depends_on_task_id = ? AND business_id = ?",
-		input.TaskID, input.DependsOnTaskID, input.BusinessID,
+		"DELETE FROM flow_task_dependencies WHERE task_id = ? AND depends_on_task_id = ? AND link_type = ? AND business_id = ?",
+		input.TaskID, input.DependsOnTaskID, domain.RelationBlocks, input.BusinessID,
 	)
 	if err != nil {
 		logger.Ctx(ctx).Error("RemoveTaskDependency failed", logger.Error(err))
@@ -261,8 +262,9 @@ func (r *Repository) RemoveTaskDependency(ctx context.Context, input domain.Remo
 	return err
 }
 
-// ListTaskDependencies returns dependency ids keyed by task id. It takes a slice
-// so list views resolve every row in one query instead of N.
+// ListTaskDependencies returns the ids of the tasks blocking each task, keyed
+// by task id. Other relation types are not dependencies. It takes a slice so
+// list views resolve every row in one query instead of N.
 func (r *Repository) ListTaskDependencies(ctx context.Context, taskIDs []int64, businessID int64) (map[int64][]int64, error) {
 	out := make(map[int64][]int64, len(taskIDs))
 	if len(taskIDs) == 0 {
@@ -271,7 +273,7 @@ func (r *Repository) ListTaskDependencies(ctx context.Context, taskIDs []int64, 
 	q, args, err := sq.
 		Select("task_id", "depends_on_task_id").
 		From("flow_task_dependencies").
-		Where(sq.Eq{"task_id": taskIDs, "business_id": businessID}).
+		Where(sq.Eq{"task_id": taskIDs, "business_id": businessID, "link_type": domain.RelationBlocks}).
 		OrderBy("id").
 		PlaceholderFormat(sq.Question).
 		ToSql()
