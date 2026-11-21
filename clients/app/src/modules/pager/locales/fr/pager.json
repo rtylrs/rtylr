@@ -1,9 +1,13 @@
 {
+  "brand": {
+    "name": "Rennili",
+    "by": "par RTYLR"
+  },
   "language": {
     "label": "Langue"
   },
   "scan": {
-    "pageTitle": "Bipeur de commande · rtylr",
+    "pageTitle": "Bipeur de commande · $t(pager.brand.name)",
     "scanning": "Récupération de votre code...",
     "slow": "Nous récupérons toujours votre code, un instant...",
     "venueBusy": "Trop de téléphones attendent dans cet établissement en ce moment. Merci de demander au comptoir.",
@@ -14,8 +18,8 @@
     "venueNotFoundDescription": "Le lien est peut-être erroné, ou l'établissement a désactivé son bipeur. Merci de demander au comptoir."
   },
   "ticket": {
-    "pageTitle": "Commande {{label}} · rtylr",
-    "pageTitleLoading": "Votre commande · rtylr",
+    "pageTitle": "Commande {{label}} · $t(pager.brand.name)",
+    "pageTitleLoading": "Votre commande · $t(pager.brand.name)",
     "orderLabel": "Commande",
     "waiting": "Nous préparons votre commande",
     "next": "Vous êtes le prochain",
@@ -39,8 +43,8 @@
     "connectionLost": "Connexion perdue. Nouvelle tentative...",
     "notFoundTitle": "Ticket introuvable",
     "notFoundDescription": "Ce lien n'est plus valide. Scannez de nouveau le code au comptoir.",
-    "pageTitleName": "{{label}} · rtylr",
-    "pageTitleCode": "Votre code {{code}} · rtylr",
+    "pageTitleName": "{{label}} · $t(pager.brand.name)",
+    "pageTitleCode": "Votre code {{code}} · $t(pager.brand.name)",
     "codeLabel": "Votre code",
     "showCode": "Montrez ce code au caissier",
     "notify": "Me prévenir quand elle est prête",
@@ -58,7 +62,7 @@
     "remindTitleName": "{{label}}, votre commande vous attend"
   },
   "board": {
-    "pageTitle": "Bipeur · rtylr",
+    "pageTitle": "Bipeur · $t(pager.brand.name)",
     "heading": "Bipeur",
     "subheading": "Quand un client scanne votre QR, son code apparaît dans Nouveaux téléphones. Saisissez le numéro de commande ou le nom sur cette carte, puis marquez-la prête pour faire sonner son téléphone.",
     "waitingColumn": "En attente",
@@ -113,7 +117,7 @@
     "labelTaken": "Une autre commande ouverte a déjà ce numéro."
   },
   "poster": {
-    "pageTitle": "Affiche du comptoir · rtylr",
+    "pageTitle": "Affiche du comptoir · $t(pager.brand.name)",
     "heading": "Affiche du comptoir",
     "intro": "Imprimez-la et posez-la sur le comptoir. Les clients la scannent pour être prévenus de leur commande.",
     "back": "Retour au bipeur",
@@ -126,13 +130,12 @@
     "stepShow": "Montrez le code affiché sur votre téléphone au caissier."
   },
   "display": {
-    "pageTitle": "Écran du comptoir · rtylr",
+    "pageTitle": "Écran du comptoir · $t(pager.brand.name)",
     "scan": "Scannez pour être prévenu de votre commande",
     "close": "Fermer l'écran du comptoir"
   },
   "try": {
-    "pageTitle": "Essayez le bipeur gratuit · rtylr",
-    "brand": "Bipeur rtylr",
+    "pageTitle": "Essayez le bipeur gratuit · $t(pager.brand.name)",
     "venueName": "Café de démo",
     "heading": "Essayez le bipeur ici même",
     "intro": "D'un côté le téléphone de votre client, de l'autre le tableau de votre comptoir. Jouez les deux rôles.",
@@ -150,7 +153,7 @@
     "anotherPhone": "Scanner avec un autre téléphone"
   },
   "setup": {
-    "pageTitle": "Configurer votre bipeur · rtylr",
+    "pageTitle": "Configurer votre bipeur · $t(pager.brand.name)",
     "heading": "Configurer le bipeur de {{venue}}",
     "intro": "Une dernière chose : le numéro de téléphone de votre établissement. Ensuite, votre tableau s'ouvre avec le bipeur activé.",
     "phoneLabel": "Téléphone de l'établissement",
@@ -162,5 +165,74 @@
     "adminOnly": "Seul le propriétaire ou un administrateur de cette entreprise peut configurer le bipeur.",
     "loadFailed": "Impossible de charger votre entreprise.",
     "retry": "Réessayer"
+  },
+  "landing": {
+    "meta": {
+      "title": "$t(pager.brand.name) : le bipeur gratuit pour restaurants, sans appli",
+      "description": "$t(pager.brand.name) est un bipeur gratuit pour restaurants et cafés, par rtylr. Le client scanne un QR au comptoir, montre son code en caisse et son téléphone sonne quand c’est prêt.",
+      "keywords": "bipeur gratuit, bipeur restaurant, pager restaurant, bipeur QR code, appel client restaurant, $t(pager.brand.name)",
+      "schemaDescription": "$t(pager.brand.name) est un bipeur gratuit pour restaurants, par rtylr. Le client scanne un QR au comptoir, montre son code au caissier et son téléphone sonne quand la commande est prête."
+    },
+    "tryCta": "Essayer maintenant",
+    "hero": {
+      "eyebrow": "$t(pager.brand.name), le bipeur gratuit de rtylr",
+      "title": "Le bipeur gratuit\nqui fait sonner leur téléphone.",
+      "subtitle": "$t(pager.brand.name) remplace les bipeurs en plastique par le téléphone que votre client a déjà en poche. Un QR sur le comptoir, et son téléphone sonne quand la commande est prête. Gratuit pour votre établissement.",
+      "note": "Pas d’appli, pas de compte, rien à acheter."
+    },
+    "how": {
+      "title": "Comment ça marche",
+      "intro": "Le client scanne et attend. Rien à installer, rien à saisir.",
+      "steps": [
+        {
+          "title": "Scanner le QR au comptoir",
+          "body": "Un seul QR imprimé près de la caisse. Le client le vise avec l’appareil photo de son téléphone et la page s’ouvre. Pas d’appli à télécharger, pas de compte à créer."
+        },
+        {
+          "title": "Montrer le code au caissier",
+          "body": "Son téléphone affiche un code court. Le caissier y associe le numéro de commande ou son nom, et le client s’assoit, sort prendre l’air ou continue sa journée."
+        },
+        {
+          "title": "Le téléphone sonne quand c’est prêt",
+          "body": "Quand la commande est prête, votre équipe touche Prête sur le tableau et le téléphone du client sonne."
+        }
+      ]
+    },
+    "compare": {
+      "title": "Tout ce que fait un bipeur en plastique, sans le plastique",
+      "intro": "Le téléphone du client fait le travail du bipeur, et tout ce que le bipeur vous coûtait disparaît.",
+      "items": [
+        {
+          "title": "Rien à acheter",
+          "body": "Pas de lot de bipeurs, pas de pièces de rechange. Le client apporte l’appareil."
+        },
+        {
+          "title": "Rien à recharger",
+          "body": "Pas de socle de charge sur le comptoir, pas de bipeur à plat en plein coup de feu."
+        },
+        {
+          "title": "Rien à nettoyer",
+          "body": "Aucun appareil qui passe de main en main toute la journée, donc rien à désinfecter entre deux clients."
+        },
+        {
+          "title": "Rien à perdre",
+          "body": "Plus de bipeurs qui repartent dans une poche ou un sac."
+        }
+      ]
+    },
+    "free": {
+      "title": "Pourquoi c’est gratuit ?",
+      "body": "rtylr fabrique un logiciel de caisse. $t(pager.brand.name) est gratuit parce que nous voulons que les restaurateurs voient comment nous construisons nos produits, avec un outil qu’ils peuvent utiliser au comptoir dès aujourd’hui."
+    },
+    "closing": {
+      "title": "Écoutez-le sonner vous-même",
+      "subtitle": "Essayez le tableau de l’équipe et le téléphone du client côte à côte, dans votre navigateur. Sans inscription."
+    },
+    "signIn": "Vous avez déjà un tableau ?",
+    "signInLink": "Se connecter",
+    "footer": "Un bipeur gratuit pour restaurants et cafés."
+  },
+  "staff": {
+    "portal": "Ouvrir RTYLR"
   }
 }
