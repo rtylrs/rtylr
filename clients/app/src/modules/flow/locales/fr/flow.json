@@ -216,6 +216,19 @@
       "merged": "Fusionnée",
       "closed": "Fermée"
     },
+    "assignToMe": "M'assigner",
+    "reporter": "Rapporteur",
+    "activityTabs": {
+      "all": "Tout",
+      "history": "Historique",
+      "time": "Temps",
+      "timeLogged": "{{name}} a saisi {{duration}}",
+      "allEmpty": "Rien pour l'instant. Les commentaires, les modifications et le temps saisi apparaîtront ici."
+    },
+    "print": {
+      "action": "Imprimer ou enregistrer en PDF",
+      "printedOn": "Imprimé le {{date}}"
+    },
     "noMilestone": "Aucun jalon",
     "noMilestonesInProject": "Aucun jalon dans ce projet",
     "relations": "Relations",

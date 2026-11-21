@@ -215,6 +215,19 @@
       "merged": "Merged",
       "closed": "Closed"
     },
+    "assignToMe": "Assign to me",
+    "reporter": "Reporter",
+    "activityTabs": {
+      "all": "All",
+      "history": "History",
+      "time": "Time",
+      "timeLogged": "{{name}} logged {{duration}}",
+      "allEmpty": "Nothing here yet. Comments, changes and logged time will show up here."
+    },
+    "print": {
+      "action": "Print or save as PDF",
+      "printedOn": "Printed {{date}}"
+    },
     "noMilestone": "No milestone",
     "noMilestonesInProject": "No milestones in this project",
     "relations": "Relations",

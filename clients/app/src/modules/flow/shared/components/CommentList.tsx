@@ -36,7 +36,11 @@ function timeAgo(ts: string, t: ReturnType<typeof useTranslation>['t']): string 
   return t('flow.taskDetail.daysAgo', { count: days });
 }
 
-function renderBody(body: string, mentionNames: string[]): React.ReactNode {
+/**
+ * A comment's text with its @mentions and inline bold, italic and code, as
+ * the thread shows it. The task print view reuses it so paper matches screen.
+ */
+export function renderCommentBody(body: string, mentionNames: string[]): React.ReactNode {
   // @mention highlight + basic markdown (bold/italic/code). Known names go
   // first, longest first, so "@Mohamad Issa" highlights as one mention rather
   // than stopping at the first space.
@@ -158,7 +162,7 @@ export const CommentList: React.FC<CommentListProps> = ({
                   className="text-flow-meta leading-relaxed whitespace-pre-wrap break-words"
                   style={{ color: 'var(--flow-text-muted)' }}
                 >
-                  {renderBody(c.body, mentionNames)}
+                  {renderCommentBody(c.body, mentionNames)}
                 </div>
               )}
             </div>

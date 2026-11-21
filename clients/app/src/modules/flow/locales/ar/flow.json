@@ -227,6 +227,19 @@
       "merged": "مدموج",
       "closed": "مغلق"
     },
+    "assignToMe": "إسناد إليّ",
+    "reporter": "المُبلِّغ",
+    "activityTabs": {
+      "all": "الكل",
+      "history": "السجل",
+      "time": "الوقت",
+      "timeLogged": "سجّل {{name}} {{duration}}",
+      "allEmpty": "لا شيء هنا بعد. ستظهر هنا التعليقات والتغييرات والوقت المسجّل."
+    },
+    "print": {
+      "action": "طباعة أو حفظ بصيغة PDF",
+      "printedOn": "طُبع في {{date}}"
+    },
     "noMilestone": "بدون معلم",
     "noMilestonesInProject": "لا معالم في هذا المشروع",
     "relations": "العلاقات",
