@@ -1,5 +1,6 @@
 import type { FlowTask as ContractTask } from '@voxire/voxie/flow/task/v2/types';
 import type { Status as ContractStatus } from '@voxire/voxie/flow/status/v2/types';
+import type { Field as ContractField } from '@voxire/voxie/flow/field/v2/types';
 
 import { oneKitResult } from '@voxire/api';
 import {
@@ -146,7 +147,9 @@ export interface ApiTask {
   waitingOn?: string;
   decisionNote?: string;
   focusPin?: boolean;
-  customFieldValues?: Record<string, string | number>;
+  // Custom field values keyed by field id. Pinned to the contract like
+  // archived above, so a wire change fails here instead of drifting.
+  fieldValues?: ContractTask['fieldValues'];
 }
 
 export interface ApiLabel {
@@ -186,6 +189,69 @@ export function toApiStatus(s: ContractStatus): ApiStatus {
 
 const toApiStatuses = (list: ContractStatus[] | undefined): ApiStatus[] =>
   (list ?? []).map(toApiStatus);
+
+export type ApiFieldType =
+  'text' | 'number' | 'date' | 'select' | 'multi_select' | 'person' | 'url' | 'checkbox';
+
+export interface ApiFieldOption {
+  id: string;
+  label: string;
+  color: string;
+}
+
+/** A project's custom field (flow.field.v2). */
+export interface ApiField {
+  id: string;
+  projectId: string;
+  name: string;
+  type: ApiFieldType;
+  options: ApiFieldOption[];
+  required: boolean;
+  defaultValue: string;
+  defaultValues: string[];
+  sortOrder: number;
+  /** How many tasks hold a value; only listFields fills it. */
+  valueCount: number;
+}
+
+/** A task's value for one field: `value` for single-value types, `values` for multi_select and person. */
+export interface ApiTaskFieldValue {
+  value?: string;
+  values?: string[];
+}
+
+export interface ApiTaskFieldValueInput extends ApiTaskFieldValue {
+  fieldId: string;
+}
+
+export interface ApiFieldInput {
+  name: string;
+  options: { id?: string; label: string; color?: string }[];
+  required: boolean;
+  defaultValue: string;
+  defaultValues: string[];
+}
+
+// The wire omits zero, false and empty lists, so every field is normalised
+// here: a missing `required` is false, not undefined.
+export function toApiField(f: ContractField): ApiField {
+  return {
+    id: String(f.id ?? ''),
+    projectId: String(f.projectId ?? ''),
+    name: f.name ?? '',
+    type: (f.type ?? 'text') as ApiFieldType,
+    options: (f.options ?? []).map((o) => ({
+      id: o.id ?? '',
+      label: o.label,
+      color: o.color ?? '',
+    })),
+    required: f.required ?? false,
+    defaultValue: f.defaultValue ?? '',
+    defaultValues: f.defaultValues ?? [],
+    sortOrder: f.sortOrder ?? 0,
+    valueCount: f.valueCount ?? 0,
+  };
+}
 
 /** One entry of the workspace status template that new projects copy. */
 export interface ApiStatusTemplateItem {

@@ -95,5 +95,6 @@ export function apiTaskToTask(t: ApiTask): Task {
     statusId: t.statusId || undefined,
     statusName: t.statusName || undefined,
     statusColor: t.statusColor || undefined,
+    fieldValues: t.fieldValues,
   };
 }
