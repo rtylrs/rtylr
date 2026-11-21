@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/domain"
+	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	flowtaskv2 "github.com/voxire/voxie/gen/go/flow/task/v2"
 )
@@ -21,6 +22,9 @@ func (a *TaskAPIV2) GetMyTasks(ctx context.Context, req *flowtaskv2.GetMyTasksRe
 	page, limit, _ := resolvePagination(req.GetPage(), req.GetLimit())
 	tasks, total, err := a.Service.GetMyTasksForBusiness(ctx, caller.UserID, businessID, int64(page), int64(limit))
 	if err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get my tasks")
+	}
+	if err := a.Service.AttachMilestoneIDs(ctx, tasks); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get my tasks")
 	}
 	return &flowtaskv2.GetMyTasksResponse{
@@ -49,6 +53,9 @@ func (a *TaskAPIV2) SearchTasks(ctx context.Context, req *flowtaskv2.SearchTasks
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
 	tasks, total, err := a.Service.SearchTasksV2(ctx, caller.UserID, businessID, req.GetQ(), int64(limit), offset)
 	if err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to search tasks")
+	}
+	if err := a.Service.AttachMilestoneIDs(ctx, tasks); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to search tasks")
 	}
 	return &flowtaskv2.SearchTasksResponse{
@@ -81,6 +88,15 @@ func (a *TaskAPIV2) CreateTask(ctx context.Context, req *flowtaskv2.CreateTaskRe
 
 	if req.SectionId != nil && (projectID == 0 || a.Service.GetColumnProject(ctx, *req.SectionId) != projectID) {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Column must belong to the selected project")
+	}
+	if req.MilestoneId != nil {
+		milestoneProject, lookupErr := a.Service.MilestoneProjectID(ctx, *req.MilestoneId, businessID)
+		if lookupErr != nil {
+			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create task")
+		}
+		if projectID == 0 || milestoneProject != projectID {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Milestone must belong to the selected project")
+		}
 	}
 	dueDate, err := parseTaskDate(req.GetDueDate())
 	if err != nil {
@@ -117,6 +133,16 @@ func (a *TaskAPIV2) CreateTask(ctx context.Context, req *flowtaskv2.CreateTaskRe
 	if createErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create task")
 	}
+	if req.MilestoneId != nil {
+		// The task already exists, so failing here would invite a retry that
+		// creates a duplicate. The response omits the milestone instead, which
+		// is what the client then shows.
+		if linkErr := a.Service.SetTaskMilestone(ctx, task.ID, req.MilestoneId); linkErr != nil {
+			logger.Ctx(ctx).Error("CreateTask milestone link failed", logger.Error(linkErr))
+		} else {
+			task.MilestoneID = req.MilestoneId
+		}
+	}
 
 	payload := toTaskV2(task)
 	publishTaskEventByProject("task.created", task.ProjectID, task.ID, caller.UserID)
@@ -143,6 +169,12 @@ func (a *TaskAPIV2) GetTaskDetail(ctx context.Context, req *flowtaskv2.GetTaskDe
 		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get task detail")
 	}
+
+	withMilestone := []domain.Task{detail.Task}
+	if err := a.Service.AttachMilestoneIDs(ctx, withMilestone); err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get task detail")
+	}
+	detail.Task = withMilestone[0]
 
 	comments := make([]*flowtaskv2.TaskComment, 0, len(detail.Comments))
 	for _, c := range detail.Comments {
@@ -201,6 +233,21 @@ func (a *TaskAPIV2) UpdateTask(ctx context.Context, req *flowtaskv2.UpdateTaskRe
 			return nil, onekiterrors.New(http.StatusBadRequest, "Column must belong to the task project")
 		}
 	}
+	var milestoneID *int64
+	if body.MilestoneId != nil && *body.MilestoneId != 0 {
+		detail, err := a.Service.GetTaskDetail(ctx, req.GetId())
+		if err != nil {
+			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update task")
+		}
+		milestoneProject, lookupErr := a.Service.MilestoneProjectID(ctx, *body.MilestoneId, businessID)
+		if lookupErr != nil {
+			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update task")
+		}
+		if milestoneProject != detail.Task.ProjectID {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Milestone must belong to the task project")
+		}
+		milestoneID = body.MilestoneId
+	}
 	input := domain.UpdateTaskInput{
 		SectionID:        body.SectionId,
 		ID:               req.GetId(),
@@ -227,6 +274,11 @@ func (a *TaskAPIV2) UpdateTask(ctx context.Context, req *flowtaskv2.UpdateTaskRe
 
 	if err := a.Service.UpdateTask(ctx, input, caller.UserID); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update task")
+	}
+	if body.MilestoneId != nil {
+		if err := a.Service.SetTaskMilestone(ctx, input.ID, milestoneID); err != nil {
+			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update task")
+		}
 	}
 
 	updated, fetchErr := a.Service.GetTaskDetail(ctx, input.ID)

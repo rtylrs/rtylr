@@ -9,7 +9,7 @@ FROM --platform=$BUILDPLATFORM golang:1.27.3-alpine3.24 AS builder
 WORKDIR /src
 
 # Layer 1: system tools — cached until this line changes
-RUN apk add --no-cache curl bash ca-certificates
+RUN apk add --no-cache curl bash ca-certificates nodejs npm
 
 # Layer 2: sqlc binary — use the fast release asset, with Go-module fallback
 # when GitHub's release-assets endpoint is unavailable.
@@ -24,9 +24,11 @@ RUN set -eux; \
     rm -f /tmp/sqlc.tar.gz; \
     sqlc version
 
-# Layer 3: the onek CLI, kept apart from the contracts so editing them doesn't
-# recompile it.
-RUN GOBIN=/usr/local/bin go install github.com/1homsi/onekit/cmd/onek@v0.36.3
+# Layer 3: the onkt CLI and TypeSpec toolchain pinned in voxie's lockfile, kept
+# apart from the contracts so editing them doesn't reinstall it. `onkt --version`
+# makes the @onkt/cli launcher fetch (and checksum) its release binary here too.
+COPY voxie/package.json voxie/package-lock.json /src/voxie/
+RUN cd /src/voxie && npm ci --no-audit --no-fund && npx --no-install onkt --version
 
 # Layer 4: module downloads depend only on the module files, so source edits
 # reuse them.
@@ -36,9 +38,9 @@ WORKDIR /src/services/onion
 RUN go mod download && go mod verify
 
 # Layer 5: generated contract output is gitignored, so produce it from the
-# pinned onek release before Go compiles against it.
+# pinned onkt release before Go compiles against it.
 COPY voxie/ /src/voxie/
-RUN cd /src/voxie && onek build .
+RUN cd /src/voxie && npx --no-install onkt build
 
 # Layer 6: the service, plus the SQL schemas and email templates it embeds.
 COPY services/onion/ ./

@@ -205,6 +205,7 @@ export interface ApiMilestone {
   computedProgress: number;
   doneCount: number;
   taskCount: number;
+  overdueCount?: number;
   status: 'planning' | 'active' | 'at_risk' | 'completed';
   description?: string;
   project?: { name: string; color: string };
@@ -364,7 +365,7 @@ const toViewPayload = (data: Partial<ApiView>) => ({
   name: data.name,
   icon: data.icon,
   // The flow/view/v1 contract wire-encodes `filters` as a JSON string (the
-  // .onk model documents it as "JSON-encoded filter criteria"; the generated
+  // .tsp model documents it as "JSON-encoded filter criteria"; the generated
   // Go struct field is `Filters string`) - sending the raw object fails
   // json.Unmarshal server-side and 400s on every request.
   filters: data.filters !== undefined ? JSON.stringify(data.filters) : undefined,
@@ -737,6 +738,7 @@ export const flowApi = {
     effortMinutes?: number;
     estimatedHours?: number;
     labels?: string[];
+    milestoneId?: string;
   }) =>
     flowResult<{ task: ApiTask }>(() => {
       const payload = toTaskCreatePayload(data);
@@ -753,6 +755,7 @@ export const flowApi = {
         startDate: payload.start_date,
         estimatedHours: payload.estimated_hours,
         labels: payload.labels,
+        milestoneId: data.milestoneId || undefined,
       });
     }),
 
@@ -792,6 +795,8 @@ export const flowApi = {
           focusPin: data.focusPin,
           waitingOn: data.waitingOn,
           decisionNote: data.decisionNote,
+          // Empty string removes the task from its milestone ('0' on the wire).
+          milestoneId: data.milestoneId !== undefined ? data.milestoneId || '0' : undefined,
         },
       })
     ),
@@ -1057,6 +1062,9 @@ export const flowApi = {
     flowResult<{ message: string }>(() =>
       milestoneV2.updateMilestone({ id, ...toMilestoneUpdatePayload(data) })
     ),
+
+  deleteMilestone: (id: string) =>
+    flowResult<Record<string, never>>(() => milestoneV2.deleteMilestone({ id })),
 
   // -- Cycles -------------------------------------------------------------
 

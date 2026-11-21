@@ -1,6 +1,5 @@
 import { EmptyState } from '../../../../shared/components/dash/EmptyState';
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Milestone as MilestoneIcon, Plus } from 'lucide-react';
@@ -10,27 +9,12 @@ import { useUserStore as useAuthUserStore } from '../../../../shared/stores/user
 import { useMilestones, useCreateMilestone } from './useMilestones';
 import { canFlowPermission } from '../../shared/lib/roleUtils';
 import { ACCENT_DEFAULT } from '../../shared/lib/colorUtils';
-import { formatDueDate } from '../../shared/lib/utils';
 import { CardSkeleton } from '../../shared/components/Skeleton';
 import { useProjects, useCreateProject } from '../projects/useProjects';
 import GateNotice from '../../shared/components/GateNotice';
-import { withAlpha } from '../../shared/lib/colorUtils';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
-
-const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
-  planning: { bg: withAlpha('var(--flow-neutral-fg)', 12), color: 'var(--flow-neutral-fg)' },
-  active: { bg: 'var(--flow-status-approved-bg)', color: 'var(--flow-status-approved)' },
-  at_risk: { bg: withAlpha('var(--flow-warn-fg)', 12), color: 'var(--flow-warn-fg)' },
-  completed: { bg: withAlpha('var(--flow-info-fg)', 12), color: 'var(--flow-info-fg)' },
-};
-
-const STATUS_LABEL_KEYS: Record<string, string> = {
-  planning: 'planning',
-  active: 'active',
-  at_risk: 'atRisk',
-  completed: 'completed',
-};
+import MilestoneCard from './MilestoneCard';
 
 // Sentinel option value. Never stored as the selected project id, so it can
 // not leak into the milestone payload the way a real id would.
@@ -398,75 +382,10 @@ const Milestones: React.FC = () => {
           </div>
         </div>
       )}
-      <div className="flex-1 overflow-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-        {milestones.map((m, i) => {
-          const style = STATUS_STYLES[m.status];
-          return (
-            <motion.div
-              key={m.id}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.16, delay: i * 0.03 }}
-              className="rounded-xl p-5"
-              style={{
-                background: 'var(--flow-card)',
-                border: '1px solid var(--flow-border)',
-              }}
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span
-                    className="h-8 w-8 rounded-md flex items-center justify-center"
-                    style={{ background: withAlpha(m.project?.color || 'var(--accent)', 13) }}
-                  >
-                    <MilestoneIcon
-                      size={14}
-                      style={{ color: m.project?.color || 'var(--accent)' }}
-                    />
-                  </span>
-                  <div>
-                    <p className="text-flow-body font-bold" style={{ color: 'var(--flow-text)' }}>
-                      {m.name}
-                    </p>
-                    <p className="text-flow-meta" style={{ color: 'var(--flow-text-dim)' }}>
-                      {m.project?.name}
-                    </p>
-                  </div>
-                </div>
-                <span
-                  className="text-flow-meta px-2 py-0.5 rounded-full font-semibold capitalize"
-                  style={{ background: style.bg, color: style.color }}
-                >
-                  {t(`flow.milestones.status.${STATUS_LABEL_KEYS[m.status]}`)}
-                </span>
-              </div>
-              {m.description && (
-                <p className="text-flow-meta mb-3" style={{ color: 'var(--flow-text-muted)' }}>
-                  {m.description}
-                </p>
-              )}
-              {/* No progress bar, and no task count, until a task can be put
-                  into a milestone. There is no attach operation in the UI or
-                  the API, so every milestone's progress is 0 of 0 forever, and
-                  a bar that can only ever read empty tells a customer their
-                  work has not started when nothing could have started it.
-
-                  Restore both when the attach operation lands: rtylr#1064 and
-                  REQ-R15. The percentage and the fill already read
-                  milestoneProgress, so it is the surrounding markup that comes
-                  back, not the calculation. */}
-              <div
-                className="flex items-center justify-between text-flow-meta"
-                style={{ color: 'var(--flow-text-dim)' }}
-              >
-                <span>{t('flow.milestones.noTasksHint')}</span>
-                <span>
-                  {t('flow.milestones.target')} {formatDueDate(m.targetDate, t)}
-                </span>
-              </div>
-            </motion.div>
-          );
-        })}
+      <div className="flex-1 overflow-auto p-6 grid grid-cols-1 md:grid-cols-2 content-start gap-4">
+        {milestones.map((m, i) => (
+          <MilestoneCard key={m.id} milestone={m} index={i} />
+        ))}
       </div>
     </div>
   );

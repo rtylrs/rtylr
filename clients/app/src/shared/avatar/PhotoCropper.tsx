@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Button } from '../components/ui/button';
 
 /** The circle the user frames their photo in, in CSS pixels. */
 const VIEW = 224;
@@ -168,24 +169,14 @@ export const PhotoCropper: React.FC<PhotoCropperProps> = ({ file, onCropped, onC
           className="flex-1"
         />
       </label>
-      <p className="text-xs opacity-70">{t('settings.avatar.dragHint')}</p>
+      <p className="text-xs text-[var(--dash-text-dim)]">{t('settings.avatar.dragHint')}</p>
       <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={busy}
-          className="min-h-9 rounded-md border px-3 text-sm disabled:opacity-50"
-        >
+        <Button variant="outline" onClick={onCancel} disabled={busy}>
           {t('settings.avatar.choosePhotoAgain')}
-        </button>
-        <button
-          type="button"
-          onClick={save}
-          disabled={busy || !natural}
-          className="min-h-9 rounded-md bg-primary px-3 text-sm font-medium text-white disabled:opacity-50"
-        >
+        </Button>
+        <Button onClick={save} disabled={busy || !natural}>
           {busy ? t('settings.avatar.uploading') : t('settings.avatar.usePhoto')}
-        </button>
+        </Button>
       </div>
     </div>
   );

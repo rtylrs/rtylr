@@ -1,0 +1,962 @@
+// The blog, both locales. Logical properties throughout (inline-start, not
+// left) so the Arabic pages mirror without a second stylesheet.
+
+$beige: #d6b88e;
+$beige-ink: #7a5a2e;
+$ink: #18181b;
+$text: #3f3f46;
+$meta: #52525b;
+$muted: $text;
+
+// One colour per reader, all from the brand: the logo blue (#4583c4, taken
+// one step deeper so white text on it reads at 5:1), the site navy
+// (--primary-color) and ink. --accent is a block colour for white type;
+// --accent-tint is its pale version for light surfaces.
+.seg_small {
+  --accent: #2f6cad;
+  --accent-deep: #1f4f86;
+  --accent-tint: #e3eef9;
+}
+.seg_mid {
+  --accent: #12245a;
+  --accent-deep: #040428;
+  --accent-tint: #e2e6f2;
+}
+.seg_large {
+  --accent: #18181b;
+  --accent-deep: #000000;
+  --accent-tint: #ececef;
+}
+.seg_vision {
+  --accent: #1f5f8f;
+  --accent-deep: #12245a;
+  --accent-tint: #dfedf6;
+}
+
+.page {
+  background: var(--app-background);
+  color: $ink;
+  padding-block-end: 96px;
+}
+
+// ── Masthead: oversized type on the page, a magazine cover line ─────────
+
+.mast {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 116px 32px 0;
+}
+
+.mastLine {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  margin: 0 0 18px;
+  padding-block-end: 14px;
+  border-block-end: 2px solid $ink;
+}
+
+.mastEyebrow {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent, $ink);
+}
+
+.heroTitle {
+  font-size: clamp(2.75rem, 7.2vw, 6.25rem);
+  font-weight: 800;
+  line-height: 0.96;
+  letter-spacing: -0.05em;
+  color: $ink;
+  margin: 0 0 28px;
+  max-width: 1100px;
+  text-wrap: balance;
+}
+
+.mastFoot {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 24px 48px;
+  align-items: end;
+  padding-block-end: 28px;
+  border-block-end: 1px solid #d4d4d8;
+}
+
+.mastIntro > :last-child {
+  margin-block-end: 0;
+}
+
+.heroSubtitle {
+  font-size: 1.2rem;
+  line-height: 1.55;
+  color: $text;
+  margin: 0 0 12px;
+}
+
+.heroRole {
+  font-weight: 700;
+  color: var(--accent, $ink);
+  margin: 0 0 8px;
+}
+
+.authorLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.95rem;
+  color: $text;
+  margin: 0;
+
+  a {
+    color: $ink;
+  }
+}
+
+.otherLanguage {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: $ink;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.segmentNav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+
+  a {
+    padding: 9px 16px;
+    border-radius: 999px;
+    border: 1.5px solid $ink;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: $ink;
+    text-decoration: none;
+
+    &:hover,
+    &[aria-current='page'] {
+      background: $ink;
+      color: #fff;
+    }
+  }
+}
+
+// ── Cards ────────────────────────────────────────────────────────────────
+
+.label {
+  display: inline-block;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent, $beige-ink);
+  margin-block-end: 12px;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: $ink;
+  margin: 0 0 24px;
+
+  &::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: $ink;
+  }
+}
+
+.leadSection,
+.segments,
+.gridSection,
+.related,
+.about {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 32px 0;
+}
+
+.about p {
+  max-width: 760px;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: $text;
+  margin: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 40px 28px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  color: $ink;
+  text-decoration: none;
+
+  // The cover sits in a coloured block; the text sits on the page.
+  > :first-child {
+    border-radius: 14px;
+    transition: transform 0.25s ease;
+  }
+
+  &:hover {
+    > :first-child {
+      transform: translateY(-4px);
+    }
+
+    .cardTitle {
+      text-decoration: underline;
+      text-decoration-color: var(--accent, $ink);
+      text-decoration-thickness: 3px;
+      text-underline-offset: 5px;
+    }
+  }
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 18px 2px 0;
+  flex-grow: 1;
+}
+
+.cardTitle {
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  color: $ink;
+  margin: 0 0 10px;
+}
+
+.cardExcerpt {
+  font-size: 1.02rem;
+  line-height: 1.55;
+  color: $text;
+  margin: 0 0 14px;
+  flex-grow: 1;
+}
+
+.cardMeta {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $meta;
+  margin: 0;
+}
+
+.wideCard {
+  grid-column: span 2;
+
+  .cardTitle {
+    font-size: 2rem;
+  }
+}
+
+// The lead story: one full colour block, white type, the cover large.
+.leadCard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  background: var(--accent, $ink);
+  color: #fff;
+  border-radius: 24px;
+  overflow: hidden;
+
+  > :first-child {
+    order: 2;
+    border-radius: 0;
+    aspect-ratio: auto;
+    min-height: 100%;
+    padding: 48px;
+    background:
+      radial-gradient(80% 80% at 70% 30%, rgba(255, 255, 255, 0.22), transparent 70%),
+      var(--accent-deep, #000);
+  }
+
+  .cardBody {
+    padding: 56px 48px;
+    justify-content: center;
+  }
+
+  .label {
+    color: #fff;
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+    border-radius: 999px;
+    padding: 5px 12px;
+    margin-block-end: 22px;
+  }
+
+  .cardTitle {
+    font-size: clamp(2rem, 3.6vw, 3.25rem);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    color: #fff;
+    margin-block-end: 18px;
+  }
+
+  .cardExcerpt {
+    font-size: 1.15rem;
+    color: rgba(255, 255, 255, 0.92);
+  }
+
+  .cardMeta {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  &:hover {
+    > :first-child {
+      transform: none;
+    }
+
+    .cardTitle {
+      text-decoration-color: #fff;
+    }
+  }
+}
+
+// Sections as solid colour blocks.
+.segmentGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.segmentCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 36px;
+  border-radius: 20px;
+  background: var(--accent, $ink);
+  color: #fff;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+  }
+
+  .label {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .cardTitle {
+    font-size: 1.9rem;
+    color: #fff;
+  }
+
+  .cardExcerpt {
+    color: rgba(255, 255, 255, 0.92);
+  }
+}
+
+.more {
+  font-size: 1rem;
+  font-weight: 700;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+// ── Post ─────────────────────────────────────────────────────────────────
+
+.post {
+  background: var(--app-background);
+  color: $ink;
+  padding: 0 0 40px;
+}
+
+// The post opens on a full-width block in the reader's colour.
+.postHeader {
+  padding: 140px max(24px, calc((100% - 980px) / 2)) 56px;
+  background:
+    radial-gradient(60% 90% at 100% 0%, rgba(255, 255, 255, 0.18), transparent 60%),
+    var(--accent, $ink);
+  color: #fff;
+
+  .label {
+    color: #fff;
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+    border-radius: 999px;
+    padding: 5px 12px;
+    margin-block-end: 22px;
+  }
+}
+
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-block-end: 22px;
+
+  a {
+    color: #fff;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.postTitle {
+  font-size: clamp(2.5rem, 6vw, 4.75rem);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+  color: #fff;
+  max-width: 940px;
+  margin: 0 0 22px;
+  text-wrap: balance;
+}
+
+.postExcerpt {
+  font-size: 1.3rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.92);
+  max-width: 760px;
+  margin: 0 0 30px;
+}
+
+.postMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+
+  a {
+    color: #fff;
+    font-weight: 700;
+  }
+}
+
+.postHeader .otherLanguage {
+  display: inline-block;
+  margin-block-start: 18px;
+  color: #fff;
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--accent, $ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.postLayout {
+  max-width: 980px;
+  margin: 0 auto;
+  padding-inline: 24px;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 48px;
+  padding-block-start: 24px;
+
+  > .postBody:only-child {
+    grid-column: 1 / -1;
+    max-width: 680px;
+    margin-inline: auto;
+  }
+}
+
+.toc {
+  position: sticky;
+  top: 96px;
+  align-self: start;
+  font-size: 0.86rem;
+
+  ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-inline-start: 1px solid var(--hairline);
+  }
+
+  li a {
+    display: block;
+    padding: 6px 14px;
+    color: $muted;
+    text-decoration: none;
+    line-height: 1.4;
+
+    &:hover {
+      color: var(--ink);
+    }
+  }
+}
+
+.tocTitle {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: $meta;
+  margin: 0 0 10px;
+}
+
+.postBody {
+  min-width: 0;
+  max-width: 680px;
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: #27272a;
+
+  > p {
+    margin: 0 0 22px;
+  }
+
+  a {
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-color: rgba($beige, 0.9);
+    text-underline-offset: 3px;
+  }
+
+  strong {
+    color: var(--ink);
+  }
+}
+
+.h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  color: var(--ink);
+  margin: 48px 0 16px;
+  scroll-margin-top: 96px;
+}
+
+.h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 30px 0 10px;
+}
+
+.quote {
+  margin: 44px 0;
+  padding: 8px 0 8px 28px;
+  border-inline-start: 6px solid var(--accent, $ink);
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  font-weight: 800;
+  line-height: 1.22;
+  letter-spacing: -0.025em;
+  color: $ink;
+}
+
+// A drop cap on the opening paragraph. Latin only: Arabic letters join,
+// so a dropped first letter breaks the word.
+:global(html[dir='ltr']) .postBody > p:first-child::first-letter {
+  float: left;
+  font-size: 4.4em;
+  line-height: 0.82;
+  font-weight: 800;
+  margin: 6px 12px 0 0;
+  color: var(--accent, $ink);
+}
+
+.list {
+  margin: 0 0 24px;
+  padding-inline-start: 22px;
+
+  li {
+    margin-block-end: 10px;
+    padding-inline-start: 4px;
+
+    &::marker {
+      color: $beige-ink;
+    }
+  }
+}
+
+.tableWrap {
+  margin: 28px 0;
+  overflow-x: auto;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--bg-surface-a);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  line-height: 1.5;
+
+  caption {
+    caption-side: top;
+    text-align: start;
+    padding: 14px 16px 4px;
+    font-size: 0.82rem;
+    color: $meta;
+  }
+
+  th,
+  td {
+    text-align: start;
+    vertical-align: top;
+    padding: 12px 16px;
+    border-block-end: 1px solid var(--hairline);
+  }
+
+  thead th {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: $meta;
+    background: #f4f4f5;
+  }
+
+  tbody th {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  tbody tr:last-child > * {
+    border-block-end: none;
+  }
+}
+
+.faq {
+  margin-block-start: 24px;
+}
+
+.faqItem p {
+  margin: 0 0 18px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 40px 0 0;
+  font-size: 0.86rem;
+  color: $meta;
+
+  a.tag {
+    text-decoration: none;
+  }
+}
+
+.tag {
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--hairline);
+  background: var(--bg-surface-a);
+  color: var(--ink);
+}
+
+.authorBox {
+  margin-block-start: 40px;
+  padding: 24px 26px;
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  background: var(--bg-surface-a);
+
+  p {
+    margin: 0;
+  }
+}
+
+.authorEyebrow {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: $meta;
+}
+
+.authorName {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin-block: 8px !important;
+  font-size: 1.05rem;
+
+  a {
+    font-weight: 700;
+    text-decoration: none !important;
+  }
+
+  span {
+    font-size: 0.86rem;
+    color: $meta;
+  }
+}
+
+.authorBio {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: $muted;
+}
+
+.related {
+  padding-block: 48px 120px;
+}
+
+// ── Calls to action ──────────────────────────────────────────────────────
+
+.cta {
+  margin-block-start: 40px;
+  padding: 32px;
+  border-radius: 16px;
+  background: var(--ink);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ctaInline {
+  margin-block: 36px;
+  padding: 24px 26px;
+  background: #fff;
+  color: $ink;
+  border: 1px solid #e4e4e7;
+  border-inline-start: 4px solid var(--accent, $ink);
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  .ctaBody {
+    color: $muted;
+  }
+}
+
+.ctaText p {
+  margin: 0;
+}
+
+.ctaTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.ctaBody {
+  margin-block-start: 6px !important;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+// Not named *Button or *cta: styles/index.scss forces every such link to the
+// solid ink button, and the end panel is ink already.
+.action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 22px;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid transparent;
+
+  // Two classes, so these beat `.postBody a`, which the buttons sit inside.
+  &.onLight {
+    background: var(--btn-cream-bg);
+    color: #fff;
+    text-decoration: none;
+    box-shadow: var(--btn-cream-shadow);
+  }
+
+  &.onDark {
+    background: #fff;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  &.ghostOnLight {
+    background: transparent;
+    color: var(--ink);
+    text-decoration: none;
+    border-color: var(--hairline-strong);
+  }
+
+  &.ghostOnDark {
+    background: transparent;
+    color: #fff;
+    text-decoration: none;
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+}
+
+// ── Narrow screens ───────────────────────────────────────────────────────
+
+@media (max-width: 1024px) {
+  .mastFoot {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .segmentNav {
+    justify-content: flex-start;
+  }
+
+  .leadCard {
+    grid-template-columns: minmax(0, 1fr);
+
+    > :first-child {
+      order: 0;
+      padding: 32px;
+      aspect-ratio: 16 / 9;
+    }
+
+    .cardBody {
+      padding: 32px 28px 36px;
+    }
+  }
+
+  .wideCard {
+    grid-column: span 2;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+
+  .postLayout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .toc {
+    position: static;
+    padding: 18px 20px;
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    background: var(--bg-surface-a);
+  }
+
+  .ctaInline {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .mast {
+    padding: 96px 16px 0;
+  }
+
+  .leadSection {
+    padding-inline: 12px;
+  }
+
+  .wideCard {
+    grid-column: auto;
+
+    .cardTitle {
+      font-size: 1.45rem;
+    }
+  }
+
+  .segmentCard {
+    padding: 28px 24px;
+  }
+
+  .postExcerpt {
+    font-size: 1.1rem;
+  }
+
+  .segments,
+  .about,
+  .gridSection,
+  .related {
+    padding-inline: 16px;
+  }
+
+  .grid,
+  .segmentGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .postHeader {
+    padding: 104px 16px 28px;
+  }
+
+  .postLayout {
+    padding-inline: 16px;
+  }
+
+  .postBody {
+    font-size: 1.0625rem;
+  }
+
+  .h2 {
+    font-size: 1.38rem;
+  }
+
+  .cta {
+    padding: 24px 20px;
+  }
+
+  .actions,
+  .action {
+    width: 100%;
+  }
+}
+
+// Negative tracking pulls Arabic letters apart at their joins, so the
+// display sizes go back to normal tracking on right-to-left pages.
+:global(html[dir='rtl']) {
+  .heroTitle,
+  .postTitle,
+  .sectionTitle,
+  .cardTitle,
+  .h2,
+  .h3,
+  .ctaTitle,
+  .label,
+  .eyebrow,
+  .tocTitle,
+  .authorEyebrow {
+    letter-spacing: 0;
+  }
+
+  .postBody {
+    line-height: 1.85;
+  }
+}

@@ -177,6 +177,14 @@ jobs:
           key: go-build-${{ runner.os }}-${{ steps.setup-go.outputs.go-version }}-${{ github.sha }}
           restore-keys: go-build-${{ runner.os }}-${{ steps.setup-go.outputs.go-version }}-
 
+      # onkt compiles the TypeSpec contracts with the TypeSpec compiler, which
+      # needs Node.js 22+. A tag cut before the TypeSpec move pins no onkt.toml.
+      - name: Set up Node.js
+        if: steps.go.outputs.version != '' && hashFiles('voxie/onkt.toml') != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - name: Compile the binary
         if: steps.go.outputs.version != ''
         env:

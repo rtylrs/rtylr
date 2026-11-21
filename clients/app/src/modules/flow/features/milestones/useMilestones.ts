@@ -40,3 +40,17 @@ export function useUpdateMilestone() {
     onError: () => toast.error(t('flowToasts.milestone.updateFailed')),
   });
 }
+
+export function useDeleteMilestone() {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => unwrap(flowApi.deleteMilestone(id)).then(() => {}),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['milestones'] });
+      // Tasks that were in the milestone now carry none.
+      void qc.invalidateQueries({ queryKey: ['tasks'] });
+    },
+    onError: () => toast.error(t('flowToasts.milestone.deleteFailed')),
+  });
+}

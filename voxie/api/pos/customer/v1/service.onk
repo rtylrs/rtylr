@@ -1,7 +1,0 @@
-package pos.customer.v1
-
-/// CustomerService defines POS customer lookup endpoints.
-service CustomerService {
-  /// Searches customers by name, email, or phone for POS lookups.
-  searchCustomers(SearchCustomersRequest) -> SearchCustomersResponse @get("/customers")
-}

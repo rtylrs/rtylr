@@ -57,10 +57,12 @@ type Milestone struct {
 	CompletedAt *time.Time
 	TaskCount   int
 	DoneCount   int
-	Progress    int // 0–100
-	Project     *MilestoneProject
-	CreatedBy   int64
-	CreatedAt   time.Time
+	// OverdueCount is open tasks whose due date has passed.
+	OverdueCount int
+	Progress     int // 0–100
+	Project      *MilestoneProject
+	CreatedBy    int64
+	CreatedAt    time.Time
 }
 
 type MilestoneProject struct {

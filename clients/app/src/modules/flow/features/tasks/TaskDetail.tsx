@@ -975,13 +975,24 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
             </button>
           </div>
         ) : (
-          milestone && (
-            <DetailField icon={MilestoneIcon} label={t('flow.taskDetail.milestone')}>
-              <span className="text-flow-meta" style={{ color: 'var(--flow-text)' }}>
-                {milestone.name}
-              </span>
-            </DetailField>
-          )
+          <DetailField icon={MilestoneIcon} label={t('flow.taskDetail.milestone')}>
+            <FlowSelect
+              label={t('flow.taskDetail.milestone')}
+              value={milestone?.id ?? ''}
+              options={
+                milestones.length === 0
+                  ? []
+                  : [
+                      { value: '', label: t('flow.taskDetail.noMilestone') },
+                      ...milestones.map((m) => ({ value: m.id, label: m.name })),
+                    ]
+              }
+              onChange={(milestoneId) => updateTask(task.id, { milestoneId })}
+              disabled={!canEdit || milestones.length === 0}
+              placeholder={t('flow.taskDetail.noMilestonesInProject')}
+              muted={!milestone}
+            />
+          </DetailField>
         )}
 
         <DetailField icon={Link2} label={t('flow.taskDetail.dependencies')}>

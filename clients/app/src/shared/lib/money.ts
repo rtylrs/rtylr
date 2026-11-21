@@ -5,7 +5,7 @@
  * `tax_amount`, `total`, `amount_paid` and `pos_order_items.unit_price` are all
  * `DECIMAL(10,2)` in onion's `pos/schema.sql`, read out through
  * `sqlutil.DecimalToFloat`, and declared `float64` in
- * `pos/orders/v1/models.onk`. Nothing in that chain scales by 100, so a $12.50
+ * `pos/orders/v1/models.tsp`. Nothing in that chain scales by 100, so a $12.50
  * order arrives as `12.5`.
  *
  * That is the opposite of the billing amounts, which really are minor units and

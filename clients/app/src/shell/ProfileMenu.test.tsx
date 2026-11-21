@@ -1,8 +1,14 @@
-import { fireEvent, render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ProfileMenu from './ProfileMenu';
+import { useSettingsModalStore } from '../features/settings/settingsModalStore';
 
 vi.mock('../features/business-switcher/BusinessSwitcher', () => ({ default: () => null }));
+vi.mock('../shared/avatar/AvatarPicker', () => ({
+  initialsOf: (name?: string) => (name ?? '?').slice(0, 2).toUpperCase(),
+  AvatarPicker: ({ open }: { open: boolean }) =>
+    open ? <div role="dialog" aria-label="avatar picker" /> : null,
+}));
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en', dir: () => 'ltr' } }),
 }));
@@ -42,5 +48,52 @@ describe('ProfileMenu', () => {
 
   it('opens upwards from the bottom of the app bar', () => {
     expect(open(false, window.innerHeight - 60, 400)).not.toHaveClass('opens-down');
+  });
+});
+
+describe('ProfileMenu profile access', () => {
+  beforeEach(() => {
+    useSettingsModalStore.getState().close();
+  });
+
+  // Opening <details> fires its toggle event asynchronously; let it settle.
+  async function openMenu() {
+    const view = render(<ProfileMenu />);
+    const details = view.container.querySelector('details')!;
+    await act(async () => {
+      details.open = true;
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    return details;
+  }
+
+  it('opens Account settings from the name and email', async () => {
+    const details = await openMenu();
+    const link = details.querySelector<HTMLAnchorElement>('.portal-profile-identity-link')!;
+    expect(link).toHaveAttribute('href', '/settings/account');
+    fireEvent.click(link);
+    expect(useSettingsModalStore.getState().path).toBe('/settings/account');
+    expect(details.open).toBe(false);
+  });
+
+  it('opens Account settings from the Your profile row', async () => {
+    const details = await openMenu();
+    fireEvent.click(screen.getByRole('link', { name: 'common.yourProfile' }));
+    expect(useSettingsModalStore.getState().path).toBe('/settings/account');
+    expect(details.open).toBe(false);
+  });
+
+  it('leaves a modified click to the browser, so it can open a new tab', async () => {
+    await openMenu();
+    fireEvent.click(screen.getByRole('link', { name: 'common.yourProfile' }), { metaKey: true });
+    expect(useSettingsModalStore.getState().path).toBeNull();
+  });
+
+  it('opens the avatar picker from your avatar', async () => {
+    const details = await openMenu();
+    expect(screen.queryByRole('dialog', { name: 'avatar picker' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'common.changeYourAvatar' }));
+    expect(screen.getByRole('dialog', { name: 'avatar picker' })).toBeInTheDocument();
+    expect(details.open).toBe(false);
   });
 });

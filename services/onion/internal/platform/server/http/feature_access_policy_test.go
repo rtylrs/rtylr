@@ -125,6 +125,18 @@ func TestERPFeatureRoutesUseCanonicalPermissions(t *testing.T) {
 	}
 }
 
+func TestOwnClockInPINRouteIsSelfServiceExempt(t *testing.T) {
+	if appID, permission, ok := featurePermissionForRequest(http.MethodPut, "/hr/employees/me/pin"); ok {
+		t.Fatalf("own clock-in PIN route mapped to %q:%q", appID, permission)
+	}
+	// Only the caller's own PIN is exempt; other employee writes stay gated.
+	for _, path := range []string{"/hr/employees/7/pin", "/hr/employees/me"} {
+		if _, permission, ok := featurePermissionForRequest(http.MethodPut, path); !ok || permission != "hr:employees:manage" {
+			t.Fatalf("PUT %s mapped to %q,%t, want hr:employees:manage", path, permission, ok)
+		}
+	}
+}
+
 func TestAttendanceClockInRoutesAreSelfServiceExempt(t *testing.T) {
 	for _, path := range []string{
 		"/hr/attendance/clock-in",

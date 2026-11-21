@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"strings"
 
 	businessdomain "github.com/voxire/onion/internal/modules/organization/business/internal/domain"
 	moduleinfra "github.com/voxire/onion/internal/modules/organization/business/internal/infrastructure"
@@ -66,6 +67,27 @@ func (m *Module) GetBusinessName(ctx context.Context, businessID int64) (string,
 
 func (m *Module) GetBusinessOwnerID(ctx context.Context, businessID int64) (int64, error) {
 	return m.service.GetBusinessOwnerID(ctx, businessID)
+}
+
+// PublicBusinessBySlug resolves the active business behind a storefront slug:
+// the lookup behind /businesses/by-slug, without its locations. An unknown
+// slug returns sql.ErrNoRows.
+func (m *Module) PublicBusinessBySlug(ctx context.Context, slug string) (id int64, name, logoURL string, err error) {
+	result, err := m.repository.LookupBySlug(ctx, strings.ToLower(strings.TrimSpace(slug)))
+	if err != nil {
+		return 0, "", "", err
+	}
+	return result.Business.ID, result.Business.Name, result.Business.LogoURL, nil
+}
+
+// PublicBusinessByID returns what an active business shows to the public. An
+// unknown or inactive business returns sql.ErrNoRows.
+func (m *Module) PublicBusinessByID(ctx context.Context, businessID int64) (name, logoURL string, err error) {
+	business, err := m.repository.GetPublicBusiness(ctx, businessID)
+	if err != nil {
+		return "", "", err
+	}
+	return business.Name, business.LogoURL, nil
 }
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {

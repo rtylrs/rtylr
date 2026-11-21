@@ -97,7 +97,8 @@
   },
   "milestone": {
     "createFailed": "فشل إنشاء المرحلة",
-    "updateFailed": "فشل تحديث المرحلة"
+    "updateFailed": "فشل تحديث المرحلة",
+    "deleteFailed": "فشل حذف المرحلة"
   },
   "view": {
     "renamed": "تمت إعادة تسمية العرض",
@@ -185,5 +186,7 @@
   "link": {
     "addFailed": "تعذرت إضافة الرابط",
     "removeFailed": "تعذرت إزالة الرابط"
-  }
+  },
+  "milestoneUpdated": "تم تحديث المرحلة",
+  "milestoneDeleted": "تم حذف المرحلة"
 }

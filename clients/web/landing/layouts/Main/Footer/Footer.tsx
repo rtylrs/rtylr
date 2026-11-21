@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '../../../lib/cn';
 import { fadeInUp, staggerContainer, viewportOnce } from '../../../lib/animations';
 import { navigateExternal } from '../../../lib/navigation';
-import { localeFromPath, localisePath, navPath } from '../../../lib/locales';
+import { localeFromPath, navPath } from '../../../lib/locales';
 import { track, EV_SIGNUP_CLICK, EV_CTA_CLICK } from '../../../lib/analytics';
 import styles from './Footer.module.scss';
 
@@ -46,7 +46,7 @@ const Footer: React.FC = () => {
       id: 'resources',
       title: t('footer.group.resources'),
       links: [
-        { to: '/blog', label: t('footer.link.blog') },
+        { to: navPath('/blog', locale), label: t('footer.link.blog') },
         {
           to: 'https://docs.rtylr.com',
           label: t('footer.link.documentation'),
@@ -164,19 +164,19 @@ const Footer: React.FC = () => {
 
         <motion.div className={styles['footer-bottom']} variants={fadeInUp}>
           <div className={styles['footer-legal']}>
-            <Link href={localisePath('/legal/terms/', locale)} className={styles['legal-link']}>
+            <Link href={navPath('/legal/terms/', locale)} className={styles['legal-link']}>
               {t('footer.legal.terms')}
             </Link>
             <Link
-              href={localisePath('/legal/privacy-policy/', locale)}
+              href={navPath('/legal/privacy-policy/', locale)}
               className={styles['legal-link']}
             >
               {t('footer.legal.privacy')}
             </Link>
-            <Link href={localisePath('/legal/security/', locale)} className={styles['legal-link']}>
+            <Link href={navPath('/legal/security/', locale)} className={styles['legal-link']}>
               {t('footer.legal.security')}
             </Link>
-            <Link href={localisePath('/trust/', locale)} className={styles['legal-link']}>
+            <Link href={navPath('/trust/', locale)} className={styles['legal-link']}>
               {t('footer.legal.trust')}
             </Link>
             <ManageConsentLink className={styles['legal-link']}>

@@ -110,6 +110,7 @@ import (
 	"github.com/voxire/onion/internal/modules/organization/team"
 	teamadapters "github.com/voxire/onion/internal/modules/organization/team/adapters"
 	"github.com/voxire/onion/internal/modules/organization/user"
+	"github.com/voxire/onion/internal/modules/pager"
 	"github.com/voxire/onion/internal/modules/portal"
 	"github.com/voxire/onion/internal/modules/pos/audit"
 	"github.com/voxire/onion/internal/modules/pos/cashmovements"
@@ -388,6 +389,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Notifications:         notificationsModule,
 		OAuth:                 oauth.NewModule(ctx, dbclient.Pool(), platformConfig.GlobalConfig.AuthAppURL),
 		OneOnOnes:             oneonones.NewModule(ctx, dbclient.Pool()),
+		Pager:                 pager.NewModule(ctx, dbclient.Pool(), businessModule),
 		Payroll:               payroll.NewModule(ctx, dbclient.Pool(), hrCoreModule),
 		PosAudit:              audit.NewModule(ctx, dbclient.Pool()),
 		PosCashMovements:      posCashMovementsModule,

@@ -13,11 +13,15 @@
   },
   "blog": {
     "route": "/blog/",
-    "headline": "Playbooks for running the whole business."
+    "headline": "Run the whole business from one place."
   },
   "blog-all-in-one-business-software": {
     "route": "/blog/all-in-one-business-software/",
     "headline": "All-in-One Business Software: What It Is and When You Actually Need It"
+  },
+  "blog-author-abed-el-fattah-amouneh": {
+    "route": "/blog/author/abed-el-fattah-amouneh/",
+    "headline": "Abed El-Fattah Amouneh"
   },
   "blog-pos-inventory-payroll-one-platform": {
     "route": "/blog/pos-inventory-payroll-one-platform/",
@@ -26,6 +30,14 @@
   "blog-restaurant-pos-system-guide": {
     "route": "/blog/restaurant-pos-system-guide/",
     "headline": "How to Choose a Restaurant POS System: A Saturday-Night Checklist"
+  },
+  "blog-small-business": {
+    "route": "/blog/small-business/",
+    "headline": "Run a small business on one system"
+  },
+  "blog-tag-pos": {
+    "route": "/blog/tag/pos/",
+    "headline": "Point of sale"
   },
   "contact": {
     "route": "/contact/",
