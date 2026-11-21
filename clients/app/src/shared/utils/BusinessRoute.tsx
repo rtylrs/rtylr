@@ -1,7 +1,7 @@
 import { Outlet, useRouterState } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { resolveAuthUrl } from '@voxire/config';
+import { resolveAppUrl, resolveAuthUrl } from '@voxire/config';
 import { parseEffectiveAccess } from '@voxire/auth';
 import CreateBusinessOnboarding from '../../features/onboarding/CreateBusinessOnboarding';
 import { useUserStore, type StoredUser } from '../stores/userStore';
@@ -50,7 +50,7 @@ function MFAAccessGate({ enrollmentRequired }: { enrollmentRequired: boolean }):
             : t('common.mfaGate.verificationDescription')}
         </p>
         <a
-          href="/security"
+          href={new URL('/security', resolveAppUrl('dash')).href}
           className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg px-4 text-sm font-semibold"
           style={{ background: 'var(--accent)', color: 'var(--dash-on-accent)' }}
         >
@@ -63,7 +63,25 @@ function MFAAccessGate({ enrollmentRequired }: { enrollmentRequired: boolean }):
   );
 }
 
-function BusinessRoute(): React.JSX.Element | null {
+/**
+ * A signed-in page served outside the Portal (Rennili's staff board): the same
+ * account, business and access checks, without the Portal shell around it.
+ */
+export interface StandaloneSurface {
+  /** The Portal path this page stands for, used for access checks and for the
+   * sign-in app's `returnTo`, which only returns to the Portal origin. */
+  portalPath: (pathname: string) => string;
+  shell: (page: React.ReactNode) => React.ReactNode;
+}
+
+function currentReturnPath(standalone?: StandaloneSurface): string {
+  const { pathname, search, hash } = window.location;
+  return standalone ? standalone.portalPath(pathname) + search : pathname + search + hash;
+}
+
+function BusinessRoute({
+  standalone,
+}: { standalone?: StandaloneSurface } = {}): React.JSX.Element | null {
   const { t } = useTranslation();
   const token = getCookieToken();
   const { user, setUser, setToken } = useUserStore();
@@ -74,16 +92,14 @@ function BusinessRoute(): React.JSX.Element | null {
   const [reloadCount, setReloadCount] = useState(0);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  useBusinessFavicon(logoUrl);
+  // Rennili keeps its own icon on the staff pages.
+  useBusinessFavicon(standalone ? undefined : logoUrl);
 
   useEffect((): void => {
     if (!token) {
       const login = new URL(resolveAuthUrl());
       login.searchParams.set('redirect', 'dash');
-      login.searchParams.set(
-        'returnTo',
-        window.location.pathname + window.location.search + window.location.hash
-      );
+      login.searchParams.set('returnTo', currentReturnPath(standalone));
       window.location.href = login.href;
       return;
     }
@@ -103,10 +119,7 @@ function BusinessRoute(): React.JSX.Element | null {
           const verify = new URL('/verify', resolveAuthUrl());
           if (res.email) verify.searchParams.set('email', res.email);
           verify.searchParams.set('redirect', 'dash');
-          verify.searchParams.set(
-            'returnTo',
-            window.location.pathname + window.location.search + window.location.hash
-          );
+          verify.searchParams.set('returnTo', currentReturnPath(standalone));
           window.location.href = verify.href;
           return;
         }
@@ -164,6 +177,7 @@ function BusinessRoute(): React.JSX.Element | null {
       });
   }, [
     token,
+    standalone,
     reloadCount,
     setAboutContent,
     setContactInfo,
@@ -234,17 +248,24 @@ function BusinessRoute(): React.JSX.Element | null {
     return <MFAAccessGate enrollmentRequired={!provisioningStatus.mfaEnrolled} />;
   }
 
+  const page = canAccessPortalPath(
+    user,
+    standalone ? standalone.portalPath(pathname) : pathname
+  ) ? (
+    <Outlet />
+  ) : (
+    <section role="alert" className="portal-access-denied">
+      <h1>{t('common.portal.accessDeniedTitle')}</h1>
+      <p>{t('common.portal.accessDeniedDescription')}</p>
+      <Link to="/">{t('common.portal.backHome')}</Link>
+    </section>
+  );
+
+  if (standalone) return <>{standalone.shell(page)}</>;
+
   return (
     <PortalShell>
-      {canAccessPortalPath(user, pathname) ? (
-        <Outlet />
-      ) : (
-        <section role="alert" className="portal-access-denied">
-          <h1>{t('common.portal.accessDeniedTitle')}</h1>
-          <p>{t('common.portal.accessDeniedDescription')}</p>
-          <Link to="/">{t('common.portal.backHome')}</Link>
-        </section>
-      )}
+      {page}
       <FirstLoginAvatarPrompt />
     </PortalShell>
   );
