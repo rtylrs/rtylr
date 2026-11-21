@@ -1,5 +1,6 @@
 import type { Task } from '../stores/flowStore';
 import { addDays } from '../lib/dateUtils';
+import { fieldIdFromKey, fieldValueParts } from '../lib/customFields';
 
 /**
  * The filter model every task list in Flow shares: the board, the list, the
@@ -11,6 +12,9 @@ import { addDays } from '../lib/dateUtils';
 
 /** Stands in for "nobody" in the assignee field, next to real user ids. */
 export const UNASSIGNED = 'none';
+
+/** Stands in for "no value" in a custom field, next to option and user ids. */
+export const NO_FIELD_VALUE = 'none';
 
 export const DUE_WINDOWS = ['overdue', 'today', 'next_7', 'next_30', 'no_date'] as const;
 export type DueWindow = (typeof DUE_WINDOWS)[number];
@@ -42,15 +46,32 @@ export interface TaskFilters {
   cycles: string[];
   milestones: string[];
   projects: string[];
+  /**
+   * Custom field values by field id (option ids, user ids, "true", or
+   * NO_FIELD_VALUE). Only the fields of the project being viewed apply.
+   * Optional so a filter set saved before custom fields existed still reads.
+   */
+  fields?: Record<string, string[]>;
   /** Free text matched against title, identifier, description and label names. */
   query: string;
 }
 
+/** A custom field in the Filter popover, keyed `field:<id>`. */
+export type CustomFilterField = `field:${string}`;
+
 /** The fields the Filter popover can list; `query` has its own box. */
 export type FilterField =
-  'assignees' | 'priorities' | 'labels' | 'due' | 'statuses' | 'cycles' | 'milestones' | 'projects';
+  | 'assignees'
+  | 'priorities'
+  | 'labels'
+  | 'due'
+  | 'statuses'
+  | 'cycles'
+  | 'milestones'
+  | 'projects'
+  | CustomFilterField;
 
-export type ListField = Exclude<FilterField, 'due'>;
+export type ListField = Exclude<FilterField, 'due' | CustomFilterField>;
 
 export const EMPTY_TASK_FILTERS: TaskFilters = {
   assignees: [],
@@ -63,6 +84,7 @@ export const EMPTY_TASK_FILTERS: TaskFilters = {
   cycles: [],
   milestones: [],
   projects: [],
+  fields: {},
   query: '',
 };
 
@@ -96,8 +118,38 @@ export function hasDueFilter(filters: TaskFilters): boolean {
  */
 export function activeFieldCount(filters: TaskFilters): number {
   let n = LIST_FIELDS.filter((field) => filters[field].length > 0).length;
+  n += Object.values(filters.fields ?? {}).filter((values) => values.length > 0).length;
   if (hasDueFilter(filters)) n += 1;
   return n;
+}
+
+/** The values picked for a list field or a custom field. */
+export function selectedValues(
+  filters: TaskFilters,
+  field: ListField | CustomFilterField
+): string[] {
+  const fieldId = fieldIdFromKey(field);
+  if (fieldId !== null) return filters.fields?.[fieldId] ?? [];
+  return filters[field as ListField];
+}
+
+/** The filters with one field's picked values replaced. */
+export function withSelectedValues(
+  filters: TaskFilters,
+  field: ListField | CustomFilterField,
+  values: string[]
+): TaskFilters {
+  const fieldId = fieldIdFromKey(field);
+  if (fieldId === null) return { ...filters, [field]: values };
+  const fields = { ...(filters.fields ?? {}) };
+  if (values.length > 0) fields[fieldId] = values;
+  else delete fields[fieldId];
+  return { ...filters, fields };
+}
+
+/** Every field cleared, the search text kept. */
+export function clearFilterFields(filters: TaskFilters): TaskFilters {
+  return { ...EMPTY_TASK_FILTERS, query: filters.query };
 }
 
 export function hasActiveTaskFilters(filters: TaskFilters): boolean {
@@ -179,6 +231,12 @@ export function matchesTaskFilters(task: Task, filters: TaskFilters, ctx: Filter
     return false;
   }
   if (filters.projects.length > 0 && !filters.projects.includes(task.projectId)) return false;
+  for (const [fieldId, picked] of Object.entries(filters.fields ?? {})) {
+    if (picked.length === 0) continue;
+    const parts = fieldValueParts(task.fieldValues?.[fieldId]);
+    const hit = picked.some((v) => (v === NO_FIELD_VALUE ? parts.length === 0 : parts.includes(v)));
+    if (!hit) return false;
+  }
   if (!matchesDue(task, filters, ctx.today)) return false;
   return matchesQuery(task, filters.query, ctx);
 }
@@ -212,6 +270,10 @@ export function serializeTaskFilters(filters: TaskFilters): SerializedTaskFilter
   for (const field of LIST_FIELDS) {
     if (filters[field].length > 0) out[field] = filters[field];
   }
+  const fields = Object.fromEntries(
+    Object.entries(filters.fields ?? {}).filter(([, values]) => values.length > 0)
+  );
+  if (Object.keys(fields).length > 0) out.fields = fields;
   if (filters.due.length > 0) out.due = filters.due;
   if (filters.dueFrom) out.dueFrom = filters.dueFrom;
   if (filters.dueTo) out.dueTo = filters.dueTo;
@@ -224,6 +286,16 @@ const DAY = /^\d{4}-\d{2}-\d{2}$/;
 function stringList(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value.filter((v) => typeof v === 'string' || typeof v === 'number').map((v) => String(v));
+}
+
+function fieldLists(value: unknown): Record<string, string[]> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return {};
+  const out: Record<string, string[]> = {};
+  for (const [id, values] of Object.entries(value as Record<string, unknown>)) {
+    const list = stringList(values);
+    if (/^\d+$/.test(id) && list.length > 0) out[id] = list;
+  }
+  return out;
 }
 
 /**
@@ -251,6 +323,7 @@ export function parseTaskFilters(value: unknown): TaskFilters {
     cycles: stringList(raw.cycles),
     milestones: stringList(raw.milestones),
     projects: stringList(raw.projects),
+    fields: fieldLists(raw.fields),
     query: typeof raw.query === 'string' ? raw.query : '',
   };
 }

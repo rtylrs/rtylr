@@ -5,8 +5,11 @@ import { Avatar, Popover, PopoverContent, PopoverTrigger, Switch } from '@voxire
 import { normalizeSearchText } from './taskFilters';
 import {
   DUE_WINDOWS,
+  clearFilterFields,
   hasDueFilter,
+  selectedValues,
   toggleValue,
+  withSelectedValues,
   type DueWindow,
   type FilterField,
   type TaskFilters,
@@ -60,7 +63,7 @@ export const FilterPopover: React.FC<FilterPopoverProps> = ({
   const selectedCount = (f: FilterField): number =>
     f === 'due'
       ? filters.due.length + (filters.dueFrom || filters.dueTo ? 1 : 0)
-      : filters[f].length;
+      : selectedValues(filters, f).length;
 
   const leftItems: { field: FilterField; label: string }[] = [
     ...fields.map((f) => ({ field: f.field as FilterField, label: f.label })),
@@ -123,14 +126,17 @@ export const FilterPopover: React.FC<FilterPopoverProps> = ({
               <OptionsPane
                 key={config.field}
                 config={config}
-                selected={filters[config.field]}
+                selected={selectedValues(filters, config.field)}
                 onToggle={(value) =>
-                  onChange({
-                    ...filters,
-                    [config.field]: toggleValue(filters[config.field], value),
-                  })
+                  onChange(
+                    withSelectedValues(
+                      filters,
+                      config.field,
+                      toggleValue(selectedValues(filters, config.field), value)
+                    )
+                  )
                 }
-                onClearField={() => onChange({ ...filters, [config.field]: [] })}
+                onClearField={() => onChange(withSelectedValues(filters, config.field, []))}
               />
             ) : (
               <p
@@ -165,21 +171,7 @@ export const FilterPopover: React.FC<FilterPopoverProps> = ({
           <button
             type="button"
             disabled={leftItems.every((i) => selectedCount(i.field) === 0)}
-            onClick={() =>
-              onChange({
-                ...filters,
-                assignees: [],
-                priorities: [],
-                labels: [],
-                due: [],
-                dueFrom: undefined,
-                dueTo: undefined,
-                statuses: [],
-                cycles: [],
-                milestones: [],
-                projects: [],
-              })
-            }
+            onClick={() => onChange(clearFilterFields(filters))}
             className="flow-focus min-h-8 rounded-md px-2 text-flow-meta font-semibold disabled:opacity-40"
             style={{ color: 'var(--flow-text-muted)' }}
           >

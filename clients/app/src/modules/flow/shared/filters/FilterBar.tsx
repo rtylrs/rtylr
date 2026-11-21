@@ -6,7 +6,9 @@ import { initialsFromName } from '../lib/memberUtils';
 import {
   activeFieldCount,
   isOnlyMine,
+  selectedValues,
   toggleOnlyMine,
+  withSelectedValues,
   toggleValue,
   UNASSIGNED,
   type FilterField,
@@ -359,13 +361,17 @@ export function buildChips(
 ): Chip[] {
   const chips: Chip[] = [];
   for (const config of fields) {
-    const selected = filters[config.field];
+    const selected = selectedValues(filters, config.field);
     for (const value of selected) {
       const option = config.options.find((o) => o.value === value);
       chips.push({
         id: `${config.field}:${value}`,
         label: `${config.label}: ${option?.label ?? t('flow.filters.unknownValue')}`,
-        next: { ...filters, [config.field]: selected.filter((v) => v !== value) },
+        next: withSelectedValues(
+          filters,
+          config.field,
+          selected.filter((v) => v !== value)
+        ),
         person: config.field === 'assignees',
       });
     }

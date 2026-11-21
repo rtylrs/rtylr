@@ -5,6 +5,7 @@ import { useTaskFilters, type TaskFilterState } from '../../shared/filters/useTa
 import { matchesTaskFilters } from '../../shared/filters/taskFilters';
 import {
   assigneeField,
+  customFieldFilters,
   labelField,
   namedField,
   peopleFrom,
@@ -20,6 +21,7 @@ import { displayStatusName, sortStatuses, statusIdOf } from './statusUtils';
 import { useLabels } from '../tasks/useLabels';
 import { useCycles } from '../cycles/useCycles';
 import { useMilestones } from '../milestones/useMilestones';
+import { useProjectFields } from './useFields';
 
 export interface ProjectTaskFilters {
   state: TaskFilterState;
@@ -53,6 +55,7 @@ export function useProjectTaskFilters(projectId: string, tasks: Task[]): Project
   const statusesQuery = useProjectStatuses(projectId);
   const cyclesQuery = useCycles(projectId);
   const milestonesQuery = useMilestones(projectId);
+  const fieldsQuery = useProjectFields(projectId);
 
   const people = useMemo(
     () => peopleFrom(membersQuery.data ?? [], tasks),
@@ -84,6 +87,7 @@ export function useProjectTaskFilters(projectId: string, tasks: Task[]): Project
     if (milestones.length > 0) {
       out.push(namedField('milestones', t('flow.filters.fields.milestone'), milestones));
     }
+    out.push(...customFieldFilters(fieldsQuery.data ?? [], people, t));
     return out;
   }, [
     people,
@@ -92,6 +96,7 @@ export function useProjectTaskFilters(projectId: string, tasks: Task[]): Project
     statusesQuery.data,
     cyclesQuery.data,
     milestonesQuery.data,
+    fieldsQuery.data,
     t,
   ]);
 
