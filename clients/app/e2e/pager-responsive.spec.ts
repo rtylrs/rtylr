@@ -88,6 +88,43 @@ test.describe('Rennili on phones and tablets', () => {
     expect(overflow).toBe(0);
   });
 
+  test('a ten-letter code word stays on one line on a tablet', async ({ page }) => {
+    await page.setViewportSize({ width: 820, height: 1180 });
+    await page.route('**/pager/v1/public/push-key', (route) =>
+      route.fulfill({ json: { public_key: '' } })
+    );
+    await page.route('**/pager/v1/public/venues/acme/scan', (route) =>
+      route.fulfill({
+        json: { public_token: 'tok-rr', word: 'strawberry', color: 3, status: 'waiting' },
+      })
+    );
+    await page.route('**/pager/v1/public/tickets/tok-rr', (route) =>
+      route.fulfill({
+        json: {
+          word: 'strawberry',
+          color: 3,
+          status: 'waiting',
+          venue_name: 'Acme Cafe',
+          server_time: new Date().toISOString(),
+        },
+      })
+    );
+
+    await page.goto(`${RENNILI_URL}/acme`);
+
+    await expect(page.locator('.pager-code--word')).toContainText('Strawberry');
+    const lines = await page.locator('.pager-code--word').evaluate((badge) => {
+      const word = Array.from(badge.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent?.includes('Strawberry')
+      );
+      if (!word) return 0;
+      const range = document.createRange();
+      range.selectNodeContents(word);
+      return new Set(Array.from(range.getClientRects()).map((rect) => Math.round(rect.top))).size;
+    });
+    expect(lines).toBe(1);
+  });
+
   test('the board puts its three columns side by side on a landscape tablet', async ({
     page,
     context,
