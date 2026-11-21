@@ -149,14 +149,14 @@ function NewPhoneCard({
           onChange={(event) =>
             setValue(numeric ? normaliseTicketNumber(event.target.value) : event.target.value)
           }
-          className="h-10 min-w-0 flex-1 rounded-lg px-3 text-base outline-none focus:border-[var(--dash-border-focus)]"
+          className="h-11 min-w-0 flex-1 rounded-lg px-3 text-base outline-none focus:border-[var(--dash-border-focus)]"
           style={{
             background: 'var(--dash-input-bg)',
             border: '1px solid var(--dash-border)',
             color: 'var(--dash-text)',
           }}
         />
-        <Button type="submit" size="sm" className="h-10" disabled={!value.trim() || busy}>
+        <Button type="submit" size="sm" className="h-11" disabled={!value.trim() || busy}>
           {t('pager.board.saveLabel')}
         </Button>
       </form>
@@ -406,7 +406,7 @@ const Board = (): React.JSX.Element => {
                 target="_blank"
                 rel="noreferrer"
                 dir="ltr"
-                className="break-all text-xs underline @xl:col-start-2 @xl:row-start-4"
+                className="inline-block break-all py-3.5 text-xs underline @xl:col-start-2 @xl:row-start-4"
                 style={{ color: 'var(--dash-text)' }}
               >
                 {customerLink}
@@ -527,6 +527,7 @@ const Board = (): React.JSX.Element => {
                     id={labelModeId}
                     aria-describedby={`${labelModeId}-hint`}
                     value={labelMode}
+                    className="h-11"
                     disabled={!canEditSettings || !settings.data || updateSettings.isPending}
                     onChange={(event) => updateSettings.mutate({ labelMode: event.target.value })}
                   >
