@@ -15,6 +15,7 @@ import {
 import { resolveAuthUrl } from './shared/services/server/serverConfig';
 import PinLogin from './features/login';
 import LocationSelect from './features/login/LocationSelect';
+import RegisterSessionGate from './features/open-session/RegisterSessionGate';
 import CommandPalette from './shared/components/CommandPalette';
 import HelpOverlay from './shared/components/HelpOverlay';
 import {
@@ -52,22 +53,24 @@ const AppInner = (): React.JSX.Element => {
   return (
     <Suspense fallback={null}>
       <AppFlagGuard flag={FLAG_KEYS.APP_POS}>
-        <Routes key={location.pathname} location={location}>
-          {AppRoutes.map((route, index) => (
-            <Route
-              key={index}
-              path={route.path}
-              element={
-                route.feature && !features[route.feature] ? (
-                  <Navigate to="/" replace />
-                ) : (
-                  route.element
-                )
-              }
-            />
-          ))}
-          <Route path="*" element={<NoMatch />} />
-        </Routes>
+        <RegisterSessionGate>
+          <Routes key={location.pathname} location={location}>
+            {AppRoutes.map((route, index) => (
+              <Route
+                key={index}
+                path={route.path}
+                element={
+                  route.feature && !features[route.feature] ? (
+                    <Navigate to="/" replace />
+                  ) : (
+                    route.element
+                  )
+                }
+              />
+            ))}
+            <Route path="*" element={<NoMatch />} />
+          </Routes>
+        </RegisterSessionGate>
       </AppFlagGuard>
       <CommandPalette />
       <HelpOverlay />
