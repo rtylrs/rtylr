@@ -167,6 +167,11 @@ test.describe('Flow - Project Board', () => {
       route.fulfill({ json: { activity: [] } })
     );
 
+    // The task panel lists relations; none unless a test says otherwise.
+    await page.route(/localhost:9999\/flow\/task\/v2\/tasks\/\d+\/relations$/, (route) =>
+      route.fulfill({ json: { groups: [] } })
+    );
+
     // The board reads projects and columns through v2 now. Columns first: its
     // path is a prefix of the project route, so the broader pattern would
     // otherwise swallow it.
@@ -440,6 +445,73 @@ test.describe('Flow - Project Board', () => {
     // A screenshot cannot show you that the page scrolls sideways at 390px. The
     // board's own columns scroll horizontally by design; the page must not.
     expect(shots.overflowsAt390).toBe(false);
+  });
+
+  test('a blocked task shows a badge on the board and the list that names its open blocker', async ({
+    page,
+  }) => {
+    // Task 101 is blocked by 102, which is open. The listing carries only the
+    // count; the badge reads the blocker's name from the task's relations.
+    await page.route(/localhost:9999\/flow\/task\/v2\/tasks(\?.*)?$/, (route: Route) =>
+      route.fulfill({
+        json: {
+          tasks: FAKE_TASKS.map((task) => ({
+            id: task.id,
+            project_id: task.projectId,
+            owner_id: '1001',
+            title: task.title,
+            status: task.status,
+            priority: task.priority,
+            assignee_id: '1001',
+            assignee_name: task.assignee,
+            project_name: 'Alpha Project',
+            identifier: `T-${task.id}`,
+            section_id: task.sectionId,
+            ...(task.id === '101'
+              ? { blocked: true, blocker_count: 1, dependencies: ['102'] }
+              : {}),
+          })),
+        },
+      })
+    );
+    let relationsRequests = 0;
+    await page.route(/localhost:9999\/flow\/task\/v2\/tasks\/101\/relations$/, (route) => {
+      relationsRequests += 1;
+      return route.fulfill({
+        json: {
+          groups: [
+            {
+              type: 'blocks',
+              direction: 'inward',
+              relation: 'blocked_by',
+              tasks: [
+                {
+                  relation_id: '9',
+                  task_id: '102',
+                  identifier: 'T-102',
+                  title: 'Fix navigation dropdown bug',
+                  project_id: '1',
+                  status: 'todo',
+                  status_bucket: 'backlog',
+                },
+              ],
+            },
+          ],
+        },
+      });
+    });
+
+    for (const path of ['/p/1', '/p/1/list']) {
+      await page.goto(`${FLOW_URL}${path}`);
+      await page.waitForLoadState('networkidle');
+      const badges = page.getByLabel('Blocked by 1 open task');
+      await expect(badges).toHaveCount(1);
+      await badges.hover();
+      const tooltip = page.getByRole('tooltip');
+      await expect(tooltip).toContainText('T-102 · Fix navigation dropdown bug');
+    }
+    // Fetched on hover, not for every card on the board.
+    expect(relationsRequests).toBeGreaterThan(0);
   });
 
   test('kanban board renders columns and task cards', async ({ page }) => {
