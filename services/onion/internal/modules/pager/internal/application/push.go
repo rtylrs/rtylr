@@ -70,10 +70,10 @@ func (s *Service) SubscribePush(ctx context.Context, token string, sub domain.Pu
 
 // pushPayload is what the service worker receives, encrypted for the browser.
 type pushPayload struct {
-	Kind   string `json:"kind"`
-	Number string `json:"number"`
-	Venue  string `json:"venue"`
-	Token  string `json:"token"`
+	Kind  string `json:"kind"`
+	Label string `json:"label"`
+	Venue string `json:"venue"`
+	Token string `json:"token"`
 }
 
 // notify starts the pushes for a ticket that just became ready or was called
@@ -101,7 +101,7 @@ func (s *Service) sendPushes(ctx context.Context, ticket domain.Ticket, kind str
 	if err != nil {
 		return err
 	}
-	payload, err := json.Marshal(pushPayload{Kind: kind, Number: ticket.Number, Venue: venue.Name, Token: ticket.PublicToken})
+	payload, err := json.Marshal(pushPayload{Kind: kind, Label: ticket.Label, Venue: venue.Name, Token: ticket.PublicToken})
 	if err != nil {
 		return err
 	}

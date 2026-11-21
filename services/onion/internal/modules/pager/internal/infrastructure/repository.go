@@ -25,36 +25,33 @@ func NewRepository(db *sql.DB) *Repository {
 func (r *Repository) Settings(ctx context.Context, businessID int64) (domain.Settings, error) {
 	row, err := r.queries.GetSettings(ctx, businessID)
 	if errors.Is(err, sql.ErrNoRows) {
-		return domain.Settings{}, nil
+		return domain.DefaultSettings(), nil
 	}
 	if err != nil {
 		return domain.Settings{}, err
 	}
-	return domain.Settings{Enabled: row.Enabled, Strict: row.Strict}, nil
+	return domain.Settings{Enabled: row.Enabled, LabelMode: row.LabelMode}, nil
 }
 
 func (r *Repository) SaveSettings(ctx context.Context, businessID int64, settings domain.Settings) error {
 	return r.queries.UpsertSettings(ctx, sqlc.UpsertSettingsParams{
 		BusinessID: businessID,
 		Enabled:    settings.Enabled,
-		Strict:     settings.Strict,
+		LabelMode:  settings.LabelMode,
 	})
 }
 
-// CreateTicket relies on uk_pager_tickets_open_number: a second open ticket
-// for the same business and number is refused by the database itself.
+// CreateTicket relies on uk_pager_tickets_open_match_code: a second open
+// unlabelled ticket with the same code is refused by the database itself.
 func (r *Repository) CreateTicket(ctx context.Context, ticket domain.Ticket) (domain.Ticket, error) {
 	result, err := r.queries.CreateTicket(ctx, sqlc.CreateTicketParams{
 		BusinessID:  ticket.BusinessID,
-		Number:      ticket.Number,
-		Source:      ticket.Source,
+		MatchCode:   sql.NullString{String: ticket.Code, Valid: true},
 		PublicToken: ticket.PublicToken,
-		PhoneLinked: ticket.PhoneLinked,
 		CreatedAt:   ticket.CreatedAt,
 	})
-	var mysqlErr *mysql.MySQLError
-	if errors.As(err, &mysqlErr) && mysqlErr.Number == mysqlDuplicateEntry {
-		return domain.Ticket{}, domain.ErrNumberTaken
+	if isDuplicate(err) {
+		return domain.Ticket{}, domain.ErrCodeTaken
 	}
 	if err != nil {
 		return domain.Ticket{}, err
@@ -67,13 +64,26 @@ func (r *Repository) CreateTicket(ctx context.Context, ticket domain.Ticket) (do
 	return ticket, nil
 }
 
-func (r *Repository) OpenTicketByNumber(ctx context.Context, businessID int64, number string, openSince time.Time) (domain.Ticket, bool, error) {
-	row, err := r.queries.GetOpenTicketByNumber(ctx, sqlc.GetOpenTicketByNumberParams{
-		BusinessID: businessID,
-		OpenNumber: sql.NullString{String: number, Valid: true},
-		OpenSince:  openSince,
+func (r *Repository) OpenMatchCodes(ctx context.Context, businessID int64, unlabelledSince time.Time) ([]string, error) {
+	rows, err := r.queries.ListOpenMatchCodes(ctx, sqlc.ListOpenMatchCodesParams{
+		BusinessID:      businessID,
+		UnlabelledSince: unlabelledSince,
 	})
-	return found(sqlc.GetTicketRow(row), err)
+	if err != nil {
+		return nil, err
+	}
+	codes := make([]string, 0, len(rows))
+	for _, row := range rows {
+		codes = append(codes, row.String)
+	}
+	return codes, nil
+}
+
+func (r *Repository) ExpireStaleUnlabelled(ctx context.Context, businessID int64, unlabelledSince time.Time) error {
+	return r.queries.ExpireStaleUnlabelledTickets(ctx, sqlc.ExpireStaleUnlabelledTicketsParams{
+		BusinessID:      businessID,
+		UnlabelledSince: unlabelledSince,
+	})
 }
 
 func (r *Repository) ExpireStaleTicket(ctx context.Context, businessID int64, number string, openSince time.Time) error {
@@ -84,17 +94,11 @@ func (r *Repository) ExpireStaleTicket(ctx context.Context, businessID int64, nu
 	})
 }
 
-func (r *Repository) CountOpenCustomerTickets(ctx context.Context, businessID int64, openSince time.Time) (int64, error) {
-	return r.queries.CountOpenCustomerTickets(ctx, sqlc.CountOpenCustomerTicketsParams{
-		BusinessID: businessID,
-		OpenSince:  openSince,
-	})
-}
-
-func (r *Repository) ListOpenTickets(ctx context.Context, businessID int64, openSince time.Time) ([]domain.Ticket, error) {
+func (r *Repository) ListOpenTickets(ctx context.Context, businessID int64, openSince, unlabelledSince time.Time) ([]domain.Ticket, error) {
 	rows, err := r.queries.ListOpenTickets(ctx, sqlc.ListOpenTicketsParams{
-		BusinessID: businessID,
-		OpenSince:  openSince,
+		BusinessID:      businessID,
+		OpenSince:       openSince,
+		UnlabelledSince: unlabelledSince,
 	})
 	if err != nil {
 		return nil, err
@@ -123,8 +127,22 @@ func (r *Repository) CountWaitingAhead(ctx context.Context, businessID, id int64
 	})
 }
 
-func (r *Repository) LinkPhone(ctx context.Context, businessID, id int64) error {
-	return r.queries.LinkPhone(ctx, sqlc.LinkPhoneParams{ID: id, BusinessID: businessID})
+// Label relies on uk_pager_tickets_open_number for a number. Only a number
+// fills the number column, so names repeat freely.
+func (r *Repository) Label(ctx context.Context, businessID, id int64, label, kind string, openSince, unlabelledSince time.Time) error {
+	err := r.queries.LabelTicket(ctx, sqlc.LabelTicketParams{
+		Label:           sql.NullString{String: label, Valid: true},
+		LabelKind:       sql.NullString{String: kind, Valid: true},
+		Number:          sql.NullString{String: label, Valid: kind == domain.LabelNumber},
+		ID:              id,
+		BusinessID:      businessID,
+		OpenSince:       openSince,
+		UnlabelledSince: unlabelledSince,
+	})
+	if isDuplicate(err) {
+		return domain.ErrLabelTaken
+	}
+	return err
 }
 
 func (r *Repository) MarkReady(ctx context.Context, businessID, id int64, at, openSince time.Time) error {
@@ -149,8 +167,13 @@ func (r *Repository) UndoReady(ctx context.Context, businessID, id int64, openSi
 	return r.queries.UndoTicketReady(ctx, sqlc.UndoTicketReadyParams{ID: id, BusinessID: businessID, OpenSince: openSince})
 }
 
-func (r *Repository) Collect(ctx context.Context, businessID, id int64, openSince time.Time) error {
-	return r.queries.CollectTicket(ctx, sqlc.CollectTicketParams{ID: id, BusinessID: businessID, OpenSince: openSince})
+func (r *Repository) Collect(ctx context.Context, businessID, id int64, openSince, unlabelledSince time.Time) error {
+	return r.queries.CollectTicket(ctx, sqlc.CollectTicketParams{
+		ID:              id,
+		BusinessID:      businessID,
+		OpenSince:       openSince,
+		UnlabelledSince: unlabelledSince,
+	})
 }
 
 func (r *Repository) Acknowledge(ctx context.Context, businessID, id int64, at, openSince time.Time) error {
@@ -160,6 +183,11 @@ func (r *Repository) Acknowledge(ctx context.Context, businessID, id int64, at, 
 		BusinessID:     businessID,
 		OpenSince:      openSince,
 	})
+}
+
+func isDuplicate(err error) bool {
+	var mysqlErr *mysql.MySQLError
+	return errors.As(err, &mysqlErr) && mysqlErr.Number == mysqlDuplicateEntry
 }
 
 // found turns a missing row into "not found" rather than an error.
@@ -179,11 +207,11 @@ func ticketFromRow(row sqlc.GetTicketRow) domain.Ticket {
 	return domain.Ticket{
 		ID:             row.ID,
 		BusinessID:     row.BusinessID,
-		Number:         row.Number,
+		Label:          row.Label.String,
+		LabelKind:      row.LabelKind.String,
+		Code:           row.MatchCode.String,
 		Status:         row.Status,
-		Source:         row.Source,
 		PublicToken:    row.PublicToken,
-		PhoneLinked:    row.PhoneLinked,
 		CreatedAt:      row.CreatedAt,
 		ReadyAt:        row.ReadyAt.Time,
 		RemindedAt:     row.RemindedAt.Time,

@@ -1,5 +1,5 @@
-// Package application holds the pager's rules: who may open a ticket, what a
-// phone following one is told, and which moves the staff can make.
+// Package application holds the pager's rules: how a scan opens a ticket, what
+// a phone following one is told, and which moves the staff can make.
 package application
 
 import (
@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"math/big"
 	"slices"
 	"time"
 
@@ -16,32 +17,42 @@ import (
 
 // repository is the pager's storage. Every ticket method takes the business,
 // so a ticket of another business is simply not found. openSince is the
-// creation time before which an open ticket no longer counts as open.
+// creation time before which a labelled ticket no longer counts as open, and
+// unlabelledSince the same for a ticket nobody labelled.
 type repository interface {
-	// Settings returns the zero value for a business that never saved any.
+	// Settings returns domain.DefaultSettings for a business that never saved any.
 	Settings(ctx context.Context, businessID int64) (domain.Settings, error)
 	SaveSettings(ctx context.Context, businessID int64, settings domain.Settings) error
 
-	// CreateTicket returns domain.ErrNumberTaken when the business already has
-	// an open ticket with the number, whatever its age.
+	// CreateTicket opens an unlabelled ticket. It returns domain.ErrCodeTaken
+	// when another open unlabelled ticket of the business shows the code,
+	// whatever its age.
 	CreateTicket(ctx context.Context, ticket domain.Ticket) (domain.Ticket, error)
-	OpenTicketByNumber(ctx context.Context, businessID int64, number string, openSince time.Time) (domain.Ticket, bool, error)
+	// OpenMatchCodes lists the codes of the business's open unlabelled tickets.
+	OpenMatchCodes(ctx context.Context, businessID int64, unlabelledSince time.Time) ([]string, error)
+	// ExpireStaleUnlabelled closes the unlabelled tickets older than
+	// unlabelledSince, which frees their codes.
+	ExpireStaleUnlabelled(ctx context.Context, businessID int64, unlabelledSince time.Time) error
 	// ExpireStaleTicket closes the open ticket holding number if it is older
 	// than openSince, which frees the number.
 	ExpireStaleTicket(ctx context.Context, businessID int64, number string, openSince time.Time) error
-	CountOpenCustomerTickets(ctx context.Context, businessID int64, openSince time.Time) (int64, error)
-	ListOpenTickets(ctx context.Context, businessID int64, openSince time.Time) ([]domain.Ticket, error)
+	ListOpenTickets(ctx context.Context, businessID int64, openSince, unlabelledSince time.Time) ([]domain.Ticket, error)
 	Ticket(ctx context.Context, businessID, id int64) (domain.Ticket, bool, error)
 	TicketByToken(ctx context.Context, token string) (domain.Ticket, bool, error)
+	// CountWaitingAhead counts the labelled waiting tickets opened before id.
 	CountWaitingAhead(ctx context.Context, businessID, id int64, openSince time.Time) (int64, error)
-	LinkPhone(ctx context.Context, businessID, id int64) error
 
 	// The moves below change nothing unless the ticket is open and in the
 	// state the move starts from.
+
+	// Label returns domain.ErrLabelTaken when kind is a number and another
+	// open ticket of the business holds it.
+	Label(ctx context.Context, businessID, id int64, label, kind string, openSince, unlabelledSince time.Time) error
+	// MarkReady needs a labelled ticket.
 	MarkReady(ctx context.Context, businessID, id int64, at, openSince time.Time) error
 	Remind(ctx context.Context, businessID, id int64, at, openSince time.Time) error
 	UndoReady(ctx context.Context, businessID, id int64, openSince time.Time) error
-	Collect(ctx context.Context, businessID, id int64, openSince time.Time) error
+	Collect(ctx context.Context, businessID, id int64, openSince, unlabelledSince time.Time) error
 	Acknowledge(ctx context.Context, businessID, id int64, at, openSince time.Time) error
 
 	// SavePushSubscription returns domain.ErrTooManyPushSubscriptions once the
@@ -95,89 +106,123 @@ func (s *Service) PublicVenue(ctx context.Context, slug string) (domain.Venue, d
 	return venue, settings, nil
 }
 
-// Join links a customer's phone to the open ticket with their number. A venue
-// that is not strict creates the ticket when the staff have not entered it yet.
-func (s *Service) Join(ctx context.Context, slug, rawNumber string) (domain.Ticket, error) {
-	number, err := domain.NormalizeNumber(rawNumber)
-	if err != nil {
-		return domain.Ticket{}, err
-	}
-	venue, settings, err := s.PublicVenue(ctx, slug)
-	if err != nil {
-		return domain.Ticket{}, err
-	}
-	return s.open(ctx, venue.BusinessID, number, domain.SourceCustomer, !settings.Strict)
-}
+// matchCodeAttempts bounds the retries when two scans draw the same free code
+// at the same moment.
+const matchCodeAttempts = 5
 
-// Create enters a number from the staff board, returning the ticket that
-// already holds it when there is one.
-func (s *Service) Create(ctx context.Context, businessID int64, rawNumber string) (domain.Ticket, error) {
-	number, err := domain.NormalizeNumber(rawNumber)
+// Scan opens a waiting, unlabelled ticket for the phone that scanned the
+// venue's QR, with a match code no other open unlabelled ticket shows.
+func (s *Service) Scan(ctx context.Context, slug string) (domain.Ticket, error) {
+	venue, _, err := s.PublicVenue(ctx, slug)
 	if err != nil {
 		return domain.Ticket{}, err
 	}
-	return s.open(ctx, businessID, number, domain.SourceStaff, true)
-}
-
-// open returns the open ticket for number, creating it when create allows.
-// Storage holds the rule that a number has one open ticket, so when the
-// cashier and the customer enter it at the same moment the loser of that race
-// attaches to the winner's ticket.
-func (s *Service) open(ctx context.Context, businessID int64, number, source string, create bool) (domain.Ticket, error) {
 	now := s.clock()
-	openSince := domain.OpenSince(now)
-	fromCustomer := source == domain.SourceCustomer
-
-	for range 2 {
-		ticket, found, err := s.repo.OpenTicketByNumber(ctx, businessID, number, openSince)
+	unlabelledSince := domain.UnlabelledSince(now)
+	// A ticket past its lifetime reads as expired but still holds its code in
+	// storage until it is closed.
+	if err := s.repo.ExpireStaleUnlabelled(ctx, venue.BusinessID, unlabelledSince); err != nil {
+		return domain.Ticket{}, err
+	}
+	codes, err := s.repo.OpenMatchCodes(ctx, venue.BusinessID, unlabelledSince)
+	if err != nil {
+		return domain.Ticket{}, err
+	}
+	if len(codes) >= domain.MaxOpenUnlabelledTickets {
+		return domain.Ticket{}, domain.ErrTooManyOpenTickets
+	}
+	used := make(map[string]bool, len(codes))
+	for _, code := range codes {
+		used[code] = true
+	}
+	for range matchCodeAttempts {
+		code, err := freeMatchCode(used)
 		if err != nil {
-			return domain.Ticket{}, err
-		}
-		if found {
-			if fromCustomer && !ticket.PhoneLinked {
-				if err := s.repo.LinkPhone(ctx, businessID, ticket.ID); err != nil {
-					return domain.Ticket{}, err
-				}
-				ticket.PhoneLinked = true
-			}
-			return ticket, nil
-		}
-		if !create {
-			return domain.Ticket{}, domain.ErrTicketNotFound
-		}
-		if fromCustomer {
-			count, err := s.repo.CountOpenCustomerTickets(ctx, businessID, openSince)
-			if err != nil {
-				return domain.Ticket{}, err
-			}
-			if count >= domain.MaxOpenCustomerTickets {
-				return domain.Ticket{}, domain.ErrTooManyOpenTickets
-			}
-		}
-		// A ticket past its lifetime reads as expired but still holds the
-		// number in storage until it is closed.
-		if err := s.repo.ExpireStaleTicket(ctx, businessID, number, openSince); err != nil {
 			return domain.Ticket{}, err
 		}
 		token, err := newPublicToken()
 		if err != nil {
 			return domain.Ticket{}, err
 		}
-		ticket, err = s.repo.CreateTicket(ctx, domain.Ticket{
-			BusinessID:  businessID,
-			Number:      number,
+		ticket, err := s.repo.CreateTicket(ctx, domain.Ticket{
+			BusinessID:  venue.BusinessID,
+			Code:        code,
 			Status:      domain.StatusWaiting,
-			Source:      source,
 			PublicToken: token,
-			PhoneLinked: fromCustomer,
 			CreatedAt:   now,
 		})
-		if errors.Is(err, domain.ErrNumberTaken) {
+		if errors.Is(err, domain.ErrCodeTaken) {
+			used[code] = true
 			continue
 		}
 		return ticket, err
 	}
-	return domain.Ticket{}, domain.ErrNumberTaken
+	return domain.Ticket{}, domain.ErrTooManyOpenTickets
+}
+
+// freeMatchCode draws a random code that is not in used.
+func freeMatchCode(used map[string]bool) (string, error) {
+	alphabet := domain.MatchCodeAlphabet
+	free := make([]string, 0, len(alphabet)*len(alphabet)-len(used))
+	for i := range len(alphabet) {
+		for j := range len(alphabet) {
+			if code := string([]byte{alphabet[i], alphabet[j]}); !used[code] {
+				free = append(free, code)
+			}
+		}
+	}
+	if len(free) == 0 {
+		return "", domain.ErrTooManyOpenTickets
+	}
+	n, err := rand.Int(rand.Reader, big.NewInt(int64(len(free))))
+	if err != nil {
+		return "", fmt.Errorf("draw pager match code: %w", err)
+	}
+	return free[n.Int64()], nil
+}
+
+// Label gives a waiting ticket of the business its order number or customer
+// name, as the venue's label mode allows. A labelled waiting ticket can be
+// labelled again to fix a typo.
+func (s *Service) Label(ctx context.Context, businessID, id int64, raw string) (domain.Ticket, error) {
+	settings, err := s.repo.Settings(ctx, businessID)
+	if err != nil {
+		return domain.Ticket{}, err
+	}
+	label, kind, err := domain.ParseLabel(raw, settings.LabelMode)
+	if err != nil {
+		return domain.Ticket{}, err
+	}
+	now := s.clock()
+	openSince := domain.OpenSince(now)
+	ticket, err := s.staffTicket(ctx, businessID, id, now)
+	if err != nil {
+		return domain.Ticket{}, err
+	}
+	if ticket.Status != domain.StatusWaiting {
+		return domain.Ticket{}, domain.ErrInvalidTransition
+	}
+	if ticket.Label == label && ticket.LabelKind == kind {
+		return ticket, nil
+	}
+	if kind == domain.LabelNumber {
+		// Yesterday's order 42 still holds the number in storage.
+		if err := s.repo.ExpireStaleTicket(ctx, businessID, label, openSince); err != nil {
+			return domain.Ticket{}, err
+		}
+	}
+	if err := s.repo.Label(ctx, businessID, id, label, kind, openSince, domain.UnlabelledSince(now)); err != nil {
+		return domain.Ticket{}, err
+	}
+	ticket, err = s.staffTicket(ctx, businessID, id, now)
+	if err != nil {
+		return domain.Ticket{}, err
+	}
+	// Another request moved the ticket first.
+	if ticket.Status != domain.StatusWaiting || ticket.Label != label || ticket.LabelKind != kind {
+		return domain.Ticket{}, domain.ErrInvalidTransition
+	}
+	return ticket, nil
 }
 
 // PublicTicket is what a phone following a ticket is told on every poll.
@@ -185,7 +230,7 @@ type PublicTicket struct {
 	// Ticket carries the status as read at ServerTime.
 	Ticket    domain.Ticket
 	VenueName string
-	// Ahead counts the waiting tickets entered before this one.
+	// Ahead counts the labelled waiting tickets opened before this one.
 	Ahead      int64
 	ServerTime time.Time
 }
@@ -205,7 +250,7 @@ func (s *Service) PublicTicket(ctx context.Context, token string) (PublicTicket,
 	}
 	ticket.Status = ticket.StatusAt(now)
 	var ahead int64
-	if ticket.Status == domain.StatusWaiting {
+	if ticket.Status == domain.StatusWaiting && ticket.Labelled() {
 		ahead, err = s.repo.CountWaitingAhead(ctx, ticket.BusinessID, ticket.ID, domain.OpenSince(now))
 		if err != nil {
 			return PublicTicket{}, err
@@ -250,11 +295,11 @@ func (s *Service) ticketByToken(ctx context.Context, token string) (domain.Ticke
 	return ticket, nil
 }
 
-// ListOpen returns the business's open tickets, oldest first, and the time
-// they were read at.
+// ListOpen returns the business's open tickets, labelled or not, oldest first,
+// and the time they were read at.
 func (s *Service) ListOpen(ctx context.Context, businessID int64) ([]domain.Ticket, time.Time, error) {
 	now := s.clock()
-	tickets, err := s.repo.ListOpenTickets(ctx, businessID, domain.OpenSince(now))
+	tickets, err := s.repo.ListOpenTickets(ctx, businessID, domain.OpenSince(now), domain.UnlabelledSince(now))
 	return tickets, now, err
 }
 
@@ -283,7 +328,9 @@ func (s *Service) UndoReady(ctx context.Context, businessID, id int64) (domain.T
 
 func (s *Service) Collect(ctx context.Context, businessID, id int64) (domain.Ticket, error) {
 	ticket, err := s.move(ctx, businessID, id, domain.StatusCollected, []string{domain.StatusWaiting, domain.StatusReady},
-		func(_, openSince time.Time) error { return s.repo.Collect(ctx, businessID, id, openSince) })
+		func(now, openSince time.Time) error {
+			return s.repo.Collect(ctx, businessID, id, openSince, domain.UnlabelledSince(now))
+		})
 	if err == nil {
 		s.forgetPushes(ctx, ticket)
 	}
@@ -299,7 +346,8 @@ func (s *Service) move(ctx context.Context, businessID, id int64, to string, fro
 	if err != nil {
 		return domain.Ticket{}, err
 	}
-	if !slices.Contains(from, ticket.Status) {
+	// Only a labelled ticket can be ready: the board has nothing to call it by.
+	if !slices.Contains(from, ticket.Status) || to == domain.StatusReady && !ticket.Labelled() {
 		return domain.Ticket{}, domain.ErrInvalidTransition
 	}
 	if err := apply(now, domain.OpenSince(now)); err != nil {
@@ -332,8 +380,11 @@ func (s *Service) Settings(ctx context.Context, businessID int64) (domain.Settin
 	return s.repo.Settings(ctx, businessID)
 }
 
-// UpdateSettings changes the switches that are given and leaves the rest.
-func (s *Service) UpdateSettings(ctx context.Context, businessID int64, enabled, strict *bool) (domain.Settings, error) {
+// UpdateSettings changes the settings that are given and leaves the rest.
+func (s *Service) UpdateSettings(ctx context.Context, businessID int64, enabled *bool, labelMode *string) (domain.Settings, error) {
+	if labelMode != nil && !domain.ValidLabelMode(*labelMode) {
+		return domain.Settings{}, domain.ErrInvalidLabelMode
+	}
 	settings, err := s.repo.Settings(ctx, businessID)
 	if err != nil {
 		return domain.Settings{}, err
@@ -341,8 +392,8 @@ func (s *Service) UpdateSettings(ctx context.Context, businessID int64, enabled,
 	if enabled != nil {
 		settings.Enabled = *enabled
 	}
-	if strict != nil {
-		settings.Strict = *strict
+	if labelMode != nil {
+		settings.LabelMode = *labelMode
 	}
 	if err := s.repo.SaveSettings(ctx, businessID, settings); err != nil {
 		return domain.Settings{}, err
