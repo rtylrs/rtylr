@@ -16,6 +16,7 @@ import {
   milestoneV2,
   cycleV2,
   statusClient,
+  fieldClient,
 } from '../lib/clients';
 
 // -- Types ----------------------------------------------------------------
@@ -252,6 +253,8 @@ export function toApiField(f: ContractField): ApiField {
     valueCount: f.valueCount ?? 0,
   };
 }
+
+const toApiFields = (list: ContractField[] | undefined): ApiField[] => (list ?? []).map(toApiField);
 
 /** One entry of the workspace status template that new projects copy. */
 export interface ApiStatusTemplateItem {
@@ -805,6 +808,7 @@ export const flowApi = {
     estimatedHours?: number;
     labels?: string[];
     milestoneId?: string;
+    fieldValues?: ApiTaskFieldValueInput[];
   }) =>
     flowResult<{ task: ApiTask }>(() => {
       const payload = toTaskCreatePayload(data);
@@ -822,6 +826,7 @@ export const flowApi = {
         estimatedHours: payload.estimated_hours,
         labels: payload.labels,
         milestoneId: data.milestoneId || undefined,
+        fieldValues: data.fieldValues?.length ? data.fieldValues : undefined,
       });
     }),
 
@@ -1094,6 +1099,53 @@ export const flowApi = {
   setTaskStatus: (data: { taskId: string; statusId: string }) =>
     flowResult<{ message: string; status: string }>(() =>
       statusClient.setTaskStatus({ taskId: data.taskId, statusId: data.statusId })
+    ),
+
+  // -- Custom fields (flow.field.v2) -----------------------------------------
+
+  // A project's fields in sort order, each with how many tasks hold a value.
+  listFields: (projectId: string) =>
+    flowResult<{ fields: ApiField[] }>(() =>
+      fieldClient.listFields({ projectId }).then((r) => ({ fields: toApiFields(r.fields) }))
+    ),
+
+  // For a select, defaultValue may name an option by label: new options have
+  // no id until the server assigns one.
+  createField: (projectId: string, type: ApiFieldType, data: ApiFieldInput) =>
+    flowResult<{ field: ApiField }>(() =>
+      fieldClient
+        .createField({ projectId, type, ...data })
+        .then((r) => ({ field: r.field ? toApiField(r.field) : undefined }))
+    ),
+
+  // A replacement: send the whole field. An option sent with its id is kept,
+  // so renaming it keeps every task value.
+  updateField: (id: string, data: ApiFieldInput) =>
+    flowResult<{ field: ApiField }>(() =>
+      fieldClient
+        .updateField({ id, body: data })
+        .then((r) => ({ field: r.field ? toApiField(r.field) : undefined }))
+    ),
+
+  // fieldIds must be the project's whole list in the new order.
+  reorderFields: (projectId: string, fieldIds: string[]) =>
+    flowResult<{ fields: ApiField[] }>(() =>
+      fieldClient
+        .reorderFields({ projectId, fieldIds })
+        .then((r) => ({ fields: toApiFields(r.fields) }))
+    ),
+
+  deleteField: (id: string) =>
+    flowResult<{ clearedTaskCount: number }>(() =>
+      fieldClient.deleteField({ id }).then((r) => ({ clearedTaskCount: r.clearedTaskCount ?? 0 }))
+    ),
+
+  // An entry with no value and no values clears that field.
+  setTaskFieldValues: (taskId: string, values: ApiTaskFieldValueInput[]) =>
+    flowResult<{ fieldValues: Record<string, ApiTaskFieldValue> }>(() =>
+      taskV2
+        .setTaskFieldValues({ taskId, values })
+        .then((r) => ({ fieldValues: r.fieldValues ?? {} }))
     ),
 
   // -- Milestones ---------------------------------------------------------
