@@ -32,6 +32,15 @@ export function venueSlugCandidates(venueName: string, suffix = randomSuffix): s
   return candidates;
 }
 
+const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
+
+export const normaliseSlug = (raw: string): string => raw.trim().toLowerCase();
+
+/** A slug the business module accepts: lowercase letters, digits, inner dashes, not reserved. */
+export function isSlugUsable(slug: string): boolean {
+  return slug.length <= SLUG_MAX_LENGTH && SLUG_PATTERN.test(slug) && !isReservedBusinessSlug(slug);
+}
+
 export interface ClaimPagerSteps {
   /** Saves the venue's phone number on the business. */
   savePhone: (phone: string) => Promise<unknown>;
@@ -44,13 +53,24 @@ export interface ClaimPagerSteps {
  * Turns the caller's business into a pager venue: its phone number, a slug
  * for the poster's link when it has none, and the pager switched on. Each
  * step is safe to repeat, so a failed claim can simply be tried again.
+ *
+ * A slug the owner confirmed (`chosenSlug`) is the only one tried: posters may
+ * already be printed with it, so a taken one fails instead of becoming another.
  */
 export async function claimPager(
   steps: ClaimPagerSteps,
-  { phone, venueName, slug }: { phone: string; venueName: string; slug: string }
+  {
+    phone,
+    venueName,
+    slug,
+    chosenSlug,
+  }: { phone: string; venueName: string; slug: string; chosenSlug?: string }
 ): Promise<void> {
   await steps.savePhone(phone);
-  if (!slug) await claimSlug(steps.setSlug, venueName);
+  if (!slug) {
+    if (chosenSlug) await steps.setSlug(chosenSlug);
+    else await claimSlug(steps.setSlug, venueName);
+  }
   await steps.enablePager();
 }
 
