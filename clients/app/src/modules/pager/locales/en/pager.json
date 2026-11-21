@@ -108,5 +108,38 @@
     "stepScan": "Scan the code with your phone camera.",
     "stepType": "Type the order number from your receipt.",
     "stepWait": "Wait anywhere. Your phone rings when it's ready."
+  },
+  "try": {
+    "pageTitle": "Try the free pager · rtylr",
+    "brand": "rtylr pager",
+    "venueName": "Demo Café",
+    "heading": "Try the pager right here",
+    "intro": "One side is your customer's phone, the other is the board at your counter. Play both.",
+    "stepPhone": "On the phone, type an order number, such as 42, and tap the button.",
+    "stepBoard": "On the board, tap Ready next to that number.",
+    "stepRing": "The phone rings. Turn your sound on to hear it.",
+    "sandboxNotice": "This is a demo. Nothing you type is saved, and reloading the page starts over.",
+    "phoneHeading": "Your customer's phone",
+    "counterHeading": "Your counter",
+    "anotherOrder": "Start again with another number",
+    "claimHeading": "Use it in your venue, free",
+    "claimBody": "Create your account with your venue's name, then add its phone number. Your board opens with the pager switched on.",
+    "claim": "Get my free pager",
+    "haveAccount": "Already use rtylr?",
+    "signIn": "Sign in to switch it on"
+  },
+  "setup": {
+    "pageTitle": "Set up your pager · rtylr",
+    "heading": "Set up the pager for {{venue}}",
+    "intro": "One last thing: your venue's phone number. Then your board opens with the pager switched on.",
+    "phoneLabel": "Venue phone number",
+    "phoneHint": "Saved on your business. You can change it later in the general settings.",
+    "phoneInvalid": "Enter a phone number with 6 to 15 digits.",
+    "submit": "Switch on my pager",
+    "submitting": "Setting up...",
+    "claimFailed": "We couldn't set up the pager. Try again.",
+    "adminOnly": "Only the owner or an admin of this business can set up the pager.",
+    "loadFailed": "We couldn't load your business.",
+    "retry": "Try again"
   }
 }
