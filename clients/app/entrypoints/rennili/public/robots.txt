@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /board
+Disallow: /display
+Disallow: /poster
+Disallow: /setup
+Disallow: /t/
+
+Sitemap: https://rennili.rtylr.com/sitemap.xml

@@ -7,6 +7,10 @@ import './pager.css';
 import './rennili.css';
 
 const Landing = React.lazy(() => import('./screens/Public/Landing'));
+const HowItWorksPage = React.lazy(() => import('./screens/Public/HowItWorksPage'));
+const FeaturesPage = React.lazy(() => import('./screens/Public/FeaturesPage'));
+const FaqPage = React.lazy(() => import('./screens/Public/FaqPage'));
+const RtylrServicesPage = React.lazy(() => import('./screens/Public/RtylrServicesPage'));
 const Scan = React.lazy(() => import('./screens/Public/Scan'));
 const Ticket = React.lazy(() => import('./screens/Public/Ticket'));
 const Try = React.lazy(() => import('./screens/Public/Try'));
@@ -41,6 +45,22 @@ function createPublicRoutes<TParent extends AnyRoute>(rootRoute: TParent) {
 
   return layoutRoute.addChildren([
     createRoute({ getParentRoute: () => layoutRoute, path: '/', component: Landing }),
+    createRoute({
+      getParentRoute: () => layoutRoute,
+      path: '/how-it-works',
+      component: HowItWorksPage,
+    }),
+    createRoute({
+      getParentRoute: () => layoutRoute,
+      path: '/features',
+      component: FeaturesPage,
+    }),
+    createRoute({ getParentRoute: () => layoutRoute, path: '/faq', component: FaqPage }),
+    createRoute({
+      getParentRoute: () => layoutRoute,
+      path: '/rtylr',
+      component: RtylrServicesPage,
+    }),
     createRoute({ getParentRoute: () => layoutRoute, path: '/try', component: Try }),
     createRoute({ getParentRoute: () => layoutRoute, path: '/t/$token', component: Ticket }),
     createRoute({ getParentRoute: () => layoutRoute, path: '/$slug', component: Scan }),

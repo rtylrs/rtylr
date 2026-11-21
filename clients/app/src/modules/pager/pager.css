@@ -4,16 +4,16 @@
  */
 
 .pager-root {
-  --pager-ink: #0f172a;
-  --pager-muted: #475569;
-  --pager-line: #cbd5e1;
+  --pager-ink: #141b17;
+  --pager-muted: #525e57;
+  --pager-line: #dce1dc;
   --pager-bg: #ffffff;
   --pager-danger: #b91c1c;
-  --pager-ready: #166534;
-  /* Rennili's one accent. Ready stays green, so the two never read alike. */
-  --pager-accent: #6d28d9;
-  --pager-accent-strong: #5b21b6;
-  --pager-accent-soft: #f3eeff;
+  --pager-ready: #15803d;
+  /* Rennili's botanical forest accent. Ready stays bright emerald so alerts pop unmistakably. */
+  --pager-accent: #0e4d3b;
+  --pager-accent-strong: #0a3b2d;
+  --pager-accent-soft: #e7f3ec;
 
   /* Always light, whatever the Portal theme. */
   color-scheme: light;
@@ -23,7 +23,14 @@
   -webkit-overflow-scrolling: touch;
   background: var(--pager-bg);
   color: var(--pager-ink);
-  font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Cairo', system-ui, sans-serif;
+}
+
+[dir='rtl'] .pager-root,
+.pager-root[dir='rtl'],
+[dir='rtl'] .pager-poster,
+[dir='rtl'] .pager-display {
+  font-family: 'Cairo', 'Plus Jakarta Sans', system-ui, sans-serif;
 }
 
 .pager-root *,
@@ -333,11 +340,11 @@
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #dce1dc;
   border-radius: 16px;
   background: #ffffff;
-  color: #0f172a;
-  font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+  color: #141b17;
+  font-family: 'Plus Jakarta Sans', 'Cairo', system-ui, sans-serif;
   text-align: center;
 }
 
@@ -402,7 +409,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: #6d28d9;
+  background: #0e4d3b;
   color: #ffffff;
   font-size: 14px;
   font-weight: 700;
@@ -418,13 +425,13 @@
 
 .pager-poster__brand,
 .pager-display__brand {
-  color: #0f172a;
+  color: #141b17;
   opacity: 0.85;
 }
 
 .pager-poster__brand .rennili-mark,
 .pager-display__brand .rennili-mark {
-  color: #6d28d9;
+  color: #0e4d3b;
   print-color-adjust: exact;
   -webkit-print-color-adjust: exact;
 }
@@ -492,10 +499,10 @@
   /* A long venue name on a small stand scrolls rather than pushing the QR off. */
   overflow-y: auto;
   background: #ffffff;
-  color: #0f172a;
+  color: #141b17;
   color-scheme: light;
   text-align: center;
-  font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Cairo', system-ui, sans-serif;
 }
 
 .pager-display__close {

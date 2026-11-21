@@ -1,48 +1,308 @@
 /*
- * The public demo (`/pager/try`): the staff board beside a phone. The board
- * uses the Portal's dash tokens, which follow the visitor's theme, so they
- * are pinned to the light values here to match the always-light phone.
+ * The public demo (`/try`): the real staff board beside the real guest phone,
+ * styled in Rennili's crisp pure-white, soft-gray, and botanical-forest palette.
  */
-.pager-try {
-  --dash-bg: #f8f8f8;
+.pager-try-shell {
+  --dash-bg: #f8f9f7;
   --dash-surface: #ffffff;
   --dash-card: #ffffff;
-  --dash-border: rgba(0, 0, 0, 0.08);
-  --dash-text: rgb(9, 9, 11);
-  --dash-text-muted: rgba(9, 9, 11, 0.5);
-  --dash-text-dim: rgba(9, 9, 11, 0.65);
-  --dash-hover: rgba(0, 0, 0, 0.05);
+  --dash-border: #e4e7e2;
+  --dash-text: #141b17;
+  --dash-text-muted: #525e57;
+  --dash-text-dim: #3d4943;
+  --dash-hover: #f1f3f0;
   --dash-input-bg: #ffffff;
+}
 
+.pager-try-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--rl-border);
+  color: var(--rl-ink);
+}
+
+.pager-try-nav-inner {
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 64px
-    max(16px, env(safe-area-inset-left));
+  max-width: 1360px;
+  min-height: 60px;
+  margin-inline: auto;
+  padding-inline: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+@media (min-width: 640px) {
+  .pager-try-nav-inner {
+    min-height: 64px;
+    padding-inline: 20px;
+    gap: 12px;
+  }
+}
+
+.pager-try-nav .rl-nav-brand {
+  flex: 0 1 auto;
+}
+
+.pager-try-nav .rl-nav-end {
+  flex: none;
+  gap: 6px;
+}
+
+.pager-try-nav .pager-languages {
+  gap: 2px;
+}
+
+.pager-try-nav .pager-language {
+  min-width: 32px;
+  min-height: 36px;
+  padding: 0 6px;
+  font-size: 12.5px;
+  border-radius: 999px;
+  color: var(--rl-muted);
+}
+
+.pager-try-nav .pager-language[aria-pressed='true'] {
+  background: var(--rl-gray);
+  border-color: var(--rl-border-strong);
+  color: var(--rl-ink);
+}
+
+.pager-try-nav .rl-btn--nav {
+  display: inline-flex;
+  min-height: 36px;
+  padding: 6px 11px;
+  font-size: 12px;
+  gap: 5px;
+}
+
+@media (min-width: 640px) {
+  .pager-try-nav .rl-nav-end {
+    gap: 10px;
+  }
+
+  .pager-try-nav .pager-language {
+    min-width: 38px;
+    min-height: 38px;
+    padding: 0 8px;
+    font-size: 13px;
+  }
+
+  .pager-try-nav .rl-btn--nav {
+    min-height: 40px;
+    padding: 8px 16px;
+    font-size: 13.5px;
+    gap: 7px;
+  }
+}
+
+.pager-try {
+  width: 100%;
+  max-width: 1360px;
+  margin-inline: auto;
+  padding: 28px 20px 64px;
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-.pager-try-header {
-  max-width: 640px;
+@media (min-width: 900px) {
+  .pager-try {
+    padding: 40px 28px 72px;
+    gap: 28px;
+  }
+}
+
+.pager-try-intro-block {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 18px;
 }
+
+.pager-try-header {
+  max-width: 700px;
+}
+
+.pager-try-title {
+  margin: 0;
+  font-family: var(--rl-font-display);
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1.16;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--rl-ink);
+}
+
+[dir='rtl'] .pager-try-title {
+  letter-spacing: 0;
+  line-height: 1.26;
+}
+
+.pager-try-lead {
+  margin: 10px 0 0;
+  color: var(--rl-muted);
+  font-size: clamp(15px, 1.35vw, 18px);
+  line-height: 1.65;
+}
+
+/* Reactive 3-step guided progress bar */
 
 .pager-try-steps {
   margin: 0;
-  padding-inline-start: 20px;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 12px;
+}
+
+@media (min-width: 840px) {
+  .pager-try-steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.pager-try-step {
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--rl-border);
+  background: var(--rl-offwhite);
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 16px;
-  line-height: 1.5;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--rl-muted);
+  font-weight: 600;
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    color 0.25s ease;
+}
+
+.pager-try-step--active {
+  background: #ffffff;
+  border-color: var(--rl-forest);
+  color: var(--rl-ink);
+  box-shadow: 0 10px 26px -14px rgba(14, 77, 59, 0.22);
+}
+
+.pager-try-step--done {
+  background: var(--rl-sage-wash);
+  border-color: rgba(21, 128, 61, 0.28);
+  color: var(--rl-ink);
+}
+
+.pager-try-step-num {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid var(--rl-border);
+  color: var(--rl-muted);
+  font-size: 12.5px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.pager-try-step--active .pager-try-step-num {
+  background: var(--rl-forest);
+  border-color: var(--rl-forest);
+  color: #ffffff;
+}
+
+.pager-try-step--done .pager-try-step-num {
+  background: var(--rl-ready);
+  border-color: var(--rl-ready);
+  color: #ffffff;
 }
 
 .pager-try-note {
-  font-size: 14px;
+  margin: 0;
+  color: var(--rl-muted);
+  font-size: 13px;
+}
+
+/* Soft neutral gray stage housing the phone & live counter board */
+
+.pager-try-stage {
+  padding: 18px;
+  border-radius: 28px;
+  background: var(--rl-gray);
+  border: 1px solid var(--rl-border);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+@media (min-width: 900px) {
+  .pager-try-stage {
+    padding: 26px;
+  }
+}
+
+/* Mobile segmented view switcher (<940px) */
+
+.pager-try-mobile-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 5px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid var(--rl-border);
+  box-shadow: 0 6px 18px -10px rgba(20, 27, 23, 0.14);
+}
+
+@media (min-width: 940px) {
+  .pager-try-mobile-tabs {
+    display: none;
+  }
+}
+
+.pager-try-mobile-tab {
+  min-height: 42px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--rl-muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.pager-try-mobile-tab--active {
+  background: var(--rl-forest);
+  color: #ffffff;
+}
+
+.pager-try-tab-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #4ade80;
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.35);
 }
 
 .pager-try-grid {
@@ -51,79 +311,222 @@
   align-items: start;
 }
 
-@media (min-width: 900px) {
+@media (max-width: 939px) {
+  .pager-try-grid[data-mobile-view='phone'] .pager-try-counter {
+    display: none;
+  }
+
+  .pager-try-grid[data-mobile-view='board'] .pager-try-phone-column {
+    display: none;
+  }
+}
+
+@media (min-width: 940px) {
   .pager-try-grid {
-    grid-template-columns: 360px minmax(0, 1fr);
+    /* Compact 300px phone column at 940–1199px leaves generous room for the board inputs. */
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .pager-try-grid {
+    grid-template-columns: 344px minmax(0, 1fr);
+    gap: 28px;
   }
 }
 
 .pager-try-label {
-  margin: 0 0 8px;
-  font-size: 13px;
-  font-weight: 700;
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--pager-muted);
+  color: var(--rl-forest);
+}
+
+[dir='rtl'] .pager-try-label {
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 13px;
 }
 
 .pager-try-phone-column {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  max-width: 350px;
+  width: 100%;
+  margin-inline: auto;
 }
 
-/* A phone-sized window onto the customer's screens. */
+@media (min-width: 940px) {
+  .pager-try-phone-column {
+    max-width: none;
+    margin-inline: 0;
+  }
+}
+
+/* Realistic phone bezel housing the live customer screen */
+
 .pager-try-phone {
-  height: 640px;
-  max-height: 80dvh;
-  overflow-y: auto;
+  position: relative;
+  height: 620px;
+  max-height: 76dvh;
+  padding: 10px;
+  border-radius: 42px;
+  background: linear-gradient(155deg, #252c28 0%, #141a17 50%, #1d2420 100%);
+  border: 1px solid rgba(20, 27, 23, 0.16);
+  box-shadow: 0 26px 56px -22px rgba(20, 27, 23, 0.3);
   display: flex;
   flex-direction: column;
-  border: 10px solid var(--pager-ink);
-  border-radius: 36px;
-  background: var(--pager-bg);
 }
 
-.pager-try-phone .pager-screen {
+.pager-try-phone-notch {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 82px;
+  height: 18px;
+  border-radius: 999px;
+  background: #141b17;
+  z-index: 3;
+}
+
+.pager-try-phone-viewport {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  border-radius: 32px;
+  background: var(--pager-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.pager-try-phone-viewport .pager-screen {
   flex: 1;
 }
 
-.pager-try-phone .pager-page {
-  /* A frame inside the page, so the device's safe areas do not apply. */
-  padding: 12px 20px 24px;
+.pager-try-phone-viewport .pager-page {
+  padding-top: 32px;
+  padding-bottom: 24px;
 }
 
-.pager-try-phone .pager-order-number {
-  font-size: 96px;
+.pager-try-phone-viewport .pager-order-number {
+  font-size: 88px;
 }
 
-.pager-try-phone .pager-order-number--long {
-  font-size: 40px;
+.pager-try-phone-viewport .pager-order-number--long {
+  font-size: 38px;
 }
 
-.pager-try-board {
-  padding: 16px;
-  border-radius: 16px;
-  background: var(--dash-bg);
-  color: var(--dash-text);
+/* Override viewport-relative clamp() so word codes stay cleanly inside the demo phone frame. */
+.pager-try-phone-viewport .pager-code {
+  font-size: 60px;
 }
 
-.pager-try-claim {
-  max-width: 640px;
+.pager-try-phone-viewport .pager-code--word {
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+.pager-try-counter {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.pager-try-claim .pager-button {
+.pager-try-board {
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid var(--rl-border);
+  background: #ffffff;
+  color: var(--dash-text);
+  box-shadow: 0 12px 32px -18px rgba(20, 27, 23, 0.12);
+}
+
+.pager-try-done {
+  margin: 0;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: var(--rl-sage-wash);
+  border: 1px solid rgba(21, 128, 61, 0.25);
+  color: var(--rl-forest);
+  font-size: 14px;
+  font-weight: 700;
   display: flex;
   align-items: center;
-  justify-content: center;
-  text-decoration: none;
+  gap: 10px;
+}
+
+/* Botanical forest claim banner */
+
+.pager-try-claim {
+  padding: 28px;
+  border-radius: 26px;
+  background: var(--rl-forest);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 22px 48px -26px rgba(14, 77, 59, 0.45);
+}
+
+@media (min-width: 840px) {
+  .pager-try-claim {
+    padding: 36px 40px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+  }
+}
+
+.pager-try-claim-copy {
+  max-width: 560px;
+}
+
+.pager-try-claim-title {
+  margin: 0;
+  font-family: var(--rl-font-display);
+  font-size: clamp(22px, 2.8vw, 32px);
+  line-height: 1.22;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.pager-try-claim-body {
+  margin: 10px 0 0;
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 15.5px;
+  line-height: 1.65;
+}
+
+.pager-try-claim-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  flex: none;
+}
+
+@media (min-width: 840px) {
+  .pager-try-claim-actions {
+    align-items: flex-end;
+  }
+}
+
+.pager-try-signin {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 14px;
 }
 
 .pager-try-link {
-  color: inherit;
+  color: #ffffff;
   font-weight: 700;
   text-decoration: underline;
+  text-underline-offset: 3px;
 }

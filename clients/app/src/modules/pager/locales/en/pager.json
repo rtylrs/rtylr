@@ -148,7 +148,11 @@
     "claim": "Get my free pager",
     "haveAccount": "Already use rtylr?",
     "signIn": "Sign in to switch it on",
-    "anotherPhone": "Scan with another phone"
+    "anotherPhone": "Scan with another phone",
+    "startOver": "Start over",
+    "backToLanding": "Back to $t(pager.brand.name)",
+    "doneBanner": "That's the whole flow. Ready to switch it on at your counter?",
+    "mobileSwitcherLabel": "Switch demo view"
   },
   "setup": {
     "pageTitle": "Set up your pager · $t(pager.brand.name)",
@@ -167,68 +171,370 @@
   "landing": {
     "meta": {
       "title": "$t(pager.brand.name): the free pager that rings your customer's phone",
-      "description": "$t(pager.brand.name) is a free pager for restaurants and cafés, by rtylr. Customers scan a QR at the counter, show their code to the cashier, and their phone rings when it is ready.",
+      "description": "$t(pager.brand.name) is a free pager for restaurants and cafés, by RTYLR. Customers scan a QR at the counter, show their code to the cashier, and their phone rings when it is ready.",
       "keywords": "free pager, restaurant pager, QR code pager, digital pager, order ready pager, guest pager, $t(pager.brand.name)",
-      "schemaDescription": "$t(pager.brand.name) is a free restaurant pager by rtylr. Customers scan a QR at the counter, show the code on their phone and their phone rings when the order is ready."
+      "schemaDescription": "$t(pager.brand.name) is a free restaurant pager by RTYLR. Customers scan a QR at the counter, show the code on their phone and their phone rings when the order is ready."
     },
-    "tryCta": "Try it now",
+    "nav": {
+      "label": "Main navigation",
+      "home": "Home",
+      "how": "How it works",
+      "features": "Features",
+      "why": "Compare",
+      "free": "Free",
+      "rtylr": "By RTYLR",
+      "faq": "FAQ",
+      "tryCta": "Try live demo",
+      "menuOpen": "Open menu",
+      "menuClose": "Close menu",
+      "backHome": "$t(pager.brand.name) home"
+    },
     "hero": {
-      "eyebrow": "$t(pager.brand.name), the free pager by rtylr",
-      "title": "The free pager\nthat rings their phone.",
-      "subtitle": "$t(pager.brand.name) replaces plastic restaurant pagers with the phone your customer already carries. One QR on the counter, and their phone rings when the order is ready. Free for your venue.",
-      "note": "No app, no account, nothing to buy."
+      "eyebrow": "Free QR order pager for cafés & restaurants",
+      "title": "Ditch the plastic buzzers.\nRing their phone when it's ready.",
+      "subtitle": "Replace plastic restaurant pagers, coasters, and beepers with one QR on your counter. Guests scan, sit anywhere, and their own phone rings the second their order is up.",
+      "primaryCta": "Try the live demo",
+      "secondaryCta": "See how it works",
+      "note": "No app · No account · Zero hardware to buy or charge",
+      "demoVenue": "Cedar Coffee",
+      "toastTitle": "Order 42 is ready",
+      "toastBody": "Collect it at the counter",
+      "simLabel": "Counter board",
+      "simOrder": "Order #42",
+      "simTapReady": "Tap Ready",
+      "simReset": "Reset preview",
+      "simHint": "Click Ready to ring the phone",
+      "simRung": "Phone is ringing live",
+      "islandWaiting": "Order #42 · Preparing",
+      "islandReady": "Order #42 is ready",
+      "qrStandLabel": "On your counter",
+      "qrStandCaption": "Scan to get a ring",
+      "strip": ["0 MB to install", "1 QR on the counter", "Works in Safari & Chrome", "Always free"]
+    },
+    "venues": {
+      "kicker": "Who uses $t(pager.brand.name)",
+      "title": "Built for every counter that calls out orders",
+      "intro": "Anywhere guests order at the till and wait for pickup, their own phone replaces noisy yelling and plastic buzzer racks.",
+      "items": [
+        {
+          "id": "cafes",
+          "title": "Coffee shops & cafés",
+          "body": "Guests grab a seat right after ordering instead of crowding the espresso bar."
+        },
+        {
+          "id": "restaurants",
+          "title": "Quick-service restaurants",
+          "body": "Call orders clearly during lunch rush without shouting numbers across the dining room."
+        },
+        {
+          "id": "bakeries",
+          "title": "Bakeries & pastry shops",
+          "body": "Let warm pastries and custom boxes finish in the kitchen while guests browse comfortably."
+        },
+        {
+          "id": "trucks",
+          "title": "Food trucks & kiosks",
+          "body": "No power-hungry charging docks or lost plastic buzzers in outdoor seating areas."
+        },
+        {
+          "id": "desserts",
+          "title": "Juice bars & dessert counters",
+          "body": "Handle fresh-blended orders and weekend queues with zero hardware cap."
+        },
+        {
+          "id": "foodCourts",
+          "title": "Food courts & takeaway",
+          "body": "Guests wait at any table across the hall and walk back the moment their phone rings."
+        }
+      ]
     },
     "how": {
-      "title": "How it works",
-      "intro": "The customer scans and waits. Nothing to install, nothing to type.",
+      "title": "Four moments, scan to pickup",
+      "intro": "No app to download, no phone number to type. Watch each screen as a guest moves through your line.",
+      "qrCaption": "Scan to get a ring",
+      "chapters": ["Scan", "Code", "Wait", "Ring"],
       "steps": [
         {
-          "title": "Scan the QR at the counter",
-          "body": "One printed QR code sits by the till. The customer points their camera at it and the page opens. No app to download, no account to create."
+          "title": "Scan one QR at the counter",
+          "body": "Put the printed poster or counter display by your till. The guest points their camera at it and their ticket opens straight in the browser."
         },
         {
           "title": "Show the code to the cashier",
-          "body": "Their phone shows a short code. The cashier types the order number or their name on that code, and they sit down, step outside or carry on with their day."
+          "body": "Their phone shows a friendly emoji-word code in two languages. Your cashier taps that card on the board and types the order number or name."
         },
         {
-          "title": "Their phone rings when it is ready",
-          "body": "When the order is up, your staff tap Ready on the board and the customer's phone rings."
+          "title": "Wait anywhere and see the line",
+          "body": "They sit at a table or step outside. Their screen shows their order label and how many orders are ahead of them."
+        },
+        {
+          "title": "One tap rings their phone",
+          "body": "When the order hits the pass, your team taps Ready. Their phone rings, vibrates, and flips full-screen green with I have it and Stop sound."
         }
       ]
     },
+    "bento": {
+      "title": "Crafted for fast counters",
+      "intro": "Every detail replaces plastic hardware with something faster, clearer, and already in your guest's pocket.",
+      "shuffler": {
+        "kicker": "Bilingual match codes",
+        "title": "Zero confusion across the counter",
+        "body": "Every scanned phone gets a bold color, an emoji, and a word shown in two languages so cashier and guest always read the same code.",
+        "action": "Shuffle code"
+      },
+      "miniBoard": {
+        "kicker": "Staff view",
+        "title": "One tap from the board",
+        "body": "Label the code, then tap Ready. Zero training needed.",
+        "order": "Order #42",
+        "statusWaiting": "Waiting",
+        "statusReady": "Ready",
+        "tapReady": "Mark ready",
+        "tapUndo": "Reset"
+      },
+      "poster": {
+        "kicker": "Counter setup",
+        "title": "One QR and you are live",
+        "body": "Print the built-in poster or open the counter QR display on any tablet."
+      },
+      "browser": {
+        "kicker": "Instant web page",
+        "title": "No app, no account",
+        "body": "Opens right in Safari or Chrome. Nothing to install, no phone number asked.",
+        "stat": "0 MB"
+      },
+      "platforms": {
+        "kicker": "Honest alerts",
+        "title": "Built for iPhone & Android",
+        "androidTitle": "Android Chrome",
+        "androidDesc": "Ring, vibrate, wake-lock & lock-screen push",
+        "iphoneTitle": "iPhone Safari",
+        "iphoneDesc": "Loud speaker ring (even on silent) & wake-lock"
+      },
+      "rush": {
+        "kicker": "Peak hours",
+        "title": "Unlimited orders, even at weekend rush",
+        "body": "Never run out of pagers when the line hits the door. Every guest brings their own screen.",
+        "cta": "Play with the live demo",
+        "badge": "∞ orders"
+      }
+    },
     "compare": {
-      "title": "Everything a plastic pager does, without the plastic",
-      "intro": "The customer's phone does the job the buzzer did, so everything the buzzer cost you goes away.",
-      "items": [
-        {
-          "title": "Nothing to buy",
-          "body": "No set of pagers and no spare parts. The customer brings the device."
-        },
-        {
-          "title": "Nothing to charge",
-          "body": "No charging base on the counter and no flat pager in the middle of the rush."
-        },
-        {
-          "title": "Nothing to clean",
-          "body": "No device passing from hand to hand all day, so nothing to wipe down between customers."
-        },
-        {
-          "title": "Nothing to lose",
-          "body": "No pagers leaving in a pocket or a bag."
-        }
+      "title": "Plastic buzzers vs. the phone in their hand",
+      "intro": "Your guests already carry a brighter screen and a louder speaker than any counter coaster.",
+      "oldTitle": "Plastic pager rack",
+      "oldBadge": "Legacy hardware",
+      "oldItems": [
+        "Buy a full set upfront and keep replacing broken units",
+        "Needs a charging dock on the counter and dies mid-rush",
+        "Passes from hand to hand all day and needs constant wiping",
+        "Walks out the door in a coat pocket or tote bag",
+        "Runs out of buzzers right when the line gets busy"
+      ],
+      "newTitle": "$t(pager.brand.name)",
+      "newBadge": "Modern counter",
+      "newItems": [
+        "Nothing to buy: the guest brings the device",
+        "Always charged and already in their hand",
+        "Zero shared plastic moving across the counter",
+        "Nothing to lose, drop, or chase after",
+        "Unlimited orders even at peak weekend rush"
       ]
     },
     "free": {
-      "title": "Why is it free?",
-      "body": "rtylr makes a point of sale system. $t(pager.brand.name) is free because we want restaurant owners to see how we build things, with something they can use at their counter today."
+      "badge": "Always free",
+      "title": "Free for your venue. Forever.",
+      "figure": "Free",
+      "figureSub": "No plans · No trial clock · No credit card",
+      "whyTitle": "Why does RTYLR give it away?",
+      "whyBody": "RTYLR builds point-of-sale software for restaurants and cafés. We give $t(pager.brand.name) away so owners can experience how we design and ship products, with something genuinely useful on their counter today.",
+      "primaryCta": "Set up my venue",
+      "secondaryCta": "Try the live demo",
+      "included": [
+        "Unlimited orders",
+        "Printable counter poster",
+        "Live counter QR display",
+        "Arabic, English & French"
+      ]
+    },
+    "faq": {
+      "kicker": "Common questions",
+      "title": "Questions owners ask",
+      "intro": "Straight answers about how $t(pager.brand.name) works on your counter.",
+      "items": [
+        {
+          "q": "Does my customer need to download an app or sign up?",
+          "a": "No. They point their phone camera at the QR on your counter and their ticket opens right in the browser. No app, no account, and nothing for them to type."
+        },
+        {
+          "q": "Does it work with my existing POS, or without one?",
+          "a": "Yes to both. $t(pager.brand.name) runs in any browser on a phone, tablet, or computer beside your register, so it works alongside whatever POS you already use or on its own."
+        },
+        {
+          "q": "What happens on iPhone versus Android?",
+          "a": "After scanning, the guest taps Notify me once. On Android Chrome, that enables the loud in-page ring, vibration, screen wake-lock, and lock-screen push notifications even if they switch apps or lock the phone. On iPhone Safari, browser tabs do not support web push or vibration, so that tap unlocks loud ringing (even with the silent switch on) and keeps the screen awake while the page stays open."
+        },
+        {
+          "q": "What if a customer doesn't have a phone or their battery died?",
+          "a": "You never have to force every order through the pager. Just hand them a receipt or call their name or number like you do today, while everyone else scans."
+        },
+        {
+          "q": "Is it really free? What is the catch?",
+          "a": "Really free, with no trial period, no subscription, and no order cap. RTYLR builds a point-of-sale platform and gives $t(pager.brand.name) away so owners can see our craft firsthand."
+        },
+        {
+          "q": "How do I start using it in my venue?",
+          "a": "Sign up with your venue name and phone number, switch on the pager, and print your counter poster or open the counter display. You can try the full board and phone right now in the live demo first."
+        }
+      ]
     },
     "closing": {
       "title": "Hear it ring for yourself",
-      "subtitle": "Try the staff board and the customer's phone side by side, right in your browser. No signup needed."
+      "subtitle": "Play both the staff board and the customer's phone side by side in your browser. No signup needed.",
+      "primaryCta": "Try the live demo",
+      "secondaryCta": "Set up my venue",
+      "signIn": "Already have a board?",
+      "signInLink": "Sign in"
     },
-    "signIn": "Already have a board?",
-    "signInLink": "Sign in",
-    "footer": "A free pager for restaurants and cafés."
+    "footer": {
+      "contactTitle": "Talk to the RTYLR team",
+      "channels": {
+        "whatsapp": {
+          "label": "WhatsApp",
+          "hint": "Quickest way to reach us"
+        },
+        "phone": {
+          "label": "Phone",
+          "hint": "Call our team directly"
+        },
+        "email": {
+          "label": "Email",
+          "hint": "Send us a note anytime"
+        }
+      },
+      "tagline": "A free phone pager for restaurants and cafés, built by RTYLR.",
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "security": "Security",
+      "builtBy": "Built by Voxire",
+      "copyright": "© RTYLR {{year}}"
+    },
+    "pages": {
+      "how": {
+        "metaTitle": "How it works · $t(pager.brand.name) free QR order pager",
+        "metaDescription": "See how $t(pager.brand.name) replaces plastic restaurant buzzers and pagers in four quick steps, from scanning one counter QR to ringing the guest's phone.",
+        "kicker": "How $t(pager.brand.name) works",
+        "heading": "One counter QR to a ringing phone in seconds",
+        "intro": "No app to install, no phone numbers collected, and zero plastic buzzers to buy, sanitize, or recharge.",
+        "setupKicker": "Live in minutes",
+        "setupTitle": "Go live on your counter in four simple steps",
+        "setupIntro": "Everything you need runs inside any browser on a tablet, laptop, or phone beside your till.",
+        "setupSteps": [
+          {
+            "title": "Create your free venue board",
+            "body": "Sign up with your venue name and phone number, then switch on the pager in one tap."
+          },
+          {
+            "title": "Print the poster or open the counter display",
+            "body": "Place your venue's single QR stand beside the register so every guest can scan while ordering."
+          },
+          {
+            "title": "Match each phone in a second",
+            "body": "Guests show their bilingual emoji-word code; staff type the order number or name on the board."
+          },
+          {
+            "title": "Tap Ready and hear it ring",
+            "body": "When the order hits the pass, one tap flips the guest's screen green and rings their phone."
+          }
+        ]
+      },
+      "features": {
+        "metaTitle": "Features & comparison · $t(pager.brand.name) vs plastic buzzers",
+        "metaDescription": "Compare $t(pager.brand.name) against legacy plastic restaurant buzzers and coasters. Bilingual match codes, 0 MB instant web pager, iPhone and Android alerts, always free.",
+        "kicker": "Features & comparison",
+        "heading": "Everything a counter pager should be, without the plastic",
+        "intro": "Built for fast coffee bars and busy restaurants that want clearer pickup calls without buying or maintaining buzzer hardware."
+      },
+      "faq": {
+        "metaTitle": "FAQ · $t(pager.brand.name) free phone pager for cafés & restaurants",
+        "metaDescription": "Answers to common questions about $t(pager.brand.name): iPhone vs Android alerts, POS compatibility, guests without phones, and why RTYLR keeps it free.",
+        "kicker": "Frequently asked questions",
+        "heading": "Straight answers for busy venue owners",
+        "intro": "Everything you want to know before putting $t(pager.brand.name) on your counter."
+      }
+    },
+    "rtylr": {
+      "metaTitle": "Explore RTYLR · POS, QR menu, inventory, HR & finance for hospitality",
+      "metaDescription": "$t(pager.brand.name) is built by RTYLR. Discover RTYLR's full hospitality and retail platform: Point of Sale, QR menu, inventory ERP, finance, HR, CRM, workflows, and insights.",
+      "metaKeywords": "RTYLR POS, restaurant POS, cafe POS, QR menu, restaurant inventory ERP, hospitality management software, $t(pager.brand.name)",
+      "eyebrow": "Built by RTYLR",
+      "teaserTitle": "Love $t(pager.brand.name)? Run your whole venue on RTYLR.",
+      "teaserBody": "$t(pager.brand.name) is free forever. When you are ready to connect your counter POS, QR menu, stock, shifts, and accounts in one place, RTYLR is built by the same team.",
+      "teaserCta": "Explore RTYLR services",
+      "heading": "One connected platform for your entire venue",
+      "intro": "Start free with $t(pager.brand.name) on your counter today, and unlock the rest of RTYLR whenever your restaurant, café, or retail business is ready to grow.",
+      "visitWorkspace": "Explore RTYLR Workspace",
+      "bookDemo": "Book a RTYLR demo",
+      "hardwareCta": "See POS hardware",
+      "suiteKicker": "The RTYLR platform",
+      "suiteTitle": "Every tool your team needs under one roof",
+      "suiteIntro": "Each module works cleanly together so orders, stock, team shifts, and finances stay in sync without juggling five separate subscriptions.",
+      "bridgeKicker": "Your free starting point",
+      "bridgeSub": "Free phone pager · Zero commitment",
+      "bridgeTitle": "Try our craft on your counter first",
+      "bridgeBody": "You never have to switch your current POS to use $t(pager.brand.name). Keep it free forever, and reach out whenever you want to see how RTYLR POS and back-office tools fit your venue.",
+      "benefits": [
+        "One account across counter & back-office",
+        "Built for Arabic, English & French teams",
+        "Multi-branch ready as you expand",
+        "Direct onboarding support from RTYLR"
+      ],
+      "services": {
+        "pos": {
+          "title": "Point of Sale (POS)",
+          "short": "Fast counter & table checkout",
+          "body": "Take dine-in and takeaway orders quickly with kitchen routing, modifiers, receipts, and dedicated counter hardware."
+        },
+        "menu": {
+          "title": "QR Menu & Ordering",
+          "short": "Digital menus in Arabic, EN & FR",
+          "body": "Publish clean, mobile-friendly menus that stay synced with your prices, categories, and item availability."
+        },
+        "erp": {
+          "title": "Inventory & Operations",
+          "short": "Stock, recipes & suppliers",
+          "body": "Track ingredients, recipes, stock transfers, suppliers, and purchase orders automatically as sales come in."
+        },
+        "finance": {
+          "title": "Finance & Accounting",
+          "short": "Invoices, expenses & cash flow",
+          "body": "Stay on top of daily settlements, supplier bills, expenses, and clear financial statements across branches."
+        },
+        "hr": {
+          "title": "Team & Shifts (HR)",
+          "short": "Schedules, attendance & payroll",
+          "body": "Plan counter shifts, track staff attendance and leave, and streamline payroll for growing hospitality teams."
+        },
+        "crm": {
+          "title": "Customers & Loyalty",
+          "short": "Guest profiles & repeat visits",
+          "body": "Know your regulars, organize customer segments, and keep guests coming back to your café or restaurant."
+        },
+        "flow": {
+          "title": "Workflows & Checklists",
+          "short": "Opening, closing & team tasks",
+          "body": "Coordinate daily prep, opening and closing checklists, and branch tasks so nothing slips during rush hours."
+        },
+        "insights": {
+          "title": "Live Insights & Analytics",
+          "short": "Real-time sales & peak hours",
+          "body": "Monitor top-selling items, peak rush windows, and branch performance live from any phone or laptop."
+        }
+      }
+    },
+    "mobileBar": {
+      "tryCta": "Try the live demo",
+      "whatsappLabel": "Message RTYLR on WhatsApp"
+    }
   },
   "staff": {
     "portal": "Open RTYLR"
