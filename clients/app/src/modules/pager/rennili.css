@@ -59,6 +59,7 @@
 }
 
 .rennili-by {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -70,6 +71,13 @@
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
+}
+
+/* The pill stays small; its tap area is the 44px a finger needs. */
+.rennili-by::after {
+  content: '';
+  position: absolute;
+  inset: -8px 0;
 }
 
 .rennili-by::before {
@@ -110,6 +118,8 @@
   min-height: 100%;
   display: flex;
   flex-direction: column;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
 }
 
 .rennili-nav {
@@ -124,6 +134,13 @@
 
 .rennili-nav .pager-languages {
   margin-inline-start: auto;
+}
+
+/* Logo, badge and three languages do not fit a 360px phone; the footer keeps the badge. */
+@media (max-width: 399px) {
+  .rennili-nav .rennili-by {
+    display: none;
+  }
 }
 
 .rennili-section {
@@ -326,7 +343,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 20px;
+  padding: max(4px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) 4px
+    max(20px, env(safe-area-inset-left));
   border-bottom: 1px solid var(--dash-border);
   background: var(--dash-surface);
 }
@@ -340,7 +358,14 @@
   color: var(--dash-text-muted);
 }
 
+.rennili-staff-header .rennili-logo,
 .rennili-staff-portal {
+  min-height: 44px;
+}
+
+.rennili-staff-portal {
+  display: inline-flex;
+  align-items: center;
   margin-inline-start: auto;
   color: var(--dash-text-muted);
   font-size: 13px;
@@ -356,5 +381,12 @@
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 20px max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom))
+    max(20px, env(safe-area-inset-left));
+}
+
+/* The board is tapped at a counter, often on a tablet: no button under 44px. */
+.rennili-staff .portal-button,
+.pager-try-board .portal-button {
+  min-height: 44px;
 }

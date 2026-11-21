@@ -36,7 +36,9 @@ const Switch = React.forwardRef<React.ElementRef<typeof SwitchPrimitive.Root>, S
         <SwitchPrimitive.Thumb
           className={cn(
             'pointer-events-none block h-4 w-4 rounded-full bg-white shadow-sm ring-0 transition-transform',
-            'data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0'
+            'data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0',
+            // The track starts on the right in Arabic, so the thumb slides left.
+            'rtl:data-[state=checked]:-translate-x-4'
           )}
         />
       </SwitchPrimitive.Root>

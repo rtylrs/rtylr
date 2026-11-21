@@ -36,6 +36,8 @@
   min-height: 100%;
   display: flex;
   flex-direction: column;
+  /* The code sizes below follow this screen, so they also fit the demo's phone frame. */
+  container-type: inline-size;
 }
 
 .pager-screen--ready {
@@ -47,7 +49,9 @@
   width: 100%;
   max-width: 480px;
   margin: 0 auto;
-  padding: 12px 20px 32px;
+  /* viewport-fit=cover lets the page run under a notch and the home bar. */
+  padding: max(12px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+    max(32px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -58,6 +62,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
   min-height: 44px;
 }
@@ -68,6 +73,7 @@
   font-weight: 700;
   min-width: 0;
   overflow-wrap: anywhere;
+  flex: 1 1 9rem;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -226,7 +232,7 @@
 /* Sized to be read from arm's length, and to shrink for a twelve-character number. */
 .pager-order-number {
   max-width: 100%;
-  font-size: clamp(64px, 30vw, 168px);
+  font-size: clamp(64px, 30cqi, 168px);
   line-height: 1;
   font-weight: 900;
   letter-spacing: -0.02em;
@@ -234,7 +240,7 @@
 }
 
 .pager-order-number--long {
-  font-size: clamp(28px, 10.5vw, 72px);
+  font-size: clamp(28px, 10.5cqi, 72px);
 }
 
 /* The match code the customer shows the cashier: read across a counter. */
@@ -243,7 +249,7 @@
   padding: 0.12em 0.4em;
   border-radius: 24px;
   color: #ffffff;
-  font-size: clamp(88px, 36vw, 176px);
+  font-size: clamp(88px, 36cqi, 176px);
   line-height: 1;
   font-weight: 900;
   letter-spacing: 0.04em;
@@ -256,7 +262,7 @@
   align-items: center;
   max-width: 100%;
   padding: 0.2em 0.5em;
-  font-size: clamp(40px, 13vw, 88px);
+  font-size: clamp(40px, 13cqi, 88px);
   letter-spacing: 0;
   text-align: center;
   overflow-wrap: anywhere;
@@ -294,7 +300,8 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
-  padding: 24px 20px;
+  padding: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
   text-align: center;
 }
 
@@ -479,7 +486,10 @@
   align-items: center;
   justify-content: center;
   gap: 20px;
-  padding: 24px;
+  padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+  /* A long venue name on a small stand scrolls rather than pushing the QR off. */
+  overflow-y: auto;
   background: #ffffff;
   color: #0f172a;
   color-scheme: light;
@@ -489,7 +499,7 @@
 
 .pager-display__close {
   position: absolute;
-  inset-block-start: 16px;
+  inset-block-start: max(16px, env(safe-area-inset-top));
   inset-inline-end: 16px;
   display: inline-flex;
   align-items: center;
@@ -510,7 +520,7 @@
 
 .pager-display__qr canvas {
   display: block;
-  width: min(72vw, 52vh) !important;
+  width: min(84vw, 56dvh) !important;
   height: auto !important;
 }
 
@@ -519,4 +529,31 @@
   font-size: clamp(20px, 4.5vw, 36px);
   font-weight: 700;
   line-height: 1.3;
+}
+
+/* A stand on its side: the QR takes the left half at nearly full height, and
+   the venue and the scan lines sit beside it. */
+@media (orientation: landscape) and (min-width: 640px) {
+  .pager-display {
+    display: grid;
+    grid-template-columns: auto minmax(0, 30rem);
+    align-content: center;
+    justify-content: center;
+    column-gap: 48px;
+    row-gap: 16px;
+  }
+
+  .pager-display > :not(.pager-display__close) {
+    grid-column: 2;
+  }
+
+  .pager-display > .pager-display__qr {
+    grid-column: 1;
+    grid-row: 1 / span 4;
+    align-self: center;
+  }
+
+  .pager-display__qr canvas {
+    width: min(46vw, 80dvh) !important;
+  }
 }
