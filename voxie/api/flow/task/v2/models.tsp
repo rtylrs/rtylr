@@ -168,10 +168,21 @@ model FlowTask {
 
   /**
    * Task ids this task depends on. Read-only projection; write through the
-   * addTaskDependency / removeTaskDependency RPCs.
+   * addTaskDependency / removeTaskDependency RPCs. Only "blocks" relations:
+   * the tasks that block this one. Other relation types are read through
+   * listTaskRelations.
    */
   @Onkt.encode("string")
   dependencies: int64[];
+
+  /**
+   * Whether at least one task blocking this one is still open, meaning its
+   * status bucket is neither done nor cancelled. Read-only projection.
+   */
+  blocked: boolean;
+
+  /** Number of open tasks blocking this one. Zero when blocked is false. */
+  blocker_count: int32;
 }
 
 model TaskComment {
@@ -335,6 +346,13 @@ model ListTasksRequest {
   /** priority is the priority value for this contract. */
   @query("priority")
   priority: string;
+
+  /**
+   * blocked narrows results to tasks that are blocked (true) or not blocked
+   * (false). Omitted, both are returned.
+   */
+  @query("blocked")
+  blocked?: boolean;
 
   /** The current result page. */
   @query("page")
@@ -923,6 +941,161 @@ model RemoveTaskDependencyRequest {
 }
 
 model RemoveTaskDependencyResponse {
+  /** message is a human-readable result message. */
+  message: string;
+}
+
+/**
+ * RelatedTask is the task at the other end of a relation, with what a row in
+ * the relations panel shows.
+ */
+model RelatedTask {
+  /** relation_id identifies the relation; pass it to removeTaskRelation. */
+  @encode(string)
+  relation_id: int64;
+
+  /** task_id is the other task. */
+  @encode(string)
+  task_id: int64;
+
+  /** Human-readable identifier of the other task, like "T-42". */
+  identifier: string;
+
+  /** title is the other task's title. */
+  title: string;
+
+  /**
+   * project_id is the other task's project. Relations may cross projects
+   * inside one business.
+   */
+  @encode(string)
+  project_id: int64;
+
+  /** project_name is the other task's project name. */
+  project_name: string;
+
+  /** status is the other task's built-in string status. */
+  status: string;
+
+  /**
+   * status_name is the other task's project status name. Empty when the task
+   * has no project status.
+   */
+  status_name: string;
+
+  /** status_color is the colour of that project status. Empty when absent. */
+  status_color: string;
+
+  /** status_bucket is backlog, active, done or cancelled. */
+  status_bucket: string;
+
+  /** assignee_id is the other task's assignee, if any. */
+  @encode(string)
+  assignee_id?: int64;
+
+  /** Assignee display name. Empty if unassigned. */
+  assignee_name: string;
+
+  /** Two-letter initials derived from assignee_name. Empty if unassigned. */
+  assignee_initials: string;
+}
+
+/**
+ * TaskRelationGroup is every relation of one type and direction, read from
+ * the listed task's side.
+ */
+model TaskRelationGroup {
+  /** type is blocks, relates, duplicates or clones. */
+  type: string;
+
+  /**
+   * direction is outward when the listed task is the subject ("this task
+   * blocks", "duplicates", "clones") and inward when it is the object ("is
+   * blocked by", "is duplicated by", "is cloned by"). relates is symmetric
+   * and always outward.
+   */
+  direction: string;
+
+  /**
+   * relation is type and direction as one key for labels: blocks,
+   * blocked_by, relates_to, duplicates, duplicated_by, clones or cloned_by.
+   */
+  relation: string;
+
+  /** tasks are the related tasks the caller may see, oldest relation first. */
+  tasks: RelatedTask[];
+}
+
+model AddTaskRelationBody {
+  /**
+   * other_task_id is the task at the other end. It must be in the caller's
+   * business and visible to the caller; it may be in another project.
+   */
+  @minValueExclusive(0)
+  @encode(string)
+  other_task_id: int64;
+
+  /** type is blocks, relates, duplicates or clones. */
+  @Onkt.required
+  type: string;
+
+  /**
+   * direction is outward (default) or inward, read from task_id's side:
+   * outward with blocks means task_id blocks other_task_id, inward means
+   * task_id is blocked by other_task_id. Ignored for relates.
+   */
+  direction: string;
+}
+
+model AddTaskRelationRequest {
+  /** task_id is the task the relation is added from. */
+  @minValueExclusive(0)
+  @encode(string)
+  task_id: int64;
+
+  /** body carries the relation bound from the HTTP payload. */
+  @body
+  body: AddTaskRelationBody;
+}
+
+model AddTaskRelationResponse {
+  /** relation_id identifies the stored relation. */
+  @encode(string)
+  relation_id: int64;
+
+  /** message is a human-readable result message. */
+  message: string;
+}
+
+model ListTaskRelationsRequest {
+  /** task_id is the task whose relations to list. */
+  @minValueExclusive(0)
+  @encode(string)
+  task_id: int64;
+}
+
+model ListTaskRelationsResponse {
+  /**
+   * groups holds one entry per type and direction that has at least one
+   * relation, in a fixed order: blocks, blocked_by, relates_to, duplicates,
+   * duplicated_by, clones, cloned_by.
+   */
+  groups: TaskRelationGroup[];
+}
+
+model RemoveTaskRelationRequest {
+  /** task_id is either end of the relation. */
+  @minValueExclusive(0)
+  @encode(string)
+  task_id: int64;
+
+  /** relation_id is the relation to remove. */
+  @minValueExclusive(0)
+  @encode(string)
+  relation_id: int64;
+}
+
+model RemoveTaskRelationResponse {
   /** message is a human-readable result message. */
   message: string;
 }
