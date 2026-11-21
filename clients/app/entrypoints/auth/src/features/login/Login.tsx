@@ -147,11 +147,17 @@ const Login: React.FC = (): React.JSX.Element => {
             <button
               type="button"
               className={authLinkClass}
-              onClick={() =>
-                navigate({
-                  to: redirectParam ? `/register?redirect=${redirectParam}` : '/register',
-                })
-              }
+              onClick={() => {
+                // Signing up instead finishes where signing in would have.
+                const current = new URLSearchParams(window.location.search);
+                const next = new URLSearchParams();
+                for (const key of ['redirect', 'returnTo']) {
+                  const value = current.get(key);
+                  if (value) next.set(key, value);
+                }
+                const query = next.toString();
+                void navigate({ to: query ? `/register?${query}` : '/register' });
+              }}
             >
               {t('auth.login.createOne')}
             </button>
