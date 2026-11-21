@@ -88,7 +88,7 @@ const Operations: React.FC = () => {
   const { data: overtimeAlerts = [], refetch: refetchOvertimeAlerts } = useOvertimeAlerts();
   const handleStartLunchBreak = useCallback((): void => {
     startBreak.mutate(
-      { staffId: staff[0]?.id ?? 1, staffName: staff[0]?.name ?? 'Alex Chen', type: 'Lunch' },
+      { staffId: staff[0]?.id ?? 0, staffName: staff[0]?.name ?? '', type: 'Lunch' },
       { onSuccess: () => toast.success(t('hrOperations.toasts.breakStarted')) }
     );
   }, [startBreak, staff, t]);
