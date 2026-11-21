@@ -15,7 +15,7 @@ vi.mock('@voxire/api', () => ({
   getOneKitErrorMessage: (_error: unknown, fallback: string) => fallback,
 }));
 
-import { useJournal } from './useChartOfAccounts';
+import { useChartOfAccounts, useJournal } from './useChartOfAccounts';
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 const wrapper = ({ children }: { children: React.ReactNode }) =>
@@ -23,6 +23,18 @@ const wrapper = ({ children }: { children: React.ReactNode }) =>
 
 beforeEach(() => {
   vi.clearAllMocks();
+  queryClient.clear();
+});
+
+describe('useChartOfAccounts', () => {
+  it('returns an empty list when listAccounts omits the accounts array', async () => {
+    clients.account.listAccounts.mockResolvedValue({ page: 1, pageSize: 50, hasMore: false });
+
+    const { result } = renderHook(() => useChartOfAccounts(), { wrapper });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual([]);
+  });
 });
 
 describe('useJournal', () => {
