@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/application"
 	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/testutil"
+	flowcyclev2 "github.com/voxire/voxie/gen/go/flow/cycle/v2"
 	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"
 	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
 	flowworkspacev1 "github.com/voxire/voxie/gen/go/flow/workspace/v1"
@@ -47,6 +48,11 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 		}},
 		{Name: "flow tasks assign", App: authorization.AppFlow, Permission: "flow:tasks:assign", Extra: []string{"flow:tasks:create"}, Call: func(ctx context.Context) (any, error) {
 			response, err := NewTaskAPI(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).CreateTask(ctx, &flowtaskv1.CreateTaskRequest{AssigneeId: &assignedUserID})
+			return response, err
+		}},
+		{Name: "flow cycle task move", App: authorization.AppFlow, Permission: "flow:tasks:edit", Call: func(ctx context.Context) (any, error) {
+			taskID := int64(1)
+			response, err := NewCycleAPIV2(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).MoveCycleTask(ctx, &flowcyclev2.MoveCycleTaskRequest{TaskId: &taskID})
 			return response, err
 		}},
 		{Name: "flow team manage", App: authorization.AppFlow, Permission: "flow:team:manage", Call: func(ctx context.Context) (any, error) {
