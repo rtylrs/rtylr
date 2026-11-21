@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { RenniliLogo } from '../../shared/components/RenniliLogo';
+import { ByRtylr, RenniliLogo } from '../../shared/components/RenniliLogo';
 import { VenueLogo } from '../../shared/components/VenueLogo';
 import { VenueQr } from './VenueQr';
 
@@ -62,6 +62,7 @@ export function CounterPoster({
       </div>
       <div className="pager-poster__brand">
         <RenniliLogo size={22} />
+        <ByRtylr />
       </div>
     </article>
   );

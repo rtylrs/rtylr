@@ -439,6 +439,12 @@
   opacity: 0.85;
 }
 
+.pager-poster__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .pager-poster__brand .rennili-mark,
 .pager-display__brand .rennili-mark {
   color: #0e4d3b;
