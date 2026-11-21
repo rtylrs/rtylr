@@ -75,9 +75,9 @@ export const useCreateShift = () => {
       await unwrap(
         hrTransport.post('/hr/shifts', {
           name: data.name,
-          locationId: data.locationId,
-          startTime: data.startTime,
-          endTime: data.endTime,
+          location_id: data.locationId,
+          start_time: data.startTime,
+          end_time: data.endTime,
           color: data.color,
         })
       );

@@ -2,9 +2,13 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/hr/hr_shifts/internal/application"
 	"github.com/voxire/onion/internal/modules/hr/hr_shifts/internal/domain"
@@ -36,17 +40,144 @@ type CreateShiftRequest struct {
 	Notes                string `json:"notes"`
 }
 
+func (r *CreateShiftRequest) UnmarshalJSON(data []byte) error {
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	decodeString := func(keys ...string) (string, error) {
+		for _, k := range keys {
+			raw, ok := fields[k]
+			if !ok || len(raw) == 0 || string(raw) == "null" {
+				continue
+			}
+			var s string
+			if err := json.Unmarshal(raw, &s); err != nil {
+				return "", fmt.Errorf("%s: %w", k, err)
+			}
+			return s, nil
+		}
+		return "", nil
+	}
+	decodeInt64 := func(keys ...string) (int64, error) {
+		for _, k := range keys {
+			raw, ok := fields[k]
+			if !ok || len(raw) == 0 || string(raw) == "null" {
+				continue
+			}
+			var s string
+			if err := json.Unmarshal(raw, &s); err == nil {
+				s = strings.TrimSpace(s)
+				if s == "" {
+					return 0, nil
+				}
+				v, err := strconv.ParseInt(s, 10, 64)
+				if err != nil {
+					return 0, fmt.Errorf("%s: %w", k, err)
+				}
+				return v, nil
+			}
+			var v int64
+			if err := json.Unmarshal(raw, &v); err != nil {
+				return 0, fmt.Errorf("%s: %w", k, err)
+			}
+			return v, nil
+		}
+		return 0, nil
+	}
+	decodeInt32 := func(keys ...string) (int32, error) {
+		v, err := decodeInt64(keys...)
+		return int32(v), err // #nosec G115 -- Bounded shift break duration minutes.
+	}
+
+	var err error
+	if r.LocationID, err = decodeInt64("location_id", "locationId"); err != nil {
+		return err
+	}
+	if r.StaffID, err = decodeInt64("staff_id", "staffId"); err != nil {
+		return err
+	}
+	if r.DepartmentID, err = decodeInt64("department_id", "departmentId"); err != nil {
+		return err
+	}
+	if r.BreakDurationMinutes, err = decodeInt32("break_duration_minutes", "breakDurationMinutes"); err != nil {
+		return err
+	}
+	if r.Name, err = decodeString("name"); err != nil {
+		return err
+	}
+	if r.StartTime, err = decodeString("start_time", "startTime"); err != nil {
+		return err
+	}
+	if r.EndTime, err = decodeString("end_time", "endTime"); err != nil {
+		return err
+	}
+	if r.Color, err = decodeString("color"); err != nil {
+		return err
+	}
+	if r.Date, err = decodeString("date"); err != nil {
+		return err
+	}
+	if r.Status, err = decodeString("status"); err != nil {
+		return err
+	}
+	if r.Notes, err = decodeString("notes"); err != nil {
+		return err
+	}
+	return nil
+}
+
 type CreateShiftResponse struct {
 	Shift *hrshiftv1.ShiftPayload `json:"shift"`
 }
 
+func isValidShiftTime(value string) bool {
+	trimmed := strings.TrimSpace(value)
+	if _, err := time.Parse("15:04", trimmed); err == nil {
+		return true
+	}
+	_, err := time.Parse("15:04:05", trimmed)
+	return err == nil
+}
+
+func isValidShiftStatus(value string) bool {
+	switch value {
+	case "", "scheduled", "in_progress", "completed", "absent", "cancelled":
+		return true
+	}
+	return false
+}
+
 func (h *CreateShiftHandler) Validate(_ context.Context, req *CreateShiftRequest) error {
+	if req == nil {
+		return onekiterrors.New(http.StatusBadRequest, "request body is required")
+	}
+	req.StartTime = strings.TrimSpace(req.StartTime)
+	req.EndTime = strings.TrimSpace(req.EndTime)
+	req.Date = strings.TrimSpace(req.Date)
+	req.Status = strings.TrimSpace(req.Status)
+	req.Color = strings.TrimSpace(req.Color)
+
 	if req.StartTime == "" || req.EndTime == "" {
 		return onekiterrors.New(http.StatusBadRequest, "start_time and end_time are required")
 	}
+	if !isValidShiftTime(req.StartTime) || !isValidShiftTime(req.EndTime) {
+		return onekiterrors.New(http.StatusBadRequest, "start_time and end_time must use HH:MM or HH:MM:SS")
+	}
+	if !isValidShiftStatus(req.Status) {
+		return onekiterrors.New(http.StatusBadRequest, "invalid shift status")
+	}
+	if len(req.Color) > 10 {
+		return onekiterrors.New(http.StatusBadRequest, "color must be at most 10 characters")
+	}
+	if req.Date != "" {
+		if _, err := time.Parse(time.DateOnly, req.Date); err != nil {
+			return onekiterrors.New(http.StatusBadRequest, "date must use YYYY-MM-DD")
+		}
+	}
 
 	if req.StaffID != 0 {
-		if strings.TrimSpace(req.Date) == "" {
+		if req.Date == "" {
 			return onekiterrors.New(http.StatusBadRequest, "date is required when staff_id is set")
 		}
 		return nil
