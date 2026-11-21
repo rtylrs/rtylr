@@ -77,6 +77,7 @@ import PriorityIcon from '../../shared/components/PriorityIcon';
 import LabelChip from '../../shared/components/LabelChip';
 import DueDatePicker from '../../shared/components/DueDatePicker';
 import { getInitials } from '../../shared/lib/utils';
+import { assigneeOptions } from '../../shared/lib/memberUtils';
 import { displayDescription } from '../../shared/lib/stringUtils';
 import { EFFORT_PRESETS, formatEffortMinutes } from '../../shared/lib/effortPresets';
 import { TASK_STATUSES, STATUS_LABEL_KEYS } from '../../shared/lib/constantsFlow';
@@ -793,14 +794,11 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
                 size={18}
               />
             }
-            options={[
-              { value: '', label: t('flow.quickCreate.unassigned') },
-              ...(task.assigneeId &&
-              !members.some((member) => String(member.id) === String(task.assigneeId))
-                ? [{ value: String(task.assigneeId), label: assignee }]
-                : []),
-              ...members.map((m) => ({ value: String(m.id), label: m.name })),
-            ]}
+            options={assigneeOptions(
+              members,
+              { id: task.assigneeId ? String(task.assigneeId) : '', name: assignee },
+              t('flow.quickCreate.unassigned')
+            ).map((option) => ({ value: option.id, label: option.name }))}
             onChange={(value) => {
               const m = members.find((m) => String(m.id) === value);
               updateTask(task.id, {
