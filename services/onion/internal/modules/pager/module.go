@@ -1,6 +1,7 @@
-// Package pager is the order pager: a customer scans a venue's poster, enters
-// the number on their receipt and their phone rings when the staff mark that
-// number ready. A venue is an ordinary business.
+// Package pager is the order pager: a customer scans a venue's QR and gets a
+// short code, the cashier labels that phone's ticket with the order number or
+// the customer's name, and the phone rings when the staff mark it ready. A
+// venue is an ordinary business.
 package pager
 
 import (
@@ -87,7 +88,7 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 func (m *Module) GetAnonymousRoutes() []string {
 	return []string{
 		"/pager/v1/public/venues/{slug}",
-		"/pager/v1/public/venues/{slug}/join",
+		"/pager/v1/public/venues/{slug}/scan",
 		"/pager/v1/public/tickets/{public_token}",
 		"/pager/v1/public/tickets/{public_token}/acknowledge",
 		"/pager/v1/public/push-key",

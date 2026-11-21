@@ -7,8 +7,8 @@ import {
   BatteryCharging,
   BellRing,
   QrCode,
-  ReceiptText,
   SearchX,
+  Smartphone,
   SprayCan,
   Wallet,
 } from 'lucide-react';
@@ -30,7 +30,7 @@ interface Card {
 
 // Icons only. The copy resolves from pager.how.steps and
 // pager.compare.items, matched by position.
-const STEP_ICONS: LucideIcon[] = [QrCode, ReceiptText, BellRing];
+const STEP_ICONS: LucideIcon[] = [QrCode, Smartphone, BellRing];
 const COMPARE_ICONS: LucideIcon[] = [Wallet, BatteryCharging, SprayCan, SearchX];
 
 const TryButton: React.FC<{ source: string }> = ({ source }) => {

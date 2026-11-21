@@ -59,7 +59,7 @@ afterEach(() => {
 });
 
 describe('pager counter poster', () => {
-  it('points the QR at the venue join page and names the venue', async () => {
+  it('points the QR at the venue scan page and names the venue', async () => {
     renderPoster();
 
     const joinUrl = `${window.location.origin}/acme/pager`;
@@ -77,6 +77,11 @@ describe('pager counter poster', () => {
     const arabic = poster.querySelector('[lang="ar"]') as HTMLElement;
     expect(within(english).getAllByRole('listitem')).toHaveLength(3);
     expect(within(english).getByText(/scan/i)).toBeInTheDocument();
+    // The customer shows a code; nobody types a receipt number any more.
+    expect(
+      within(english).getByText('Show the code on your phone to the cashier.')
+    ).toBeInTheDocument();
+    expect(poster.textContent).not.toMatch(/receipt/i);
     expect(arabic).toHaveAttribute('dir', 'rtl');
     expect(within(arabic).getAllByRole('listitem')).toHaveLength(3);
     expect(arabic.textContent).toMatch(/[؀-ۿ]/);

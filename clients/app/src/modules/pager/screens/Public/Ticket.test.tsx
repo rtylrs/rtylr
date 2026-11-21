@@ -44,15 +44,24 @@ const { bell, navigator: fakeNavigator } = (
   readyAlarmModule as unknown as { fakeAlarm: ReturnType<typeof createFakeAlarmEnvironment> }
 ).fakeAlarm;
 
+const scanned = {
+  code: 'A7',
+  color: 2,
+  status: 'waiting',
+  venueName: 'Acme Cafe',
+  serverTime: '2026-11-19T09:58:00.000Z',
+};
 const waiting = {
-  number: '42',
+  label: '42',
+  labelKind: 'number',
   status: 'waiting',
   venueName: 'Acme Cafe',
   ahead: 2,
   serverTime: '2026-11-19T10:00:00.000Z',
 };
 const ready = {
-  number: '42',
+  label: '42',
+  labelKind: 'number',
   status: 'ready',
   venueName: 'Acme Cafe',
   ahead: 0,
@@ -83,6 +92,79 @@ afterEach(() => {
 });
 
 describe('pager ticket page', () => {
+  // Runs first, before any test taps a button: sound starts locked, as it
+  // does right after the scan.
+  it('shows the code to show the cashier and one button to be notified', async () => {
+    push.key = 'server-key';
+    api.getPublicTicket.mockResolvedValue(scanned);
+    render(<Ticket />);
+
+    expect(await screen.findByRole('heading', { name: 'Your code A7' })).toBeInTheDocument();
+    expect(screen.getByText('Show this code to the cashier')).toBeInTheDocument();
+    expect(screen.queryByText(/ahead of you|You're next/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    // Kept awake and followed by push before the customer taps anything.
+    await waitFor(() => expect(fakeNavigator.wakeLock.request).toHaveBeenCalledWith('screen'));
+    await waitFor(() => expect(push.follow).toHaveBeenCalled());
+
+    const notify = screen.getByRole('button', { name: "Notify me when it's ready" });
+    const followsBeforeTap = push.follow.mock.calls.length;
+    fireEvent.click(notify);
+
+    expect(readyAlarm.getSnapshot().unlocked).toBe(true);
+    expect(bell.play).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('button', { name: "Notify me when it's ready" })).not.toBeInTheDocument();
+    // The same tap asks for lock-screen notifications, inside the click, and
+    // the page subscribes again in case the visitor allowed them.
+    expect(push.ask).toHaveBeenCalledWith('server-key');
+    await waitFor(() => expect(push.follow.mock.calls.length).toBeGreaterThan(followsBeforeTap));
+  });
+
+  it('switches from the code to the label once the cashier types it', async () => {
+    api.getPublicTicket
+      .mockResolvedValueOnce(scanned)
+      .mockResolvedValue({ ...waiting, label: 'Sara', labelKind: 'name' });
+    render(<Ticket />);
+    await screen.findByRole('heading', { name: 'Your code A7' });
+
+    await nextPoll();
+
+    expect(await screen.findByRole('heading', { name: 'Sara' })).toBeInTheDocument();
+    expect(screen.getByText("We're preparing your order")).toBeInTheDocument();
+    expect(screen.getByText('2 orders ahead of you')).toBeInTheDocument();
+    expect(screen.queryByText('Show this code to the cashier')).not.toBeInTheDocument();
+  });
+
+  it('names the customer in the lock-screen text when the label is a name', async () => {
+    push.key = 'server-key';
+    api.getPublicTicket.mockResolvedValue({ ...waiting, label: 'Sara', labelKind: 'name' });
+    render(<Ticket />);
+
+    await waitFor(() =>
+      expect(push.follow).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          text: {
+            ready: { title: 'Sara, your order is ready', body: 'Collect it at the counter of Acme Cafe.' },
+            remind: {
+              title: 'Sara, your order is waiting for you',
+              body: 'Acme Cafe is calling your number again.',
+            },
+          },
+        })
+      )
+    );
+  });
+
+  it('asks for a new scan when the code expired before anyone labelled it', async () => {
+    api.getPublicTicket.mockResolvedValue({ ...scanned, status: 'expired' });
+    render(<Ticket />);
+
+    expect(await screen.findByText('This code has expired')).toBeInTheDocument();
+    expect(
+      screen.getByText('Scan the QR at the counter again to get a new one.')
+    ).toBeInTheDocument();
+  });
+
   it('shows the number, the queue and how to keep the alert alive while waiting', async () => {
     api.getPublicTicket.mockResolvedValue(waiting);
     render(<Ticket />);
@@ -110,27 +192,6 @@ describe('pager ticket page', () => {
     render(<Ticket />);
 
     expect(await screen.findByText("You're next")).toBeInTheDocument();
-  });
-
-  // Runs before any test taps a button: sound starts locked, as it does after
-  // a reload or when the link was shared.
-  it('offers "alert me" when the page was opened without the join tap', async () => {
-    push.key = 'server-key';
-    api.getPublicTicket.mockResolvedValue(waiting);
-    render(<Ticket />);
-
-    const alertMe = await screen.findByRole('button', { name: 'Alert me' });
-    await waitFor(() => expect(push.follow).toHaveBeenCalled());
-    const followsBeforeTap = push.follow.mock.calls.length;
-    fireEvent.click(alertMe);
-
-    expect(readyAlarm.getSnapshot().unlocked).toBe(true);
-    expect(bell.play).toHaveBeenCalledTimes(1);
-    expect(screen.queryByRole('button', { name: 'Alert me' })).not.toBeInTheDocument();
-    // The same tap asks for lock-screen notifications, inside the click, and
-    // the page subscribes again in case the visitor allowed them.
-    expect(push.ask).toHaveBeenCalledWith('server-key');
-    await waitFor(() => expect(push.follow.mock.calls.length).toBeGreaterThan(followsBeforeTap));
   });
 
   it('follows the ticket on the lock screen in the visitor language when push is on', async () => {

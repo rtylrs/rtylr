@@ -12,8 +12,8 @@ import (
 	pagerv1 "github.com/voxire/voxie/gen/go/pager/v1"
 )
 
-// codedError is a failure the client reacts to by its code: a strict venue's
-// ticket_not_found is retried, a venue_not_found is not.
+// codedError is a failure the client reacts to by its code, such as a
+// label_taken the board explains or a venue_not_found the phone shows.
 type codedError struct {
 	status  int
 	code    string
@@ -28,7 +28,9 @@ func (e *codedError) PublicCode() string    { return e.code }
 var (
 	errVenueNotFound      = &codedError{http.StatusNotFound, "venue_not_found", "This pager link is not active"}
 	errTicketNotFound     = &codedError{http.StatusNotFound, "ticket_not_found", "Ticket not found"}
-	errInvalidNumber      = &codedError{http.StatusBadRequest, "invalid_number", "The order number must be 1 to 12 letters and digits"}
+	errInvalidLabel       = &codedError{http.StatusBadRequest, "invalid_label", "Enter an order number of 1 to 12 letters and digits, or a name of up to 40 characters"}
+	errLabelTaken         = &codedError{http.StatusConflict, "label_taken", "Another open order already has this number"}
+	errInvalidLabelMode   = &codedError{http.StatusBadRequest, "invalid_label_mode", "The label mode must be number, name or either"}
 	errInvalidTransition  = &codedError{http.StatusConflict, "invalid_transition", "The ticket is no longer in a state that allows this"}
 	errTooManyOpenTickets = &codedError{http.StatusTooManyRequests, "too_many_open_tickets", "This venue has too many open tickets right now"}
 	errInvalidPush        = &codedError{http.StatusBadRequest, "invalid_push_subscription", "This browser's push subscription is not accepted"}
@@ -43,8 +45,12 @@ func publicError(ctx context.Context, action string, err error) error {
 		return errVenueNotFound
 	case errors.Is(err, domain.ErrTicketNotFound):
 		return errTicketNotFound
-	case errors.Is(err, domain.ErrInvalidNumber):
-		return errInvalidNumber
+	case errors.Is(err, domain.ErrInvalidLabel):
+		return errInvalidLabel
+	case errors.Is(err, domain.ErrLabelTaken):
+		return errLabelTaken
+	case errors.Is(err, domain.ErrInvalidLabelMode):
+		return errInvalidLabelMode
 	case errors.Is(err, domain.ErrInvalidTransition):
 		return errInvalidTransition
 	case errors.Is(err, domain.ErrTooManyOpenTickets):

@@ -21,56 +21,163 @@ import (
 	"github.com/voxire/onion/internal/testutil"
 )
 
-func TestJoinAttachesToTheOpenTicketOrCreatesIt(t *testing.T) {
+func TestScanOpensAnUnlabelledTicketTheBoardShowsAtOnce(t *testing.T) {
 	eachBackend(t, func(h *harness) {
-		h.enable(h.a, false)
+		h.enable(h.a)
 
-		// The customer is first: the ticket is theirs to create.
-		first := h.want(h.join(h.a, "42"), http.StatusOK, "")
-		if first.text("number") != "42" || first.text("status") != domain.StatusWaiting || first.text("public_token") == "" {
-			h.Fatalf("join = %v", first.body)
+		scan := h.want(h.scan(h.a), http.StatusOK, "")
+		code := scan.text("code")
+		if len(code) != 2 || strings.Trim(code, domain.MatchCodeAlphabet) != "" || scan.text("status") != domain.StatusWaiting {
+			h.Fatalf("scan = %v", scan.body)
 		}
-		// A second phone follows the same ticket with the same token.
-		if again := h.want(h.join(h.a, "42"), http.StatusOK, ""); again.text("public_token") != first.text("public_token") {
-			h.Fatal("a second phone got a different token for the same number")
-		}
-
-		// The cashier is first: the customer attaches, typed with Arabic-Indic
-		// digits, padding and lower case.
-		staffTicket := h.create(h.a, "a7")
-		attached := h.want(h.join(h.a, " A٧ "), http.StatusOK, "")
-		if attached.text("number") != "A7" {
-			h.Fatalf("number = %q, want the normalised A7", attached.text("number"))
-		}
-		// Entering an open number again returns the ticket that holds it.
-		if again := h.create(h.a, "A7"); again["id"] != staffTicket["id"] {
-			h.Fatalf("staff create of an open number made ticket %v, want the existing %v", again["id"], staffTicket["id"])
+		if color, _ := scan.body["color"].(float64); int(color) != domain.MatchColor(code) {
+			h.Fatalf("scan colour = %v, want %d for %s", scan.body["color"], domain.MatchColor(code), code)
 		}
 
+		// The very next board poll has the phone, before anyone touches it.
 		open := h.open(h.a)
-		if len(open) != 2 {
-			h.Fatalf("open tickets = %v, want exactly the two numbers", open)
+		if len(open) != 1 || open[0]["code"] != code || open[0]["label"] != nil ||
+			open[0]["status"] != domain.StatusWaiting || open[0]["created_at"] != "2026-11-19T12:00:00.000Z" {
+			h.Fatalf("board after a scan = %v", open)
 		}
-		if open[0]["number"] != "42" || open[0]["source"] != domain.SourceCustomer || open[0]["phone_linked"] != true {
-			h.Fatalf("customer ticket = %v", open[0])
+		// The phone shows the code and no queue position until it has a label.
+		followed := h.want(h.publicTicket(scan.text("public_token")), http.StatusOK, "")
+		if followed.text("code") != code || followed.text("label") != "" || followed.body["ahead"] != nil {
+			h.Fatalf("phone before labelling = %v", followed.body)
 		}
-		if open[1]["id"] != staffTicket["id"] || open[1]["source"] != domain.SourceStaff || open[1]["phone_linked"] != true {
-			h.Fatalf("staff ticket after a customer joined = %v", open[1])
+
+		// Every phone waiting to be labelled shows its own code.
+		codes := map[string]bool{code: true}
+		for range 40 {
+			next := h.want(h.scan(h.a), http.StatusOK, "").text("code")
+			if codes[next] {
+				h.Fatalf("code %s handed to two waiting phones", next)
+			}
+			codes[next] = true
 		}
 	})
 }
 
-func TestStrictVenueJoinsOnlyNumbersTheStaffEntered(t *testing.T) {
+func TestCashierLabelsAPhoneWithANumberOrAName(t *testing.T) {
 	eachBackend(t, func(h *harness) {
-		h.enable(h.a, true)
+		h.enable(h.a)
+		token, ticket := h.scanned(h.a)
 
-		h.want(h.join(h.a, "42"), http.StatusNotFound, "ticket_not_found")
-		if open := h.open(h.a); len(open) != 0 {
-			h.Fatalf("a refused join left tickets behind: %v", open)
+		// Either mode, the default: Arabic-Indic digits are a number.
+		labelled := h.want(h.label(h.a.member, ticket["id"], " ٤٢ "), http.StatusOK, "").ticket()
+		if labelled["label"] != "42" || labelled["label_kind"] != domain.LabelNumber || labelled["code"] != nil {
+			h.Fatalf("labelled = %v", labelled)
+		}
+		phone := h.want(h.publicTicket(token), http.StatusOK, "")
+		if phone.text("label") != "42" || phone.text("label_kind") != domain.LabelNumber || phone.text("code") != "" {
+			h.Fatalf("phone after labelling = %v", phone.body)
 		}
 
-		h.create(h.a, "42")
-		h.want(h.join(h.a, "42"), http.StatusOK, "")
+		// A typo is fixed by labelling again while the order is waiting.
+		fixed := h.want(h.label(h.a.member, ticket["id"], "  Sara   Haddad "), http.StatusOK, "").ticket()
+		if fixed["label"] != "Sara Haddad" || fixed["label_kind"] != domain.LabelName {
+			h.Fatalf("relabelled = %v", fixed)
+		}
+
+		// Names repeat; an open number belongs to one ticket.
+		_, second := h.scanned(h.a)
+		h.want(h.label(h.a.member, second["id"], "Sara Haddad"), http.StatusOK, "")
+		_, third := h.scanned(h.a)
+		h.want(h.label(h.a.member, third["id"], "17"), http.StatusOK, "")
+		_, fourth := h.scanned(h.a)
+		h.want(h.label(h.a.member, fourth["id"], "17"), http.StatusConflict, "label_taken")
+		// The refused ticket is still waiting for a label, code and all.
+		for _, open := range h.open(h.a) {
+			if open["id"] == fourth["id"] && (open["label"] != nil || open["code"] == nil) {
+				h.Fatalf("a refused label changed the ticket: %v", open)
+			}
+		}
+
+		for _, bad := range []string{"   ", strings.Repeat("x", 41), "Sara\u0000"} {
+			h.want(h.label(h.a.member, fourth["id"], bad), http.StatusBadRequest, "invalid_label")
+		}
+
+		// Number mode refuses a name; name mode keeps digits as a name, which
+		// may repeat an open number.
+		h.labelMode(h.a, domain.LabelModeNumber)
+		h.want(h.label(h.a.member, fourth["id"], "Sara"), http.StatusBadRequest, "invalid_label")
+		h.want(h.label(h.a.member, fourth["id"], "a18"), http.StatusOK, "")
+		h.labelMode(h.a, domain.LabelModeName)
+		named := h.want(h.label(h.a.member, fourth["id"], "17"), http.StatusOK, "").ticket()
+		if named["label"] != "17" || named["label_kind"] != domain.LabelName {
+			h.Fatalf("name mode label = %v", named)
+		}
+
+		// Once ready, the label stays as it is.
+		h.want(h.move(h.a.member, third["id"], "ready"), http.StatusOK, "")
+		h.want(h.label(h.a.member, third["id"], "18"), http.StatusConflict, "invalid_transition")
+		h.want(h.label(h.a.member, 999999999, "18"), http.StatusNotFound, "ticket_not_found")
+	})
+}
+
+func TestOnlyALabelledTicketCanBeReady(t *testing.T) {
+	eachBackend(t, func(h *harness) {
+		h.enable(h.a)
+		_, ticket := h.scanned(h.a)
+		h.want(h.move(h.a.member, ticket["id"], "ready"), http.StatusConflict, "invalid_transition")
+		// A phone scanned by mistake can still be dismissed.
+		h.want(h.move(h.a.member, ticket["id"], "collect"), http.StatusOK, "")
+		if open := h.open(h.a); len(open) != 0 {
+			h.Fatalf("a dismissed phone is still on the board: %v", open)
+		}
+	})
+}
+
+func TestUnlabelledTicketsExpireAfterFifteenMinutes(t *testing.T) {
+	eachBackend(t, func(h *harness) {
+		h.enable(h.a)
+		token, ticket := h.scanned(h.a)
+		_, kept := h.labelled(h.a, "42")
+
+		h.clock.advance(domain.UnlabelledLifetime)
+		if len(h.open(h.a)) != 2 || h.want(h.publicTicket(token), http.StatusOK, "").text("status") != domain.StatusWaiting {
+			h.Fatal("an unlabelled ticket exactly 15 minutes old is not open any more")
+		}
+
+		h.clock.advance(time.Millisecond)
+		if got := h.want(h.publicTicket(token), http.StatusOK, "").text("status"); got != domain.StatusExpired {
+			h.Fatalf("unlabelled status past 15 minutes = %q, want expired", got)
+		}
+		if open := h.open(h.a); len(open) != 1 || open[0]["id"] != kept {
+			h.Fatalf("board past 15 minutes = %v, want only the labelled order", open)
+		}
+		h.want(h.label(h.a.member, ticket["id"], "43"), http.StatusConflict, "invalid_transition")
+		h.want(h.move(h.a.member, ticket["id"], "collect"), http.StatusConflict, "invalid_transition")
+
+		// Its code is free for the next phone, and its phone stays expired.
+		h.want(h.scan(h.a), http.StatusOK, "")
+		if got := h.want(h.publicTicket(token), http.StatusOK, "").text("status"); got != domain.StatusExpired {
+			h.Fatalf("the expired phone reads %q after the next scan", got)
+		}
+	})
+}
+
+func TestScanCapsTheOpenUnlabelledTickets(t *testing.T) {
+	eachBackend(t, func(h *harness) {
+		h.enable(h.a)
+		h.enable(h.b)
+		for i := range domain.MaxOpenUnlabelledTickets {
+			if r := h.scan(h.a); r.status != http.StatusOK {
+				h.Fatalf("scan %d = %d %v", i+1, r.status, r.body)
+			}
+		}
+		h.want(h.scan(h.a), http.StatusTooManyRequests, "too_many_open_tickets")
+		// Another venue has its own room.
+		h.want(h.scan(h.b), http.StatusOK, "")
+
+		// Labelling a phone makes room for the next.
+		h.want(h.label(h.a.member, h.open(h.a)[0]["id"], "1"), http.StatusOK, "")
+		h.want(h.scan(h.a), http.StatusOK, "")
+		h.want(h.scan(h.a), http.StatusTooManyRequests, "too_many_open_tickets")
+
+		// So does time.
+		h.clock.advance(domain.UnlabelledLifetime + time.Second)
+		h.want(h.scan(h.a), http.StatusOK, "")
 	})
 }
 
@@ -78,32 +185,24 @@ func TestPublicRoutesAnswerOnlyForAnEnabledVenue(t *testing.T) {
 	eachBackend(t, func(h *harness) {
 		venuePath := "/pager/v1/public/venues/" + h.a.slug
 		h.want(h.call(nil, http.MethodGet, venuePath, ""), http.StatusNotFound, "venue_not_found")
-		h.want(h.join(h.a, "42"), http.StatusNotFound, "venue_not_found")
+		h.want(h.scan(h.a), http.StatusNotFound, "venue_not_found")
 		h.want(h.call(nil, http.MethodGet, "/pager/v1/public/venues/no-such-place", ""), http.StatusNotFound, "venue_not_found")
+		h.want(h.call(nil, http.MethodPost, "/pager/v1/public/venues/no-such-place/scan", ""), http.StatusNotFound, "venue_not_found")
 
-		h.enable(h.a, false)
+		h.enable(h.a)
 		found := h.want(h.call(nil, http.MethodGet, venuePath, ""), http.StatusOK, "")
 		if found.text("name") != "Cedar Café" || found.body["enabled"] != true {
 			h.Fatalf("venue = %v", found.body)
 		}
-		token := h.want(h.join(h.a, "42"), http.StatusOK, "").text("public_token")
+		token := h.want(h.scan(h.a), http.StatusOK, "").text("public_token")
 		h.want(h.publicTicket(token), http.StatusOK, "")
 
 		// Switching the pager off hides the tickets already handed out.
 		h.want(h.call(h.a.owner, http.MethodPut, "/pager/v1/settings", `{"enabled":false}`), http.StatusOK, "")
 		h.want(h.publicTicket(token), http.StatusNotFound, "ticket_not_found")
 		h.want(h.call(nil, http.MethodPost, "/pager/v1/public/tickets/"+token+"/acknowledge", ""), http.StatusNotFound, "ticket_not_found")
-	})
-}
-
-func TestJoinRefusesNumbersThatAreNotReceiptNumbers(t *testing.T) {
-	eachBackend(t, func(h *harness) {
-		h.enable(h.a, false)
-		for _, number := range []string{"   ", "12-3", "4 2", "#42", strings.Repeat("9", 13)} {
-			h.want(h.join(h.a, number), http.StatusBadRequest, "invalid_number")
-		}
-		if open := h.open(h.a); len(open) != 0 {
-			h.Fatalf("an invalid number was stored: %v", open)
+		if open := h.open(h.a); len(open) != 1 {
+			h.Fatalf("board after the pager was switched off = %v", open)
 		}
 	})
 }
@@ -112,10 +211,14 @@ func TestJoinRefusesNumbersThatAreNotReceiptNumbers(t *testing.T) {
 // comes from who is signed in, never from the request.
 func TestStaffRoutesAreScopedToTheCallersBusiness(t *testing.T) {
 	eachBackend(t, func(h *harness) {
-		h.enable(h.a, false)
-		ours := h.create(h.a, "5")
+		h.enable(h.a)
+		h.enable(h.b)
+		_, oursID := h.labelled(h.a, "5")
 		// The same number is open at both venues at once.
-		theirs := h.create(h.b, "5")
+		_, theirsID := h.labelled(h.b, "5")
+		_, unlabelled := h.scanned(h.a)
+		ours := map[string]any{"id": oursID}
+		theirs := map[string]any{"id": theirsID}
 
 		ids := func(tickets []map[string]any) []any {
 			out := make([]any, 0, len(tickets))
@@ -124,18 +227,23 @@ func TestStaffRoutesAreScopedToTheCallersBusiness(t *testing.T) {
 			}
 			return out
 		}
-		testutil.AssertTenantIsolation(h, ids(h.open(h.b)), []any{theirs["id"]}, []any{ours["id"]})
-		testutil.AssertTenantIsolation(h, ids(h.open(h.a)), []any{ours["id"]}, []any{theirs["id"]})
+		testutil.AssertTenantIsolation(h, ids(h.open(h.b)), []any{theirs["id"]}, []any{ours["id"], unlabelled["id"]})
+		testutil.AssertTenantIsolation(h, ids(h.open(h.a)), []any{ours["id"], unlabelled["id"]}, []any{theirs["id"]})
 
 		for _, action := range []string{"ready", "remind", "undo", "collect"} {
 			h.want(h.move(h.b.member, ours["id"], action), http.StatusNotFound, "ticket_not_found")
 		}
-		if open := h.open(h.a); len(open) != 1 || open[0]["status"] != domain.StatusWaiting {
-			h.Fatalf("business A's ticket after business B's attempts = %v", open)
+		// B's cashier cannot label a phone that scanned at A.
+		h.want(h.label(h.b.member, unlabelled["id"], "9"), http.StatusNotFound, "ticket_not_found")
+		h.want(h.label(h.b.member, ours["id"], "9"), http.StatusNotFound, "ticket_not_found")
+		open := h.open(h.a)
+		if len(open) != 2 || open[0]["status"] != domain.StatusWaiting || open[0]["label"] != "5" || open[1]["label"] != nil {
+			h.Fatalf("business A's tickets after business B's attempts = %v", open)
 		}
 
-		// B's switches are B's alone.
-		if settings := h.call(h.b.member, http.MethodGet, "/pager/v1/settings", ""); settings.body["enabled"] == true {
+		// B's settings are B's alone.
+		h.labelMode(h.a, domain.LabelModeName)
+		if settings := h.call(h.b.member, http.MethodGet, "/pager/v1/settings", ""); settings.text("label_mode") != domain.LabelModeEither {
 			h.Fatalf("business B reads business A's settings: %v", settings.body)
 		}
 
@@ -147,6 +255,9 @@ func TestStaffRoutesAreScopedToTheCallersBusiness(t *testing.T) {
 			}
 			if r := h.move(user, ours["id"], "collect"); r.status != http.StatusForbidden {
 				h.Fatalf("collect without a membership = %d %v, want 403", r.status, r.body)
+			}
+			if r := h.label(user, unlabelled["id"], "9"); r.status != http.StatusForbidden {
+				h.Fatalf("label without a membership = %d %v, want 403", r.status, r.body)
 			}
 		}
 	})
@@ -161,117 +272,158 @@ func TestOnlyOwnersAndAdminsChangeSettings(t *testing.T) {
 			h.Fatalf("a refused update took effect: %v", r.body)
 		}
 
-		h.enable(h.a, true)
-		// A switch left out of the request keeps its value.
-		r := h.want(h.call(h.a.owner, http.MethodPut, "/pager/v1/settings", `{"strict":false}`), http.StatusOK, "")
-		if r.body["enabled"] != true || r.body["strict"] == true {
-			h.Fatalf("settings after a partial update = %v, want enabled and not strict", r.body)
+		if r := h.call(h.a.member, http.MethodPut, "/pager/v1/settings", `{"label_mode":"name"}`); r.status != http.StatusForbidden {
+			h.Fatalf("member label mode update = %d %v, want 403", r.status, r.body)
+		}
+		if r := h.want(h.call(h.a.member, http.MethodGet, "/pager/v1/settings", ""), http.StatusOK, ""); r.text("label_mode") != domain.LabelModeEither {
+			h.Fatalf("default settings = %v, want label mode either", r.body)
+		}
+
+		h.enable(h.a)
+		// A setting left out of the request keeps its value.
+		r := h.want(h.call(h.a.owner, http.MethodPut, "/pager/v1/settings", `{"label_mode":"number"}`), http.StatusOK, "")
+		if r.body["enabled"] != true || r.text("label_mode") != domain.LabelModeNumber {
+			h.Fatalf("settings after a partial update = %v, want enabled in number mode", r.body)
+		}
+		h.want(h.call(h.a.owner, http.MethodPut, "/pager/v1/settings", `{"label_mode":"strict"}`), http.StatusBadRequest, "invalid_label_mode")
+		if r := h.call(h.a.member, http.MethodGet, "/pager/v1/settings", ""); r.text("label_mode") != domain.LabelModeNumber {
+			h.Fatalf("a refused mode took effect: %v", r.body)
 		}
 	})
 }
 
-// The cashier and several phones enter the same number at the same moment.
-// Whoever wins, there is one open ticket and everyone holds its token.
-func TestConcurrentCreateAndJoinShareOneTicket(t *testing.T) {
+// A rush of phones scanning at the same moment each get their own code, and
+// two cashiers typing the same number on two phones leave it on one ticket.
+func TestConcurrentScansAndLabelsKeepCodesAndNumbersUnique(t *testing.T) {
 	eachBackend(t, func(h *harness) {
-		h.enable(h.a, false)
-		const rounds, phones = 12, 6
+		h.enable(h.a)
+		const phones = 60
 
-		for round := range rounds {
-			number := fmt.Sprintf("R%d", round)
-			tokens := make([]string, phones)
-			statuses := make([]int, phones+1)
-			start := make(chan struct{})
-			var wg sync.WaitGroup
-			for i := range phones {
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					<-start
-					r := h.join(h.a, number)
-					statuses[i], tokens[i] = r.status, r.text("public_token")
-				}()
-			}
+		codes := make([]string, phones)
+		statuses := make([]int, phones)
+		start := make(chan struct{})
+		var wg sync.WaitGroup
+		for i := range phones {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
 				<-start
-				statuses[phones] = h.call(h.a.member, http.MethodPost, "/pager/v1/tickets", h.numberBody(number)).status
+				r := h.scan(h.a)
+				statuses[i], codes[i] = r.status, r.text("code")
 			}()
-			close(start)
-			wg.Wait()
-
-			for i, status := range statuses {
-				if status != http.StatusOK {
-					h.Fatalf("round %d request %d answered %d", round, i, status)
-				}
+		}
+		close(start)
+		wg.Wait()
+		seen := map[string]bool{}
+		for i, code := range codes {
+			if statuses[i] != http.StatusOK || code == "" || seen[code] {
+				h.Fatalf("scan %d = %d %q; codes %v", i, statuses[i], code, codes)
 			}
-			for _, token := range tokens {
-				if token == "" || token != tokens[0] {
-					h.Fatalf("round %d handed out different tokens for one number: %v", round, tokens)
-				}
-			}
+			seen[code] = true
 		}
 
 		open := h.open(h.a)
-		if len(open) != rounds {
-			h.Fatalf("%d open tickets for %d numbers: %v", len(open), rounds, open)
+		if len(open) != phones {
+			h.Fatalf("%d tickets on the board for %d phones", len(open), phones)
 		}
-		for _, ticket := range open {
-			if ticket["phone_linked"] != true {
-				h.Fatalf("ticket %v lost its phone link in the race", ticket)
+		for round := range 10 {
+			first, second := open[2*round]["id"], open[2*round+1]["id"]
+			number := fmt.Sprintf("R%d", round)
+			results := make([]reply, 2)
+			start := make(chan struct{})
+			var wg sync.WaitGroup
+			for i, id := range []any{first, second} {
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					<-start
+					results[i] = h.label(h.a.member, id, number)
+				}()
+			}
+			close(start)
+			wg.Wait()
+			ok := 0
+			for _, r := range results {
+				switch {
+				case r.status == http.StatusOK:
+					ok++
+				case r.code() != "label_taken":
+					h.Fatalf("round %d: %d %v", round, r.status, r.body)
+				}
+			}
+			if ok != 1 {
+				h.Fatalf("round %d: %d tickets took number %s", round, ok, number)
 			}
 		}
 	})
 }
 
-// The rule lives in the database, not only in the service: a second open
-// ticket for a number is refused even when written directly.
-func TestDatabaseRefusesASecondOpenTicketForANumber(t *testing.T) {
+// The rules live in the database, not only in the service: a second open
+// unlabelled ticket with a code, or a second open ticket with a number, is
+// refused even when written directly.
+func TestDatabaseRefusesDuplicateOpenCodesAndNumbers(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := moduleinfra.NewRepository(db)
 	ctx := context.Background()
 	now := time.Now().UTC().Truncate(time.Millisecond)
+	openSince, unlabelledSince := domain.OpenSince(now), domain.UnlabelledSince(now)
 	businessID := now.UnixMicro()
 	t.Cleanup(func() {
 		_, _ = db.Exec("DELETE FROM pager_tickets WHERE business_id IN (?, ?)", businessID, businessID+1)
 	})
-	ticket := func(businessID int64, token string) domain.Ticket {
-		return domain.Ticket{BusinessID: businessID, Number: "42", Source: domain.SourceStaff, PublicToken: token + fmt.Sprint(businessID), CreatedAt: now}
+	seq := 0
+	scan := func(businessID int64, code string) (domain.Ticket, error) {
+		seq++
+		return repo.CreateTicket(ctx, domain.Ticket{BusinessID: businessID, Code: code, PublicToken: fmt.Sprintf("t%d-%d", businessID, seq), CreatedAt: now})
 	}
 
-	first, err := repo.CreateTicket(ctx, ticket(businessID, "first"))
+	first, err := scan(businessID, "A7")
 	if err != nil {
-		t.Fatalf("create: %v", err)
+		t.Fatalf("scan: %v", err)
 	}
-	if _, err := repo.CreateTicket(ctx, ticket(businessID, "second")); !errors.Is(err, domain.ErrNumberTaken) {
-		t.Fatalf("second open ticket for the number: err = %v, want ErrNumberTaken", err)
+	if _, err := scan(businessID, "A7"); !errors.Is(err, domain.ErrCodeTaken) {
+		t.Fatalf("second open ticket with the code: err = %v, want ErrCodeTaken", err)
 	}
-	// Ready is still open.
-	if err := repo.MarkReady(ctx, businessID, first.ID, now, domain.OpenSince(now)); err != nil {
+	if _, err := scan(businessID+1, "A7"); err != nil {
+		t.Fatalf("same code at another business: %v", err)
+	}
+	// Labelling frees the code.
+	if err := repo.Label(ctx, businessID, first.ID, "42", domain.LabelNumber, openSince, unlabelledSince); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := repo.CreateTicket(ctx, ticket(businessID, "third")); !errors.Is(err, domain.ErrNumberTaken) {
-		t.Fatalf("open ticket next to a ready one: err = %v, want ErrNumberTaken", err)
+	second, err := scan(businessID, "A7")
+	if err != nil {
+		t.Fatalf("code of a labelled ticket: %v", err)
 	}
-	// Another business is free to use the number, and so is this one once the
-	// ticket is collected.
-	if _, err := repo.CreateTicket(ctx, ticket(businessID+1, "other")); err != nil {
-		t.Fatalf("same number at another business: %v", err)
+
+	if err := repo.Label(ctx, businessID, second.ID, "42", domain.LabelNumber, openSince, unlabelledSince); !errors.Is(err, domain.ErrLabelTaken) {
+		t.Fatalf("second open ticket with the number: err = %v, want ErrLabelTaken", err)
 	}
-	if err := repo.Collect(ctx, businessID, first.ID, domain.OpenSince(now)); err != nil {
+	if err := repo.Label(ctx, businessID, second.ID, "42", domain.LabelName, openSince, unlabelledSince); err != nil {
+		t.Fatalf("a name equal to an open number: %v", err)
+	}
+	// Ready is still open; collected frees the number.
+	if err := repo.MarkReady(ctx, businessID, first.ID, now, openSince); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := repo.CreateTicket(ctx, ticket(businessID, "fourth")); err != nil {
+	third, err := scan(businessID, "B8")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := repo.Label(ctx, businessID, third.ID, "42", domain.LabelNumber, openSince, unlabelledSince); !errors.Is(err, domain.ErrLabelTaken) {
+		t.Fatalf("number of a ready ticket: err = %v, want ErrLabelTaken", err)
+	}
+	if err := repo.Collect(ctx, businessID, first.ID, openSince, unlabelledSince); err != nil {
+		t.Fatal(err)
+	}
+	if err := repo.Label(ctx, businessID, third.ID, "42", domain.LabelNumber, openSince, unlabelledSince); err != nil {
 		t.Fatalf("number of a collected ticket: %v", err)
 	}
 }
 
 func TestPublicRepliesNeverCarryTheTicketID(t *testing.T) {
 	eachBackend(t, func(h *harness) {
-		h.enable(h.a, false)
-		staffTicket := h.create(h.a, "42")
-		id := fmt.Sprint(staffTicket["id"])
+		h.enable(h.a)
 
 		keys := func(r reply) []string {
 			out := make([]string, 0, len(r.body))
@@ -290,24 +442,26 @@ func TestPublicRepliesNeverCarryTheTicketID(t *testing.T) {
 			}
 		}
 
-		joined := h.want(h.join(h.a, "42"), http.StatusOK, "")
-		allowed("join", joined, "public_token", "number", "status")
-		token := joined.text("public_token")
+		scanned := h.want(h.scan(h.a), http.StatusOK, "")
+		allowed("scan", scanned, "public_token", "code", "color", "status")
+		token := scanned.text("public_token")
 		// 32 base64url characters carry 192 random bits.
 		if len(token) != 32 {
 			h.Fatalf("token %q is not 32 characters", token)
 		}
-		other := h.want(h.join(h.a, "43"), http.StatusOK, "").text("public_token")
+		other := h.want(h.scan(h.a), http.StatusOK, "").text("public_token")
 		if other == token {
 			h.Fatal("two tickets share a token")
 		}
+		id := fmt.Sprint(h.open(h.a)[0]["id"])
+		h.want(h.label(h.a.member, id, "42"), http.StatusOK, "")
 
 		followed := h.want(h.publicTicket(token), http.StatusOK, "")
-		allowed("ticket", followed, "number", "status", "venue_name", "ahead", "ready_at", "reminded_at", "acknowledged_at", "server_time")
+		allowed("ticket", followed, "label", "label_kind", "code", "color", "status", "venue_name", "ahead", "ready_at", "reminded_at", "acknowledged_at", "server_time")
 		if followed.text("venue_name") != "Cedar Café" || followed.text("server_time") != "2026-11-19T12:00:00.000Z" {
 			h.Fatalf("ticket = %v", followed.body)
 		}
-		allowed("venue", h.call(nil, http.MethodGet, "/pager/v1/public/venues/"+h.a.slug, ""), "name", "logo_url", "enabled", "strict")
+		allowed("venue", h.call(nil, http.MethodGet, "/pager/v1/public/venues/"+h.a.slug, ""), "name", "logo_url", "enabled")
 
 		// The id is not a way in, and neither is a token nobody was given.
 		h.want(h.publicTicket(id), http.StatusNotFound, "ticket_not_found")
@@ -317,9 +471,8 @@ func TestPublicRepliesNeverCarryTheTicketID(t *testing.T) {
 
 func TestStaffMovesATicketThroughItsStatuses(t *testing.T) {
 	eachBackend(t, func(h *harness) {
-		h.enable(h.a, false)
-		token := h.want(h.join(h.a, "42"), http.StatusOK, "").text("public_token")
-		id := h.open(h.a)[0]["id"]
+		h.enable(h.a)
+		token, id := h.labelled(h.a, "42")
 		acknowledge := func() reply {
 			return h.call(nil, http.MethodPost, "/pager/v1/public/tickets/"+token+"/acknowledge", "")
 		}
@@ -371,21 +524,26 @@ func TestStaffMovesATicketThroughItsStatuses(t *testing.T) {
 		}
 
 		// Collecting frees the number for the next order.
-		if next := h.create(h.a, "42"); next["id"] == id {
-			h.Fatal("the collected ticket was handed out again")
-		}
+		_, next := h.scanned(h.a)
+		h.want(h.label(h.a.member, next["id"], "42"), http.StatusOK, "")
 		h.want(h.move(h.a.member, 999999999, "ready"), http.StatusNotFound, "ticket_not_found")
 	})
 }
 
 func TestAheadCountsTheWaitingTicketsEnteredEarlier(t *testing.T) {
 	eachBackend(t, func(h *harness) {
-		h.enable(h.a, false)
-		// Another venue's queue is not this venue's queue.
-		h.create(h.b, "1")
+		h.enable(h.a)
+		h.enable(h.b)
+		// Another venue's queue is not this venue's queue, and a phone the
+		// cashier has not labelled yet is not in the queue at all.
+		h.labelled(h.b, "1")
 		var tokens []string
-		for _, number := range []string{"10", "11", "12"} {
-			tokens = append(tokens, h.want(h.join(h.a, number), http.StatusOK, "").text("public_token"))
+		for i, number := range []string{"10", "11", "12"} {
+			token, _ := h.labelled(h.a, number)
+			tokens = append(tokens, token)
+			if i == 0 {
+				h.scanned(h.a)
+			}
 		}
 		ahead := func(token string) any { return h.want(h.publicTicket(token), http.StatusOK, "").body["ahead"] }
 
@@ -402,9 +560,8 @@ func TestAheadCountsTheWaitingTicketsEnteredEarlier(t *testing.T) {
 
 func TestOpenTicketsExpireAfterSixHours(t *testing.T) {
 	eachBackend(t, func(h *harness) {
-		h.enable(h.a, false)
-		token := h.want(h.join(h.a, "42"), http.StatusOK, "").text("public_token")
-		id := h.open(h.a)[0]["id"]
+		h.enable(h.a)
+		token, id := h.labelled(h.a, "42")
 
 		h.clock.advance(domain.OpenLifetime)
 		if h.want(h.publicTicket(token), http.StatusOK, "").text("status") != domain.StatusWaiting || len(h.open(h.a)) != 1 {
@@ -423,9 +580,9 @@ func TestOpenTicketsExpireAfterSixHours(t *testing.T) {
 		}
 
 		// Tomorrow's order 42 is a new ticket; yesterday's phone stays expired.
-		next := h.want(h.join(h.a, "42"), http.StatusOK, "")
-		if next.text("public_token") == token || next.text("status") != domain.StatusWaiting {
-			h.Fatalf("join after expiry = %v, want a new waiting ticket", next.body)
+		nextToken, _ := h.labelled(h.a, "42")
+		if nextToken == token {
+			h.Fatal("tomorrow's phone got yesterday's token")
 		}
 		if got := h.want(h.publicTicket(token), http.StatusOK, "").text("status"); got != domain.StatusExpired {
 			h.Fatalf("the old ticket reads %q after its number was reused", got)
@@ -438,8 +595,8 @@ func TestOpenTicketsExpireAfterSixHours(t *testing.T) {
 
 func TestRateLimitsComeFromTheContract(t *testing.T) {
 	h := newHarness(t, nil)
-	h.enable(h.a, false)
-	h.enable(h.b, false)
+	h.enable(h.a)
+	h.enable(h.b)
 	const phone = "203.0.113.9:5000"
 	venuePath := "/pager/v1/public/venues/" + h.a.slug
 
@@ -469,21 +626,21 @@ func TestRateLimitsComeFromTheContract(t *testing.T) {
 // it is checked against the mounted routes behind the real bearer gate.
 func TestOnlyTheCustomerRoutesAreAnonymous(t *testing.T) {
 	h := newHarness(t, nil)
-	h.enable(h.a, false)
-	token := h.want(h.join(h.a, "42"), http.StatusOK, "").text("public_token")
+	h.enable(h.a)
+	token := h.want(h.scan(h.a), http.StatusOK, "").text("public_token")
 	policy := serverhttp.NewRouteAccessPolicy()
 	policy.RegisterAnonymousRoutes((&Module{}).GetAnonymousRoutes()...)
 	gate := serverhttp.GetAuthMiddlewareFunc(policy, nil)(h.mux)
 
 	for route, anonymous := range map[string]bool{
 		"GET /pager/v1/public/venues/" + h.a.slug:                 true,
-		"POST /pager/v1/public/venues/" + h.a.slug + "/join":      true,
+		"POST /pager/v1/public/venues/" + h.a.slug + "/scan":      true,
 		"GET /pager/v1/public/tickets/" + token:                   true,
 		"POST /pager/v1/public/tickets/" + token + "/acknowledge": true,
 		"GET /pager/v1/public/push-key":                           true,
 		"POST /pager/v1/public/tickets/" + token + "/push":        true,
 		"GET /pager/v1/tickets":                                   false,
-		"POST /pager/v1/tickets":                                  false,
+		"POST /pager/v1/tickets/7/label":                          false,
 		"POST /pager/v1/tickets/7/ready":                          false,
 		"POST /pager/v1/tickets/7/remind":                         false,
 		"POST /pager/v1/tickets/7/undo":                           false,
@@ -492,7 +649,7 @@ func TestOnlyTheCustomerRoutesAreAnonymous(t *testing.T) {
 		"PUT /pager/v1/settings":                                  false,
 	} {
 		method, target, _ := strings.Cut(route, " ")
-		req := httptest.NewRequest(method, target, strings.NewReader(`{"number":"42",`+validSubscriptionFields+`}`))
+		req := httptest.NewRequest(method, target, strings.NewReader(`{"label":"42",`+validSubscriptionFields+`}`))
 		req.Header.Set("Content-Type", "application/json")
 		if _, pattern := h.mux.Handler(req); pattern == "" {
 			t.Errorf("%s is not a mounted route", route)
@@ -543,7 +700,7 @@ func TestVenueIsTheBusinessBehindTheMenuSlug(t *testing.T) {
 	if found.text("name") != "Pager Test "+slug {
 		t.Fatalf("venue = %v", found.body)
 	}
-	token := h.want(h.call(nil, http.MethodPost, "/pager/v1/public/venues/"+slug+"/join", `{"number":"42"}`), http.StatusOK, "").text("public_token")
+	token := h.want(h.call(nil, http.MethodPost, "/pager/v1/public/venues/"+slug+"/scan", ""), http.StatusOK, "").text("public_token")
 	if got := h.want(h.publicTicket(token), http.StatusOK, "").text("venue_name"); got != "Pager Test "+slug {
 		t.Fatalf("venue_name = %q", got)
 	}

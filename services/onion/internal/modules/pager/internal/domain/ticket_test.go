@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestNormalizeNumber(t *testing.T) {
@@ -26,13 +27,85 @@ func TestNormalizeNumber(t *testing.T) {
 	} {
 		got, err := NormalizeNumber(raw)
 		if want == "" {
-			if !errors.Is(err, ErrInvalidNumber) {
-				t.Errorf("NormalizeNumber(%q) = %q, %v; want ErrInvalidNumber", raw, got, err)
+			if !errors.Is(err, ErrInvalidLabel) {
+				t.Errorf("NormalizeNumber(%q) = %q, %v; want ErrInvalidLabel", raw, got, err)
 			}
 			continue
 		}
 		if err != nil || got != want {
 			t.Errorf("NormalizeNumber(%q) = %q, %v; want %q", raw, got, err, want)
 		}
+	}
+}
+
+func TestParseLabelFollowsTheVenuesMode(t *testing.T) {
+	for _, c := range []struct {
+		mode, raw, label, kind string
+	}{
+		{LabelModeEither, " 42 ", "42", LabelNumber},
+		{LabelModeEither, "a17", "A17", LabelNumber},
+		{LabelModeEither, "٤٢", "42", LabelNumber},
+		{LabelModeEither, "  Sara   Haddad ", "Sara Haddad", LabelName},
+		{LabelModeEither, "سارة", "سارة", LabelName},
+		// A digit alone does not make a number: this is a name with a digit.
+		{LabelModeEither, "Table 4", "Table 4", LabelName},
+		{LabelModeNumber, "a17", "A17", LabelNumber},
+		{LabelModeName, "42", "42", LabelName},
+	} {
+		label, kind, err := ParseLabel(c.raw, c.mode)
+		if err != nil || label != c.label || kind != c.kind {
+			t.Errorf("ParseLabel(%q, %s) = %q %s %v; want %q %s", c.raw, c.mode, label, kind, err, c.label, c.kind)
+		}
+	}
+	for _, c := range []struct{ mode, raw string }{
+		{LabelModeNumber, "Sara"},
+		{LabelModeNumber, "4 2"},
+		{LabelModeName, "   "},
+		{LabelModeName, strings.Repeat("س", 41)},
+		{LabelModeEither, ""},
+		{LabelModeEither, "Sara\x00"},
+	} {
+		if _, _, err := ParseLabel(c.raw, c.mode); !errors.Is(err, ErrInvalidLabel) {
+			t.Errorf("ParseLabel(%q, %s) err = %v; want ErrInvalidLabel", c.raw, c.mode, err)
+		}
+	}
+	if label, _, err := ParseLabel(strings.Repeat("س", 40), LabelModeName); err != nil || label == "" {
+		t.Errorf("a 40 character name was refused: %v", err)
+	}
+}
+
+func TestUnlabelledTicketsExpireSoonerThanLabelledOnes(t *testing.T) {
+	created := time.Date(2026, 11, 21, 12, 0, 0, 0, time.UTC)
+	unlabelled := Ticket{Status: StatusWaiting, CreatedAt: created}
+	labelled := Ticket{Status: StatusWaiting, CreatedAt: created, Label: "42", LabelKind: LabelNumber}
+
+	if got := unlabelled.StatusAt(created.Add(UnlabelledLifetime)); got != StatusWaiting {
+		t.Fatalf("unlabelled at exactly 15 minutes = %s", got)
+	}
+	if got := unlabelled.StatusAt(created.Add(UnlabelledLifetime + time.Millisecond)); got != StatusExpired {
+		t.Fatalf("unlabelled past 15 minutes = %s", got)
+	}
+	if got := labelled.StatusAt(created.Add(UnlabelledLifetime + time.Hour)); got != StatusWaiting {
+		t.Fatalf("labelled after an hour and a quarter = %s", got)
+	}
+	if got := labelled.StatusAt(created.Add(OpenLifetime + time.Millisecond)); got != StatusExpired {
+		t.Fatalf("labelled past six hours = %s", got)
+	}
+}
+
+func TestMatchColorIsStableAndInRange(t *testing.T) {
+	seen := map[int]bool{}
+	for i := range len(MatchCodeAlphabet) {
+		for j := range len(MatchCodeAlphabet) {
+			code := string([]byte{MatchCodeAlphabet[i], MatchCodeAlphabet[j]})
+			color := MatchColor(code)
+			if color < 0 || color >= MatchColors || color != MatchColor(code) {
+				t.Fatalf("MatchColor(%s) = %d", code, color)
+			}
+			seen[color] = true
+		}
+	}
+	if len(seen) != MatchColors {
+		t.Fatalf("codes use %d of %d colours", len(seen), MatchColors)
 	}
 }

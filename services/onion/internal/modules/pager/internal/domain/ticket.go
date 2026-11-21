@@ -6,6 +6,8 @@ import (
 	"errors"
 	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
 )
 
 const (
@@ -14,67 +16,127 @@ const (
 	StatusCollected = "collected"
 	StatusExpired   = "expired"
 
-	SourceStaff    = "staff"
-	SourceCustomer = "customer"
+	LabelNumber = "number"
+	LabelName   = "name"
+
+	// LabelModeEither takes a number when the entry looks like one and a name
+	// otherwise. It is the default.
+	LabelModeNumber = "number"
+	LabelModeName   = "name"
+	LabelModeEither = "either"
 )
 
-// OpenLifetime is how long a ticket stays open. Receipt numbers repeat every
-// day, so an older open ticket reads as expired and its number is free again.
+// OpenLifetime is how long a labelled ticket stays open. Receipt numbers repeat
+// every day, so an older open ticket reads as expired and its number is free
+// again.
 const OpenLifetime = 6 * time.Hour
 
-// MaxOpenCustomerTickets bounds what anonymous joins can create at one venue.
-// Tickets the staff enter are not counted and are never refused.
-const MaxOpenCustomerTickets = 2000
+// UnlabelledLifetime is how long a scanned phone waits for the cashier to label
+// it before its ticket expires and leaves the board.
+const UnlabelledLifetime = 15 * time.Minute
 
-const maxNumberLength = 12
+// MaxOpenUnlabelledTickets bounds what anonymous scans can open at one venue.
+const MaxOpenUnlabelledTickets = 200
+
+// MatchCodeAlphabet leaves out 0, O, 1 and I, which are easy to misread.
+const MatchCodeAlphabet = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
+
+// MatchColors is how many colours a code can be shown on.
+const MatchColors = 6
+
+const (
+	maxNumberLength = 12
+	maxNameLength   = 40
+)
 
 var (
 	ErrVenueNotFound      = errors.New("pager venue not found")
 	ErrTicketNotFound     = errors.New("pager ticket not found")
-	ErrInvalidNumber      = errors.New("pager number is invalid")
+	ErrInvalidLabel       = errors.New("pager label is invalid")
+	ErrInvalidLabelMode   = errors.New("pager label mode is invalid")
 	ErrInvalidTransition  = errors.New("pager ticket is not in a state that allows this")
 	ErrTooManyOpenTickets = errors.New("pager venue has too many open tickets")
-	// ErrNumberTaken is the storage layer reporting that another open ticket
-	// already holds the number.
-	ErrNumberTaken = errors.New("pager number already has an open ticket")
+	// ErrLabelTaken means another open ticket already holds the number.
+	ErrLabelTaken = errors.New("pager number already has an open ticket")
+	// ErrCodeTaken is the storage layer reporting that another open
+	// unlabelled ticket already shows the match code.
+	ErrCodeTaken = errors.New("pager match code already in use")
 )
 
-// Ticket is one order number being waited for. The time fields are zero until
-// the moment they describe has happened.
+// Ticket is one phone waiting for its order. Label and LabelKind are empty
+// until the cashier labels it. The time fields are zero until the moment they
+// describe has happened.
 type Ticket struct {
 	ID             int64
 	BusinessID     int64
-	Number         string
+	Label          string
+	LabelKind      string
+	Code           string
 	Status         string
-	Source         string
 	PublicToken    string
-	PhoneLinked    bool
 	CreatedAt      time.Time
 	ReadyAt        time.Time
 	RemindedAt     time.Time
 	AcknowledgedAt time.Time
 }
 
-// OpenSince is the oldest creation time a ticket can have and still be open.
+func (t Ticket) Labelled() bool {
+	return t.LabelKind != ""
+}
+
+// OpenSince is the oldest creation time a labelled ticket can have and still
+// be open.
 func OpenSince(now time.Time) time.Time {
 	return now.Add(-OpenLifetime)
+}
+
+// UnlabelledSince is the same for a ticket nobody has labelled.
+func UnlabelledSince(now time.Time) time.Time {
+	return now.Add(-UnlabelledLifetime)
 }
 
 // StatusAt is the status as read at now: an open ticket past its lifetime is
 // expired whatever the stored status says.
 func (t Ticket) StatusAt(now time.Time) string {
 	open := t.Status == StatusWaiting || t.Status == StatusReady
-	if open && t.CreatedAt.Before(OpenSince(now)) {
+	since := OpenSince(now)
+	if !t.Labelled() {
+		since = UnlabelledSince(now)
+	}
+	if open && t.CreatedAt.Before(since) {
 		return StatusExpired
 	}
 	return t.Status
 }
 
+// MatchColor is the colour a code is shown on. It follows from the code, so
+// the phone and the board always agree.
+func MatchColor(code string) int {
+	if len(code) != 2 {
+		return 0
+	}
+	first := strings.IndexByte(MatchCodeAlphabet, code[0])
+	second := strings.IndexByte(MatchCodeAlphabet, code[1])
+	if first < 0 || second < 0 {
+		return 0
+	}
+	return (first + second) % MatchColors
+}
+
 type Settings struct {
 	// Enabled makes the venue reachable on the public pager routes.
 	Enabled bool
-	// Strict lets customers join only numbers the staff already entered.
-	Strict bool
+	// LabelMode is what the cashier labels a ticket with.
+	LabelMode string
+}
+
+// DefaultSettings is what a business that never saved any has.
+func DefaultSettings() Settings {
+	return Settings{LabelMode: LabelModeEither}
+}
+
+func ValidLabelMode(mode string) bool {
+	return mode == LabelModeNumber || mode == LabelModeName || mode == LabelModeEither
 }
 
 // Venue is the business a pager link points at.
@@ -84,9 +146,39 @@ type Venue struct {
 	LogoURL    string
 }
 
-// NormalizeNumber turns what a person typed from a receipt into the stored
-// form: trimmed, Arabic-Indic and Persian digits as ASCII, letters in capitals.
-// Anything other than 1 to 12 ASCII letters and digits is refused.
+// ParseLabel turns what the cashier typed into a label and its kind under the
+// venue's mode. An order number has at least one digit, so in either mode "42"
+// and "A17" are numbers and "Sara" is a name.
+func ParseLabel(raw, mode string) (label, kind string, err error) {
+	switch mode {
+	case LabelModeNumber:
+		label, err = orderNumber(raw)
+		return label, LabelNumber, err
+	case LabelModeName:
+		label, err = NormalizeName(raw)
+		return label, LabelName, err
+	}
+	if number, err := orderNumber(raw); err == nil {
+		return number, LabelNumber, nil
+	}
+	label, err = NormalizeName(raw)
+	return label, LabelName, err
+}
+
+func orderNumber(raw string) (string, error) {
+	number, err := NormalizeNumber(raw)
+	if err != nil {
+		return "", err
+	}
+	if !strings.ContainsFunc(number, unicode.IsDigit) {
+		return "", ErrInvalidLabel
+	}
+	return number, nil
+}
+
+// NormalizeNumber turns a receipt number into the stored form: trimmed,
+// Arabic-Indic and Persian digits as ASCII, letters in capitals. Anything other
+// than 1 to 12 ASCII letters and digits is refused.
 func NormalizeNumber(raw string) (string, error) {
 	var out strings.Builder
 	for _, r := range strings.TrimSpace(raw) {
@@ -99,15 +191,28 @@ func NormalizeNumber(raw string) (string, error) {
 		case r >= '۰' && r <= '۹':
 			r = '0' + (r - '۰')
 		default:
-			return "", ErrInvalidNumber
+			return "", ErrInvalidLabel
 		}
 		if out.Len() == maxNumberLength {
-			return "", ErrInvalidNumber
+			return "", ErrInvalidLabel
 		}
 		out.WriteRune(r)
 	}
 	if out.Len() == 0 {
-		return "", ErrInvalidNumber
+		return "", ErrInvalidLabel
 	}
 	return out.String(), nil
+}
+
+// NormalizeName trims a customer's name and folds runs of spaces into one. It
+// must be 1 to 40 characters with no control characters.
+func NormalizeName(raw string) (string, error) {
+	if strings.ContainsFunc(raw, func(r rune) bool { return unicode.IsControl(r) && !unicode.IsSpace(r) }) {
+		return "", ErrInvalidLabel
+	}
+	name := strings.Join(strings.Fields(raw), " ")
+	if name == "" || utf8.RuneCountInString(name) > maxNameLength || !utf8.ValidString(name) {
+		return "", ErrInvalidLabel
+	}
+	return name, nil
 }

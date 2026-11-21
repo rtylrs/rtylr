@@ -5,11 +5,12 @@ import { HelmetContainer } from '@voxire/components';
 import { Alert, Switch } from '@voxire/ui';
 import type { ListTicketsResponse, Ticket } from '@voxire/voxie/pager/v1/types';
 import { Link } from '@tanstack/react-router';
-import { BellRing, Delete, Printer, Smartphone } from 'lucide-react';
-import { Badge, Button } from '../../../../shared/components/ui';
+import { BellRing, MonitorSmartphone, Printer } from 'lucide-react';
+import { Badge, Button, Select } from '../../../../shared/components/ui';
 import { useUserStore } from '../../../../shared/stores/userStore';
-import { PAGER_POSTER_PATH } from '../../pagerPaths';
+import { PAGER_DISPLAY_PATH, PAGER_POSTER_PATH } from '../../pagerPaths';
 import { PAGER_ERROR, errorCode, errorStatus } from '../../shared/lib/apiError';
+import { matchColor } from '../../shared/lib/matchCode';
 import {
   type StaffPagerClient,
   usePagerSandbox,
@@ -18,22 +19,28 @@ import {
 import { normaliseTicketNumber } from '../../shared/lib/ticketNumber';
 import { TICKET_POLL_INTERVAL_MS, isStaleAnswer } from '../../shared/lib/ticketPoller';
 import { usePagerVenue } from '../../shared/lib/usePagerVenue';
+import { VenueQr } from './VenueQr';
 
 const TICKETS_KEY = ['pager', 'tickets'] as const;
 const SETTINGS_KEY = ['pager', 'settings'] as const;
-const KEYPAD_DIGITS = ['1', '2', '3', '4', '5', '6', '7', '8', '9'] as const;
+const LABEL_MODES = ['either', 'number', 'name'] as const;
+type LabelMode = (typeof LABEL_MODES)[number];
 
 type BoardError =
-  'invalidNumber' | 'invalidTransition' | 'tooManyOpen' | 'settingsAdminOnly' | 'actionFailed';
+  | 'invalidLabel'
+  | 'labelTaken'
+  | 'invalidTransition'
+  | 'settingsAdminOnly'
+  | 'actionFailed';
 
 function boardErrorFor(error: unknown): BoardError {
   switch (errorCode(error)) {
-    case PAGER_ERROR.invalidNumber:
-      return 'invalidNumber';
+    case PAGER_ERROR.invalidLabel:
+      return 'invalidLabel';
+    case PAGER_ERROR.labelTaken:
+      return 'labelTaken';
     case PAGER_ERROR.invalidTransition:
       return 'invalidTransition';
-    case PAGER_ERROR.tooManyOpenTickets:
-      return 'tooManyOpen';
     default:
       return errorStatus(error) === 403 ? 'settingsAdminOnly' : 'actionFailed';
   }
@@ -58,13 +65,107 @@ function runTicketAction(
   }
 }
 
+function asLabelMode(value: string | undefined): LabelMode {
+  return LABEL_MODES.find((mode) => mode === value) ?? 'either';
+}
+
+/** Whole minutes between the scan and the board's last answer. */
+function minutesSince(createdAt: string | undefined, serverTime: string | undefined): number {
+  const since = Date.parse(serverTime ?? '') - Date.parse(createdAt ?? '');
+  return Number.isNaN(since) ? 0 : Math.max(0, Math.floor(since / 60_000));
+}
+
+interface NewPhoneCardProps {
+  ticket: Ticket;
+  labelMode: LabelMode;
+  serverTime: string | undefined;
+  busy: boolean;
+  onLabel: (label: string, done: () => void) => void;
+  onRemove: () => void;
+}
+
+/** A phone that scanned the QR and waits for the cashier to type its label. */
+function NewPhoneCard({
+  ticket,
+  labelMode,
+  serverTime,
+  busy,
+  onLabel,
+  onRemove,
+}: NewPhoneCardProps): React.JSX.Element {
+  const { t } = useTranslation('pager');
+  const inputId = useId();
+  const [value, setValue] = useState('');
+  const code = ticket.code ?? '';
+  const minutes = minutesSince(ticket.createdAt, serverTime);
+  const numeric = labelMode === 'number';
+
+  return (
+    <li className="space-y-2 rounded-lg p-3" style={{ border: '1px solid var(--dash-border)' }}>
+      <div className="flex items-center gap-3">
+        <bdi
+          className="rounded-lg px-2.5 py-1 text-2xl font-bold tracking-wider"
+          style={{ background: matchColor(ticket.color), color: '#ffffff' }}
+        >
+          {code}
+        </bdi>
+        <span className="flex-1 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+          {minutes < 1 ? t('pager.board.scannedNow') : t('pager.board.scannedAgo', { count: minutes })}
+        </span>
+        <Button
+          size="sm"
+          variant="ghost"
+          aria-label={t('pager.board.removePhone', { code })}
+          disabled={busy}
+          onClick={onRemove}
+        >
+          {t('pager.board.remove')}
+        </Button>
+      </div>
+      <form
+        className="flex gap-2"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (value.trim() && !busy) onLabel(value.trim(), () => setValue(''));
+        }}
+      >
+        <label htmlFor={inputId} className="sr-only">
+          {t('pager.board.labelFor', { code })}
+        </label>
+        <input
+          id={inputId}
+          dir="auto"
+          inputMode={numeric ? 'numeric' : 'text'}
+          enterKeyHint="done"
+          autoComplete="off"
+          autoCapitalize={numeric ? 'characters' : 'words'}
+          spellCheck={false}
+          maxLength={40}
+          placeholder={t(`pager.board.labelPlaceholder.${labelMode}`)}
+          value={value}
+          onChange={(event) =>
+            setValue(numeric ? normaliseTicketNumber(event.target.value) : event.target.value)
+          }
+          className="h-10 min-w-0 flex-1 rounded-lg px-3 text-base outline-none focus:border-[var(--dash-border-focus)]"
+          style={{
+            background: 'var(--dash-input-bg)',
+            border: '1px solid var(--dash-border)',
+            color: 'var(--dash-text)',
+          }}
+        />
+        <Button type="submit" size="sm" className="h-10" disabled={!value.trim() || busy}>
+          {t('pager.board.saveLabel')}
+        </Button>
+      </form>
+    </li>
+  );
+}
+
 const Board = (): React.JSX.Element => {
   const { t } = useTranslation('pager');
   const queryClient = useQueryClient();
-  const inputId = useId();
   const enabledId = useId();
-  const strictId = useId();
-  const [number, setNumber] = useState('');
+  const labelModeId = useId();
   const [boardError, setBoardError] = useState<BoardError | null>(null);
   const shown = useRef<ListTicketsResponse | null>(null);
   const staffPagerClient = useStaffPagerClient();
@@ -101,10 +202,10 @@ const Board = (): React.JSX.Element => {
   const afterChange = (): Promise<void> => queryClient.invalidateQueries({ queryKey: TICKETS_KEY });
   const onChangeFailed = (error: unknown): void => setBoardError(boardErrorFor(error));
 
-  const createTicket = useMutation({
-    mutationFn: (value: string) => staffPagerClient.createTicket({ number: value }),
+  const labelTicket = useMutation({
+    mutationFn: ({ id, label }: { id: string; label: string }) =>
+      staffPagerClient.labelTicket({ id, label }),
     onMutate: beforeChange,
-    onSuccess: () => setNumber(''),
     onError: onChangeFailed,
     onSettled: afterChange,
   });
@@ -118,7 +219,7 @@ const Board = (): React.JSX.Element => {
   });
 
   const updateSettings = useMutation({
-    mutationFn: (patch: { enabled?: boolean; strict?: boolean }) =>
+    mutationFn: (patch: { enabled?: boolean; labelMode?: string }) =>
       staffPagerClient.updateSettings(patch),
     onMutate: () => setBoardError(null),
     onSuccess: (next) => queryClient.setQueryData(SETTINGS_KEY, next),
@@ -143,10 +244,14 @@ const Board = (): React.JSX.Element => {
     );
   }
 
+  const labelMode = asLabelMode(settings.data?.labelMode);
   const open = tickets.data?.tickets ?? [];
-  const waiting = open.filter((ticket) => ticket.status === 'waiting');
+  const newPhones = open.filter((ticket) => ticket.status === 'waiting' && !ticket.labelKind);
+  const waiting = open.filter((ticket) => ticket.status === 'waiting' && ticket.labelKind);
   const ready = open.filter((ticket) => ticket.status === 'ready');
-  const busyId = changeTicket.isPending ? changeTicket.variables?.id : undefined;
+  const busyId =
+    (changeTicket.isPending ? changeTicket.variables?.id : undefined) ??
+    (labelTicket.isPending ? labelTicket.variables?.id : undefined);
 
   const actionButton = (
     ticket: Ticket,
@@ -157,7 +262,7 @@ const Board = (): React.JSX.Element => {
     <Button
       size="sm"
       variant={variant}
-      aria-label={t('pager.board.actionFor', { action: label, number: ticket.number ?? '' })}
+      aria-label={t('pager.board.actionFor', { action: label, label: ticket.label ?? '' })}
       disabled={busyId === ticket.id}
       onClick={() => changeTicket.mutate({ id: ticket.id ?? '', action })}
     >
@@ -165,64 +270,64 @@ const Board = (): React.JSX.Element => {
     </Button>
   );
 
-  const column = (
+  const columnShell = (
     title: string,
+    count: number,
     emptyText: string,
-    items: Ticket[],
-    actions: (ticket: Ticket) => React.ReactNode
+    list: React.ReactNode
   ): React.JSX.Element => (
     <section
       className="min-w-0 rounded-xl p-3"
       style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
     >
       <h2 className="mb-3 text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-        {title} ({items.length})
+        {title} ({count})
       </h2>
-      {items.length === 0 ? (
+      {count === 0 ? (
         <p className="text-sm" style={{ color: 'var(--dash-text-dim)' }}>
           {emptyText}
         </p>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {items.map((ticket) => {
-            const ticketNumber = ticket.number ?? '';
-            return (
-              <li
-                key={ticket.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-lg p-3"
-                style={{ border: '1px solid var(--dash-border)' }}
-              >
-                <div className="flex min-w-0 flex-wrap items-center gap-2">
-                  <bdi
-                    className="text-2xl font-bold tabular-nums"
-                    style={{ color: 'var(--dash-text)' }}
-                  >
-                    {ticketNumber}
-                  </bdi>
-                  {ticket.phoneLinked && (
-                    <Smartphone
-                      size={18}
-                      role="img"
-                      aria-label={t('pager.board.phoneLinked')}
-                      style={{ color: 'var(--dash-text-muted)' }}
-                    />
-                  )}
-                  {ticket.acknowledgedAt && (
-                    <Badge variant="success">{t('pager.board.acknowledged')}</Badge>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-2">{actions(ticket)}</div>
-              </li>
-            );
-          })}
-        </ul>
+        <ul className="flex flex-col gap-2">{list}</ul>
       )}
     </section>
   );
 
-  const add = (): void => {
-    if (number && !createTicket.isPending) createTicket.mutate(number);
-  };
+  const labelledColumn = (
+    title: string,
+    emptyText: string,
+    items: Ticket[],
+    actions: (ticket: Ticket) => React.ReactNode
+  ): React.JSX.Element =>
+    columnShell(
+      title,
+      items.length,
+      emptyText,
+      items.map((ticket) => (
+        <li
+          key={ticket.id}
+          className="flex flex-wrap items-center justify-between gap-2 rounded-lg p-3"
+          style={{ border: '1px solid var(--dash-border)' }}
+        >
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <bdi
+              className={
+                ticket.labelKind === 'number'
+                  ? 'text-2xl font-bold tabular-nums'
+                  : 'break-all text-xl font-bold'
+              }
+              style={{ color: 'var(--dash-text)' }}
+            >
+              {ticket.label}
+            </bdi>
+            {ticket.acknowledgedAt && (
+              <Badge variant="success">{t('pager.board.acknowledged')}</Badge>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">{actions(ticket)}</div>
+        </li>
+      ))
+    );
 
   return (
     <>
@@ -240,16 +345,25 @@ const Board = (): React.JSX.Element => {
               {t('pager.board.subheading')}
             </p>
           </div>
-          {/* The demo has no venue to print a poster for, and the poster page needs a sign in. */}
+          {/* The demo has no venue to show a QR for, and these pages need a sign in. */}
           {!sandbox && (
-            // The Portal's Button renders a <button> only, so the link wears its classes.
-            <Link
-              to={PAGER_POSTER_PATH}
-              className="portal-button portal-button--outline portal-button--sm"
-            >
-              <Printer size={16} aria-hidden="true" />
-              {t('pager.board.posterLink')}
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              {/* The Portal's Button renders a <button> only, so the links wear its classes. */}
+              <Link
+                to={PAGER_DISPLAY_PATH}
+                className="portal-button portal-button--outline portal-button--sm"
+              >
+                <MonitorSmartphone size={16} aria-hidden="true" />
+                {t('pager.board.displayLink')}
+              </Link>
+              <Link
+                to={PAGER_POSTER_PATH}
+                className="portal-button portal-button--outline portal-button--sm"
+              >
+                <Printer size={16} aria-hidden="true" />
+                {t('pager.board.posterLink')}
+              </Link>
+            </div>
           )}
         </div>
 
@@ -259,82 +373,37 @@ const Board = (): React.JSX.Element => {
           <Alert variant="warning">{t('pager.board.disabledNotice')}</Alert>
         )}
 
-        {/* On a phone the order is keypad, tickets, settings; on a wide screen the
+        {/* On a phone the order is QR, tickets, settings; on a wide screen the
             tickets take the second column beside the other two. */}
-        <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)] lg:grid-rows-[auto_1fr]">
-          <form
-            className="space-y-3 lg:col-start-1 lg:row-start-1"
-            onSubmit={(event) => {
-              event.preventDefault();
-              add();
-            }}
-          >
-            <label
-              htmlFor={inputId}
-              className="block text-xs font-semibold"
-              style={{ color: 'var(--dash-text-muted)' }}
+        <div className="grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)] lg:grid-rows-[auto_1fr]">
+          {customerLink ? (
+            <section
+              className="flex flex-col items-center gap-2 rounded-xl p-4 text-center lg:col-start-1 lg:row-start-1"
+              style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
             >
-              {t('pager.board.numberLabel')}
-            </label>
-            <input
-              id={inputId}
-              dir="ltr"
-              inputMode="numeric"
-              autoComplete="off"
-              autoCapitalize="characters"
-              spellCheck={false}
-              value={number}
-              onChange={(event) => setNumber(normaliseTicketNumber(event.target.value))}
-              className="h-14 w-full rounded-lg px-3 text-center text-3xl! font-bold tabular-nums outline-none focus:border-[var(--dash-border-focus)]"
-              style={{
-                background: 'var(--dash-input-bg)',
-                border: '1px solid var(--dash-border)',
-                color: 'var(--dash-text)',
-              }}
-            />
-            {/* A phone keypad reads left to right in every language. */}
-            <div
-              dir="ltr"
-              role="group"
-              aria-label={t('pager.board.keypadLabel')}
-              className="grid grid-cols-3 gap-2"
-            >
-              {KEYPAD_DIGITS.map((digit) => (
-                <Button
-                  key={digit}
-                  variant="outline"
-                  className="h-14 text-xl"
-                  onClick={() => setNumber((value) => normaliseTicketNumber(value + digit))}
-                >
-                  {digit}
-                </Button>
-              ))}
-              <Button
-                variant="ghost"
-                className="h-14"
-                aria-label={t('pager.board.backspace')}
-                disabled={!number}
-                onClick={() => setNumber((value) => value.slice(0, -1))}
+              <h2 className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                {t('pager.board.qrHeading')}
+              </h2>
+              <div className="rounded-lg bg-white p-2">
+                <VenueQr url={customerLink} size={180} />
+              </div>
+              <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+                {t('pager.board.qrHint')}
+              </p>
+              <a
+                href={customerLink}
+                target="_blank"
+                rel="noreferrer"
+                dir="ltr"
+                className="break-all text-xs underline"
+                style={{ color: 'var(--dash-text)' }}
               >
-                <Delete size={20} aria-hidden="true" />
-              </Button>
-              <Button
-                variant="outline"
-                className="h-14 text-xl"
-                onClick={() => setNumber((value) => normaliseTicketNumber(`${value}0`))}
-              >
-                0
-              </Button>
-              <span />
-            </div>
-            <Button
-              type="submit"
-              className="h-12 w-full"
-              disabled={!number || createTicket.isPending}
-            >
-              {t('pager.board.add')}
-            </Button>
-          </form>
+                {customerLink}
+              </a>
+            </section>
+          ) : (
+            <span className="hidden lg:block" />
+          )}
 
           <div className="min-w-0 space-y-3 lg:col-start-2 lg:row-start-1 lg:row-span-2">
             {tickets.isPending && (
@@ -356,8 +425,26 @@ const Board = (): React.JSX.Element => {
               </p>
             )}
             {tickets.data && (
-              <div className="grid gap-3 md:grid-cols-2">
-                {column(
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {columnShell(
+                  t('pager.board.newColumn'),
+                  newPhones.length,
+                  t('pager.board.emptyNew'),
+                  newPhones.map((ticket) => (
+                    <NewPhoneCard
+                      key={ticket.id}
+                      ticket={ticket}
+                      labelMode={labelMode}
+                      serverTime={tickets.data.serverTime}
+                      busy={busyId === ticket.id}
+                      onLabel={(label, done) =>
+                        labelTicket.mutate({ id: ticket.id ?? '', label }, { onSuccess: done })
+                      }
+                      onRemove={() => changeTicket.mutate({ id: ticket.id ?? '', action: 'collect' })}
+                    />
+                  ))
+                )}
+                {labelledColumn(
                   t('pager.board.waitingColumn'),
                   t('pager.board.emptyWaiting'),
                   waiting,
@@ -368,7 +455,7 @@ const Board = (): React.JSX.Element => {
                     </>
                   )
                 )}
-                {column(
+                {labelledColumn(
                   t('pager.board.readyColumn'),
                   t('pager.board.emptyReady'),
                   ready,
@@ -414,21 +501,33 @@ const Board = (): React.JSX.Element => {
                     {t('pager.board.enabledHint')}
                   </p>
                 </div>
-                <div>
-                  <Switch
-                    id={strictId}
-                    label={t('pager.board.strictLabel')}
-                    aria-describedby={`${strictId}-hint`}
-                    checked={settings.data?.strict ?? false}
+                <div className="space-y-1">
+                  <label
+                    htmlFor={labelModeId}
+                    className="block text-xs font-semibold"
+                    style={{ color: 'var(--dash-text-muted)' }}
+                  >
+                    {t('pager.board.labelModeLabel')}
+                  </label>
+                  <Select
+                    id={labelModeId}
+                    aria-describedby={`${labelModeId}-hint`}
+                    value={labelMode}
                     disabled={!canEditSettings || !settings.data || updateSettings.isPending}
-                    onCheckedChange={(strict) => updateSettings.mutate({ strict })}
-                  />
+                    onChange={(event) => updateSettings.mutate({ labelMode: event.target.value })}
+                  >
+                    {LABEL_MODES.map((mode) => (
+                      <option key={mode} value={mode}>
+                        {t(`pager.board.labelMode.${mode}`)}
+                      </option>
+                    ))}
+                  </Select>
                   <p
-                    id={`${strictId}-hint`}
-                    className="mt-1 text-xs"
+                    id={`${labelModeId}-hint`}
+                    className="text-xs"
                     style={{ color: 'var(--dash-text-dim)' }}
                   >
-                    {t('pager.board.strictHint')}
+                    {t('pager.board.labelModeHint')}
                   </p>
                 </div>
                 {!canEditSettings && (
@@ -437,21 +536,6 @@ const Board = (): React.JSX.Element => {
                   </p>
                 )}
               </>
-            )}
-            {customerLink && (
-              <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-                {t('pager.board.customerLink')}{' '}
-                <a
-                  href={customerLink}
-                  target="_blank"
-                  rel="noreferrer"
-                  dir="ltr"
-                  className="break-all underline"
-                  style={{ color: 'var(--dash-text)' }}
-                >
-                  {customerLink}
-                </a>
-              </p>
             )}
           </section>
         </div>

@@ -9,8 +9,15 @@ namespace pager.v1;
 // the moment they describe has happened. Statuses are waiting, ready,
 // collected and expired.
 //
+// A ticket starts when a phone scans the venue's QR: it is waiting, has no
+// label yet and shows a short match code. The cashier finds the code on the
+// board and gives the ticket its label, the order number or the customer's
+// name. An unlabelled ticket expires after 15 minutes, a labelled one after 6
+// hours.
+//
 // Errors carry a stable `code` next to `message`: venue_not_found (404),
-// ticket_not_found (404), invalid_number (400), invalid_transition (409),
+// ticket_not_found (404), invalid_label (400), label_taken (409),
+// invalid_label_mode (400), invalid_transition (409),
 // too_many_open_tickets (429), invalid_push_subscription (400) and
 // too_many_push_subscriptions (429).
 /** A ticket as the venue's staff see it. */
@@ -18,17 +25,23 @@ model Ticket {
   @encode(string)
   id: int64;
 
-  /** The order number as normalised by the server: ASCII digits and capitals. */
-  number: string;
+  /** The order number or the customer's name. Absent until the cashier labels the ticket. */
+  label: string;
+
+  /** number or name; absent while the ticket has no label. */
+  label_kind: string;
+
+  /**
+   * Two characters from 2-9 and A-Z without I and O, unique among the
+   * venue's open unlabelled tickets. Absent once the ticket is labelled.
+   */
+  code: string;
+
+  /** 0 to 5: the colour shown behind the code, so it is easier to match. */
+  color: int32;
 
   /** One of waiting, ready, collected, expired. */
   status: string;
-
-  /** Who entered the number first: staff or customer. */
-  source: string;
-
-  /** True once a customer's phone has joined the ticket. */
-  phone_linked: boolean;
 
   created_at: string;
   ready_at: string;
@@ -54,36 +67,21 @@ model GetPublicVenueResponse {
   logo_url: string;
 
   enabled: boolean;
-
-  /** When true only numbers the staff already entered can be joined. */
-  strict: boolean;
 }
 
-model JoinTicketRequest {
+model ScanTicketRequest {
   slug: string;
-
-  /**
-   * The order number on the receipt. Trimmed, Arabic-Indic digits become
-   * ASCII, letters are capitalised; then 1 to 12 ASCII letters and digits.
-   */
-  @Onkt.required
-  @minLength(1)
-  @maxLength(64)
-  number: string;
 }
 
-/**
- * A strict venue answers 404 ticket_not_found until the staff enter the
- * number, so the client can keep retrying for a short while.
- */
-model JoinTicketResponse {
-  /**
-   * Opaque credential for this ticket. Every phone that joins the same
-   * ticket receives the same token.
-   */
+/** A new waiting ticket for the phone that scanned the venue's QR. */
+model ScanTicketResponse {
+  /** Opaque credential for this ticket, the only one the phone holds. */
   public_token: string;
 
-  number: string;
+  /** The match code the customer shows the cashier. */
+  code: string;
+
+  color: int32;
   status: string;
 }
 
@@ -92,13 +90,22 @@ model GetPublicTicketRequest {
 }
 
 model GetPublicTicketResponse {
-  number: string;
+  /** Absent until the cashier labels the ticket; until then show the code. */
+  label: string;
+
+  /** number or name; absent while the ticket has no label. */
+  label_kind: string;
+
+  /** Absent once the ticket is labelled. */
+  code: string;
+
+  color: int32;
   status: string;
   venue_name: string;
 
   /**
-   * Waiting tickets at the venue entered before this one. Zero once this
-   * ticket is no longer waiting.
+   * Labelled waiting tickets at the venue that scanned before this one. Zero
+   * while this ticket has no label and once it is no longer waiting.
    */
   ahead: int32;
 
@@ -168,16 +175,29 @@ model ListTicketsResponse {
   server_time: string;
 }
 
-model CreateTicketRequest {
-  /** Normalised the same way as JoinTicketRequest.number. */
+model LabelTicketRequest {
+  @minValueExclusive(0)
+  @encode(string)
+  id: int64;
+
+  /**
+   * The order number or the customer's name, as the venue's label mode
+   * allows. Trimmed; a number is normalised like a receipt number (1 to 12
+   * ASCII letters and digits, Arabic-Indic digits as ASCII) and a name is 1
+   * to 40 characters. In "either" mode an entry with a digit that is a valid
+   * number is a number, anything else a name.
+   */
   @Onkt.required
   @minLength(1)
   @maxLength(64)
-  number: string;
+  label: string;
 }
 
-/** Returns the existing ticket when the number is already open. */
-model CreateTicketResponse {
+/**
+ * label_taken when another open ticket already has this number. Names may
+ * repeat.
+ */
+model LabelTicketResponse {
   ticket: Ticket;
 }
 
@@ -227,18 +247,19 @@ model GetSettingsResponse {
   /** Whether the public pager pages answer for this business. */
   enabled: boolean;
 
-  strict: boolean;
+  /** What the cashier labels a ticket with: number, name or either. */
+  label_mode: string;
 }
 
 model UpdateSettingsRequest {
   /** Unchanged when absent. */
   enabled?: boolean;
 
-  /** Unchanged when absent. */
-  strict?: boolean;
+  /** number, name or either. Unchanged when absent. */
+  label_mode?: string;
 }
 
 model UpdateSettingsResponse {
   enabled: boolean;
-  strict: boolean;
+  label_mode: string;
 }

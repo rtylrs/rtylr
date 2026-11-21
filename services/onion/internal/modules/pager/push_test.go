@@ -108,28 +108,14 @@ func (h *harness) pushRows(v venue) int {
 	return count
 }
 
-// joinAndFind joins a number as a customer and returns the token and the
-// staff's id for the ticket.
-func (h *harness) joinAndFind(v venue, number string) (string, any) {
-	h.Helper()
-	token := h.want(h.join(v, number), http.StatusOK, "").text("public_token")
-	for _, ticket := range h.open(v) {
-		if ticket["number"] == number {
-			return token, ticket["id"]
-		}
-	}
-	h.Fatalf("ticket %s is not on the board", number)
-	return "", nil
-}
-
 func TestPushStaysOffWithoutKeys(t *testing.T) {
 	eachBackend(t, func(h *harness) {
-		h.enable(h.a, false)
+		h.enable(h.a)
 		key := h.want(h.call(nil, http.MethodGet, "/pager/v1/public/push-key", ""), http.StatusOK, "")
 		if key.text("public_key") != "" {
 			h.Fatalf("push key without configuration = %q, want none", key.text("public_key"))
 		}
-		token, id := h.joinAndFind(h.a, "42")
+		token, id := h.labelled(h.a, "42")
 		// A browser that subscribes anyway is told yes and nothing is kept.
 		h.want(h.subscribe(token, endpoint("a"), testP256dh, testAuth), http.StatusOK, "")
 		if rows := h.pushRows(h.a); rows != 0 {
@@ -144,12 +130,12 @@ func TestPushStaysOffWithoutKeys(t *testing.T) {
 func TestPushRingsOnReadyAndOnCallAgain(t *testing.T) {
 	eachBackend(t, func(h *harness) {
 		push := h.enablePush()
-		h.enable(h.a, false)
+		h.enable(h.a)
 		key := h.want(h.call(nil, http.MethodGet, "/pager/v1/public/push-key", ""), http.StatusOK, "")
 		if key.text("public_key") != "test-vapid-key" {
 			h.Fatalf("push key = %q", key.text("public_key"))
 		}
-		token, id := h.joinAndFind(h.a, "42")
+		token, id := h.labelled(h.a, "42")
 		h.want(h.subscribe(token, endpoint("a"), testP256dh, testAuth), http.StatusOK, "")
 		h.want(h.subscribe(token, endpoint("b"), testP256dh, testAuth), http.StatusOK, "")
 		// The same browser subscribing again on a reload is still one row.
@@ -167,7 +153,7 @@ func TestPushRingsOnReadyAndOnCallAgain(t *testing.T) {
 			h.Fatalf("ready sent %d pushes, want one per browser", len(sent))
 		}
 		for _, p := range sent {
-			want := map[string]string{"kind": "ready", "number": "42", "venue": "Cedar Café", "token": token}
+			want := map[string]string{"kind": "ready", "label": "42", "venue": "Cedar Café", "token": token}
 			if fmt.Sprint(p.payload) != fmt.Sprint(want) {
 				h.Fatalf("ready payload = %v, want %v", p.payload, want)
 			}
@@ -194,8 +180,8 @@ func TestPushFailureDoesNotFailTheStaffAction(t *testing.T) {
 	h := newHarness(t, nil)
 	push := h.enablePush()
 	push.fail = true
-	h.enable(h.a, false)
-	token, id := h.joinAndFind(h.a, "42")
+	h.enable(h.a)
+	token, id := h.labelled(h.a, "42")
 	h.want(h.subscribe(token, endpoint("a"), testP256dh, testAuth), http.StatusOK, "")
 	h.want(h.move(h.a.member, id, "ready"), http.StatusOK, "")
 	if sent := push.take(); len(sent) != 1 {
@@ -210,8 +196,8 @@ func TestPushFailureDoesNotFailTheStaffAction(t *testing.T) {
 func TestPushSubscribeNeedsAnOpenTicketAtAnEnabledVenue(t *testing.T) {
 	eachBackend(t, func(h *harness) {
 		h.enablePush()
-		h.enable(h.a, false)
-		token, id := h.joinAndFind(h.a, "42")
+		h.enable(h.a)
+		token, id := h.labelled(h.a, "42")
 
 		h.want(h.subscribe(strings.Repeat("A", 32), endpoint("a"), testP256dh, testAuth), http.StatusNotFound, "ticket_not_found")
 		h.want(h.subscribe("not-a-token", endpoint("a"), testP256dh, testAuth), http.StatusNotFound, "ticket_not_found")
@@ -219,12 +205,12 @@ func TestPushSubscribeNeedsAnOpenTicketAtAnEnabledVenue(t *testing.T) {
 
 		h.want(h.call(h.a.owner, http.MethodPut, "/pager/v1/settings", `{"enabled":false}`), http.StatusOK, "")
 		h.want(h.subscribe(token, endpoint("a"), testP256dh, testAuth), http.StatusNotFound, "ticket_not_found")
-		h.enable(h.a, false)
+		h.enable(h.a)
 
 		h.want(h.move(h.a.member, id, "collect"), http.StatusOK, "")
 		h.want(h.subscribe(token, endpoint("a"), testP256dh, testAuth), http.StatusNotFound, "ticket_not_found")
 
-		expiring, _ := h.joinAndFind(h.a, "43")
+		expiring, _ := h.labelled(h.a, "43")
 		h.clock.advance(domain.OpenLifetime + time.Minute)
 		h.want(h.subscribe(expiring, endpoint("a"), testP256dh, testAuth), http.StatusNotFound, "ticket_not_found")
 
@@ -237,8 +223,8 @@ func TestPushSubscribeNeedsAnOpenTicketAtAnEnabledVenue(t *testing.T) {
 func TestPushRefusesEndpointsOutsideThePushServices(t *testing.T) {
 	h := newHarness(t, nil)
 	h.enablePush()
-	h.enable(h.a, false)
-	token, _ := h.joinAndFind(h.a, "42")
+	h.enable(h.a)
+	token, _ := h.labelled(h.a, "42")
 
 	for _, bad := range []struct{ name, endpoint, p256dh, auth string }{
 		{"plain http", "http://fcm.googleapis.com/fcm/send/x", testP256dh, testAuth},
@@ -277,8 +263,8 @@ func TestPushRefusesEndpointsOutsideThePushServices(t *testing.T) {
 func TestPushForgetsGoneBrowsersAndClosedTickets(t *testing.T) {
 	eachBackend(t, func(h *harness) {
 		push := h.enablePush()
-		h.enable(h.a, false)
-		token, id := h.joinAndFind(h.a, "42")
+		h.enable(h.a)
+		token, id := h.labelled(h.a, "42")
 		h.want(h.subscribe(token, endpoint("gone"), testP256dh, testAuth), http.StatusOK, "")
 		h.want(h.subscribe(token, endpoint("kept"), testP256dh, testAuth), http.StatusOK, "")
 		push.gone[endpoint("gone")] = true
@@ -305,14 +291,14 @@ func TestPushForgetsGoneBrowsersAndClosedTickets(t *testing.T) {
 func TestPushSweepsSubscriptionsOfTicketsPastTheirLifetime(t *testing.T) {
 	eachBackend(t, func(h *harness) {
 		h.enablePush()
-		h.enable(h.a, false)
-		h.enable(h.b, false)
-		old, _ := h.joinAndFind(h.a, "42")
+		h.enable(h.a)
+		h.enable(h.b)
+		old, _ := h.labelled(h.a, "42")
 		h.want(h.subscribe(old, endpoint("old"), testP256dh, testAuth), http.StatusOK, "")
 
 		h.clock.advance(domain.OpenLifetime + time.Minute)
 		// Any later subscription, at any venue, clears what has expired.
-		fresh, _ := h.joinAndFind(h.b, "7")
+		fresh, _ := h.labelled(h.b, "7")
 		h.want(h.subscribe(fresh, endpoint("fresh"), testP256dh, testAuth), http.StatusOK, "")
 		if rows := h.pushRows(h.a); rows != 0 {
 			h.Fatalf("%d subscriptions of an expired ticket left", rows)
@@ -326,8 +312,8 @@ func TestPushSweepsSubscriptionsOfTicketsPastTheirLifetime(t *testing.T) {
 func TestPushLimitsBrowsersPerTicket(t *testing.T) {
 	eachBackend(t, func(h *harness) {
 		h.enablePush()
-		h.enable(h.a, false)
-		token, _ := h.joinAndFind(h.a, "42")
+		h.enable(h.a)
+		token, _ := h.labelled(h.a, "42")
 		for i := range domain.MaxPushSubscriptionsPerTicket {
 			h.want(h.subscribe(token, endpoint(fmt.Sprint(i)), testP256dh, testAuth), http.StatusOK, "")
 		}
