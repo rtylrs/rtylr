@@ -148,13 +148,15 @@ func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolv
 					return
 				}
 				authUser.EffectiveAccess = effectiveAccess
-				if appID, isAppPath := appForPath(path); isAppPath && !authPkg.HasAppAccess(authUser, appID) {
-					WriteOneKitError(ctx, w, onekiterrors.PermissionDenied())
-					return
-				}
-				if appID, permission, isFeaturePath := featurePermissionForRequest(r.Method, path); isFeaturePath && !hasFeaturePermission(authUser, appID, permission) {
-					WriteOneKitError(ctx, w, onekiterrors.PermissionDenied())
-					return
+				if !hasCrossAppReadAccess(r.Method, path, authUser) {
+					if appID, isAppPath := appForPath(path); isAppPath && !authPkg.HasAppAccess(authUser, appID) {
+						WriteOneKitError(ctx, w, onekiterrors.PermissionDenied())
+						return
+					}
+					if appID, permission, isFeaturePath := featurePermissionForRequest(r.Method, path); isFeaturePath && !hasFeaturePermission(authUser, appID, permission) {
+						WriteOneKitError(ctx, w, onekiterrors.PermissionDenied())
+						return
+					}
 				}
 				if statusResolver, ok := accessResolver.(authPkg.ProvisioningStatusResolver); ok {
 					var status *authorization.ProvisioningStatus
@@ -220,6 +222,24 @@ func hasFeaturePermission(user *authPkg.AuthUser, appID authorization.AppID, per
 		return authPkg.HasDashboardPermission(user, permission) || authPkg.IsBusinessAdmin(user)
 	}
 	return authPkg.HasAppPermission(user, appID, permission)
+}
+
+// hasCrossAppReadAccess permits narrow, read-only cross-app lookups that an
+// app's own workflow requires (such as picking a CRM customer when creating a
+// Finance invoice) without granting broader access to the foreign app.
+func hasCrossAppReadAccess(method, path string, user *authPkg.AuthUser) bool {
+	if user == nil || !strings.EqualFold(method, http.MethodGet) {
+		return false
+	}
+	normalized := strings.ToLower(strings.TrimRight(path, "/"))
+	if normalized == "/crm/customer/v1/customers" {
+		if !authPkg.HasAppAccess(user, authorization.AppFinance) {
+			return false
+		}
+		return authPkg.HasAppPermission(user, authorization.AppFinance, "finance:invoices:view") ||
+			authPkg.HasAppPermission(user, authorization.AppFinance, "finance:invoices:create")
+	}
+	return false
 }
 
 func appForPath(path string) (authorization.AppID, bool) {
