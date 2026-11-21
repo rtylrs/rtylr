@@ -56,7 +56,10 @@ vi.mock('../../shared/hooks/queries/useProjectLabourCost', () => ({
 
 vi.mock('../tasks/useTasks', () => ({
   useTasks: () => tasksState,
+  useEpicRollups: () => ({ data: [] }),
 }));
+
+vi.mock('../../shared/lib/useOpenTask', () => ({ useOpenTask: () => vi.fn() }));
 
 // The Insights project dashboard panel (T-567) is tested on its own. Here it
 // stands in as unavailable, so the client-side tiles it falls back to render,
