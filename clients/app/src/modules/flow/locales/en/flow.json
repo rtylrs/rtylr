@@ -892,8 +892,6 @@
     "resizeColumn": "Resize {{column}}",
     "exportCsv": "Export CSV",
     "gridLabel": "Tasks in {{project}}",
-    "estimateValue": "{{hours}}h",
-    "noLabels": "No labels yet",
     "showSubtasks_one": "Show {{count}} subtask",
     "showSubtasks_other": "Show {{count}} subtasks",
     "hideSubtasks": "Hide subtasks",
