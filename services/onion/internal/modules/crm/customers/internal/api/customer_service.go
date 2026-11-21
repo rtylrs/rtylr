@@ -16,7 +16,7 @@ type CustomerAPI struct{ service *application.Service }
 func NewCustomerAPI(service *application.Service) *CustomerAPI { return &CustomerAPI{service: service} }
 
 func (a *CustomerAPI) ListCustomers(ctx context.Context, req *customerv1.ListCustomersRequest) (*customerv1.ListCustomersResponse, error) {
-	if err := requireCRMFeaturePermission(ctx, "crm:customers:view"); err != nil {
+	if err := requireCRMCustomerListPermission(ctx); err != nil {
 		return nil, err
 	}
 	handler := &ListCustomersHandler{CRMService: a.service}
