@@ -45,7 +45,7 @@ const { bell, navigator: fakeNavigator } = (
 ).fakeAlarm;
 
 const scanned = {
-  code: 'A7',
+  word: 'panda',
   color: 2,
   status: 'waiting',
   venueName: 'Acme Cafe',
@@ -99,7 +99,11 @@ describe('pager ticket page', () => {
     api.getPublicTicket.mockResolvedValue(scanned);
     render(<Ticket />);
 
-    expect(await screen.findByRole('heading', { name: 'Your code A7' })).toBeInTheDocument();
+    // The word in the page language, and in Arabic for a cashier who reads it.
+    expect(
+      await screen.findByRole('heading', { name: 'Your code Panda باندا' })
+    ).toBeInTheDocument();
+    expect(screen.getByText('🐼', { exact: false })).toBeInTheDocument();
     expect(screen.getByText('Show this code to the cashier')).toBeInTheDocument();
     expect(screen.queryByText(/ahead of you|You're next/)).not.toBeInTheDocument();
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
@@ -125,7 +129,7 @@ describe('pager ticket page', () => {
       .mockResolvedValueOnce(scanned)
       .mockResolvedValue({ ...waiting, label: 'Sara', labelKind: 'name' });
     render(<Ticket />);
-    await screen.findByRole('heading', { name: 'Your code A7' });
+    await screen.findByRole('heading', { name: /^Your code Panda/ });
 
     await nextPoll();
 
@@ -323,6 +327,21 @@ describe('pager ticket page', () => {
     render(<Ticket />);
 
     expect(await screen.findByText('Ticket not found')).toBeInTheDocument();
+  });
+
+  it('shows the word with its number, in Arabic with English beside it', async () => {
+    await initTestI18n('ar');
+    api.getPublicTicket.mockResolvedValue({ ...scanned, word: 'goat', wordNumber: 2 });
+    render(<Ticket />);
+
+    expect(await screen.findByRole('heading', { name: /غوت 2 GOAT 2$/ })).toBeInTheDocument();
+  });
+
+  it('still shows the two character code of a phone that scanned before the words', async () => {
+    api.getPublicTicket.mockResolvedValue({ ...scanned, word: undefined, code: 'A7' });
+    render(<Ticket />);
+
+    expect(await screen.findByRole('heading', { name: 'Your code A7' })).toBeInTheDocument();
   });
 
   it('offers a retry when the first load fails, and recovers', async () => {

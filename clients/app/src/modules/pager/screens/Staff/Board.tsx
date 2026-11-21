@@ -10,7 +10,8 @@ import { Badge, Button, Select } from '../../../../shared/components/ui';
 import { useUserStore } from '../../../../shared/stores/userStore';
 import { PAGER_DISPLAY_PATH, PAGER_POSTER_PATH } from '../../pagerPaths';
 import { PAGER_ERROR, errorCode, errorStatus } from '../../shared/lib/apiError';
-import { matchColor } from '../../shared/lib/matchCode';
+import MatchBadge from '../../shared/components/MatchBadge';
+import { matchOf, wordIn } from '../../shared/lib/matchWords';
 import {
   type StaffPagerClient,
   usePagerSandbox,
@@ -93,22 +94,25 @@ function NewPhoneCard({
   onLabel,
   onRemove,
 }: NewPhoneCardProps): React.JSX.Element {
-  const { t } = useTranslation('pager');
+  const { t, i18n } = useTranslation('pager');
   const inputId = useId();
   const [value, setValue] = useState('');
-  const code = ticket.code ?? '';
+  const match = matchOf(ticket);
+  const code = match ? wordIn(match, i18n.resolvedLanguage ?? i18n.language) : '';
   const minutes = minutesSince(ticket.createdAt, serverTime);
   const numeric = labelMode === 'number';
 
   return (
     <li className="space-y-2 rounded-lg p-3" style={{ border: '1px solid var(--dash-border)' }}>
       <div className="flex items-center gap-3">
-        <bdi
-          className="rounded-lg px-2.5 py-1 text-2xl font-bold tracking-wider"
-          style={{ background: matchColor(ticket.color), color: '#ffffff' }}
-        >
-          {code}
-        </bdi>
+        {match && (
+          <MatchBadge
+            match={match}
+            color={ticket.color}
+            className="flex flex-col rounded-lg px-2.5 py-1 text-xl font-bold"
+            otherClassName="text-xs font-semibold"
+          />
+        )}
         <span className="flex-1 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
           {minutes < 1 ? t('pager.board.scannedNow') : t('pager.board.scannedAgo', { count: minutes })}
         </span>

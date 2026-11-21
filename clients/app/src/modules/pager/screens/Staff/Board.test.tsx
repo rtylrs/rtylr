@@ -43,7 +43,7 @@ import { initTestI18n } from '../../shared/testing/i18n';
 
 const newPhone = {
   id: '5',
-  code: 'A7',
+  word: 'panda',
   color: 2,
   status: 'waiting',
   createdAt: '2026-11-19T10:03:00.000Z',
@@ -106,7 +106,7 @@ describe('pager staff board', () => {
     const waiting = await section(/^Waiting \(2\)$/);
     const ready = await section(/^Ready \(1\)$/);
 
-    expect(within(fresh).getByText('A7')).toBeInTheDocument();
+    expect(within(fresh).getByText('Panda')).toBeInTheDocument();
     expect(within(fresh).getByText('Scanned 3 min ago')).toBeInTheDocument();
     expect(within(waiting).getByText('41')).toBeInTheDocument();
     expect(within(waiting).getByText('Sara')).toBeInTheDocument();
@@ -126,12 +126,12 @@ describe('pager staff board', () => {
     });
 
     const fresh = await section(/^New phones \(1\)$/);
-    expect(within(fresh).getByText('A7')).toBeInTheDocument();
+    expect(within(fresh).getByText('Panda')).toBeInTheDocument();
   });
 
   it('labels a new phone with what the cashier types', async () => {
     renderBoard();
-    const input = await screen.findByLabelText('Order number or name for code A7');
+    const input = await screen.findByLabelText('Order number or name for code Panda');
     expect(input).toHaveAttribute('inputmode', 'text');
 
     fireEvent.change(input, { target: { value: ' Sara ' } });
@@ -145,7 +145,7 @@ describe('pager staff board', () => {
   it('opens a numeric keyboard and shapes the entry as a receipt number in number mode', async () => {
     api.getSettings.mockResolvedValue({ enabled: true, labelMode: 'number' });
     renderBoard();
-    const input = await screen.findByLabelText('Order number or name for code A7');
+    const input = await screen.findByLabelText('Order number or name for code Panda');
     await waitFor(() => expect(input).toHaveAttribute('inputmode', 'numeric'));
     expect(input).toHaveAttribute('placeholder', 'Order number');
 
@@ -157,7 +157,7 @@ describe('pager staff board', () => {
   it('says so when another open order has the number', async () => {
     api.labelTicket.mockRejectedValue({ statusCode: 409, code: 'label_taken' });
     renderBoard();
-    const input = await screen.findByLabelText('Order number or name for code A7');
+    const input = await screen.findByLabelText('Order number or name for code Panda');
 
     fireEvent.change(input, { target: { value: '41' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
@@ -171,7 +171,7 @@ describe('pager staff board', () => {
   it.each([
     ['Ready: 41', 'markReady', '1'],
     ['Remove: 41', 'collectTicket', '1'],
-    ['Remove phone A7', 'collectTicket', '5'],
+    ['Remove phone Panda', 'collectTicket', '5'],
     ['Call again: 40', 'remindTicket', '3'],
     ['Undo: 40', 'undoReady', '3'],
     ['Collected: 40', 'collectTicket', '3'],
@@ -214,7 +214,7 @@ describe('pager staff board', () => {
     ).toBeInTheDocument();
     // Running the board is still theirs to do.
     expect(await screen.findByRole('button', { name: 'Ready: 41' })).toBeEnabled();
-    expect(screen.getByLabelText('Order number or name for code A7')).toBeEnabled();
+    expect(screen.getByLabelText('Order number or name for code Panda')).toBeEnabled();
   });
 
   it('warns while the pager is switched off', async () => {

@@ -77,12 +77,14 @@ describe('pager demo', () => {
 
     // The phone has "scanned": a code and nothing to type.
     const heading = await within(phone).findByRole('heading', { name: /^Your code / });
-    const code = heading.textContent?.replace('Your code', '').trim() ?? '';
+    // The board names the card by the same word the phone shows.
+    const word = (heading.querySelector('bdi')?.childNodes[1]?.textContent ?? '').trim();
+    expect(word).not.toBe('');
     expect(within(phone).getByText('Show this code to the cashier')).toBeInTheDocument();
     expect(within(phone).queryByRole('textbox')).not.toBeInTheDocument();
 
     await nextPoll();
-    fireEvent.change(await within(counter).findByLabelText(`Order number or name for code ${code}`), {
+    fireEvent.change(await within(counter).findByLabelText(`Order number or name for code ${word}`), {
       target: { value: '42' },
     });
     fireEvent.click(within(counter).getByRole('button', { name: 'Save' }));

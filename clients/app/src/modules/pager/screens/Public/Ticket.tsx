@@ -8,7 +8,8 @@ import { SearchX } from 'lucide-react';
 import { readyAlarm } from '../../../../shared/alarm/readyAlarm';
 import { useAlarm } from '../../../../shared/alarm/useAlarm';
 import LanguageSwitch from '../../shared/components/LanguageSwitch';
-import { matchColor } from '../../shared/lib/matchCode';
+import MatchBadge from '../../shared/components/MatchBadge';
+import { matchName, matchOf } from '../../shared/lib/matchWords';
 import { usePublicPagerClient } from '../../shared/lib/pagerClients';
 import { askPushPermission, followTicketByPush, usePushKey } from '../../shared/lib/pushAlerts';
 import { ticketAlarmState } from '../../shared/lib/ticketAlarm';
@@ -132,7 +133,8 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
   const acknowledged = Boolean(ticket.acknowledgedAt) || answeredRing === ringMark;
   const ahead = ticket.ahead ?? 0;
   const labelled = Boolean(ticket.labelKind);
-  const code = ticket.code ?? '';
+  const match = matchOf(ticket);
+  const code = match ? matchName(match, i18n.resolvedLanguage ?? i18n.language) : '';
 
   const acknowledge = async (): Promise<void> => {
     readyAlarm.silence();
@@ -191,9 +193,14 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
           ) : (
             <h1 className="pager-order">
               <span className="pager-order-label">{t('pager.ticket.codeLabel')}</span>{' '}
-              <bdi className="pager-code" style={{ background: matchColor(ticket.color) }}>
-                {code}
-              </bdi>
+              {match && (
+                <MatchBadge
+                  match={match}
+                  color={ticket.color}
+                  className={match.kind === 'word' ? 'pager-code pager-code--word' : 'pager-code'}
+                  otherClassName="pager-code-other"
+                />
+              )}
             </h1>
           )}
 
