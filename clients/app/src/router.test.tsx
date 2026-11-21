@@ -42,6 +42,8 @@ vi.mock('./modules/pager/screens/Public/Join', () => ({ default: () => <h1>Pager
 vi.mock('./modules/pager/screens/Public/Ticket', () => ({ default: () => <h1>Pager ticket</h1> }));
 vi.mock('./modules/pager/screens/Staff/Board', () => ({ default: () => <h1>Pager board</h1> }));
 vi.mock('./modules/pager/screens/Staff/Poster', () => ({ default: () => <h1>Pager poster</h1> }));
+vi.mock('./modules/pager/screens/Public/Try', () => ({ default: () => <h1>Pager demo</h1> }));
+vi.mock('./modules/pager/screens/Staff/Setup', () => ({ default: () => <h1>Pager setup</h1> }));
 const locales = path.resolve(import.meta.dirname, 'locales');
 const publicMenuLocales = path.resolve(import.meta.dirname, 'modules/public-menu/locales');
 beforeEach(async () => {
@@ -146,8 +148,10 @@ describe('Pager routes', () => {
       expect.arrayContaining([
         '/pager-public/$slug/pager',
         '/pager-public/pager/t/$token',
+        '/pager-public/pager/try',
         '/business/pager',
         '/business/pager/poster',
+        '/business/pager/setup',
       ])
     );
   });
@@ -157,6 +161,8 @@ describe('Pager routes', () => {
     ['/pager/t/tok-1', 'Pager ticket'],
     ['/pager', 'Pager board'],
     ['/pager/poster', 'Pager poster'],
+    ['/pager/try', 'Pager demo'],
+    ['/pager/setup', 'Pager setup'],
   ])('serves %s', async (url, heading) => {
     const router = await open(url);
     expect(await screen.findByRole('heading', { name: heading })).toBeVisible();
