@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Search, X } from 'lucide-react';
 import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 import { isUnscheduled } from '../../shared/lib/calendarSpans';
+import { isClosedTask } from '../../shared/filters/useShowCompleted';
 import type { CalendarScheduling } from './useCalendarScheduling';
 import type { GridTask } from './PlanningGrid';
 
@@ -15,8 +16,7 @@ export function needsScheduling(task: {
   status?: string;
   archived?: boolean;
 }): boolean {
-  if (task.archived) return false;
-  if (task.status === 'done' || task.status === 'cancelled') return false;
+  if (task.archived || isClosedTask(task)) return false;
   return isUnscheduled(task);
 }
 
