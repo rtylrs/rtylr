@@ -324,7 +324,7 @@ const routeTree = rootRoute.addChildren([
     createFinanceRoutes(businessRoute),
     createHrRoutes(businessRoute),
     createRecruitRoutes(businessRoute),
-    createPagerStaffRoutes(businessRoute),
+    ...createPagerStaffRoutes(businessRoute),
     dashboardRoute,
     automationsRoute,
     automationWebhooksRoute,

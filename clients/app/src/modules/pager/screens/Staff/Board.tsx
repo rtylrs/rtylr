@@ -4,15 +4,16 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { HelmetContainer } from '@voxire/components';
 import { Alert, Switch } from '@voxire/ui';
 import type { ListTicketsResponse, Ticket } from '@voxire/voxie/pager/v1/types';
-import { BellRing, Delete, Smartphone } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
+import { BellRing, Delete, Printer, Smartphone } from 'lucide-react';
 import { Badge, Button } from '../../../../shared/components/ui';
-import { configClient } from '../../../../shared/lib/clients';
 import { useUserStore } from '../../../../shared/stores/userStore';
-import { pagerJoinPath } from '../../pagerPaths';
+import { PAGER_POSTER_PATH } from '../../pagerPaths';
 import { PAGER_ERROR, errorCode, errorStatus } from '../../shared/lib/apiError';
 import { staffPagerClient } from '../../shared/lib/clients';
 import { normaliseTicketNumber } from '../../shared/lib/ticketNumber';
 import { TICKET_POLL_INTERVAL_MS, isStaleAnswer } from '../../shared/lib/ticketPoller';
+import { usePagerVenue } from '../../shared/lib/usePagerVenue';
 
 const TICKETS_KEY = ['pager', 'tickets'] as const;
 const SETTINGS_KEY = ['pager', 'settings'] as const;
@@ -42,18 +43,6 @@ const TICKET_ACTIONS: Record<TicketAction, (id: string) => Promise<unknown>> = {
   undo: (id) => staffPagerClient.undoReady({ id }),
   collect: (id) => staffPagerClient.collectTicket({ id }),
 };
-
-function useCustomerLink(): string {
-  const user = useUserStore((state) => state.user);
-  const knownSlug = user?.businessSlug?.trim() || user?.business_slug?.trim() || '';
-  const config = useQuery({
-    queryKey: ['pager', 'business-slug'],
-    enabled: knownSlug === '',
-    queryFn: async () => (await configClient.getConfig({})).business?.slug?.trim() ?? '',
-  });
-  const slug = knownSlug || config.data || '';
-  return slug ? `${window.location.origin}${pagerJoinPath(slug)}` : '';
-}
 
 const Board = (): React.JSX.Element => {
   const { t } = useTranslation('pager');
@@ -120,7 +109,7 @@ const Board = (): React.JSX.Element => {
     onError: onChangeFailed,
   });
 
-  const customerLink = useCustomerLink();
+  const customerLink = usePagerVenue().joinUrl;
   // The server refuses a settings change from anyone else; this only saves
   // them the round trip.
   const canEditSettings = useUserStore(
@@ -222,16 +211,26 @@ const Board = (): React.JSX.Element => {
     <>
       <HelmetContainer title={t('pager.board.pageTitle')} />
       <div className="w-full min-w-0 space-y-5">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <BellRing size={17} aria-hidden="true" style={{ color: 'var(--dash-text-muted)' }} />
-            <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
-              {t('pager.board.heading')}
-            </h1>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <BellRing size={17} aria-hidden="true" style={{ color: 'var(--dash-text-muted)' }} />
+              <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
+                {t('pager.board.heading')}
+              </h1>
+            </div>
+            <p className="mt-1 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+              {t('pager.board.subheading')}
+            </p>
           </div>
-          <p className="mt-1 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-            {t('pager.board.subheading')}
-          </p>
+          {/* The Portal's Button renders a <button> only, so the link wears its classes. */}
+          <Link
+            to={PAGER_POSTER_PATH}
+            className="portal-button portal-button--outline portal-button--sm"
+          >
+            <Printer size={16} aria-hidden="true" />
+            {t('pager.board.posterLink')}
+          </Link>
         </div>
 
         {boardError && <Alert variant="destructive">{t(`pager.board.${boardError}`)}</Alert>}

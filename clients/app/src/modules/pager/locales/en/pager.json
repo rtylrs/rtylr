@@ -88,6 +88,19 @@
     "actionFailed": "That didn't work. Try again.",
     "invalidNumber": "Use letters and digits only, up to 12.",
     "invalidTransition": "This order has already moved on.",
-    "tooManyOpen": "Too many open orders. Mark some as collected first."
+    "tooManyOpen": "Too many open orders. Mark some as collected first.",
+    "posterLink": "Print the counter poster"
+  },
+  "poster": {
+    "pageTitle": "Counter poster · rtylr",
+    "heading": "Counter poster",
+    "intro": "Print it and put it on the counter. Customers scan it to follow their order.",
+    "back": "Back to the pager",
+    "print": "Print poster",
+    "loading": "Preparing the poster...",
+    "noLink": "Your business has no public link yet, so there is nothing for the code to open. Set a slug in your business settings first.",
+    "stepScan": "Scan the code with your phone camera.",
+    "stepType": "Type the order number from your receipt.",
+    "stepWait": "Wait anywhere. Your phone rings when it's ready."
   }
 }

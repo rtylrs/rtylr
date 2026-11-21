@@ -4,6 +4,13 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@voxire/components', () => ({ HelmetContainer: () => null }));
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ to, children, ...props }: { to: string; children: React.ReactNode }) => (
+    <a href={to} {...props}>
+      {children}
+    </a>
+  ),
+}));
 
 const api = vi.hoisted(() => ({
   listTickets: vi.fn(),
@@ -162,6 +169,15 @@ describe('pager staff board', () => {
 
     const link = await screen.findByRole('link', { name: /\/acme\/pager$/ });
     expect(link).toHaveAttribute('href', `${window.location.origin}/acme/pager`);
+  });
+
+  it('links to the counter poster', async () => {
+    renderBoard();
+
+    expect(await screen.findByRole('link', { name: 'Print the counter poster' })).toHaveAttribute(
+      'href',
+      '/pager/poster'
+    );
   });
 
   it.each([

@@ -116,4 +116,12 @@ describe('pager staff board', () => {
     expect(canAccessPortalPath(user, '/pager/')).toBe(true);
     expect(canAccessPortalPath(null, '/pager')).toBe(false);
   });
+
+  it('opens the counter poster to the same members', () => {
+    const user = {
+      effectiveAccess: createEffectiveAccess('insights', { permissions: [] }),
+    };
+    expect(canAccessPortalPath(user, '/pager/poster')).toBe(true);
+    expect(canAccessPortalPath(null, '/pager/poster')).toBe(false);
+  });
 });
