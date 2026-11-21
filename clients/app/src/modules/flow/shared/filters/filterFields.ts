@@ -3,6 +3,7 @@ import type { Task } from '../stores/flowStore';
 import { initialsFromName } from '../lib/memberUtils';
 import { statusLabelKey } from '../lib/statusLabels';
 import { PRIORITIES, UNASSIGNED, type ListField } from './taskFilters';
+import { NO_EPIC, type EpicSummary } from '../lib/taskHierarchy';
 
 const BUILT_IN_STATUSES: Task['status'][] = [
   'backlog',
@@ -87,6 +88,18 @@ export function labelField(
     field: 'labels',
     label: t('flow.filters.fields.label'),
     options: labels.map((l) => ({ value: String(l.id), label: l.name, color: l.color })),
+  };
+}
+
+/** A project's epics in board order, then "No epic". */
+export function epicField(epics: readonly EpicSummary[], t: TFunction): FilterFieldConfig {
+  return {
+    field: 'epics',
+    label: t('flow.filters.fields.epic'),
+    options: [
+      ...epics.map((e) => ({ value: e.id, label: e.title, color: e.color })),
+      { value: NO_EPIC, label: t('flow.epics.noEpic') },
+    ],
   };
 }
 
