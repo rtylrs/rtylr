@@ -4,7 +4,7 @@ import path from 'node:path';
 import React from 'react';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { initTestI18nFrom } from '../../../test/i18nTestInstance';
-import { BusinessRoute } from './BusinessRoute';
+import { BusinessRoute, type StandaloneSurface } from './BusinessRoute';
 import { useUserStore } from '../stores/userStore';
 
 const mockGetMe = vi.fn();
@@ -20,7 +20,9 @@ vi.mock('../lib/clients', () => ({
 }));
 
 vi.mock('../../shell/PortalShell', () => ({
-  default: ({ children }: React.PropsWithChildren) => <div>{children}</div>,
+  default: ({ children }: React.PropsWithChildren) => (
+    <div data-testid="portal-shell">{children}</div>
+  ),
 }));
 
 vi.mock('@voxire/ui', () => ({ Avatar: () => <div data-testid="avatar" /> }));
@@ -290,5 +292,89 @@ describe('BusinessRoute authorization', () => {
     } finally {
       Object.defineProperty(window, 'location', { configurable: true, value: original });
     }
+  });
+});
+
+describe('BusinessRoute on Rennili (standalone)', () => {
+  const surface: StandaloneSurface = {
+    portalPath: (pathname) => (pathname === '/board' ? '/pager' : '/elsewhere'),
+    shell: (page) => <div data-testid="rennili-shell">{page}</div>,
+  };
+
+  beforeAll(() => initTestI18nFrom(path.resolve(import.meta.dirname, '../../locales')));
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useUserStore.setState({ user: null, token: null });
+    routerState.pathname = '/board';
+    mockGetConfig.mockResolvedValue({ business: { name: 'Acme Corp' } });
+  });
+
+  it('sends a signed-out visitor to sign in, coming back through the Portal path', () => {
+    document.cookie = 'token=; Max-Age=0; path=/';
+    const original = window.location;
+    const assigned: string[] = [];
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: {
+        hostname: 'localhost',
+        pathname: '/board',
+        search: '?from=poster',
+        hash: '',
+        get href(): string {
+          return 'http://localhost:5186/board?from=poster';
+        },
+        set href(value: string) {
+          assigned.push(value);
+        },
+      },
+    });
+    try {
+      render(<BusinessRoute standalone={surface} />);
+
+      expect(assigned).toHaveLength(1);
+      const target = new URL(assigned[0]);
+      expect(target.searchParams.get('redirect')).toBe('dash');
+      // The sign-in app returns to the Portal origin only; the Portal's
+      // _redirects forwards /pager to Rennili's /board.
+      expect(target.searchParams.get('returnTo')).toBe('/pager?from=poster');
+      expect(mockGetMe).not.toHaveBeenCalled();
+    } finally {
+      Object.defineProperty(window, 'location', { configurable: true, value: original });
+    }
+  });
+
+  it('lets a signed-in member open the board in the Rennili shell, not the Portal one', async () => {
+    document.cookie = 'token=test-token; path=/';
+    mockGetMe.mockResolvedValue({
+      id: 5,
+      email: 'staff@example.com',
+      businessId: 10,
+      effectiveAccess: accessDocument(),
+    });
+
+    render(<BusinessRoute standalone={surface} />);
+
+    await waitFor(() => expect(screen.getByTestId('outlet')).toBeTruthy());
+    expect(screen.getByTestId('rennili-shell')).toContainElement(screen.getByTestId('outlet'));
+    expect(screen.queryByTestId('portal-shell')).toBeNull();
+  });
+
+  it('checks access against the Portal path the page stands for', async () => {
+    document.cookie = 'token=test-token; path=/';
+    routerState.pathname = '/somewhere';
+    mockGetMe.mockResolvedValue({
+      id: 5,
+      email: 'staff@example.com',
+      businessId: 10,
+      effectiveAccess: accessDocument(),
+    });
+
+    render(<BusinessRoute standalone={surface} />);
+
+    await waitFor(() =>
+      expect(screen.getByRole('alert')).toHaveTextContent('You don’t have access to this page')
+    );
+    expect(screen.queryByTestId('outlet')).toBeNull();
   });
 });
