@@ -36,8 +36,6 @@
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  /* The code sizes below follow this screen, so they also fit the demo's phone frame. */
-  container-type: inline-size;
 }
 
 .pager-screen--ready {
@@ -49,6 +47,9 @@
   width: 100%;
   max-width: 480px;
   margin: 0 auto;
+  /* The code sizes below follow this column, not the screen: a 480px column on a
+     tablet, the frame in the demo. A ten-letter word then stays on one line. */
+  container-type: inline-size;
   /* viewport-fit=cover lets the page run under a notch and the home bar. */
   padding: max(12px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
     max(32px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
@@ -232,7 +233,7 @@
 /* Sized to be read from arm's length, and to shrink for a twelve-character number. */
 .pager-order-number {
   max-width: 100%;
-  font-size: clamp(64px, 30cqi, 168px);
+  font-size: clamp(64px, 33cqi, 168px);
   line-height: 1;
   font-weight: 900;
   letter-spacing: -0.02em;
@@ -240,7 +241,7 @@
 }
 
 .pager-order-number--long {
-  font-size: clamp(28px, 10.5cqi, 72px);
+  font-size: clamp(28px, 11.5cqi, 72px);
 }
 
 /* The match code the customer shows the cashier: read across a counter. */
@@ -249,7 +250,7 @@
   padding: 0.12em 0.4em;
   border-radius: 24px;
   color: #ffffff;
-  font-size: clamp(88px, 36cqi, 176px);
+  font-size: clamp(88px, 40cqi, 176px);
   line-height: 1;
   font-weight: 900;
   letter-spacing: 0.04em;
@@ -262,7 +263,7 @@
   align-items: center;
   max-width: 100%;
   padding: 0.2em 0.5em;
-  font-size: clamp(40px, 13cqi, 88px);
+  font-size: clamp(40px, 14cqi, 88px);
   letter-spacing: 0;
   text-align: center;
   overflow-wrap: anywhere;
