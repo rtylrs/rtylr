@@ -9,6 +9,7 @@ const LeavePolicySettings = (): React.JSX.Element => {
   const { t } = useTranslation('hrCommon');
   const createLeaveType = useCreateLeaveType();
   const [name, setName] = useState('');
+  const [annualDays, setAnnualDays] = useState(0);
   const [maxCarryoverDays, setMaxCarryoverDays] = useState(0);
   const [minNoticeDays, setMinNoticeDays] = useState(1);
   const [isPaid, setIsPaid] = useState(true);
@@ -16,7 +17,7 @@ const LeavePolicySettings = (): React.JSX.Element => {
 
   const save = (event: React.FormEvent): void => {
     event.preventDefault();
-    if (!name.trim() || maxCarryoverDays < 1 || minNoticeDays < 1) {
+    if (!name.trim() || annualDays < 1 || maxCarryoverDays < 1 || minNoticeDays < 1) {
       toast.error(t('hrLeave.policy.nameAndLimitsRequired'));
       return;
     }
@@ -25,12 +26,15 @@ const LeavePolicySettings = (): React.JSX.Element => {
         name: name.trim(),
         isPaid,
         requiresApproval,
+        accrualRule: 'annual',
+        accrualAmount: annualDays,
         maxCarryoverDays,
         minNoticeDays,
       },
       {
         onSuccess: () => {
           setName('');
+          setAnnualDays(0);
           setMaxCarryoverDays(0);
         },
       }
@@ -53,6 +57,16 @@ const LeavePolicySettings = (): React.JSX.Element => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t('hrLeave.policies.namePlaceholder')}
+                required
+              />
+            </div>
+            <div>
+              <Label>{t('hrLeave.policies.annualAllowance')}</Label>
+              <Input
+                type="number"
+                min={1}
+                value={annualDays}
+                onChange={(e) => setAnnualDays(Number(e.target.value))}
                 required
               />
             </div>

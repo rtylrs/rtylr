@@ -145,4 +145,29 @@ describe('Register Feature Component', () => {
       expect(assigned).toEqual(['/verify?email=alex%40acme.com&sent=1']);
     }
   );
+
+  it('carries the Portal page it was sent from through email verification', async () => {
+    const assigned = captureRedirectLocation('?redirect=dash&returnTo=%2Fpager%2Fsetup');
+    render(<Register />);
+    fireEvent.change(screen.getByPlaceholderText(/my coffee shop/i), {
+      target: { value: 'Bean Bar' },
+    });
+    fireEvent.change(screen.getByPlaceholderText(/you@company.com/i), {
+      target: { value: 'alex@acme.com' },
+    });
+    const passwordInputs = screen.getAllByPlaceholderText(/characters/i);
+    fireEvent.change(passwordInputs[0], { target: { value: 'SecurePass123' } });
+    fireEvent.change(screen.getByPlaceholderText(/repeat password/i), {
+      target: { value: 'SecurePass123' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    await waitFor(() => expect(mockMutate).toHaveBeenCalledOnce());
+    const options = mockMutate.mock.calls[0][1] as { onSuccess: () => void };
+    options.onSuccess();
+
+    expect(assigned).toEqual([
+      '/verify?email=alex%40acme.com&sent=1&redirect=dash&returnTo=%2Fpager%2Fsetup',
+    ]);
+  });
 });

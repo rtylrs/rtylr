@@ -11,9 +11,16 @@ import {
 const storageKey = (scope: string): string => `flow:filters:${scope}`;
 const DIM_KEY = 'flow:filters:dim';
 
+/**
+ * Filters last for the visit, not forever. They are kept in sessionStorage, so
+ * moving between a project's board, list and calendar keeps them, but closing
+ * the site and coming back opens every board unfiltered. Remembering them in
+ * localStorage made a board reopen days later already narrowed to "Urgent",
+ * which read as a default nobody set.
+ */
 function load(scope: string): TaskFilters {
   try {
-    const raw = localStorage.getItem(storageKey(scope));
+    const raw = sessionStorage.getItem(storageKey(scope));
     return raw ? parseTaskFilters(JSON.parse(raw)) : EMPTY_TASK_FILTERS;
   } catch {
     // Private mode, quota, or a corrupt entry: start unfiltered.
@@ -24,10 +31,25 @@ function load(scope: string): TaskFilters {
 function save(scope: string, filters: TaskFilters): void {
   try {
     const value = serializeTaskFilters(filters);
-    if (value) localStorage.setItem(storageKey(scope), JSON.stringify(value));
-    else localStorage.removeItem(storageKey(scope));
+    if (value) sessionStorage.setItem(storageKey(scope), JSON.stringify(value));
+    else sessionStorage.removeItem(storageKey(scope));
   } catch {
     // Not being remembered is fine; the URL still carries the filter.
+  }
+}
+
+/**
+ * Filters used to be saved in localStorage; drop those on mount so they never
+ * resurface. The dim preference stays: it is a setting, not a filter.
+ */
+function clearLegacyFilters(): void {
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i -= 1) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('flow:filters:') && key !== DIM_KEY) localStorage.removeItem(key);
+    }
+  } catch {
+    // Storage unavailable: nothing to clear.
   }
 }
 
@@ -53,7 +75,8 @@ export interface TaskFilterState {
  * Filters for one list, kept in two places:
  *
  * - the URL (`?filter=`), so a filtered board is a link someone else can open;
- * - localStorage per `scope`, so the board reopens filtered the way it was left.
+ * - sessionStorage per `scope`, so switching between a project's board, list
+ *   and calendar keeps the filter for the rest of the visit.
  *
  * The URL wins. When it has no filter the stored one is used straight away
  * (no unfiltered flash) and then written into the URL, so the address bar is
@@ -113,6 +136,8 @@ export function useTaskFilters(scope: string): TaskFilterState {
   );
 
   const clear = useCallback(() => setFilters(EMPTY_TASK_FILTERS), [setFilters]);
+
+  useEffect(clearLegacyFilters, []);
 
   const [dim, setDimState] = useState(loadDim);
   const setDim = useCallback((value: boolean) => {

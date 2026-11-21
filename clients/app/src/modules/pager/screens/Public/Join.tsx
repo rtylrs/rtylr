@@ -9,8 +9,8 @@ import { readyAlarm } from '../../../../shared/alarm/readyAlarm';
 import { pagerTicketPath } from '../../pagerPaths';
 import LanguageSwitch from '../../shared/components/LanguageSwitch';
 import { PAGER_ERROR, errorCode, errorStatus } from '../../shared/lib/apiError';
-import { publicPagerClient } from '../../shared/lib/clients';
 import { joinWithRetry } from '../../shared/lib/joinWithRetry';
+import { usePublicPagerClient } from '../../shared/lib/pagerClients';
 import { askPushPermission, usePushKey } from '../../shared/lib/pushAlerts';
 import { normaliseTicketNumber } from '../../shared/lib/ticketNumber';
 
@@ -27,11 +27,19 @@ function joinErrorFor(error: unknown): JoinError {
   return 'failed';
 }
 
-const Join = (): React.JSX.Element => {
+interface JoinProps {
+  /** The venue, when not taken from the route. */
+  slug?: string;
+  /** Replaces opening the ticket page, as in the demo's phone. */
+  onJoined?: (publicToken: string) => void;
+}
+
+const Join = ({ slug: givenSlug, onJoined }: JoinProps = {}): React.JSX.Element => {
   const { t } = useTranslation('pager');
   const { slug: rawSlug } = useParams({ strict: false });
-  const slug = (rawSlug ?? '').toLowerCase();
+  const slug = (givenSlug ?? rawSlug ?? '').toLowerCase();
   const navigate = useNavigate();
+  const publicPagerClient = usePublicPagerClient();
   const pushKey = usePushKey();
   const inputId = useId();
   const errorId = useId();
@@ -66,6 +74,10 @@ const Join = (): React.JSX.Element => {
       });
       if (controller.signal.aborted) return;
       if (!ticket.publicToken) throw new Error('The pager answered without a ticket token');
+      if (onJoined) {
+        onJoined(ticket.publicToken);
+        return;
+      }
       // A router navigation, not a page load: the unlocked audio lives in this document.
       void navigate({ to: pagerTicketPath(ticket.publicToken) });
     } catch (error) {

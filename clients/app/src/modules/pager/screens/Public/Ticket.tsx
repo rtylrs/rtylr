@@ -8,7 +8,7 @@ import { SearchX } from 'lucide-react';
 import { readyAlarm } from '../../../../shared/alarm/readyAlarm';
 import { useAlarm } from '../../../../shared/alarm/useAlarm';
 import LanguageSwitch from '../../shared/components/LanguageSwitch';
-import { publicPagerClient } from '../../shared/lib/clients';
+import { usePublicPagerClient } from '../../shared/lib/pagerClients';
 import { askPushPermission, followTicketByPush, usePushKey } from '../../shared/lib/pushAlerts';
 import { ticketAlarmState } from '../../shared/lib/ticketAlarm';
 import { createTicketPoller, isOpenStatus, type TicketPoller } from '../../shared/lib/ticketPoller';
@@ -18,10 +18,11 @@ import { createTicketPoller, isOpenStatus, type TicketPoller } from '../../share
 const POLL_TIMEOUT_MS = 10_000;
 const LONG_NUMBER_LENGTH = 5;
 
-const Ticket = (): React.JSX.Element => {
+const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Element => {
   const { t, i18n } = useTranslation('pager');
   const { token: rawToken } = useParams({ strict: false });
-  const token = rawToken ?? '';
+  const token = givenToken ?? rawToken ?? '';
+  const publicPagerClient = usePublicPagerClient();
   const alarm = useAlarm(readyAlarm);
   const pushKey = usePushKey();
   // Bumped by the "alert me" tap so a permission granted there subscribes.
@@ -52,7 +53,7 @@ const Ticket = (): React.JSX.Element => {
     poller.current = created;
     created.start();
     return () => created.stop();
-  }, [token]);
+  }, [token, publicPagerClient]);
 
   const number = ticket?.number ?? '';
   const readyTitle = t('pager.ticket.readyTitle', { number });

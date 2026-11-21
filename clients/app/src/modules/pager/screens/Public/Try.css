@@ -1,0 +1,127 @@
+/*
+ * The public demo (`/pager/try`): the staff board beside a phone. The board
+ * uses the Portal's dash tokens, which follow the visitor's theme, so they
+ * are pinned to the light values here to match the always-light phone.
+ */
+.pager-try {
+  --dash-bg: #f8f8f8;
+  --dash-surface: #ffffff;
+  --dash-card: #ffffff;
+  --dash-border: rgba(0, 0, 0, 0.08);
+  --dash-text: rgb(9, 9, 11);
+  --dash-text-muted: rgba(9, 9, 11, 0.5);
+  --dash-text-dim: rgba(9, 9, 11, 0.65);
+  --dash-hover: rgba(0, 0, 0, 0.05);
+  --dash-input-bg: #ffffff;
+
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 16px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.pager-try-header {
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pager-try-steps {
+  margin: 0;
+  padding-inline-start: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.pager-try-note {
+  font-size: 14px;
+}
+
+.pager-try-grid {
+  display: grid;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .pager-try-grid {
+    grid-template-columns: 360px minmax(0, 1fr);
+  }
+}
+
+.pager-try-label {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pager-muted);
+}
+
+.pager-try-phone-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* A phone-sized window onto the customer's screens. */
+.pager-try-phone {
+  height: 640px;
+  max-height: 80dvh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  border: 10px solid var(--pager-ink);
+  border-radius: 36px;
+  background: var(--pager-bg);
+}
+
+.pager-try-phone .pager-screen {
+  flex: 1;
+}
+
+.pager-try-phone .pager-page {
+  padding-bottom: 24px;
+}
+
+.pager-try-phone .pager-order-number {
+  font-size: 96px;
+}
+
+.pager-try-phone .pager-order-number--long {
+  font-size: 40px;
+}
+
+.pager-try-board {
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--dash-bg);
+  color: var(--dash-text);
+}
+
+.pager-try-claim {
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pager-try-claim .pager-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.pager-try-link {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+}

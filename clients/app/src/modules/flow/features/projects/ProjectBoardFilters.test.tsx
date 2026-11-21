@@ -160,6 +160,7 @@ beforeAll(async () => {
 
 beforeEach(() => {
   localStorage.clear();
+  sessionStorage.clear();
   router.set({});
 });
 
@@ -204,13 +205,14 @@ describe('Board filters', () => {
     );
   });
 
-  it('puts the filter in the URL and remembers it for the project', () => {
+  it('puts the filter in the URL and remembers it for the rest of the visit only', () => {
     renderBoard();
     fireEvent.click(screen.getByRole('button', { name: /only mine/i }));
     expect(router.get().filter).toEqual({ assignees: ['1'] });
-    expect(JSON.parse(localStorage.getItem('flow:filters:project:2') ?? '{}')).toEqual({
+    expect(JSON.parse(sessionStorage.getItem('flow:filters:project:2') ?? '{}')).toEqual({
       assignees: ['1'],
     });
+    expect(localStorage.getItem('flow:filters:project:2')).toBeNull();
   });
 
   it('opens filtered when the link carries a filter', () => {
@@ -220,11 +222,21 @@ describe('Board filters', () => {
     expect(screen.getByRole('button', { name: /priority: high/i })).toBeTruthy();
   });
 
-  it('reopens with the remembered filter when the URL has none', () => {
-    localStorage.setItem('flow:filters:project:2', JSON.stringify({ priorities: ['high'] }));
+  it('keeps the filter when coming back to the board in the same visit', () => {
+    sessionStorage.setItem('flow:filters:project:2', JSON.stringify({ priorities: ['high'] }));
     renderBoard();
     expect(cardTitles()).toEqual(['3']);
     expect(router.get().filter).toEqual({ priorities: ['high'] });
+  });
+
+  it('opens unfiltered on a new visit and forgets filters saved by older versions', () => {
+    localStorage.setItem('flow:filters:project:2', JSON.stringify({ priorities: ['urgent'] }));
+    localStorage.setItem('flow:filters:dim', '1');
+    renderBoard();
+    expect(cardTitles()).toHaveLength(3);
+    expect(router.get().filter).toBeUndefined();
+    expect(localStorage.getItem('flow:filters:project:2')).toBeNull();
+    expect(localStorage.getItem('flow:filters:dim')).toBe('1');
   });
 
   it('hides the columns a status filter leaves out', () => {

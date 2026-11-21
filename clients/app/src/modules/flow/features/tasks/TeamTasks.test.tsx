@@ -89,6 +89,7 @@ beforeAll(async () => {
 
 beforeEach(() => {
   localStorage.clear();
+  sessionStorage.clear();
   router.set({});
   listCalls.length = 0;
 });

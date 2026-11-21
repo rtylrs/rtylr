@@ -109,5 +109,38 @@
     "stepScan": "Scannez le code avec l'appareil photo de votre téléphone.",
     "stepType": "Saisissez le numéro de commande imprimé sur votre reçu.",
     "stepWait": "Attendez où vous voulez : votre téléphone sonne quand c'est prêt."
+  },
+  "try": {
+    "pageTitle": "Essayez le bipeur gratuit · rtylr",
+    "brand": "Bipeur rtylr",
+    "venueName": "Café de démo",
+    "heading": "Essayez le bipeur ici même",
+    "intro": "D'un côté le téléphone de votre client, de l'autre le tableau de votre comptoir. Jouez les deux rôles.",
+    "stepPhone": "Sur le téléphone, saisissez un numéro de commande, par exemple 42, puis touchez le bouton.",
+    "stepBoard": "Sur le tableau, touchez Prête à côté de ce numéro.",
+    "stepRing": "Le téléphone sonne. Activez le son pour l'entendre.",
+    "sandboxNotice": "Ceci est une démo. Rien de ce que vous saisissez n'est enregistré, et recharger la page remet tout à zéro.",
+    "phoneHeading": "Le téléphone de votre client",
+    "counterHeading": "Votre comptoir",
+    "anotherOrder": "Recommencer avec un autre numéro",
+    "claimHeading": "Utilisez-le dans votre établissement, gratuitement",
+    "claimBody": "Créez votre compte avec le nom de votre établissement, puis ajoutez son numéro de téléphone. Votre tableau s'ouvre avec le bipeur activé.",
+    "claim": "Obtenir mon bipeur gratuit",
+    "haveAccount": "Vous utilisez déjà rtylr ?",
+    "signIn": "Connectez-vous pour l'activer"
+  },
+  "setup": {
+    "pageTitle": "Configurer votre bipeur · rtylr",
+    "heading": "Configurer le bipeur de {{venue}}",
+    "intro": "Une dernière chose : le numéro de téléphone de votre établissement. Ensuite, votre tableau s'ouvre avec le bipeur activé.",
+    "phoneLabel": "Téléphone de l'établissement",
+    "phoneHint": "Enregistré sur votre entreprise. Vous pourrez le modifier plus tard dans les paramètres généraux.",
+    "phoneInvalid": "Saisissez un numéro de téléphone de 6 à 15 chiffres.",
+    "submit": "Activer mon bipeur",
+    "submitting": "Configuration...",
+    "claimFailed": "Impossible de configurer le bipeur. Réessayez.",
+    "adminOnly": "Seul le propriétaire ou un administrateur de cette entreprise peut configurer le bipeur.",
+    "loadFailed": "Impossible de charger votre entreprise.",
+    "retry": "Réessayer"
   }
 }

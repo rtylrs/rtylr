@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { publicPagerClient } from './clients';
+import { usePagerSandbox } from './pagerClients';
 
 // Lock-screen notifications for a ticket, on browsers with Web Push (Android
 // Chrome and desktop browsers; an iPhone Safari tab has none). They come on
@@ -47,9 +48,16 @@ export function loadPushKey(): Promise<string> {
   return pushKey;
 }
 
+/**
+ * The key for the screens. Empty in the public demo: its tickets live only in
+ * the browser, so the server has nothing to push to and the visitor is never
+ * asked. An empty key keeps askPushPermission and followTicketByPush silent.
+ */
 export function usePushKey(): string {
+  const sandbox = usePagerSandbox();
   const [key, setKey] = useState('');
   useEffect(() => {
+    if (sandbox) return undefined;
     let current = true;
     void loadPushKey().then((loaded) => {
       if (current) setKey(loaded);
@@ -57,8 +65,8 @@ export function usePushKey(): string {
     return () => {
       current = false;
     };
-  }, []);
-  return key;
+  }, [sandbox]);
+  return sandbox ? '' : key;
 }
 
 let pendingPermission: Promise<NotificationPermission> | null = null;
