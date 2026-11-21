@@ -765,7 +765,27 @@
     "creating": "Creating…",
     "prevMonthLabel": "Previous month",
     "nextMonthLabel": "Next month",
-    "agendaEmpty": "No tasks due this month."
+    "agendaEmpty": "No tasks due this month.",
+    "prevWeekLabel": "Previous week",
+    "nextWeekLabel": "Next week",
+    "viewLabel": "Calendar view",
+    "month": "Month",
+    "week": "Week",
+    "cycleTitle": "Cycle: {{name}}",
+    "milestoneTitle": "Milestone: {{name}}",
+    "leaveCount": "{{count}} on leave",
+    "resizeStart": "Drag to change the start date",
+    "resizeEnd": "Drag to change the due date",
+    "unscheduled": {
+      "title": "Unscheduled",
+      "toggle": "Unscheduled ({{count}})",
+      "hide": "Hide unscheduled tasks",
+      "search": "Search unscheduled tasks",
+      "hint": "Drag a task onto a day to set its due date.",
+      "readOnly": "You can open these tasks but not schedule them.",
+      "empty": "Every open task has a date.",
+      "noMatches": "No unscheduled tasks match."
+    }
   },
   "milestones": {
     "heading": "Milestones",

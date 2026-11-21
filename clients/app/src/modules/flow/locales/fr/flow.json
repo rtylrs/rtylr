@@ -770,7 +770,27 @@
     "creating": "Création…",
     "prevMonthLabel": "Mois précédent",
     "nextMonthLabel": "Mois suivant",
-    "agendaEmpty": "Aucune tâche à échéance ce mois-ci."
+    "agendaEmpty": "Aucune tâche à échéance ce mois-ci.",
+    "prevWeekLabel": "Semaine précédente",
+    "nextWeekLabel": "Semaine suivante",
+    "viewLabel": "Vue du calendrier",
+    "month": "Mois",
+    "week": "Semaine",
+    "cycleTitle": "Cycle : {{name}}",
+    "milestoneTitle": "Jalon : {{name}}",
+    "leaveCount": "{{count}} en congé",
+    "resizeStart": "Faites glisser pour changer la date de début",
+    "resizeEnd": "Faites glisser pour changer la date d'échéance",
+    "unscheduled": {
+      "title": "Non planifiées",
+      "toggle": "Non planifiées ({{count}})",
+      "hide": "Masquer les tâches non planifiées",
+      "search": "Rechercher les tâches non planifiées",
+      "hint": "Faites glisser une tâche sur un jour pour fixer son échéance.",
+      "readOnly": "Vous pouvez ouvrir ces tâches mais pas les planifier.",
+      "empty": "Toutes les tâches ouvertes ont une date.",
+      "noMatches": "Aucune tâche non planifiée ne correspond."
+    }
   },
   "milestones": {
     "heading": "Jalons",
