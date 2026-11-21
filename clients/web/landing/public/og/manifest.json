@@ -67,6 +67,10 @@
     "route": "/legal/terms/",
     "headline": "Terms of Service"
   },
+  "pager": {
+    "route": "/pager/",
+    "headline": "The free pager that rings their phone."
+  },
   "partners": {
     "route": "/partners/",
     "headline": "Build with rtylr. Grow with us."
