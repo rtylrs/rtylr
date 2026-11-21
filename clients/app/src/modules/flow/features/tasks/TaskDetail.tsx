@@ -1,11 +1,9 @@
-import { EmptyState } from '../../../../shared/components/dash/EmptyState';
 import React, { useEffect, useRef, useState } from 'react';
 import { useOpenTask } from '../../shared/lib/useOpenTask';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import type { TFunction } from 'i18next';
 import {
   ArrowLeft,
   Copy,
@@ -26,9 +24,10 @@ import {
   Hourglass,
   Pin,
   Lightbulb,
-  Activity,
-  Type,
   PartyPopper,
+  UserPen,
+  UserPlus,
+  Printer,
 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 
@@ -62,7 +61,7 @@ import { useApprovedLeaveInRange } from '../../shared/hooks/queries/useApprovedL
 import DescriptionEditor from './components/DescriptionEditor';
 import TimePanel from './components/TimePanel';
 import { useFlowStore, Attachment, Task } from '../../shared/stores/flowStore';
-import type { ApiTask, ApiTaskDetail, ApiTaskActivity } from '../../shared/services/flowApi';
+import type { ApiTask, ApiTaskDetail } from '../../shared/services/flowApi';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useCanEditTask, useCanDeleteResource } from '../../shared/lib/currentUser';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
@@ -77,6 +76,8 @@ import PriorityIcon from '../../shared/components/PriorityIcon';
 import LabelChip from '../../shared/components/LabelChip';
 import DueDatePicker from '../../shared/components/DueDatePicker';
 import { getInitials } from '../../shared/lib/utils';
+import { displayUserName } from '../../shared/lib/userDisplay';
+import { priorityLabelKey } from '../../shared/lib/priorityLabels';
 import { assigneeOptions } from '../../shared/lib/memberUtils';
 import { displayDescription } from '../../shared/lib/stringUtils';
 import { EFFORT_PRESETS, formatEffortMinutes } from '../../shared/lib/effortPresets';
@@ -88,95 +89,16 @@ import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import DevelopmentSection from './components/DevelopmentSection';
 import { useIsDeveloperProject } from '../projects-v2/useDeveloperMode';
 import LinksSection from './components/LinksSection';
+import TaskActivityTabs from './components/TaskActivityTabs';
+import TaskPrintView from './components/TaskPrintView';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatRelative(dateStr: string, t: TFunction): string {
-  const d = new Date(dateStr);
-  const diff = Date.now() - d.getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return t('flow.taskDetail.justNow');
-  if (mins < 60) return t('flow.taskDetail.minutesAgo', { count: mins });
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return t('flow.taskDetail.hoursAgo', { count: hours });
-  const days = Math.floor(hours / 24);
-  if (days < 30) return t('flow.taskDetail.daysAgo', { count: days });
-  return d.toLocaleDateString(t('flow.taskDetail.dateLocale'), {
-    month: 'short',
-    day: 'numeric',
-  });
-}
-
-function humanizeValue(action: string, value: string): string {
-  if (!value) return '-';
-  if (action.includes('status') || action === 'status_changed' || action === 'status_change') {
-    return value
-      .split('_')
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' ');
-  }
-  if (
-    action.includes('priority') ||
-    action === 'priority_changed' ||
-    action === 'priority_change'
-  ) {
-    return value.charAt(0).toUpperCase() + value.slice(1);
-  }
-  return value;
-}
 
 function inferAttachmentMime(name: string): string {
   if (/\.(apng|avif|gif|jpe?g|png|svg|webp)$/i.test(name)) {
     return 'image/*';
   }
   return 'application/octet-stream';
-}
-
-function describeActivity(a: ApiTaskActivity, t: TFunction): React.ReactNode {
-  const action = a.action;
-  const oldVal = humanizeValue(action, a.oldValue);
-  const newVal = humanizeValue(action, a.newValue);
-
-  if (action === 'link_added') {
-    return t('flow.taskDetail.linkAdded', { value: a.newValue });
-  }
-  if (action === 'link_removed') {
-    return t('flow.taskDetail.linkRemoved', { value: a.oldValue });
-  }
-
-  if (action === 'status_changed' || action === 'status_change') {
-    return t('flow.taskDetail.statusChanged', { from: oldVal, to: newVal });
-  }
-  if (action === 'priority_changed' || action === 'priority_change') {
-    return t('flow.taskDetail.priorityChanged', { from: oldVal, to: newVal });
-  }
-  if (action === 'assignee_changed' || action === 'assignee_change') {
-    return t('flow.taskDetail.assigneeChanged', { to: newVal });
-  }
-  if (action === 'title_changed' || action === 'title_change') {
-    return t('flow.taskDetail.titleChanged');
-  }
-  if (action === 'due_date_changed' || action === 'due_date_change') {
-    return t('flow.taskDetail.dueDateChanged', { to: newVal });
-  }
-  // generic
-  const label = action
-    .replace(/_/g, ' ')
-    .replace(/\bchanged\b/, 'changed')
-    .trim();
-  return a.newValue
-    ? t('flow.taskDetail.genericActivity', { label, value: newVal })
-    : t('flow.taskDetail.genericActivityNoValue', { label });
-}
-
-function activityIcon(action: string): React.ComponentType<{ size?: number }> {
-  if (action.includes('status')) return CircleDot;
-  if (action.includes('priority')) return Flag;
-  if (action.includes('assignee')) return UserIcon;
-  if (action.includes('title')) return Type;
-  if (action.includes('due_date')) return CalendarIcon;
-  if (action.includes('label')) return Tag;
-  return Activity;
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -262,6 +184,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
 
   const [labelPickerOpen, setLabelPickerOpen] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [printing, setPrinting] = useState(false);
 
   const updateTask = (
     taskId: string,
@@ -288,7 +211,6 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
     addSubtaskMut.mutate({ taskId, title });
   };
 
-  const [tab, setTab] = useState<'activity' | 'comments'>('comments');
   const [depId, setDepId] = useState('');
 
   if (isLoading) {
@@ -311,6 +233,12 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
     if (member.name) peopleNames[String(member.id)] = member.name;
   }
   const currentUserId = user?.id === undefined ? undefined : String(user.id);
+  // The signed-in person is not always on either list (no team-view access,
+  // not a project member yet), yet they are often the reporter.
+  const currentUserName = displayUserName(user);
+  if (currentUserId !== undefined && currentUserName && !peopleNames[currentUserId]) {
+    peopleNames[currentUserId] = currentUserName;
+  }
   // The people a comment here can mention: the project's members, who are the
   // ones the server notifies when their name follows an "@".
   const mentionCandidates: MentionCandidate[] = projectMembers
@@ -365,6 +293,22 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   }
 
   const { assignee, assigneeInitials } = apiTaskToTask(task);
+  // Reporter comes as an id on the task. It resolves through the same people
+  // map comments use, so it costs no request of its own.
+  const reporterId = task.reporterId && task.reporterId !== '0' ? String(task.reporterId) : '';
+  const reporterName = reporterId ? (peopleNames[reporterId] ?? t('flow.time.unknownAuthor')) : '';
+  // Hidden rather than disabled: it is a shortcut, and to a viewer, or to the
+  // person already assigned, it has nothing to offer.
+  const canAssignToMe =
+    canEdit && currentUserId !== undefined && String(task.assigneeId ?? '') !== currentUserId;
+  const assignToMe = (): void => {
+    if (currentUserId === undefined) return;
+    updateTask(task.id, {
+      assigneeId: currentUserId,
+      assignee: currentUserName,
+      assigneeInitials: getInitials(currentUserName),
+    });
+  };
   const project = taskProject ?? projects.find((p) => p.id === task.projectId);
   const dependencyTasks = allTasks.filter((ot) => task.dependencies?.includes(ot.id));
   const dependencyCandidates = allTasks.filter(
@@ -469,6 +413,20 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
             />
           </div>
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+            {canAssignToMe && (
+              <button
+                type="button"
+                onClick={assignToMe}
+                disabled={updateTaskMut.isPending}
+                className="flex h-8 items-center gap-1 rounded-sm px-2 text-flow-meta hover:bg-[var(--flow-hover)] disabled:opacity-40 sm:h-7"
+                style={{ color: 'var(--flow-text-muted)' }}
+                title={t('flow.taskDetail.assignToMe')}
+                aria-label={t('flow.taskDetail.assignToMe')}
+              >
+                <UserPlus size={11} aria-hidden="true" />
+                <span className="hidden sm:inline">{t('flow.taskDetail.assignToMe')}</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={async () => {
@@ -485,6 +443,19 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
             >
               <Copy size={11} />
               <span className="hidden sm:inline">{t('flow.taskDetail.copyId')}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPrinting(true)}
+              disabled={printing}
+              // Not on phones: the header is full there, the task key was
+              // squeezed to one letter, and printing from a phone is rare.
+              className="hidden h-7 w-7 rounded-sm items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40 sm:flex"
+              style={{ color: 'var(--flow-text-muted)' }}
+              title={t('flow.taskDetail.print.action')}
+              aria-label={t('flow.taskDetail.print.action')}
+            >
+              <Printer size={12} aria-hidden="true" />
             </button>
             <button
               type="button"
@@ -612,57 +583,28 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
 
             <LinksSection taskId={task.id} canEdit={canEdit} peopleNames={peopleNames} />
 
-            {/* Tabs */}
-            <div
-              className="flex items-center gap-1 mb-4"
-              style={{ borderBottom: '1px solid var(--flow-border)' }}
-            >
-              {(['comments', 'activity'] as const).map((tabName) => (
-                <button
-                  type="button"
-                  key={tabName}
-                  onClick={() => setTab(tabName)}
-                  className="px-3 py-2 text-flow-meta font-medium capitalize"
-                  style={{
-                    color: tab === tabName ? 'var(--flow-text)' : 'var(--flow-text-muted)',
-                    borderBottom:
-                      tab === tabName ? '2px solid var(--accent)' : '2px solid transparent',
-                  }}
-                >
-                  {tabName === 'comments'
-                    ? t('flow.taskDetail.comments')
-                    : t('flow.taskDetail.activity')}
-                  {tabName === 'comments' && (
-                    <span
-                      className="ms-1.5 text-flow-meta px-1 rounded-sm"
-                      style={{
-                        background: 'var(--flow-hover)',
-                        color: 'var(--flow-text-dim)',
-                      }}
-                    >
-                      {taskComments.length}
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
-
-            {tab === 'comments' && (
-              <div>
-                <div className="mb-4">
-                  <CommentList
-                    comments={taskComments}
-                    currentUserId={currentUserId}
-                    mentionCandidates={mentionCandidates}
-                    mentionNames={Object.values(peopleNames)}
-                    onEdit={
-                      canEdit
-                        ? (commentId, body) =>
-                            updateCommentMut.mutate({ id: commentId, content: body })
-                        : undefined
-                    }
-                  />
-                </div>
+            <TaskActivityTabs
+              taskId={task.id}
+              projectId={task.projectId}
+              currentUserId={currentUserId}
+              comments={taskComments}
+              activity={taskActivityData}
+              peopleNames={peopleNames}
+              renderComments={(comments) => (
+                <CommentList
+                  comments={comments}
+                  currentUserId={currentUserId}
+                  mentionCandidates={mentionCandidates}
+                  mentionNames={Object.values(peopleNames)}
+                  onEdit={
+                    canEdit
+                      ? (commentId, body) =>
+                          updateCommentMut.mutate({ id: commentId, content: body })
+                      : undefined
+                  }
+                />
+              )}
+              composer={
                 <CommentInput
                   mentionCandidates={mentionCandidates}
                   onSubmit={(body) =>
@@ -684,16 +626,8 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
                   }
                   disabled={!canEdit}
                 />
-              </div>
-            )}
-
-            {tab === 'activity' && (
-              <ActivitySection
-                entries={taskActivityData}
-                t={t}
-                onGoToComments={() => setTab('comments')}
-              />
-            )}
+              }
+            />
           </div>
         </motion.div>
       </div>
@@ -810,6 +744,22 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
             disabled={!canEdit}
           />
         </DetailField>
+
+        {reporterId && (
+          <DetailField icon={UserPen} label={t('flow.taskDetail.reporter')}>
+            <div className="flex min-w-0 items-center gap-2">
+              <AssigneeAvatar
+                name={reporterName}
+                initials={getInitials(reporterName)}
+                seed={reporterId}
+                size={18}
+              />
+              <span className="truncate text-flow-meta" style={{ color: 'var(--flow-text)' }}>
+                {reporterName}
+              </span>
+            </div>
+          </DetailField>
+        )}
 
         {overlappingLeave && overlappingLeave.length > 0 && (
           <div
@@ -1147,6 +1097,45 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           </div>
         </DetailField>
       </aside>
+      {printing && (
+        <TaskPrintView
+          identifier={task.identifier ?? task.id}
+          projectName={project?.name || task.projectName || ''}
+          title={task.title}
+          description={displayDescription(task.description)}
+          fields={[
+            {
+              label: t('flow.taskDetail.status'),
+              value: (() => {
+                const current = projectStatuses.find((s) => s.id === currentStatusId);
+                return current
+                  ? displayStatusName(current.name, t)
+                  : t(STATUS_LABEL_KEYS[task.status]);
+              })(),
+            },
+            {
+              label: t('flow.taskDetail.priority'),
+              value: t(priorityLabelKey(task.priority)),
+            },
+            {
+              label: t('flow.taskDetail.assignee'),
+              value: task.assigneeId ? assignee : t('flow.quickCreate.unassigned'),
+            },
+            { label: t('flow.taskDetail.reporter'), value: reporterName },
+            { label: t('flow.taskDetail.dueDate'), value: task.dueDate },
+            {
+              label: t('flow.taskDetail.estimate'),
+              value:
+                estimatedHours == null ? '' : `${estimatedHours} ${t('flow.taskDetail.hours')}`,
+            },
+            { label: t('flow.taskDetail.labels'), value: taskLabels.map((l) => l.name).join(', ') },
+          ]}
+          subtasks={taskSubtasks}
+          comments={taskComments}
+          mentionNames={Object.values(peopleNames)}
+          onDone={() => setPrinting(false)}
+        />
+      )}
       <NewStatusDialog
         open={newStatusOpen}
         onOpenChange={setNewStatusOpen}
@@ -1257,51 +1246,6 @@ function TaskTextField({
   }
   return multiline ? <textarea {...props} {...handlers} /> : <input {...props} {...handlers} />;
 }
-
-// ── Activity Section ──────────────────────────────────────────────────────────
-
-const ActivitySection: React.FC<{
-  entries: ApiTaskActivity[];
-  t: TFunction;
-  onGoToComments: () => void;
-}> = ({ entries, t, onGoToComments }) => {
-  if (entries.length === 0) {
-    return (
-      <EmptyState
-        icon={Activity}
-        title={t('flow.taskDetail.noActivity')}
-        action={{
-          label: t('flow.taskDetail.goToComments'),
-          onClick: onGoToComments,
-        }}
-        size="compact"
-      />
-    );
-  }
-  return (
-    <div className="space-y-3">
-      {entries.map((a) => {
-        const Icon = activityIcon(a.action);
-        return (
-          <div key={a.id} className="flex items-start gap-2.5">
-            <span
-              className="h-5 w-5 rounded-full flex items-center justify-center shrink-0 mt-0.5"
-              style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
-            >
-              <Icon size={10} />
-            </span>
-            <div className="flex-1 text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>
-              {describeActivity(a, t)}
-              <span className="ms-2" style={{ color: 'var(--flow-text-dim)' }}>
-                {formatRelative(a.createdAt, t)}
-              </span>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
 
 // ── DetailField ───────────────────────────────────────────────────────────────
 

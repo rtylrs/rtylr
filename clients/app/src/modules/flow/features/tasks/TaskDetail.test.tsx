@@ -7,7 +7,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { ApiTask, ApiTaskDetail } from '../../shared/services/flowApi';
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({
+    t: (key: string) => key,
+    i18n: { language: 'en', dir: () => 'ltr' },
+  }),
 }));
 
 vi.mock('@tanstack/react-router', () => ({
@@ -79,8 +82,12 @@ vi.mock('./useLabels', () => ({
   useSetTaskLabels: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
+const taskActivity = vi.hoisted(() => ({ data: [] as unknown[] }));
 vi.mock('./useTaskActivity', () => ({
-  useTaskActivity: () => ({ data: [] }),
+  useTaskActivity: () => taskActivity,
+}));
+vi.mock('./useTimeLogs', () => ({
+  useTimeLogs: () => ({ data: { timeLogs: [] }, isPending: false, isError: false }),
 }));
 
 vi.mock('../../shared/lib/useTaskRealtime', () => ({
@@ -129,9 +136,10 @@ vi.mock('./components/TimePanel', () => ({
   default: () => null,
 }));
 
+const canEditMock = vi.hoisted(() => vi.fn(() => true));
 vi.mock('../../shared/lib/currentUser', () => ({
-  useCanEditTask: () => true,
-  useCanDeleteResource: () => true,
+  useCanEditTask: () => canEditMock(),
+  useCanDeleteResource: () => canEditMock(),
 }));
 
 vi.mock('../../shared/components/Breadcrumbs', () => ({
@@ -139,7 +147,12 @@ vi.mock('../../shared/components/Breadcrumbs', () => ({
     <>{items.map((item) => item.label).join(' / ')}</>
   ),
 }));
-vi.mock('../../shared/components/CommentList', () => ({ default: () => null }));
+// The thread itself is stubbed; the print view still renders comment text
+// through the real renderCommentBody.
+vi.mock('../../shared/components/CommentList', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../shared/components/CommentList')>()),
+  default: () => null,
+}));
 vi.mock('../../shared/components/CommentInput', () => ({ default: () => null }));
 vi.mock('../../shared/components/SubtaskList', () => ({ default: () => null }));
 vi.mock('../../shared/components/AttachmentUpload', () => ({ default: () => null }));
@@ -173,6 +186,7 @@ vi.mock('../../shared/components/ConfirmDialog', () => ({
 
 import TaskDetail from './TaskDetail';
 import { useFlowStore } from '../../shared/stores/flowStore';
+import { useUserStore } from '../../shared/stores/userStore';
 
 function renderTaskDetail() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -189,6 +203,12 @@ beforeEach(() => {
   useLabelsSpy.mockReturnValue({ data: [] });
   useCurrentProjectSpy.mockReturnValue({ project: undefined, isLoading: false });
   developerProjectMock.mockReturnValue(false);
+  canEditMock.mockReturnValue(true);
+  taskActivity.data = [];
+  // The activity tab a person last chose is remembered in localStorage.
+  window.localStorage.clear();
+  useUserStore.setState({ user: null });
+  useFlowStore.setState({ members: [] });
   // The query-failure flags belong here, not in one describe's own hook. They
   // were reset inside the failure describe only, so `--sequence.shuffle` could
   // run a failure test before another and leave this stuck (#1194).
@@ -328,7 +348,7 @@ describe('TaskDetail activity empty state', () => {
 
     renderTaskDetail();
 
-    fireEvent.click(screen.getByText('flow.taskDetail.activity'));
+    fireEvent.click(screen.getByRole('tab', { name: 'flow.taskDetail.activityTabs.history' }));
 
     expect(screen.getByText('flow.taskDetail.noActivity')).toBeInTheDocument();
     const goToComments = screen.getByRole('button', { name: 'flow.taskDetail.goToComments' });
@@ -643,5 +663,121 @@ describe('TaskDetail Development section (T-365)', () => {
       screen.getByRole('heading', { name: 'flow.taskDetail.development' })
     ).toBeInTheDocument();
     expect(screen.getByText('flow.taskDetail.devPoints')).toBeInTheDocument();
+  });
+});
+
+describe('TaskDetail Assign to me (T-603)', () => {
+  const renderAssignedTo = (assigneeId?: string): void => {
+    useUserStore.setState({ user: { id: 7, fullName: 'Abed Amouneh' } });
+    taskDetailData.data = {
+      task: apiTask({ assigneeId }),
+      subtasks: [],
+      comments: [],
+      activity: [],
+    };
+    renderTaskDetail();
+  };
+
+  it('assigns the task to the signed-in person in one click', () => {
+    renderAssignedTo('12');
+    fireEvent.click(screen.getByRole('button', { name: 'flow.taskDetail.assignToMe' }));
+    expect(updateTaskMutate).toHaveBeenCalledWith({
+      id: 't-1',
+      data: { assigneeId: '7', assignee: 'Abed Amouneh', assigneeInitials: 'AA' },
+    });
+  });
+
+  it('is hidden when the task is already assigned to them', () => {
+    renderAssignedTo('7');
+    expect(
+      screen.queryByRole('button', { name: 'flow.taskDetail.assignToMe' })
+    ).not.toBeInTheDocument();
+  });
+
+  it('is hidden from someone who cannot edit the task', () => {
+    canEditMock.mockReturnValue(false);
+    renderAssignedTo(undefined);
+    expect(
+      screen.queryByRole('button', { name: 'flow.taskDetail.assignToMe' })
+    ).not.toBeInTheDocument();
+  });
+});
+
+describe('TaskDetail reporter (T-603)', () => {
+  it('names the reporter from the people the panel already knows', () => {
+    useFlowStore.setState({
+      members: [{ id: '31', name: 'Mohamad Homsi', initials: 'MH' }] as never,
+    });
+    taskDetailData.data = {
+      task: apiTask({ reporterId: '31' }),
+      subtasks: [],
+      comments: [],
+      activity: [],
+    };
+    renderTaskDetail();
+    expect(screen.getByText('flow.taskDetail.reporter')).toBeInTheDocument();
+    expect(screen.getByText('Mohamad Homsi')).toBeInTheDocument();
+  });
+
+  it('leaves the field out when the task carries no reporter', () => {
+    taskDetailData.data = {
+      task: apiTask(),
+      subtasks: [],
+      comments: [],
+      activity: [],
+    };
+    renderTaskDetail();
+    expect(screen.queryByText('flow.taskDetail.reporter')).not.toBeInTheDocument();
+  });
+});
+
+describe('TaskDetail print (T-603)', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  it('lays the task out for print and opens the browser print dialog', () => {
+    vi.useFakeTimers();
+    // The DOM shim has no print(); the real browser opens its dialog here.
+    const print = vi.fn();
+    vi.stubGlobal('print', print);
+    taskDetailData.data = {
+      task: apiTask({ identifier: 'FLOW-603', title: 'Printable task' }),
+      subtasks: [{ id: 's-1', title: 'Write the print view', status: 'done' }],
+      comments: [
+        {
+          id: 'c-1',
+          taskId: 'task-1',
+          userId: '7',
+          actorName: 'Abed Amouneh',
+          content: 'Looks **ready** to ship',
+          isEdited: false,
+          createdAt: '2026-11-20T10:00:00Z',
+          updatedAt: '2026-11-20T10:00:00Z',
+        },
+      ],
+      activity: [],
+    };
+    renderTaskDetail();
+
+    fireEvent.click(screen.getByRole('button', { name: 'flow.taskDetail.print.action' }));
+
+    const page = document.body.querySelector('.flow-task-print');
+    expect(page).not.toBeNull();
+    expect(document.documentElement).toHaveClass('flow-printing');
+    expect(within(page as HTMLElement).getByText('Printable task')).toBeInTheDocument();
+    expect(within(page as HTMLElement).getByText('Write the print view')).toBeInTheDocument();
+    // The comment prints the way the thread shows it, not as raw Markdown.
+    const bold = within(page as HTMLElement).getByText('ready');
+    expect(bold.tagName).toBe('STRONG');
+    expect(page?.textContent).not.toContain('**ready**');
+
+    vi.runAllTimers();
+    expect(print).toHaveBeenCalledTimes(1);
+
+    fireEvent(window, new Event('afterprint'));
+    expect(document.body.querySelector('.flow-task-print')).toBeNull();
+    expect(document.documentElement).not.toHaveClass('flow-printing');
   });
 });

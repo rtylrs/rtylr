@@ -104,6 +104,9 @@ export interface ApiTask {
   assigneeName?: ContractTask['assigneeName'];
   assigneeId?: string;
   assigneeInitials: string;
+  // Who created the task. The detail read passes the wire task through, so the
+  // value is already there; pinned to the contract like archived below.
+  reporterId?: ContractTask['reporterId'];
   dueDate: string;
   // Read and written. flow.task.v2 carries start_date on FlowTask and on
   // UpdateTaskBody, onion's list and detail reads select and map it, and the
