@@ -27,6 +27,9 @@ model LeaveTypePayload {
   /** Rule describing how entitlement accrues (e.g. "monthly", "yearly"); absent if entitlement is fixed. */
   accrual_rule?: string;
 
+  /** Days granted per accrual period (per year for "annual", per month for "monthly"); absent when none. */
+  accrual_amount?: float64;
+
   /** Maximum unused days that may carry over to the next year. */
   max_carryover_days: int32;
 
@@ -292,6 +295,10 @@ model CreateLeaveTypeRequest {
   /** Accrual rule; absent if entitlement is fixed. */
   accrual_rule?: string;
 
+  /** Days granted per accrual period; absent or zero grants no entitlement. */
+  @minValue(0)
+  accrual_amount?: float64;
+
   /** Maximum unused days that may carry over to the next year. */
   @Onkt.required
   @minValueExclusive(0)
@@ -324,6 +331,10 @@ model UpdateLeaveTypeBody {
 
   /** Updated accrual rule; absent to keep current value. */
   accrual_rule?: string;
+
+  /** Updated days granted per accrual period; absent to keep current value. */
+  @minValue(0)
+  accrual_amount?: float64;
 
   /** Updated max carryover days; absent to keep current value. */
   max_carryover_days?: int32;
