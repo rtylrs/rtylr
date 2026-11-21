@@ -95,5 +95,8 @@ export function apiTaskToTask(t: ApiTask): Task {
     statusId: t.statusId || undefined,
     statusName: t.statusName || undefined,
     statusColor: t.statusColor || undefined,
+    // Both are omitted on the wire when the task is not blocked. The count
+    // is what the badge shows; blocked alone still means at least one.
+    blockerCount: t.blockerCount || (t.blocked ? 1 : 0),
   };
 }

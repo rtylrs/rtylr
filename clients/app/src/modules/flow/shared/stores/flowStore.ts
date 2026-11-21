@@ -182,6 +182,8 @@ export interface Task {
   milestoneId?: string;
   parentId?: string;
   dependencies?: string[];
+  /** How many open tasks block this one; 0 when it is free to start. */
+  blockerCount?: number;
   archived?: boolean;
   createdAt: string;
   updatedAt: string;
