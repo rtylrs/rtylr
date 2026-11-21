@@ -12,11 +12,11 @@ VALUES (?, ?, ?)
 ON DUPLICATE KEY UPDATE enabled = VALUES(enabled), label_mode = VALUES(label_mode);
 
 -- name: CreateTicket :execresult
-INSERT INTO pager_tickets (business_id, match_word, status, source, public_token, phone_linked, created_at)
+INSERT INTO pager_tickets (business_id, match_number, status, source, public_token, phone_linked, created_at)
 VALUES (?, ?, 'waiting', 'customer', ?, TRUE, ?);
 
 -- name: ListOpenMatchCodes :many
-SELECT COALESCE(match_word, match_code, '') AS code
+SELECT COALESCE(match_number, match_word, match_code, '') AS code
 FROM pager_tickets
 WHERE business_id = ? AND status IN ('waiting', 'ready') AND label_kind IS NULL
   AND created_at >= sqlc.arg(unlabelled_since);
@@ -42,7 +42,7 @@ SET status = 'expired'
 WHERE business_id = ? AND open_number = ? AND created_at < sqlc.arg(open_since);
 
 -- name: ListOpenTickets :many
-SELECT id, business_id, label, label_kind, match_code, match_word, status, public_token,
+SELECT id, business_id, label, label_kind, match_code, match_word, match_number, status, public_token,
        created_at, ready_at, reminded_at, acknowledged_at
 FROM pager_tickets
 WHERE business_id = ? AND status IN ('waiting', 'ready') AND created_at >= sqlc.arg(open_since)
@@ -50,13 +50,13 @@ WHERE business_id = ? AND status IN ('waiting', 'ready') AND created_at >= sqlc.
 ORDER BY id;
 
 -- name: GetTicket :one
-SELECT id, business_id, label, label_kind, match_code, match_word, status, public_token,
+SELECT id, business_id, label, label_kind, match_code, match_word, match_number, status, public_token,
        created_at, ready_at, reminded_at, acknowledged_at
 FROM pager_tickets
 WHERE id = ? AND business_id = ?;
 
 -- name: GetTicketByToken :one
-SELECT id, business_id, label, label_kind, match_code, match_word, status, public_token,
+SELECT id, business_id, label, label_kind, match_code, match_word, match_number, status, public_token,
        created_at, ready_at, reminded_at, acknowledged_at
 FROM pager_tickets
 WHERE public_token = ?;

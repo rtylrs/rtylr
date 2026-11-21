@@ -41,12 +41,12 @@ func (r *Repository) SaveSettings(ctx context.Context, businessID int64, setting
 	})
 }
 
-// CreateTicket relies on uk_pager_tickets_open_match_word: a second open
-// unlabelled ticket with the same word is refused by the database itself.
+// CreateTicket relies on uk_pager_tickets_open_match_number: a second open
+// unlabelled ticket with the same number is refused by the database itself.
 func (r *Repository) CreateTicket(ctx context.Context, ticket domain.Ticket) (domain.Ticket, error) {
 	result, err := r.queries.CreateTicket(ctx, sqlc.CreateTicketParams{
 		BusinessID:  ticket.BusinessID,
-		MatchWord:   sql.NullString{String: ticket.Code, Valid: true},
+		MatchNumber: sql.NullString{String: ticket.Code, Valid: true},
 		PublicToken: ticket.PublicToken,
 		CreatedAt:   ticket.CreatedAt,
 	})
@@ -211,9 +211,13 @@ func found(row sqlc.GetTicketRow, err error) (domain.Ticket, bool, error) {
 	return ticketFromRow(row), true, nil
 }
 
-// matchOf is the ticket's word, or the code of a ticket opened before words.
+// matchOf is the ticket's match number, or on a ticket opened before the
+// numbers, its word or two character code.
 func matchOf(row sqlc.GetTicketRow) string {
-	if row.MatchWord.Valid {
+	switch {
+	case row.MatchNumber.Valid:
+		return row.MatchNumber.String
+	case row.MatchWord.Valid:
 		return row.MatchWord.String
 	}
 	return row.MatchCode.String

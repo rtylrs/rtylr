@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"math/big"
 	"slices"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/pager/internal/domain"
@@ -25,11 +26,12 @@ type repository interface {
 	SaveSettings(ctx context.Context, businessID int64, settings domain.Settings) error
 
 	// CreateTicket opens an unlabelled ticket showing ticket.Code as its match
-	// word. It returns domain.ErrCodeTaken when another open unlabelled ticket
-	// of the business shows the word, whatever its age.
+	// number. It returns domain.ErrCodeTaken when another open unlabelled
+	// ticket of the business shows the number, whatever its age.
 	CreateTicket(ctx context.Context, ticket domain.Ticket) (domain.Ticket, error)
 	// OpenMatchCodes lists what the business's open unlabelled tickets show:
-	// words, and the two character codes of tickets opened before them.
+	// numbers, and the words and two character codes of tickets opened before
+	// them.
 	OpenMatchCodes(ctx context.Context, businessID int64, unlabelledSince time.Time) ([]string, error)
 	// ExpireStaleUnlabelled closes the unlabelled tickets older than
 	// unlabelledSince, which frees their words.
@@ -108,12 +110,11 @@ func (s *Service) PublicVenue(ctx context.Context, slug string) (domain.Venue, d
 }
 
 // matchCodeAttempts bounds the retries when scans at the same moment draw the
-// same free word. There are only a few dozen words, so a rush of phones at one
-// venue does collide; each retry reads the taken words again.
+// same free number; each retry reads the taken numbers again.
 const matchCodeAttempts = 10
 
 // Scan opens a waiting, unlabelled ticket for the phone that scanned the
-// venue's QR, with a match word no other open unlabelled ticket shows.
+// venue's QR, with a match number no other open unlabelled ticket shows.
 func (s *Service) Scan(ctx context.Context, slug string) (domain.Ticket, error) {
 	venue, _, err := s.PublicVenue(ctx, slug)
 	if err != nil {
@@ -121,8 +122,8 @@ func (s *Service) Scan(ctx context.Context, slug string) (domain.Ticket, error) 
 	}
 	now := s.clock()
 	unlabelledSince := domain.UnlabelledSince(now)
-	// A ticket past its lifetime reads as expired but still holds its word in
-	// storage until it is closed.
+	// A ticket past its lifetime reads as expired but still holds its number
+	// in storage until it is closed.
 	if err := s.repo.ExpireStaleUnlabelled(ctx, venue.BusinessID, unlabelledSince); err != nil {
 		return domain.Ticket{}, err
 	}
@@ -138,7 +139,7 @@ func (s *Service) Scan(ctx context.Context, slug string) (domain.Ticket, error) 
 		for _, code := range codes {
 			used[code] = true
 		}
-		code, err := freeMatchWord(used)
+		code, err := freeMatchNumber(used)
 		if err != nil {
 			return domain.Ticket{}, err
 		}
@@ -161,14 +162,16 @@ func (s *Service) Scan(ctx context.Context, slug string) (domain.Ticket, error) 
 	return domain.Ticket{}, domain.ErrTooManyOpenTickets
 }
 
-// freeMatchWord draws a random word that is not in used: a key on its own
-// while any is free, then the keys with the lowest number still free ("panda2",
-// then "panda3").
-func freeMatchWord(used map[string]bool) (string, error) {
-	for number := 1; number <= domain.MaxOpenUnlabelledTickets; number++ {
-		free := make([]string, 0, len(domain.MatchWords))
-		for _, key := range domain.MatchWords {
-			if code := domain.MatchWordCode(key, number); !used[code] {
+// freeMatchNumber draws a random match number that is not in used: three
+// digits while any is free, then four.
+func freeMatchNumber(used map[string]bool) (string, error) {
+	for _, span := range [][2]int{
+		{domain.MinMatchNumber, domain.MaxMatchNumber},
+		{domain.MinFallbackMatchNumber, domain.MaxFallbackMatchNumber},
+	} {
+		free := make([]string, 0, span[1]-span[0]+1)
+		for n := span[0]; n <= span[1]; n++ {
+			if code := strconv.Itoa(n); !used[code] {
 				free = append(free, code)
 			}
 		}
@@ -177,7 +180,7 @@ func freeMatchWord(used map[string]bool) (string, error) {
 		}
 		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(free))))
 		if err != nil {
-			return "", fmt.Errorf("draw pager match word: %w", err)
+			return "", fmt.Errorf("draw pager match number: %w", err)
 		}
 		return free[n.Int64()], nil
 	}
