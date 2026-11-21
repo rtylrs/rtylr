@@ -124,6 +124,8 @@ func toTaskV2(t domain.Task) *flowtaskv2.FlowTask {
 		StatusName:        t.StatusName,
 		StatusColor:       t.StatusColor,
 		Dependencies:      dependencies,
+		Blocked:           t.Blocked,
+		BlockerCount:      t.BlockerCount,
 		WaitingOn:         t.WaitingOn,
 		DecisionNote:      t.DecisionNote,
 	}
@@ -210,6 +212,7 @@ func (a *TaskAPIV2) ListTasks(ctx context.Context, req *flowtaskv2.ListTasksRequ
 		v := req.GetAssigneeId()
 		filter.AssigneeID = &v
 	}
+	filter.Blocked = req.Blocked
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
 	filter.Limit, filter.Offset = int64(limit), offset
 
