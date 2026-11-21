@@ -478,6 +478,46 @@ describe('Flow task persistence adapters', () => {
   });
 });
 
+describe('flowApi cycle planning', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('sends a cycle change on a task, with an empty cycle meaning the backlog', async () => {
+    await flowApi.updateTask('9', { cycleId: '' });
+    expect(vi.mocked(taskV2.updateTask).mock.lastCall?.[0].body).toMatchObject({ cycleId: '0' });
+    await flowApi.updateTask('9', { cycleId: '44' });
+    expect(vi.mocked(taskV2.updateTask).mock.lastCall?.[0].body).toMatchObject({ cycleId: '44' });
+    await flowApi.updateTask('9', { title: 'x' });
+    const omitted = JSON.parse(
+      JSON.stringify(vi.mocked(taskV2.updateTask).mock.lastCall?.[0].body)
+    );
+    expect(omitted).not.toHaveProperty('cycleId');
+  });
+
+  it('maps start, complete, move and capacity onto the cycle client', async () => {
+    await flowApi.startCycle('5', { lengthWeeks: 3, goal: 'Ship' });
+    expect(cycleV2.startCycle).toHaveBeenCalledWith({
+      id: '5',
+      lengthWeeks: 3,
+      goal: 'Ship',
+      startDate: undefined,
+    });
+    await flowApi.completeCycle('5', [{ taskId: '9', decision: 'move', toCycleId: '6' }]);
+    expect(cycleV2.completeCycle).toHaveBeenCalledWith({
+      id: '5',
+      decisions: [{ taskId: '9', decision: 'move', toCycleId: '6' }],
+    });
+    await flowApi.moveCycleTask({ taskId: '9', cycleId: '', beforeTaskId: '3' });
+    expect(cycleV2.moveCycleTask).toHaveBeenCalledWith({
+      taskId: '9',
+      cycleId: undefined,
+      beforeTaskId: '3',
+      afterTaskId: undefined,
+    });
+    await flowApi.getCycleCapacity('5');
+    expect(cycleV2.getCycleCapacity).toHaveBeenCalledWith({ id: '5' });
+  });
+});
+
 describe('toApiStatus', () => {
   it('fills the zero and false values the wire omits, so the first status sorts first', () => {
     const first = toApiStatus({ id: '1', projectId: '8', name: 'Backlog', bucket: 'backlog' });

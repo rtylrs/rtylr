@@ -133,9 +133,24 @@ model FlowTask {
   @encode(string)
   section_id?: int64;
 
-  /** Cycle (sprint) this task belongs to, if any. Cycles are project-scoped in v2. */
+  /**
+   * Cycle (sprint) this task belongs to, if any. Cycles are project-scoped in
+   * v2. It is the task's upcoming or active cycle, or the completed cycle it was
+   * finished in. Absent means the task is in the unplanned backlog.
+   */
   @encode(string)
   cycle_id?: int64;
+
+  /** Name of that cycle. Empty when cycle_id is absent. */
+  cycle_name: string;
+
+  /**
+   * Position of the task inside its cycle, or inside the unplanned backlog when
+   * cycle_id is absent. Lower comes first. Absent for a backlog task that was
+   * never placed; those follow the ranked ones, oldest first.
+   */
+  @encode(string)
+  plan_rank?: int64;
 
   /** Milestone this task rolls up to, if any. */
   @encode(string)
@@ -487,6 +502,14 @@ model CreateTaskRequest {
   @minValueExclusive(0)
   @encode(string)
   milestone_id?: int64;
+
+  /**
+   * Upcoming or active cycle of the task's project to add the task to, at the
+   * end of the cycle. Absent leaves the task in the unplanned backlog.
+   */
+  @minValueExclusive(0)
+  @encode(string)
+  cycle_id?: int64;
 }
 
 model CreateTaskResponse {
@@ -601,6 +624,14 @@ model UpdateTaskBody {
    */
   @encode(string)
   milestone_id?: int64;
+
+  /**
+   * Cycle to move the task to, at the end of that cycle. Absent leaves it
+   * untouched; 0 returns the task to the unplanned backlog. Must be an upcoming
+   * or active cycle of the task's project.
+   */
+  @encode(string)
+  cycle_id?: int64;
 }
 
 model UpdateTaskRequest {

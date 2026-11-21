@@ -102,6 +102,28 @@ describe('useProjectRealtime', () => {
     );
   });
 
+  // Backlog, Cycles page and task cycle fields follow a teammate's planning.
+  it.each(['cycle.started', 'cycle.completed', 'cycle.created', 'cycle.updated'])(
+    'invalidates cycles and tasks on %s',
+    (type) => {
+      const spy = mount('p-7');
+      handler?.(event({ type }));
+      expect(keys(spy)).toEqual(
+        expect.arrayContaining([
+          JSON.stringify(['cycles', 'p-7']),
+          JSON.stringify(['cycle-capacity']),
+          JSON.stringify(['tasks']),
+        ])
+      );
+    }
+  );
+
+  it('refreshes cycle totals when a task changes', () => {
+    const spy = mount('p-7');
+    handler?.(event());
+    expect(keys(spy)).toContain(JSON.stringify(['cycles', 'p-7']));
+  });
+
   // The mutation's own onSuccess already invalidated; refetching again would
   // clobber an in-flight optimistic update.
   it('ignores a task event the current user caused', () => {

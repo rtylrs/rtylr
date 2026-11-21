@@ -81,6 +81,7 @@ export const QuickCreate: React.FC = () => {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const quickCreateOpen = useFlowStore((state) => state.quickCreateOpen);
   const quickCreateColumnId = useFlowStore((state) => state.quickCreateColumnId);
+  const quickCreateCycleId = useFlowStore((state) => state.quickCreateCycleId);
   const setQuickCreateOpen = useFlowStore((state) => state.setQuickCreateOpen);
   const user = useUserStore((s) => s.user);
   const { projectId: currentProjectId } = useParams({ strict: false });
@@ -162,6 +163,10 @@ export const QuickCreate: React.FC = () => {
         effortMinutes,
         labels: labelId ? [labelId] : undefined,
         milestoneId: projectMilestones.some((m) => m.id === milestoneId) ? milestoneId : undefined,
+        // Opened from a Backlog section: the task joins that cycle, unless the
+        // project was changed in the dialog.
+        cycleId:
+          quickCreateCycleId && projectId === currentProjectId ? quickCreateCycleId : undefined,
       });
       const task = res.task;
       const taskId = String(task.id);

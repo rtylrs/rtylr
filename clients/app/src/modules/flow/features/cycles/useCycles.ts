@@ -3,7 +3,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { flowApi } from '../../shared/services/flowApi';
-import type { ApiCycle } from '../../shared/services/flowApi';
+import type {
+  ApiCycle,
+  ApiCycleCapacity,
+  ApiCycleTaskDecision,
+  ApiTask,
+} from '../../shared/services/flowApi';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 
 /**
@@ -52,5 +57,121 @@ export function useUpdateCycle() {
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['cycles'] }),
     onError: () => toast.error(t('flowToasts.cycle.updateFailed')),
+  });
+}
+
+/** Whether a failed request was refused as a conflict (HTTP 409). */
+function isConflict(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'status' in error &&
+    (error as { status?: unknown }).status === 409
+  );
+}
+
+/**
+ * Everything a cycle change can move: the cycle list (totals, carry-over), the
+ * tasks it holds, and the task panel's cycle field.
+ */
+function invalidatePlanning(qc: ReturnType<typeof useQueryClient>) {
+  void qc.invalidateQueries({ queryKey: ['cycles'] });
+  void qc.invalidateQueries({ queryKey: ['cycle-capacity'] });
+  void qc.invalidateQueries({ queryKey: ['tasks'] });
+  void qc.invalidateQueries({ queryKey: ['my-tasks'] });
+  void qc.invalidateQueries({ queryKey: ['task'] });
+}
+
+export function useStartCycle() {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, lengthWeeks, goal }: { id: string; lengthWeeks: number; goal?: string }) =>
+      unwrap(flowApi.startCycle(id, { lengthWeeks, goal })),
+    onSuccess: () => {
+      invalidatePlanning(qc);
+      toast.success(t('flowToasts.cycle.started'));
+    },
+    onError: (error) =>
+      toast.error(
+        isConflict(error) ? t('flowToasts.cycle.alreadyActive') : t('flowToasts.cycle.startFailed')
+      ),
+  });
+}
+
+export function useCompleteCycle() {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, decisions }: { id: string; decisions: ApiCycleTaskDecision[] }) =>
+      unwrap(flowApi.completeCycle(id, decisions)),
+    onSuccess: () => {
+      invalidatePlanning(qc);
+      toast.success(t('flowToasts.cycle.completed'));
+    },
+    onError: () => toast.error(t('flowToasts.cycle.completeFailed')),
+  });
+}
+
+export interface CycleTaskMove {
+  taskId: string;
+  /** Empty for the unplanned backlog. */
+  cycleId: string;
+  beforeTaskId?: string;
+  afterTaskId?: string;
+  /** The rank to show until the server answers. */
+  optimisticRank: number;
+}
+
+/**
+ * Places a task in a cycle or the backlog at a position. The task moves in
+ * every cached task list at once, so the drop lands without waiting for the
+ * round trip; a failure rolls it back.
+ */
+export function useMoveCycleTask() {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (move: CycleTaskMove) =>
+      unwrap(
+        flowApi.moveCycleTask({
+          taskId: move.taskId,
+          cycleId: move.cycleId,
+          beforeTaskId: move.beforeTaskId,
+          afterTaskId: move.afterTaskId,
+        })
+      ),
+    onMutate: async (move) => {
+      await qc.cancelQueries({ queryKey: ['tasks'] });
+      const previous = qc.getQueriesData<ApiTask[]>({ queryKey: ['tasks'] });
+      qc.setQueriesData<ApiTask[]>({ queryKey: ['tasks'] }, (tasks) =>
+        Array.isArray(tasks)
+          ? tasks.map((task) =>
+              String(task.id) === move.taskId
+                ? {
+                    ...task,
+                    cycleId: move.cycleId || undefined,
+                    planRank: String(move.optimisticRank),
+                  }
+                : task
+            )
+          : tasks
+      );
+      return { previous };
+    },
+    onError: (_error, _move, context) => {
+      context?.previous.forEach(([key, data]) => qc.setQueryData(key, data));
+      toast.error(t('flowToasts.cycle.moveFailed'));
+    },
+    onSettled: () => invalidatePlanning(qc),
+  });
+}
+
+export function useCycleCapacity(cycleId: string | undefined) {
+  return useQuery<ApiCycleCapacity>({
+    queryKey: ['cycle-capacity', cycleId],
+    queryFn: () => unwrap(flowApi.getCycleCapacity(cycleId!)),
+    enabled: cycleId !== undefined && cycleId !== '',
+    staleTime: 60 * 1000,
   });
 }

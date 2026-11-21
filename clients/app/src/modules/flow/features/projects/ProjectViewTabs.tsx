@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from '@tanstack/react-router';
 import {
   Activity,
+  ListOrdered,
   LayoutGrid,
   List,
   GanttChart,
@@ -26,6 +27,7 @@ interface ProjectViewTabsProps {
 type ProjectViewPath =
   | '/flow/p/$projectId'
   | '/flow/p/$projectId/overview'
+  | '/flow/p/$projectId/backlog'
   | '/flow/p/$projectId/list'
   | '/flow/p/$projectId/timeline'
   | '/flow/p/$projectId/calendar'
@@ -58,6 +60,14 @@ const VIEWS: ViewDef[] = [
     to: '/flow/p/$projectId/overview',
     match: (p) => p.endsWith('/overview'),
     previewOnly: true,
+  },
+  {
+    // Plan cycles here, work them on the board: the backlog sits before it.
+    key: 'backlog',
+    labelKey: 'flow.projectViewTabs.backlog',
+    icon: ListOrdered,
+    to: '/flow/p/$projectId/backlog',
+    match: (p) => p.endsWith('/backlog'),
   },
   {
     key: 'board',
