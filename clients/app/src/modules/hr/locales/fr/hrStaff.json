@@ -7,6 +7,10 @@
     "title": "Aucun membre du personnel",
     "description": "Ajustez les filtres ou invitez quelqu'un dans votre équipe."
   },
+  "restricted": {
+    "title": "Répertoire du personnel indisponible",
+    "description": "Le répertoire de l'entreprise est désactivé ou restreint par un administrateur."
+  },
   "profile": {
     "notFoundTitle": "Employé introuvable",
     "notFoundDescription": "L'employé que vous recherchez a peut-être été supprimé.",
