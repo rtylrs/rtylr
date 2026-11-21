@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
-import { claimPager, isPhoneValid, normalisePhone, venueSlugCandidates } from './claimPager';
+import {
+  claimPager,
+  isPhoneValid,
+  isSlugUsable,
+  normalisePhone,
+  venueSlugCandidates,
+} from './claimPager';
 
 const taken = { statusCode: 409, code: 'conflict' };
 
@@ -56,6 +62,30 @@ describe('claiming the pager', () => {
     expect(claim.enablePager).toHaveBeenCalledOnce();
   });
 
+  it('uses only the slug the owner confirmed, and fails rather than pick another', async () => {
+    const claim = steps();
+    await claimPager(claim, {
+      phone: '03123456',
+      venueName: 'Brio Coffee',
+      slug: '',
+      chosenSlug: 'brio',
+    });
+    expect(claim.calls).toEqual(['phone 03123456', 'slug brio', 'enable']);
+
+    const takenClaim = steps();
+    takenClaim.setSlug.mockRejectedValueOnce(taken);
+    await expect(
+      claimPager(takenClaim, {
+        phone: '03123456',
+        venueName: 'Brio Coffee',
+        slug: '',
+        chosenSlug: 'brio',
+      })
+    ).rejects.toBe(taken);
+    expect(takenClaim.setSlug).toHaveBeenCalledOnce();
+    expect(takenClaim.enablePager).not.toHaveBeenCalled();
+  });
+
   it('stops without switching the pager on when a step fails for another reason', async () => {
     const claim = steps();
     claim.setSlug.mockRejectedValue({ statusCode: 403 });
@@ -65,6 +95,19 @@ describe('claiming the pager', () => {
     expect(claim.setSlug).toHaveBeenCalledOnce();
     expect(claim.enablePager).not.toHaveBeenCalled();
   });
+});
+
+describe('a slug the owner types', () => {
+  it.each(['brio', 'brio-coffee', 'b2'])('accepts %s', (slug) => {
+    expect(isSlugUsable(slug)).toBe(true);
+  });
+
+  it.each(['', '-brio', 'brio-', 'Brio', 'brio coffee', 'board', 'menu', 'a'.repeat(61)])(
+    'refuses %j',
+    (slug) => {
+      expect(isSlugUsable(slug)).toBe(false);
+    }
+  );
 });
 
 describe('venue phone number', () => {

@@ -344,6 +344,34 @@ describe('BusinessRoute on Rennili (standalone)', () => {
     }
   });
 
+  it('sends a signed-out visitor where the surface says, when it names a place', () => {
+    document.cookie = 'token=; Max-Age=0; path=/';
+    const original = window.location;
+    const assigned: string[] = [];
+    const signedOutUrl = vi.fn(() => 'https://auth.example.test/register?x=1');
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: {
+        hostname: 'localhost',
+        pathname: '/setup',
+        search: '?slug=brio',
+        hash: '',
+        set href(value: string) {
+          assigned.push(value);
+        },
+      },
+    });
+    try {
+      render(<BusinessRoute standalone={{ ...surface, signedOutUrl }} />);
+
+      expect(signedOutUrl).toHaveBeenCalledWith('/setup', '?slug=brio');
+      expect(assigned).toEqual(['https://auth.example.test/register?x=1']);
+      expect(mockGetMe).not.toHaveBeenCalled();
+    } finally {
+      Object.defineProperty(window, 'location', { configurable: true, value: original });
+    }
+  });
+
   it('lets a signed-in member open the board in the Rennili shell, not the Portal one', async () => {
     document.cookie = 'token=test-token; path=/';
     mockGetMe.mockResolvedValue({

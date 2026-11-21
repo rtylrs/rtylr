@@ -49,6 +49,7 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
+  window.history.replaceState(null, '', '/setup');
   navigateSpy.mockReset();
   Object.values(pager).forEach((mock) => mock.mockReset());
   Object.values(hub).forEach((mock) => mock.mockReset().mockResolvedValue({}));
@@ -102,5 +103,66 @@ describe('pager setup', () => {
       await screen.findByText('Only the owner or an admin of this business can set up the pager.')
     ).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Switch on my pager' })).not.toBeInTheDocument();
+  });
+
+  it('asks the owner to confirm the slug a setup link named, and uses exactly that one', async () => {
+    window.history.replaceState(null, '', '/setup?name=Bean+Bar&slug=Beans');
+    renderSetup();
+
+    const link = await screen.findByLabelText('Your customer link');
+    expect(link).toHaveValue('beans');
+    expect(screen.getByText(/opens \S+\/beans\./)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Venue phone number'), {
+      target: { value: '+961 3 123 456' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Switch on my pager' }));
+
+    await waitFor(() => expect(navigateSpy).toHaveBeenCalledWith({ to: '/board' }));
+    expect(hub.setSlug).toHaveBeenCalledTimes(1);
+    expect(hub.setSlug).toHaveBeenCalledWith({ slug: 'beans' });
+  });
+
+  it('says so when the confirmed slug is taken, without switching the pager on', async () => {
+    window.history.replaceState(null, '', '/setup?slug=beans');
+    hub.setSlug.mockRejectedValue({ statusCode: 409 });
+    renderSetup();
+
+    fireEvent.change(await screen.findByLabelText('Venue phone number'), {
+      target: { value: '+961 3 123 456' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Switch on my pager' }));
+
+    expect(await screen.findByText('That link is taken. Choose another one.')).toBeVisible();
+    expect(hub.setSlug).toHaveBeenCalledTimes(1);
+    expect(pager.updateSettings).not.toHaveBeenCalled();
+  });
+
+  it('refuses a slug the business module would not accept, before saving anything', async () => {
+    window.history.replaceState(null, '', '/setup?slug=beans');
+    renderSetup();
+
+    fireEvent.change(await screen.findByLabelText('Your customer link'), {
+      target: { value: 'bean bar' },
+    });
+    fireEvent.change(screen.getByLabelText('Venue phone number'), {
+      target: { value: '+961 3 123 456' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Switch on my pager' }));
+
+    expect(
+      await screen.findByText(
+        'Use lowercase letters, numbers and dashes, starting and ending with a letter or number.'
+      )
+    ).toBeVisible();
+    expect(hub.updateConfig).not.toHaveBeenCalled();
+  });
+
+  it('keeps the slug the business already has, whatever the link says', async () => {
+    window.history.replaceState(null, '', '/setup?slug=other');
+    hub.getConfig.mockResolvedValue({ business: { name: 'Bean Bar', slug: 'beans' } });
+    renderSetup();
+
+    await screen.findByLabelText('Venue phone number');
+    expect(screen.queryByLabelText('Your customer link')).not.toBeInTheDocument();
   });
 });
