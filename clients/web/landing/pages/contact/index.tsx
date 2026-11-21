@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
 import { MessageCircle, Phone, Mail, ArrowRight, CheckCircle } from 'lucide-react';
+import { RTYLR_CONTACT_CHANNELS, type RtylrContactChannelId } from '@voxire/config';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
@@ -35,11 +36,16 @@ interface ContactFormErrors {
 /** Address routing, in the order a reader is most likely to need it. */
 const ROUTING = ['sales', 'support', 'security', 'partners', 'press'] as const;
 
-const CONTACT_CHANNELS = [
-  { icon: MessageCircle, id: 'whatsapp', href: 'https://wa.me/9613940708' },
-  { icon: Phone, id: 'phone', href: 'tel:+9613940708' },
-  { icon: Mail, id: 'email', href: 'mailto:info@voxire.com' },
-];
+const CHANNEL_ICONS: Record<RtylrContactChannelId, typeof MessageCircle> = {
+  whatsapp: MessageCircle,
+  phone: Phone,
+  email: Mail,
+};
+
+const CONTACT_CHANNELS = RTYLR_CONTACT_CHANNELS.map((channel) => ({
+  ...channel,
+  icon: CHANNEL_ICONS[channel.id],
+}));
 
 /** Topics a link can preselect with ?topic=, from the blog's calls to action. */
 const TOPICS = ['investors', 'sales'] as const;
@@ -239,7 +245,12 @@ const ContactPage = (): React.JSX.Element => {
                     </button>
                   </div>
                 ) : (
-                  <form onSubmit={handleSubmit} onInput={markFormStart} className={styles.form} noValidate>
+                  <form
+                    onSubmit={handleSubmit}
+                    onInput={markFormStart}
+                    className={styles.form}
+                    noValidate
+                  >
                     <h2 className={styles.formTitle}>{t('contact.form.title')}</h2>
                     {topic && <p className={styles.formTopic}>{t(`contact.topic.${topic}`)}</p>}
 
