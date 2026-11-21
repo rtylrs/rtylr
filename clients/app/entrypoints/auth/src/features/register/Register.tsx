@@ -49,14 +49,18 @@ function signInPath(redirect: string | null, returnTo: string | null): string {
   return query ? `/?${query}` : '/';
 }
 
+const searchParam = (key: string): string =>
+  new URLSearchParams(window.location.search).get(key)?.trim() ?? '';
+
 // ── Register ────────────────────────────────────────────────────────────────
 
 const Register: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [name, setName] = useState('');
-  const [businessName, setBusinessName] = useState('');
-  const [email, setEmail] = useState('');
+  // A link that signs a venue up (the pager setup's) can fill these in.
+  const [businessName, setBusinessName] = useState(() => searchParam('businessName'));
+  const [email, setEmail] = useState(() => searchParam('email'));
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [emailTaken, setEmailTaken] = useState(false);
