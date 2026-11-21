@@ -24,7 +24,7 @@ func NewTerminalAPI(service *application.Service) *TerminalAPI {
 }
 
 func (a *TerminalAPI) ListTerminals(ctx context.Context, _ *posterminalv1.ListTerminalsRequest) (*posterminalv1.ListTerminalsResponse, error) {
-	user, err := requireTerminalPermission(ctx, "pos:terminals:manage")
+	user, err := requireAnyTerminalPermission(ctx, "pos:orders:view", "pos:terminals:manage")
 	if err != nil {
 		return nil, err
 	}
@@ -126,11 +126,20 @@ func (a *TerminalAPI) HeartbeatTerminal(ctx context.Context, req *posterminalv1.
 }
 
 func requireTerminalPermission(ctx context.Context, permission string) (*authPkg.AuthUser, error) {
+	return requireAnyTerminalPermission(ctx, permission)
+}
+
+func requireAnyTerminalPermission(ctx context.Context, permissions ...string) (*authPkg.AuthUser, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil || !authPkg.HasAppPermission(device.User, authorization.AppPOS, permission) || !authPkg.HasAnyAppScope(device.User, authorization.AppPOS) {
+	if device.User == nil || !authPkg.HasAnyAppScope(device.User, authorization.AppPOS) {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	return device.User, nil
+	for _, permission := range permissions {
+		if authPkg.HasAppPermission(device.User, authorization.AppPOS, permission) {
+			return device.User, nil
+		}
+	}
+	return nil, onekiterrors.PermissionDenied()
 }
 
 func toProtoTerminal(t domain.Terminal) *posterminalv1.Terminal {
