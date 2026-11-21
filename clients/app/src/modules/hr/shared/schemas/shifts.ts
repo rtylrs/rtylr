@@ -71,7 +71,8 @@ export const swapRequestSchema = z.object({
 
 export const breakLogSchema = z.object({
   id: z.union([z.string(), z.number()]).transform(Number),
-  staffId: z.number(),
+  employeeId: z.union([z.string(), z.number()]).transform(Number).optional(),
+  staffId: z.union([z.string(), z.number()]).transform(Number).default(0),
   staffName: z.string(),
   start: z.string(),
   end: z.string().optional(),
