@@ -8,7 +8,9 @@ import { SearchX } from 'lucide-react';
 import { readyAlarm } from '../../../../shared/alarm/readyAlarm';
 import { useAlarm } from '../../../../shared/alarm/useAlarm';
 import LanguageSwitch from '../../shared/components/LanguageSwitch';
-import { matchColor } from '../../shared/lib/matchCode';
+import MatchBadge from '../../shared/components/MatchBadge';
+import { DEPLOY_GAP_PATIENCE_MS } from '../../shared/lib/apiError';
+import { matchName, matchOf } from '../../shared/lib/matchWords';
 import { usePublicPagerClient } from '../../shared/lib/pagerClients';
 import { askPushPermission, followTicketByPush, usePushKey } from '../../shared/lib/pushAlerts';
 import { ticketAlarmState } from '../../shared/lib/ticketAlarm';
@@ -32,6 +34,9 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
   const [ticket, setTicket] = useState<GetPublicTicketResponse | null>(null);
   const [notFound, setNotFound] = useState(token === '');
   const [pollFailed, setPollFailed] = useState(false);
+  // Until the first answer, failures read as "still getting your code" for
+  // as long as a deploy takes; the poller keeps asking every few seconds.
+  const [patienceOver, setPatienceOver] = useState(false);
   const [acknowledging, setAcknowledging] = useState(false);
   const [acknowledgeFailed, setAcknowledgeFailed] = useState(false);
   // The ring this phone answered, so its buttons go away before the next poll
@@ -53,7 +58,12 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
     });
     poller.current = created;
     created.start();
-    return () => created.stop();
+    setPatienceOver(false);
+    const patience = setTimeout(() => setPatienceOver(true), DEPLOY_GAP_PATIENCE_MS);
+    return () => {
+      created.stop();
+      clearTimeout(patience);
+    };
   }, [token, publicPagerClient]);
 
   const label = ticket?.label ?? '';
@@ -104,7 +114,7 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
     return (
       <div className="pager-center">
         <HelmetContainer title={t('pager.ticket.pageTitleLoading')} />
-        {pollFailed ? (
+        {pollFailed && patienceOver ? (
           <>
             <p className="pager-error" role="alert">
               {t('pager.ticket.loadFailed')}
@@ -119,7 +129,7 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
           </>
         ) : (
           <p className="pager-text" role="status">
-            {t('pager.ticket.loading')}
+            {t(pollFailed ? 'pager.scan.slow' : 'pager.ticket.loading')}
           </p>
         )}
       </div>
@@ -132,7 +142,8 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
   const acknowledged = Boolean(ticket.acknowledgedAt) || answeredRing === ringMark;
   const ahead = ticket.ahead ?? 0;
   const labelled = Boolean(ticket.labelKind);
-  const code = ticket.code ?? '';
+  const match = matchOf(ticket);
+  const code = match ? matchName(match, i18n.resolvedLanguage ?? i18n.language) : '';
 
   const acknowledge = async (): Promise<void> => {
     readyAlarm.silence();
@@ -191,9 +202,14 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
           ) : (
             <h1 className="pager-order">
               <span className="pager-order-label">{t('pager.ticket.codeLabel')}</span>{' '}
-              <bdi className="pager-code" style={{ background: matchColor(ticket.color) }}>
-                {code}
-              </bdi>
+              {match && (
+                <MatchBadge
+                  match={match}
+                  color={ticket.color}
+                  className={match.kind === 'word' ? 'pager-code pager-code--word' : 'pager-code'}
+                  otherClassName="pager-code-other"
+                />
+              )}
             </h1>
           )}
 

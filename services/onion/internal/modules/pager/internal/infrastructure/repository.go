@@ -41,12 +41,12 @@ func (r *Repository) SaveSettings(ctx context.Context, businessID int64, setting
 	})
 }
 
-// CreateTicket relies on uk_pager_tickets_open_match_code: a second open
-// unlabelled ticket with the same code is refused by the database itself.
+// CreateTicket relies on uk_pager_tickets_open_match_word: a second open
+// unlabelled ticket with the same word is refused by the database itself.
 func (r *Repository) CreateTicket(ctx context.Context, ticket domain.Ticket) (domain.Ticket, error) {
 	result, err := r.queries.CreateTicket(ctx, sqlc.CreateTicketParams{
 		BusinessID:  ticket.BusinessID,
-		MatchCode:   sql.NullString{String: ticket.Code, Valid: true},
+		MatchWord:   sql.NullString{String: ticket.Code, Valid: true},
 		PublicToken: ticket.PublicToken,
 		CreatedAt:   ticket.CreatedAt,
 	})
@@ -72,18 +72,28 @@ func (r *Repository) OpenMatchCodes(ctx context.Context, businessID int64, unlab
 	if err != nil {
 		return nil, err
 	}
-	codes := make([]string, 0, len(rows))
-	for _, row := range rows {
-		codes = append(codes, row.String)
-	}
-	return codes, nil
+	return rows, nil
 }
 
 func (r *Repository) ExpireStaleUnlabelled(ctx context.Context, businessID int64, unlabelledSince time.Time) error {
-	return r.queries.ExpireStaleUnlabelledTickets(ctx, sqlc.ExpireStaleUnlabelledTicketsParams{
+	ids, err := r.queries.ListStaleUnlabelledTicketIDs(ctx, sqlc.ListStaleUnlabelledTicketIDsParams{
 		BusinessID:      businessID,
 		UnlabelledSince: unlabelledSince,
 	})
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		err := r.queries.ExpireStaleUnlabelledTicket(ctx, sqlc.ExpireStaleUnlabelledTicketParams{
+			ID:              id,
+			BusinessID:      businessID,
+			UnlabelledSince: unlabelledSince,
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (r *Repository) ExpireStaleTicket(ctx context.Context, businessID int64, number string, openSince time.Time) error {
@@ -201,6 +211,14 @@ func found(row sqlc.GetTicketRow, err error) (domain.Ticket, bool, error) {
 	return ticketFromRow(row), true, nil
 }
 
+// matchOf is the ticket's word, or the code of a ticket opened before words.
+func matchOf(row sqlc.GetTicketRow) string {
+	if row.MatchWord.Valid {
+		return row.MatchWord.String
+	}
+	return row.MatchCode.String
+}
+
 // ticketFromRow maps a ticket row. Every ticket query selects the same
 // columns, so their row types convert to sqlc.GetTicketRow.
 func ticketFromRow(row sqlc.GetTicketRow) domain.Ticket {
@@ -209,7 +227,7 @@ func ticketFromRow(row sqlc.GetTicketRow) domain.Ticket {
 		BusinessID:     row.BusinessID,
 		Label:          row.Label.String,
 		LabelKind:      row.LabelKind.String,
-		Code:           row.MatchCode.String,
+		Code:           matchOf(row),
 		Status:         row.Status,
 		PublicToken:    row.PublicToken,
 		CreatedAt:      row.CreatedAt,

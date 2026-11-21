@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/pager/internal/application"
+	"github.com/voxire/onion/internal/modules/pager/internal/domain"
 	moduleinfra "github.com/voxire/onion/internal/modules/pager/internal/infrastructure"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/authorization"
@@ -111,14 +112,22 @@ type reply struct {
 	body   map[string]any
 }
 
-// code is the stable error code of a failed reply. A successful scan's code
-// is its match code, read with text("code").
+// code is the stable error code of a failed reply. A ticket's two character
+// code from before match words is read with text("code").
 func (r reply) code() string {
 	if r.status < http.StatusBadRequest {
 		return ""
 	}
 	code, _ := r.body["code"].(string)
 	return code
+}
+
+// wordOf is the match word a ticket or scan shows, as storage keeps it
+// ("panda", "panda2"), or "" when it shows none.
+func wordOf(fields map[string]any) string {
+	key, _ := fields["word"].(string)
+	number, _ := fields["word_number"].(float64)
+	return domain.MatchWordCode(key, int(number))
 }
 
 func (r reply) text(key string) string {
@@ -180,6 +189,30 @@ func (h *harness) labelMode(v venue, mode string) {
 	h.want(h.call(v.owner, http.MethodPut, "/pager/v1/settings", fmt.Sprintf(`{"label_mode":%q}`, mode)), http.StatusOK, "")
 }
 
+// legacyTicket stores an unlabelled ticket the way a scan did before match
+// words, showing a two character code, and returns its token.
+func (h *harness) legacyTicket(v venue, code string) string {
+	h.Helper()
+	token := fmt.Sprintf("legacy-%d-%s", v.businessID, code)
+	token += strings.Repeat("x", 32-len(token))
+	created := h.clock.Now().UTC()
+	if h.memory != nil {
+		h.memory.mu.Lock()
+		defer h.memory.mu.Unlock()
+		h.memory.tickets = append(h.memory.tickets, &domain.Ticket{
+			ID: int64(len(h.memory.tickets) + 1), BusinessID: v.businessID, Code: code,
+			Status: domain.StatusWaiting, PublicToken: token, CreatedAt: created,
+		})
+		return token
+	}
+	_, err := h.db.Exec(`INSERT INTO pager_tickets (business_id, match_code, status, source, public_token, phone_linked, created_at)
+		VALUES (?, ?, 'waiting', 'customer', ?, TRUE, ?)`, v.businessID, code, token, created)
+	if err != nil {
+		h.Fatalf("store an old ticket: %v", err)
+	}
+	return token
+}
+
 // scan is a phone scanning the venue's QR.
 func (h *harness) scan(v venue) reply {
 	h.Helper()
@@ -191,11 +224,11 @@ func (h *harness) scanned(v venue) (string, map[string]any) {
 	h.Helper()
 	r := h.want(h.scan(v), http.StatusOK, "")
 	for _, ticket := range h.open(v) {
-		if ticket["code"] == r.text("code") {
+		if wordOf(ticket) == wordOf(r.body) {
 			return r.text("public_token"), ticket
 		}
 	}
-	h.Fatalf("scanned code %q is not on the board", r.text("code"))
+	h.Fatalf("scanned word %q is not on the board", wordOf(r.body))
 	return "", nil
 }
 

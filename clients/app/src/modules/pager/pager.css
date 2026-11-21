@@ -236,6 +236,26 @@
   letter-spacing: 0.04em;
 }
 
+/* A word such as "🐼 Strawberry 2" is longer than a code, so it is smaller and wraps. */
+.pager-code--word {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 100%;
+  padding: 0.2em 0.5em;
+  font-size: clamp(40px, 13vw, 88px);
+  letter-spacing: 0;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.pager-code-other {
+  margin-top: 0.15em;
+  font-size: 0.4em;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
 .pager-status {
   margin: 0;
   font-size: 22px;

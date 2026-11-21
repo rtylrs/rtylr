@@ -61,11 +61,13 @@ export const helpers = {
     return obj;
   },
 
-  // Retry function with exponential backoff
+  // Retry function with exponential backoff. `shouldRetry` stops early on an
+  // error that another attempt cannot fix.
   retry: async <T>(
     fn: () => Promise<T>,
     maxAttempts: number = 3,
-    delay: number = 1000
+    delay: number = 1000,
+    shouldRetry: (error: unknown) => boolean = () => true
   ): Promise<T> => {
     let lastError: Error;
 
@@ -74,7 +76,7 @@ export const helpers = {
         return await fn();
       } catch (error) {
         lastError = error as Error;
-        if (attempt === maxAttempts) break;
+        if (attempt === maxAttempts || !shouldRetry(error)) break;
 
         await new Promise((resolve) => setTimeout(resolve, delay * Math.pow(2, attempt - 1)));
       }

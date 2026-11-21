@@ -1,4 +1,4 @@
-import { errorStatus } from './apiError';
+import { isGone } from './apiError';
 
 export const TICKET_POLL_INTERVAL_MS = 3_000;
 
@@ -64,7 +64,9 @@ export function createTicketPoller<T extends { status?: string; serverTime?: str
       if (CLOSED_STATUSES.has(ticket.status ?? '')) stop();
     } catch (error) {
       if (!running) return;
-      if (errorStatus(error) === 404) {
+      // A 404 without the pager's code is a route a deploy has not served
+      // yet, not a missing ticket: keep polling.
+      if (isGone(error)) {
         stop();
         options.onNotFound();
       } else {

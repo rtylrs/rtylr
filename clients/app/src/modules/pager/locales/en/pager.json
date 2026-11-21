@@ -5,6 +5,7 @@
   "scan": {
     "pageTitle": "Order pager · rtylr",
     "scanning": "Getting your code...",
+    "slow": "Still getting your code, one moment...",
     "venueBusy": "This venue has too many phones waiting right now. Please ask at the counter.",
     "tooManyAttempts": "Too many attempts. Wait a moment, then try again.",
     "failed": "We couldn't reach the pager. Check your connection and try again.",

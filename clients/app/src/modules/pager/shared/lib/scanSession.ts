@@ -1,4 +1,4 @@
-import { errorStatus } from './apiError';
+import { isGone } from './apiError';
 import type { PublicPagerClient } from './pagerClients';
 import { isOpenStatus } from './ticketPoller';
 
@@ -51,7 +51,7 @@ export async function openScanTicket(
       const ticket = await client.getPublicTicket({ publicToken: stored });
       if (isOpenStatus(ticket.status)) return stored;
     } catch (error) {
-      if (errorStatus(error) !== 404) return stored;
+      if (!isGone(error)) return stored;
     }
     forgetScan(slug);
   }

@@ -4,6 +4,7 @@ package domain
 
 import (
 	"errors"
+	"slices"
 	"strings"
 	"time"
 	"unicode"
@@ -38,7 +39,8 @@ const UnlabelledLifetime = 15 * time.Minute
 // MaxOpenUnlabelledTickets bounds what anonymous scans can open at one venue.
 const MaxOpenUnlabelledTickets = 200
 
-// MatchCodeAlphabet leaves out 0, O, 1 and I, which are easy to misread.
+// MatchCodeAlphabet is the alphabet of the two character codes phones were
+// given before the words. Tickets opened then may still be open.
 const MatchCodeAlphabet = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
 
 // MatchColors is how many colours a code can be shown on.
@@ -59,13 +61,15 @@ var (
 	// ErrLabelTaken means another open ticket already holds the number.
 	ErrLabelTaken = errors.New("pager number already has an open ticket")
 	// ErrCodeTaken is the storage layer reporting that another open
-	// unlabelled ticket already shows the match code.
-	ErrCodeTaken = errors.New("pager match code already in use")
+	// unlabelled ticket already shows the match word.
+	ErrCodeTaken = errors.New("pager match word already in use")
 )
 
 // Ticket is one phone waiting for its order. Label and LabelKind are empty
-// until the cashier labels it. The time fields are zero until the moment they
-// describe has happened.
+// until the cashier labels it. Code is what the phone shows the cashier until
+// then: a match word as MatchWordCode stores it, or on a ticket opened before
+// the words, a two character code. The time fields are zero until the moment
+// they describe has happened.
 type Ticket struct {
 	ID             int64
 	BusinessID     int64
@@ -112,6 +116,9 @@ func (t Ticket) StatusAt(now time.Time) string {
 // MatchColor is the colour a code is shown on. It follows from the code, so
 // the phone and the board always agree.
 func MatchColor(code string) int {
+	if key, number, ok := ParseMatchWord(code); ok {
+		return (slices.Index(MatchWords, key) + number) % MatchColors
+	}
 	if len(code) != 2 {
 		return 0
 	}
