@@ -66,6 +66,31 @@ describe('useHrSettings', () => {
 
     expect(result.current.data).toEqual(settings);
   });
+
+  it('normalizes the /hr/config payload shape returned by onion', async () => {
+    mocks.getSettings.mockResolvedValue({
+      config: {
+        id: '10',
+        defaultCurrency: 'EUR',
+        defaultTimezone: 'Europe/Berlin',
+        overtimeEnabled: true,
+        overtimeMultiplier: 1.5,
+        directoryEnabled: false,
+      },
+    });
+
+    const { result } = renderHook(() => useHrSettings(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data).toEqual({
+      workWeekStart: 'Monday',
+      overtimeAfterHours: 40,
+      ptoPolicyDays: 20,
+      currency: 'EUR',
+      weeklyHours: 40,
+    });
+  });
 });
 
 describe('useMyEmployeeId', () => {
