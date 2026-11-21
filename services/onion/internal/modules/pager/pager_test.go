@@ -480,6 +480,8 @@ func TestOnlyTheCustomerRoutesAreAnonymous(t *testing.T) {
 		"POST /pager/v1/public/venues/" + h.a.slug + "/join":      true,
 		"GET /pager/v1/public/tickets/" + token:                   true,
 		"POST /pager/v1/public/tickets/" + token + "/acknowledge": true,
+		"GET /pager/v1/public/push-key":                           true,
+		"POST /pager/v1/public/tickets/" + token + "/push":        true,
 		"GET /pager/v1/tickets":                                   false,
 		"POST /pager/v1/tickets":                                  false,
 		"POST /pager/v1/tickets/7/ready":                          false,
@@ -490,7 +492,7 @@ func TestOnlyTheCustomerRoutesAreAnonymous(t *testing.T) {
 		"PUT /pager/v1/settings":                                  false,
 	} {
 		method, target, _ := strings.Cut(route, " ")
-		req := httptest.NewRequest(method, target, strings.NewReader(`{"number":"42"}`))
+		req := httptest.NewRequest(method, target, strings.NewReader(`{"number":"42",`+validSubscriptionFields+`}`))
 		req.Header.Set("Content-Type", "application/json")
 		if _, pattern := h.mux.Handler(req); pattern == "" {
 			t.Errorf("%s is not a mounted route", route)

@@ -53,6 +53,12 @@
     "notFoundTitle": "Ticket introuvable",
     "notFoundDescription": "Ce lien n'est plus valide. Scannez de nouveau le code au comptoir."
   },
+  "push": {
+    "readyTitle": "La commande {{number}} est prête",
+    "readyBody": "Récupérez-la au comptoir de {{venue}}.",
+    "remindTitle": "La commande {{number}} vous attend",
+    "remindBody": "{{venue}} appelle à nouveau votre numéro."
+  },
   "board": {
     "pageTitle": "Bipeur · rtylr",
     "heading": "Bipeur",

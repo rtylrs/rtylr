@@ -162,3 +162,4 @@ rtylr/portal_preferences.sql	internal/modules/portal/sql/schema/rtylr/portal_pre
 shared/zz_console_owner_provisioning.sql	internal/modules/organization/sql/schema/shared/zz_console_owner_provisioning.sql
 internal/modules/finance/invoices/sql/migration_20261117_invoice_project.sql	internal/modules/finance/invoices/sql/migration_20261117_invoice_project.sql
 pager/pager.sql	internal/modules/pager/sql/schema/pager/pager.sql
+pager/pager_push.sql	internal/modules/pager/sql/schema/pager/pager_push.sql

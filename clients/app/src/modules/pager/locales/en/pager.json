@@ -52,6 +52,12 @@
     "notFoundTitle": "Ticket not found",
     "notFoundDescription": "This link is no longer valid. Scan the code at the counter again."
   },
+  "push": {
+    "readyTitle": "Order {{number}} is ready",
+    "readyBody": "Collect it at the counter of {{venue}}.",
+    "remindTitle": "Order {{number}} is waiting for you",
+    "remindBody": "{{venue}} is calling your number again."
+  },
   "board": {
     "pageTitle": "Pager · rtylr",
     "heading": "Pager",
