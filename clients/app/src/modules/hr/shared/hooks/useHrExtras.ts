@@ -603,7 +603,7 @@ export function useHrSettings() {
     queryKey: ['hr', 'settings'],
     queryFn: async () => {
       const res = await unwrap(hrExtras.getSettings());
-      return hrSettingsSchema.parse(res.config);
+      return hrSettingsSchema.parse(res?.config ?? {});
     },
   });
 }
