@@ -4,6 +4,7 @@ sql:
     queries: "queries"
     schema:
       - "schema/pager/pager.sql"
+      - "schema/pager/pager_push.sql"
     gen:
       go:
         package: "sqlc"
