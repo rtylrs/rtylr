@@ -104,7 +104,10 @@ describe('hrExtras schedule calls', () => {
 
     hrExtras.updateSettings(settings);
 
-    expect(hrTransport.put).toHaveBeenCalledWith('/hr/config', settings);
+    expect(hrTransport.put).toHaveBeenCalledWith('/hr/config', {
+      ...settings,
+      defaultCurrency: 'EUR',
+    });
     expect(hrTransport.put).not.toHaveBeenCalledWith('/hr/config', {});
   });
 });
