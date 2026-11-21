@@ -24,7 +24,11 @@
     "moveFailed": "Failed to move task",
     "titleRequired": "Task title is required",
     "linkCopied": "Link copied",
-    "createdWithId": "Created {{id}}"
+    "createdWithId": "Created {{id}}",
+    "parentChanged": "Task moved",
+    "parentFailed": "Could not move the task",
+    "epicDeleted_one": "Epic deleted. {{count}} task kept with no epic",
+    "epicDeleted_other": "Epic deleted. {{count}} tasks kept with no epic"
   },
   "comment": {
     "postFailed": "Failed to post comment",
