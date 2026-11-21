@@ -7,6 +7,7 @@ import (
 	"fmt"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	nethttp "net/http"
+	"strings"
 	"time"
 
 	moduleinfra "github.com/voxire/onion/internal/modules/hr/hr_core/internal/infrastructure"
@@ -255,6 +256,19 @@ func (m *Module) GetEmployeeBusinessID(ctx context.Context, ownerID, employeeID 
 		return 0, err
 	}
 	return employee.BusinessID, nil
+}
+
+// GetEmployeeDisplayName returns the employee's full name, falling back to email.
+func (m *Module) GetEmployeeDisplayName(ctx context.Context, businessID, employeeID int64) (string, error) {
+	employee, err := m.service.GetEmployee(ctx, businessID, employeeID)
+	if err != nil || employee == nil {
+		return "", err
+	}
+	name := strings.TrimSpace(employee.FirstName + " " + employee.LastName)
+	if name != "" {
+		return name, nil
+	}
+	return strings.TrimSpace(employee.Email), nil
 }
 
 func (m *Module) HasPermission(ctx context.Context, ownerID, employeeID int64, permissionKey string) (bool, error) {

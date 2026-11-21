@@ -119,6 +119,30 @@ func (m *mockRepo) ListAvailabilityForStaffDate(_ context.Context, _, staffID in
 	return m.forDate, m.availabilityErr
 }
 
+func (m *mockRepo) ListBreaks(_ context.Context, _ int64, _ domain.ListBreaksParams) ([]domain.BreakRecord, error) {
+	return nil, nil
+}
+
+func (m *mockRepo) GetBreak(_ context.Context, _, _ int64) (*domain.BreakRecord, error) {
+	return nil, domain.ErrBreakNotFound
+}
+
+func (m *mockRepo) GetOpenBreakByEmployee(_ context.Context, _, _ int64) (*domain.BreakRecord, error) {
+	return nil, nil
+}
+
+func (m *mockRepo) GetOpenBreakByStaff(_ context.Context, _, _ int64) (*domain.BreakRecord, error) {
+	return nil, nil
+}
+
+func (m *mockRepo) CreateBreak(_ context.Context, _ int64, input domain.StartBreakInput) (*domain.BreakRecord, error) {
+	return &domain.BreakRecord{ID: 1, EmployeeID: input.EmployeeID, StaffID: input.StaffID, StaffName: input.StaffName, BreakType: input.BreakType}, nil
+}
+
+func (m *mockRepo) EndBreak(_ context.Context, _, id int64) (*domain.BreakRecord, error) {
+	return &domain.BreakRecord{ID: id}, nil
+}
+
 // mockStaffResolver stands in for the hr_staff lookups. staffByUser and
 // staffByEmployee are separate because those are genuinely different identities.
 type mockStaffResolver struct {

@@ -27,6 +27,10 @@ func (a *hrCorePermissionAdapter) HasPermission(ctx context.Context, ownerID, em
 	return a.core.HasPermission(ctx, ownerID, employeeID, permissionKey)
 }
 
+func (a *hrCorePermissionAdapter) GetEmployeeDisplayName(ctx context.Context, businessID, employeeID int64) (string, error) {
+	return a.core.GetEmployeeDisplayName(ctx, businessID, employeeID)
+}
+
 type Module struct {
 	service *application.Service
 }

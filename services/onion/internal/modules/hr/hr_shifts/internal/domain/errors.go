@@ -19,4 +19,9 @@ var (
 	// ErrPermissionDenied is returned when a caller tries to read or write another
 	// staff member's availability without manage_schedules.
 	ErrPermissionDenied = errors.New("permission denied")
+
+	ErrBreakNotFound     = errors.New("break not found")
+	ErrBreakAlreadyOpen  = errors.New("break is already in progress")
+	ErrBreakAlreadyEnded = errors.New("break has already ended")
+	ErrInvalidBreakType  = errors.New("break type must be Lunch, Short, or Other")
 )
