@@ -70,6 +70,10 @@ type Task struct {
 	StatusName        string
 	StatusColor       string
 	Dependencies      []int64
+	// Blocked is true while at least one task blocking this one is open;
+	// BlockerCount is how many are.
+	Blocked      bool
+	BlockerCount int32
 }
 
 type ProjectColumn struct {
@@ -207,9 +211,11 @@ type ListTasksFilter struct {
 	AssigneeID  *int64
 	Priority    string
 	ActiveOnly  bool
-	Compact     bool
-	Limit       int64
-	Offset      int64
+	// Blocked narrows to blocked (true) or unblocked (false) tasks; nil is both.
+	Blocked *bool
+	Compact bool
+	Limit   int64
+	Offset  int64
 }
 
 type Label struct {
