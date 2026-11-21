@@ -4,7 +4,6 @@ package domain
 
 import (
 	"errors"
-	"slices"
 	"strings"
 	"time"
 	"unicode"
@@ -39,12 +38,16 @@ const UnlabelledLifetime = 15 * time.Minute
 // MaxOpenUnlabelledTickets bounds what anonymous scans can open at one venue.
 const MaxOpenUnlabelledTickets = 200
 
-// MatchCodeAlphabet is the alphabet of the two character codes phones were
-// given before the words. Tickets opened then may still be open.
-const MatchCodeAlphabet = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
-
-// MatchColors is how many colours a code can be shown on.
-const MatchColors = 6
+// Match numbers are what a scanned phone shows the cashier: three digits while
+// any is free, four once every three digit number is taken. The open
+// unlabelled cap keeps a venue far below the 900 three digit numbers, so four
+// digits only appear if the cap is raised.
+const (
+	MinMatchNumber         = 100
+	MaxMatchNumber         = 999
+	MinFallbackMatchNumber = 1000
+	MaxFallbackMatchNumber = 9999
+)
 
 const (
 	maxNumberLength = 12
@@ -61,14 +64,14 @@ var (
 	// ErrLabelTaken means another open ticket already holds the number.
 	ErrLabelTaken = errors.New("pager number already has an open ticket")
 	// ErrCodeTaken is the storage layer reporting that another open
-	// unlabelled ticket already shows the match word.
-	ErrCodeTaken = errors.New("pager match word already in use")
+	// unlabelled ticket already shows the match number.
+	ErrCodeTaken = errors.New("pager match number already in use")
 )
 
 // Ticket is one phone waiting for its order. Label and LabelKind are empty
 // until the cashier labels it. Code is what the phone shows the cashier until
-// then: a match word as MatchWordCode stores it, or on a ticket opened before
-// the words, a two character code. The time fields are zero until the moment
+// then: a match number such as "427", or on a ticket opened before the numbers,
+// its word key ("panda2") or two character code ("A7"). The time fields are zero until the moment
 // they describe has happened.
 type Ticket struct {
 	ID             int64
@@ -113,21 +116,12 @@ func (t Ticket) StatusAt(now time.Time) string {
 	return t.Status
 }
 
-// MatchColor is the colour a code is shown on. It follows from the code, so
-// the phone and the board always agree.
-func MatchColor(code string) int {
-	if key, number, ok := ParseMatchWord(code); ok {
-		return (slices.Index(MatchWords, key) + number) % MatchColors
-	}
-	if len(code) != 2 {
-		return 0
-	}
-	first := strings.IndexByte(MatchCodeAlphabet, code[0])
-	second := strings.IndexByte(MatchCodeAlphabet, code[1])
-	if first < 0 || second < 0 {
-		return 0
-	}
-	return (first + second) % MatchColors
+// ShownCode is the code as the phone and the board show it. A match number is
+// shown as it is. A ticket opened before the numbers keeps its old code in
+// capitals ("PANDA2", "A7") until it is labelled or expires, so both screens
+// still show the same characters.
+func ShownCode(code string) string {
+	return strings.ToUpper(code)
 }
 
 type Settings struct {

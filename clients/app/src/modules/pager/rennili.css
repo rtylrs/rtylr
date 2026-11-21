@@ -1289,25 +1289,6 @@
   background: var(--rl-forest);
 }
 
-.rl-mock-match {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 12px 20px;
-  border-radius: 20px;
-  color: #ffffff;
-  font-size: 24px;
-  font-weight: 900;
-  line-height: 1.2;
-}
-
-.rl-mock-match-other {
-  margin-top: 3px;
-  font-size: 12.5px;
-  font-weight: 700;
-  opacity: 0.9;
-}
-
 .rl-mock-notify-btn {
   display: inline-flex;
   align-items: center;
@@ -1927,23 +1908,55 @@
   justify-content: center;
 }
 
-.rl-bento-badge {
+/* The match code card, as the phone shows it: white, a thin accent line, dark digits. */
+.rl-code-card {
+  position: relative;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  padding: 14px 24px;
-  border-radius: 20px;
-  color: #ffffff;
-  font-size: 24px;
-  font-weight: 900;
-  box-shadow: 0 12px 26px -12px rgba(20, 27, 23, 0.25);
+  gap: 4px;
+  padding: 18px 28px 16px;
+  overflow: hidden;
+  border: 1px solid var(--rl-border-strong);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 12px 26px -16px rgba(20, 27, 23, 0.22);
 }
 
-.rl-bento-badge-other {
-  font-size: 13px;
+.rl-code-card::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+  height: 3px;
+  background: var(--rl-forest);
+}
+
+.rl-code-card--mock {
+  padding: 12px 20px 10px;
+  border-radius: 14px;
+}
+
+.rl-code-caption {
+  font-size: 11px;
   font-weight: 700;
-  opacity: 0.92;
-  margin-top: 2px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rl-muted);
+}
+
+.rl-code-digits {
+  color: var(--rl-ink);
+  font-size: 48px;
+  line-height: 1;
+  font-weight: 800;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: 0.08em;
+  margin-inline-end: -0.08em;
+}
+
+.rl-code-card--mock .rl-code-digits {
+  font-size: 34px;
 }
 
 /* Mini Staff Board Tile */

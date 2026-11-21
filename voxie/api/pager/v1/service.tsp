@@ -6,7 +6,7 @@ using TypeSpec.Http;
 namespace pager.v1;
 
 /**
- * The order pager: a customer scans the venue's QR and gets a match word, the
+ * The order pager: a customer scans the venue's QR and gets a match number, the
  * cashier labels that phone's ticket with the order number or the customer's
  * name, and the phone rings when the staff mark it ready. A venue is an
  * ordinary business.

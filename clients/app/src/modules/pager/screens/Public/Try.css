@@ -421,14 +421,13 @@
   font-size: 38px;
 }
 
-/* Override viewport-relative clamp() so word codes stay cleanly inside the demo phone frame. */
+/* Override viewport-relative clamp() so the code stays cleanly inside the demo phone frame. */
 .pager-try-phone-viewport .pager-code {
-  font-size: 60px;
+  font-size: 64px;
 }
 
-.pager-try-phone-viewport .pager-code--word {
+.pager-try-phone-viewport .pager-code--long {
   font-size: 32px;
-  line-height: 1.2;
 }
 
 .pager-try-counter {

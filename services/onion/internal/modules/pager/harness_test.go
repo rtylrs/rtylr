@@ -112,8 +112,8 @@ type reply struct {
 	body   map[string]any
 }
 
-// code is the stable error code of a failed reply. A ticket's two character
-// code from before match words is read with text("code").
+// code is the stable error code of a failed reply. A ticket's match code is
+// read with text("code").
 func (r reply) code() string {
 	if r.status < http.StatusBadRequest {
 		return ""
@@ -122,12 +122,18 @@ func (r reply) code() string {
 	return code
 }
 
-// wordOf is the match word a ticket or scan shows, as storage keeps it
-// ("panda", "panda2"), or "" when it shows none.
-func wordOf(fields map[string]any) string {
-	key, _ := fields["word"].(string)
-	number, _ := fields["word_number"].(float64)
-	return domain.MatchWordCode(key, int(number))
+// isMatchNumber reports whether code is a match number of the given number of
+// ASCII digits with no leading zero.
+func isMatchNumber(code string, digits int) bool {
+	if len(code) != digits || code[0] == '0' {
+		return false
+	}
+	for _, r := range code {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
 }
 
 func (r reply) text(key string) string {
@@ -190,8 +196,9 @@ func (h *harness) labelMode(v venue, mode string) {
 }
 
 // legacyTicket stores an unlabelled ticket the way a scan did before match
-// words, showing a two character code, and returns its token.
-func (h *harness) legacyTicket(v venue, code string) string {
+// numbers, with its code in column (match_code for "A7", match_word for
+// "panda2"), and returns its token.
+func (h *harness) legacyTicket(v venue, column, code string) string {
 	h.Helper()
 	token := fmt.Sprintf("legacy-%d-%s", v.businessID, code)
 	token += strings.Repeat("x", 32-len(token))
@@ -205,7 +212,10 @@ func (h *harness) legacyTicket(v venue, code string) string {
 		})
 		return token
 	}
-	_, err := h.db.Exec(`INSERT INTO pager_tickets (business_id, match_code, status, source, public_token, phone_linked, created_at)
+	if column != "match_code" && column != "match_word" {
+		h.Fatalf("no old code column %q", column)
+	}
+	_, err := h.db.Exec(`INSERT INTO pager_tickets (business_id, `+column+`, status, source, public_token, phone_linked, created_at)
 		VALUES (?, ?, 'waiting', 'customer', ?, TRUE, ?)`, v.businessID, code, token, created)
 	if err != nil {
 		h.Fatalf("store an old ticket: %v", err)
@@ -224,11 +234,11 @@ func (h *harness) scanned(v venue) (string, map[string]any) {
 	h.Helper()
 	r := h.want(h.scan(v), http.StatusOK, "")
 	for _, ticket := range h.open(v) {
-		if wordOf(ticket) == wordOf(r.body) {
+		if ticket["code"] == r.text("code") {
 			return r.text("public_token"), ticket
 		}
 	}
-	h.Fatalf("scanned word %q is not on the board", wordOf(r.body))
+	h.Fatalf("scanned code %q is not on the board", r.text("code"))
 	return "", nil
 }
 

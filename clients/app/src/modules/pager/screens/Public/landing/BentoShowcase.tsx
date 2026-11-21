@@ -12,29 +12,20 @@ import {
   Shuffle,
   Smartphone,
 } from 'lucide-react';
-import MatchBadge from '../../../shared/components/MatchBadge';
-import { matchOf } from '../../../shared/lib/matchWords';
+import MatchCode from '../../../shared/components/MatchCode';
 import { PAGER_TRY_PATH } from '../../../pagerPaths';
 
-const SHOWCASE_WORDS = [
-  { word: 'strawberry', color: 1 },
-  { word: 'panda', color: 5 },
-  { word: 'lemon', color: 2 },
-  { word: 'croissant', color: 3 },
-  { word: 'aura', color: 5 },
-  { word: 'lion', color: 2 },
-] as const;
+const SHOWCASE_CODES = ['427', '318', '952', '604', '781', '265'] as const;
 
 export const BentoShowcase = (): React.JSX.Element => {
   const { t } = useTranslation('pager');
-  const [wordIndex, setWordIndex] = useState(0);
+  const [codeIndex, setCodeIndex] = useState(0);
   const [miniReady, setMiniReady] = useState(false);
 
-  const currentSample = SHOWCASE_WORDS[wordIndex];
-  const currentMatch = matchOf({ word: currentSample.word });
+  const currentCode = SHOWCASE_CODES[codeIndex];
 
-  const nextWord = (): void => {
-    setWordIndex((prev) => (prev + 1) % SHOWCASE_WORDS.length);
+  const nextCode = (): void => {
+    setCodeIndex((prev) => (prev + 1) % SHOWCASE_CODES.length);
   };
 
   return (
@@ -52,7 +43,7 @@ export const BentoShowcase = (): React.JSX.Element => {
         </div>
 
         <div className="rl-bento-grid">
-          {/* Tile 1 (2-col wide): Interactive Bilingual Emoji-Word Shuffler */}
+          {/* Tile 1 (2-col wide): interactive match code shuffler */}
           <article className="rl-bento-card rl-bento-card--wide rl-bento-shuffler">
             <div className="rl-bento-copy">
               <span className="rl-bento-kicker">{t('pager.landing.bento.shuffler.kicker')}</span>
@@ -61,7 +52,7 @@ export const BentoShowcase = (): React.JSX.Element => {
               <motion.button
                 type="button"
                 whileTap={{ scale: 0.96 }}
-                onClick={nextWord}
+                onClick={nextCode}
                 className="rl-bento-action"
               >
                 <Shuffle size={15} strokeWidth={2.2} aria-hidden="true" />
@@ -71,22 +62,17 @@ export const BentoShowcase = (): React.JSX.Element => {
 
             <div className="rl-bento-shuffler-stage" aria-live="polite">
               <AnimatePresence mode="wait" initial={false}>
-                {currentMatch && (
-                  <motion.div
-                    key={currentSample.word}
-                    initial={{ opacity: 0, scale: 0.88, y: 8 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9, y: -8 }}
-                    transition={{ type: 'spring', stiffness: 460, damping: 28 }}
-                  >
-                    <MatchBadge
-                      match={currentMatch}
-                      color={currentSample.color}
-                      className="rl-bento-badge"
-                      otherClassName="rl-bento-badge-other"
-                    />
-                  </motion.div>
-                )}
+                <motion.div
+                  key={currentCode}
+                  className="rl-code-card"
+                  initial={{ opacity: 0, scale: 0.94, y: 6 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.96, y: -6 }}
+                  transition={{ type: 'spring', stiffness: 460, damping: 30 }}
+                >
+                  <span className="rl-code-caption">{t('pager.ticket.codeLabel')}</span>
+                  <MatchCode code={currentCode} className="rl-code-digits" />
+                </motion.div>
               </AnimatePresence>
             </div>
           </article>

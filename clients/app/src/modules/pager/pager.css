@@ -251,36 +251,63 @@
   font-size: clamp(28px, 11.5cqi, 72px);
 }
 
-/* The match code the customer shows the cashier: read across a counter. */
-.pager-code {
-  margin-top: 8px;
-  padding: 0.12em 0.4em;
-  border-radius: 24px;
-  color: #ffffff;
-  font-size: clamp(88px, 40cqi, 176px);
-  line-height: 1;
-  font-weight: 900;
-  letter-spacing: 0.04em;
-}
-
-/* A word such as "🐼 Strawberry 2" is longer than a code, so it is smaller and wraps. */
-.pager-code--word {
+/*
+ * The match code the customer shows the cashier, read across a counter: a calm
+ * white card with a thin accent line, dark lining tabular digits.
+ */
+.pager-code-card {
+  position: relative;
+  margin: 0;
+  width: min(100%, 360px);
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 6px;
+  padding: 22px 20px 20px;
+  overflow: hidden;
+  border: 1px solid var(--pager-line);
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow:
+    0 1px 2px rgba(20, 27, 23, 0.04),
+    0 12px 28px -18px rgba(20, 27, 23, 0.18);
+}
+
+.pager-code-card::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+  height: 3px;
+  background: var(--pager-accent);
+}
+
+.pager-code-caption {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pager-muted);
+}
+
+.pager-code {
   max-width: 100%;
-  padding: 0.2em 0.5em;
-  font-size: clamp(40px, 14cqi, 88px);
-  letter-spacing: 0;
-  text-align: center;
+  color: var(--pager-ink);
+  font-size: clamp(72px, 28cqi, 132px);
+  line-height: 1;
+  font-weight: 800;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: 0.08em;
+  /* The spacing after the last digit would push the number off centre. */
+  margin-inline-end: -0.08em;
   overflow-wrap: anywhere;
 }
 
-.pager-code-other {
-  margin-top: 0.15em;
-  font-size: 0.4em;
-  font-weight: 700;
-  opacity: 0.9;
+/* A code from before the numbers, such as "PANDA2", is longer. */
+.pager-code--long {
+  font-size: clamp(36px, 13cqi, 64px);
+  letter-spacing: 0.02em;
+  margin-inline-end: 0;
 }
 
 .pager-status {

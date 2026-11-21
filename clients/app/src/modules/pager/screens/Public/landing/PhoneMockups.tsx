@@ -2,12 +2,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence, motion, useMotionValue, useSpring } from 'motion/react';
 import { BellRing, Check, QrCode, RotateCcw, VolumeX } from 'lucide-react';
-import MatchBadge from '../../../shared/components/MatchBadge';
+import MatchCode from '../../../shared/components/MatchCode';
 import { RenniliLogo, RenniliMark } from '../../../shared/components/RenniliLogo';
-import { matchOf } from '../../../shared/lib/matchWords';
 import { useInView, useReducedMotion } from './useLandingObservers';
 
-const SAMPLE_MATCH = matchOf({ word: 'strawberry' });
+const SAMPLE_CODE = '427';
 
 /** Sleek bezel phone frame with fixed dimensions (zero CLS) and optional morphing Dynamic Island. */
 export const PhoneFrame = ({
@@ -90,7 +89,7 @@ export const ScreenScan = ({ active = true }: { active?: boolean }): React.JSX.E
   );
 };
 
-/** Miniature of step 2: real emoji-word code shown to the cashier (`Ticket.tsx`). */
+/** Miniature of step 2: the match number shown to the cashier (`Ticket.tsx`). */
 export const ScreenCode = (): React.JSX.Element => {
   const { t } = useTranslation('pager');
   return (
@@ -100,15 +99,10 @@ export const ScreenCode = (): React.JSX.Element => {
         <span className="rl-screen-lang">EN · ع</span>
       </div>
       <div className="rl-screen-body">
-        <span className="rl-screen-kicker">{t('pager.ticket.codeLabel')}</span>
-        {SAMPLE_MATCH && (
-          <MatchBadge
-            match={SAMPLE_MATCH}
-            color={1}
-            className="rl-mock-match"
-            otherClassName="rl-mock-match-other"
-          />
-        )}
+        <div className="rl-code-card rl-code-card--mock">
+          <span className="rl-code-caption">{t('pager.ticket.codeLabel')}</span>
+          <MatchCode code={SAMPLE_CODE} className="rl-code-digits" />
+        </div>
         <p className="rl-screen-status">{t('pager.ticket.showCode')}</p>
         <span className="rl-mock-notify-btn">{t('pager.ticket.notify')}</span>
       </div>

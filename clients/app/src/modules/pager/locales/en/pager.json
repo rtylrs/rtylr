@@ -45,7 +45,7 @@
     "pageTitleName": "{{label}} · $t(pager.brand.name)",
     "pageTitleCode": "Your code {{code}} · $t(pager.brand.name)",
     "codeLabel": "Your code",
-    "showCode": "Show this code to the cashier",
+    "showCode": "Show this number to the cashier",
     "notify": "Notify me when it's ready",
     "notifyHint": "Tap once so your phone can ring and vibrate when your order is ready. There is nothing to type.",
     "readyTitleName": "{{label}}, your order is ready",
@@ -94,8 +94,14 @@
     "scannedAgo_one": "Scanned {{count}} min ago",
     "scannedAgo_other": "Scanned {{count}} min ago",
     "removePhone": "Remove phone {{code}}",
-    "labelFor": "Order number or name for code {{code}}",
-    "labelPlaceholder": {
+    "codeCaption": "Code",
+    "orderCaption": "Order",
+    "labelFor": {
+      "either": "Order number or name for code {{code}}",
+      "number": "Order number for code {{code}}",
+      "name": "Customer name for code {{code}}"
+    },
+    "labelInput": {
       "either": "Order number or name",
       "number": "Order number",
       "name": "Customer name"
@@ -268,7 +274,7 @@
         },
         {
           "title": "Show the code to the cashier",
-          "body": "Their phone shows a friendly emoji-word code in two languages. Your cashier taps that card on the board and types the order number or name."
+          "body": "Their phone shows a short number, such as 427. Your cashier finds that card on the board and types the order number or name."
         },
         {
           "title": "Wait anywhere and see the line",
@@ -284,10 +290,10 @@
       "title": "Crafted for fast counters",
       "intro": "Every detail replaces plastic hardware with something faster, clearer, and already in your guest's pocket.",
       "shuffler": {
-        "kicker": "Bilingual match codes",
+        "kicker": "Short match codes",
         "title": "Zero confusion across the counter",
-        "body": "Every scanned phone gets a bold color, an emoji, and a word shown in two languages so cashier and guest always read the same code.",
-        "action": "Shuffle code"
+        "body": "Every scanned phone gets its own short number. The digits read the same on every screen, in every language, so cashier and guest always match the same code.",
+        "action": "Next code"
       },
       "miniBoard": {
         "kicker": "Staff view",
@@ -447,7 +453,7 @@
           },
           {
             "title": "Match each phone in a second",
-            "body": "Guests show their bilingual emoji-word code; staff type the order number or name on the board."
+            "body": "Guests show their short number; staff type the order number or name on the board."
           },
           {
             "title": "Tap Ready and hear it ring",
@@ -457,7 +463,7 @@
       },
       "features": {
         "metaTitle": "Features & comparison · $t(pager.brand.name) vs plastic buzzers",
-        "metaDescription": "Compare $t(pager.brand.name) against legacy plastic restaurant buzzers and coasters. Bilingual match codes, 0 MB instant web pager, iPhone and Android alerts, always free.",
+        "metaDescription": "Compare $t(pager.brand.name) against legacy plastic restaurant buzzers and coasters. Short number codes, 0 MB instant web pager, iPhone and Android alerts, always free.",
         "kicker": "Features & comparison",
         "heading": "Everything a counter pager should be, without the plastic",
         "intro": "Built for fast coffee bars and busy restaurants that want clearer pickup calls without buying or maintaining buzzer hardware."

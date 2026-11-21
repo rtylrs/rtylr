@@ -46,7 +46,7 @@
     "pageTitleName": "{{label}} · $t(pager.brand.name)",
     "pageTitleCode": "Votre code {{code}} · $t(pager.brand.name)",
     "codeLabel": "Votre code",
-    "showCode": "Montrez ce code au caissier",
+    "showCode": "Montrez ce numéro au caissier",
     "notify": "Me prévenir quand elle est prête",
     "notifyHint": "Touchez une fois pour que votre téléphone puisse sonner et vibrer quand votre commande sera prête. Rien à saisir.",
     "readyTitleName": "{{label}}, votre commande est prête",
@@ -96,8 +96,14 @@
     "scannedAgo_many": "Scanné il y a {{count}} min",
     "scannedAgo_other": "Scanné il y a {{count}} min",
     "removePhone": "Retirer le téléphone {{code}}",
-    "labelFor": "Numéro de commande ou nom pour le code {{code}}",
-    "labelPlaceholder": {
+    "codeCaption": "Code",
+    "orderCaption": "Commande",
+    "labelFor": {
+      "either": "Numéro de commande ou nom pour le code {{code}}",
+      "number": "Numéro de commande pour le code {{code}}",
+      "name": "Nom du client pour le code {{code}}"
+    },
+    "labelInput": {
       "either": "Numéro de commande ou nom",
       "number": "Numéro de commande",
       "name": "Nom du client"
@@ -270,7 +276,7 @@
         },
         {
           "title": "Montrer le code au caissier",
-          "body": "Son écran affiche un code court avec emoji et mot en deux langues. Votre caissier touche cette carte sur le tableau et saisit le numéro ou le prénom."
+          "body": "Son écran affiche un numéro court, par exemple 427. Votre caissier retrouve cette carte sur le tableau et saisit le numéro ou le prénom."
         },
         {
           "title": "Attendre où l’on veut et voir la file",
@@ -286,10 +292,10 @@
       "title": "Pensé pour les comptoirs animés",
       "intro": "Chaque détail remplace les boîtiers plastique par un outil plus rapide, plus clair, déjà dans la main du client.",
       "shuffler": {
-        "kicker": "Codes bilingues",
+        "kicker": "Codes courts",
         "title": "Aucune confusion en caisse",
-        "body": "Chaque téléphone reçoit une couleur franche, un emoji et un mot affiché en deux langues pour que caissier et client lisent toujours le même code.",
-        "action": "Autre code"
+        "body": "Chaque téléphone reçoit son propre numéro court. Les chiffres sont identiques sur chaque écran et dans chaque langue, pour que caissier et client lisent toujours le même code.",
+        "action": "Code suivant"
       },
       "miniBoard": {
         "kicker": "Vue équipe",
@@ -449,7 +455,7 @@
           },
           {
             "title": "Associez le téléphone en une seconde",
-            "body": "Le client montre son code bilingue avec emoji ; votre caissier saisit le numéro ou le prénom."
+            "body": "Le client montre son numéro court ; votre caissier saisit le numéro de commande ou le prénom."
           },
           {
             "title": "Touchez Prête et faites sonner",
@@ -459,7 +465,7 @@
       },
       "features": {
         "metaTitle": "Atouts & comparatif · $t(pager.brand.name) face aux bipeurs plastique",
-        "metaDescription": "Comparez $t(pager.brand.name) aux bipeurs et boîtiers plastique classiques : codes bilingues, 0 Mo sans appli, alertes iPhone et Android, toujours gratuit.",
+        "metaDescription": "Comparez $t(pager.brand.name) aux bipeurs et boîtiers plastique classiques : codes chiffrés courts, 0 Mo sans appli, alertes iPhone et Android, toujours gratuit.",
         "kicker": "Atouts & comparatif",
         "heading": "Tout ce qu’on attend d’un bipeur de comptoir, sans le plastique",
         "intro": "Pensé pour les cafés rapides et restaurants animés qui veulent appeler leurs clients clairement sans gérer de boîtiers."

@@ -21,14 +21,7 @@ async function stubBoard(page: Page): Promise<void> {
     route.fulfill({
       json: {
         tickets: [
-          {
-            id: '1',
-            word: 'chefskiss',
-            word_number: 2,
-            color: 3,
-            status: 'waiting',
-            created_at: now,
-          },
+          { id: '1', code: '427', status: 'waiting', created_at: now },
           { id: '2', label: '1234567890AB', label_kind: 'number', status: 'waiting' },
           { id: '3', label: 'Sara', label_kind: 'name', status: 'ready', ready_at: now },
         ],
@@ -48,82 +41,82 @@ const box = async (page: Page, name: string) => {
 };
 
 test.describe('Rennili on phones and tablets', () => {
-  test('the customer page fits a small phone with the one tap in view', async ({ page }) => {
-    await page.setViewportSize({ width: 360, height: 740 });
+  /** A scanned phone whose ticket shows the match number 427. */
+  async function stubScannedPhone(page: Page, venueName: string): Promise<void> {
     await page.route('**/pager/v1/public/push-key', (route) =>
       route.fulfill({ json: { public_key: '' } })
     );
     await page.route('**/pager/v1/public/venues/acme/scan', (route) =>
-      route.fulfill({
-        json: {
-          public_token: 'tok-rr',
-          word: 'chefskiss',
-          word_number: 2,
-          color: 3,
-          status: 'waiting',
-        },
-      })
+      route.fulfill({ json: { public_token: 'tok-rr', code: '427', status: 'waiting' } })
     );
     await page.route('**/pager/v1/public/tickets/tok-rr', (route) =>
       route.fulfill({
         json: {
-          word: 'chefskiss',
-          word_number: 2,
-          color: 3,
+          code: '427',
           status: 'waiting',
-          venue_name: 'Al Mokhtar Bakery & Roastery Hamra Street',
+          venue_name: venueName,
           server_time: new Date().toISOString(),
         },
       })
     );
+  }
 
-    await page.goto(`${RENNILI_URL}/acme`);
+  async function chooseLanguage(page: Page, language: 'en' | 'ar'): Promise<void> {
+    if (language === 'ar') await page.getByRole('button', { name: 'العربية' }).click();
+    await expect(page.locator('.pager-code')).toHaveText('427');
+  }
 
-    const notify = page.getByRole('button', { name: "Notify me when it's ready" });
-    await expect(notify).toBeInViewport();
-    const overflow = await page.evaluate(() => {
-      const root = document.querySelector('.pager-root');
-      return root ? root.scrollWidth - root.clientWidth : -1;
+  for (const language of ['en', 'ar'] as const) {
+    test(`the customer page fits a small phone with the one tap in view (${language})`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 360, height: 740 });
+      await stubScannedPhone(page, 'Al Mokhtar Bakery & Roastery Hamra Street');
+
+      await page.goto(`${RENNILI_URL}/acme`);
+      await chooseLanguage(page, language);
+
+      const notify = page.getByRole('button', {
+        name: language === 'ar' ? 'نبّهني عندما يجهز' : "Notify me when it's ready",
+      });
+      await expect(notify).toBeInViewport();
+      const overflow = await page.evaluate(() => {
+        const root = document.querySelector('.pager-root');
+        return root ? root.scrollWidth - root.clientWidth : -1;
+      });
+      expect(overflow).toBe(0);
     });
-    expect(overflow).toBe(0);
-  });
 
-  test('a ten-letter code word stays on one line on a tablet', async ({ page }) => {
-    await page.setViewportSize({ width: 820, height: 1180 });
-    await page.route('**/pager/v1/public/push-key', (route) =>
-      route.fulfill({ json: { public_key: '' } })
-    );
-    await page.route('**/pager/v1/public/venues/acme/scan', (route) =>
-      route.fulfill({
-        json: { public_token: 'tok-rr', word: 'strawberry', color: 3, status: 'waiting' },
-      })
-    );
-    await page.route('**/pager/v1/public/tickets/tok-rr', (route) =>
-      route.fulfill({
-        json: {
-          word: 'strawberry',
-          color: 3,
-          status: 'waiting',
-          venue_name: 'Acme Cafe',
-          server_time: new Date().toISOString(),
-        },
-      })
-    );
+    test(`the code reads left to right on one line, centred in its card, on a tablet (${language})`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 820, height: 1180 });
+      await stubScannedPhone(page, 'Acme Cafe');
 
-    await page.goto(`${RENNILI_URL}/acme`);
+      await page.goto(`${RENNILI_URL}/acme`);
+      await chooseLanguage(page, language);
 
-    await expect(page.locator('.pager-code--word')).toContainText('Strawberry');
-    const lines = await page.locator('.pager-code--word').evaluate((badge) => {
-      const word = Array.from(badge.childNodes).find(
-        (node) => node.nodeType === Node.TEXT_NODE && node.textContent?.includes('Strawberry')
-      );
-      if (!word) return 0;
-      const range = document.createRange();
-      range.selectNodeContents(word);
-      return new Set(Array.from(range.getClientRects()).map((rect) => Math.round(rect.top))).size;
+      const code = page.locator('.pager-code');
+      await expect(code).toHaveAttribute('dir', 'ltr');
+      const layout = await code.evaluate((element) => {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const lines = new Set(Array.from(range.getClientRects()).map((r) => Math.round(r.top)));
+        const card = element.closest('.pager-code-card')?.getBoundingClientRect();
+        const text = range.getBoundingClientRect();
+        return {
+          lines: lines.size,
+          offCentre: card
+            ? Math.abs(text.left + text.width / 2 - (card.left + card.width / 2))
+            : 99,
+          inside: card ? text.left >= card.left && text.right <= card.right : false,
+        };
+      });
+      expect(layout.lines).toBe(1);
+      expect(layout.inside).toBe(true);
+      expect(layout.offCentre).toBeLessThan(12);
     });
-    expect(lines).toBe(1);
-  });
+  }
 
   test('the board puts its three columns side by side on a landscape tablet', async ({
     page,

@@ -93,19 +93,10 @@ func TestUnlabelledTicketsExpireSoonerThanLabelledOnes(t *testing.T) {
 	}
 }
 
-func TestMatchColorIsStableAndInRange(t *testing.T) {
-	seen := map[int]bool{}
-	for i := range len(MatchCodeAlphabet) {
-		for j := range len(MatchCodeAlphabet) {
-			code := string([]byte{MatchCodeAlphabet[i], MatchCodeAlphabet[j]})
-			color := MatchColor(code)
-			if color < 0 || color >= MatchColors || color != MatchColor(code) {
-				t.Fatalf("MatchColor(%s) = %d", code, color)
-			}
-			seen[color] = true
+func TestShownCodeKeepsNumbersAndCapitalisesOldCodes(t *testing.T) {
+	for code, want := range map[string]string{"427": "427", "1003": "1003", "panda2": "PANDA2", "A7": "A7"} {
+		if got := ShownCode(code); got != want {
+			t.Errorf("ShownCode(%q) = %q, want %q", code, got, want)
 		}
-	}
-	if len(seen) != MatchColors {
-		t.Fatalf("codes use %d of %d colours", len(seen), MatchColors)
 	}
 }
