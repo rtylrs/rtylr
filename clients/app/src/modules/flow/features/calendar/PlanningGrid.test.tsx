@@ -309,4 +309,19 @@ describe('UnscheduledPanel', () => {
     fireEvent.change(within(panel).getByRole('searchbox'), { target: { value: 'nothing' } });
     expect(within(panel).getByText('flow.calendar.unscheduled.noMatches')).toBeInTheDocument();
   });
+
+  it('searches the way the filter bar does, ignoring accents and cancelled work', () => {
+    render(
+      <Harness
+        tasks={[
+          { id: 'u1', title: 'Café menu', projectId: 'p' },
+          { id: 'u2', title: 'Café sign', projectId: 'p', status: 'cancelled' },
+        ]}
+      />
+    );
+    const panel = screen.getByRole('complementary', { name: 'flow.calendar.unscheduled.title' });
+    expect(within(panel).queryByTitle('Café sign')).toBeNull();
+    fireEvent.change(within(panel).getByRole('searchbox'), { target: { value: 'cafe' } });
+    expect(within(panel).getByTitle('Café menu')).toBeInTheDocument();
+  });
 });
