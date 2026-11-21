@@ -3,31 +3,7 @@ import type { ApiStatus } from '../../../shared/services/flowApi';
 import { PRIORITY_LABEL_KEY } from '../taskGroups';
 import { displayStatusName, sortStatuses } from '../statusUtils';
 import { listColumn, resolveTaskStatus, type ListColumnId } from './listColumns';
-
-/**
- * Characters that make a spreadsheet read a cell as a formula (or, for tab
- * and carriage return, that some of them strip before doing so). A task
- * title such as `=HYPERLINK(...)` must arrive as text, not run.
- */
-const FORMULA_START = /^[=+\-@\t\r]/;
-
-/**
- * One CSV field: always quoted, quotes doubled, and a value that would start
- * a formula prefixed with an apostrophe so it stays text.
- */
-export function csvField(value: string | number | null | undefined): string {
-  let text = value == null ? '' : String(value);
-  if (FORMULA_START.test(text)) text = `'${text}`;
-  return `"${text.replace(/"/g, '""')}"`;
-}
-
-/**
- * A whole document. The byte order mark makes Excel read it as UTF-8, which
- * Arabic and accented names need; CRLF is what RFC 4180 asks for.
- */
-export function buildCsv(rows: ReadonlyArray<ReadonlyArray<string | number | null>>): string {
-  return `\uFEFF${rows.map((row) => row.map(csvField).join(',')).join('\r\n')}\r\n`;
-}
+import { buildCsv } from '../../../../../shared/lib/csv';
 
 export interface CsvContext {
   t: (key: string) => string;
@@ -97,19 +73,4 @@ export function csvFileName(projectName: string, today: string): string {
     .replace(/\s+/g, ' ')
     .trim();
   return `${safe || 'tasks'} ${today}.csv`;
-}
-
-/** Hands the CSV to the browser as a download. Nothing leaves the device. */
-export function downloadCsv(fileName: string, csv: string): void {
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = fileName;
-  link.rel = 'noopener';
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  // Revoked after the click has been handled, not during it.
-  setTimeout(() => URL.revokeObjectURL(url), 0);
 }

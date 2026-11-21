@@ -32,7 +32,8 @@ import { ListGridContext, useListGrid, type ListGridState } from './list/listGri
 import { handleGridKeyDown, GRID_CELL, GRID_ROW } from './list/gridKeyboard';
 import { useListPrefs } from './list/useListPrefs';
 import { nextSort, rowMinWidth, sortListTasks, type ListColumnId } from './list/listColumns';
-import { csvFileName, downloadCsv, listTasksToCsv } from './list/listCsv';
+import { csvFileName, listTasksToCsv } from './list/listCsv';
+import { downloadCsv } from '../../../../shared/lib/csv';
 
 export { TaskRow };
 
