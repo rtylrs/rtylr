@@ -60,7 +60,7 @@ async function stubPublicPager(page: Page): Promise<{ ticket: TicketState; scans
   await page.route('**/pager/v1/public/venues/acme/scan', (route) => {
     state.scans += 1;
     return route.fulfill({
-      json: { public_token: 'tok-e2e', code: 'A7', color: 2, status: 'waiting' },
+      json: { public_token: 'tok-e2e', code: '427', status: 'waiting' },
     });
   });
   await page.route('**/pager/v1/public/tickets/tok-e2e', (route) => {
@@ -68,8 +68,7 @@ async function stubPublicPager(page: Page): Promise<{ ticket: TicketState; scans
     const waiting = state.ticket === 'scanned' || state.ticket === 'waiting';
     return route.fulfill({
       json: {
-        ...(labelled ? { label: '42', label_kind: 'number' } : { code: 'A7' }),
-        color: 2,
+        ...(labelled ? { label: '42', label_kind: 'number' } : { code: '427' }),
         status: waiting ? 'waiting' : 'ready',
         venue_name: 'Acme Cafe',
         ...(state.ticket === 'waiting' ? { ahead: 2 } : {}),
@@ -123,14 +122,14 @@ test.describe('Pager (customer)', () => {
 
     // The ticket exists before any tap: the scan itself opened it.
     await expect(page).toHaveURL(`${RENNILI_URL}/t/tok-e2e`);
-    await expect(page.getByRole('heading', { name: 'Your code A7' })).toBeVisible();
-    await expect(page.getByText('Show this code to the cashier')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Your code 427' })).toBeVisible();
+    await expect(page.getByText('Show this number to the cashier')).toBeVisible();
     await expect(page.getByRole('textbox')).toHaveCount(0);
     expect(state.scans).toBe(1);
 
     // A reload keeps the same ticket and code.
     await page.reload();
-    await expect(page.getByRole('heading', { name: 'Your code A7' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Your code 427' })).toBeVisible();
     await page.goto(`${RENNILI_URL}/acme`);
     await expect(page).toHaveURL(`${RENNILI_URL}/t/tok-e2e`);
     expect(state.scans).toBe(1);
@@ -194,7 +193,7 @@ test.describe('Pager (staff board)', () => {
     await stubPortalSession(page, context);
     const tickets: Record<string, unknown>[] = [
       { id: '1', label: '41', label_kind: 'number', status: 'waiting' },
-      { id: '2', code: 'A7', color: 2, status: 'waiting', created_at: new Date().toISOString() },
+      { id: '2', code: '427', status: 'waiting', created_at: new Date().toISOString() },
     ];
     const labelCalls: unknown[] = [];
     const readyCalls: string[] = [];
@@ -233,7 +232,7 @@ test.describe('Pager (staff board)', () => {
     await expect(page.getByRole('switch', { name: 'Pager on' })).toBeChecked();
     await expect(page.getByRole('switch', { name: 'Pager on' })).toBeDisabled();
 
-    const label = page.getByLabel('Order number or name for code A7');
+    const label = page.getByLabel('Order number for code 427');
     await expect(label).toHaveAttribute('inputmode', 'numeric');
     await label.fill('42');
     await page.getByRole('button', { name: 'Save' }).click();
