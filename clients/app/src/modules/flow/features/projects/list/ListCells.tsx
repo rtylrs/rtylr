@@ -5,6 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@voxire/
 import { useFlowStore, type Task } from '../../../shared/stores/flowStore';
 import type { ApiStatus } from '../../../shared/services/flowApi';
 import { cn, formatDueDate, formatShortDate, getInitials } from '../../../shared/lib/utils';
+import { assigneeOptions } from '../../../shared/lib/memberUtils';
 import PriorityIcon from '../../../shared/components/PriorityIcon';
 import { FLOW_MENU_SURFACE, FlowMenuItem } from '../../../shared/components/FlowSelect';
 import { LabelChip } from '../../../shared/components/LabelChip';
@@ -346,14 +347,11 @@ function AssigneeEditor({
   const edit = useListCellEdit();
   const members = useFlowStore((state) => state.members);
   const current = task.assigneeId || '';
-  const options = [
-    { id: '', name: t('flow.quickCreate.unassigned'), initials: '' },
-    // Someone assigned who has since left the member list stays choosable.
-    ...(current && !members.some((m) => String(m.id) === current)
-      ? [{ id: current, name, initials: task.assigneeInitials }]
-      : []),
-    ...members.map((m) => ({ id: String(m.id), name: m.name, initials: m.initials })),
-  ];
+  const options = assigneeOptions(
+    members,
+    { id: current, name, initials: task.assigneeInitials },
+    t('flow.quickCreate.unassigned')
+  );
   return (
     <CellMenu label={t(listColumn('assignee').labelKey)} onClose={onClose}>
       {options.map((option) => (
