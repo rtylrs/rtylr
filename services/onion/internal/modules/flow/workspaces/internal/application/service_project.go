@@ -93,6 +93,13 @@ func (s *Service) CreateTask(ctx context.Context, input domain.TaskInput) (domai
 		input.ProjectID = bucketID
 	}
 
+	// Resolved before anything is written, so a missing required custom field
+	// refuses the task without side effects.
+	fieldWrites, fieldErr := s.fieldValuesForNewTask(ctx, input.BusinessID, input.ProjectID, input.FieldValues)
+	if fieldErr != nil {
+		return domain.Task{}, fieldErr
+	}
+
 	// T1: assignment carries access with it.
 	if input.AssigneeID != nil && *input.AssigneeID > 0 && *input.AssigneeID != input.OwnerID {
 		if grantErr := s.EnsureAssigneeMembership(ctx, input.ProjectID, input.BusinessID, *input.AssigneeID); grantErr != nil {
@@ -108,11 +115,23 @@ func (s *Service) CreateTask(ctx context.Context, input domain.TaskInput) (domai
 		return domain.Task{}, err
 	}
 
+	if err := s.storeNewTaskFieldValues(ctx, input.BusinessID, id, fieldWrites); err != nil {
+		return domain.Task{}, err
+	}
+
 	if actErr := s.repo.LogActivity(ctx, id, input.ReporterID, "created_task", "", input.Title); actErr != nil {
 		logger.Ctx(ctx).Error("CreateTask: failed to log activity", logger.Error(actErr))
 	}
 
-	return s.repo.GetTaskByID(ctx, id)
+	task, err := s.repo.GetTaskByID(ctx, id)
+	if err != nil {
+		return domain.Task{}, err
+	}
+	created := []domain.Task{task}
+	if err := s.attachFieldValues(ctx, input.BusinessID, created); err != nil {
+		return domain.Task{}, err
+	}
+	return created[0], nil
 }
 
 func (s *Service) GetTaskDetail(ctx context.Context, taskID int64) (domain.TaskDetail, error) {
@@ -144,6 +163,13 @@ func (s *Service) GetTaskDetail(ctx context.Context, taskID int64) (domain.TaskD
 	if task.Dependencies == nil {
 		task.Dependencies = []int64{}
 	}
+
+	// One query covers the task and its subtasks.
+	withValues := append([]domain.Task{task}, subtasks...)
+	if err := s.attachFieldValues(ctx, task.BusinessID, withValues); err != nil {
+		return domain.TaskDetail{}, err
+	}
+	task, subtasks = withValues[0], withValues[1:]
 
 	return domain.TaskDetail{
 		Task:     task,
