@@ -16,6 +16,12 @@ import { useProjectLabourCost } from '../../shared/hooks/queries/useProjectLabou
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import ProjectDashboardPanel from '../../../insights/shared/components/ProjectDashboardPanel';
+import { useEpicRollups } from '../tasks/useTasks';
+import { useOpenTask } from '../../shared/lib/useOpenTask';
+import EpicProgressBar, {
+  EpicProgressModeSelect,
+  useEpicProgressMode,
+} from '../../shared/components/EpicProgressBar';
 
 /**
  * ProjectDashboard - one-glance health view. The top is the Insights project
@@ -47,6 +53,9 @@ const ProjectDashboard: React.FC = () => {
   const { data: apiTasks = [] } = tasksQuery;
   const tasksLoadFailed = hasQueryFailed(tasksQuery);
   const tasksLoading = tasksQuery.isPending && !tasksLoadFailed;
+  const { data: epicRollups = [] } = useEpicRollups(projectId);
+  const [epicMode, setEpicMode] = useEpicProgressMode();
+  const openTask = useOpenTask();
 
   const stats = useMemo(() => {
     const total = apiTasks.length;
@@ -179,6 +188,41 @@ const ProjectDashboard: React.FC = () => {
               }
             />
           </div>
+        )}
+
+        {/* Epics, each with its progress in the chosen mode */}
+        {epicRollups.length > 0 && (
+          <Card
+            title={t('flow.epics.dashboardTitle')}
+            action={
+              <div className="w-[140px]">
+                <EpicProgressModeSelect mode={epicMode} onChange={setEpicMode} />
+              </div>
+            }
+          >
+            <div className="space-y-3">
+              {epicRollups.map((epic) => (
+                <div key={String(epic.epicId)} className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => openTask(String(epic.epicId))}
+                    className="flow-focus flex w-[160px] shrink-0 items-center gap-1.5 truncate text-start text-flow-meta hover:underline"
+                    style={{ color: 'var(--flow-text)' }}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="h-2 w-2 shrink-0 rounded-full"
+                      style={{ background: epic.color || project.color }}
+                    />
+                    <span className="truncate">{epic.title}</span>
+                  </button>
+                  <div className="min-w-0 flex-1">
+                    <EpicProgressBar rollup={epic} mode={epicMode} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
         )}
 
         {/* Status breakdown bar */}
@@ -326,7 +370,11 @@ const StatTile: React.FC<{
   </div>
 );
 
-const Card: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
+const Card: React.FC<{ title: string; action?: React.ReactNode; children: React.ReactNode }> = ({
+  title,
+  action,
+  children,
+}) => (
   <section
     className="rounded-md p-4"
     style={{
@@ -334,12 +382,15 @@ const Card: React.FC<{ title: string; children: React.ReactNode }> = ({ title, c
       border: '1px solid var(--flow-border)',
     }}
   >
-    <h3
-      className="text-flow-meta font-semibold uppercase tracking-wider mb-3"
-      style={{ color: 'var(--flow-text-dim)' }}
-    >
-      {title}
-    </h3>
+    <div className="mb-3 flex items-center justify-between gap-2">
+      <h3
+        className="text-flow-meta font-semibold uppercase tracking-wider"
+        style={{ color: 'var(--flow-text-dim)' }}
+      >
+        {title}
+      </h3>
+      {action}
+    </div>
     {children}
   </section>
 );
