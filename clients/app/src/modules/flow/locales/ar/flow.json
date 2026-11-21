@@ -716,7 +716,8 @@
       "due": "نطاق الاستحقاق",
       "label": "التصنيف",
       "cycle": "الدورة",
-      "milestone": "المرحلة"
+      "milestone": "المرحلة",
+      "epic": "الملحمة"
     },
     "moveTask": "نقل {{title}} إلى عمود آخر",
     "moveTaskMenu": "النقل إلى عمود",
@@ -984,7 +985,8 @@
       "assignee": "المسند إليه",
       "priority": "الأولوية",
       "due": "تاريخ الاستحقاق",
-      "none": "بدون"
+      "none": "بدون",
+      "epic": "الملحمة"
     },
     "empty": "لا توجد مهام في هذا المشروع بعد.",
     "columns": "الأعمدة",
@@ -1370,7 +1372,8 @@
       "status": "الحالة",
       "cycle": "الدورة",
       "milestone": "المرحلة",
-      "project": "المشروع"
+      "project": "المشروع",
+      "epic": "الملحمة"
     },
     "due": {
       "overdue": "متأخرة",
@@ -1471,6 +1474,42 @@
       "number": "أضف رقمًا",
       "date": "اختر تاريخًا"
     }
+  },
+  "taskType": {
+    "label": "النوع",
+    "task": "مهمة",
+    "bug": "خلل",
+    "feature": "ميزة",
+    "epic": "ملحمة"
+  },
+  "epics": {
+    "noEpic": "بلا ملحمة",
+    "filterBy": "عرض {{name}} فقط",
+    "parent": "الأصل",
+    "changeParent": "تغيير الأصل",
+    "noParent": "بلا أصل",
+    "color": "لون الملحمة",
+    "noColor": "بلا لون",
+    "progress": "تقدّم الملحمة",
+    "progressMode": "احتساب التقدّم حسب",
+    "mode": {
+      "count": "عدد المهام",
+      "estimate": "التقدير",
+      "hours": "الساعات المسجّلة"
+    },
+    "countSummary": "أُنجزت {{done}} من {{total}} مهام",
+    "estimateSummary": "أُنجز {{done}} من تقدير {{total}}",
+    "hoursSummary": "سُجّل {{done}} من تقدير {{total}}",
+    "noEstimate": "لا تقديرات بعد",
+    "progressLabel": "تقدّم {{name}}",
+    "tasksInEpic": "مهام هذه الملحمة",
+    "dashboardTitle": "الملاحم",
+    "deleteKeepsChildren_zero": "لا مهام فيها.",
+    "deleteKeepsChildren_one": "تبقى مهمتها الوحيدة في المشروع بلا ملحمة.",
+    "deleteKeepsChildren_two": "تبقى مهمتاها في المشروع بلا ملحمة.",
+    "deleteKeepsChildren_few": "تبقى مهامها الـ{{count}} في المشروع بلا ملحمة.",
+    "deleteKeepsChildren_many": "تبقى مهامها الـ{{count}} في المشروع بلا ملحمة.",
+    "deleteKeepsChildren_other": "تبقى مهامها الـ{{count}} في المشروع بلا ملحمة."
   },
   "backlog": {
     "pageTitle": "قائمة الأعمال",

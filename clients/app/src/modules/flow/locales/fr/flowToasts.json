@@ -26,7 +26,12 @@
     "moveFailed": "Échec du déplacement de la tâche",
     "titleRequired": "Le titre de la tâche est requis",
     "linkCopied": "Lien copié",
-    "createdWithId": "Créé {{id}}"
+    "createdWithId": "Créé {{id}}",
+    "parentChanged": "Tâche déplacée",
+    "parentFailed": "Impossible de déplacer la tâche",
+    "epicDeleted_one": "Épopée supprimée. {{count}} tâche conservée sans épopée",
+    "epicDeleted_many": "Épopée supprimée. {{count}} tâches conservées sans épopée",
+    "epicDeleted_other": "Épopée supprimée. {{count}} tâches conservées sans épopée"
   },
   "comment": {
     "postFailed": "Impossible de publier le commentaire",

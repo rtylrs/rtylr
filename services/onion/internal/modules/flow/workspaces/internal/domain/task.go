@@ -77,6 +77,14 @@ type Task struct {
 	Dependencies      []int64
 	// FieldValues holds the task's custom field values keyed by field id.
 	FieldValues map[int64]FieldValue
+
+	// TaskType is task, bug, feature or epic. EpicColor is the epic's own
+	// colour on an epic and the colour of the epic a task sits under otherwise.
+	// EpicID and EpicTitle name that epic; a subtask reports its parent's.
+	TaskType  string
+	EpicID    *int64
+	EpicTitle string
+	EpicColor string
 }
 
 type ProjectColumn struct {
@@ -160,6 +168,12 @@ type TaskInput struct {
 	Labels         []int64
 	// FieldValues are custom field values to store with the new task.
 	FieldValues []FieldValueInput
+	// ParentTaskID may name an epic or a task on the way in. The service
+	// resolves it, so the repository only ever sees a task parent here and an
+	// epic in EpicID.
+	TaskType  string
+	EpicID    *int64
+	EpicColor string
 }
 
 type UpdateTaskInput struct {
@@ -187,6 +201,10 @@ type UpdateTaskInput struct {
 	// FocusPin is per-user, so the repository writes flow_task_focus_pins
 	// keyed on the caller rather than a column on flow_tasks.
 	FocusPin *bool
+	// TaskType empty leaves the type alone. EpicColor nil leaves the colour
+	// alone and an empty string clears it.
+	TaskType  string
+	EpicColor *string
 }
 
 type AddTaskDependencyInput struct {
@@ -222,6 +240,11 @@ type ListTasksFilter struct {
 	// Custom field clauses, already validated against the project's fields.
 	FieldFilters []TaskFieldFilter
 	FieldSort    *TaskFieldSort
+	// TaskTypes narrows to the listed types. EpicID narrows to one epic's
+	// tasks; NoEpic to tasks that sit under no epic and are not epics.
+	TaskTypes []string
+	EpicID    *int64
+	NoEpic    bool
 }
 
 type Label struct {

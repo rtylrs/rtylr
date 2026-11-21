@@ -5,7 +5,7 @@ import { useClickOutside } from '@voxire/utils';
 import { useThemeScope } from '@voxire/ui';
 import { toast } from 'sonner';
 import { ExternalLink, Trash2, Copy } from 'lucide-react';
-import { useDeleteTask } from '../../features/tasks/useTasks';
+import { useDeleteTask, useTaskDetail } from '../../features/tasks/useTasks';
 import { useCanDeleteResource } from '../lib/currentUser';
 import { useTranslation } from 'react-i18next';
 import ConfirmDialog from './ConfirmDialog';
@@ -31,6 +31,11 @@ export const TaskContextMenu: React.FC<{
   const canRemove = useCanDeleteResource(menu.projectId);
   const ref = useRef<HTMLDivElement>(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  // Read only once Delete is chosen: an epic's confirmation names how many of
+  // its tasks are kept. The detail lists an epic's tasks as its subtasks.
+  const { data: pendingDetail } = useTaskDetail(confirmingDelete ? menu.taskId : undefined);
+  const epicChildCount =
+    pendingDetail?.task?.taskType === 'epic' ? (pendingDetail.subtasks ?? []).length : null;
 
   // A menu's items are what the arrow keys move between, and role="menu" whose
   // children are plain buttons is invalid ARIA: the menu is announced but its
@@ -207,6 +212,9 @@ export const TaskContextMenu: React.FC<{
           <>
             {t('flow.taskMenu.deleteConfirmPrefix')} <strong>{menu.taskTitle}</strong>
             {t('flow.taskMenu.deleteConfirmSuffix')}
+            {epicChildCount !== null && (
+              <> {t('flow.epics.deleteKeepsChildren', { count: epicChildCount })}</>
+            )}
           </>
         }
         confirmLabel={t('flowCommon.delete')}
@@ -214,7 +222,14 @@ export const TaskContextMenu: React.FC<{
         pending={deleteTask.isPending}
         onConfirm={() => {
           deleteTask.mutate(menu.taskId, {
-            onSuccess: () => toast.success(t('flowToasts.task.deleted')),
+            onSuccess: (result) => {
+              const detached = Number(result?.detachedChildren ?? 0);
+              toast.success(
+                detached > 0
+                  ? t('flowToasts.task.epicDeleted', { count: detached })
+                  : t('flowToasts.task.deleted')
+              );
+            },
             onError: () => toast.error(t('flowToasts.task.deleteFailed')),
           });
           setConfirmingDelete(false);

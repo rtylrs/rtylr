@@ -31,18 +31,18 @@ func (a *PagerAPI) GetPublicVenue(ctx context.Context, req *pagerv1.GetPublicVen
 		Name:    venue.Name,
 		LogoUrl: venue.LogoURL,
 		Enabled: settings.Enabled,
-		Strict:  settings.Strict,
 	}, nil
 }
 
-func (a *PagerAPI) JoinTicket(ctx context.Context, req *pagerv1.JoinTicketRequest) (*pagerv1.JoinTicketResponse, error) {
-	ticket, err := a.Service.Join(ctx, req.GetSlug(), req.GetNumber())
+func (a *PagerAPI) ScanTicket(ctx context.Context, req *pagerv1.ScanTicketRequest) (*pagerv1.ScanTicketResponse, error) {
+	ticket, err := a.Service.Scan(ctx, req.GetSlug())
 	if err != nil {
-		return nil, publicError(ctx, "join ticket", err)
+		return nil, publicError(ctx, "scan ticket", err)
 	}
-	return &pagerv1.JoinTicketResponse{
+	return &pagerv1.ScanTicketResponse{
 		PublicToken: ticket.PublicToken,
-		Number:      ticket.Number,
+		Code:        ticket.Code,
+		Color:       int32(domain.MatchColor(ticket.Code)),
 		Status:      ticket.Status,
 	}, nil
 }
@@ -53,7 +53,10 @@ func (a *PagerAPI) GetPublicTicket(ctx context.Context, req *pagerv1.GetPublicTi
 		return nil, publicError(ctx, "get public ticket", err)
 	}
 	return &pagerv1.GetPublicTicketResponse{
-		Number:         view.Ticket.Number,
+		Label:          view.Ticket.Label,
+		LabelKind:      view.Ticket.LabelKind,
+		Code:           matchCode(view.Ticket),
+		Color:          int32(domain.MatchColor(view.Ticket.Code)),
 		Status:         view.Ticket.Status,
 		VenueName:      view.VenueName,
 		Ahead:          int32(view.Ahead),
@@ -103,16 +106,14 @@ func (a *PagerAPI) ListTickets(ctx context.Context, _ *pagerv1.ListTicketsReques
 	return &pagerv1.ListTicketsResponse{Tickets: out, ServerTime: timestamp(readAt)}, nil
 }
 
-func (a *PagerAPI) CreateTicket(ctx context.Context, req *pagerv1.CreateTicketRequest) (*pagerv1.CreateTicketResponse, error) {
-	businessID, err := staffBusinessID(ctx)
+func (a *PagerAPI) LabelTicket(ctx context.Context, req *pagerv1.LabelTicketRequest) (*pagerv1.LabelTicketResponse, error) {
+	ticket, err := a.move(ctx, "label ticket", req.GetId(), func(ctx context.Context, businessID, id int64) (domain.Ticket, error) {
+		return a.Service.Label(ctx, businessID, id, req.GetLabel())
+	})
 	if err != nil {
 		return nil, err
 	}
-	ticket, err := a.Service.Create(ctx, businessID, req.GetNumber())
-	if err != nil {
-		return nil, publicError(ctx, "create ticket", err)
-	}
-	return &pagerv1.CreateTicketResponse{Ticket: toTicket(ticket)}, nil
+	return &pagerv1.LabelTicketResponse{Ticket: ticket}, nil
 }
 
 func (a *PagerAPI) MarkReady(ctx context.Context, req *pagerv1.MarkReadyRequest) (*pagerv1.MarkReadyResponse, error) {
@@ -169,7 +170,7 @@ func (a *PagerAPI) GetSettings(ctx context.Context, _ *pagerv1.GetSettingsReques
 	if err != nil {
 		return nil, publicError(ctx, "get settings", err)
 	}
-	return &pagerv1.GetSettingsResponse{Enabled: settings.Enabled, Strict: settings.Strict}, nil
+	return &pagerv1.GetSettingsResponse{Enabled: settings.Enabled, LabelMode: settings.LabelMode}, nil
 }
 
 // UpdateSettings is for owners and admins: turning the pager on publishes the
@@ -182,11 +183,11 @@ func (a *PagerAPI) UpdateSettings(ctx context.Context, req *pagerv1.UpdateSettin
 	if !authPkg.IsBusinessAdmin(authPkg.DeviceCtx(ctx).User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	settings, err := a.Service.UpdateSettings(ctx, businessID, req.Enabled, req.Strict)
+	settings, err := a.Service.UpdateSettings(ctx, businessID, req.Enabled, req.LabelMode)
 	if err != nil {
 		return nil, publicError(ctx, "update settings", err)
 	}
-	return &pagerv1.UpdateSettingsResponse{Enabled: settings.Enabled, Strict: settings.Strict}, nil
+	return &pagerv1.UpdateSettingsResponse{Enabled: settings.Enabled, LabelMode: settings.LabelMode}, nil
 }
 
 // staffBusinessID is the business of the signed-in caller, verified against
@@ -206,15 +207,25 @@ func staffBusinessID(ctx context.Context) (int64, error) {
 func toTicket(ticket domain.Ticket) *pagerv1.Ticket {
 	return &pagerv1.Ticket{
 		Id:             ticket.ID,
-		Number:         ticket.Number,
+		Label:          ticket.Label,
+		LabelKind:      ticket.LabelKind,
+		Code:           matchCode(ticket),
+		Color:          int32(domain.MatchColor(ticket.Code)),
 		Status:         ticket.Status,
-		Source:         ticket.Source,
-		PhoneLinked:    ticket.PhoneLinked,
 		CreatedAt:      timestamp(ticket.CreatedAt),
 		ReadyAt:        timestamp(ticket.ReadyAt),
 		RemindedAt:     timestamp(ticket.RemindedAt),
 		AcknowledgedAt: timestamp(ticket.AcknowledgedAt),
 	}
+}
+
+// matchCode is the code to show for a ticket: only until it is labelled, after
+// which another phone may be showing the same code.
+func matchCode(ticket domain.Ticket) string {
+	if ticket.Labelled() {
+		return ""
+	}
+	return ticket.Code
 }
 
 // timestamp formats a time as RFC 3339 UTC with milliseconds, and a time that

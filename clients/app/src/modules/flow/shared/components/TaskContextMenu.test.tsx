@@ -19,6 +19,7 @@ vi.mock('@voxire/utils', () => ({ useClickOutside: () => undefined }));
 
 vi.mock('../../features/tasks/useTasks', () => ({
   useDeleteTask: () => ({ mutate: deleteMutate, isPending: false }),
+  useTaskDetail: () => ({ data: undefined }),
 }));
 
 vi.mock('../lib/currentUser', () => ({

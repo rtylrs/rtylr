@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetContainer } from '@voxire/components';
 import Board from '../Staff/Board';
-import Join from './Join';
+import Scan from './Scan';
 import Ticket from './Ticket';
 import LanguageSwitch from '../../shared/components/LanguageSwitch';
 import { pagerClaimUrl } from '../../pagerPaths';
@@ -32,6 +32,8 @@ const Try = (): React.JSX.Element => {
     [sandbox]
   );
   const [phoneToken, setPhoneToken] = useState<string | null>(null);
+  // Each "scan with another phone" mounts a fresh scan screen.
+  const [phone, setPhone] = useState(0);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -61,16 +63,19 @@ const Try = (): React.JSX.Element => {
                 {phoneToken ? (
                   <Ticket token={phoneToken} />
                 ) : (
-                  <Join slug={SANDBOX_SLUG} onJoined={setPhoneToken} />
+                  <Scan key={phone} slug={SANDBOX_SLUG} onScanned={setPhoneToken} />
                 )}
               </div>
               {phoneToken && (
                 <button
                   type="button"
                   className="pager-button pager-button--secondary"
-                  onClick={() => setPhoneToken(null)}
+                  onClick={() => {
+                    setPhoneToken(null);
+                    setPhone((n) => n + 1);
+                  }}
                 >
-                  {t('pager.try.anotherOrder')}
+                  {t('pager.try.anotherPhone')}
                 </button>
               )}
             </section>

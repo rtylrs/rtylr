@@ -38,10 +38,11 @@ vi.mock('./features/menu/Menu.tsx', () => ({ default: () => <h1>Admin menu</h1> 
 vi.mock('./modules/public-menu/screens/Public/SlugLanding/SlugLanding', () => ({
   default: () => <h1>Slug landing</h1>,
 }));
-vi.mock('./modules/pager/screens/Public/Join', () => ({ default: () => <h1>Pager join</h1> }));
+vi.mock('./modules/pager/screens/Public/Scan', () => ({ default: () => <h1>Pager scan</h1> }));
 vi.mock('./modules/pager/screens/Public/Ticket', () => ({ default: () => <h1>Pager ticket</h1> }));
 vi.mock('./modules/pager/screens/Staff/Board', () => ({ default: () => <h1>Pager board</h1> }));
 vi.mock('./modules/pager/screens/Staff/Poster', () => ({ default: () => <h1>Pager poster</h1> }));
+vi.mock('./modules/pager/screens/Staff/Display', () => ({ default: () => <h1>Pager display</h1> }));
 vi.mock('./modules/pager/screens/Public/Try', () => ({ default: () => <h1>Pager demo</h1> }));
 vi.mock('./modules/pager/screens/Staff/Setup', () => ({ default: () => <h1>Pager setup</h1> }));
 const locales = path.resolve(import.meta.dirname, 'locales');
@@ -142,7 +143,7 @@ describe('Public menu routes', () => {
 
 describe('Pager routes', () => {
   // The customer pages hang off the root, outside the signed-in shell, and
-  // share one document so the join tap can unlock the ticket page's sound.
+  // share one document so the tap on the ticket page unlocks its sound.
   it('mounts the customer pages outside the business route and the board inside it', () => {
     expect(Object.keys(appRouter.routesById)).toEqual(
       expect.arrayContaining([
@@ -150,6 +151,7 @@ describe('Pager routes', () => {
         '/pager-public/pager/t/$token',
         '/pager-public/pager/try',
         '/business/pager',
+        '/business/pager/display',
         '/business/pager/poster',
         '/business/pager/setup',
       ])
@@ -157,10 +159,11 @@ describe('Pager routes', () => {
   });
 
   it.each([
-    ['/some-business/pager', 'Pager join'],
+    ['/some-business/pager', 'Pager scan'],
     ['/pager/t/tok-1', 'Pager ticket'],
     ['/pager', 'Pager board'],
     ['/pager/poster', 'Pager poster'],
+    ['/pager/display', 'Pager display'],
     ['/pager/try', 'Pager demo'],
     ['/pager/setup', 'Pager setup'],
   ])('serves %s', async (url, heading) => {

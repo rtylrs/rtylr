@@ -41,20 +41,39 @@ export const SummaryCard: React.FC<{
   title: string;
   children: React.ReactNode;
   className?: string;
-}> = ({ title, children, className }) => (
-  <section
-    className={['rounded-md p-4', className].filter(Boolean).join(' ')}
-    style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
-  >
+  /** A control on the right of the title, such as a mode picker. */
+  action?: React.ReactNode;
+}> = ({ title, children, className, action }) => {
+  const heading = (
     <h3
-      className="text-flow-meta font-semibold uppercase tracking-wider mb-3"
+      className={[
+        'text-flow-meta font-semibold uppercase tracking-wider',
+        action ? undefined : 'mb-3',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       style={{ color: 'var(--flow-text-dim)' }}
     >
       {title}
     </h3>
-    {children}
-  </section>
-);
+  );
+  return (
+    <section
+      className={['rounded-md p-4', className].filter(Boolean).join(' ')}
+      style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
+    >
+      {action ? (
+        <div className="mb-3 flex items-center justify-between gap-2">
+          {heading}
+          {action}
+        </div>
+      ) : (
+        heading
+      )}
+      {children}
+    </section>
+  );
+};
 
 const TILE_BOX: React.CSSProperties = {
   background: 'var(--flow-card)',

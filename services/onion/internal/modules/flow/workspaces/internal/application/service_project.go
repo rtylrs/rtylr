@@ -100,6 +100,10 @@ func (s *Service) CreateTask(ctx context.Context, input domain.TaskInput) (domai
 		return domain.Task{}, fieldErr
 	}
 
+	if err := s.resolveNewTaskHierarchy(ctx, &input); err != nil {
+		return domain.Task{}, err
+	}
+
 	// T1: assignment carries access with it.
 	if input.AssigneeID != nil && *input.AssigneeID > 0 && *input.AssigneeID != input.OwnerID {
 		if grantErr := s.EnsureAssigneeMembership(ctx, input.ProjectID, input.BusinessID, *input.AssigneeID); grantErr != nil {
@@ -242,6 +246,9 @@ func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, 
 	}
 	if input.BusinessID == 0 || existing.BusinessID != input.BusinessID {
 		return domain.ErrUnauthorized
+	}
+	if err := s.resolveTaskTypeUpdate(ctx, existing, &input); err != nil {
+		return err
 	}
 
 	// Any edit changes what the current assignee's my-tasks list should show,

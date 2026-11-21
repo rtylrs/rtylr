@@ -3,6 +3,7 @@ import type { BoardGroupKey } from '../../shared/lib/boardUtils';
 import { addDays, todayIso } from '../../shared/lib/dateUtils';
 import type { ApiField } from '../../shared/services/flowApi';
 import { fieldIdFromKey, fieldKey, fieldValueParts } from '../../shared/lib/customFields';
+import { NO_EPIC, epicKeyOf, epicsIn } from '../../shared/lib/taskHierarchy';
 
 export const PRIORITY_ORDER: Task['priority'][] = [
   'urgent',
@@ -54,9 +55,30 @@ export function fieldGroupOptions(
   return groupableFields(fields).map((f) => ({ key: fieldKey(f.id), label: f.name }));
 }
 
+export interface EpicLane {
+  key: string;
+  /** An epic's own title. Never translated. */
+  label?: string;
+  /** The "No epic" lane's translation key. */
+  labelKey?: string;
+  color?: string;
+}
+
+/**
+ * One lane per epic, in list order, then "No epic". An epic's own card sits
+ * in its lane (see epicKeyOf), so the epic heads the work under it.
+ */
+export function epicLanes(tasks: readonly Task[]): EpicLane[] {
+  return [
+    ...epicsIn(tasks).map((e) => ({ key: e.id, label: e.title, color: e.color })),
+    { key: NO_EPIC, labelKey: 'flow.epics.noEpic' },
+  ];
+}
+
 export function laneKeyFor(t: Task, groupBy: BoardGroupKey): string {
   const fieldId = fieldIdFromKey(groupBy);
   if (fieldId !== null) return fieldValueParts(t.fieldValues?.[fieldId])[0] ?? NO_FIELD_LANE;
+  if (groupBy === 'epic') return epicKeyOf(t);
   if (groupBy === 'assignee') return t.assignee || 'Unassigned';
   if (groupBy === 'priority') return t.priority;
   if (groupBy === 'due') {

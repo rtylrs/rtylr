@@ -100,4 +100,12 @@ export function columnLabel(status: TaskStatus): string {
  * identical. Adding a value to one and not the other would compile.
  */
 export type BoardGroupKey =
-  'none' | 'assignee' | 'priority' | 'due' | 'label' | 'cycle' | 'milestone' | `field:${string}`;
+  | 'none'
+  | 'assignee'
+  | 'priority'
+  | 'due'
+  | 'label'
+  | 'cycle'
+  | 'milestone'
+  | 'epic'
+  | `field:${string}`;

@@ -1,11 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { QRCode } from 'react-qrcode-logo';
-import { QrCodeTemplates } from '../../../../features/qr-codes/templates';
-
-// The qr-codes feature's plain black-on-white template: it scans best from
-// across a counter.
-const QR_STYLE = QrCodeTemplates[0];
+import { VenueQr } from './VenueQr';
 
 const POSTER_LANGUAGES = ['en', 'ar'] as const;
 type PosterLanguage = (typeof POSTER_LANGUAGES)[number];
@@ -14,12 +9,12 @@ function PosterSteps({ lng }: { lng: PosterLanguage }): React.JSX.Element {
   const { t } = useTranslation('pager', { lng });
   const steps = [
     ['scan', t('pager.poster.stepScan')],
-    ['type', t('pager.poster.stepType')],
+    ['show', t('pager.poster.stepShow')],
     ['wait', t('pager.poster.stepWait')],
   ] as const;
   return (
     <section lang={lng} dir={lng === 'ar' ? 'rtl' : 'ltr'} className="pager-poster__lang">
-      <h2>{t('pager.join.heading')}</h2>
+      <h2>{t('pager.poster.callToAction')}</h2>
       <ol>
         {steps.map(([key, step], index) => (
           <li key={key}>
@@ -50,14 +45,7 @@ export function CounterPoster({
     <article className="pager-poster">
       {venueName && <p className="pager-poster__venue">{venueName}</p>}
       <div className="pager-poster__qr">
-        <QRCode
-          value={joinUrl}
-          size={qrSize}
-          fgColor={QR_STYLE.fgColor}
-          bgColor={QR_STYLE.bgColor}
-          eyeRadius={QR_STYLE.eyeRadius}
-          qrStyle={QR_STYLE.qrStyle}
-        />
+        <VenueQr url={joinUrl} size={qrSize} />
       </div>
       <p className="pager-poster__url" dir="ltr">
         {joinUrl}

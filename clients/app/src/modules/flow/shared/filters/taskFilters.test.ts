@@ -256,3 +256,31 @@ describe('custom field filters', () => {
     expect(parseTaskFilters({ fields: { x: ['a'], '6': 'b', '7': [] } }).fields).toEqual({});
   });
 });
+
+describe('epic filter', () => {
+  const epic = task({ id: '10', taskType: 'epic', title: 'Payments' });
+  const child = task({ id: '11', epicId: '10' });
+  const subtaskOfChild = task({ id: '12', parentId: '11', epicId: '10' });
+  const loose = task({ id: '13' });
+
+  it('keeps the epic, its tasks and their subtasks', () => {
+    const filters = f({ epics: ['10'] });
+    expect(
+      [epic, child, subtaskOfChild, loose].filter((t) => matchesTaskFilters(t, filters, ctx))
+    ).toEqual([epic, child, subtaskOfChild]);
+  });
+
+  it('matches tasks under no epic with No epic', () => {
+    const filters = f({ epics: ['none'] });
+    expect(matchesTaskFilters(loose, filters, ctx)).toBe(true);
+    expect(matchesTaskFilters(child, filters, ctx)).toBe(false);
+    expect(matchesTaskFilters(epic, filters, ctx)).toBe(false);
+  });
+
+  it('counts as a field and survives the URL round trip', () => {
+    const filters = f({ epics: ['10'] });
+    expect(activeFieldCount(filters)).toBe(1);
+    expect(serializeTaskFilters(filters)).toEqual({ epics: ['10'] });
+    expect(parseTaskFilters(serializeTaskFilters(filters))).toEqual(filters);
+  });
+});

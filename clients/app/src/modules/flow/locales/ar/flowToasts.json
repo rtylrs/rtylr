@@ -32,7 +32,15 @@
     "moveFailed": "فشل نقل المهمة",
     "titleRequired": "عنوان المهمة مطلوب",
     "linkCopied": "تم نسخ الرابط",
-    "createdWithId": "تم إنشاء {{id}}"
+    "createdWithId": "تم إنشاء {{id}}",
+    "parentChanged": "نُقلت المهمة",
+    "parentFailed": "تعذّر نقل المهمة",
+    "epicDeleted_zero": "حُذفت الملحمة",
+    "epicDeleted_one": "حُذفت الملحمة. بقيت مهمة واحدة بلا ملحمة",
+    "epicDeleted_two": "حُذفت الملحمة. بقيت مهمتان بلا ملحمة",
+    "epicDeleted_few": "حُذفت الملحمة. بقيت {{count}} مهام بلا ملحمة",
+    "epicDeleted_many": "حُذفت الملحمة. بقيت {{count}} مهمة بلا ملحمة",
+    "epicDeleted_other": "حُذفت الملحمة. بقيت {{count}} مهمة بلا ملحمة"
   },
   "comment": {
     "postFailed": "تعذّر نشر التعليق",

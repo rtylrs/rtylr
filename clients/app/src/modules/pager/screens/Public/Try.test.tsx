@@ -2,7 +2,7 @@ import React from 'react';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// The real board, join and ticket screens against the in-memory pager. Real
+// The real board, scan and ticket screens against the in-memory pager. Real
 // translations, so the English below also proves the keys resolve.
 
 vi.mock('@voxire/components', () => ({
@@ -37,7 +37,7 @@ const syncSpy = vi.hoisted(() => vi.fn());
 vi.mock('../../../../shared/alarm/readyAlarm', () => ({
   readyAlarm: { unlock: vi.fn(), sync: syncSpy, release: vi.fn(), silence: vi.fn() },
 }));
-// Unlocked unless a test needs the ticket's "Alert me" tap on screen.
+// Unlocked unless a test needs the ticket's "Notify me" tap on screen.
 const alarmState = vi.hoisted(() => ({ ringing: false, unlocked: true }));
 vi.mock('../../../../shared/alarm/useAlarm', () => ({
   useAlarm: () => alarmState,
@@ -70,19 +70,27 @@ afterEach(() => {
 });
 
 describe('pager demo', () => {
-  it('rings the demo phone when the board marks its number ready', async () => {
+  it('scans the demo phone, labels it on the board and rings it on ready', async () => {
     render(<Try />);
     const phone = screen.getByRole('region', { name: "Your customer's phone" });
     const counter = screen.getByRole('region', { name: 'Your counter' });
 
-    fireEvent.change(await within(phone).findByLabelText('Order number'), {
-      target: { value: '42' },
-    });
-    fireEvent.click(within(phone).getByRole('button', { name: "Ring me when it's ready" }));
-    expect(await within(phone).findByText("We're preparing your order")).toBeInTheDocument();
+    // The phone has "scanned": a code and nothing to type.
+    const heading = await within(phone).findByRole('heading', { name: /^Your code / });
+    const code = heading.textContent?.replace('Your code', '').trim() ?? '';
+    expect(within(phone).getByText('Show this code to the cashier')).toBeInTheDocument();
+    expect(within(phone).queryByRole('textbox')).not.toBeInTheDocument();
 
     await nextPoll();
-    fireEvent.click(await within(counter).findByRole('button', { name: 'Ready: order 42' }));
+    fireEvent.change(await within(counter).findByLabelText(`Order number or name for code ${code}`), {
+      target: { value: '42' },
+    });
+    fireEvent.click(within(counter).getByRole('button', { name: 'Save' }));
+    await nextPoll();
+
+    expect(await within(phone).findByRole('heading', { name: 'Order 42' })).toBeInTheDocument();
+    expect(within(phone).getByText("We're preparing your order")).toBeInTheDocument();
+    fireEvent.click(await within(counter).findByRole('button', { name: 'Ready: 42' }));
     await nextPoll();
 
     expect(await within(phone).findByText('Your order is ready!')).toBeInTheDocument();
@@ -100,12 +108,8 @@ describe('pager demo', () => {
       render(<Try />);
       const phone = screen.getByRole('region', { name: "Your customer's phone" });
 
-      fireEvent.change(await within(phone).findByLabelText('Order number'), {
-        target: { value: '42' },
-      });
-      fireEvent.click(within(phone).getByRole('button', { name: "Ring me when it's ready" }));
-      expect(await within(phone).findByText("We're preparing your order")).toBeInTheDocument();
-      fireEvent.click(within(phone).getByRole('button', { name: 'Alert me' }));
+      expect(await within(phone).findByText('Show this code to the cashier')).toBeInTheDocument();
+      fireEvent.click(within(phone).getByRole('button', { name: "Notify me when it's ready" }));
       await nextPoll();
 
       expect(pushBrowser.requestPermission).not.toHaveBeenCalled();
@@ -119,19 +123,33 @@ describe('pager demo', () => {
   it('lets the visitor change the demo venue settings', async () => {
     render(<Try />);
     const counter = screen.getByRole('region', { name: 'Your counter' });
-    const strict = await within(counter).findByRole('switch', {
-      name: 'Only numbers entered here',
-    });
-    expect(strict).toBeEnabled();
+    const mode = await within(counter).findByLabelText('Label orders by');
+    expect(mode).toBeEnabled();
     expect(within(counter).queryByText(/Only owners and admins/)).not.toBeInTheDocument();
   });
 
-  it('gives the demo counter no customer link and no poster link', async () => {
+  it('gives the demo counter no venue QR, no display and no poster link', async () => {
     render(<Try />);
     const counter = screen.getByRole('region', { name: 'Your counter' });
-    await within(counter).findByRole('switch', { name: 'Only numbers entered here' });
-    expect(within(counter).queryByText('Customer link')).not.toBeInTheDocument();
+    await within(counter).findByLabelText('Label orders by');
+    expect(within(counter).queryByText('Your pager QR')).not.toBeInTheDocument();
+    expect(screen.queryByText('Counter display')).not.toBeInTheDocument();
     expect(screen.queryByText('Print the counter poster')).not.toBeInTheDocument();
+  });
+
+  it('starts over with a new code for another phone', async () => {
+    render(<Try />);
+    const phone = screen.getByRole('region', { name: "Your customer's phone" });
+    const first = await within(phone).findByRole('heading', { name: /^Your code / });
+    const firstCode = first.textContent;
+
+    fireEvent.click(screen.getByRole('button', { name: 'Scan with another phone' }));
+
+    const second = await within(phone).findByRole('heading', { name: /^Your code / });
+    expect(second.textContent).not.toBe(firstCode);
+    await nextPoll();
+    const counter = screen.getByRole('region', { name: 'Your counter' });
+    expect(await within(counter).findByRole('heading', { name: 'New phones (2)' })).toBeInTheDocument();
   });
 
   it('sends the visitor to the ordinary sign-up, returning to the pager setup', () => {
