@@ -72,6 +72,8 @@ export interface StandaloneSurface {
    * sign-in app's `returnTo`, which only returns to the Portal origin. */
   portalPath: (pathname: string) => string;
   shell: (page: React.ReactNode) => React.ReactNode;
+  /** Where a signed-out visitor goes instead of the sign-in page, or null for sign-in. */
+  signedOutUrl?: (pathname: string, search: string) => string | null;
 }
 
 function currentReturnPath(standalone?: StandaloneSurface): string {
@@ -97,6 +99,14 @@ function BusinessRoute({
 
   useEffect((): void => {
     if (!token) {
+      const elsewhere = standalone?.signedOutUrl?.(
+        window.location.pathname,
+        window.location.search
+      );
+      if (elsewhere) {
+        window.location.href = elsewhere;
+        return;
+      }
       const login = new URL(resolveAuthUrl());
       login.searchParams.set('redirect', 'dash');
       login.searchParams.set('returnTo', currentReturnPath(standalone));
