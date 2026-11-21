@@ -921,7 +921,29 @@
       "due": "Échéance",
       "none": "Aucun"
     },
-    "empty": "Aucune tâche dans ce projet pour le moment."
+    "empty": "Aucune tâche dans ce projet pour le moment.",
+    "columns": "Colonnes",
+    "resetColumns": "Réinitialiser les colonnes",
+    "moveColumnEarlier": "Déplacer {{column}} avant",
+    "moveColumnLater": "Déplacer {{column}} après",
+    "resizeColumn": "Redimensionner {{column}}",
+    "exportCsv": "Exporter en CSV",
+    "gridLabel": "Tâches de {{project}}",
+    "showSubtasks_one": "Afficher {{count}} sous-tâche",
+    "showSubtasks_other": "Afficher {{count}} sous-tâches",
+    "hideSubtasks": "Masquer les sous-tâches",
+    "subtasksLoading": "Chargement des sous-tâches…",
+    "subtasksFailed": "Impossible de charger les sous-tâches",
+    "column": {
+      "priority": "Priorité",
+      "status": "Statut",
+      "assignee": "Responsable",
+      "startDate": "Date de début",
+      "estimate": "Estimation",
+      "labels": "Étiquettes",
+      "key": "Clé",
+      "created": "Créée le"
+    }
   },
   "projectOverview": {
     "pageTitle": "Aperçu · rtylr",

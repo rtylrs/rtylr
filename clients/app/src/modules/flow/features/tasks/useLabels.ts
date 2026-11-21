@@ -6,13 +6,15 @@ import { flowApi } from '../../shared/services/flowApi';
 import type { ApiLabel } from '../../shared/services/flowApi';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 
-export function useLabels() {
+/** `enabled: false` holds the request until a caller actually needs the labels. */
+export function useLabels({ enabled = true }: { enabled?: boolean } = {}) {
   return useQuery<ApiLabel[]>({
     queryKey: ['labels'],
     queryFn: async () => {
       const res = await unwrap(flowApi.listLabels());
       return unwrapListResponse<ApiLabel>(res, 'labels');
     },
+    enabled,
   });
 }
 

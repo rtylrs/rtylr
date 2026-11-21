@@ -951,7 +951,33 @@
       "due": "تاريخ الاستحقاق",
       "none": "بدون"
     },
-    "empty": "لا توجد مهام في هذا المشروع بعد."
+    "empty": "لا توجد مهام في هذا المشروع بعد.",
+    "columns": "الأعمدة",
+    "resetColumns": "إعادة تعيين الأعمدة",
+    "moveColumnEarlier": "تقديم عمود {{column}}",
+    "moveColumnLater": "تأخير عمود {{column}}",
+    "resizeColumn": "تغيير عرض عمود {{column}}",
+    "exportCsv": "تصدير CSV",
+    "gridLabel": "مهام {{project}}",
+    "showSubtasks_zero": "لا توجد مهام فرعية",
+    "showSubtasks_one": "إظهار مهمة فرعية واحدة",
+    "showSubtasks_two": "إظهار مهمتين فرعيتين",
+    "showSubtasks_few": "إظهار {{count}} مهام فرعية",
+    "showSubtasks_many": "إظهار {{count}} مهمة فرعية",
+    "showSubtasks_other": "إظهار {{count}} مهمة فرعية",
+    "hideSubtasks": "إخفاء المهام الفرعية",
+    "subtasksLoading": "جارٍ تحميل المهام الفرعية…",
+    "subtasksFailed": "تعذّر تحميل المهام الفرعية",
+    "column": {
+      "priority": "الأولوية",
+      "status": "الحالة",
+      "assignee": "المسند إليه",
+      "startDate": "تاريخ البدء",
+      "estimate": "التقدير",
+      "labels": "الوسوم",
+      "key": "المعرّف",
+      "created": "تاريخ الإنشاء"
+    }
   },
   "projectOverview": {
     "pageTitle": "نظرة عامة · rtylr",
