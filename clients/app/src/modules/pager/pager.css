@@ -49,7 +49,9 @@
   width: 100%;
   max-width: 480px;
   margin: 0 auto;
-  padding: 12px 20px 32px;
+  /* viewport-fit=cover lets the page run under a notch and the home bar. */
+  padding: max(12px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+    max(32px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -298,7 +300,8 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
-  padding: 24px 20px;
+  padding: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
   text-align: center;
 }
 
@@ -493,7 +496,7 @@
 
 .pager-display__close {
   position: absolute;
-  inset-block-start: 16px;
+  inset-block-start: max(16px, env(safe-area-inset-top));
   inset-inline-end: 16px;
   display: inline-flex;
   align-items: center;
