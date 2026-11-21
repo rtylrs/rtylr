@@ -902,8 +902,6 @@
     "resizeColumn": "Redimensionner {{column}}",
     "exportCsv": "Exporter en CSV",
     "gridLabel": "Tâches de {{project}}",
-    "estimateValue": "{{hours}} h",
-    "noLabels": "Aucune étiquette pour l'instant",
     "showSubtasks_one": "Afficher {{count}} sous-tâche",
     "showSubtasks_other": "Afficher {{count}} sous-tâches",
     "hideSubtasks": "Masquer les sous-tâches",
