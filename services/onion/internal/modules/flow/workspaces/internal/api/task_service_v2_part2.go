@@ -127,9 +127,13 @@ func (a *TaskAPIV2) CreateTask(ctx context.Context, req *flowtaskv2.CreateTaskRe
 		StartDate:      startDate,
 		EstimatedHours: req.EstimatedHours,
 		Labels:         req.GetLabels(),
+		FieldValues:    fieldValueInputs(req.GetFieldValues()),
 	}
 
 	task, createErr := a.Service.CreateTask(ctx, input)
+	if isFieldInputError(createErr) {
+		return nil, fieldError(createErr, "Failed to create task")
+	}
 	if createErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create task")
 	}

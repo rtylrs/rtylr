@@ -179,6 +179,9 @@ func toTaskV2(t domain.Task) *flowtaskv2.FlowTask {
 	if t.Archived {
 		out.Archived = true
 	}
+	if len(t.FieldValues) > 0 {
+		out.FieldValues = fieldValuesToProto(t.FieldValues)
+	}
 	return out
 }
 
@@ -212,6 +215,16 @@ func (a *TaskAPIV2) ListTasks(ctx context.Context, req *flowtaskv2.ListTasksRequ
 	}
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
 	filter.Limit, filter.Offset = int64(limit), offset
+
+	clauses, err := parseFieldFilter(req.GetFieldFilter())
+	if err != nil {
+		return nil, fieldError(err, "Failed to list tasks")
+	}
+	filter.FieldFilters, filter.FieldSort, err = a.Service.ResolveTaskFieldQuery(ctx, caller.UserID, businessID,
+		req.GetProjectId(), clauses, req.GetSortBy(), req.GetSortDir())
+	if err != nil {
+		return nil, fieldError(err, "Failed to list tasks")
+	}
 
 	tasks, total, err := a.Service.ListTasksV2(ctx, caller.UserID, businessID, filter)
 	if err != nil {

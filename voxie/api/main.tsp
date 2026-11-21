@@ -103,6 +103,8 @@ import "./flow/dashboard/v1/models.tsp";
 import "./flow/dashboard/v1/service.tsp";
 import "./flow/dashboard/v2/models.tsp";
 import "./flow/dashboard/v2/service.tsp";
+import "./flow/field/v2/models.tsp";
+import "./flow/field/v2/service.tsp";
 import "./flow/github/v2/models.tsp";
 import "./flow/github/v2/service.tsp";
 import "./flow/insights/v1/models.tsp";
