@@ -932,8 +932,6 @@
     "resizeColumn": "تغيير عرض عمود {{column}}",
     "exportCsv": "تصدير CSV",
     "gridLabel": "مهام {{project}}",
-    "estimateValue": "{{hours}} س",
-    "noLabels": "لا توجد وسوم بعد",
     "showSubtasks_zero": "لا توجد مهام فرعية",
     "showSubtasks_one": "إظهار مهمة فرعية واحدة",
     "showSubtasks_two": "إظهار مهمتين فرعيتين",
