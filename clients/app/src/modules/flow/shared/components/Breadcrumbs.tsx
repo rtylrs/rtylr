@@ -5,11 +5,18 @@ import { ChevronRight } from 'lucide-react';
 interface Crumb {
   label: string;
   to?: string;
+  /** For a crumb that is not a route, such as a task opened in the drawer. */
+  onClick?: () => void;
+  /** A dot of this colour before the label, such as an epic's colour. */
+  color?: string;
 }
 
 interface BreadcrumbsProps {
   items: Crumb[];
 }
+
+const linkClass =
+  'min-w-0 max-w-[42vw] truncate hover:text-[var(--flow-text)] transition-colors sm:max-w-[12rem]';
 
 export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items }) => {
   return (
@@ -23,14 +30,30 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items }) => {
               style={{ color: 'var(--flow-text-dim)' }}
             />
           )}
+          {c.color && (
+            <span
+              aria-hidden="true"
+              className="h-1.5 w-1.5 shrink-0 rounded-full"
+              style={{ background: c.color }}
+            />
+          )}
           {c.to ? (
             <Link
               to={c.to as string}
-              className="min-w-0 max-w-[42vw] truncate hover:text-[var(--flow-text)] transition-colors sm:max-w-[12rem]"
+              className={linkClass}
               style={{ color: 'var(--flow-text-muted)' }}
             >
               {c.label}
             </Link>
+          ) : c.onClick ? (
+            <button
+              type="button"
+              onClick={c.onClick}
+              className={`flow-focus ${linkClass} text-start`}
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              {c.label}
+            </button>
           ) : (
             <span className="min-w-0 truncate font-medium" style={{ color: 'var(--flow-text)' }}>
               {c.label}
