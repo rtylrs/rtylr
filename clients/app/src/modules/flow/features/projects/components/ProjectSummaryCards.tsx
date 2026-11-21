@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { serializeTaskFilters, type TaskFilters } from '../../../shared/filters/taskFilters';
-import { PRIORITY_LABEL_KEY } from '../taskGroups';
+import { priorityLabelKey } from '../../../shared/lib/priorityLabels';
 import { PRIORITY_COLORS } from '../../../shared/stores/flowStore';
 import type { HoursSummary, ProjectSummaryData, SummaryMetric } from '../projectSummary';
 import { formatHours } from '../../../../insights/shared/lib/format';
@@ -395,7 +395,7 @@ export const PriorityBreakdownCard: React.FC<{
           countAttr="data-priority-count"
           segments={priorities.map(({ priority, metric }) => ({
             key: priority,
-            label: t(PRIORITY_LABEL_KEY[priority]),
+            label: t(priorityLabelKey(priority)),
             count: metric.count,
             color: PRIORITY_COLORS[priority],
             filters: metric.filters,
