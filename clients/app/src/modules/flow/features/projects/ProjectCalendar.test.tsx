@@ -22,6 +22,11 @@ const { language } = vi.hoisted(() => ({ language: { value: 'en-US' } }));
 // Filtering has its own suite (ProjectBoardFilters); here it is a no-op unless
 // a test names the tasks that match.
 const filterStub = vi.hoisted(() => ({ matching: null as Set<string> | null }));
+// Custom fields come from their own query; none are defined here.
+vi.mock('./useFields', () => ({
+  useProjectFields: () => ({ data: [] }),
+  useSetTaskFieldValues: () => ({ mutate: vi.fn(), isPending: false }),
+}));
 vi.mock('./useProjectTaskFilters', () => ({
   useProjectTaskFilters: (_projectId: string, tasks: unknown[]) => ({
     state: {
