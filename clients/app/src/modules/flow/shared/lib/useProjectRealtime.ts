@@ -46,6 +46,18 @@ export function useProjectRealtime(projectId: string | undefined): void {
         qc.invalidateQueries({ queryKey: ['columns', projectId] });
         qc.invalidateQueries({ queryKey: ['project-overview', projectId] });
         qc.invalidateQueries({ queryKey: ['milestones', projectId] });
+        // A task's estimate, assignee or status changes its cycle's totals
+        // and capacity, and a cycle move arrives as task.updated.
+        qc.invalidateQueries({ queryKey: ['cycles', projectId] });
+        qc.invalidateQueries({ queryKey: ['cycle-capacity'] });
+      }
+      // Started, completed, created or edited cycles: the Backlog sections, the
+      // Cycles page and every task's cycle field.
+      if (e.type.startsWith('cycle.')) {
+        qc.invalidateQueries({ queryKey: ['cycles', projectId] });
+        qc.invalidateQueries({ queryKey: ['cycle-capacity'] });
+        qc.invalidateQueries({ queryKey: ['tasks'] });
+        qc.invalidateQueries({ queryKey: ['task'] });
       }
       // The server names these `status.*`; `column.*` writes the same rows,
       // because a project's board columns are its statuses.

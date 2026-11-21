@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/application"
 	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/testutil"
+	flowcyclev2 "github.com/voxire/voxie/gen/go/flow/cycle/v2"
 	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"
 	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
 	flowtaskv2 "github.com/voxire/voxie/gen/go/flow/task/v2"
@@ -56,6 +57,11 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 		}},
 		{Name: "flow epic rollups view", App: authorization.AppFlow, Permission: "flow:tasks:view", Call: func(ctx context.Context) (any, error) {
 			response, err := NewTaskAPIV2(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).ListEpicRollups(ctx, &flowtaskv2.ListEpicRollupsRequest{ProjectId: testutil.Int64Ptr(7301)})
+			return response, err
+		}},
+		{Name: "flow cycle task move", App: authorization.AppFlow, Permission: "flow:tasks:edit", Call: func(ctx context.Context) (any, error) {
+			taskID := int64(1)
+			response, err := NewCycleAPIV2(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).MoveCycleTask(ctx, &flowcyclev2.MoveCycleTaskRequest{TaskId: &taskID})
 			return response, err
 		}},
 		{Name: "flow team manage", App: authorization.AppFlow, Permission: "flow:team:manage", Call: func(ctx context.Context) (any, error) {

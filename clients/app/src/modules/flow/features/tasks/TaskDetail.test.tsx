@@ -73,7 +73,8 @@ vi.mock('./useTasks', () => ({
   useRemoveAttachment: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
-vi.mock('../cycles/useCycles', () => ({ useCycles: () => ({ data: [] }) }));
+const cyclesData = vi.hoisted(() => ({ data: [] as Array<Record<string, unknown>> }));
+vi.mock('../cycles/useCycles', () => ({ useCycles: () => cyclesData }));
 vi.mock('../milestones/useMilestones', () => ({ useMilestones: () => ({ data: [] }) }));
 vi.mock('../projects/useColumns', () => ({ useProjectColumns: () => ({ data: [] }) }));
 vi.mock('../projects/useProjectMembers', () => ({ useProjectMembers: () => ({ data: [] }) }));
@@ -714,6 +715,50 @@ describe('TaskDetail Development section (T-365)', () => {
       screen.getByRole('heading', { name: 'flow.taskDetail.development' })
     ).toBeInTheDocument();
     expect(screen.getByText('flow.taskDetail.devPoints')).toBeInTheDocument();
+  });
+});
+
+describe('TaskDetail cycle field (T-336)', () => {
+  beforeEach(() => {
+    cyclesData.data = [
+      { id: 'c-1', name: 'Sprint 1', status: 'active' },
+      { id: 'c-2', name: 'Sprint 2', status: 'upcoming' },
+      { id: 'c-0', name: 'Sprint 0', status: 'completed' },
+    ];
+  });
+  afterEach(() => {
+    cyclesData.data = [];
+  });
+
+  const detailWith = (cycleId?: string) =>
+    ({
+      task: apiTask({ cycleId }),
+      subtasks: [],
+      comments: [],
+      activity: [],
+    }) as unknown as ApiTaskDetail;
+
+  it('moves the task into an open cycle', async () => {
+    taskDetailData.data = detailWith();
+    renderTaskDetail();
+    expect(flowSelectTrigger('flow.taskDetail.cycle')).toHaveAccessibleName(
+      'flow.taskDetail.cycle: flow.taskDetail.noCycle'
+    );
+    await chooseFlowOption('flow.taskDetail.cycle', 'Sprint 2');
+    expect(updateTaskMutate).toHaveBeenCalledWith({ id: 't-1', data: { cycleId: 'c-2' } });
+  });
+
+  it('returns the task to the backlog and never offers a completed cycle as a target', async () => {
+    taskDetailData.data = detailWith('c-1');
+    renderTaskDetail();
+    fireEvent.pointerDown(flowSelectTrigger('flow.taskDetail.cycle'), {
+      button: 0,
+      ctrlKey: false,
+    });
+    const backlog = await screen.findByRole('menuitem', { name: 'flow.taskDetail.noCycle' });
+    expect(screen.queryByRole('menuitem', { name: 'Sprint 0' })).not.toBeInTheDocument();
+    fireEvent.click(backlog);
+    expect(updateTaskMutate).toHaveBeenLastCalledWith({ id: 't-1', data: { cycleId: '' } });
   });
 });
 

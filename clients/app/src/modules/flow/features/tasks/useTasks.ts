@@ -101,10 +101,12 @@ export function useCreateTask() {
       parentTaskId?: string;
       taskType?: string;
       epicColor?: string;
+      cycleId?: string;
     }) => {
       return unwrap(flowApi.createTask(data));
     },
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['cycles'] });
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['epic-rollups'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
@@ -129,6 +131,7 @@ export function useUpdateTask() {
       qc.invalidateQueries({ queryKey: ['projects'] });
       qc.invalidateQueries({ queryKey: ['projects-v2'] });
       qc.invalidateQueries({ queryKey: ['milestones'] });
+      qc.invalidateQueries({ queryKey: ['cycles'] });
       qc.invalidateQueries({ queryKey: ['task'] });
     },
     onError: () => toast.error(t('flowToasts.task.updateFailed')),

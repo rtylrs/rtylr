@@ -99,6 +99,7 @@ CREATE TABLE IF NOT EXISTS `flow_tasks` (
   `decision_note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `section_id` bigint DEFAULT NULL,
   `sort_order` int DEFAULT '0',
+  `backlog_rank` bigint DEFAULT NULL,
   `archived` tinyint(1) DEFAULT '0',
   `labels` json DEFAULT NULL COMMENT 'Array of label IDs',
   `task_type` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'task',
@@ -212,11 +213,15 @@ CREATE TABLE IF NOT EXISTS `flow_cycles` (
   `start_date` date DEFAULT NULL,
   `end_date` date DEFAULT NULL,
   `status` enum('upcoming','active','completed') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'upcoming',
+  `goal` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `started_at` timestamp NULL DEFAULT NULL,
+  `completed_at` timestamp NULL DEFAULT NULL,
   `created_by` bigint DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `idx_flow_cycles_owner` (`owner_id`)
+  KEY `idx_flow_cycles_owner` (`owner_id`),
+  KEY `idx_flow_cycles_business_project` (`business_id`,`project_id`,`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `flow_views` (
@@ -289,7 +294,23 @@ CREATE TABLE IF NOT EXISTS `flow_cycle_tasks` (
   `cycle_id` bigint NOT NULL,
   `task_id` bigint NOT NULL,
   `added_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`cycle_id`,`task_id`)
+  `sort_rank` bigint NOT NULL DEFAULT '0',
+  PRIMARY KEY (`cycle_id`,`task_id`),
+  KEY `idx_flow_cycle_tasks_task` (`task_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `flow_cycle_carryovers` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `business_id` bigint NOT NULL,
+  `cycle_id` bigint NOT NULL,
+  `task_id` bigint NOT NULL,
+  `to_cycle_id` bigint DEFAULT NULL,
+  `decision` enum('move','backlog','cancel') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_by` bigint NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_flow_cycle_carryovers_cycle` (`business_id`,`cycle_id`),
+  KEY `idx_flow_cycle_carryovers_to_cycle` (`business_id`,`to_cycle_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `flow_milestone_tasks` (

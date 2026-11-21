@@ -379,7 +379,20 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const taskLabelIds: string[] = rawLabels.map((l) => String(l));
   const taskLabels = allLabels.filter((l) => taskLabelIds.includes(String(l.id)));
 
-  const cycle = cycles.find((c) => c.id === task.cycleId);
+  // Open cycles take tasks. A completed cycle stays listed only while it is
+  // the one this task was finished in, so the field can still name it.
+  const currentCycle = cycles.find((c) => c.id === task.cycleId);
+  const openCycles = cycles.filter((c) => c.status !== 'completed');
+  const cycleOptions =
+    openCycles.length === 0 && !currentCycle
+      ? []
+      : [
+          { value: '', label: t('flow.taskDetail.noCycle') },
+          ...openCycles.map((c) => ({ value: c.id, label: c.name })),
+          ...(currentCycle?.status === 'completed'
+            ? [{ value: currentCycle.id, label: currentCycle.name }]
+            : []),
+        ];
   const milestone = milestones.find((m) => m.id === task.milestoneId);
 
   // Totals and the entry list now live in TimePanel, which reads the time-log
@@ -953,13 +966,19 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           </button>
         </DetailField>
 
-        {cycle && (
-          <DetailField icon={Timer} label={t('flow.taskDetail.cycle')}>
-            <span className="text-flow-meta" style={{ color: 'var(--flow-text)' }}>
-              {cycle.name}
-            </span>
-          </DetailField>
-        )}
+        <DetailField icon={Timer} label={t('flow.taskDetail.cycle')}>
+          <FlowSelect
+            label={t('flow.taskDetail.cycle')}
+            value={task.cycleId ?? ''}
+            options={cycleOptions}
+            // Empty returns the task to the backlog; a cycle puts it at the end
+            // of that cycle.
+            onChange={(cycleId) => updateTask(task.id, { cycleId })}
+            disabled={!canEdit || cycleOptions.length === 0}
+            placeholder={t('flow.taskDetail.noCyclesInProject')}
+            muted={!task.cycleId}
+          />
+        </DetailField>
 
         {hasQueryFailed(milestonesQuery) ? (
           <div role="alert" className="text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>

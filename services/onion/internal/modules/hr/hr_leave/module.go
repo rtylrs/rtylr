@@ -100,6 +100,42 @@ func (m *Module) ApprovedLeaveEmployeeIDs(ctx context.Context, ownerID int64, da
 	return onLeave, nil
 }
 
+// ApprovedLeaveRange is one approved leave request, dates as YYYY-MM-DD.
+type ApprovedLeaveRange struct {
+	EmployeeID int64
+	StartDate  string
+	EndDate    string
+}
+
+// ApprovedLeaveRanges returns the approved leave requests overlapping
+// [from, to] (YYYY-MM-DD). Flow's cycle capacity reads it through a port to
+// take leave days out of each person's available time. Business resolution
+// follows ApprovedLeaveEmployeeIDs.
+func (m *Module) ApprovedLeaveRanges(ctx context.Context, ownerID int64, from, to string) ([]ApprovedLeaveRange, error) {
+	businessID := ownerID
+	if authUser, ok := authPkg.GetAuthUser(ctx); ok && authUser != nil {
+		resolved, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+		if err != nil {
+			return nil, err
+		}
+		businessID = resolved
+	}
+	if businessID <= 0 {
+		return nil, domain.ErrLeaveAccessDenied
+	}
+	requests, err := m.service.GetLeaveCalendar(ctx, businessID, domain.LeaveCalendarParams{DateFrom: from, DateTo: to})
+	if err != nil {
+		return nil, err
+	}
+	ranges := make([]ApprovedLeaveRange, 0, len(requests))
+	for _, r := range requests {
+		if r.Status == domain.LeaveStatusApproved {
+			ranges = append(ranges, ApprovedLeaveRange{EmployeeID: r.EmployeeID, StartDate: r.StartDate, EndDate: r.EndDate})
+		}
+	}
+	return ranges, nil
+}
+
 func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {
 	serverHttp.RegisterGET[api.GetLeaveCalendarRequest, api.GetLeaveCalendarResponse](
 		ctx, router, api.GetLeaveCalendarRoutes(), &api.GetLeaveCalendarHandler{Service: m.service},

@@ -59,7 +59,13 @@
   "cycle": {
     "created": "تم إنشاء الدورة",
     "createFailed": "فشل إنشاء الدورة",
-    "updateFailed": "فشل تحديث الدورة"
+    "updateFailed": "فشل تحديث الدورة",
+    "started": "بدأت الدورة",
+    "alreadyActive": "لهذا المشروع دورة نشطة بالفعل",
+    "startFailed": "تعذّر بدء الدورة",
+    "completed": "اكتملت الدورة",
+    "completeFailed": "تعذّر إنهاء الدورة",
+    "moveFailed": "تعذّر نقل المهمة"
   },
   "label": {
     "created": "تم إنشاء التسمية",

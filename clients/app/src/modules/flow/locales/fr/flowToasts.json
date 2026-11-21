@@ -50,7 +50,13 @@
   "cycle": {
     "created": "Itération créée",
     "createFailed": "Échec de la création de l'itération",
-    "updateFailed": "Échec de la mise à jour de l'itération"
+    "updateFailed": "Échec de la mise à jour de l'itération",
+    "started": "Cycle démarré",
+    "alreadyActive": "Ce projet a déjà un cycle actif",
+    "startFailed": "Échec du démarrage du cycle",
+    "completed": "Cycle terminé",
+    "completeFailed": "Échec de la clôture du cycle",
+    "moveFailed": "Échec du déplacement de la tâche"
   },
   "label": {
     "created": "Étiquette créée",
