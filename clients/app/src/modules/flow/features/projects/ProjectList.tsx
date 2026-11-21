@@ -1,5 +1,5 @@
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Calendar, ChevronRight, Check, MoreHorizontal, ChevronDown } from 'lucide-react';
@@ -14,7 +14,8 @@ import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import { useCurrentProject } from './useCurrentProject';
 import { useProjectStatuses } from './useStatuses';
 import { defaultStatus, displayStatusName, sortStatuses, statusIdOf } from './statusUtils';
-import { DUE_LANES, PRIORITY_LABEL_KEY, PRIORITY_ORDER, laneKeyFor } from './taskGroups';
+import { DUE_LANES, PRIORITY_LABEL_KEY, PRIORITY_ORDER, epicLanes, laneKeyFor } from './taskGroups';
+import EpicChip, { EpicFilterContext } from '../../shared/components/EpicChip';
 import { TaskContextMenu, ContextMenuState } from '../../shared/components/TaskContextMenu';
 import PriorityIcon from '../../shared/components/PriorityIcon';
 import FlowSelect from '../../shared/components/FlowSelect';
@@ -29,9 +30,9 @@ import FilterBar from '../../shared/filters/FilterBar';
 import { useProjectTaskFilters } from './useProjectTaskFilters';
 import { projectFiltersForView, useSaveFiltersAsView } from '../views/useSaveFiltersAsView';
 
-export type ListGroupKey = 'status' | 'assignee' | 'priority' | 'due' | 'none';
+export type ListGroupKey = 'status' | 'assignee' | 'priority' | 'due' | 'epic' | 'none';
 
-const LIST_GROUP_KEYS: ListGroupKey[] = ['status', 'assignee', 'priority', 'due', 'none'];
+const LIST_GROUP_KEYS: ListGroupKey[] = ['status', 'assignee', 'priority', 'due', 'epic', 'none'];
 
 const listGroupStorageKey = (projectId: string): string => `flow:list:groupBy:${projectId}`;
 
@@ -103,6 +104,16 @@ export function buildListGroups(
       color: muted,
       tasks: tasks.filter((task) => task.priority === p),
     })).filter((group) => group.tasks.length > 0);
+  }
+  if (groupBy === 'epic') {
+    return epicLanes(tasks)
+      .map((lane) => ({
+        id: lane.key,
+        label: lane.label ?? t(lane.labelKey ?? ''),
+        color: lane.color ?? muted,
+        tasks: tasks.filter((task) => laneKeyFor(task, 'epic') === lane.key),
+      }))
+      .filter((group) => group.tasks.length > 0);
   }
   if (groupBy === 'due') {
     return DUE_LANES.map((lane) => ({
@@ -226,6 +237,8 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0, rowProps, dim
       >
         {task.title}
       </span>
+
+      <EpicChip task={task} />
 
       {/* Subtask indicator */}
       {task.subtaskCount > 0 && (
@@ -395,6 +408,11 @@ const ProjectList: React.FC = () => {
   const projectFilters = useProjectTaskFilters(projectId, projectTasks);
   const { shownTasks, dimmedIds, matchingIds } = projectFilters;
   const saveAsView = useSaveFiltersAsView();
+  const { setFilters } = projectFilters.state;
+  const filterByEpic = useCallback(
+    (epicId: string) => setFilters((current) => ({ ...current, epics: [epicId] })),
+    [setFilters]
+  );
   const groups = useMemo(
     () => buildListGroups(shownTasks, statusesQuery.data ?? [], groupBy, t),
     [shownTasks, statusesQuery.data, groupBy, t]
@@ -427,79 +445,85 @@ const ProjectList: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <HelmetContainer title={t('flow.projectList.pageTitle')} />
-      <ProjectViewTabs
-        project={project}
-        projectId={projectId}
-        taskCount={projectTasks.length}
-        onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
-        rightSlot={
-          <div className="w-[180px]">
-            <FlowSelect
-              label={t('flow.projectList.groupBy')}
-              value={groupBy}
-              options={LIST_GROUP_KEYS.map((key) => ({
-                value: key,
-                label: t(`flow.projectList.groupByOption.${key}`),
-              }))}
-              onChange={(value) => setGroupBy(value as ListGroupKey)}
+    <EpicFilterContext.Provider value={filterByEpic}>
+      <div className="flex flex-col h-full">
+        <HelmetContainer title={t('flow.projectList.pageTitle')} />
+        <ProjectViewTabs
+          project={project}
+          projectId={projectId}
+          taskCount={projectTasks.length}
+          onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
+          rightSlot={
+            <div className="w-[180px]">
+              <FlowSelect
+                label={t('flow.projectList.groupBy')}
+                value={groupBy}
+                options={LIST_GROUP_KEYS.map((key) => ({
+                  value: key,
+                  label: t(`flow.projectList.groupByOption.${key}`),
+                }))}
+                onChange={(value) => setGroupBy(value as ListGroupKey)}
+              />
+            </div>
+          }
+        />
+
+        <FilterBar
+          state={projectFilters.state}
+          currentUserId={projectFilters.currentUserId}
+          fields={projectFilters.fields}
+          people={projectFilters.people}
+          visible={matchingIds?.size ?? projectTasks.length}
+          total={projectTasks.length}
+          savingView={saveAsView.pending}
+          onSaveAsView={() =>
+            saveAsView.save(
+              t('flow.filters.savedViewName', { project: project.name }),
+              projectFiltersForView(
+                projectFilters.state.filters,
+                projectId,
+                statusesQuery.data ?? []
+              )
+            )
+          }
+        />
+
+        {/* Column headers */}
+        <div
+          className="flex items-center gap-3 px-4 py-2 text-flow-meta font-semibold uppercase tracking-wider"
+          style={{
+            color: 'var(--flow-text-dim)',
+            borderBottom: '1px solid var(--flow-border)',
+            background: 'var(--flow-surface)',
+          }}
+        >
+          <div className="w-4" />
+          <div className="w-2" />
+          <div className="flex-1">{t('flow.projectList.columnTitle')}</div>
+          <div className="w-5" />
+          <div className="w-[96px] text-end">{t('flowCommon.dueDate')}</div>
+          <div className="w-5" />
+        </div>
+
+        <div className="flex-1 overflow-y-auto">
+          {groups.map((group) => (
+            <TaskGroup
+              key={`${groupBy}:${group.id}`}
+              group={group}
+              showHeader={groupBy !== 'none'}
+              dimmedIds={dimmedIds}
             />
-          </div>
-        }
-      />
-
-      <FilterBar
-        state={projectFilters.state}
-        currentUserId={projectFilters.currentUserId}
-        fields={projectFilters.fields}
-        people={projectFilters.people}
-        visible={matchingIds?.size ?? projectTasks.length}
-        total={projectTasks.length}
-        savingView={saveAsView.pending}
-        onSaveAsView={() =>
-          saveAsView.save(
-            t('flow.filters.savedViewName', { project: project.name }),
-            projectFiltersForView(projectFilters.state.filters, projectId, statusesQuery.data ?? [])
-          )
-        }
-      />
-
-      {/* Column headers */}
-      <div
-        className="flex items-center gap-3 px-4 py-2 text-flow-meta font-semibold uppercase tracking-wider"
-        style={{
-          color: 'var(--flow-text-dim)',
-          borderBottom: '1px solid var(--flow-border)',
-          background: 'var(--flow-surface)',
-        }}
-      >
-        <div className="w-4" />
-        <div className="w-2" />
-        <div className="flex-1">{t('flow.projectList.columnTitle')}</div>
-        <div className="w-5" />
-        <div className="w-[96px] text-end">{t('flowCommon.dueDate')}</div>
-        <div className="w-5" />
+          ))}
+          {groups.length === 0 && (
+            <p className="px-4 py-6 text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>
+              {projectTasks.length > 0 && matchingIds !== null
+                ? t('flow.filters.noMatches')
+                : t('flow.projectList.empty')}
+            </p>
+          )}
+        </div>
       </div>
-
-      <div className="flex-1 overflow-y-auto">
-        {groups.map((group) => (
-          <TaskGroup
-            key={`${groupBy}:${group.id}`}
-            group={group}
-            showHeader={groupBy !== 'none'}
-            dimmedIds={dimmedIds}
-          />
-        ))}
-        {groups.length === 0 && (
-          <p className="px-4 py-6 text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>
-            {projectTasks.length > 0 && matchingIds !== null
-              ? t('flow.filters.noMatches')
-              : t('flow.projectList.empty')}
-          </p>
-        )}
-      </div>
-    </div>
+    </EpicFilterContext.Provider>
   );
 };
 

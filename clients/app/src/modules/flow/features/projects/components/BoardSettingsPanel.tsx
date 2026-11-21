@@ -8,7 +8,7 @@ import type { BoardGroupKey } from '../../../shared/lib/boardUtils';
 import { useDialogBehavior } from '../../../shared/lib/useDialogBehavior';
 import { displayStatusName } from '../statusUtils';
 
-const GROUP_KEYS: BoardGroupKey[] = ['none', 'assignee', 'priority', 'due'];
+const GROUP_KEYS: BoardGroupKey[] = ['none', 'assignee', 'priority', 'due', 'epic'];
 
 /**
  * Card fields the design puts on a board card. None of them can be stored:

@@ -11,6 +11,7 @@ import StatusIcon from './StatusIcon';
 import AssigneeAvatar from './AssigneeAvatar';
 import { Check } from 'lucide-react';
 import { TaskContextMenu, ContextMenuState } from './TaskContextMenu';
+import EpicChip from './EpicChip';
 import { withAlpha, onTint } from '../lib/colorUtils';
 import type { RowProps } from '../../../../shared/hooks/useVirtualRows';
 
@@ -148,6 +149,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({
             </p>
           )}
         </div>
+        <EpicChip task={task} />
         {showProject && project && (
           <span
             className="text-flow-meta px-2 py-0.5 rounded-sm shrink-0 font-medium"

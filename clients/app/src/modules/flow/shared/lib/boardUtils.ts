@@ -98,4 +98,4 @@ export function columnLabel(status: TaskStatus): string {
  * two local copies typecheck against each other only while they happen to be
  * identical. Adding a value to one and not the other would compile.
  */
-export type BoardGroupKey = 'none' | 'assignee' | 'priority' | 'due';
+export type BoardGroupKey = 'none' | 'assignee' | 'priority' | 'due' | 'epic';

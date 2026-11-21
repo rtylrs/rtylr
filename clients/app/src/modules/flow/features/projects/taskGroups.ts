@@ -1,6 +1,7 @@
 import type { Task } from '../../shared/stores/flowStore';
 import type { BoardGroupKey } from '../../shared/lib/boardUtils';
 import { addDays, todayIso } from '../../shared/lib/dateUtils';
+import { NO_EPIC, epicKeyOf, epicsIn } from '../../shared/lib/taskHierarchy';
 
 export const PRIORITY_ORDER: Task['priority'][] = [
   'urgent',
@@ -29,7 +30,28 @@ export const DUE_LANES: { key: string; labelKey: string }[] = [
   { key: 'No due date', labelKey: 'flow.board.dueLane.noDueDate' },
 ];
 
+export interface EpicLane {
+  key: string;
+  /** An epic's own title. Never translated. */
+  label?: string;
+  /** The "No epic" lane's translation key. */
+  labelKey?: string;
+  color?: string;
+}
+
+/**
+ * One lane per epic, in list order, then "No epic". An epic's own card sits
+ * in its lane (see epicKeyOf), so the epic heads the work under it.
+ */
+export function epicLanes(tasks: readonly Task[]): EpicLane[] {
+  return [
+    ...epicsIn(tasks).map((e) => ({ key: e.id, label: e.title, color: e.color })),
+    { key: NO_EPIC, labelKey: 'flow.epics.noEpic' },
+  ];
+}
+
 export function laneKeyFor(t: Task, groupBy: BoardGroupKey): string {
+  if (groupBy === 'epic') return epicKeyOf(t);
   if (groupBy === 'assignee') return t.assignee || 'Unassigned';
   if (groupBy === 'priority') return t.priority;
   if (groupBy === 'due') {
