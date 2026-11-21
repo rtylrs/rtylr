@@ -49,7 +49,9 @@ func TestBusinessMyTasksCacheIsolatedByBusiness(t *testing.T) {
 		Total: 1,
 	}, cacher.WithExpiry(ctx, workspacesTTL))
 
-	svc := &Service{}
+	// The page comes from the cache, but the blocked flags are read fresh on
+	// every call, so the service still needs a repository.
+	svc := &Service{repo: testsupport.NewRepository(testutil.OpenDB(t))}
 	fromA, _, err := svc.GetMyTasksForBusiness(ctx, userID, businessA, page, limit)
 	if err != nil {
 		t.Fatalf("business A cache read: %v", err)
