@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   createdTerminalId,
   filterTerminalsForLocation,
+  getOrCreateTerminalDeviceId,
   mapBranchLocations,
 } from './locationSelection';
 
@@ -40,5 +41,21 @@ describe('locationSelection', () => {
     expect(() => createdTerminalId('')).toThrow(
       'Terminal registration did not return a valid terminal ID.',
     );
+  });
+
+  it('generates and persists a non-empty terminal device id', () => {
+    const store = new Map<string, string>();
+    const storage = {
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        store.set(key, value);
+      },
+    };
+
+    const first = getOrCreateTerminalDeviceId(storage);
+    const second = getOrCreateTerminalDeviceId(storage);
+
+    expect(first).toMatch(/^pos-.+/);
+    expect(second).toBe(first);
   });
 });

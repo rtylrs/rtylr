@@ -11,6 +11,7 @@ import {
   createdLocationId,
   createdTerminalId,
   filterTerminalsForLocation,
+  getOrCreateTerminalDeviceId,
   mapBranchLocations,
   mergeLocationOptions,
   type LocationOption,
@@ -142,7 +143,7 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
       const data = await terminalClient.createTerminal({
         branchId: String(selectedLocation.locationId),
         name: newTerminalName.trim(),
-        deviceId: '',
+        deviceId: getOrCreateTerminalDeviceId(),
       });
       onComplete(selectedLocation.locationId, createdTerminalId(data.terminalId ?? ''));
     } catch (error) {
