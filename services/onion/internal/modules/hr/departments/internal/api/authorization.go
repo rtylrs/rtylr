@@ -10,16 +10,34 @@ import (
 
 const departmentManagePermission = "hr:employees:manage"
 
-// requireDepartmentManagePermission guards the department writes. Department
-// structure is tenant org configuration, and these handlers previously
-// authenticated the caller without checking a permission, so any member with HR
-// app access could create, rename or delete departments across the tenant.
-func requireDepartmentManagePermission(ctx context.Context) error {
+var hrDepartmentPermissionKeys = []string{"manage_departments", "manage_employees"}
+
+// PermissionProvider exposes the hr_core employee/role lookups so members who
+// hold the HR-internal HR Admin role (manage_departments / manage_employees)
+// can manage departments alongside app-level hr:employees:manage holders.
+type PermissionProvider interface {
+	GetEmployeeIDByUserID(ctx context.Context, businessID, userID int64) (int64, error)
+	HasPermission(ctx context.Context, businessID, employeeID int64, permissionKey string) (bool, error)
+}
+
+func requireDepartmentManagePermission(ctx context.Context, permissions PermissionProvider, businessID int64) error {
 	device := authPkg.DeviceCtx(ctx)
-	if device.IsAnonymous || device.User == nil ||
-		(!authPkg.HasAppPermission(device.User, authorization.AppHR, departmentManagePermission) && !authPkg.IsBusinessAdmin(device.User)) ||
-		!authPkg.HasAnyAppScope(device.User, authorization.AppHR) {
+	if device.IsAnonymous || device.User == nil || !authPkg.HasAnyAppScope(device.User, authorization.AppHR) {
 		return onekiterrors.PermissionDenied()
 	}
-	return nil
+	if authPkg.IsBusinessAdmin(device.User) ||
+		authPkg.HasAppPermission(device.User, authorization.AppHR, departmentManagePermission) {
+		return nil
+	}
+	if permissions != nil && businessID > 0 {
+		employeeID, err := permissions.GetEmployeeIDByUserID(ctx, businessID, device.User.UserID)
+		if err == nil && employeeID > 0 {
+			for _, key := range hrDepartmentPermissionKeys {
+				if allowed, permErr := permissions.HasPermission(ctx, businessID, employeeID, key); permErr == nil && allowed {
+					return nil
+				}
+			}
+		}
+	}
+	return onekiterrors.PermissionDenied()
 }

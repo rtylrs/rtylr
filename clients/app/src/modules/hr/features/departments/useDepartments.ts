@@ -1,10 +1,11 @@
-import { createOneKitClient } from '@voxire/api';
+import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { DepartmentServiceClient } from '@voxire/voxie/hr/department/v1/client';
 import type { CreateDepartmentRequest } from '@voxire/voxie/hr/department/v1/types';
 import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/client';
+import type { Staff } from '@voxire/voxie/hr/staff/v1/types';
 import { departmentSchema, type Department } from '../../shared/schemas/departments';
 
 const departmentClient = createOneKitClient(DepartmentServiceClient, 'hr');
@@ -17,13 +18,18 @@ export function useDepartments(includeCompensation = false) {
       const departmentsRes = await departmentClient.listDepartments({});
       const departments = departmentsRes.departments ?? [];
       const staffByDepartment = await Promise.all(
-        departments.map(async (department) => {
-          const response = await staffClient.listStaff({
-            search: '',
-            departmentId: String(department.id),
-            status: '',
-          });
-          return [department.id, response.staff ?? []] as const;
+        departments.map(async (department): Promise<[string | undefined, Staff[]]> => {
+          try {
+            const response = await staffClient.listStaff({
+              search: '',
+              departmentId: String(department.id),
+              status: '',
+            });
+            return [department.id, response.staff ?? []];
+          } catch {
+            // Staff directory may be disabled or restricted; still show departments.
+            return [department.id, []];
+          }
         })
       );
       const staffByDepartmentId = new Map(staffByDepartment);
@@ -59,6 +65,6 @@ export function useCreateDepartment() {
   return useMutation({
     mutationFn: (data: CreateDepartmentRequest) => departmentClient.createDepartment(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['hr', 'departments'] }),
-    onError: () => toast.error(t('hrErrors.createDepartment')),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, t('hrErrors.createDepartment'))),
   });
 }
