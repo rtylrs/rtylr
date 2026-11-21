@@ -5,6 +5,7 @@
   "scan": {
     "pageTitle": "Bipeur de commande · rtylr",
     "scanning": "Récupération de votre code...",
+    "slow": "Nous récupérons toujours votre code, un instant...",
     "venueBusy": "Trop de téléphones attendent dans cet établissement en ce moment. Merci de demander au comptoir.",
     "tooManyAttempts": "Trop de tentatives. Patientez un instant, puis réessayez.",
     "failed": "Impossible de joindre le bipeur. Vérifiez votre connexion et réessayez.",
