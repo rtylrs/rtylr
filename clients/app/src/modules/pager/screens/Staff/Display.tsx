@@ -52,7 +52,7 @@ const Display = (): React.JSX.Element => {
           {name && <p className="pager-display__venue">{name}</p>}
           {joinUrl ? (
             <div className="pager-display__qr">
-              <VenueQr url={joinUrl} size={320} />
+              <VenueQr url={joinUrl} size={640} />
             </div>
           ) : loading ? (
             <p role="status">{t('pager.poster.loading')}</p>
