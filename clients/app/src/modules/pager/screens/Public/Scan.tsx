@@ -3,9 +3,17 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
+import { helpers } from '@voxire/utils';
 import { BellOff } from 'lucide-react';
 import { pagerTicketPath } from '../../pagerPaths';
-import { PAGER_ERROR, errorCode, errorStatus } from '../../shared/lib/apiError';
+import {
+  DEPLOY_GAP_ATTEMPTS,
+  DEPLOY_GAP_FIRST_DELAY_MS,
+  PAGER_ERROR,
+  errorCode,
+  errorStatus,
+  isTransient,
+} from '../../shared/lib/apiError';
 import { usePagerSandbox, usePublicPagerClient } from '../../shared/lib/pagerClients';
 import { openScanTicket } from '../../shared/lib/scanSession';
 
@@ -41,6 +49,7 @@ const Scan = ({ slug: givenSlug, onScanned }: ScanProps = {}): React.JSX.Element
   const sandbox = usePagerSandbox();
   const [state, setState] = useState<ScanState>(slug ? 'scanning' : 'unavailable');
   const [attempt, setAttempt] = useState(0);
+  const [slow, setSlow] = useState(false);
   // React runs effects twice in development; one scan per attempt.
   const started = useRef(-1);
   const mounted = useRef(true);
@@ -56,18 +65,33 @@ const Scan = ({ slug: givenSlug, onScanned }: ScanProps = {}): React.JSX.Element
     if (!slug || started.current === attempt) return;
     started.current = attempt;
     setState('scanning');
-    openScanTicket(client, slug, { remember: !sandbox }).then(
-      (publicToken) => {
-        if (!mounted.current) return;
-        if (onScanned) onScanned(publicToken);
-        // A router navigation, not a page load: the unlocked audio lives in
-        // this document. Replace, so Back does not land on this page again.
-        else void navigate({ to: pagerTicketPath(publicToken), replace: true });
-      },
-      (error: unknown) => {
-        if (mounted.current) setState(stateFor(error));
-      }
-    );
+    setSlow(false);
+    let tries = 0;
+    // A deploy makes the pager unreachable for a few seconds; waiting 1, 2, 4
+    // and 8 seconds rides it out before the customer sees an error.
+    helpers
+      .retry(
+        () => {
+          tries += 1;
+          if (tries > 1 && mounted.current) setSlow(true);
+          return openScanTicket(client, slug, { remember: !sandbox });
+        },
+        DEPLOY_GAP_ATTEMPTS,
+        DEPLOY_GAP_FIRST_DELAY_MS,
+        (error) => mounted.current && isTransient(error)
+      )
+      .then(
+        (publicToken) => {
+          if (!mounted.current) return;
+          if (onScanned) onScanned(publicToken);
+          // A router navigation, not a page load: the unlocked audio lives in
+          // this document. Replace, so Back does not land on this page again.
+          else void navigate({ to: pagerTicketPath(publicToken), replace: true });
+        },
+        (error: unknown) => {
+          if (mounted.current) setState(stateFor(error));
+        }
+      );
   }, [slug, attempt, client, sandbox, onScanned, navigate]);
 
   if (state === 'unavailable') {
@@ -88,7 +112,7 @@ const Scan = ({ slug: givenSlug, onScanned }: ScanProps = {}): React.JSX.Element
       <div className="pager-center">
         <HelmetContainer title={t('pager.scan.pageTitle')} />
         <p className="pager-text" role="status">
-          {t('pager.scan.scanning')}
+          {t(slow ? 'pager.scan.slow' : 'pager.scan.scanning')}
         </p>
       </div>
     );

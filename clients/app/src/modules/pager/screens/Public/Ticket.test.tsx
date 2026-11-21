@@ -344,13 +344,34 @@ describe('pager ticket page', () => {
     expect(await screen.findByRole('heading', { name: 'Your code A7' })).toBeInTheDocument();
   });
 
-  it('offers a retry when the first load fails, and recovers', async () => {
-    api.getPublicTicket.mockRejectedValueOnce({ statusCode: 503 }).mockResolvedValue(waiting);
+  it('waits calmly through a deploy, then offers a retry, and recovers', async () => {
+    api.getPublicTicket.mockRejectedValue({ statusCode: 503 });
     render(<Ticket />);
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Try again' }));
+    expect(await screen.findByText('Still getting your code, one moment...')).toBeInTheDocument();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(15_000);
+    });
+    expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5_000);
+    });
+
+    api.getPublicTicket.mockResolvedValue(waiting);
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
 
     expect(await screen.findByText("We're preparing your order")).toBeInTheDocument();
+  });
+
+  it('keeps polling through a 404 the pager did not give a code', async () => {
+    api.getPublicTicket.mockRejectedValueOnce({ statusCode: 404 }).mockResolvedValue(waiting);
+    render(<Ticket />);
+    await screen.findByText('Still getting your code, one moment...');
+
+    await nextPoll();
+
+    expect(await screen.findByText("We're preparing your order")).toBeInTheDocument();
+    expect(screen.queryByText('Ticket not found')).not.toBeInTheDocument();
   });
 
   it('keeps the last known state on screen when a later poll fails', async () => {

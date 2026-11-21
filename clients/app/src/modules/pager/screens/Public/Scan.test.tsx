@@ -1,6 +1,6 @@
 import React, { StrictMode } from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Real translations: an assertion written in English also proves the key resolves.
 
@@ -19,7 +19,7 @@ import Scan from './Scan';
 import { initTestI18n } from '../../shared/testing/i18n';
 
 const STORAGE_KEY = 'pager:scan:acme';
-const scanned = { publicToken: 'tok-1', code: 'A7', color: 2, status: 'waiting' };
+const scanned = { publicToken: 'tok-1', word: 'panda', color: 2, status: 'waiting' };
 
 beforeAll(async () => {
   await initTestI18n('en');
@@ -30,6 +30,10 @@ beforeEach(() => {
   navigateSpy.mockReset();
   api.scanTicket.mockReset().mockResolvedValue(scanned);
   api.getPublicTicket.mockReset();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 describe('pager scan page', () => {
@@ -53,7 +57,7 @@ describe('pager scan page', () => {
 
   it('keeps the same ticket and code when the page is reloaded', async () => {
     window.sessionStorage.setItem(STORAGE_KEY, 'tok-old');
-    api.getPublicTicket.mockResolvedValue({ status: 'waiting', code: 'K3' });
+    api.getPublicTicket.mockResolvedValue({ status: 'waiting', word: 'slay' });
     render(<Scan />);
 
     await waitFor(() =>
@@ -135,7 +139,6 @@ describe('pager scan page', () => {
       { statusCode: 429, code: 'too_many_open_tickets' },
       'This venue has too many phones waiting right now. Please ask at the counter.',
     ],
-    [{ statusCode: 500 }, "We couldn't reach the pager. Check your connection and try again."],
   ])('explains a failed scan and retries on a tap: %j', async (failure, message) => {
     api.scanTicket.mockRejectedValueOnce(failure);
     render(<Scan />);
@@ -149,5 +152,56 @@ describe('pager scan page', () => {
       expect(navigateSpy).toHaveBeenCalledWith({ to: '/pager/t/tok-1', replace: true })
     );
     expect(api.scanTicket).toHaveBeenCalledTimes(2);
+  });
+
+  // While a new version deploys, the API answers with nothing, a 5xx or an
+  // uncoded 404 for a few seconds.
+  it('rides out a deploy calmly, retrying after 1, 2 and 4 seconds', async () => {
+    vi.useFakeTimers();
+    api.scanTicket
+      .mockRejectedValueOnce({ statusCode: 502 })
+      .mockRejectedValueOnce({ statusCode: 404 })
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+      .mockResolvedValue(scanned);
+    render(<Scan />);
+
+    await act(() => vi.advanceTimersByTimeAsync(1_000));
+    expect(screen.getByRole('status')).toHaveTextContent('Still getting your code, one moment...');
+    await act(() => vi.advanceTimersByTimeAsync(2_000));
+    expect(navigateSpy).not.toHaveBeenCalled();
+    await act(() => vi.advanceTimersByTimeAsync(4_000));
+
+    expect(navigateSpy).toHaveBeenCalledWith({ to: '/pager/t/tok-1', replace: true });
+    expect(api.scanTicket).toHaveBeenCalledTimes(4);
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('shows the error with a retry once the deploy has taken about 20 seconds', async () => {
+    vi.useFakeTimers();
+    api.scanTicket.mockRejectedValue({ statusCode: 503 });
+    render(<Scan />);
+
+    await act(() => vi.advanceTimersByTimeAsync(14_000));
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    await act(() => vi.advanceTimersByTimeAsync(1_000));
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      "We couldn't reach the pager. Check your connection and try again."
+    );
+    expect(api.scanTicket).toHaveBeenCalledTimes(5);
+
+    api.scanTicket.mockResolvedValue(scanned);
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    await act(() => vi.advanceTimersByTimeAsync(0));
+    expect(navigateSpy).toHaveBeenCalledWith({ to: '/pager/t/tok-1', replace: true });
+  });
+
+  it('does not retry a venue without a pager', async () => {
+    vi.useFakeTimers();
+    api.scanTicket.mockRejectedValue({ statusCode: 404, code: 'venue_not_found' });
+    render(<Scan />);
+
+    await act(() => vi.advanceTimersByTimeAsync(20_000));
+    expect(api.scanTicket).toHaveBeenCalledTimes(1);
   });
 });
