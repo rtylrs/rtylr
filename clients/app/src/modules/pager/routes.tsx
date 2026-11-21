@@ -10,6 +10,7 @@ const Ticket = React.lazy(() => import('./screens/Public/Ticket'));
 const Try = React.lazy(() => import('./screens/Public/Try'));
 const Board = React.lazy(() => import('./screens/Staff/Board'));
 const Poster = React.lazy(() => import('./screens/Staff/Poster'));
+const Setup = React.lazy(() => import('./screens/Staff/Setup'));
 
 /**
  * The customer's side of the pager: public and unauthenticated, mounted on the
@@ -98,4 +99,17 @@ export function createPagerStaffRoutes<TParent extends AnyRoute>(parent: TParent
       ),
     }),
   ] as const;
+}
+
+/** The last step of the pager sign-up, where a new venue switches its pager on. */
+export function createPagerSetupRoute<TParent extends AnyRoute>(parent: TParent) {
+  return createRoute({
+    getParentRoute: () => parent,
+    path: 'pager/setup',
+    component: () => (
+      <StaffScreen>
+        <Setup />
+      </StaffScreen>
+    ),
+  });
 }
