@@ -7,8 +7,12 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { Plus, Search, Users } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import { QueryError } from '../../shared/components/ui';
-import { useListEmployees } from '../../shared/hooks/queries/useEmployees';
-import type { EmployeePayload } from '@voxire/voxie/hr/employee/v1/types';
+import {
+  KNOWN_CONTRACT_TYPES,
+  KNOWN_EMPLOYEE_STATUSES,
+  useListEmployees,
+  type EmployeeRecord,
+} from '../../shared/hooks/queries/useEmployees';
 
 const PAGE_SIZE = 50;
 
@@ -154,7 +158,7 @@ const Employees = (): React.JSX.Element => {
                     className="grid grid-cols-4 gap-4 px-4 py-2 text-xs font-medium"
                     style={{ background: 'var(--hr-hover)', color: 'var(--hr-text-muted)' }}
                   >
-                    <span>{t('hrEmployees.jobTitle')}</span>
+                    <span>{t('hrCommon.name')}</span>
                     <span>{t('hrEmployees.contractType')}</span>
                     <span>{t('hrEmployees.hireDate')}</span>
                     <span>{t('hrCommon.status')}</span>
@@ -174,9 +178,18 @@ const Employees = (): React.JSX.Element => {
                       }}
                     >
                       {virtualizer.getVirtualItems().map((virtualRow) => {
-                        const emp: EmployeePayload | undefined =
-                          filteredEmployees[virtualRow.index];
+                        const emp: EmployeeRecord | undefined = filteredEmployees[virtualRow.index];
                         if (!emp) return null;
+                        const nameLabel =
+                          emp.displayName || emp.jobTitle || emp.email || `#${emp.id}`;
+                        const contractLabel =
+                          emp.contractType && KNOWN_CONTRACT_TYPES.has(emp.contractType)
+                            ? t(`hrEmployees.contractTypes.${emp.contractType}` as const)
+                            : '-';
+                        const statusLabel =
+                          emp.status && KNOWN_EMPLOYEE_STATUSES.has(emp.status)
+                            ? t(`hrEmployees.statuses.${emp.status}` as const)
+                            : emp.status || '-';
                         return (
                           <div
                             key={virtualRow.key}
@@ -203,13 +216,13 @@ const Employees = (): React.JSX.Element => {
                             }}
                           >
                             <span className="truncate text-sm" style={{ color: 'var(--hr-text)' }}>
-                              {emp.jobTitle}
+                              {nameLabel}
                             </span>
                             <span className="text-sm" style={{ color: 'var(--hr-text-muted)' }}>
-                              {t(`hrEmployees.contractTypes.${emp.contractType}` as const)}
+                              {contractLabel}
                             </span>
                             <span className="text-sm" style={{ color: 'var(--hr-text-muted)' }}>
-                              {emp.hireDate}
+                              {emp.hireDate || '-'}
                             </span>
                             <span>
                               <span
@@ -223,7 +236,7 @@ const Employees = (): React.JSX.Element => {
                                     emp.status === 'active' ? '#22c55e' : 'var(--hr-text-muted)',
                                 }}
                               >
-                                {t(`hrEmployees.statuses.${emp.status}` as const)}
+                                {statusLabel}
                               </span>
                             </span>
                           </div>
