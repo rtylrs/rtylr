@@ -24,8 +24,16 @@ vi.mock('../../../../shared/alarm/readyAlarm', () => ({ readyAlarm: { unlock: un
 
 vi.mock('../../../../shared/services/i18next', () => ({ selectLanguage: vi.fn() }));
 
+// The server's push key as the page has loaded it; the asking itself is real.
+const pushKey = vi.hoisted(() => ({ value: '' }));
+vi.mock('../../shared/lib/pushAlerts', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../shared/lib/pushAlerts')>()),
+  usePushKey: () => pushKey.value,
+}));
+
 import Join from './Join';
 import { JOIN_RETRY_INTERVAL_MS, JOIN_RETRY_WINDOW_MS } from '../../shared/lib/joinWithRetry';
+import { installFakePushBrowser, type FakePushBrowser } from '../../shared/testing/fakePushBrowser';
 import { initTestI18n } from '../../shared/testing/i18n';
 
 const notYet = { statusCode: 404, code: 'ticket_not_found' };
@@ -52,7 +60,11 @@ beforeAll(async () => {
   await initTestI18n('en');
 });
 
+let pushBrowser: FakePushBrowser;
+
 beforeEach(() => {
+  pushBrowser = installFakePushBrowser();
+  pushKey.value = '';
   // Real time still moves the fake clock, so findBy* keeps working while the
   // five-second retry and two-minute window are stepped by hand.
   vi.useFakeTimers({ shouldAdvanceTime: true });
@@ -64,6 +76,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.useRealTimers();
+  pushBrowser.restore();
 });
 
 describe('pager join page', () => {
@@ -85,6 +98,33 @@ describe('pager join page', () => {
     expect(unlockSpy.mock.invocationCallOrder[0]).toBeLessThan(
       api.joinTicket.mock.invocationCallOrder[0]
     );
+  });
+
+  it('asks to notify on the lock screen in the same tap, before the request', async () => {
+    pushKey.value = 'server-key';
+    api.joinTicket.mockResolvedValue({ publicToken: 'tok-1', number: '42', status: 'waiting' });
+    renderJoin();
+
+    await typeNumber('42');
+    fireEvent.click(screen.getByRole('button', { name: "Ring me when it's ready" }));
+
+    await waitFor(() => expect(navigateSpy).toHaveBeenCalled());
+    expect(pushBrowser.requestPermission).toHaveBeenCalledTimes(1);
+    expect(pushBrowser.requestPermission.mock.invocationCallOrder[0]).toBeLessThan(
+      api.joinTicket.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('does not ask to notify while the server has push off', async () => {
+    api.joinTicket.mockResolvedValue({ publicToken: 'tok-1', number: '42', status: 'waiting' });
+    renderJoin();
+
+    await typeNumber('42');
+    fireEvent.click(screen.getByRole('button', { name: "Ring me when it's ready" }));
+
+    await waitFor(() => expect(navigateSpy).toHaveBeenCalled());
+    expect(unlockSpy).toHaveBeenCalledTimes(1);
+    expect(pushBrowser.requestPermission).not.toHaveBeenCalled();
   });
 
   it('offers a numeric keypad and cannot be sent empty', async () => {
