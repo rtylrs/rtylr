@@ -170,6 +170,19 @@ describe('helpers', () => {
       await expect(helpers.retry(fn, 3, 1)).rejects.toThrow();
       expect(fn).toHaveBeenCalledTimes(3);
     });
+
+    it('stops at an error shouldRetry refuses', async () => {
+      const fn = vi
+        .fn()
+        .mockRejectedValueOnce(new Error('brief'))
+        .mockRejectedValueOnce(new Error('final'))
+        .mockResolvedValue('ok');
+
+      await expect(
+        helpers.retry(fn, 5, 1, (error) => (error as Error).message === 'brief')
+      ).rejects.toThrow('final');
+      expect(fn).toHaveBeenCalledTimes(2);
+    });
   });
 
   // ── sleep ──────────────────────────────────────────────────
