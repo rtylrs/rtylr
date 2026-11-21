@@ -21,10 +21,11 @@ export function useDaySummary(date?: string) {
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
+    const requestDate = date?.trim() || new Date().toISOString().slice(0, 10);
     try {
-      const res = await daySummaryClient.daySummary({ date: date ?? '' });
+      const res = await daySummaryClient.daySummary({ date: requestDate });
       const mapped = normalizeDaySummaryResponse(res, {
-        date: date ?? new Date().toISOString().slice(0, 10),
+        date: requestDate,
         openingFloat,
         closingCash: expectedCash,
       });
@@ -33,7 +34,7 @@ export function useDaySummary(date?: string) {
       setError(e instanceof Error && e.message ? e.message : 'Failed to load day summary');
       setSummary(
         buildLocalDaySummary({
-          date: date ?? new Date().toISOString().slice(0, 10),
+          date: requestDate,
           openingFloat,
           movements,
           closingCash: expectedCash,

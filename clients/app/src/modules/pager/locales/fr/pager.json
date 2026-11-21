@@ -114,7 +114,11 @@
     "qrHint": "Les clients le scannent, puis montrent leur code au comptoir.",
     "displayLink": "Écran du comptoir",
     "invalidLabel": "Saisissez un numéro de commande (lettres et chiffres, 12 au maximum) ou un nom (40 caractères au maximum).",
-    "labelTaken": "Une autre commande ouverte a déjà ce numéro."
+    "labelTaken": "Une autre commande ouverte a déjà ce numéro.",
+    "logoLabel": "Logo de l'établissement",
+    "logoAdd": "Ajouter votre logo",
+    "logoChange": "Changer le logo",
+    "logoHint": "Affiché sur le téléphone de vos clients, l'affiche et l'écran du comptoir. Il se règle dans les paramètres de votre entreprise."
   },
   "poster": {
     "pageTitle": "Affiche du comptoir · $t(pager.brand.name)",

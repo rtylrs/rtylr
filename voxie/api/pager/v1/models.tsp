@@ -125,6 +125,9 @@ model GetPublicTicketResponse {
   status: string;
   venue_name: string;
 
+  /** Absent when the business has no logo. */
+  venue_logo_url: string;
+
   /**
    * Labelled waiting tickets at the venue that scanned before this one. Zero
    * while this ticket has no label and once it is no longer waiting.

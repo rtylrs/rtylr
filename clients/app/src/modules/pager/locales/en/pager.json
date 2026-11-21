@@ -112,7 +112,11 @@
     "qrHint": "Customers scan this, then show their code at the counter.",
     "displayLink": "Counter display",
     "invalidLabel": "Enter an order number (letters and digits, up to 12) or a name (up to 40 characters).",
-    "labelTaken": "Another open order already has this number."
+    "labelTaken": "Another open order already has this number.",
+    "logoLabel": "Venue logo",
+    "logoAdd": "Add your logo",
+    "logoChange": "Change logo",
+    "logoHint": "Shown on your customers' phones, the poster and the counter display. You set it in your business settings."
   },
   "poster": {
     "pageTitle": "Counter poster · $t(pager.brand.name)",

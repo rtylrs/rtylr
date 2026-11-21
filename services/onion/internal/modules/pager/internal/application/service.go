@@ -233,6 +233,8 @@ type PublicTicket struct {
 	// Ticket carries the status as read at ServerTime.
 	Ticket    domain.Ticket
 	VenueName string
+	// VenueLogoURL is empty when the business has no logo.
+	VenueLogoURL string
 	// Ahead counts the labelled waiting tickets opened before this one.
 	Ahead      int64
 	ServerTime time.Time
@@ -259,7 +261,7 @@ func (s *Service) PublicTicket(ctx context.Context, token string) (PublicTicket,
 			return PublicTicket{}, err
 		}
 	}
-	return PublicTicket{Ticket: ticket, VenueName: venue.Name, Ahead: ahead, ServerTime: now}, nil
+	return PublicTicket{Ticket: ticket, VenueName: venue.Name, VenueLogoURL: venue.LogoURL, Ahead: ahead, ServerTime: now}, nil
 }
 
 // Acknowledge records that a customer silenced the bell. It leaves the status

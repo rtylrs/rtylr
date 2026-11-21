@@ -117,7 +117,9 @@ describe('pager ticket page', () => {
 
     expect(readyAlarm.getSnapshot().unlocked).toBe(true);
     expect(bell.play).toHaveBeenCalledTimes(1);
-    expect(screen.queryByRole('button', { name: "Notify me when it's ready" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: "Notify me when it's ready" })
+    ).not.toBeInTheDocument();
     // The same tap asks for lock-screen notifications, inside the click, and
     // the page subscribes again in case the visitor allowed them.
     expect(push.ask).toHaveBeenCalledWith('server-key');
@@ -148,7 +150,10 @@ describe('pager ticket page', () => {
       expect(push.follow).toHaveBeenLastCalledWith(
         expect.objectContaining({
           text: {
-            ready: { title: 'Sara, your order is ready', body: 'Collect it at the counter of Acme Cafe.' },
+            ready: {
+              title: 'Sara, your order is ready',
+              body: 'Collect it at the counter of Acme Cafe.',
+            },
             remind: {
               title: 'Sara, your order is waiting for you',
               body: 'Acme Cafe is calling your number again.',
@@ -320,6 +325,21 @@ describe('pager ticket page', () => {
 
     expect(api.getPublicTicket).toHaveBeenCalledTimes(1);
     expect(screen.queryByRole('button', { name: 'I have it' })).not.toBeInTheDocument();
+  });
+
+  it("shows the venue's logo beside its name, and nothing when the file fails", async () => {
+    api.getPublicTicket.mockResolvedValue({
+      ...waiting,
+      venueLogoUrl: 'https://cdn.example.test/acme.png',
+    });
+    const { container } = render(<Ticket />);
+
+    await screen.findByText('Acme Cafe');
+    const logo = container.querySelector('.pager-venue img');
+    expect(logo).toHaveAttribute('src', 'https://cdn.example.test/acme.png');
+    fireEvent.error(logo as HTMLImageElement);
+    expect(container.querySelector('.pager-venue img')).toBeNull();
+    expect(screen.getByText('Acme Cafe')).toBeInTheDocument();
   });
 
   it('shows a dead end for a ticket that does not exist', async () => {
