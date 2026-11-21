@@ -313,6 +313,8 @@ func (r *Repository) PurgeProjectCascade(ctx context.Context, id, businessID int
 		`DELETE c FROM flow_task_comments c JOIN flow_tasks t ON t.id = c.task_id WHERE t.project_id = ? AND t.business_id = ?`,
 		`DELETE act FROM flow_task_activity act JOIN flow_tasks t ON t.id = act.task_id WHERE t.project_id = ? AND t.business_id = ?`,
 		`DELETE fp FROM flow_task_focus_pins fp JOIN flow_tasks t ON t.id = fp.task_id WHERE t.project_id = ? AND t.business_id = ?`,
+		`DELETE fv FROM flow_task_field_values fv JOIN flow_tasks t ON t.id = fv.task_id WHERE t.project_id = ? AND t.business_id = ?`,
+		`DELETE FROM flow_custom_fields WHERE project_id = ? AND business_id = ?`,
 		`DELETE FROM flow_task_dependencies WHERE task_id IN (SELECT id FROM flow_tasks WHERE project_id = ? AND business_id = ?) OR depends_on_task_id IN (SELECT id FROM flow_tasks WHERE project_id = ? AND business_id = ?)`,
 		`DELETE ct FROM flow_cycle_tasks ct JOIN flow_cycles cy ON cy.id = ct.cycle_id WHERE cy.project_id = ? AND cy.business_id = ?`,
 		`DELETE mt FROM flow_milestone_tasks mt JOIN flow_milestones m ON m.id = mt.milestone_id WHERE m.project_id = ? AND m.business_id = ?`,

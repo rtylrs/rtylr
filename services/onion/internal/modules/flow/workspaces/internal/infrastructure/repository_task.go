@@ -318,6 +318,11 @@ func (r *Repository) DeleteTask(ctx context.Context, taskID, businessID int64) e
 		logger.Ctx(ctx).Error("DeleteTask failed", logger.Error(err))
 		return err
 	}
+	if _, err := r.pool.ExecContext(ctx,
+		"DELETE FROM flow_task_field_values WHERE task_id = ? AND business_id = ?", taskID, businessID); err != nil {
+		logger.Ctx(ctx).Error("DeleteTask field values cleanup failed", logger.Error(err))
+		return err
+	}
 	return nil
 }
 

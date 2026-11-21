@@ -40,14 +40,20 @@ func (r *Repository) GetTasksByBusinessV2(ctx context.Context, filter domain.Lis
 	if vis := projectVisibilityExpr(callerID, includeAll); vis != nil {
 		conds = append(conds, vis)
 	}
+	for _, f := range filter.FieldFilters {
+		conds = append(conds, fieldFilterExpr(f, filter.BusinessID))
+	}
 
 	total, err := r.countTasks(ctx, conds)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	builder := enrichedTaskSelectForList(filter.Compact).
-		Where(conds).
+	builder := enrichedTaskSelectForList(filter.Compact).Where(conds)
+	if filter.FieldSort != nil {
+		builder = applyFieldSort(builder, *filter.FieldSort, filter.BusinessID)
+	}
+	builder = builder.
 		OrderBy("t.sort_order ASC", "t.created_at ASC").
 		Limit(uint64(filter.Limit)).  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		Offset(uint64(filter.Offset)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
