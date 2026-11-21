@@ -3263,6 +3263,36 @@
   min-height: 44px;
 }
 
+.rennili-staff-venue {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dash-text);
+}
+
+.rennili-staff-venue img {
+  height: 32px;
+  width: auto;
+  max-width: 80px;
+  object-fit: contain;
+}
+
+.rennili-staff-venue__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A phone has room for the logo, not the name beside it. */
+@media (max-width: 479px) {
+  .rennili-staff-venue img + .rennili-staff-venue__name {
+    display: none;
+  }
+}
+
 .rennili-staff-portal {
   display: inline-flex;
   align-items: center;

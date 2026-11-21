@@ -4,7 +4,21 @@ import { Link } from '@tanstack/react-router';
 import { resolveAppUrl } from '@voxire/config';
 import { BusinessRoute, type StandaloneSurface } from '../../../../shared/utils/BusinessRoute';
 import { PAGER_BOARD_PATH, portalPathForStaffPage } from '../../pagerPaths';
+import { usePagerVenue } from '../lib/usePagerVenue';
 import { ByRtylr, RenniliLogo } from './RenniliLogo';
+import { VenueLogo } from './VenueLogo';
+
+/** Whose board this is: the business's logo and name. */
+function StaffVenue(): React.JSX.Element | null {
+  const { name, logoUrl } = usePagerVenue();
+  if (!name && !logoUrl) return null;
+  return (
+    <span className="rennili-staff-venue">
+      <VenueLogo src={logoUrl} />
+      {name && <span className="rennili-staff-venue__name">{name}</span>}
+    </span>
+  );
+}
 
 function StaffShell({ page }: { page: React.ReactNode }): React.JSX.Element {
   const { t } = useTranslation('pager');
@@ -15,6 +29,7 @@ function StaffShell({ page }: { page: React.ReactNode }): React.JSX.Element {
           <RenniliLogo size={26} />
         </Link>
         <ByRtylr />
+        <StaffVenue />
         <a className="rennili-staff-portal" href={resolveAppUrl('dash')}>
           {t('pager.staff.portal')}
         </a>
