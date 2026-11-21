@@ -8,7 +8,8 @@ import { useUserStore } from '../stores/userStore';
 import { useFlowStore } from '../stores/flowStore';
 import QuickCreate from './QuickCreate';
 import { chooseFlowOption, flowSelectTrigger } from '../../../../../test/flowSelect';
-import type { ApiStatus } from '../services/flowApi';
+import { toast } from 'sonner';
+import type { ApiField, ApiStatus } from '../services/flowApi';
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
@@ -17,6 +18,7 @@ const mocks = vi.hoisted(() => ({
   labels: [] as Array<{ id: number; name: string }>,
   statuses: [] as ApiStatus[],
   milestones: [] as Array<{ id: string; name: string }>,
+  fields: [] as ApiField[],
 }));
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => mocks.navigate,
@@ -37,6 +39,12 @@ vi.mock('../../features/tasks/useTasks', () => ({
 vi.mock('../../features/tasks/useLabels', () => ({ useLabels: () => ({ data: mocks.labels }) }));
 vi.mock('../../features/milestones/useMilestones', () => ({
   useMilestones: (projectId: string) => ({ data: projectId ? mocks.milestones : undefined }),
+}));
+vi.mock('../../features/projects/useFields', () => ({
+  useProjectFields: (projectId: string) => ({ data: projectId ? mocks.fields : undefined }),
+}));
+vi.mock('../../features/projects/useProjectMembers', () => ({
+  useProjectMembers: () => ({ data: [] }),
 }));
 vi.mock('../../features/projects/useStatuses', () => ({
   useProjectStatuses: (projectId: string) => ({ data: projectId ? mocks.statuses : undefined }),
@@ -60,6 +68,7 @@ beforeEach(async () => {
   mocks.currentProjectId = undefined;
   mocks.labels = [];
   mocks.milestones = [];
+  mocks.fields = [];
   mocks.statuses = [status('3', 'To Do', 10, true), status('4', 'Doing', 20)];
   mocks.create.mockResolvedValue({
     task: { id: '101', identifier: 'FLOW-101', title: 'Ship the thing' },
@@ -240,4 +249,59 @@ describe('Quick task creation in Portal', () => {
     render(<QuickCreate />);
     expect(screen.queryByRole('button', { name: /^Status/ })).toBeNull();
   });
+
+  it('blocks create while a required custom field is empty and names it', async () => {
+    mocks.currentProjectId = '12';
+    mocks.fields = [field({ id: '5', name: 'Severity', type: 'select', required: true })];
+    render(<QuickCreate />);
+    fillTitle();
+    create();
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith('Fill in the required fields first: Severity')
+    );
+    expect(screen.getByRole('alert')).toHaveTextContent('This field is required.');
+    expect(mocks.create).not.toHaveBeenCalled();
+
+    await chooseFlowOption('Severity', 'High');
+    create();
+    await waitFor(() =>
+      expect(mocks.create).toHaveBeenCalledWith(
+        expect.objectContaining({ fieldValues: [{ fieldId: '5', value: 'o2' }] })
+      )
+    );
+  });
+  it('starts a custom field on its default and sends it', async () => {
+    mocks.currentProjectId = '12';
+    mocks.fields = [
+      field({ id: '6', name: 'Team', type: 'select', required: true, defaultValue: 'o1' }),
+    ];
+    render(<QuickCreate />);
+    expect(flowSelectTrigger('Team')).toHaveAccessibleName('Team: Low');
+    fillTitle();
+    create();
+    await waitFor(() =>
+      expect(mocks.create).toHaveBeenCalledWith(
+        expect.objectContaining({ fieldValues: [{ fieldId: '6', value: 'o1' }] })
+      )
+    );
+  });
 });
+
+function field(overrides: Partial<ApiField>): ApiField {
+  return {
+    id: '1',
+    projectId: '12',
+    name: 'Field',
+    type: 'text',
+    options: [
+      { id: 'o1', label: 'Low', color: '#22c55e' },
+      { id: 'o2', label: 'High', color: '#ef4444' },
+    ],
+    required: false,
+    defaultValue: '',
+    defaultValues: [],
+    sortOrder: 0,
+    valueCount: 0,
+    ...overrides,
+  };
+}
