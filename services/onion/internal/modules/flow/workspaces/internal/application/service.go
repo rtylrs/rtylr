@@ -335,6 +335,10 @@ type repository interface {
 	GetStatusTemplate(ctx context.Context, businessID int64) ([]domain.StatusTemplateItem, error)
 	SaveStatusTemplate(ctx context.Context, businessID int64, items []domain.StatusTemplateItem) error
 	DeleteTask(ctx context.Context, taskID, businessID int64) error
+	DeleteTaskDetachingEpicTasks(ctx context.Context, taskID, businessID int64) (int64, error)
+	GetTaskHierarchyNode(ctx context.Context, taskID, businessID int64) (domain.HierarchyNode, bool, error)
+	ListEpicRollups(ctx context.Context, projectID, businessID int64) ([]domain.EpicRollup, error)
+	SetTaskParent(ctx context.Context, taskID, businessID int64, parentID *int64, decide func(child domain.HierarchyNode, parent *domain.HierarchyNode) (domain.TaskPlacement, error)) error
 	DeleteTimeLog(ctx context.Context, id, userID int64) error
 	DeleteView(ctx context.Context, id, actorID, businessID int64) error
 	DeleteWorkDayLine(ctx context.Context, id, businessID int64) (bool, error)
