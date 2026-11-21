@@ -214,7 +214,9 @@
       "closed": "مغلق"
     },
     "noMilestone": "بدون معلم",
-    "noMilestonesInProject": "لا معالم في هذا المشروع"
+    "noMilestonesInProject": "لا معالم في هذا المشروع",
+    "noCycle": "قائمة الأعمال (بدون دورة)",
+    "noCyclesInProject": "لا توجد دورات مفتوحة"
   },
   "time": {
     "add": {
@@ -1181,7 +1183,8 @@
   "projectViewTabs": {
     "overview": "نظرة عامة",
     "board": "اللوحة",
-    "list": "القائمة"
+    "list": "القائمة",
+    "backlog": "قائمة الأعمال"
   },
   "trialBanner": {
     "endsToday": "تنتهي فترتك التجريبية اليوم.",
@@ -1282,5 +1285,93 @@
     "summary": "{{tasks}} مهمة مفتوحة لدى {{people}} أشخاص",
     "emptyTitle": "لا توجد مهام لعرضها",
     "emptyDescription": "ستظهر هنا مهام المشاريع التي يمكنك رؤيتها، مجمّعة حسب الشخص."
+  },
+  "backlog": {
+    "pageTitle": "قائمة الأعمال",
+    "createCycle": "دورة جديدة",
+    "newCycleName": "الدورة {{number}}",
+    "unplanned": "غير مخطط",
+    "status": {
+      "active": "نشطة",
+      "upcoming": "قادمة",
+      "completed": "مكتملة"
+    },
+    "goal": "الهدف",
+    "totals": {
+      "todo": "للتنفيذ: {{count}}",
+      "active": "قيد التنفيذ: {{count}}",
+      "done": "منجزة: {{count}}"
+    },
+    "committedOfAvailable": "{{committed}} ملتزم بها من أصل {{available}} متاحة",
+    "estimate": "{{hours}} مقدّرة",
+    "capacity": "السعة",
+    "startCycle": "بدء الدورة",
+    "completeCycle": "إنهاء الدورة",
+    "startBlocked": "أنهِ الدورة النشطة قبل بدء دورة أخرى.",
+    "leaveUnavailable": "تعذّرت قراءة الإجازات المعتمدة، لذا يُحسب الوقت المتاح بأيام العمل فقط.",
+    "noMembers": "لا يوجد أحد في هذا المشروع بعد.",
+    "unknownMember": "عضو غير معروف",
+    "emptyCycle": "اسحب المهام إلى هنا لتخطيطها ضمن هذه الدورة.",
+    "emptyBacklog": "لا يوجد شيء غير مخطط. تصل المهام الجديدة إلى هنا.",
+    "create": "إنشاء",
+    "expand": "توسيع القسم",
+    "collapse": "طيّ القسم",
+    "cancel": "إلغاء",
+    "start": {
+      "title": "بدء {{name}}",
+      "description": "اختر مدة الدورة وما يجب أن تحققه.",
+      "alreadyActive": "{{name}} نشطة بالفعل. أنهِها قبل بدء دورة أخرى.",
+      "length": "المدة",
+      "goal": "الهدف",
+      "goalPlaceholder": "ما الذي يجب أن تسلّمه هذه الدورة؟",
+      "confirm": "بدء الدورة",
+      "starting": "جارٍ البدء...",
+      "weeks_zero": "لا أسابيع",
+      "weeks_one": "أسبوع واحد",
+      "weeks_two": "أسبوعان",
+      "weeks_few": "{{count}} أسابيع",
+      "weeks_many": "{{count}} أسبوعًا",
+      "weeks_other": "{{count}} أسبوع"
+    },
+    "complete": {
+      "title": "إنهاء {{name}}",
+      "allDone": "جميع المهام منجزة.",
+      "toCycle": "نقل إلى {{name}}",
+      "toBacklog": "إعادة إلى قائمة الأعمال",
+      "cancelTask": "إلغاء المهمة",
+      "rowLabel": "وجهة {{title}}",
+      "confirm": "إنهاء الدورة",
+      "completing": "جارٍ الإنهاء...",
+      "description_zero": "لا توجد مهام غير منجزة.",
+      "description_one": "مهمة واحدة غير منجزة. اختر وجهتها.",
+      "description_two": "مهمتان غير منجزتين. اختر وجهة كل منهما.",
+      "description_few": "{{count}} مهام غير منجزة. اختر وجهة كل منها.",
+      "description_many": "{{count}} مهمة غير منجزة. اختر وجهة كل منها.",
+      "description_other": "{{count}} مهمة غير منجزة. اختر وجهة كل منها."
+    },
+    "taskCount_zero": "لا مهام",
+    "taskCount_one": "مهمة واحدة",
+    "taskCount_two": "مهمتان",
+    "taskCount_few": "{{count}} مهام",
+    "taskCount_many": "{{count}} مهمة",
+    "taskCount_other": "{{count}} مهمة",
+    "carriedOver_zero": "لم تُرحّل أي مهمة من {{name}}",
+    "carriedOver_one": "رُحّلت مهمة واحدة من {{name}}",
+    "carriedOver_two": "رُحّلت مهمتان من {{name}}",
+    "carriedOver_few": "رُحّلت {{count}} مهام من {{name}}",
+    "carriedOver_many": "رُحّلت {{count}} مهمة من {{name}}",
+    "carriedOver_other": "رُحّلت {{count}} مهمة من {{name}}",
+    "leaveDays_zero": "لا أيام إجازة معتمدة",
+    "leaveDays_one": "يوم إجازة معتمد واحد",
+    "leaveDays_two": "يوما إجازة معتمدان",
+    "leaveDays_few": "{{count}} أيام إجازة معتمدة",
+    "leaveDays_many": "{{count}} يومًا من الإجازة المعتمدة",
+    "leaveDays_other": "{{count}} يوم إجازة معتمد",
+    "unassigned_zero": "لا مهام غير مسندة ({{hours}})",
+    "unassigned_one": "مهمة واحدة غير مسندة ({{hours}})",
+    "unassigned_two": "مهمتان غير مسندتين ({{hours}})",
+    "unassigned_few": "{{count}} مهام غير مسندة ({{hours}})",
+    "unassigned_many": "{{count}} مهمة غير مسندة ({{hours}})",
+    "unassigned_other": "{{count}} مهمة غير مسندة ({{hours}})"
   }
 }
