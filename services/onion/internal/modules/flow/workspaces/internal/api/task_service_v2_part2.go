@@ -24,7 +24,7 @@ func (a *TaskAPIV2) GetMyTasks(ctx context.Context, req *flowtaskv2.GetMyTasksRe
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get my tasks")
 	}
-	if err := a.Service.AttachMilestoneIDs(ctx, tasks); err != nil {
+	if err := a.Service.AttachTaskMemberships(ctx, tasks); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get my tasks")
 	}
 	return &flowtaskv2.GetMyTasksResponse{
@@ -55,7 +55,7 @@ func (a *TaskAPIV2) SearchTasks(ctx context.Context, req *flowtaskv2.SearchTasks
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to search tasks")
 	}
-	if err := a.Service.AttachMilestoneIDs(ctx, tasks); err != nil {
+	if err := a.Service.AttachTaskMemberships(ctx, tasks); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to search tasks")
 	}
 	return &flowtaskv2.SearchTasksResponse{
@@ -96,6 +96,11 @@ func (a *TaskAPIV2) CreateTask(ctx context.Context, req *flowtaskv2.CreateTaskRe
 		}
 		if projectID == 0 || milestoneProject != projectID {
 			return nil, onekiterrors.New(http.StatusBadRequest, "Milestone must belong to the selected project")
+		}
+	}
+	if req.CycleId != nil {
+		if err := a.requireOpenProjectCycle(ctx, businessID, *req.CycleId, projectID); err != nil {
+			return nil, err
 		}
 	}
 	dueDate, err := parseTaskDate(req.GetDueDate())
@@ -143,6 +148,17 @@ func (a *TaskAPIV2) CreateTask(ctx context.Context, req *flowtaskv2.CreateTaskRe
 			task.MilestoneID = req.MilestoneId
 		}
 	}
+	if req.CycleId != nil {
+		// Same reasoning as the milestone: the task exists, so a failed cycle
+		// placement is logged and the response shows the task in the backlog.
+		if cycleErr := a.Service.SetTaskCycle(ctx, businessID, task.ID, *req.CycleId); cycleErr != nil {
+			logger.Ctx(ctx).Error("CreateTask cycle placement failed", logger.Error(cycleErr))
+		}
+		created := []domain.Task{task}
+		if attachErr := a.Service.AttachTaskCycles(ctx, created); attachErr == nil {
+			task = created[0]
+		}
+	}
 
 	payload := toTaskV2(task)
 	publishTaskEventByProject("task.created", task.ProjectID, task.ID, caller.UserID)
@@ -171,7 +187,7 @@ func (a *TaskAPIV2) GetTaskDetail(ctx context.Context, req *flowtaskv2.GetTaskDe
 	}
 
 	withMilestone := []domain.Task{detail.Task}
-	if err := a.Service.AttachMilestoneIDs(ctx, withMilestone); err != nil {
+	if err := a.Service.AttachTaskMemberships(ctx, withMilestone); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get task detail")
 	}
 	detail.Task = withMilestone[0]
@@ -248,6 +264,15 @@ func (a *TaskAPIV2) UpdateTask(ctx context.Context, req *flowtaskv2.UpdateTaskRe
 		}
 		milestoneID = body.MilestoneId
 	}
+	if body.CycleId != nil && *body.CycleId != 0 {
+		detail, err := a.Service.GetTaskDetail(ctx, req.GetId())
+		if err != nil {
+			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update task")
+		}
+		if err := a.requireOpenProjectCycle(ctx, businessID, *body.CycleId, detail.Task.ProjectID); err != nil {
+			return nil, err
+		}
+	}
 	input := domain.UpdateTaskInput{
 		SectionID:        body.SectionId,
 		ID:               req.GetId(),
@@ -280,6 +305,11 @@ func (a *TaskAPIV2) UpdateTask(ctx context.Context, req *flowtaskv2.UpdateTaskRe
 			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update task")
 		}
 	}
+	if body.CycleId != nil {
+		if err := a.Service.SetTaskCycle(ctx, businessID, input.ID, *body.CycleId); err != nil {
+			return nil, cyclePlanningError(ctx, "UpdateTask cycle", err)
+		}
+	}
 
 	updated, fetchErr := a.Service.GetTaskDetail(ctx, input.ID)
 	if fetchErr != nil {
@@ -289,4 +319,21 @@ func (a *TaskAPIV2) UpdateTask(ctx context.Context, req *flowtaskv2.UpdateTaskRe
 	publishTaskEventByProject("task.updated", updated.Task.ProjectID, input.ID, caller.UserID)
 	publishBusinessEvent("business.task_updated", businessID, input.ID, caller.UserID)
 	return &flowtaskv2.UpdateTaskResponse{Message: "Task updated successfully"}, nil
+}
+
+// requireOpenProjectCycle checks that cycleID is an upcoming or active cycle
+// of projectID in the business, so a task is never filed into another
+// project's cycle or a closed one.
+func (a *TaskAPIV2) requireOpenProjectCycle(ctx context.Context, businessID, cycleID, projectID int64) error {
+	cycle, err := a.Service.GetCycleV2(ctx, businessID, cycleID)
+	if errors.Is(err, domain.ErrCycleNotFound) || (err == nil && (cycle.ProjectID == nil || *cycle.ProjectID != projectID || projectID == 0)) {
+		return onekiterrors.New(http.StatusBadRequest, "Cycle must belong to the task project")
+	}
+	if err != nil {
+		return onekiterrors.New(http.StatusInternalServerError, "Failed to load cycle")
+	}
+	if cycle.Status == domain.CycleStatusCompleted {
+		return onekiterrors.New(http.StatusBadRequest, "The cycle is completed")
+	}
+	return nil
 }

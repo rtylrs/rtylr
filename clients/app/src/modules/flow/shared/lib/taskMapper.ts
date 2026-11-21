@@ -73,6 +73,9 @@ export function apiTaskToTask(t: ApiTask): Task {
     completedAt: t.completedAt || undefined,
     estimate: t.estimatedHours ?? t.estimate,
     cycleId: t.cycleId != null ? String(t.cycleId) : undefined,
+    cycleName: t.cycleName || undefined,
+    // int64 as a string on the wire; absent for a backlog task never placed.
+    planRank: t.planRank != null && t.planRank !== '' ? Number(t.planRank) : undefined,
     milestoneId: t.milestoneId != null ? String(t.milestoneId) : undefined,
     // Older tasks stored effort as estimated hours.
     effortMinutes:

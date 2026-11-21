@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"math"
 	"net/http"
 	"time"
 
@@ -197,11 +198,20 @@ func (a *CycleAPIV2) ListCycles(ctx context.Context, req *flowcyclev2.ListCycles
 }
 
 func (a *CycleAPIV2) CreateCycle(ctx context.Context, req *flowcyclev2.CreateCycleRequest) (*flowcyclev2.CreateCycleResponse, error) {
-	_, businessID, err := resolveV2(ctx)
+	caller, businessID, err := resolveV2(ctx)
 	if err != nil {
 		return nil, err
 	}
-	cycle, err := a.Service.CreateCycleV2(ctx, businessID, req.GetProjectId(), req.GetName(), req.GetStartDate(), req.GetEndDate())
+	// Creating a cycle writes to the project, so it takes the same member tier
+	// as creating a task there. Without it anyone in the business could add
+	// cycles to a project they cannot even open.
+	if roleErr := a.Service.RequireProjectRole(ctx, req.GetProjectId(), caller.UserID, businessID, domain.FlowRoleMember); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	cycle, err := a.Service.CreateCycleV2(ctx, domain.CycleInput{
+		BusinessID: businessID, ProjectID: req.ProjectId, Name: req.GetName(),
+		Goal: req.GetGoal(), CreatedBy: caller.UserID,
+	}, req.GetStartDate(), req.GetEndDate())
 	if err != nil {
 		// A bad date pair is the caller's mistake, not an outage. Reported as 500
 		// it would look like a broken server and get retried forever.
@@ -210,6 +220,7 @@ func (a *CycleAPIV2) CreateCycle(ctx context.Context, req *flowcyclev2.CreateCyc
 		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create cycle")
 	}
+	publishCycleEvent("cycle.created", cycleCaller{UserID: caller.UserID, BusinessID: businessID, ProjectID: req.GetProjectId()}, cycle.ID)
 	return &flowcyclev2.CreateCycleResponse{Cycle: toContractCycleV2(cycle)}, nil
 }
 
@@ -241,7 +252,36 @@ func toContractCycleV2(c domain.Cycle) *flowcyclev2.Cycle {
 	if c.ProjectID != nil {
 		out.ProjectId = *c.ProjectID
 	}
+	out.Goal = c.Goal
+	if c.StartedAt != nil {
+		out.StartedAt = c.StartedAt.UTC().Format(time.RFC3339)
+	}
+	if c.CompletedAt != nil {
+		out.CompletedAt = c.CompletedAt.UTC().Format(time.RFC3339)
+	}
+	out.Totals = &flowcyclev2.CycleTotals{
+		Backlog:   int32(c.Totals.Backlog),   // #nosec G115 -- task counts per cycle stay far below int32.
+		Active:    int32(c.Totals.Active),    // #nosec G115 -- task counts per cycle stay far below int32.
+		Done:      int32(c.Totals.Done),      // #nosec G115 -- task counts per cycle stay far below int32.
+		Cancelled: int32(c.Totals.Cancelled), // #nosec G115 -- task counts per cycle stay far below int32.
+	}
+	out.EstimateMinutes = clampInt32(c.EstimateMinutes)
+	for _, carry := range c.CarriedOver {
+		out.CarriedOver = append(out.CarriedOver, &flowcyclev2.CycleCarryOver{
+			FromCycleId: carry.FromCycleID, FromCycleName: carry.FromCycleName, TaskIds: carry.TaskIDs,
+		})
+	}
 	return out
+}
+
+func clampInt32(v int64) int32 {
+	switch {
+	case v > math.MaxInt32:
+		return math.MaxInt32
+	case v < math.MinInt32:
+		return math.MinInt32
+	}
+	return int32(v)
 }
 
 func formatCycleDate(t time.Time) string {
@@ -249,40 +289,6 @@ func formatCycleDate(t time.Time) string {
 		return ""
 	}
 	return t.Format("2006-01-02")
-}
-
-func (a *CycleAPIV2) UpdateCycle(ctx context.Context, req *flowcyclev2.UpdateCycleRequest) (*flowcyclev2.UpdateCycleResponse, error) {
-	caller, businessID, err := resolveV2(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var end time.Time
-	if req.GetEndDate() != "" {
-		parsed, parseErr := time.Parse("2006-01-02", req.GetEndDate())
-		if parseErr != nil {
-			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid end_date")
-		}
-		end = parsed
-	}
-
-	if err := a.Service.UpdateCycle(ctx, domain.UpdateCycleInput{
-		ID:         req.GetId(),
-		ActorID:    caller.UserID,
-		BusinessID: businessID,
-		Name:       req.GetName(),
-		Status:     req.GetStatus(),
-		EndDate:    end,
-	}); err != nil {
-		// The repository reports a row the caller may not write as
-		// ErrUnauthorized. That is a 403, not an outage: mapping it to 500 made
-		// a permission denial look like a broken server and get retried.
-		if errors.Is(err, domain.ErrUnauthorized) {
-			return nil, onekiterrors.PermissionDenied()
-		}
-		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update cycle")
-	}
-	return &flowcyclev2.UpdateCycleResponse{}, nil
 }
 
 // ─── milestone/v2 ───────────────────────────────────────────────────────────

@@ -25,16 +25,21 @@ func IsValidTaskStatus(status string) bool {
 }
 
 type Task struct {
-	WaitingOn      string
-	DecisionNote   string
-	ID             int64
-	ProjectID      int64
-	WorkspaceID    int64
-	OwnerID        int64
-	BusinessID     int64
-	ParentTaskID   *int64
-	SectionID      *int64
-	CycleID        *int64
+	WaitingOn    string
+	DecisionNote string
+	ID           int64
+	ProjectID    int64
+	WorkspaceID  int64
+	OwnerID      int64
+	BusinessID   int64
+	ParentTaskID *int64
+	SectionID    *int64
+	CycleID      *int64
+	// CycleName and PlanRank come with CycleID from flow_cycle_tasks. PlanRank
+	// is the rank inside the cycle, or inside the unplanned backlog when
+	// CycleID is nil; nil for a backlog task that was never placed.
+	CycleName      string
+	PlanRank       *int64
 	MilestoneID    *int64
 	Title          string
 	Description    string

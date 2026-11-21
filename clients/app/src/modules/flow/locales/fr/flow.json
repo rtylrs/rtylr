@@ -251,7 +251,9 @@
     "closeDuplicateTitle": "Fermer {{identifier}} comme doublon ?",
     "closeDuplicateDescription": "Elle passe en Annulée. Le lien reste, pour retrouver la tâche conservée.",
     "closeDuplicateConfirm": "Fermer le doublon",
-    "closeDuplicateKeepOpen": "Laisser ouverte"
+    "closeDuplicateKeepOpen": "Laisser ouverte",
+    "noCycle": "Carnet (aucun cycle)",
+    "noCyclesInProject": "Aucun cycle ouvert"
   },
   "time": {
     "add": {
@@ -1265,7 +1267,8 @@
   "projectViewTabs": {
     "overview": "Aperçu",
     "board": "Tableau",
-    "list": "Liste"
+    "list": "Liste",
+    "backlog": "Carnet"
   },
   "trialBanner": {
     "endsToday": "Votre essai se termine aujourd'hui.",
@@ -1368,5 +1371,75 @@
     "summary": "{{tasks}} tâches ouvertes pour {{people}} personnes",
     "emptyTitle": "Aucune tâche à afficher",
     "emptyDescription": "Les tâches des projets que vous pouvez voir apparaîtront ici, regroupées par personne."
+  },
+  "backlog": {
+    "pageTitle": "Carnet",
+    "createCycle": "Nouveau cycle",
+    "newCycleName": "Cycle n° {{number}}",
+    "unplanned": "Non planifié",
+    "status": {
+      "active": "Actif",
+      "upcoming": "À venir",
+      "completed": "Terminé"
+    },
+    "taskCount_one": "{{count}} tâche",
+    "taskCount_many": "{{count}} tâches",
+    "taskCount_other": "{{count}} tâches",
+    "goal": "Objectif",
+    "carriedOver_one": "{{count}} tâche reportée depuis {{name}}",
+    "carriedOver_many": "{{count}} tâches reportées depuis {{name}}",
+    "carriedOver_other": "{{count}} tâches reportées depuis {{name}}",
+    "totals": {
+      "todo": "À faire : {{count}}",
+      "active": "En cours : {{count}}",
+      "done": "Terminées : {{count}}"
+    },
+    "committedOfAvailable": "{{committed}} engagées sur {{available}} disponibles",
+    "estimate": "{{hours}} estimées",
+    "capacity": "Capacité",
+    "startCycle": "Démarrer le cycle",
+    "completeCycle": "Terminer le cycle",
+    "startBlocked": "Terminez le cycle actif avant d'en démarrer un autre.",
+    "leaveUnavailable": "Les congés approuvés n'ont pas pu être lus : le temps disponible ne compte que les jours ouvrés.",
+    "noMembers": "Personne ne participe encore à ce projet.",
+    "unknownMember": "Membre inconnu",
+    "leaveDays_one": "{{count}} jour de congé approuvé",
+    "leaveDays_many": "{{count}} jours de congé approuvé",
+    "leaveDays_other": "{{count}} jours de congé approuvé",
+    "unassigned_one": "{{count}} tâche non assignée ({{hours}})",
+    "unassigned_many": "{{count}} tâches non assignées ({{hours}})",
+    "unassigned_other": "{{count}} tâches non assignées ({{hours}})",
+    "emptyCycle": "Glissez des tâches ici pour les planifier dans ce cycle.",
+    "emptyBacklog": "Rien de non planifié. Les nouvelles tâches arrivent ici.",
+    "create": "Créer",
+    "expand": "Déplier la section",
+    "collapse": "Replier la section",
+    "cancel": "Annuler",
+    "start": {
+      "title": "Démarrer {{name}}",
+      "description": "Choisissez la durée du cycle et ce qu'il doit accomplir.",
+      "alreadyActive": "{{name}} est déjà actif. Terminez-le avant de démarrer un autre cycle.",
+      "length": "Durée",
+      "weeks_one": "{{count}} semaine",
+      "weeks_many": "{{count}} semaines",
+      "weeks_other": "{{count}} semaines",
+      "goal": "Objectif",
+      "goalPlaceholder": "Que doit livrer ce cycle ?",
+      "confirm": "Démarrer le cycle",
+      "starting": "Démarrage..."
+    },
+    "complete": {
+      "title": "Terminer {{name}}",
+      "description_one": "{{count}} tâche n'est pas terminée. Choisissez où elle va.",
+      "description_many": "{{count}} tâches ne sont pas terminées. Choisissez où va chacune.",
+      "description_other": "{{count}} tâches ne sont pas terminées. Choisissez où va chacune.",
+      "allDone": "Toutes les tâches sont terminées.",
+      "toCycle": "Déplacer vers {{name}}",
+      "toBacklog": "Retour au carnet",
+      "cancelTask": "Annuler la tâche",
+      "rowLabel": "Destination de {{title}}",
+      "confirm": "Terminer le cycle",
+      "completing": "Clôture..."
+    }
   }
 }

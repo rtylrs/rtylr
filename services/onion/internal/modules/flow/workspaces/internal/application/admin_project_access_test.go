@@ -38,7 +38,7 @@ func newAdminProjectFixture(ctx context.Context, t *testing.T, svc *Service) adm
 	if err != nil {
 		t.Fatalf("CreateTask: %v", err)
 	}
-	if _, err := svc.CreateCycleV2(ctx, v2Business, p.ID, "Sprint", "2026-11-01", "2026-11-14"); err != nil {
+	if _, err := svc.CreateCycleV2(ctx, domain.CycleInput{BusinessID: v2Business, ProjectID: &p.ID, Name: "Sprint"}, "2026-11-01", "2026-11-14"); err != nil {
 		t.Fatalf("CreateCycleV2: %v", err)
 	}
 	if _, err := svc.CreateMilestoneV2(ctx, v2Business, p.ID, "Launch", "", "2026-12-01"); err != nil {

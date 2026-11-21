@@ -215,6 +215,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	workspacesModule.SetWorkdayRosterSource(workspaceadapters.NewWorkdayRosterSource(hrCoreModule, teamModule))
 	workspacesModule.SetInsightsMemberProfileSource(workspaceadapters.NewInsightsMemberProfileSource(userModule))
 	workspacesModule.SetPresenceSource(workspaceadapters.NewPresenceSource(hrCoreModule, hrLeaveModule))
+	workspacesModule.SetCycleLeaveSource(workspaceadapters.NewCycleLeaveSource(hrCoreModule, hrLeaveModule))
 	workspacesModule.Service().SetLabourCostProvider(hrPayrollModule.LabourCostProvider())
 	// The project dashboard asks Flow who may see a project rather than
 	// restating Flow's privacy rules.

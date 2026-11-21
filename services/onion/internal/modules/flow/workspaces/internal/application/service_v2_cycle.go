@@ -9,22 +9,21 @@ import (
 	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/domain"
 )
 
-func (s *Service) CreateCycleV2(ctx context.Context, businessID, projectID int64, name, startDate, endDate string) (domain.Cycle, error) {
+// CreateCycleV2 creates a cycle in input.ProjectID. A new cycle is upcoming
+// unless its window is already over: it becomes active only through
+// StartCycle, which is what keeps one active cycle per project.
+func (s *Service) CreateCycleV2(ctx context.Context, input domain.CycleInput, startDate, endDate string) (domain.Cycle, error) {
 	sd, ed, dateErr := NormalizeCycleDates(startDate, endDate)
 	if dateErr != nil {
 		return domain.Cycle{}, dateErr
 	}
-	status := "upcoming"
+	status := domain.CycleStatusUpcoming
 	today := time.Now().UTC().Truncate(24 * time.Hour)
 	if today.After(ed) {
-		status = "completed"
-	} else if !today.Before(sd) {
-		status = "active"
+		status = domain.CycleStatusCompleted
 	}
-	id, err := s.repo.CreateCycleV2(ctx, domain.CycleInput{
-		BusinessID: businessID, ProjectID: &projectID,
-		Name: name, StartDate: sd, EndDate: ed, Status: status,
-	})
+	input.StartDate, input.EndDate, input.Status = sd, ed, status
+	id, err := s.repo.CreateCycleV2(ctx, input)
 	if err != nil {
 		return domain.Cycle{}, err
 	}
@@ -32,8 +31,8 @@ func (s *Service) CreateCycleV2(ctx context.Context, businessID, projectID int64
 	// response carries no dates, so a client that renders straight from it has
 	// to re-read the row to learn when the cycle runs.
 	return domain.Cycle{
-		ID: id, ProjectID: &projectID, Name: name, Status: status,
-		StartDate: sd, EndDate: ed,
+		ID: id, ProjectID: input.ProjectID, BusinessID: input.BusinessID, Name: input.Name,
+		Status: status, Goal: input.Goal, StartDate: sd, EndDate: ed,
 	}, nil
 }
 

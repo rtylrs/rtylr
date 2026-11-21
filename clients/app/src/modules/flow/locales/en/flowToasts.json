@@ -43,7 +43,13 @@
   "cycle": {
     "created": "Cycle created",
     "createFailed": "Failed to create cycle",
-    "updateFailed": "Failed to update cycle"
+    "updateFailed": "Failed to update cycle",
+    "started": "Cycle started",
+    "alreadyActive": "This project already has an active cycle",
+    "startFailed": "Failed to start cycle",
+    "completed": "Cycle completed",
+    "completeFailed": "Failed to complete cycle",
+    "moveFailed": "Failed to move task"
   },
   "label": {
     "created": "Label created",
