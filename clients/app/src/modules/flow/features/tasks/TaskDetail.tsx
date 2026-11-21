@@ -1123,6 +1123,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           ]}
           subtasks={taskSubtasks}
           comments={taskComments}
+          mentionNames={Object.values(peopleNames)}
           onDone={() => setPrinting(false)}
         />
       )}
