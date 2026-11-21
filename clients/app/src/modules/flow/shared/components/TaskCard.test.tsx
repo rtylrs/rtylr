@@ -8,6 +8,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { TaskCard } from './TaskCard';
+import { EpicFilterContext } from './EpicChip';
 import type { Task } from '../stores/flowStore';
 
 vi.mock('react-i18next', async (importOriginal) => {
@@ -184,5 +185,52 @@ describe('TaskCard board dragging', () => {
     expect(onDragPointerDown).toHaveBeenLastCalledWith(expect.anything(), baseTask.id);
     expect(onDragPointerEnd).toHaveBeenCalledTimes(2);
     expect(openTask).not.toHaveBeenCalled();
+  });
+});
+
+describe('TaskCard epic chip (T-573)', () => {
+  const child: Task = { ...baseTask, epicId: 'e9', epicTitle: 'Payments', epicColor: '#22c55e' };
+
+  beforeEach(() => openTask.mockClear());
+
+  it('shows the epic a task sits under, in the epic colour', () => {
+    render(<TaskCard task={child} />);
+
+    const chip = screen.getByText('Payments').parentElement as HTMLElement;
+    expect(chip.style.getPropertyValue('--tone')).toBe('#22c55e');
+  });
+
+  it('filters the view by the epic instead of opening the task', () => {
+    const filterByEpic = vi.fn();
+    render(
+      <EpicFilterContext.Provider value={filterByEpic}>
+        <TaskCard task={child} />
+      </EpicFilterContext.Provider>
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'flow.epics.filterBy' }));
+
+    expect(filterByEpic).toHaveBeenCalledWith('e9');
+    expect(openTask).not.toHaveBeenCalled();
+  });
+
+  it('marks an epic itself, and filters to it', () => {
+    const filterByEpic = vi.fn();
+    render(
+      <EpicFilterContext.Provider value={filterByEpic}>
+        <TaskCard task={{ ...baseTask, id: 'e9', taskType: 'epic' }} />
+      </EpicFilterContext.Provider>
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'flow.epics.filterBy' }));
+
+    expect(filterByEpic).toHaveBeenCalledWith('e9');
+  });
+
+  it('shows no chip on a task outside any epic', () => {
+    render(<TaskCard task={baseTask} />);
+
+    expect(screen.queryByRole('button', { name: 'flow.epics.filterBy' })).not.toBeInTheDocument();
+    expect(screen.queryByText('flow.taskType.epic')).not.toBeInTheDocument();
   });
 });
