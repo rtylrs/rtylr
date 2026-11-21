@@ -301,3 +301,20 @@ func TestCustomFields_AccessMatrix(t *testing.T) {
 }
 
 func itoa(n int64) string { return strconv.FormatInt(n, 10) }
+
+func TestCustomFields_DeletingATaskDropsItsValues(t *testing.T) {
+	svc, ctx, _ := v2Svc(t)
+	p := createV2Project(ctx, t, svc, "fields-delete", "", v2UserA)
+	points := createField(ctx, t, svc, domain.CustomFieldInput{ProjectID: p.ID, Name: "Points", Type: domain.FieldTypeNumber})
+	task := fieldTask(ctx, t, svc, p.ID, "doomed", domain.FieldValueInput{FieldID: points.ID, Value: domain.FieldValue{Value: "2"}})
+
+	// The task panel deletes through the epic aware path, which must clean up
+	// the values as well, or they keep counting against the field.
+	if _, err := svc.DeleteTaskDetachingEpicTasks(ctx, task.ID, v2Business); err != nil {
+		t.Fatalf("DeleteTaskDetachingEpicTasks: %v", err)
+	}
+	fields, err := svc.ListProjectFields(ctx, p.ID, v2UserA, v2Business)
+	if err != nil || len(fields) != 1 || fields[0].ValueCount != 0 {
+		t.Fatalf("after delete fields = %+v, %v; want one field with no values", fields, err)
+	}
+}
