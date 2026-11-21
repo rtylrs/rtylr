@@ -136,6 +136,13 @@
   margin-inline-start: auto;
 }
 
+/* Logo, badge and three languages do not fit a 360px phone; the footer keeps the badge. */
+@media (max-width: 399px) {
+  .rennili-nav .rennili-by {
+    display: none;
+  }
+}
+
 .rennili-section {
   width: 100%;
   max-width: 1080px;
