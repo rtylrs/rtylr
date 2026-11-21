@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { MATCH_WORDS } from './matchWords';
 import { createSandboxPager } from './sandboxPager';
 
 function sandbox() {
@@ -16,18 +15,15 @@ async function scanAndLabel(pager: ReturnType<typeof sandbox>, label: string) {
 }
 
 describe('sandbox pager', () => {
-  it('gives each scanned phone its own word until the board labels it', async () => {
+  it('gives each scanned phone its own three digit number until the board labels it', async () => {
     const pager = sandbox();
-    const keys = new Set(MATCH_WORDS.map((entry) => entry.key));
-    const words = new Set<string>();
-    for (let i = 0; i < MATCH_WORDS.length + 3; i += 1) {
+    const codes = new Set<string>();
+    for (let i = 0; i < 200; i += 1) {
       const scanned = await pager.scanTicket({ slug: 'demo' });
-      expect(keys.has(scanned.word ?? '')).toBe(true);
-      // Every word on its own first, then the words with a number.
-      expect(scanned.wordNumber).toBe(i < MATCH_WORDS.length ? undefined : 2);
-      words.add(`${scanned.word} ${scanned.wordNumber ?? ''}`);
+      expect(scanned.code).toMatch(/^[1-9]\d{2}$/);
+      codes.add(scanned.code ?? '');
     }
-    expect(words.size).toBe(MATCH_WORDS.length + 3);
+    expect(codes.size).toBe(200);
 
     const { publicToken } = await pager.scanTicket({ slug: 'demo' });
     const phone = await pager.getPublicTicket({ publicToken });
@@ -38,11 +34,17 @@ describe('sandbox pager', () => {
     const { ticket } = await pager.labelTicket({ id, label: ' ٤٢ ' });
     expect(ticket).toMatchObject({ label: '42', labelKind: 'number' });
     expect(ticket).not.toHaveProperty('publicToken');
-    expect(ticket?.word).toBeUndefined();
+    expect(ticket?.code).toBeUndefined();
     expect(await pager.getPublicTicket({ publicToken })).toMatchObject({
       label: '42',
       labelKind: 'number',
     });
+  });
+
+  it('falls back to four digits once every three digit number is on a waiting phone', async () => {
+    const pager = sandbox();
+    for (let i = 0; i < 900; i += 1) await pager.scanTicket({ slug: 'demo' });
+    expect((await pager.scanTicket({ slug: 'demo' })).code).toMatch(/^[1-9]\d{3}$/);
   });
 
   it('follows the label mode, and keeps an open number on one ticket', async () => {

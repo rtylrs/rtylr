@@ -4,7 +4,6 @@ import type {
   Ticket,
 } from '@voxire/voxie/pager/v1/types';
 import { PAGER_ERROR } from './apiError';
-import { MATCH_WORDS } from './matchWords';
 import type { PublicPagerClient, StaffPagerClient } from './pagerClients';
 import { normaliseTicketNumber } from './ticketNumber';
 
@@ -25,15 +24,11 @@ interface SandboxTicket extends Ticket {
 
 export type SandboxPager = PublicPagerClient & StaffPagerClient;
 
-// The server's colour count and colour rule for a word.
-const COLORS = 6;
-const WORD_KEYS = MATCH_WORDS.map((entry) => entry.key);
-
-function colorOf(word: string, number: number): number {
-  return (WORD_KEYS.indexOf(word) + number) % COLORS;
-}
-
-const wordOf = (ticket: SandboxTicket): string => `${ticket.word ?? ''}:${ticket.wordNumber ?? 0}`;
+// The server's match numbers: three digits while any is free, then four.
+const MATCH_NUMBER_SPANS: readonly (readonly [number, number])[] = [
+  [100, 999],
+  [1000, 9999],
+];
 
 /**
  * An in-memory stand-in for the pager API, for the public demo. It follows
@@ -61,18 +56,19 @@ export function createSandboxPager({
     ticket.status === 'waiting' || ticket.status === 'ready';
   const staffView = ({ publicToken: _token, ...ticket }: SandboxTicket): Ticket => ({
     ...ticket,
-    word: ticket.labelKind ? undefined : ticket.word,
-    wordNumber: ticket.labelKind ? undefined : ticket.wordNumber,
+    code: ticket.labelKind ? undefined : ticket.code,
   });
 
-  // As the server: a free word on its own first, then the words with a number.
-  const freeWord = (): { word: string; wordNumber: number | undefined } => {
-    const used = new Set(tickets.filter((t) => isOpen(t) && !t.labelKind).map(wordOf));
-    for (let number = 1; number <= 200; number += 1) {
-      const wordNumber = number < 2 ? undefined : number;
-      const free = WORD_KEYS.filter((key) => !used.has(`${key}:${wordNumber ?? 0}`));
-      const word = free[Math.floor(random() * free.length)];
-      if (word) return { word, wordNumber };
+  // As the server: a random number no open unlabelled ticket shows.
+  const freeCode = (): string => {
+    const used = new Set(tickets.filter((t) => isOpen(t) && !t.labelKind).map((t) => t.code));
+    for (const [min, max] of MATCH_NUMBER_SPANS) {
+      const free: string[] = [];
+      for (let n = min; n <= max; n += 1) {
+        if (!used.has(String(n))) free.push(String(n));
+      }
+      const code = free[Math.floor(random() * free.length)];
+      if (code) return code;
     }
     throw new SandboxPagerError(429, PAGER_ERROR.tooManyOpenTickets);
   };
@@ -122,13 +118,11 @@ export function createSandboxPager({
   return {
     scanTicket: async () => {
       if (!settings.enabled) throw new SandboxPagerError(404, PAGER_ERROR.venueNotFound);
-      const { word, wordNumber } = freeWord();
+      const code = freeCode();
       lastId += 1;
       const ticket: SandboxTicket = {
         id: String(lastId),
-        word,
-        wordNumber,
-        color: colorOf(word, wordNumber ?? 0),
+        code,
         status: 'waiting',
         createdAt: clock(),
         publicToken: `sandbox-${lastId}`,
@@ -136,9 +130,7 @@ export function createSandboxPager({
       tickets.push(ticket);
       return {
         publicToken: ticket.publicToken,
-        word,
-        wordNumber,
-        color: ticket.color,
+        code,
         status: ticket.status,
       };
     },
@@ -157,9 +149,7 @@ export function createSandboxPager({
       return {
         label: ticket.label,
         labelKind: ticket.labelKind,
-        word: ticket.labelKind ? undefined : ticket.word,
-        wordNumber: ticket.labelKind ? undefined : ticket.wordNumber,
-        color: ticket.color,
+        code: ticket.labelKind ? undefined : ticket.code,
         status: ticket.status,
         venueName: venueName(),
         ahead,

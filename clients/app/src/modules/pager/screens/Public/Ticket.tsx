@@ -10,9 +10,8 @@ import { useAlarm } from '../../../../shared/alarm/useAlarm';
 import LanguageSwitch from '../../shared/components/LanguageSwitch';
 import { ByRtylr, RenniliLogo, RenniliMark } from '../../shared/components/RenniliLogo';
 import { VenueLogo } from '../../shared/components/VenueLogo';
-import MatchBadge from '../../shared/components/MatchBadge';
+import MatchCode from '../../shared/components/MatchCode';
 import { DEPLOY_GAP_PATIENCE_MS } from '../../shared/lib/apiError';
-import { matchName, matchOf } from '../../shared/lib/matchWords';
 import { usePublicPagerClient } from '../../shared/lib/pagerClients';
 import { askPushPermission, followTicketByPush, usePushKey } from '../../shared/lib/pushAlerts';
 import { ticketAlarmState } from '../../shared/lib/ticketAlarm';
@@ -154,8 +153,7 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
   const acknowledged = Boolean(ticket.acknowledgedAt) || answeredRing === ringMark;
   const ahead = ticket.ahead ?? 0;
   const labelled = Boolean(ticket.labelKind);
-  const match = matchOf(ticket);
-  const code = match ? matchName(match, i18n.resolvedLanguage ?? i18n.language) : '';
+  const code = ticket.code ?? '';
 
   const acknowledge = async (): Promise<void> => {
     readyAlarm.silence();
@@ -215,16 +213,9 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
               </bdi>
             </h1>
           ) : (
-            <h1 className="pager-order">
-              <span className="pager-order-label">{t('pager.ticket.codeLabel')}</span>{' '}
-              {match && (
-                <MatchBadge
-                  match={match}
-                  color={ticket.color}
-                  className={match.kind === 'word' ? 'pager-code pager-code--word' : 'pager-code'}
-                  otherClassName="pager-code-other"
-                />
-              )}
+            <h1 className="pager-code-card">
+              <span className="pager-code-caption">{t('pager.ticket.codeLabel')}</span>{' '}
+              <MatchCode code={code} className="pager-code" longClassName="pager-code--long" />
             </h1>
           )}
 

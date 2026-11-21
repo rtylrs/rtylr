@@ -11,8 +11,7 @@ import { Badge, Button, Select } from '../../../../shared/components/ui';
 import { useUserStore } from '../../../../shared/stores/userStore';
 import { PAGER_DISPLAY_PATH, PAGER_POSTER_PATH } from '../../pagerPaths';
 import { PAGER_ERROR, errorCode, errorStatus } from '../../shared/lib/apiError';
-import MatchBadge from '../../shared/components/MatchBadge';
-import { matchOf, wordIn } from '../../shared/lib/matchWords';
+import MatchCode from '../../shared/components/MatchCode';
 import {
   type StaffPagerClient,
   usePagerSandbox,
@@ -92,25 +91,30 @@ function NewPhoneCard({
   onLabel,
   onRemove,
 }: NewPhoneCardProps): React.JSX.Element {
-  const { t, i18n } = useTranslation('pager');
+  const { t } = useTranslation('pager');
   const inputId = useId();
   const [value, setValue] = useState('');
-  const match = matchOf(ticket);
-  const code = match ? wordIn(match, i18n.resolvedLanguage ?? i18n.language) : '';
+  const code = ticket.code ?? '';
   const minutes = minutesSince(ticket.createdAt, serverTime);
   const numeric = labelMode === 'number';
 
   return (
     <li className="space-y-2 rounded-lg p-3" style={{ border: '1px solid var(--dash-border)' }}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        {match && (
-          <MatchBadge
-            match={match}
-            color={ticket.color}
-            className="flex flex-col rounded-lg px-2.5 py-1 text-xl font-bold"
-            otherClassName="text-xs font-semibold"
+        {/* Captioned, so the cashier never takes the code for the order number. */}
+        <div className="flex flex-col leading-none">
+          <span
+            className="text-[11px] font-semibold uppercase tracking-wider"
+            style={{ color: 'var(--dash-text-dim)' }}
+          >
+            {t('pager.board.codeCaption')}
+          </span>
+          <MatchCode
+            code={code}
+            className="mt-1 text-3xl font-bold tracking-[0.06em] [font-variant-numeric:lining-nums_tabular-nums]"
+            longClassName="text-lg!"
           />
-        )}
+        </div>
         <span className="min-w-[5rem] flex-1 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
           {minutes < 1
             ? t('pager.board.scannedNow')
@@ -128,39 +132,48 @@ function NewPhoneCard({
         </Button>
       </div>
       <form
-        className="flex gap-2"
+        className="space-y-1"
         onSubmit={(event) => {
           event.preventDefault();
           if (value.trim() && !busy) onLabel(value.trim(), () => setValue(''));
         }}
       >
+        {/* What to type, in sight; the input's name also says which code it is for. */}
+        <span
+          aria-hidden="true"
+          className="block text-xs font-semibold"
+          style={{ color: 'var(--dash-text-muted)' }}
+        >
+          {t(`pager.board.labelInput.${labelMode}`)}
+        </span>
         <label htmlFor={inputId} className="sr-only">
-          {t('pager.board.labelFor', { code })}
+          {t(`pager.board.labelFor.${labelMode}`, { code })}
         </label>
-        <input
-          id={inputId}
-          dir="auto"
-          inputMode={numeric ? 'numeric' : 'text'}
-          enterKeyHint="done"
-          autoComplete="off"
-          autoCapitalize={numeric ? 'characters' : 'words'}
-          spellCheck={false}
-          maxLength={40}
-          placeholder={t(`pager.board.labelPlaceholder.${labelMode}`)}
-          value={value}
-          onChange={(event) =>
-            setValue(numeric ? normaliseTicketNumber(event.target.value) : event.target.value)
-          }
-          className="h-11 min-w-0 flex-1 rounded-lg px-3 text-base outline-none focus:border-[var(--dash-border-focus)]"
-          style={{
-            background: 'var(--dash-input-bg)',
-            border: '1px solid var(--dash-border)',
-            color: 'var(--dash-text)',
-          }}
-        />
-        <Button type="submit" size="sm" className="h-11" disabled={!value.trim() || busy}>
-          {t('pager.board.saveLabel')}
-        </Button>
+        <div className="flex gap-2">
+          <input
+            id={inputId}
+            dir="auto"
+            inputMode={numeric ? 'numeric' : 'text'}
+            enterKeyHint="done"
+            autoComplete="off"
+            autoCapitalize={numeric ? 'characters' : 'words'}
+            spellCheck={false}
+            maxLength={40}
+            value={value}
+            onChange={(event) =>
+              setValue(numeric ? normaliseTicketNumber(event.target.value) : event.target.value)
+            }
+            className="h-11 min-w-0 flex-1 rounded-lg px-3 text-base outline-none focus:border-[var(--dash-border-focus)]"
+            style={{
+              background: 'var(--dash-input-bg)',
+              border: '1px solid var(--dash-border)',
+              color: 'var(--dash-text)',
+            }}
+          />
+          <Button type="submit" size="sm" className="h-11" disabled={!value.trim() || busy}>
+            {t('pager.board.saveLabel')}
+          </Button>
+        </div>
       </form>
     </li>
   );
@@ -316,6 +329,14 @@ const Board = (): React.JSX.Element => {
           style={{ border: '1px solid var(--dash-border)' }}
         >
           <div className="flex min-w-0 flex-wrap items-center gap-2">
+            {ticket.labelKind === 'number' && (
+              <span
+                className="text-[11px] font-semibold uppercase tracking-wider"
+                style={{ color: 'var(--dash-text-dim)' }}
+              >
+                {t('pager.board.orderCaption')}
+              </span>
+            )}
             <bdi
               className={
                 ticket.labelKind === 'number'
