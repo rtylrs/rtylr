@@ -1,4 +1,7 @@
-import type { FlowTask as ContractTask } from '@voxire/voxie/flow/task/v2/types';
+import type {
+  FlowTask as ContractTask,
+  TaskRelationGroup as ContractRelationGroup,
+} from '@voxire/voxie/flow/task/v2/types';
 import type { Status as ContractStatus } from '@voxire/voxie/flow/status/v2/types';
 
 import { oneKitResult } from '@voxire/api';
@@ -138,6 +141,10 @@ export interface ApiTask {
   completedAt?: ContractTask['completedAt'];
   labels?: string[];
   dependencies?: string[];
+  // True while at least one task blocking this one is open. Both are omitted
+  // on the wire when false or zero.
+  blocked?: ContractTask['blocked'];
+  blockerCount?: ContractTask['blockerCount'];
   sectionId?: string;
   cycleId?: string;
   milestoneId?: string;
@@ -492,6 +499,58 @@ export interface ApiTaskDetail {
   activity: ApiTaskActivity[];
 }
 
+export type ApiRelationType = 'blocks' | 'relates' | 'duplicates' | 'clones';
+export type ApiRelationDirection = 'outward' | 'inward';
+/** A relation type read from one task's side, as one label key. */
+export type ApiRelationKey =
+  'blocks' | 'blocked_by' | 'relates_to' | 'duplicates' | 'duplicated_by' | 'clones' | 'cloned_by';
+
+export interface ApiRelatedTask {
+  relationId: string;
+  taskId: string;
+  identifier: string;
+  title: string;
+  projectId: string;
+  projectName: string;
+  status: string;
+  statusName: string;
+  statusColor: string;
+  statusBucket: 'backlog' | 'active' | 'done' | 'cancelled';
+  assigneeId?: string;
+  assigneeName: string;
+}
+
+export interface ApiTaskRelationGroup {
+  type: ApiRelationType;
+  direction: ApiRelationDirection;
+  relation: ApiRelationKey;
+  tasks: ApiRelatedTask[];
+}
+
+// Every string on the wire is omitted when empty, so each is defaulted here
+// and nothing downstream has to guard against undefined.
+function toApiRelationGroups(groups: ContractRelationGroup[] | undefined): ApiTaskRelationGroup[] {
+  return (groups ?? []).map((group) => ({
+    type: (group.type ?? 'relates') as ApiRelationType,
+    direction: (group.direction ?? 'outward') as ApiRelationDirection,
+    relation: (group.relation ?? 'relates_to') as ApiRelationKey,
+    tasks: (group.tasks ?? []).map((related) => ({
+      relationId: String(related.relationId ?? ''),
+      taskId: String(related.taskId ?? ''),
+      identifier: related.identifier ?? `T-${related.taskId ?? ''}`,
+      title: related.title ?? '',
+      projectId: String(related.projectId ?? ''),
+      projectName: related.projectName ?? '',
+      status: related.status ?? 'todo',
+      statusName: related.statusName ?? '',
+      statusColor: related.statusColor ?? '',
+      statusBucket: (related.statusBucket || 'backlog') as ApiRelatedTask['statusBucket'],
+      assigneeId: related.assigneeId ? String(related.assigneeId) : undefined,
+      assigneeName: related.assigneeName ?? '',
+    })),
+  }));
+}
+
 // -- API ------------------------------------------------------------------
 
 function flowResult<T>(operation: () => Promise<unknown>) {
@@ -803,13 +862,27 @@ export const flowApi = {
 
   deleteTask: (id: string) => flowResult<{ message: string }>(() => taskV2.deleteTask({ id })),
 
-  addTaskDependency: (taskId: string, dependsOnTaskId: string) =>
-    flowResult<{ message: string }>(() =>
-      taskV2.addTaskDependency({ taskId, body: { dependsOnTaskId } })
+  // Typed relations replace the dependency endpoints: a dependency is a
+  // "blocks" relation and is listed here as blocked_by.
+  listTaskRelations: (taskId: string) =>
+    oneKitResult(() => taskV2.listTaskRelations({ taskId })).map((response) =>
+      toApiRelationGroups(response.groups)
     ),
 
-  removeTaskDependency: (taskId: string, dependsOnTaskId: string) =>
-    flowResult<{ message: string }>(() => taskV2.removeTaskDependency({ taskId, dependsOnTaskId })),
+  // direction is read from taskId's side: outward "blocks" means taskId
+  // blocks otherTaskId, inward means taskId is blocked by it.
+  addTaskRelation: (
+    taskId: string,
+    otherTaskId: string,
+    type: ApiRelationType,
+    direction: ApiRelationDirection
+  ) =>
+    flowResult<{ relationId: string; message: string }>(() =>
+      taskV2.addTaskRelation({ taskId, body: { otherTaskId, type, direction } })
+    ),
+
+  removeTaskRelation: (taskId: string, relationId: string) =>
+    flowResult<{ message: string }>(() => taskV2.removeTaskRelation({ taskId, relationId })),
 
   updateTaskStatus: (id: string, status: ApiTask['status']) =>
     flowResult<{ message: string }>(() => taskV2.updateTaskStatus({ id, body: { status } })),
