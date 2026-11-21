@@ -122,7 +122,8 @@ export function canAccessPortalPath(user: StoredUser | null, pathname: string): 
     pathname === '/security' ||
     pathname === '/notifications' ||
     // The pager's staff routes answer every member of the business.
-    pathname === '/pager'
+    pathname === '/pager' ||
+    pathname === '/pager/poster'
   ) {
     return true;
   }
