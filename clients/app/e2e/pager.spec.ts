@@ -94,18 +94,19 @@ test.describe('Pager (landing)', () => {
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 
     // Open a closed FAQ accordion item by keyboard.
-    const faqTrigger = page.locator('#faq button[aria-expanded="false"]').first();
+    const faqTrigger = page.locator('#faq button[aria-controls="rl-faq-panel-1"]');
+    await expect(faqTrigger).toHaveAttribute('aria-expanded', 'false');
     await faqTrigger.focus();
     await page.keyboard.press('Enter');
     await expect(faqTrigger).toHaveAttribute('aria-expanded', 'true');
 
-    // Dedicated nav route reaches the RTYLR services upsell page.
-    await page.getByRole('link', { name: 'By RTYLR' }).first().click();
+    // Dedicated route reaches the RTYLR services upsell page on both desktop and mobile.
+    await page.getByRole('link', { name: 'Explore RTYLR services' }).click();
     await expect(page).toHaveURL(`${RENNILI_URL}/rtylr`);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 
     // Primary CTA reaches the live demo without calling any real API.
-    await page.getByRole('link', { name: 'Try the live demo' }).first().click();
+    await page.locator('main').getByRole('link', { name: 'Try the live demo' }).first().click();
     await expect(page).toHaveURL(`${RENNILI_URL}/try`);
     await expect(page.getByRole('region', { name: "Your customer's phone" })).toBeVisible();
   });
