@@ -10,6 +10,7 @@ import { useOpenTask } from '../../../shared/lib/useOpenTask';
 import { useCanEditTask } from '../../../shared/lib/currentUser';
 import { TaskContextMenu, type ContextMenuState } from '../../../shared/components/TaskContextMenu';
 import BlockedBadge from '../../../shared/components/BlockedBadge';
+import EpicChip from '../../../shared/components/EpicChip';
 import type { RowProps } from '../../../../../shared/hooks/useVirtualRows';
 import { useToggleDone } from '../../tasks/useToggleDone';
 import { useTaskDetail } from '../../tasks/useTasks';
@@ -139,6 +140,7 @@ function TitleCell({
       {(task.blockerCount ?? 0) > 0 && (
         <BlockedBadge taskId={String(task.id)} count={task.blockerCount ?? 0} />
       )}
+      <EpicChip task={task} />
     </div>
   );
 }

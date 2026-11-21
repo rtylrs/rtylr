@@ -12,6 +12,7 @@ import AssigneeAvatar from './AssigneeAvatar';
 import BlockedBadge from './BlockedBadge';
 import { Check } from 'lucide-react';
 import { TaskContextMenu, ContextMenuState } from './TaskContextMenu';
+import EpicChip from './EpicChip';
 import { withAlpha, onTint } from '../lib/colorUtils';
 import type { RowProps } from '../../../../shared/hooks/useVirtualRows';
 
@@ -152,6 +153,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({
         {(task.blockerCount ?? 0) > 0 && (
           <BlockedBadge taskId={String(task.id)} count={task.blockerCount ?? 0} />
         )}
+        <EpicChip task={task} />
         {showProject && project && (
           <span
             className="text-flow-meta px-2 py-0.5 rounded-sm shrink-0 font-medium"

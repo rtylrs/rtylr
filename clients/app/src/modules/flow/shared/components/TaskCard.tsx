@@ -20,6 +20,7 @@ import PriorityIcon from './PriorityIcon';
 import AssigneeAvatar from './AssigneeAvatar';
 import LabelChip from './LabelChip';
 import BlockedBadge from './BlockedBadge';
+import EpicChip from './EpicChip';
 import { TaskContextMenu, ContextMenuState } from './TaskContextMenu';
 import { withAlpha, onTint } from '../lib/colorUtils';
 import { displayStatusName } from '../../features/projects/statusUtils';
@@ -240,6 +241,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         >
           {task.title}
         </p>
+
+        {/* Epic: the one this task sits under, or "Epic" on an epic. */}
+        <EpicChip task={task} className="mb-2" />
 
         {/* Labels */}
         {fields.labels && taskLabels.length > 0 && (

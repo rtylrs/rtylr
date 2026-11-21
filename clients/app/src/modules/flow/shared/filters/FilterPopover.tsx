@@ -178,6 +178,7 @@ export const FilterPopover: React.FC<FilterPopoverProps> = ({
                 cycles: [],
                 milestones: [],
                 projects: [],
+                epics: [],
               })
             }
             className="flow-focus min-h-8 rounded-md px-2 text-flow-meta font-semibold disabled:opacity-40"

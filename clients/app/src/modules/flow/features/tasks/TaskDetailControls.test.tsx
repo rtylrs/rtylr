@@ -28,6 +28,8 @@ vi.mock('./useTask', () => ({ useTask: () => ({ data: state.detail, isLoading: f
 vi.mock('./useTasks', () => ({
   useTasks: () => ({ data: state.tasks, isLoading: false }),
   useUpdateTask: () => ({ mutate: update }),
+  useSetTaskParent: () => ({ mutate: vi.fn(), isPending: false }),
+  useEpicRollups: () => ({ data: [] }),
   useDeleteTask: () => ({ mutate: vi.fn() }),
   useAddComment: () => ({ mutate: vi.fn() }),
   useUpdateComment: () => ({ mutate: vi.fn() }),

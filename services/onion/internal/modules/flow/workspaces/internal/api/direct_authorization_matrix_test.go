@@ -65,6 +65,14 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 			response, err := NewTaskAPIV2(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).RemoveTaskRelation(ctx, &flowtaskv2.RemoveTaskRelationRequest{TaskId: 7303, RelationId: 7304})
 			return response, err
 		}},
+		{Name: "flow tasks set parent", App: authorization.AppFlow, Permission: "flow:tasks:edit", Call: func(ctx context.Context) (any, error) {
+			response, err := NewTaskAPIV2(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).SetTaskParent(ctx, &flowtaskv2.SetTaskParentRequest{Id: 1, Body: &flowtaskv2.SetTaskParentBody{}})
+			return response, err
+		}},
+		{Name: "flow epic rollups view", App: authorization.AppFlow, Permission: "flow:tasks:view", Call: func(ctx context.Context) (any, error) {
+			response, err := NewTaskAPIV2(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).ListEpicRollups(ctx, &flowtaskv2.ListEpicRollupsRequest{ProjectId: testutil.Int64Ptr(7301)})
+			return response, err
+		}},
 		{Name: "flow cycle task move", App: authorization.AppFlow, Permission: "flow:tasks:edit", Call: func(ctx context.Context) (any, error) {
 			taskID := int64(1)
 			response, err := NewCycleAPIV2(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).MoveCycleTask(ctx, &flowcyclev2.MoveCycleTaskRequest{TaskId: &taskID})

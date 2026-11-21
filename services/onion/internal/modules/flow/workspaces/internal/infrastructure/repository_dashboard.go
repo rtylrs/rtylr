@@ -96,6 +96,8 @@ func enrichedTaskColumns(includeDescription bool) []string {
 		"t.status_id", "COALESCE(t.waiting_on, '')", "COALESCE(t.decision_note, '')",
 		"COALESCE(fs.name, '') AS status_name",
 		"COALESCE(fs.color, '') AS status_color",
+		"t.task_type", "ep.id AS epic_id", "COALESCE(ep.title, '') AS epic_title",
+		"COALESCE(IF(t.task_type = 'epic', t.epic_color, ep.epic_color), '') AS epic_color",
 	}
 }
 
@@ -115,6 +117,11 @@ func enrichedTaskSelectForList(compact bool) sq.SelectBuilder {
 		From("flow_tasks t").
 		LeftJoin("flow_projects p ON p.id = t.project_id").
 		LeftJoin("flow_statuses fs ON fs.id = t.status_id").
+		// A task names its epic itself; a subtask reads its parent's. Both
+		// joins are primary-key lookups, so a list resolves every epic in the
+		// one query.
+		LeftJoin("flow_tasks pt ON pt.id = t.parent_task_id AND pt.business_id = t.business_id").
+		LeftJoin("flow_tasks ep ON ep.id = COALESCE(t.epic_id, pt.epic_id) AND ep.business_id = t.business_id AND ep.task_type = 'epic'").
 		PlaceholderFormat(sq.Question)
 }
 
@@ -181,7 +188,7 @@ func (r *Repository) listEnrichedTasks(ctx context.Context, builder sq.SelectBui
 func scanEnrichedTask(ctx context.Context, rows *sql.Rows) (domain.Task, error) {
 	var t domain.Task
 	var desc sql.NullString
-	var parentID, sectionID, assigneeID, statusID sql.NullInt64
+	var parentID, sectionID, assigneeID, statusID, epicID sql.NullInt64
 	var dueDate, startDate, completedAt sql.NullTime
 	var estHours, actHours sql.NullFloat64
 	var effortMinutes sql.NullInt64
@@ -197,6 +204,7 @@ func scanEnrichedTask(ctx context.Context, rows *sql.Rows) (domain.Task, error) 
 		&t.ProjectName, &t.ProjectColor, &t.AssigneeName, &t.SubtaskCount,
 		&t.CompletedSubtasks, &t.CommentCount, &t.AttachmentCount,
 		&statusID, &t.WaitingOn, &t.DecisionNote, &t.StatusName, &t.StatusColor,
+		&t.TaskType, &epicID, &t.EpicTitle, &t.EpicColor,
 	)
 	if err != nil {
 		logger.Ctx(ctx).Error("scanEnrichedTask row scan failed", logger.Error(err))
@@ -215,6 +223,9 @@ func scanEnrichedTask(ctx context.Context, rows *sql.Rows) (domain.Task, error) 
 	}
 	if statusID.Valid {
 		t.StatusID = &statusID.Int64
+	}
+	if epicID.Valid {
+		t.EpicID = &epicID.Int64
 	}
 	if dueDate.Valid {
 		t.DueDate = &dueDate.Time

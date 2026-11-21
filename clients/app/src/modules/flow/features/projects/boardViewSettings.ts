@@ -31,6 +31,7 @@ export const BOARD_GROUP_KEYS: readonly BoardGroupKey[] = [
   'label',
   'cycle',
   'milestone',
+  'epic',
 ];
 
 /** Optional card fields, in the order the settings list them. */

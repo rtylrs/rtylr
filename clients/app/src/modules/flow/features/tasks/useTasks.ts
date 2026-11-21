@@ -98,6 +98,9 @@ export function useCreateTask() {
       estimatedHours?: number;
       labels?: string[];
       milestoneId?: string;
+      parentTaskId?: string;
+      taskType?: string;
+      epicColor?: string;
       cycleId?: string;
     }) => {
       return unwrap(flowApi.createTask(data));
@@ -105,6 +108,7 @@ export function useCreateTask() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['cycles'] });
       qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['epic-rollups'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
       qc.invalidateQueries({ queryKey: ['projects'] });
       qc.invalidateQueries({ queryKey: ['projects-v2'] });
@@ -122,6 +126,7 @@ export function useUpdateTask() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['epic-rollups'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
       qc.invalidateQueries({ queryKey: ['projects'] });
       qc.invalidateQueries({ queryKey: ['projects-v2'] });
@@ -141,12 +146,48 @@ export function useDeleteTask() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['epic-rollups'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
       qc.invalidateQueries({ queryKey: ['projects'] });
       qc.invalidateQueries({ queryKey: ['projects-v2'] });
       qc.invalidateQueries({ queryKey: ['milestones'] });
     },
     onError: () => toast.error(t('flowToasts.task.deleteFailed')),
+  });
+}
+
+/**
+ * Moves a task under an epic or a task, or to the top level with an empty
+ * parentId. The server enforces the hierarchy and answers a refused move with
+ * its rule, which is shown as is.
+ */
+export function useSetTaskParent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ taskId, parentId }: { taskId: string; parentId: string }) =>
+      unwrap(flowApi.setTaskParent(taskId, parentId)),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['epic-rollups'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['task'] });
+    },
+    onError: () => toast.error(t('flowToasts.task.parentFailed')),
+  });
+}
+
+/**
+ * Every epic of a project with its progress numbers. Not keyed under 'tasks':
+ * the board's optimistic move rewrites every ['tasks', ...] entry as a task
+ * list. Task writes that change progress invalidate it by name instead, and it
+ * is refetched whenever a view showing it mounts.
+ */
+export function useEpicRollups(projectId: string | undefined) {
+  return useQuery({
+    queryKey: ['epic-rollups', projectId],
+    queryFn: async () => (await unwrap(flowApi.listEpicRollups(projectId!))).epics ?? [],
+    enabled: !!projectId,
+    staleTime: 0,
   });
 }
 
@@ -211,6 +252,7 @@ export function useUpdateTaskStatus() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['epic-rollups'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
       qc.invalidateQueries({ queryKey: ['projects'] });
       qc.invalidateQueries({ queryKey: ['projects-v2'] });
@@ -256,6 +298,7 @@ export function useBulkUpdateStatus() {
       bulkSettle(ids, (id) => unwrap(flowApi.updateTaskStatus(id, status))),
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['epic-rollups'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
       qc.invalidateQueries({ queryKey: ['projects'] });
       qc.invalidateQueries({ queryKey: ['projects-v2'] });
@@ -291,6 +334,7 @@ export function useBulkUpdateArchive() {
       bulkSettle(ids, (id) => unwrap(flowApi.updateTask(id, { archived: true }))),
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['epic-rollups'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
       qc.invalidateQueries({ queryKey: ['projects'] });
       qc.invalidateQueries({ queryKey: ['projects-v2'] });
@@ -308,6 +352,7 @@ export function useBulkDelete() {
     mutationFn: (ids) => bulkSettle(ids, (id) => unwrap(flowApi.deleteTask(id))),
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['epic-rollups'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
       qc.invalidateQueries({ queryKey: ['projects'] });
       qc.invalidateQueries({ queryKey: ['projects-v2'] });
@@ -358,6 +403,7 @@ export function useAddSubtask() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['task'] });
       qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['epic-rollups'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
       qc.invalidateQueries({ queryKey: ['projects'] });
       qc.invalidateQueries({ queryKey: ['projects-v2'] });
@@ -374,6 +420,7 @@ export function useToggleSubtask() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['task'] });
       qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['epic-rollups'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
       qc.invalidateQueries({ queryKey: ['projects'] });
       qc.invalidateQueries({ queryKey: ['projects-v2'] });

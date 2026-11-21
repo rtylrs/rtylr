@@ -3,15 +3,16 @@ import { resolveAuthUrl } from '@voxire/config';
 /**
  * Canonical in-app paths for the pager. Shapes (see `routes.tsx`):
  * `/$slug/pager`, `/pager/t/$token`, the demo at `/pager/try`, the staff board
- * at `/pager`, its counter poster at `/pager/poster` and the sign-up's last step
- * at `/pager/setup`.
+ * at `/pager`, its counter poster at `/pager/poster`, its counter display at
+ * `/pager/display` and the sign-up's last step at `/pager/setup`.
  */
 
 export const PAGER_BOARD_PATH = '/pager';
 export const PAGER_POSTER_PATH = '/pager/poster';
+export const PAGER_DISPLAY_PATH = '/pager/display';
 export const PAGER_SETUP_PATH = '/pager/setup';
 
-/** `/{slug}/pager` - where the venue's QR poster points. */
+/** `/{slug}/pager` - where the venue's one QR points. */
 export function pagerJoinPath(slug: string): string {
   return `/${encodeURIComponent(slug)}/pager`;
 }
@@ -23,7 +24,7 @@ export function pagerTicketPath(publicToken: string): string {
 
 const PUBLIC_PAGER_PATHS = [/^\/[^/]+\/pager\/?$/, /^\/pager\/t\/[^/]+\/?$/];
 
-/** True on the customer's join and ticket pages, never on the staff board. */
+/** True on the customer's scan and ticket pages, never on the staff board. */
 export function isPagerPublicPath(pathname: string): boolean {
   return PUBLIC_PAGER_PATHS.some((pattern) => pattern.test(pathname));
 }

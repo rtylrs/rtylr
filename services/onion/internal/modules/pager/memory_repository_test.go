@@ -27,10 +27,31 @@ func isOpen(t *domain.Ticket) bool {
 	return t.Status == domain.StatusWaiting || t.Status == domain.StatusReady
 }
 
+// holdsCode mirrors open_match_code, numberOf mirrors open_number.
+func holdsCode(t *domain.Ticket) bool {
+	return isOpen(t) && !t.Labelled()
+}
+
+func numberOf(t *domain.Ticket) string {
+	if isOpen(t) && t.LabelKind == domain.LabelNumber {
+		return t.Label
+	}
+	return ""
+}
+
+// fresh mirrors the open_since and unlabelled_since predicates.
+func fresh(t *domain.Ticket, openSince, unlabelledSince time.Time) bool {
+	return !t.CreatedAt.Before(openSince) && (t.Labelled() || !t.CreatedAt.Before(unlabelledSince))
+}
+
 func (r *memoryRepository) Settings(_ context.Context, businessID int64) (domain.Settings, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	return r.settings[businessID], nil
+	settings, ok := r.settings[businessID]
+	if !ok {
+		return domain.DefaultSettings(), nil
+	}
+	return settings, nil
 }
 
 func (r *memoryRepository) SaveSettings(_ context.Context, businessID int64, settings domain.Settings) error {
@@ -44,8 +65,8 @@ func (r *memoryRepository) CreateTicket(_ context.Context, ticket domain.Ticket)
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	for _, t := range r.tickets {
-		if t.BusinessID == ticket.BusinessID && t.Number == ticket.Number && isOpen(t) {
-			return domain.Ticket{}, domain.ErrNumberTaken
+		if t.BusinessID == ticket.BusinessID && holdsCode(t) && t.Code == ticket.Code {
+			return domain.Ticket{}, domain.ErrCodeTaken
 		}
 	}
 	ticket.ID = int64(len(r.tickets) + 1)
@@ -65,42 +86,46 @@ func (r *memoryRepository) where(businessID int64, keep func(*domain.Ticket) boo
 	return out
 }
 
-func (r *memoryRepository) OpenTicketByNumber(_ context.Context, businessID int64, number string, openSince time.Time) (domain.Ticket, bool, error) {
+func (r *memoryRepository) OpenMatchCodes(_ context.Context, businessID int64, unlabelledSince time.Time) ([]string, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	for _, t := range r.where(businessID, isOpen) {
-		if t.Number == number && !t.CreatedAt.Before(openSince) {
-			return *t, true, nil
+	var codes []string
+	for _, t := range r.where(businessID, holdsCode) {
+		if !t.CreatedAt.Before(unlabelledSince) {
+			codes = append(codes, t.Code)
 		}
 	}
-	return domain.Ticket{}, false, nil
+	return codes, nil
 }
 
-func (r *memoryRepository) ExpireStaleTicket(_ context.Context, businessID int64, number string, openSince time.Time) error {
+func (r *memoryRepository) ExpireStaleUnlabelled(_ context.Context, businessID int64, unlabelledSince time.Time) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	for _, t := range r.where(businessID, isOpen) {
-		if t.Number == number && t.CreatedAt.Before(openSince) {
+	for _, t := range r.where(businessID, holdsCode) {
+		if t.CreatedAt.Before(unlabelledSince) {
 			t.Status = domain.StatusExpired
 		}
 	}
 	return nil
 }
 
-func (r *memoryRepository) CountOpenCustomerTickets(_ context.Context, businessID int64, openSince time.Time) (int64, error) {
+func (r *memoryRepository) ExpireStaleTicket(_ context.Context, businessID int64, number string, openSince time.Time) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	return int64(len(r.where(businessID, func(t *domain.Ticket) bool {
-		return isOpen(t) && t.Source == domain.SourceCustomer && !t.CreatedAt.Before(openSince)
-	}))), nil
+	for _, t := range r.where(businessID, isOpen) {
+		if numberOf(t) == number && t.CreatedAt.Before(openSince) {
+			t.Status = domain.StatusExpired
+		}
+	}
+	return nil
 }
 
-func (r *memoryRepository) ListOpenTickets(_ context.Context, businessID int64, openSince time.Time) ([]domain.Ticket, error) {
+func (r *memoryRepository) ListOpenTickets(_ context.Context, businessID int64, openSince, unlabelledSince time.Time) ([]domain.Ticket, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	var out []domain.Ticket
 	for _, t := range r.where(businessID, isOpen) {
-		if !t.CreatedAt.Before(openSince) {
+		if fresh(t, openSince, unlabelledSince) {
 			out = append(out, *t)
 		}
 	}
@@ -131,18 +156,31 @@ func (r *memoryRepository) CountWaitingAhead(_ context.Context, businessID, id i
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	return int64(len(r.where(businessID, func(t *domain.Ticket) bool {
-		return t.Status == domain.StatusWaiting && !t.CreatedAt.Before(openSince) && t.ID < id
+		return t.Status == domain.StatusWaiting && t.Labelled() && !t.CreatedAt.Before(openSince) && t.ID < id
 	}))), nil
 }
 
-func (r *memoryRepository) LinkPhone(_ context.Context, businessID, id int64) error {
-	return r.update(businessID, id, func(*domain.Ticket) bool { return true }, func(t *domain.Ticket) {
-		t.PhoneLinked = true
-	})
+func (r *memoryRepository) Label(_ context.Context, businessID, id int64, label, kind string, openSince, unlabelledSince time.Time) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if kind == domain.LabelNumber {
+		for _, t := range r.where(businessID, isOpen) {
+			if t.ID != id && numberOf(t) == label {
+				return domain.ErrLabelTaken
+			}
+		}
+	}
+	for _, t := range r.where(businessID, func(t *domain.Ticket) bool { return t.ID == id }) {
+		if t.Status == domain.StatusWaiting && fresh(t, openSince, unlabelledSince) {
+			t.Label, t.LabelKind = label, kind
+		}
+	}
+	return nil
 }
 
 func (r *memoryRepository) MarkReady(_ context.Context, businessID, id int64, at, openSince time.Time) error {
-	return r.update(businessID, id, openIn(openSince, domain.StatusWaiting), func(t *domain.Ticket) {
+	waiting := openIn(openSince, domain.StatusWaiting)
+	return r.update(businessID, id, func(t *domain.Ticket) bool { return waiting(t) && t.Labelled() }, func(t *domain.Ticket) {
 		t.Status, t.ReadyAt, t.RemindedAt, t.AcknowledgedAt = domain.StatusReady, at, time.Time{}, time.Time{}
 	})
 }
@@ -159,8 +197,9 @@ func (r *memoryRepository) UndoReady(_ context.Context, businessID, id int64, op
 	})
 }
 
-func (r *memoryRepository) Collect(_ context.Context, businessID, id int64, openSince time.Time) error {
-	return r.update(businessID, id, openIn(openSince, domain.StatusWaiting, domain.StatusReady), func(t *domain.Ticket) {
+func (r *memoryRepository) Collect(_ context.Context, businessID, id int64, openSince, unlabelledSince time.Time) error {
+	open := openIn(openSince, domain.StatusWaiting, domain.StatusReady)
+	return r.update(businessID, id, func(t *domain.Ticket) bool { return open(t) && fresh(t, openSince, unlabelledSince) }, func(t *domain.Ticket) {
 		t.Status = domain.StatusCollected
 	})
 }

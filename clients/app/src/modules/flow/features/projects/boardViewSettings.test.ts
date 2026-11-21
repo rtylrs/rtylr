@@ -93,7 +93,7 @@ describe('board view storage', () => {
 describe('parseBoardViewSettings', () => {
   it('keeps each valid field and defaults each invalid one', () => {
     const parsed = parseBoardViewSettings({
-      groupBy: 'epic',
+      groupBy: 'sprint',
       hideDoneAfterDays: 3,
       columnWidth: 'flexible',
       cardFields: { estimate: true, key: 'yes' },

@@ -15,7 +15,8 @@ import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import { useCurrentProject } from './useCurrentProject';
 import { useProjectStatuses } from './useStatuses';
 import { defaultStatus, displayStatusName, sortStatuses, statusIdOf } from './statusUtils';
-import { DUE_LANES, PRIORITY_LABEL_KEY, PRIORITY_ORDER, laneKeyFor } from './taskGroups';
+import { DUE_LANES, PRIORITY_LABEL_KEY, PRIORITY_ORDER, epicLanes, laneKeyFor } from './taskGroups';
+import { EpicFilterContext } from '../../shared/components/EpicChip';
 import FlowSelect from '../../shared/components/FlowSelect';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { useCanCreateTask } from '../../shared/lib/currentUser';
@@ -37,9 +38,9 @@ import { downloadCsv } from '../../../../shared/lib/csv';
 
 export { TaskRow };
 
-export type ListGroupKey = 'status' | 'assignee' | 'priority' | 'due' | 'none';
+export type ListGroupKey = 'status' | 'assignee' | 'priority' | 'due' | 'epic' | 'none';
 
-const LIST_GROUP_KEYS: ListGroupKey[] = ['status', 'assignee', 'priority', 'due', 'none'];
+const LIST_GROUP_KEYS: ListGroupKey[] = ['status', 'assignee', 'priority', 'due', 'epic', 'none'];
 
 const listGroupStorageKey = (projectId: string): string => `flow:list:groupBy:${projectId}`;
 
@@ -111,6 +112,16 @@ export function buildListGroups(
       color: muted,
       tasks: tasks.filter((task) => task.priority === p),
     })).filter((group) => group.tasks.length > 0);
+  }
+  if (groupBy === 'epic') {
+    return epicLanes(tasks)
+      .map((lane) => ({
+        id: lane.key,
+        label: lane.label ?? t(lane.labelKey ?? ''),
+        color: lane.color ?? muted,
+        tasks: tasks.filter((task) => laneKeyFor(task, 'epic') === lane.key),
+      }))
+      .filter((group) => group.tasks.length > 0);
   }
   if (groupBy === 'due') {
     return DUE_LANES.map((lane) => ({
@@ -288,6 +299,11 @@ const ProjectList: React.FC = () => {
     (tasks: Task[]) => sortListTasks(tasks, prefs.sort, { statuses: statuses ?? [], labelNames }),
     [prefs.sort, statuses, labelNames]
   );
+  const { setFilters } = projectFilters.state;
+  const filterByEpic = useCallback(
+    (epicId: string) => setFilters((current) => ({ ...current, epics: [epicId] })),
+    [setFilters]
+  );
   // Sorted first, then grouped: grouping keeps the order inside each group.
   const groups = useMemo(
     () => buildListGroups(sortRows(shownTasks), statuses ?? [], groupBy, t),
@@ -363,77 +379,83 @@ const ProjectList: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <HelmetContainer title={t('flow.projectList.pageTitle')} />
-      <ProjectViewTabs
-        project={project}
-        projectId={projectId}
-        taskCount={projectTasks.length}
-        onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
-        rightSlot={
-          <>
-            <ListColumnPicker prefs={prefs} onChange={setPrefs} />
-            <ExportCsvButton disabled={exportRows.length === 0} onExport={exportCsv} />
-            <div className="w-[180px]">
-              <FlowSelect
-                label={t('flow.projectList.groupBy')}
-                value={groupBy}
-                options={LIST_GROUP_KEYS.map((key) => ({
-                  value: key,
-                  label: t(`flow.projectList.groupByOption.${key}`),
-                }))}
-                onChange={(value) => setGroupBy(value as ListGroupKey)}
-              />
+    <EpicFilterContext.Provider value={filterByEpic}>
+      <div className="flex flex-col h-full">
+        <HelmetContainer title={t('flow.projectList.pageTitle')} />
+        <ProjectViewTabs
+          project={project}
+          projectId={projectId}
+          taskCount={projectTasks.length}
+          onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
+          rightSlot={
+            <>
+              <ListColumnPicker prefs={prefs} onChange={setPrefs} />
+              <ExportCsvButton disabled={exportRows.length === 0} onExport={exportCsv} />
+              <div className="w-[180px]">
+                <FlowSelect
+                  label={t('flow.projectList.groupBy')}
+                  value={groupBy}
+                  options={LIST_GROUP_KEYS.map((key) => ({
+                    value: key,
+                    label: t(`flow.projectList.groupByOption.${key}`),
+                  }))}
+                  onChange={(value) => setGroupBy(value as ListGroupKey)}
+                />
+              </div>
+            </>
+          }
+        />
+
+        <FilterBar
+          state={projectFilters.state}
+          currentUserId={projectFilters.currentUserId}
+          fields={projectFilters.fields}
+          people={projectFilters.people}
+          visible={matchingIds?.size ?? projectTasks.length}
+          total={projectTasks.length}
+          savingView={saveAsView.pending}
+          onSaveAsView={() =>
+            saveAsView.save(
+              t('flow.filters.savedViewName', { project: project.name }),
+              projectFiltersForView(
+                projectFilters.state.filters,
+                projectId,
+                statusesQuery.data ?? []
+              )
+            )
+          }
+        />
+
+        <div className="flex-1 overflow-auto">
+          <ListGridContext.Provider value={grid}>
+            <div
+              role="treegrid"
+              aria-label={t('flow.projectList.gridLabel', { project: project.name })}
+              aria-colcount={prefs.columns.length + 2}
+              style={{ minWidth: rowMinWidth(prefs) }}
+              onKeyDown={(event) => handleGridKeyDown(event, gridColumn)}
+            >
+              <ListHeader prefs={prefs} onSort={sortBy} onResize={resize} />
+              {groups.map((group) => (
+                <TaskGroup
+                  key={`${groupBy}:${group.id}`}
+                  group={group}
+                  showHeader={groupBy !== 'none'}
+                  dimmedIds={dimmedIds}
+                />
+              ))}
             </div>
-          </>
-        }
-      />
-
-      <FilterBar
-        state={projectFilters.state}
-        currentUserId={projectFilters.currentUserId}
-        fields={projectFilters.fields}
-        people={projectFilters.people}
-        visible={matchingIds?.size ?? projectTasks.length}
-        total={projectTasks.length}
-        savingView={saveAsView.pending}
-        onSaveAsView={() =>
-          saveAsView.save(
-            t('flow.filters.savedViewName', { project: project.name }),
-            projectFiltersForView(projectFilters.state.filters, projectId, statusesQuery.data ?? [])
-          )
-        }
-      />
-
-      <div className="flex-1 overflow-auto">
-        <ListGridContext.Provider value={grid}>
-          <div
-            role="treegrid"
-            aria-label={t('flow.projectList.gridLabel', { project: project.name })}
-            aria-colcount={prefs.columns.length + 2}
-            style={{ minWidth: rowMinWidth(prefs) }}
-            onKeyDown={(event) => handleGridKeyDown(event, gridColumn)}
-          >
-            <ListHeader prefs={prefs} onSort={sortBy} onResize={resize} />
-            {groups.map((group) => (
-              <TaskGroup
-                key={`${groupBy}:${group.id}`}
-                group={group}
-                showHeader={groupBy !== 'none'}
-                dimmedIds={dimmedIds}
-              />
-            ))}
-          </div>
-        </ListGridContext.Provider>
-        {groups.length === 0 && (
-          <p className="px-4 py-6 text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>
-            {projectTasks.length > 0 && matchingIds !== null
-              ? t('flow.filters.noMatches')
-              : t('flow.projectList.empty')}
-          </p>
-        )}
+          </ListGridContext.Provider>
+          {groups.length === 0 && (
+            <p className="px-4 py-6 text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>
+              {projectTasks.length > 0 && matchingIds !== null
+                ? t('flow.filters.noMatches')
+                : t('flow.projectList.empty')}
+            </p>
+          )}
+        </div>
       </div>
-    </div>
+    </EpicFilterContext.Provider>
   );
 };
 

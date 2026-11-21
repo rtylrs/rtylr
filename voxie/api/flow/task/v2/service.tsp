@@ -138,4 +138,21 @@ interface TaskService {
   @delete
   @route("/tasks/{task_id}/relations/{relation_id}")
   removeTaskRelation(...RemoveTaskRelationRequest): RemoveTaskRelationResponse;
+
+  /**
+   * setTaskParent moves a task under an epic or a task, or clears both. The
+   * hierarchy is epic, task, subtask: the parent must be in the same project,
+   * an epic takes no parent, and nothing may sit under a subtask.
+   */
+  @patch
+  @route("/tasks/{id}/parent")
+  setTaskParent(...SetTaskParentRequest): SetTaskParentResponse;
+
+  /**
+   * listEpicRollups summarises every epic of one project: its tasks by status
+   * bucket, their estimates and the time logged on them.
+   */
+  @get
+  @route("/tasks/epic-rollups")
+  listEpicRollups(...ListEpicRollupsRequest): ListEpicRollupsResponse;
 }

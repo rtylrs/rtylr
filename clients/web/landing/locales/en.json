@@ -1928,9 +1928,9 @@
   "pager": {
     "meta": {
       "title": "{{brand}}: the free pager that rings your customer's phone",
-      "description": "{{brand}} is a free pager for restaurants and cafés, by rtylr. Customers scan a QR at the counter, type their receipt number, and their phone rings when it is ready.",
+      "description": "{{brand}} is a free pager for restaurants and cafés, by rtylr. Customers scan a QR at the counter, show their code to the cashier, and their phone rings when it is ready.",
       "keywords": "free pager, restaurant pager, QR code pager, digital pager, order ready pager, guest pager, {{brand}}",
-      "schemaDescription": "{{brand}} is a free restaurant pager by rtylr. Customers scan a QR at the counter, type their receipt number and their phone rings when the order is ready."
+      "schemaDescription": "{{brand}} is a free restaurant pager by rtylr. Customers scan a QR at the counter, show the code on their phone and their phone rings when the order is ready."
     },
     "tryCta": "Try it now",
     "hero": {
@@ -1941,19 +1941,19 @@
     },
     "how": {
       "title": "How it works",
-      "intro": "Three steps for the customer, and nothing to install.",
+      "intro": "The customer scans and waits. Nothing to install, nothing to type.",
       "steps": [
         {
           "title": "Scan the QR at the counter",
           "body": "One printed QR code sits by the till. The customer points their camera at it and the page opens. No app to download, no account to create."
         },
         {
-          "title": "Type the receipt number",
-          "body": "They enter the order number printed on their receipt, then sit down, step outside or carry on with their day."
+          "title": "Show the code to the cashier",
+          "body": "Their phone shows a short code. The cashier types the order number or their name on that code, and they sit down, step outside or carry on with their day."
         },
         {
           "title": "Their phone rings when it is ready",
-          "body": "When the order is up, your staff tap that number on the board and the customer's phone rings."
+          "body": "When the order is up, your staff tap Ready on the board and the customer's phone rings."
         }
       ]
     },

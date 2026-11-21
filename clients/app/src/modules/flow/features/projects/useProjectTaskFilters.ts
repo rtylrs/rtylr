@@ -5,6 +5,7 @@ import { useTaskFilters, type TaskFilterState } from '../../shared/filters/useTa
 import { matchesTaskFilters } from '../../shared/filters/taskFilters';
 import {
   assigneeField,
+  epicField,
   labelField,
   namedField,
   peopleFrom,
@@ -20,6 +21,7 @@ import { displayStatusName, sortStatuses, statusIdOf } from './statusUtils';
 import { useLabels } from '../tasks/useLabels';
 import { useCycles } from '../cycles/useCycles';
 import { useMilestones } from '../milestones/useMilestones';
+import { epicsIn } from '../../shared/lib/taskHierarchy';
 import type { ApiCycle, ApiMilestone } from '../../shared/services/flowApi';
 
 const NO_CYCLES: ApiCycle[] = [];
@@ -91,8 +93,12 @@ export function useProjectTaskFilters(projectId: string, tasks: Task[]): Project
     if (milestones.length > 0) {
       out.push(namedField('milestones', t('flow.filters.fields.milestone'), milestones));
     }
+    // The epics are tasks on this board, so they come from the same list.
+    const epics = epicsIn(tasks);
+    if (epics.length > 0) out.push(epicField(epics, t));
     return out;
   }, [
+    tasks,
     people,
     currentUserId,
     labelsQuery.data,
