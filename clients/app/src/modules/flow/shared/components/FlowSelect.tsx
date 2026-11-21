@@ -33,6 +33,51 @@ interface FlowSelectProps {
   action?: { label: string; icon?: React.ReactNode; onSelect: () => void };
 }
 
+/** The open list of every Flow dropdown: card colour, border and shadow. */
+export const FLOW_MENU_SURFACE: React.CSSProperties = {
+  background: 'var(--flow-card)',
+  border: '1px solid var(--flow-border)',
+  boxShadow: 'var(--flow-shadow)',
+};
+
+/**
+ * One option in a Flow dropdown: an optional icon, the label, and a check when
+ * it is the chosen one. With `checkable` it is one of several that can be on
+ * at once (a menuitemcheckbox), and choosing it keeps the menu open.
+ */
+export function FlowMenuItem({
+  label,
+  icon,
+  selected,
+  checkable = false,
+  onSelect,
+}: {
+  label: string;
+  icon?: React.ReactNode;
+  selected: boolean;
+  checkable?: boolean;
+  onSelect: () => void;
+}): React.JSX.Element {
+  return (
+    <DropdownMenuItem
+      // Spread only when set: an explicit undefined would wipe Radix's own role.
+      {...(checkable
+        ? { role: 'menuitemcheckbox', 'aria-checked': selected }
+        : { 'aria-current': selected ? ('true' as const) : undefined })}
+      onSelect={(event) => {
+        if (checkable) event.preventDefault();
+        onSelect();
+      }}
+      className="text-flow-meta"
+      style={{ color: 'var(--flow-text)' }}
+    >
+      {icon}
+      <span className="min-w-0 flex-1 truncate">{label}</span>
+      {selected && <Check size={13} aria-hidden="true" className="shrink-0" />}
+    </DropdownMenuItem>
+  );
+}
+
 /**
  * A styled replacement for the native `<select>` in Flow's properties rail.
  *
@@ -88,28 +133,20 @@ export const FlowSelect: React.FC<FlowSelectProps> = ({
         }}
         align="start"
         className="max-h-[260px] min-w-[var(--radix-dropdown-menu-trigger-width)] overflow-y-auto"
-        style={{
-          background: 'var(--flow-card)',
-          border: '1px solid var(--flow-border)',
-          boxShadow: 'var(--flow-shadow)',
-        }}
+        style={FLOW_MENU_SURFACE}
       >
         {options.map((option) => {
           const isSelected = option.value === value;
           return (
-            <DropdownMenuItem
+            <FlowMenuItem
               key={option.value}
-              aria-current={isSelected ? 'true' : undefined}
+              label={option.label}
+              icon={option.icon}
+              selected={isSelected}
               onSelect={() => {
                 if (!isSelected) onChange(option.value);
               }}
-              className="text-flow-meta"
-              style={{ color: 'var(--flow-text)' }}
-            >
-              {option.icon}
-              <span className="min-w-0 flex-1 truncate">{option.label}</span>
-              {isSelected && <Check size={13} aria-hidden="true" className="shrink-0" />}
-            </DropdownMenuItem>
+            />
           );
         })}
         {action && (

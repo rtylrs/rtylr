@@ -7,20 +7,28 @@ import type { ApiCycle } from '../../shared/services/flowApi';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 
 /**
+ * The query behind useCycles, shared so a screen that needs several projects'
+ * cycles at once (the Plan calendar) reads and fills the same cache entries.
+ */
+export function cyclesQueryOptions(projectId?: string) {
+  return {
+    queryKey: ['cycles', projectId],
+    queryFn: async (): Promise<ApiCycle[]> => {
+      const res = await unwrap(flowApi.getCycles(projectId!));
+      return unwrapListResponse<ApiCycle>(res, 'cycles');
+    },
+    enabled: projectId !== undefined && projectId !== '',
+  };
+}
+
+/**
  * Cycles for one project.
  *
  * v2 requires a project id, so this stays disabled until the caller has one
  * rather than firing a request that would 400.
  */
 export function useCycles(projectId?: string): ReturnType<typeof useQuery<ApiCycle[]>> {
-  return useQuery<ApiCycle[]>({
-    queryKey: ['cycles', projectId],
-    queryFn: async () => {
-      const res = await unwrap(flowApi.getCycles(projectId!));
-      return unwrapListResponse<ApiCycle>(res, 'cycles');
-    },
-    enabled: projectId !== undefined && projectId !== '',
-  });
+  return useQuery<ApiCycle[]>(cyclesQueryOptions(projectId));
 }
 
 export function useCreateCycle() {

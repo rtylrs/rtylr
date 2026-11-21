@@ -8,7 +8,8 @@ import { HelmetContainer } from '@voxire/components';
 import { STATUS_COLORS, useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
 import { STATUS_LABEL_KEYS } from '../../shared/lib/constantsFlow';
-import { isOverdue } from '../../shared/lib/dateUtils';
+import { isOverdue, todayIso } from '../../shared/lib/dateUtils';
+import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import ProjectViewTabs from './ProjectViewTabs';
 import { useCurrentProject } from './useCurrentProject';
@@ -16,13 +17,30 @@ import { useProjectLabourCost } from '../../shared/hooks/queries/useProjectLabou
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import ProjectDashboardPanel from '../../../insights/shared/components/ProjectDashboardPanel';
+import { useProjectStatuses } from './useStatuses';
+import { useCycles } from '../cycles/useCycles';
+import { computeProjectSummary } from './projectSummary';
+import {
+  BreakdownBar,
+  FilteredListLink,
+  fmtHours,
+  HoursVsEstimateCard,
+  NeedsAttentionCard,
+  PriorityBreakdownCard,
+  RecentChangeTiles,
+  StatTile,
+  SummaryCard,
+} from './components/ProjectSummaryCards';
 
 /**
  * ProjectDashboard - one-glance health view. The top is the Insights project
  * dashboard (T-567): progress, overdue tasks, hours logged and, for people who
  * may view finance invoices, the project's invoices, computed by the server.
- * Below it, a status breakdown bar and a grouped-by-assignee distribution
- * card, computed client-side from the task list.
+ * Below it, computed client-side from the task list (T-591): what was
+ * created, completed and updated in the last 7 days and what is due in the
+ * next 7, a Needs attention list, estimated against logged hours, the status
+ * and priority breakdowns and the workload per person. Every number opens the
+ * List view filtered to the tasks behind it.
  *
  * Someone who cannot open the Insights dashboard (no Business Overview access,
  * or a private project they reach through their workspace rather than as a
@@ -30,7 +48,7 @@ import ProjectDashboardPanel from '../../../insights/shared/components/ProjectDa
  * (Total · Done · In progress · Overdue) instead of the server panel.
  */
 const ProjectDashboard: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { projectId = '' } = useParams({ strict: false });
 
   useProjectRealtime(projectId);
@@ -47,6 +65,16 @@ const ProjectDashboard: React.FC = () => {
   const { data: apiTasks = [] } = tasksQuery;
   const tasksLoadFailed = hasQueryFailed(tasksQuery);
   const tasksLoading = tasksQuery.isPending && !tasksLoadFailed;
+  const { data: statuses = [] } = useProjectStatuses(projectId);
+  const { data: cycles = [] } = useCycles(projectId);
+
+  // The board and list drop archived tasks, so the summary does too: its
+  // counts must equal the rows its links open.
+  const summary = useMemo(() => {
+    const tasks = apiTasks.map(apiTaskToTask).filter((task) => !task.archived);
+    const loggedHours = new Map(apiTasks.map((t) => [String(t.id), Number(t.actualHours ?? 0)]));
+    return computeProjectSummary({ tasks, loggedHours, statuses, cycles, today: todayIso() });
+  }, [apiTasks, statuses, cycles]);
 
   const stats = useMemo(() => {
     const total = apiTasks.length;
@@ -71,19 +99,7 @@ const ProjectDashboard: React.FC = () => {
       statusCounts[t.status] = (statusCounts[t.status] ?? 0) + 1;
     });
 
-    const assigneeTally = new Map<string, { name: string; count: number }>();
-    apiTasks.forEach((t) => {
-      // The wire carries assignee_name; `assignee` is the legacy field and is
-      // usually empty, which put every task under Unassigned. An empty name
-      // means unassigned and is labelled at render time.
-      const name = t.assigneeName || t.assignee || '';
-      const prev = assigneeTally.get(name) ?? { name, count: 0 };
-      prev.count += 1;
-      assigneeTally.set(name, prev);
-    });
-    const byAssignee = Array.from(assigneeTally.values()).sort((a, b) => b.count - a.count);
-
-    return { total, done, inProgress, overdue, statusCounts, byAssignee };
+    return { total, done, inProgress, overdue, statusCounts };
   }, [apiTasks]);
 
   if (projectLoading && !project) {
@@ -181,8 +197,15 @@ const ProjectDashboard: React.FC = () => {
           </div>
         )}
 
+        <RecentChangeTiles projectId={projectId} recent={summary.recent} />
+
+        <div className="grid gap-5 md:grid-cols-2">
+          <NeedsAttentionCard projectId={projectId} attention={summary.attention} />
+          {summary.hours.estimated > 0 && <HoursVsEstimateCard hours={summary.hours} />}
+        </div>
+
         {/* Status breakdown bar */}
-        <Card title={t('flow.projectDashboard.statusBreakdown')}>
+        <SummaryCard title={t('flow.projectDashboard.statusBreakdown')}>
           {stats.total === 0 ? (
             <EmptyState
               icon={ListTodo}
@@ -195,55 +218,33 @@ const ProjectDashboard: React.FC = () => {
               size="compact"
             />
           ) : (
-            <>
-              <div
-                className="flex h-6 rounded-md overflow-hidden"
-                style={{ background: 'var(--flow-hover)' }}
-              >
-                {(
-                  ['done', 'in_progress', 'in_review', 'todo', 'cancelled', 'backlog'] as const
-                ).map((status) => {
-                  const n = stats.statusCounts[status] ?? 0;
-                  if (!n) return null;
-                  return (
-                    <div
-                      key={status}
-                      style={{
-                        width: `${(n / stats.total) * 100}%`,
-                        background: STATUS_COLORS[status],
-                      }}
-                      title={`${status}: ${n}`}
-                    />
-                  );
-                })}
-              </div>
-              <div className="flex flex-wrap gap-3 mt-3 text-flow-meta">
-                {(
-                  ['done', 'in_progress', 'in_review', 'todo', 'cancelled', 'backlog'] as const
-                ).map((status) => (
-                  <span
-                    key={status}
-                    className="flex items-center gap-1.5"
-                    style={{ color: 'var(--flow-text-muted)' }}
-                  >
-                    <span
-                      className="h-2 w-2 rounded-full"
-                      style={{ background: STATUS_COLORS[status] }}
-                    />
-                    {t(STATUS_LABEL_KEYS[status])}
-                    <span style={{ color: 'var(--flow-text-dim)' }}>
-                      ({stats.statusCounts[status] ?? 0})
-                    </span>
-                  </span>
-                ))}
-              </div>
-            </>
+            <BreakdownBar
+              projectId={projectId}
+              segments={(
+                ['done', 'in_progress', 'in_review', 'todo', 'cancelled', 'backlog'] as const
+              ).map((status) => {
+                const count = stats.statusCounts[status] ?? 0;
+                // A legend entry opens the list on the project statuses that
+                // map to it, when the project has any.
+                const filters = summary.statusFilters[status];
+                return {
+                  key: status,
+                  label: t(STATUS_LABEL_KEYS[status]),
+                  count,
+                  color: STATUS_COLORS[status],
+                  filters: filters && count ? filters : undefined,
+                };
+              })}
+            />
           )}
-        </Card>
+        </SummaryCard>
 
-        {/* Assignee distribution */}
-        <Card title={t('flow.projectDashboard.byAssignee')}>
-          {stats.byAssignee.length === 0 ? (
+        <PriorityBreakdownCard projectId={projectId} priorities={summary.priorities} />
+
+        {/* Workload per person: share of the project's tasks, open tasks and
+            the hours estimated on them. A row opens that person's open tasks. */}
+        <SummaryCard title={t('flow.projectDashboard.byAssignee')}>
+          {summary.workload.length === 0 ? (
             <EmptyState
               icon={ListTodo}
               title={t('flow.projectDashboard.noTasksYet')}
@@ -255,93 +256,69 @@ const ProjectDashboard: React.FC = () => {
             />
           ) : (
             <div className="space-y-2">
-              {stats.byAssignee.slice(0, 8).map((a) => (
-                <div key={a.name || '__unassigned'} className="flex items-center gap-3">
-                  <span
-                    className="text-flow-meta w-[128px] truncate"
-                    style={{ color: 'var(--flow-text-muted)' }}
-                  >
-                    {a.name || t('flow.projectDashboard.unassigned')}
-                  </span>
-                  <div
-                    className="flex-1 h-1.5 rounded-full overflow-hidden"
-                    style={{ background: 'var(--flow-hover)' }}
-                  >
+              {summary.workload.slice(0, 8).map((a) => {
+                const label = a.name || t('flow.projectDashboard.unassigned');
+                const detail = t('flow.projectDashboard.summary.workloadDetail', {
+                  open: a.open,
+                  hours: fmtHours(a.openEstimateHours, i18n.language),
+                });
+                const row = (
+                  <>
+                    <span
+                      className="text-flow-meta w-[128px] shrink-0 truncate"
+                      style={{ color: 'var(--flow-text-muted)' }}
+                    >
+                      {label}
+                    </span>
                     <div
-                      className="h-full rounded-full"
-                      style={{
-                        width: `${(a.count / stats.total) * 100}%`,
-                        background: project.color,
-                      }}
-                    />
-                  </div>
-                  <span
-                    className="text-flow-meta font-mono tabular-nums w-8 text-right"
-                    style={{ color: 'var(--flow-text-dim)' }}
+                      className="flex-1 h-1.5 rounded-full overflow-hidden"
+                      style={{ background: 'var(--flow-hover)' }}
+                    >
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${(a.total / stats.total) * 100}%`,
+                          background: project.color,
+                        }}
+                      />
+                    </div>
+                    <span
+                      className="hidden sm:inline text-flow-meta tabular-nums shrink-0"
+                      style={{ color: 'var(--flow-text-muted)' }}
+                      data-workload-detail={a.key}
+                    >
+                      {detail}
+                    </span>
+                    <span
+                      className="text-flow-meta font-mono tabular-nums w-8 shrink-0 text-end"
+                      style={{ color: 'var(--flow-text-dim)' }}
+                    >
+                      {a.total}
+                    </span>
+                  </>
+                );
+                return a.filters ? (
+                  <FilteredListLink
+                    key={a.key}
+                    projectId={projectId}
+                    filters={a.filters}
+                    aria-label={`${label}: ${detail}`}
+                    className="flex items-center gap-3 rounded-sm px-1 py-0.5 transition-colors hover:bg-[var(--flow-hover)]"
                   >
-                    {a.count}
-                  </span>
-                </div>
-              ))}
+                    {row}
+                  </FilteredListLink>
+                ) : (
+                  <div key={a.key} className="flex items-center gap-3 px-1 py-0.5">
+                    {row}
+                  </div>
+                );
+              })}
             </div>
           )}
-        </Card>
+        </SummaryCard>
       </div>
     </div>
   );
 };
-
-const StatTile: React.FC<{
-  label: string;
-  value: number;
-  tint: string;
-  hint?: string;
-}> = ({ label, value, tint, hint }) => (
-  <div
-    className="rounded-md p-3"
-    style={{
-      background: 'var(--flow-card)',
-      border: '1px solid var(--flow-border)',
-    }}
-  >
-    <div
-      className="text-flow-meta font-semibold uppercase tracking-wider mb-1"
-      style={{ color: 'var(--flow-text-dim)' }}
-    >
-      {label}
-    </div>
-    <div className="flex items-baseline gap-2">
-      <span
-        className="text-flow-screen font-bold tabular-nums"
-        style={{ color: 'var(--flow-text)' }}
-      >
-        {value}
-      </span>
-      {hint && (
-        <span className="text-flow-meta" style={{ color: tint }}>
-          {hint}
-        </span>
-      )}
-    </div>
-  </div>
-);
-
-const Card: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-  <section
-    className="rounded-md p-4"
-    style={{
-      background: 'var(--flow-card)',
-      border: '1px solid var(--flow-border)',
-    }}
-  >
-    <h3
-      className="text-flow-meta font-semibold uppercase tracking-wider mb-3"
-      style={{ color: 'var(--flow-text-dim)' }}
-    >
-      {title}
-    </h3>
-    {children}
-  </section>
-);
 
 export default ProjectDashboard;

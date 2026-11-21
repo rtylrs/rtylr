@@ -71,6 +71,22 @@ func (a *PagerAPI) AcknowledgeTicket(ctx context.Context, req *pagerv1.Acknowled
 	return &pagerv1.AcknowledgeTicketResponse{}, nil
 }
 
+func (a *PagerAPI) GetPushKey(_ context.Context, _ *pagerv1.GetPushKeyRequest) (*pagerv1.GetPushKeyResponse, error) {
+	return &pagerv1.GetPushKeyResponse{PublicKey: a.Service.PushKey()}, nil
+}
+
+func (a *PagerAPI) SubscribePush(ctx context.Context, req *pagerv1.SubscribePushRequest) (*pagerv1.SubscribePushResponse, error) {
+	err := a.Service.SubscribePush(ctx, req.GetPublicToken(), domain.PushSubscription{
+		Endpoint: req.GetEndpoint(),
+		P256dh:   req.GetP256dh(),
+		Auth:     req.GetAuth(),
+	})
+	if err != nil {
+		return nil, publicError(ctx, "subscribe push", err)
+	}
+	return &pagerv1.SubscribePushResponse{}, nil
+}
+
 func (a *PagerAPI) ListTickets(ctx context.Context, _ *pagerv1.ListTicketsRequest) (*pagerv1.ListTicketsResponse, error) {
 	businessID, err := staffBusinessID(ctx)
 	if err != nil {

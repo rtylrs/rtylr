@@ -1810,5 +1810,68 @@
       "foundCta": "Rencontrer Caret",
       "close": "Fermer"
     }
+  },
+  "pager": {
+    "meta": {
+      "title": "{{brand}} : le bipeur gratuit pour restaurants, sans appli",
+      "description": "{{brand}} est un bipeur gratuit pour restaurants et cafés, par rtylr. Le client scanne un QR au comptoir, tape son numéro de ticket et son téléphone sonne quand c’est prêt.",
+      "keywords": "bipeur gratuit, bipeur restaurant, pager restaurant, bipeur QR code, appel client restaurant, {{brand}}",
+      "schemaDescription": "{{brand}} est un bipeur gratuit pour restaurants, par rtylr. Le client scanne un QR au comptoir, tape son numéro de ticket et son téléphone sonne quand la commande est prête."
+    },
+    "tryCta": "Essayer maintenant",
+    "hero": {
+      "eyebrow": "{{brand}}, le bipeur gratuit de rtylr",
+      "title": "Le bipeur gratuit\nqui fait sonner leur téléphone.",
+      "subtitle": "{{brand}} remplace les bipeurs en plastique par le téléphone que votre client a déjà en poche. Un QR sur le comptoir, et son téléphone sonne quand la commande est prête. Gratuit pour votre établissement.",
+      "note": "Pas d’appli, pas de compte, rien à acheter."
+    },
+    "how": {
+      "title": "Comment ça marche",
+      "intro": "Trois étapes pour le client, et rien à installer.",
+      "steps": [
+        {
+          "title": "Scanner le QR au comptoir",
+          "body": "Un seul QR imprimé près de la caisse. Le client le vise avec l’appareil photo de son téléphone et la page s’ouvre. Pas d’appli à télécharger, pas de compte à créer."
+        },
+        {
+          "title": "Taper le numéro du ticket",
+          "body": "Il saisit le numéro de commande imprimé sur son ticket, puis s’assoit, sort prendre l’air ou continue sa journée."
+        },
+        {
+          "title": "Le téléphone sonne quand c’est prêt",
+          "body": "Quand la commande est prête, votre équipe touche ce numéro sur le tableau et le téléphone du client sonne."
+        }
+      ]
+    },
+    "compare": {
+      "title": "Tout ce que fait un bipeur en plastique, sans le plastique",
+      "intro": "Le téléphone du client fait le travail du bipeur, et tout ce que le bipeur vous coûtait disparaît.",
+      "items": [
+        {
+          "title": "Rien à acheter",
+          "body": "Pas de lot de bipeurs, pas de pièces de rechange. Le client apporte l’appareil."
+        },
+        {
+          "title": "Rien à recharger",
+          "body": "Pas de socle de charge sur le comptoir, pas de bipeur à plat en plein coup de feu."
+        },
+        {
+          "title": "Rien à nettoyer",
+          "body": "Aucun appareil qui passe de main en main toute la journée, donc rien à désinfecter entre deux clients."
+        },
+        {
+          "title": "Rien à perdre",
+          "body": "Plus de bipeurs qui repartent dans une poche ou un sac."
+        }
+      ]
+    },
+    "free": {
+      "title": "Pourquoi c’est gratuit ?",
+      "body": "rtylr fabrique un logiciel de caisse. {{brand}} est gratuit parce que nous voulons que les restaurateurs voient comment nous construisons nos produits, avec un outil qu’ils peuvent utiliser au comptoir dès aujourd’hui."
+    },
+    "closing": {
+      "title": "Écoutez-le sonner vous-même",
+      "subtitle": "Essayez le tableau de l’équipe et le téléphone du client côte à côte, dans votre navigateur. Sans inscription."
+    }
   }
 }

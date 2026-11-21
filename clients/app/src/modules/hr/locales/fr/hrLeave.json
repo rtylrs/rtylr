@@ -59,6 +59,7 @@
     "title": "Politiques de congés",
     "subtitle": "Créez les types de congés que les employés peuvent demander.",
     "namePlaceholder": "Congé annuel",
+    "annualAllowance": "Jours par an",
     "maxCarryover": "Jours de report maximum",
     "minNotice": "Jours de préavis minimum"
   },

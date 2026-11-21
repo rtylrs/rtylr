@@ -9,12 +9,15 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/pager/internal/api"
 	"github.com/voxire/onion/internal/modules/pager/internal/application"
 	"github.com/voxire/onion/internal/modules/pager/internal/domain"
 	moduleinfra "github.com/voxire/onion/internal/modules/pager/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/logger"
 	serverhttp "github.com/voxire/onion/internal/platform/server/http"
 	pagerv1 "github.com/voxire/voxie/gen/go/pager/v1"
 )
@@ -31,10 +34,35 @@ type Module struct {
 	service *application.Service
 }
 
-func NewModule(_ context.Context, db *sql.DB, businesses BusinessDirectory) *Module {
-	return &Module{
-		service: application.NewService(moduleinfra.NewRepository(db), venues{businesses}, time.Now),
+func NewModule(ctx context.Context, db *sql.DB, businesses BusinessDirectory) *Module {
+	service := application.NewService(moduleinfra.NewRepository(db), venues{businesses}, time.Now)
+	configurePush(ctx, service)
+	return &Module{service: service}
+}
+
+// defaultPushSubject is who the push services can contact about our pushes
+// when WEB_PUSH_SUBJECT is unset.
+const defaultPushSubject = "mailto:info@voxire.com"
+
+// configurePush turns on lock-screen notifications when the VAPID key pair is
+// set. Both unset leaves them off; a partial or unreadable pair is logged and
+// also leaves them off rather than failing startup.
+func configurePush(ctx context.Context, service *application.Service) {
+	publicKey := strings.TrimSpace(os.Getenv("WEB_PUSH_VAPID_PUBLIC_KEY"))
+	privateKey := strings.TrimSpace(os.Getenv("WEB_PUSH_VAPID_PRIVATE_KEY"))
+	if publicKey == "" && privateKey == "" {
+		return
 	}
+	subject := strings.TrimSpace(os.Getenv("WEB_PUSH_SUBJECT"))
+	if subject == "" {
+		subject = defaultPushSubject
+	}
+	sender, err := moduleinfra.NewWebPush(publicKey, privateKey, subject)
+	if err != nil {
+		logger.Ctx(ctx).Error("pager lock-screen notifications stay off: WEB_PUSH_VAPID_* is not a valid key pair", logger.Error(err))
+		return
+	}
+	service.EnablePush(sender, nil)
 }
 
 // RegisterAPI serves pager.v1. The public routes carry an @meta("rate_limit")
@@ -62,6 +90,8 @@ func (m *Module) GetAnonymousRoutes() []string {
 		"/pager/v1/public/venues/{slug}/join",
 		"/pager/v1/public/tickets/{public_token}",
 		"/pager/v1/public/tickets/{public_token}/acknowledge",
+		"/pager/v1/public/push-key",
+		"/pager/v1/public/tickets/{public_token}/push",
 	}
 }
 

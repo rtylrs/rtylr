@@ -10,6 +10,7 @@ import TermsPage from '../legal/terms';
 import PrivacyPage from '../legal/privacy-policy';
 import SecurityPage from '../legal/security';
 import TrustPage from '../trust';
+import PagerPage from '../pager';
 
 /**
  * One catch-all that serves every localised route.
@@ -42,6 +43,7 @@ const PAGES: Record<string, React.ComponentType> = {
   '/legal/privacy-policy/': PrivacyPage,
   '/legal/security/': SecurityPage,
   '/trust/': TrustPage,
+  '/pager/': PagerPage,
 };
 
 interface Props {

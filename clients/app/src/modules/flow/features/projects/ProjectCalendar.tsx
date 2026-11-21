@@ -2,7 +2,6 @@ import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import React, { useMemo, useState } from 'react';
 import { useOpenTask } from '../../shared/lib/useOpenTask';
 import { useParams } from '@tanstack/react-router';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@voxire/utils';
 import { HelmetContainer } from '@voxire/components';
@@ -11,19 +10,28 @@ import { useTasks } from '../tasks/useTasks';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import ProjectViewTabs from './ProjectViewTabs';
 import { useCurrentProject } from './useCurrentProject';
-import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
-import { monthCells, tasksByLocalDay, agendaDays } from '../../shared/lib/monthGrid';
+import { tasksByLocalDay, agendaDays } from '../../shared/lib/monthGrid';
 import { CalendarAgenda } from '../../shared/components/CalendarAgenda';
 import { todayIso } from '../../shared/lib/dateUtils';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
+import { useCanEditTask } from '../../shared/lib/currentUser';
+import type { ApiTask } from '../../shared/services/flowApi';
 import FilterBar from '../../shared/filters/FilterBar';
 import { useProjectTaskFilters } from './useProjectTaskFilters';
+import { useCalendarView } from '../calendar/useCalendarView';
+import { useCalendarScheduling } from '../calendar/useCalendarScheduling';
+import { useCalendarPlanning } from '../calendar/useCalendarPlanning';
+import { PlanningGrid } from '../calendar/PlanningGrid';
+import { UnscheduledPanel, needsScheduling } from '../calendar/UnscheduledPanel';
+import { CalendarControls } from '../calendar/CalendarControls';
 
 /**
- * ProjectCalendar - month grid with tasks placed on their due_date.
- * Clicking a task should open its detail (wired via Link in a later pass);
- * for now tasks render as compact chips on the owning day.
+ * ProjectCalendar - the project's tasks by date, as a month or a week.
+ *
+ * A task runs from its start date to its due date; the project's cycles and
+ * milestones and the team's approved leave sit behind it; open tasks with no
+ * dates wait in the Unscheduled panel to be dragged onto a day.
  */
 /**
  * The grid needs room; below that the month is a list.
@@ -37,11 +45,19 @@ import { useProjectTaskFilters } from './useProjectTaskFilters';
  */
 const WIDE = '(min-width: 768px)';
 
+/** Room for the Unscheduled panel beside the grid; below it the panel starts closed. */
+const LARGE = '(min-width: 1024px)';
+
 const ProjectCalendar: React.FC = () => {
   const { t, i18n } = useTranslation();
   const openTask = useOpenTask();
   const isWide = useMediaQuery(WIDE);
+  const isLarge = useMediaQuery(LARGE);
   const { projectId = '' } = useParams({ strict: false });
+  const canEdit = useCanEditTask(projectId);
+  // null until the user chooses, so the default can follow the width.
+  const [panelChoice, setPanelChoice] = useState<boolean | null>(null);
+  const panelOpen = panelChoice ?? isLarge;
 
   useProjectRealtime(projectId);
 
@@ -61,26 +77,8 @@ const ProjectCalendar: React.FC = () => {
     void tasksQuery.refetch();
   };
 
-  const [cursor, setCursor] = useState(() => {
-    const d = new Date();
-    d.setDate(1);
-    return d;
-  });
-
-  const { cells, weekCount, monthLabel } = useMemo(() => {
-    const all = monthCells(cursor);
-    return {
-      cells: all,
-      weekCount: all.length / 7,
-      // `undefined` here meant "the browser's locale", which is unrelated to
-      // the language the user picked in Flow. The global calendar threads
-      // i18n.language through; this now matches it.
-      monthLabel: cursor.toLocaleString(i18n.language, {
-        month: 'long',
-        year: 'numeric',
-      }),
-    };
-  }, [cursor, i18n.language]);
+  const calendar = useCalendarView(i18n.language);
+  const { view, cells, from, to } = calendar;
 
   // Same filters as the board and list. A month cell fits three pills, so the
   // calendar always hides non-matching tasks rather than fading them.
@@ -92,21 +90,21 @@ const ProjectCalendar: React.FC = () => {
       matchingIds === null ? apiTasks : apiTasks.filter((task) => matchingIds.has(String(task.id))),
     [apiTasks, matchingIds]
   );
-  const tasksByDay = useMemo(() => tasksByLocalDay(calendarTasks), [calendarTasks]);
-
+  const scheduling = useCalendarScheduling(calendarTasks);
+  const shownTasks = scheduling.tasks;
+  const tasksByDay = useMemo(() => tasksByLocalDay(shownTasks), [shownTasks]);
   const agenda = useMemo(() => agendaDays(cells, tasksByDay), [cells, tasksByDay]);
-
-  // Built from Intl rather than hardcoded English. The grid's first column is
-  // Sunday, so the names are generated from a known Sunday; which day the week
-  // starts on is unchanged, only the language of the labels. Declared here,
-  // above the early returns below, because a hook has to run on every render.
-  const weekdays = useMemo(() => {
-    const formatter = new Intl.DateTimeFormat(i18n.language, { weekday: 'short' });
-    const knownSunday = new Date(2026, 0, 4);
-    return Array.from({ length: 7 }, (_, offset) =>
-      formatter.format(new Date(2026, 0, knownSunday.getDate() + offset))
-    );
-  }, [i18n.language]);
+  const unscheduledCount = useMemo(
+    () => calendarTasks.filter(needsScheduling).length,
+    [calendarTasks]
+  );
+  const cycleProjectIds = useMemo(() => (projectId ? [projectId] : []), [projectId]);
+  const planning = useCalendarPlanning({
+    cycleProjectIds,
+    milestoneProjectId: projectId,
+    from,
+    to,
+  });
 
   if (projectLoading && !project) {
     return (
@@ -139,6 +137,21 @@ const ProjectCalendar: React.FC = () => {
   }
 
   const today = todayIso();
+  // Tinted by status. Every task on this screen belongs to the same project, so
+  // project.color made all 34 pills one shade and carried no information (#1087).
+  const statusTone = (task: ApiTask): string =>
+    STATUS_COLORS[task.status] ?? 'var(--flow-text-muted)';
+  const panel = (layout: 'side' | 'stacked') => (
+    <UnscheduledPanel
+      tasks={shownTasks}
+      tone={statusTone}
+      canEdit={() => canEdit}
+      onOpen={(task) => openTask(String(task.id))}
+      onClose={() => setPanelChoice(false)}
+      scheduling={scheduling}
+      layout={layout}
+    />
+  );
 
   return (
     <div className="flex flex-col h-full">
@@ -160,48 +173,24 @@ const ProjectCalendar: React.FC = () => {
         allowDim={false}
       />
 
-      <div className="flex items-center justify-between px-4 py-2">
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setCursor((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}
-            className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
-            style={{ color: 'var(--flow-text-muted)' }}
-            aria-label={t('flow.calendar.prevMonthLabel')}
-          >
-            <ChevronLeft size={14} />
-          </button>
-          <button
-            type="button"
-            onClick={() => setCursor((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))}
-            className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
-            style={{ color: 'var(--flow-text-muted)' }}
-            aria-label={t('flow.calendar.nextMonthLabel')}
-          >
-            <ChevronRight size={14} />
-          </button>
-          <h2 className="text-flow-body font-semibold" style={{ color: 'var(--flow-text)' }}>
-            {monthLabel}
-          </h2>
-        </div>
-        <button
-          type="button"
-          onClick={() => {
-            const d = new Date();
-            d.setDate(1);
-            setCursor(d);
-          }}
-          className="text-flow-meta px-2 py-1 rounded-sm hover:bg-[var(--flow-hover)]"
-          style={{ color: 'var(--flow-text-muted)' }}
-        >
-          {t('flow.calendar.today')}
-        </button>
+      <div className="px-4 py-2">
+        <CalendarControls
+          view={view}
+          onView={calendar.setView}
+          label={calendar.label}
+          onStep={calendar.step}
+          onToday={calendar.goToday}
+          unscheduledCount={unscheduledCount}
+          unscheduledOpen={panelOpen}
+          onToggleUnscheduled={() => setPanelChoice(!panelOpen)}
+        />
       </div>
 
       {/* At 390px a seven-column month gives each day about 55px, which truncates
           a title to two or three characters (rtylr#1215, S-10). */}
       {!isWide && (
         <div className="flex-1 overflow-auto">
+          {panelOpen && panel('stacked')}
           <CalendarAgenda
             entries={agenda}
             todayIso={today}
@@ -214,95 +203,23 @@ const ProjectCalendar: React.FC = () => {
       )}
 
       {isWide && (
-        <div className="flex flex-1 flex-col px-3 pb-3 min-h-0">
-          <div className="grid grid-cols-7 gap-px shrink-0">
-            {weekdays.map((d) => (
-              <div
-                key={d}
-                className="text-flow-meta font-semibold uppercase tracking-wider py-1.5 text-center"
-                style={{ color: 'var(--flow-text-dim)' }}
-              >
-                {d}
-              </div>
-            ))}
+        <div className="flex flex-1 min-h-0">
+          <div className="flex flex-1 min-w-0 flex-col px-3 pb-3">
+            <PlanningGrid
+              cells={cells}
+              view={view}
+              tasks={shownTasks}
+              cycles={planning.cycles}
+              milestones={planning.milestones}
+              leave={planning.leave}
+              today={today}
+              tone={statusTone}
+              canEdit={() => canEdit}
+              onOpen={(task) => openTask(String(task.id))}
+              scheduling={scheduling}
+            />
           </div>
-          <div
-            className="flex-1 grid gap-px overflow-auto rounded-md"
-            style={{
-              gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
-              gridTemplateRows: `repeat(${weekCount}, minmax(96px, 1fr))`,
-              background: 'var(--flow-border)',
-            }}
-          >
-            {cells.map((cell, i) => {
-              const d = cell.inMonth ? cell.date : null;
-              const dayTasks = d ? (tasksByDay.get(cell.iso) ?? []) : [];
-              const isToday = cell.inMonth && cell.iso === today;
-              return (
-                <div
-                  key={i}
-                  className="flex flex-col p-1.5 overflow-hidden"
-                  style={{
-                    background: d ? 'var(--flow-card)' : 'var(--flow-surface)',
-                  }}
-                >
-                  {d && (
-                    <>
-                      <div
-                        className={[
-                          'text-flow-meta mb-1 self-end',
-                          isToday ? 'font-bold' : 'font-medium',
-                        ].join(' ')}
-                        style={{
-                          color: isToday ? 'var(--accent)' : 'var(--flow-text-dim)',
-                        }}
-                      >
-                        {d.getDate()}
-                      </div>
-                      <div className="flex flex-col gap-1 min-h-0 overflow-hidden">
-                        {dayTasks.slice(0, 3).map((t) => {
-                          // Tinted by status. Every task on this screen belongs to
-                          // the same project, so project.color made all 34 pills
-                          // one shade and carried no information (#1087).
-                          const tone = STATUS_COLORS[t.status] ?? 'var(--flow-text-muted)';
-                          return (
-                            <div
-                              key={t.id}
-                              // dir="auto" so a right-to-left title truncates at
-                              // its own end. Left as-is, an Arabic task clipped
-                              // with the ellipsis at the start of the phrase.
-                              dir="auto"
-                              className="text-flow-meta px-1.5 py-0.5 rounded-sm truncate"
-                              style={{
-                                // See Calendar: the tone is set once and read back,
-                                // which also makes it observable in tests.
-                                ['--tone' as string]: tone,
-                                background: withAlpha('var(--tone)', 13),
-                                color: onTint('var(--tone)'),
-                                cursor: 'pointer',
-                              }}
-                              title={t.title}
-                              onClick={() => openTask(String(t.id))}
-                            >
-                              {t.title}
-                            </div>
-                          );
-                        })}
-                        {dayTasks.length > 3 && (
-                          <span
-                            className="text-flow-meta"
-                            style={{ color: 'var(--flow-text-dim)' }}
-                          >
-                            {t('flow.calendar.moreCount', { count: dayTasks.length - 3 })}
-                          </span>
-                        )}
-                      </div>
-                    </>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          {panelOpen && panel('side')}
         </div>
       )}
     </div>

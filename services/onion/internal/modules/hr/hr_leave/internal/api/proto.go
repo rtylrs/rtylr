@@ -7,10 +7,14 @@ import (
 
 func leaveTypeToProto(lt domain.LeaveTypeRecord) *hrleavev1.LeaveTypePayload {
 	var accrualRule *string
+	var accrualAmount *float64
 	var requiresDocAfterDays *int32
 
 	if lt.AccrualRule != "" {
 		accrualRule = &lt.AccrualRule
+	}
+	if lt.AccrualAmount > 0 {
+		accrualAmount = &lt.AccrualAmount
 	}
 	if lt.RequiresDocumentationAfterDays != 0 {
 		requiresDocAfterDays = &lt.RequiresDocumentationAfterDays
@@ -23,6 +27,7 @@ func leaveTypeToProto(lt domain.LeaveTypeRecord) *hrleavev1.LeaveTypePayload {
 		IsPaid:                         lt.IsPaid,
 		RequiresApproval:               lt.RequiresApproval,
 		AccrualRule:                    accrualRule,
+		AccrualAmount:                  accrualAmount,
 		MaxCarryoverDays:               lt.MaxCarryoverDays,
 		MinNoticeDays:                  lt.MinNoticeDays,
 		RequiresDocumentationAfterDays: requiresDocAfterDays,

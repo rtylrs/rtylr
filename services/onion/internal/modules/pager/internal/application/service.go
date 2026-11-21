@@ -43,6 +43,14 @@ type repository interface {
 	UndoReady(ctx context.Context, businessID, id int64, openSince time.Time) error
 	Collect(ctx context.Context, businessID, id int64, openSince time.Time) error
 	Acknowledge(ctx context.Context, businessID, id int64, at, openSince time.Time) error
+
+	// SavePushSubscription returns domain.ErrTooManyPushSubscriptions once the
+	// ticket holds limit subscriptions.
+	SavePushSubscription(ctx context.Context, sub domain.PushSubscription, at time.Time, limit int) error
+	PushSubscriptions(ctx context.Context, businessID, ticketID int64) ([]domain.PushSubscription, error)
+	DeletePushSubscription(ctx context.Context, businessID, id int64) error
+	DeleteTicketPushSubscriptions(ctx context.Context, businessID, ticketID int64) error
+	DeleteStalePushSubscriptions(ctx context.Context, openSince time.Time) error
 }
 
 // venueReader resolves the business behind a pager link. Both methods return
@@ -56,6 +64,10 @@ type Service struct {
 	repo   repository
 	venues venueReader
 	now    func() time.Time
+
+	// push is nil while lock-screen notifications are off.
+	push    PushSender
+	runPush func(func())
 }
 
 func NewService(repo repository, venues venueReader, now func() time.Time) *Service {
@@ -247,13 +259,21 @@ func (s *Service) ListOpen(ctx context.Context, businessID int64) ([]domain.Tick
 }
 
 func (s *Service) MarkReady(ctx context.Context, businessID, id int64) (domain.Ticket, error) {
-	return s.move(ctx, businessID, id, domain.StatusReady, []string{domain.StatusWaiting},
+	ticket, err := s.move(ctx, businessID, id, domain.StatusReady, []string{domain.StatusWaiting},
 		func(now, openSince time.Time) error { return s.repo.MarkReady(ctx, businessID, id, now, openSince) })
+	if err == nil {
+		s.notify(ctx, ticket, domain.PushReady)
+	}
+	return ticket, err
 }
 
 func (s *Service) Remind(ctx context.Context, businessID, id int64) (domain.Ticket, error) {
-	return s.move(ctx, businessID, id, domain.StatusReady, []string{domain.StatusReady},
+	ticket, err := s.move(ctx, businessID, id, domain.StatusReady, []string{domain.StatusReady},
 		func(now, openSince time.Time) error { return s.repo.Remind(ctx, businessID, id, now, openSince) })
+	if err == nil {
+		s.notify(ctx, ticket, domain.PushRemind)
+	}
+	return ticket, err
 }
 
 func (s *Service) UndoReady(ctx context.Context, businessID, id int64) (domain.Ticket, error) {
@@ -262,8 +282,12 @@ func (s *Service) UndoReady(ctx context.Context, businessID, id int64) (domain.T
 }
 
 func (s *Service) Collect(ctx context.Context, businessID, id int64) (domain.Ticket, error) {
-	return s.move(ctx, businessID, id, domain.StatusCollected, []string{domain.StatusWaiting, domain.StatusReady},
+	ticket, err := s.move(ctx, businessID, id, domain.StatusCollected, []string{domain.StatusWaiting, domain.StatusReady},
 		func(_, openSince time.Time) error { return s.repo.Collect(ctx, businessID, id, openSince) })
+	if err == nil {
+		s.forgetPushes(ctx, ticket)
+	}
+	return ticket, err
 }
 
 // move takes a ticket of the business from one of the from states to to. The

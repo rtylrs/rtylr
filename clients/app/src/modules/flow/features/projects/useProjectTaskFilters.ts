@@ -22,6 +22,10 @@ import { useLabels } from '../tasks/useLabels';
 import { useCycles } from '../cycles/useCycles';
 import { useMilestones } from '../milestones/useMilestones';
 import { useProjectFields } from './useFields';
+import type { ApiCycle, ApiMilestone } from '../../shared/services/flowApi';
+
+const NO_CYCLES: ApiCycle[] = [];
+const NO_MILESTONES: ApiMilestone[] = [];
 
 export interface ProjectTaskFilters {
   state: TaskFilterState;
@@ -34,6 +38,9 @@ export interface ProjectTaskFilters {
   shownTasks: Task[];
   /** Tasks to fade, while "Dim instead of hide" is on and a filter is active. */
   dimmedIds: ReadonlySet<string> | null;
+  /** This project's cycles and milestones, loaded for the filter fields anyway. */
+  cycles: ApiCycle[];
+  milestones: ApiMilestone[];
 }
 
 /**
@@ -122,5 +129,15 @@ export function useProjectTaskFilters(projectId: string, tasks: Task[]): Project
     [matchingIds, dim, tasks]
   );
 
-  return { state, fields, people, currentUserId, matchingIds, shownTasks, dimmedIds };
+  return {
+    state,
+    fields,
+    people,
+    currentUserId,
+    matchingIds,
+    shownTasks,
+    dimmedIds,
+    cycles: cyclesQuery.data ?? NO_CYCLES,
+    milestones: milestonesQuery.data ?? NO_MILESTONES,
+  };
 }

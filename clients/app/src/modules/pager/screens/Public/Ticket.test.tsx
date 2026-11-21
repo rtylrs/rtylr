@@ -12,6 +12,17 @@ vi.mock('../../shared/lib/clients', () => ({ publicPagerClient: api }));
 
 vi.mock('../../../../shared/services/i18next', () => ({ selectLanguage: vi.fn() }));
 
+const push = vi.hoisted(() => ({
+  key: '',
+  ask: vi.fn(),
+  follow: vi.fn(),
+}));
+vi.mock('../../shared/lib/pushAlerts', () => ({
+  usePushKey: () => push.key,
+  askPushPermission: push.ask,
+  followTicketByPush: push.follow,
+}));
+
 // The real alarm, with only the browser's audio, vibration and wake lock
 // faked, so what the screen shows and what the phone would do stay in step.
 vi.mock('../../../../shared/alarm/readyAlarm', async () => {
@@ -58,6 +69,9 @@ beforeEach(async () => {
   await initTestI18n('en');
   vi.useFakeTimers({ shouldAdvanceTime: true });
   params.token = 'tok-1';
+  push.key = '';
+  push.ask.mockReset();
+  push.follow.mockReset().mockResolvedValue(true);
   api.getPublicTicket.mockReset();
   api.acknowledgeTicket.mockReset().mockResolvedValue({});
 });
@@ -101,14 +115,51 @@ describe('pager ticket page', () => {
   // Runs before any test taps a button: sound starts locked, as it does after
   // a reload or when the link was shared.
   it('offers "alert me" when the page was opened without the join tap', async () => {
+    push.key = 'server-key';
     api.getPublicTicket.mockResolvedValue(waiting);
     render(<Ticket />);
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Alert me' }));
+    const alertMe = await screen.findByRole('button', { name: 'Alert me' });
+    await waitFor(() => expect(push.follow).toHaveBeenCalled());
+    const followsBeforeTap = push.follow.mock.calls.length;
+    fireEvent.click(alertMe);
 
     expect(readyAlarm.getSnapshot().unlocked).toBe(true);
     expect(bell.play).toHaveBeenCalledTimes(1);
     expect(screen.queryByRole('button', { name: 'Alert me' })).not.toBeInTheDocument();
+    // The same tap asks for lock-screen notifications, inside the click, and
+    // the page subscribes again in case the visitor allowed them.
+    expect(push.ask).toHaveBeenCalledWith('server-key');
+    await waitFor(() => expect(push.follow.mock.calls.length).toBeGreaterThan(followsBeforeTap));
+  });
+
+  it('follows the ticket on the lock screen in the visitor language when push is on', async () => {
+    push.key = 'server-key';
+    api.getPublicTicket.mockResolvedValue(waiting);
+    render(<Ticket />);
+
+    await waitFor(() => expect(push.follow).toHaveBeenCalled());
+    expect(push.follow).toHaveBeenLastCalledWith({
+      publicKey: 'server-key',
+      token: 'tok-1',
+      text: {
+        ready: { title: 'Order 42 is ready', body: 'Collect it at the counter of Acme Cafe.' },
+        remind: {
+          title: 'Order 42 is waiting for you',
+          body: 'Acme Cafe is calling your number again.',
+        },
+      },
+    });
+  });
+
+  it('leaves push alone while the server has it off', async () => {
+    api.getPublicTicket.mockResolvedValue(waiting);
+    render(<Ticket />);
+
+    await screen.findByText("We're preparing your order");
+    await nextPoll();
+
+    expect(push.follow).not.toHaveBeenCalled();
   });
 
   it('rings when the order becomes ready and stops when the customer has it', async () => {

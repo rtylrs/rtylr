@@ -2,6 +2,7 @@ import { createOneKitClient } from "@voxire/api";
 import { SessionServiceClient } from "@voxire/voxie/pos/session/v1/client";
 import type { CloseSessionRequest } from "@voxire/voxie/pos/session/v1/types";
 import { isRetryableTransportError } from "../../shared/utils/errorClassify";
+import { useRegisterSessionStore } from "../../shared/stores/registerSessionStore";
 import { useUserStore } from "../../shared/stores/userStore";
 
 const sessionClient = createOneKitClient(SessionServiceClient, "pos");
@@ -34,7 +35,7 @@ function nonNegativeNumber(value: number): number {
   return value;
 }
 
-function positiveInteger(value: unknown): number | undefined {
+export function positiveInteger(value: unknown): number | undefined {
   const numeric =
     typeof value === "string" ? Number(value.trim()) : Number(value);
   if (!Number.isInteger(numeric) || numeric <= 0) return undefined;
@@ -77,9 +78,15 @@ export async function resolveOpenSessionId(): Promise<number> {
       positiveInteger(session.staffId) === staffId,
   );
   const sessionId = positiveInteger(open?.id);
-  if (staffId == null || sessionId == null) {
+  if (staffId == null) throw new NoOpenRegisterSessionError();
+  // Recorded on every lookup so the open-register step appears as soon as any
+  // screen finds the session gone, and clears once one exists again.
+  const { setStatus } = useRegisterSessionStore.getState();
+  if (sessionId == null) {
+    setStatus("none");
     throw new NoOpenRegisterSessionError();
   }
+  setStatus("open");
   return sessionId;
 }
 

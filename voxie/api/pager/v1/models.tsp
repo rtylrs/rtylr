@@ -10,8 +10,9 @@ namespace pager.v1;
 // collected and expired.
 //
 // Errors carry a stable `code` next to `message`: venue_not_found (404),
-// ticket_not_found (404), invalid_number (400), invalid_transition (409) and
-// too_many_open_tickets (429).
+// ticket_not_found (404), invalid_number (400), invalid_transition (409),
+// too_many_open_tickets (429), invalid_push_subscription (400) and
+// too_many_push_subscriptions (429).
 /** A ticket as the venue's staff see it. */
 model Ticket {
   @encode(string)
@@ -117,6 +118,45 @@ model AcknowledgeTicketRequest {
 }
 
 model AcknowledgeTicketResponse {}
+
+model GetPushKeyRequest {}
+
+model GetPushKeyResponse {
+  /**
+   * The VAPID public key, URL-safe base64. Absent while lock-screen
+   * notifications are off on this server; then do not ask for permission.
+   */
+  public_key: string;
+}
+
+/**
+ * A browser's Web Push subscription, as PushSubscription.toJSON() reports it.
+ * Taken only for an open ticket at a venue whose pager is on, and kept only
+ * while the ticket is open. It carries no personal data.
+ */
+model SubscribePushRequest {
+  public_token: string;
+
+  /** Must be an https URL of a known browser push service. */
+  @Onkt.required
+  @minLength(1)
+  @maxLength(1024)
+  endpoint: string;
+
+  /** keys.p256dh: the browser's P-256 public key. */
+  @Onkt.required
+  @minLength(1)
+  @maxLength(128)
+  p256dh: string;
+
+  /** keys.auth: the browser's 16 byte auth secret. */
+  @Onkt.required
+  @minLength(1)
+  @maxLength(64)
+  auth: string;
+}
+
+model SubscribePushResponse {}
 
 // ── Staff ─────────────────────────────────────────────────────────
 model ListTicketsRequest {}

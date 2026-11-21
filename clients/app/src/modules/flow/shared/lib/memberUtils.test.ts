@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
 import {
+  assigneeOptions,
   findMemberById,
   findMemberByEmail,
   memberDisplayName,
@@ -67,5 +68,28 @@ describe('totalTeamCapacity', () => {
 
   it('returns 0 for empty list', () => {
     expect(totalTeamCapacity([])).toBe(0);
+  });
+});
+
+describe('assigneeOptions', () => {
+  const members = [makeMember({}), makeMember({ id: 'm2', name: 'Bob', initials: 'BO' })];
+
+  it('offers nobody first, then the members', () => {
+    expect(assigneeOptions(members, { id: '', name: '' }, 'Unassigned')).toEqual([
+      { id: '', name: 'Unassigned', initials: '' },
+      { id: 'm1', name: 'Alice', initials: 'AL' },
+      { id: 'm2', name: 'Bob', initials: 'BO' },
+    ]);
+  });
+
+  it('keeps someone assigned who has left the member list', () => {
+    const options = assigneeOptions(members, { id: 'm9', name: 'Cara', initials: 'CA' }, 'None');
+    expect(options.map((o) => o.id)).toEqual(['', 'm9', 'm1', 'm2']);
+    expect(options[1]).toEqual({ id: 'm9', name: 'Cara', initials: 'CA' });
+  });
+
+  it('does not repeat an assignee who is still a member', () => {
+    const options = assigneeOptions(members, { id: 'm2', name: 'Bob' }, 'None');
+    expect(options.map((o) => o.id)).toEqual(['', 'm1', 'm2']);
   });
 });

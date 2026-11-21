@@ -426,6 +426,7 @@ linters:
             - github.com/koyachi/go-nude
             - github.com/ledongthuc/pdf
             - golang.org/x/image/webp
+            - github.com/SherClockHolmes/webpush-go
           # Packages that are not allowed
           deny:
             - pkg: "github.com/sirupsen/logrus"
@@ -477,6 +478,7 @@ linters:
           - github.com/testcontainers/testcontainers-go
           - github.com/koyachi/go-nude
           - github.com/ledongthuc/pdf
+          - github.com/SherClockHolmes/webpush-go
 
         # List of allowed module domains
         domains:

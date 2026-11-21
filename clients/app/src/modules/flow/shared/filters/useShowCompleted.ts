@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
-import type { Task } from '../stores/flowStore';
 
-export const isClosedTask = (task: Task): boolean =>
+/** Done or cancelled. Takes any task shape, store `Task` or wire `ApiTask`. */
+export const isClosedTask = (task: { status?: string }): boolean =>
   task.status === 'done' || task.status === 'cancelled';
 
 /**
