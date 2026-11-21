@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import type { Comment } from '../../../shared/stores/flowStore';
 import DescriptionEditor from './DescriptionEditor';
+import { renderCommentBody } from '../../../shared/components/CommentList';
 
 export interface PrintField {
   label: string;
@@ -18,6 +19,8 @@ interface TaskPrintViewProps {
   fields: PrintField[];
   subtasks: { id: string; title: string; completed: boolean }[];
   comments: Comment[];
+  /** Names an @mention in a comment may carry, as the comment thread gets them. */
+  mentionNames?: string[];
   /** Called once the browser's print dialog has closed. */
   onDone: () => void;
 }
@@ -42,6 +45,7 @@ const TaskPrintView: React.FC<TaskPrintViewProps> = ({
   fields,
   subtasks,
   comments,
+  mentionNames = [],
   onDone,
 }) => {
   const { t, i18n } = useTranslation();
@@ -61,19 +65,13 @@ const TaskPrintView: React.FC<TaskPrintViewProps> = ({
     };
   }, []);
 
-  const printedOn = new Intl.DateTimeFormat(`${i18n.language}-u-nu-latn`, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date());
-  const commentDate = (iso: string): string => {
-    const at = new Date(iso);
-    return Number.isNaN(at.getTime())
+  const stamp = (at: Date): string =>
+    Number.isNaN(at.getTime())
       ? ''
       : new Intl.DateTimeFormat(`${i18n.language}-u-nu-latn`, {
           dateStyle: 'medium',
           timeStyle: 'short',
         }).format(at);
-  };
 
   return createPortal(
     <article className="flow-task-print" dir={i18n.dir(i18n.language)} lang={i18n.language}>
@@ -123,9 +121,11 @@ const TaskPrintView: React.FC<TaskPrintViewProps> = ({
             {comments.map((comment) => (
               <li key={comment.id}>
                 <p className="flow-task-print-meta">
-                  <strong>{comment.author}</strong> · {commentDate(comment.createdAt)}
+                  <strong>{comment.author}</strong> · {stamp(new Date(comment.createdAt))}
                 </p>
-                <p className="flow-task-print-body">{comment.body}</p>
+                <p className="flow-task-print-body">
+                  {renderCommentBody(comment.body, mentionNames)}
+                </p>
               </li>
             ))}
           </ol>
@@ -133,7 +133,7 @@ const TaskPrintView: React.FC<TaskPrintViewProps> = ({
       )}
 
       <footer className="flow-task-print-meta">
-        {t('flow.taskDetail.print.printedOn', { date: printedOn })}
+        {t('flow.taskDetail.print.printedOn', { date: stamp(new Date()) })}
       </footer>
     </article>,
     document.body
