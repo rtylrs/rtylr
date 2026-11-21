@@ -1,19 +1,21 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { toast } from 'sonner';
 import QuickAddProductModal from './QuickAddProductModal';
 import { initTestI18n } from '../testing/i18n';
 import type { FullProduct, Product } from '../../features/products/useProducts';
 
 const mocks = vi.hoisted(() => ({
   useProductFull: vi.fn(),
+  createMutate: vi.fn(),
   emptyAttributes: [] as unknown[],
 }));
 
 vi.mock('../../features/products/useProducts', () => ({
   useProductFull: mocks.useProductFull,
   useProductAttributes: () => ({ data: mocks.emptyAttributes }),
-  useCreateProduct: () => ({ mutate: vi.fn(), isPending: false }),
+  useCreateProduct: () => ({ mutate: mocks.createMutate, isPending: false }),
   useUpdateProduct: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
@@ -102,5 +104,39 @@ describe('QuickAddProductModal edit seeding', () => {
     );
 
     expect(screen.getByTestId('qap-name')).toHaveValue('Second name');
+  });
+
+  it('creates a product with only name and SKU without requiring optional fields', () => {
+    mocks.useProductFull.mockReturnValue({ data: undefined });
+    render(<QuickAddProductModal open onClose={vi.fn()} />);
+
+    fireEvent.change(screen.getByTestId('qap-name'), { target: { value: 'Oat Milk' } });
+    fireEvent.change(screen.getByTestId('qap-sku'), { target: { value: 'OAT-001' } });
+    fireEvent.click(screen.getByTestId('qap-submit'));
+
+    expect(toast.error).not.toHaveBeenCalled();
+    expect(mocks.createMutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Oat Milk',
+        sku: 'OAT-001',
+        categoryId: '0',
+        supplierId: '0',
+        barcode: '',
+        description: '',
+        unit: 'pcs',
+      }),
+      expect.any(Object)
+    );
+  });
+
+  it('shows required fields error when name or SKU is missing', () => {
+    mocks.useProductFull.mockReturnValue({ data: undefined });
+    render(<QuickAddProductModal open onClose={vi.fn()} />);
+
+    fireEvent.change(screen.getByTestId('qap-name'), { target: { value: 'Oat Milk' } });
+    fireEvent.click(screen.getByTestId('qap-submit'));
+
+    expect(toast.error).toHaveBeenCalledWith('Please fill required fields');
+    expect(mocks.createMutate).not.toHaveBeenCalled();
   });
 });
