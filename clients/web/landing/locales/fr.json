@@ -1814,9 +1814,9 @@
   "pager": {
     "meta": {
       "title": "{{brand}} : le bipeur gratuit pour restaurants, sans appli",
-      "description": "{{brand}} est un bipeur gratuit pour restaurants et cafés, par rtylr. Le client scanne un QR au comptoir, tape son numéro de ticket et son téléphone sonne quand c’est prêt.",
+      "description": "{{brand}} est un bipeur gratuit pour restaurants et cafés, par rtylr. Le client scanne un QR au comptoir, montre son code en caisse et son téléphone sonne quand c’est prêt.",
       "keywords": "bipeur gratuit, bipeur restaurant, pager restaurant, bipeur QR code, appel client restaurant, {{brand}}",
-      "schemaDescription": "{{brand}} est un bipeur gratuit pour restaurants, par rtylr. Le client scanne un QR au comptoir, tape son numéro de ticket et son téléphone sonne quand la commande est prête."
+      "schemaDescription": "{{brand}} est un bipeur gratuit pour restaurants, par rtylr. Le client scanne un QR au comptoir, montre son code au caissier et son téléphone sonne quand la commande est prête."
     },
     "tryCta": "Essayer maintenant",
     "hero": {
@@ -1827,19 +1827,19 @@
     },
     "how": {
       "title": "Comment ça marche",
-      "intro": "Trois étapes pour le client, et rien à installer.",
+      "intro": "Le client scanne et attend. Rien à installer, rien à saisir.",
       "steps": [
         {
           "title": "Scanner le QR au comptoir",
           "body": "Un seul QR imprimé près de la caisse. Le client le vise avec l’appareil photo de son téléphone et la page s’ouvre. Pas d’appli à télécharger, pas de compte à créer."
         },
         {
-          "title": "Taper le numéro du ticket",
-          "body": "Il saisit le numéro de commande imprimé sur son ticket, puis s’assoit, sort prendre l’air ou continue sa journée."
+          "title": "Montrer le code au caissier",
+          "body": "Son téléphone affiche un code court. Le caissier y associe le numéro de commande ou son nom, et le client s’assoit, sort prendre l’air ou continue sa journée."
         },
         {
           "title": "Le téléphone sonne quand c’est prêt",
-          "body": "Quand la commande est prête, votre équipe touche ce numéro sur le tableau et le téléphone du client sonne."
+          "body": "Quand la commande est prête, votre équipe touche Prête sur le tableau et le téléphone du client sonne."
         }
       ]
     },
