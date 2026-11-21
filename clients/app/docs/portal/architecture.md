@@ -59,12 +59,17 @@ Business slugs equal to a Portal route name would be shadowed by that route, so 
 
 ## Pager
 
-The order pager lives in `src/modules/pager`. Its customer pages are registered on the Portal's `rootRoute` like the public menu and need no auth cookie:
+The order pager is Rennili, served from its own origin, `rennili.rtylr.com`. The code lives in `src/modules/pager`; `entrypoints/rennili` builds it with its own `index.html` (brand, link previews, icons) into its own Pages project (`rtylr-rennili` in `.github/deploy-targets.json`). The Portal does not mount it.
 
-- `/$slug/pager` - join page, where a venue's QR poster points
-- `/pager/t/$token` - the ticket a phone is following
+- `/` - landing page
+- `/$slug` - venue page, where a venue's QR poster points
+- `/t/$token` - the ticket a phone is following
+- `/try` - the demo, against an in-memory pager
+- `/board`, `/display`, `/poster`, `/setup` - staff pages
 
-The staff board is `/pager` inside the signed-in shell, with no navigation entry. The tap on the join page unlocks the sound the ticket page plays later (`src/shared/alarm`), so moving between the two has to stay a router navigation: a full page load discards the unlocked audio.
+The staff pages go through `BusinessRoute` with a `standalone` surface: the same token cookie (`.rtylr.com`), account, MFA and access checks, without the Portal shell. The sign-in app only returns to the Portal origin, so a signed-out visitor is sent there with the old Portal path (`/pager`, `/pager/display`...), and the Portal's `public/_redirects` forwards those paths, plus the old customer paths printed on posters (`/<slug>/pager`, `/pager/t/<token>`), to Rennili. Rennili's top-level route names are reserved business slugs.
+
+The tap on the ticket page unlocks the sound it plays later (`src/shared/alarm`), so moving from the venue page to the ticket has to stay a router navigation: a full page load discards the unlocked audio.
 
 ## Release order
 

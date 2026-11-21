@@ -1,2 +1,14 @@
 /version  /version.json  200
+
+# The pager moved to Rennili. Printed posters carry /<slug>/pager, so these
+# stay as long as any poster might. Temporary (302) so a browser never caches
+# the hop and the target can still change.
+/pager/t/:token  https://rennili.rtylr.com/t/:token  302
+/pager/try  https://rennili.rtylr.com/try  302
+/pager/display  https://rennili.rtylr.com/display  302
+/pager/poster  https://rennili.rtylr.com/poster  302
+/pager/setup  https://rennili.rtylr.com/setup  302
+/pager  https://rennili.rtylr.com/board  302
+/:slug/pager  https://rennili.rtylr.com/:slug  302
+
 /*  /index.html  200

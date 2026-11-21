@@ -138,7 +138,6 @@ export const LOCALISED_ROUTES: string[] = [
   '/legal/privacy-policy/',
   '/legal/security/',
   '/trust/',
-  '/pager/',
 ];
 
 /** Whether one route is translated in the non-default locales. */

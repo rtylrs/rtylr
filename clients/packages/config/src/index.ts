@@ -12,4 +12,4 @@ export * from './serviceUrls';
 export * from './portal';
 export * from './publicMenu';
 
-export { RECRUIT_PUBLIC_URL } from './apps';
+export { RECRUIT_PUBLIC_URL, RENNILI_URL } from './apps';

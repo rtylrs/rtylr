@@ -57,6 +57,12 @@ describe('RESERVED_BUSINESS_SLUGS', () => {
       'www',
       'app',
       'portal',
+      'board',
+      'display',
+      'poster',
+      'try',
+      'setup',
+      't',
     ]);
   });
 });

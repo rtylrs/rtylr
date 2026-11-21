@@ -45,6 +45,30 @@
     "node_version": "22"
   },
   {
+    "app": "rennili",
+    "type": "pages",
+    "paths": [
+      "clients/app/",
+      "clients/packages/",
+      "voxie/",
+      "clients/package.json",
+      "clients/pnpm-lock.yaml",
+      "clients/pnpm-workspace.yaml"
+    ],
+    "ignore": [
+      "clients/app/entrypoints/auth/",
+      "clients/app/entrypoints/recruit/",
+      "clients/app/docs/",
+      "clients/app/e2e/"
+    ],
+    "project_name": "rtylr-rennili",
+    "working_directory": "clients/app",
+    "app_filter": "@rtylr/portal",
+    "build_script": "build:rennili",
+    "dist_dir": "dist/rennili",
+    "node_version": "22"
+  },
+  {
     "app": "pos",
     "type": "pages",
     "paths": [

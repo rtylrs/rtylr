@@ -8,6 +8,7 @@ import { X } from 'lucide-react';
 import { readyAlarm } from '../../../../shared/alarm/readyAlarm';
 import { PAGER_BOARD_PATH } from '../../pagerPaths';
 import { usePagerVenue } from '../../shared/lib/usePagerVenue';
+import { RenniliLogo } from '../../shared/components/RenniliLogo';
 import { VenueQr } from './VenueQr';
 
 const DISPLAY_LANGUAGES = ['en', 'ar'] as const;
@@ -61,6 +62,9 @@ const Display = (): React.JSX.Element => {
           {DISPLAY_LANGUAGES.map((lng) => (
             <ScanLine key={lng} lng={lng} />
           ))}
+          <div className="pager-display__brand">
+            <RenniliLogo size={28} />
+          </div>
         </div>,
         document.body
       )}

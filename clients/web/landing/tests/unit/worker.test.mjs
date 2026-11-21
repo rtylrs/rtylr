@@ -331,6 +331,18 @@ describe('routing', () => {
     }
   });
 
+  it('the old pager pages 301 to Rennili in every language', async () => {
+    for (const from of ['/pager/', '/fr/pager/', '/ar/pager/']) {
+      for (const variant of [from, from.slice(0, -1), `${from}index.html`]) {
+        const res = await worker.fetch(req(variant), env);
+        assert.equal(res.status, 301, variant);
+        assert.equal(res.headers.get('location'), 'https://rennili.rtylr.com/', variant);
+      }
+    }
+    const res = await worker.fetch(req('/pager?utm_source=poster'), env);
+    assert.equal(res.headers.get('location'), 'https://rennili.rtylr.com/?utm_source=poster');
+  });
+
   it('a retired page redirect keeps the query string before the fragment', async () => {
     const res = await worker.fetch(req('/pos?utm_source=ad'), env);
     assert.equal(res.status, 301);

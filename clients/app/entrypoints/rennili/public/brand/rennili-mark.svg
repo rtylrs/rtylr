@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Rennili">
+  <g fill="none" stroke="#6D28D9" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="rotate(-12 32 32)">
+      <rect x="21.5" y="9.5" width="21" height="45" rx="6" stroke-width="4.5"/>
+      <path d="M29 47.5h6" stroke-width="4"/>
+    </g>
+    <path d="M11.5 25c-2.6 4.6-2.6 9.4 0 14" stroke-width="4"/>
+    <path d="M5 20.5c-4.4 7.6-4.4 15.4 0 23" stroke-width="4"/>
+    <path d="M52.5 25c2.6 4.6 2.6 9.4 0 14" stroke-width="4"/>
+    <path d="M59 20.5c4.4 7.6 4.4 15.4 0 23" stroke-width="4"/>
+  </g>
+</svg>

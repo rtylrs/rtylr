@@ -37,6 +37,9 @@ export const APP_URLS: Record<AppId, string> & {
 
 export const RECRUIT_PUBLIC_URL = IS_LOCAL ? 'http://localhost:5184' : 'https://recruit.rtylr.com';
 
+/** Rennili, the free pager: its landing, customer pages and staff board. */
+export const RENNILI_URL = IS_LOCAL ? 'http://localhost:5186' : 'https://rennili.rtylr.com';
+
 export const APP_CONFIG: Record<AppId, { name: string; devPort: number }> = {
   dash: { name: 'Home', devPort: 5175 },
   auth: { name: 'Auth', devPort: 5176 },

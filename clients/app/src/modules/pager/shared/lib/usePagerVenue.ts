@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { configClient } from '../../../../shared/lib/clients';
 import { useUserStore } from '../../../../shared/stores/userStore';
-import { pagerJoinPath } from '../../pagerPaths';
+import { pagerJoinUrl } from '../../pagerPaths';
 import { usePagerSandbox } from './pagerClients';
 
 interface PagerVenue {
@@ -34,7 +34,7 @@ export function usePagerVenue(): PagerVenue {
   const slug = knownSlug || config.data?.slug || '';
   return {
     name: knownName || config.data?.name || '',
-    joinUrl: slug ? `${window.location.origin}${pagerJoinPath(slug)}` : '',
+    joinUrl: slug ? pagerJoinUrl(slug) : '',
     loading: config.isLoading,
   };
 }

@@ -47,7 +47,7 @@ describe('pager scan page', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('Getting your code...');
     await waitFor(() =>
-      expect(navigateSpy).toHaveBeenCalledWith({ to: '/pager/t/tok-1', replace: true })
+      expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-1', replace: true })
     );
     expect(api.scanTicket).toHaveBeenCalledTimes(1);
     expect(api.scanTicket).toHaveBeenCalledWith({ slug: 'acme' });
@@ -61,7 +61,7 @@ describe('pager scan page', () => {
     render(<Scan />);
 
     await waitFor(() =>
-      expect(navigateSpy).toHaveBeenCalledWith({ to: '/pager/t/tok-old', replace: true })
+      expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-old', replace: true })
     );
     expect(api.getPublicTicket).toHaveBeenCalledWith({ publicToken: 'tok-old' });
     expect(api.scanTicket).not.toHaveBeenCalled();
@@ -76,7 +76,7 @@ describe('pager scan page', () => {
     render(<Scan />);
 
     await waitFor(() =>
-      expect(navigateSpy).toHaveBeenCalledWith({ to: '/pager/t/tok-1', replace: true })
+      expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-1', replace: true })
     );
     expect(window.sessionStorage.getItem(STORAGE_KEY)).toBe('tok-1');
   });
@@ -96,7 +96,7 @@ describe('pager scan page', () => {
     render(<Scan />);
 
     await waitFor(() =>
-      expect(navigateSpy).toHaveBeenCalledWith({ to: '/pager/t/tok-old', replace: true })
+      expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-old', replace: true })
     );
     expect(api.scanTicket).not.toHaveBeenCalled();
   });
@@ -111,7 +111,7 @@ describe('pager scan page', () => {
     render(<Scan />);
 
     await waitFor(() =>
-      expect(navigateSpy).toHaveBeenCalledWith({ to: '/pager/t/tok-1', replace: true })
+      expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-1', replace: true })
     );
     getItem.mockRestore();
     setItem.mockRestore();
@@ -149,7 +149,7 @@ describe('pager scan page', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
 
     await waitFor(() =>
-      expect(navigateSpy).toHaveBeenCalledWith({ to: '/pager/t/tok-1', replace: true })
+      expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-1', replace: true })
     );
     expect(api.scanTicket).toHaveBeenCalledTimes(2);
   });
@@ -171,7 +171,7 @@ describe('pager scan page', () => {
     expect(navigateSpy).not.toHaveBeenCalled();
     await act(() => vi.advanceTimersByTimeAsync(4_000));
 
-    expect(navigateSpy).toHaveBeenCalledWith({ to: '/pager/t/tok-1', replace: true });
+    expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-1', replace: true });
     expect(api.scanTicket).toHaveBeenCalledTimes(4);
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
@@ -193,7 +193,7 @@ describe('pager scan page', () => {
     api.scanTicket.mockResolvedValue(scanned);
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
     await act(() => vi.advanceTimersByTimeAsync(0));
-    expect(navigateSpy).toHaveBeenCalledWith({ to: '/pager/t/tok-1', replace: true });
+    expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-1', replace: true });
   });
 
   it('does not retry a venue without a pager', async () => {

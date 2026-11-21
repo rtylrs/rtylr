@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { RenniliLogo } from '../../shared/components/RenniliLogo';
 import { VenueQr } from './VenueQr';
 
 const POSTER_LANGUAGES = ['en', 'ar'] as const;
@@ -54,6 +55,9 @@ export function CounterPoster({
         {POSTER_LANGUAGES.map((lng) => (
           <PosterSteps key={lng} lng={lng} />
         ))}
+      </div>
+      <div className="pager-poster__brand">
+        <RenniliLogo size={22} />
       </div>
     </article>
   );

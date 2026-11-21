@@ -105,6 +105,13 @@ export default defineConfig({
       timeout: 120_000,
     },
     {
+      command: 'pnpm dev:rennili --port 5198',
+      url: 'http://localhost:5198',
+      env: { VITE_API_URL: 'http://localhost:9999/' },
+      reuseExistingServer: false,
+      timeout: 120_000,
+    },
+    {
       command: 'pnpm dev:recruit',
       url: 'http://localhost:5184',
       env: { VITE_API_URL: 'http://localhost:9999/' },

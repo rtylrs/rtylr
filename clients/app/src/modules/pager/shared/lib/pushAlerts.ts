@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { PAGER_TICKET_PREFIX } from '../../pagerPaths';
 import { publicPagerClient } from './clients';
 import { usePagerSandbox } from './pagerClients';
 
@@ -8,8 +9,8 @@ import { usePagerSandbox } from './pagerClients';
 
 export const PAGER_SW_URL = '/pager-sw.js';
 /** Only the ticket pages: the worker never sees the staff board or the Portal. */
-export const PAGER_SW_SCOPE = '/pager/t/';
-/** Read by public/pager-sw.js; keep the two in step. */
+export const PAGER_SW_SCOPE = PAGER_TICKET_PREFIX;
+/** Read by entrypoints/rennili/public/pager-sw.js; keep the two in step. */
 export const PUSH_TEXT_CACHE = 'pager-push-text';
 const MAX_STORED_TEXTS = 20;
 

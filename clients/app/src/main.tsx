@@ -16,7 +16,7 @@ import { queryClient } from './shared/lib/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import { bootObservability } from '@voxire/observability';
 import HelmetContainer from './shared/components/HelmetContainer';
-import { PortalCookieBanner } from './shared/components/PortalCookieBanner';
+import { CookieBanner } from '@voxire/consent';
 
 import './globals.css';
 import 'react-lazy-load-image-component/src/effects/blur.css';
@@ -40,7 +40,7 @@ if (rootElement) {
           <Suspense fallback={<FullScreenLoader />}>
             <I18nextProvider i18n={i18next}>
               <HelmetContainer title="Portal - RTYLR" favicon="/favicon.ico" />
-              <PortalCookieBanner router={router} />
+              <CookieBanner />
               <AvatarDirectoryProvider>
                 <RouterProvider router={router} />
                 <AvatarNameTooltip />

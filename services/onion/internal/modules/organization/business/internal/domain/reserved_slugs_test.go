@@ -9,8 +9,8 @@ import (
 
 func TestReservedBusinessSlug_AllListEntries(t *testing.T) {
 	expectedEntries := domain.ReservedBusinessSlugsList()
-	if len(expectedEntries) != 45 {
-		t.Fatalf("expected 45 reserved slugs, got %d", len(expectedEntries))
+	if len(expectedEntries) != 51 {
+		t.Fatalf("expected 51 reserved slugs, got %d", len(expectedEntries))
 	}
 
 	for _, slug := range expectedEntries {

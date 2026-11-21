@@ -5,7 +5,8 @@ import { PORTAL_URL } from './apps';
  * (and `/<business-slug>/menu/<location-slug>` for a location).
  *
  * Portal routes own their first path segment, so a business slug that collides
- * with a Portal route name would be shadowed. The Go backend rejects those
+ * with a Portal route name would be shadowed. The same goes for Rennili's
+ * routes, where the venue page is `/<business-slug>`. The Go backend rejects those
  * slugs; this list mirrors that decision on the client so the settings form can
  * refuse them before the request is sent.
  */
@@ -55,6 +56,13 @@ export const RESERVED_BUSINESS_SLUGS = [
   'www',
   'app',
   'portal',
+  // Rennili owns the first path segment on its own origin too.
+  'board',
+  'display',
+  'poster',
+  'try',
+  'setup',
+  't',
 ] as const;
 
 const PORTAL_ORIGIN = PORTAL_URL.replace(/\/+$/, '');

@@ -10,6 +10,10 @@
   --pager-bg: #ffffff;
   --pager-danger: #b91c1c;
   --pager-ready: #166534;
+  /* Rennili's one accent. Ready stays green, so the two never read alike. */
+  --pager-accent: #6d28d9;
+  --pager-accent-strong: #5b21b6;
+  --pager-accent-soft: #f3eeff;
 
   /* Always light, whatever the Portal theme. */
   color-scheme: light;
@@ -39,7 +43,6 @@
   color: #ffffff;
 }
 
-/* The Portal's cookie banner stays off these pages (`PortalCookieBanner`). */
 .pager-page {
   width: 100%;
   max-width: 480px;
@@ -123,9 +126,9 @@
   width: 100%;
   min-height: 60px;
   padding: 12px 20px;
-  border: 2px solid var(--pager-ink);
+  border: 2px solid var(--pager-accent);
   border-radius: 16px;
-  background: var(--pager-ink);
+  background: var(--pager-accent);
   color: #ffffff;
   font: inherit;
   font-size: 18px;
@@ -144,18 +147,28 @@
   outline-offset: 2px;
 }
 
-.pager-button--secondary {
+.pager-button:hover:not(:disabled) {
+  border-color: var(--pager-accent-strong);
+  background: var(--pager-accent-strong);
+}
+
+.pager-button--secondary,
+.pager-button--secondary:hover:not(:disabled) {
+  border-color: var(--pager-line);
   background: transparent;
   color: var(--pager-ink);
 }
 
-.pager-screen--ready .pager-button {
+.pager-screen--ready .pager-button,
+.pager-screen--ready .pager-button:hover:not(:disabled) {
   border-color: #ffffff;
   background: #ffffff;
   color: var(--pager-ready);
 }
 
-.pager-screen--ready .pager-button--secondary {
+.pager-screen--ready .pager-button--secondary,
+.pager-screen--ready .pager-button--secondary:hover:not(:disabled) {
+  border-color: #ffffff;
   background: transparent;
   color: #ffffff;
 }
@@ -381,7 +394,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: #0f172a;
+  background: #6d28d9;
   color: #ffffff;
   font-size: 14px;
   font-weight: 700;
@@ -393,6 +406,19 @@
   .pager-poster__langs {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+.pager-poster__brand,
+.pager-display__brand {
+  color: #0f172a;
+  opacity: 0.85;
+}
+
+.pager-poster__brand .rennili-mark,
+.pager-display__brand .rennili-mark {
+  color: #6d28d9;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
 }
 
 .pager-poster-print {
@@ -443,7 +469,7 @@
   }
 }
 
-/* The counter display covers the Portal shell: a stand facing the customers. */
+/* The counter display covers the page: a stand facing the customers. */
 .pager-display {
   position: fixed;
   inset: 0;

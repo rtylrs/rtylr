@@ -437,6 +437,11 @@ export const MOVED_PAGES = {
   '/flow': '/workspace/#work',
 };
 
+// The pager became Rennili, with its own site. Every language's old page
+// lands on its home; Rennili picks the language on the page itself.
+export const RENNILI_URL = 'https://rennili.rtylr.com/';
+export const PAGES_MOVED_AWAY = ['/pager', '/fr/pager', '/ar/pager'];
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -466,6 +471,11 @@ export default {
     if (moved) {
       const [path, hash] = moved.split('#');
       return Response.redirect(`${url.origin}${path}${url.search}#${hash}`, 301);
+    }
+
+    // 3c. Pages that moved to another site: one permanent hop there.
+    if (PAGES_MOVED_AWAY.includes(pathname.replace(/\/(index\.html)?$/, ''))) {
+      return Response.redirect(`${RENNILI_URL}${url.search}`, 301);
     }
 
     // 4. One URL per document. The export is directory-style, so /trust and

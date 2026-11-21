@@ -56,6 +56,13 @@ var reservedBusinessSlugs = map[string]struct{}{
 	"www":           {},
 	"app":           {},
 	"portal":        {},
+	// Rennili's routes: its venue page is /<slug> on its own origin.
+	"board":   {},
+	"display": {},
+	"poster":  {},
+	"try":     {},
+	"setup":   {},
+	"t":       {},
 }
 
 // ReservedBusinessSlug reports whether the given slug is a reserved business slug.
@@ -78,6 +85,6 @@ func ReservedBusinessSlugsList() []string {
 		"store", "integrations", "insights", "flow", "crm", "erp", "finance",
 		"hr", "recruit", "settings", "security", "api-keys", "pos", "b", "api",
 		"auth", "login", "signup", "assets", "static", "public", "admin", "www",
-		"app", "portal",
+		"app", "portal", "board", "display", "poster", "try", "setup", "t",
 	}
 }
