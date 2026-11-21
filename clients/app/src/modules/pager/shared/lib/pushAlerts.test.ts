@@ -85,7 +85,7 @@ describe('following a ticket by push', () => {
       followTicketByPush({ publicKey: PUBLIC_KEY, token: 'tok-1', text: TEXT })
     ).resolves.toBe(true);
 
-    expect(browser.register).toHaveBeenCalledWith('/pager-sw.js', { scope: '/pager/t/' });
+    expect(browser.register).toHaveBeenCalledWith('/pager-sw.js', { scope: '/t/' });
     expect(browser.subscribe).toHaveBeenCalledWith({
       userVisibleOnly: true,
       applicationServerKey: KEY_BYTES,
@@ -96,8 +96,8 @@ describe('following a ticket by push', () => {
       p256dh: FAKE_SUBSCRIPTION.keys.p256dh,
       auth: FAKE_SUBSCRIPTION.keys.auth,
     });
-    // Where public/pager-sw.js reads the text in the visitor's language.
-    expect(await browser.storedText('/pager/t/tok-1')).toEqual(TEXT);
+    // Where entrypoints/rennili/public/pager-sw.js reads the text in the visitor's language.
+    expect(await browser.storedText('/t/tok-1')).toEqual(TEXT);
   });
 
   it('waits for the prompt opened by the tap', async () => {

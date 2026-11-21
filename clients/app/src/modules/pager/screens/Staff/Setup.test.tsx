@@ -70,7 +70,7 @@ describe('pager setup', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: 'Switch on my pager' }));
 
-    await waitFor(() => expect(navigateSpy).toHaveBeenCalledWith({ to: '/pager' }));
+    await waitFor(() => expect(navigateSpy).toHaveBeenCalledWith({ to: '/board' }));
     expect(hub.updateConfig).toHaveBeenCalledWith({ contactNumber: '+961 3 123 456' });
     expect(hub.setSlug).toHaveBeenCalledWith({ slug: 'bean-bar' });
     expect(pager.updateSettings).toHaveBeenCalledWith({ enabled: true });
@@ -92,7 +92,7 @@ describe('pager setup', () => {
     pager.getSettings.mockResolvedValue({ enabled: true });
     hub.getConfig.mockResolvedValue({ business: { name: 'Bean Bar', slug: 'beans' } });
     renderSetup();
-    expect(await screen.findByText('Redirected to /pager')).toBeInTheDocument();
+    expect(await screen.findByText('Redirected to /board')).toBeInTheDocument();
   });
 
   it('tells a member without admin rights who can set it up', async () => {

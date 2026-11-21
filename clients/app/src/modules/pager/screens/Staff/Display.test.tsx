@@ -32,6 +32,7 @@ vi.mock('../../../../shared/lib/clients', () => ({ configClient: { getConfig } }
 import Display from './Display';
 import { useUserStore } from '../../../../shared/stores/userStore';
 import { initTestI18n } from '../../shared/testing/i18n';
+import { RENNILI_URL } from '@voxire/config';
 
 function renderDisplay() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -62,14 +63,14 @@ describe('pager counter display', () => {
   it('shows the venue QR, its name and the line in English and Arabic', () => {
     renderDisplay();
 
-    expect(qrValues).toContain(`${window.location.origin}/acme/pager`);
+    expect(qrValues).toContain(`${RENNILI_URL}/acme`);
     expect(screen.getByText('Acme Coffee')).toBeInTheDocument();
     expect(screen.getByText('Scan to get your order alert')).toHaveAttribute('lang', 'en');
     const arabic = screen.getByText('امسح الرمز ليصلك تنبيه طلبك');
     expect(arabic).toHaveAttribute('dir', 'rtl');
     expect(screen.getByRole('link', { name: 'Close the counter display' })).toHaveAttribute(
       'href',
-      '/pager'
+      '/board'
     );
   });
 

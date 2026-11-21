@@ -29,6 +29,7 @@ vi.mock('../../../../shared/lib/clients', () => ({ configClient: { getConfig } }
 import Poster from './Poster';
 import { useUserStore } from '../../../../shared/stores/userStore';
 import { initTestI18n } from '../../shared/testing/i18n';
+import { RENNILI_URL } from '@voxire/config';
 
 function renderPoster() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -62,7 +63,7 @@ describe('pager counter poster', () => {
   it('points the QR at the venue scan page and names the venue', async () => {
     renderPoster();
 
-    const joinUrl = `${window.location.origin}/acme/pager`;
+    const joinUrl = `${RENNILI_URL}/acme`;
     expect(qrValues).toContain(joinUrl);
     const poster = screen.getAllByRole('article')[0];
     expect(within(poster).getByText('Acme Coffee')).toBeInTheDocument();
@@ -103,7 +104,7 @@ describe('pager counter poster', () => {
 
     expect(screen.getByRole('link', { name: 'Back to the pager' })).toHaveAttribute(
       'href',
-      '/pager'
+      '/board'
     );
   });
 

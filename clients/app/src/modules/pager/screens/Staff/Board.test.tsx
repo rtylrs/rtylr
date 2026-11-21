@@ -38,6 +38,7 @@ vi.mock('../../../../shared/lib/clients', () => ({ configClient: { getConfig } }
 import Board from './Board';
 import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 import { useUserStore } from '../../../../shared/stores/userStore';
+import { RENNILI_URL } from '@voxire/config';
 import { TICKET_POLL_INTERVAL_MS } from '../../shared/lib/ticketPoller';
 import { initTestI18n } from '../../shared/testing/i18n';
 
@@ -230,9 +231,9 @@ describe('pager staff board', () => {
   it('shows the venue QR and the link it opens', async () => {
     renderBoard();
 
-    const link = await screen.findByRole('link', { name: /\/acme\/pager$/ });
-    expect(link).toHaveAttribute('href', `${window.location.origin}/acme/pager`);
-    expect(qrValues).toContain(`${window.location.origin}/acme/pager`);
+    const link = await screen.findByRole('link', { name: /\/acme$/ });
+    expect(link).toHaveAttribute('href', `${RENNILI_URL}/acme`);
+    expect(qrValues).toContain(`${RENNILI_URL}/acme`);
   });
 
   it('links to the counter display and the poster', async () => {
@@ -240,11 +241,11 @@ describe('pager staff board', () => {
 
     expect(await screen.findByRole('link', { name: 'Counter display' })).toHaveAttribute(
       'href',
-      '/pager/display'
+      '/display'
     );
     expect(screen.getByRole('link', { name: 'Print the counter poster' })).toHaveAttribute(
       'href',
-      '/pager/poster'
+      '/poster'
     );
   });
 
