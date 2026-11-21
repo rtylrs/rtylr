@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/voxire/onion/internal/modules/hr/departments/internal/application"
 	"github.com/voxire/onion/internal/modules/hr/departments/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
@@ -13,12 +12,24 @@ import (
 	hrdepartmentv1 "github.com/voxire/voxie/gen/go/hr/department/v1"
 )
 
-type DepartmentAPI struct {
-	Service *application.Service
+type departmentService interface {
+	ListDepartments(ctx context.Context, businessID int64) ([]domain.Department, error)
+	CreateDepartment(ctx context.Context, input domain.DepartmentInput) (int64, error)
+	UpdateDepartment(ctx context.Context, businessID int64, input domain.DepartmentInput) error
+	DeleteDepartment(ctx context.Context, businessID, departmentID int64) error
 }
 
-func NewDepartmentAPI(service *application.Service) *DepartmentAPI {
-	return &DepartmentAPI{Service: service}
+type DepartmentAPI struct {
+	Service     departmentService
+	permissions PermissionProvider
+}
+
+func NewDepartmentAPI(service departmentService, permissions ...PermissionProvider) *DepartmentAPI {
+	var p PermissionProvider
+	if len(permissions) > 0 {
+		p = permissions[0]
+	}
+	return &DepartmentAPI{Service: service, permissions: p}
 }
 
 func (a *DepartmentAPI) ListDepartments(ctx context.Context, _ *hrdepartmentv1.ListDepartmentsRequest) (*hrdepartmentv1.ListDepartmentsResponse, error) {
@@ -48,19 +59,19 @@ func (a *DepartmentAPI) CreateDepartment(ctx context.Context, req *hrdepartmentv
 	if device.IsAnonymous || device.User == nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	if err := requireDepartmentManagePermission(ctx); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	if err := requireDepartmentManagePermission(ctx, a.permissions, businessID); err != nil {
 		return nil, err
 	}
 	if strings.TrimSpace(req.GetName()) == "" {
 		return nil, onekiterrors.New(http.StatusBadRequest, "name is required")
 	}
-	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
-	if bizErr != nil {
-		return nil, onekiterrors.PermissionDenied()
-	}
 
 	id, err := a.Service.CreateDepartment(ctx, domain.DepartmentInput{
-		OwnerID:        device.User.UserID,
+		OwnerID:        businessID,
 		BusinessID:     businessID,
 		Name:           req.GetName(),
 		Description:    req.GetDescription(),
@@ -77,7 +88,11 @@ func (a *DepartmentAPI) UpdateDepartment(ctx context.Context, req *hrdepartmentv
 	if device.IsAnonymous || device.User == nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	if err := requireDepartmentManagePermission(ctx); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	if err := requireDepartmentManagePermission(ctx, a.permissions, businessID); err != nil {
 		return nil, err
 	}
 	if req.GetId() <= 0 {
@@ -86,10 +101,6 @@ func (a *DepartmentAPI) UpdateDepartment(ctx context.Context, req *hrdepartmentv
 	body := req.GetBody()
 	if body == nil || strings.TrimSpace(body.GetName()) == "" {
 		return nil, onekiterrors.New(http.StatusBadRequest, "name is required")
-	}
-	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
-	if bizErr != nil {
-		return nil, onekiterrors.PermissionDenied()
 	}
 
 	if err := a.Service.UpdateDepartment(ctx, businessID, domain.DepartmentInput{
@@ -108,15 +119,15 @@ func (a *DepartmentAPI) DeleteDepartment(ctx context.Context, req *hrdepartmentv
 	if device.IsAnonymous || device.User == nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	if err := requireDepartmentManagePermission(ctx); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	if err := requireDepartmentManagePermission(ctx, a.permissions, businessID); err != nil {
 		return nil, err
 	}
 	if req.GetId() <= 0 {
 		return nil, onekiterrors.New(http.StatusBadRequest, "id is required")
-	}
-	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
-	if bizErr != nil {
-		return nil, onekiterrors.PermissionDenied()
 	}
 
 	if err := a.Service.DeleteDepartment(ctx, businessID, req.GetId()); err != nil {

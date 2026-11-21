@@ -350,7 +350,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		CRMSales:              crmSalesModule,
 		Customers:             customersModule,
 		FeatureSupport:        featuresupport.NewModule(ctx, dbclient.Pool()),
-		Departments:           departments.NewModule(ctx, dbclient.Pool()),
+		Departments:           departments.NewModule(ctx, dbclient.Pool(), hrCoreModule),
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
 		AIQuota:               aiQuotaModule,
