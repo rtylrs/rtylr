@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/testutil"
 	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"
 	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
+	flowtaskv2 "github.com/voxire/voxie/gen/go/flow/task/v2"
 	flowworkspacev1 "github.com/voxire/voxie/gen/go/flow/workspace/v1"
 )
 
@@ -43,6 +44,10 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 		}},
 		{Name: "flow tasks edit", App: authorization.AppFlow, Permission: "flow:tasks:edit", Call: func(ctx context.Context) (any, error) {
 			response, err := NewTaskAPI(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).UpdateTask(ctx, &flowtaskv1.UpdateTaskRequest{Id: 1, Body: &flowtaskv1.UpdateTaskBody{Title: "Direct Authorization Task"}})
+			return response, err
+		}},
+		{Name: "flow tasks edit field values", App: authorization.AppFlow, Permission: "flow:tasks:edit", Call: func(ctx context.Context) (any, error) {
+			response, err := NewTaskAPIV2(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).SetTaskFieldValues(ctx, &flowtaskv2.SetTaskFieldValuesRequest{TaskId: testutil.Int64Ptr(1), Values: []*flowtaskv2.TaskFieldValueInput{}})
 			return response, err
 		}},
 		{Name: "flow tasks assign", App: authorization.AppFlow, Permission: "flow:tasks:assign", Extra: []string{"flow:tasks:create"}, Call: func(ctx context.Context) (any, error) {
