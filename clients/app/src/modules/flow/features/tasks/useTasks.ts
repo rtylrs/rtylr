@@ -3,7 +3,7 @@ import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/rea
 import { toast } from 'sonner';
 import i18next from '../../shared/services/i18next';
 import { flowApi, ApiAttachment, ApiTask } from '../../shared/services/flowApi';
-import type { ApiTaskDetail } from '../../shared/services/flowApi';
+import type { ApiTaskDetail, ApiTaskFieldValueInput } from '../../shared/services/flowApi';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 import { fetchAllMyTasks } from './useMyIssues';
 
@@ -98,6 +98,7 @@ export function useCreateTask() {
       estimatedHours?: number;
       labels?: string[];
       milestoneId?: string;
+      fieldValues?: ApiTaskFieldValueInput[];
     }) => {
       return unwrap(flowApi.createTask(data));
     },
