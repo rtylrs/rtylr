@@ -486,6 +486,9 @@ func posFeaturePermission(method, path string) (string, bool) {
 	case strings.Contains(path, "/employees"):
 		return "pos:employees:manage", true
 	case strings.Contains(path, "/terminals"):
+		if method == http.MethodGet {
+			return "pos:orders:view", true
+		}
 		return "pos:terminals:manage", true
 	case strings.Contains(path, "/reports"), strings.Contains(path, "/audit"):
 		return "pos:reports:view", true
