@@ -201,13 +201,11 @@ model ListProductsResponse {
 }
 
 model CreateProductRequest {
-  @Onkt.required
-  @minValueExclusive(0)
+  @minValue(0)
   @encode(string)
   category_id?: int64;
 
-  @Onkt.required
-  @minValueExclusive(0)
+  @minValue(0)
   @encode(string)
   supplier_id?: int64;
 
@@ -217,13 +215,8 @@ model CreateProductRequest {
   @Onkt.required
   sku: string;
 
-  @Onkt.required
   barcode: string;
-
-  @Onkt.required
   description: string;
-
-  @Onkt.required
   unit: string;
 
   @minValue(0)
@@ -330,13 +323,11 @@ model ListProductAttributesResponse {
 }
 
 model UpdateProductBody {
-  @Onkt.required
-  @minValueExclusive(0)
+  @minValue(0)
   @encode(string)
   category_id?: int64;
 
-  @Onkt.required
-  @minValueExclusive(0)
+  @minValue(0)
   @encode(string)
   supplier_id?: int64;
 
@@ -346,13 +337,8 @@ model UpdateProductBody {
   @Onkt.required
   sku: string;
 
-  @Onkt.required
   barcode: string;
-
-  @Onkt.required
   description: string;
-
-  @Onkt.required
   unit: string;
 
   @minValue(0)
