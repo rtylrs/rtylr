@@ -1,3 +1,5 @@
+import React from 'react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   FAKE_SUBSCRIPTION,
@@ -150,5 +152,34 @@ describe('following a ticket by push', () => {
     await followTicketByPush({ publicKey: PUBLIC_KEY, token: 'tok-1', text: TEXT });
     expect(browser.unsubscribe).toHaveBeenCalledTimes(1);
     expect(browser.subscribe).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('the screens push key', () => {
+  async function renderKey(sandbox: boolean) {
+    const { usePushKey } = await load();
+    // After load(): the same pagerClients module the hook reads.
+    const { PagerClientsProvider } = await import('./pagerClients');
+    const value = { publicClient: api as never, staffClient: api as never, sandbox };
+    return renderHook(() => usePushKey(), {
+      wrapper: ({ children }: { children: React.ReactNode }) =>
+        React.createElement(PagerClientsProvider, { value }, children),
+    });
+  }
+
+  it('loads the server key outside the demo', async () => {
+    const { result } = await renderKey(false);
+
+    await waitFor(() => expect(result.current).toBe(PUBLIC_KEY));
+  });
+
+  it('stays empty in the demo, without asking the server', async () => {
+    const { result } = await renderKey(true);
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(result.current).toBe('');
+    expect(api.getPushKey).not.toHaveBeenCalled();
   });
 });
