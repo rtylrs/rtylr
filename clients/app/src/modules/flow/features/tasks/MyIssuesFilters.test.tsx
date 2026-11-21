@@ -75,6 +75,7 @@ beforeAll(async () => {
 
 beforeEach(() => {
   localStorage.clear();
+  sessionStorage.clear();
   router.set({});
   useUserStore.setState({
     user: { id: 7, effectiveAccess: createEffectiveAccess('flow', { isOwner: true }) },
