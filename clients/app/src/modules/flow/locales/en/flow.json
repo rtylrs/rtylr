@@ -210,7 +210,9 @@
       "closed": "Closed"
     },
     "noMilestone": "No milestone",
-    "noMilestonesInProject": "No milestones in this project"
+    "noMilestonesInProject": "No milestones in this project",
+    "noCycle": "Backlog (no cycle)",
+    "noCyclesInProject": "No open cycles"
   },
   "time": {
     "add": {
@@ -1121,7 +1123,8 @@
   "projectViewTabs": {
     "overview": "Overview",
     "board": "Board",
-    "list": "List"
+    "list": "List",
+    "backlog": "Backlog"
   },
   "trialBanner": {
     "endsToday": "Your trial ends today.",
@@ -1218,5 +1221,69 @@
     "summary": "{{tasks}} open tasks across {{people}} people",
     "emptyTitle": "No tasks to show",
     "emptyDescription": "Tasks in projects you can see will appear here, grouped by person."
+  },
+  "backlog": {
+    "pageTitle": "Backlog",
+    "createCycle": "New cycle",
+    "newCycleName": "Cycle {{number}}",
+    "unplanned": "Backlog",
+    "status": {
+      "active": "Active",
+      "upcoming": "Upcoming",
+      "completed": "Completed"
+    },
+    "taskCount_one": "{{count}} task",
+    "taskCount_other": "{{count}} tasks",
+    "goal": "Goal",
+    "carriedOver_one": "{{count}} task carried over from {{name}}",
+    "carriedOver_other": "{{count}} tasks carried over from {{name}}",
+    "totals": {
+      "todo": "To do: {{count}}",
+      "active": "In progress: {{count}}",
+      "done": "Done: {{count}}"
+    },
+    "committedOfAvailable": "{{committed}} committed of {{available}} available",
+    "estimate": "{{hours}} estimated",
+    "capacity": "Capacity",
+    "startCycle": "Start cycle",
+    "completeCycle": "Complete cycle",
+    "startBlocked": "Complete the active cycle before starting another.",
+    "leaveUnavailable": "Approved leave could not be read, so available time counts working days only.",
+    "noMembers": "No one is on this project yet.",
+    "unknownMember": "Unknown member",
+    "leaveDays_one": "{{count}} day of approved leave",
+    "leaveDays_other": "{{count}} days of approved leave",
+    "unassigned_one": "{{count}} unassigned task ({{hours}})",
+    "unassigned_other": "{{count}} unassigned tasks ({{hours}})",
+    "emptyCycle": "Drag tasks here to plan them into this cycle.",
+    "emptyBacklog": "Nothing unplanned. New tasks land here.",
+    "create": "Create",
+    "expand": "Expand section",
+    "collapse": "Collapse section",
+    "cancel": "Cancel",
+    "start": {
+      "title": "Start {{name}}",
+      "description": "Pick how long the cycle runs and what it should achieve.",
+      "alreadyActive": "{{name}} is already active. Complete it before starting another cycle.",
+      "length": "Length",
+      "weeks_one": "{{count}} week",
+      "weeks_other": "{{count}} weeks",
+      "goal": "Goal",
+      "goalPlaceholder": "What should this cycle deliver?",
+      "confirm": "Start cycle",
+      "starting": "Starting..."
+    },
+    "complete": {
+      "title": "Complete {{name}}",
+      "description_one": "{{count}} task is not finished. Choose where it goes.",
+      "description_other": "{{count}} tasks are not finished. Choose where each one goes.",
+      "allDone": "Every task is finished.",
+      "toCycle": "Move to {{name}}",
+      "toBacklog": "Back to backlog",
+      "cancelTask": "Cancel task",
+      "rowLabel": "Where {{title}} goes",
+      "confirm": "Complete cycle",
+      "completing": "Completing..."
+    }
   }
 }
