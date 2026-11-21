@@ -1,10 +1,12 @@
 import { test, expect, type Page } from './fixtures';
-import { PORTAL_URL, stubPortalSession } from './portal-session';
+import { stubPortalSession } from './portal-session';
+
+const RENNILI_URL = process.env.RENNILI_URL ?? 'http://localhost:5198';
 
 /**
- * Pager e2e. The customer pages are public and mounted on the Portal's root
- * route, so they need no auth cookie; the staff board sits inside the
- * signed-in shell.
+ * Pager e2e, on Rennili's own dev server. The customer pages are public, so
+ * they need no auth cookie; the staff board needs the signed-in business, read
+ * from the same token cookie the Portal uses.
  *
  * What only a browser can show: the scan opens the ticket with no tap, the
  * one "notify me" tap and the later ring happen in the same document, with the
@@ -92,10 +94,10 @@ test.describe('Pager (customer)', () => {
     await recordBellPlays(page);
     const state = await stubPublicPager(page);
 
-    await page.goto(`${PORTAL_URL}/acme/pager`);
+    await page.goto(`${RENNILI_URL}/acme`);
 
     // The ticket exists before any tap: the scan itself opened it.
-    await expect(page).toHaveURL(`${PORTAL_URL}/pager/t/tok-e2e`);
+    await expect(page).toHaveURL(`${RENNILI_URL}/t/tok-e2e`);
     await expect(page.getByRole('heading', { name: 'Your code A7' })).toBeVisible();
     await expect(page.getByText('Show this code to the cashier')).toBeVisible();
     await expect(page.getByRole('textbox')).toHaveCount(0);
@@ -104,8 +106,8 @@ test.describe('Pager (customer)', () => {
     // A reload keeps the same ticket and code.
     await page.reload();
     await expect(page.getByRole('heading', { name: 'Your code A7' })).toBeVisible();
-    await page.goto(`${PORTAL_URL}/acme/pager`);
-    await expect(page).toHaveURL(`${PORTAL_URL}/pager/t/tok-e2e`);
+    await page.goto(`${RENNILI_URL}/acme`);
+    await expect(page).toHaveURL(`${RENNILI_URL}/t/tok-e2e`);
     expect(state.scans).toBe(1);
 
     await page.evaluate(() => {
@@ -152,7 +154,7 @@ test.describe('Pager (customer)', () => {
       })
     );
 
-    await page.goto(`${PORTAL_URL}/nowhere/pager`);
+    await page.goto(`${RENNILI_URL}/nowhere`);
 
     await expect(page.getByText("This pager isn't available")).toBeVisible();
     await expect(page.getByRole('textbox')).toHaveCount(0);
@@ -194,7 +196,11 @@ test.describe('Pager (staff board)', () => {
       route.fulfill({ json: { enabled: true, label_mode: 'number' } })
     );
 
-    await page.goto(`${PORTAL_URL}/pager`);
+    await page.goto(`${RENNILI_URL}/board`);
+
+    // Rennili's own header, not the Portal shell.
+    await expect(page.getByRole('link', { name: 'Rennili' }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Open RTYLR' })).toBeVisible();
 
     await expect(page.getByRole('heading', { name: 'New phones (1)' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Waiting (1)' })).toBeVisible();
