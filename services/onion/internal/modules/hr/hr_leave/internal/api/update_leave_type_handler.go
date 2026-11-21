@@ -20,15 +20,16 @@ type UpdateLeaveTypeHandler struct{ Service *application.Service }
 // UpdateLeaveTypeRequest intentionally keeps the generated patch fields as
 // pointers. A nil field means omitted; false and zero are meaningful values.
 type UpdateLeaveTypeRequest struct {
-	ID                             int64   `json:"id"`
-	Name                           *string `json:"name"`
-	IsPaid                         *bool   `json:"is_paid"`
-	RequiresApproval               *bool   `json:"requires_approval"`
-	AccrualRule                    *string `json:"accrual_rule"`
-	MaxCarryoverDays               *int32  `json:"max_carryover_days"`
-	MinNoticeDays                  *int32  `json:"min_notice_days"`
-	RequiresDocumentationAfterDays *int32  `json:"requires_documentation_after_days"`
-	IsActive                       *bool   `json:"is_active"`
+	ID                             int64    `json:"id"`
+	Name                           *string  `json:"name"`
+	IsPaid                         *bool    `json:"is_paid"`
+	RequiresApproval               *bool    `json:"requires_approval"`
+	AccrualRule                    *string  `json:"accrual_rule"`
+	AccrualAmount                  *float64 `json:"accrual_amount"`
+	MaxCarryoverDays               *int32   `json:"max_carryover_days"`
+	MinNoticeDays                  *int32   `json:"min_notice_days"`
+	RequiresDocumentationAfterDays *int32   `json:"requires_documentation_after_days"`
+	IsActive                       *bool    `json:"is_active"`
 }
 
 type UpdateLeaveTypeResponse struct {
@@ -44,7 +45,7 @@ func (h *UpdateLeaveTypeHandler) Validate(_ context.Context, req *UpdateLeaveTyp
 		return onekiterrors.New(http.StatusBadRequest, "id must be greater than zero")
 	}
 	if req.Name == nil && req.IsPaid == nil && req.RequiresApproval == nil &&
-		req.AccrualRule == nil && req.MaxCarryoverDays == nil && req.MinNoticeDays == nil &&
+		req.AccrualRule == nil && req.AccrualAmount == nil && req.MaxCarryoverDays == nil && req.MinNoticeDays == nil &&
 		req.RequiresDocumentationAfterDays == nil && req.IsActive == nil {
 		return onekiterrors.New(http.StatusBadRequest, "at least one leave type field is required")
 	}
@@ -62,6 +63,9 @@ func (h *UpdateLeaveTypeHandler) Validate(_ context.Context, req *UpdateLeaveTyp
 			return onekiterrors.New(http.StatusBadRequest, "accrual_rule must be none, monthly, or annual")
 		}
 		req.AccrualRule = &rule
+	}
+	if req.AccrualAmount != nil && *req.AccrualAmount < 0 {
+		return onekiterrors.New(http.StatusBadRequest, "accrual_amount must be non-negative")
 	}
 	if (req.MaxCarryoverDays != nil && *req.MaxCarryoverDays < 0) ||
 		(req.MinNoticeDays != nil && *req.MinNoticeDays < 0) ||
@@ -93,6 +97,7 @@ func (h *UpdateLeaveTypeHandler) Serve(ctx context.Context, req *UpdateLeaveType
 		IsPaid:                         req.IsPaid,
 		RequiresApproval:               req.RequiresApproval,
 		AccrualRule:                    req.AccrualRule,
+		AccrualAmount:                  req.AccrualAmount,
 		MaxCarryoverDays:               req.MaxCarryoverDays,
 		MinNoticeDays:                  req.MinNoticeDays,
 		RequiresDocumentationAfterDays: req.RequiresDocumentationAfterDays,

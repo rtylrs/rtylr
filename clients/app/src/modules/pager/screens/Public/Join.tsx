@@ -9,8 +9,9 @@ import { readyAlarm } from '../../../../shared/alarm/readyAlarm';
 import { pagerTicketPath } from '../../pagerPaths';
 import LanguageSwitch from '../../shared/components/LanguageSwitch';
 import { PAGER_ERROR, errorCode, errorStatus } from '../../shared/lib/apiError';
-import { publicPagerClient } from '../../shared/lib/clients';
 import { joinWithRetry } from '../../shared/lib/joinWithRetry';
+import { usePublicPagerClient } from '../../shared/lib/pagerClients';
+import { askPushPermission, usePushKey } from '../../shared/lib/pushAlerts';
 import { normaliseTicketNumber } from '../../shared/lib/ticketNumber';
 
 type Phase = 'idle' | 'joining' | 'waitingForCashier' | 'notYet';
@@ -26,11 +27,20 @@ function joinErrorFor(error: unknown): JoinError {
   return 'failed';
 }
 
-const Join = (): React.JSX.Element => {
+interface JoinProps {
+  /** The venue, when not taken from the route. */
+  slug?: string;
+  /** Replaces opening the ticket page, as in the demo's phone. */
+  onJoined?: (publicToken: string) => void;
+}
+
+const Join = ({ slug: givenSlug, onJoined }: JoinProps = {}): React.JSX.Element => {
   const { t } = useTranslation('pager');
   const { slug: rawSlug } = useParams({ strict: false });
-  const slug = (rawSlug ?? '').toLowerCase();
+  const slug = (givenSlug ?? rawSlug ?? '').toLowerCase();
   const navigate = useNavigate();
+  const publicPagerClient = usePublicPagerClient();
+  const pushKey = usePushKey();
   const inputId = useId();
   const errorId = useId();
 
@@ -64,6 +74,10 @@ const Join = (): React.JSX.Element => {
       });
       if (controller.signal.aborted) return;
       if (!ticket.publicToken) throw new Error('The pager answered without a ticket token');
+      if (onJoined) {
+        onJoined(ticket.publicToken);
+        return;
+      }
       // A router navigation, not a page load: the unlocked audio lives in this document.
       void navigate({ to: pagerTicketPath(ticket.publicToken) });
     } catch (error) {
@@ -157,6 +171,7 @@ const Join = (): React.JSX.Element => {
               className="pager-button"
               onClick={() => {
                 readyAlarm.unlock();
+                askPushPermission(pushKey);
                 void join();
               }}
             >
@@ -209,15 +224,18 @@ const Join = (): React.JSX.Element => {
                 {t(`pager.join.${joinError}`)}
               </p>
             )}
-            {/* The browser only lets a page ring after a tap, and this is the one
-                tap there is. The unlock runs in the click itself, ahead of the
-                submit and of every await. Pressing "go" on the keyboard clicks
-                this button too. */}
+            {/* The browser only lets a page ring, or ask to notify, after a tap,
+                and this is the one tap there is. Both run in the click itself,
+                ahead of the submit and of every await. Pressing "go" on the
+                keyboard clicks this button too. */}
             <button
               type="submit"
               className="pager-button"
               disabled={!number || joining}
-              onClick={() => readyAlarm.unlock()}
+              onClick={() => {
+                readyAlarm.unlock();
+                askPushPermission(pushKey);
+              }}
             >
               {joining ? t('pager.join.submitting') : t('pager.join.submit')}
             </button>

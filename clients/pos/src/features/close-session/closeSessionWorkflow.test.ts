@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useRegisterSessionStore } from "../../shared/stores/registerSessionStore";
 import { useUserStore } from "../../shared/stores/userStore";
 
 const { mockListSessions } = vi.hoisted(() => ({ mockListSessions: vi.fn() }));
@@ -111,6 +112,7 @@ describe("resolveOpenSessionId", () => {
     });
 
     await expect(resolveOpenSessionId()).resolves.toBe(42);
+    expect(useRegisterSessionStore.getState().status).toBe("open");
   });
 
   it("does not fall back to another staff member when no matching session exists", async () => {
@@ -122,6 +124,16 @@ describe("resolveOpenSessionId", () => {
     await expect(resolveOpenSessionId()).rejects.toBeInstanceOf(
       NoOpenRegisterSessionError,
     );
+    expect(useRegisterSessionStore.getState().status).toBe("none");
+  });
+
+  it("leaves the recorded status alone when the list cannot be reached", async () => {
+    useUserStore.setState({ userId: "7" });
+    useRegisterSessionStore.setState({ status: "open" });
+    mockListSessions.mockRejectedValue(new TypeError("Failed to fetch"));
+
+    await expect(resolveOpenSessionId()).rejects.toThrow("Failed to fetch");
+    expect(useRegisterSessionStore.getState().status).toBe("open");
   });
 });
 

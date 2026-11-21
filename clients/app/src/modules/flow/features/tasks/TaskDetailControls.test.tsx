@@ -46,6 +46,9 @@ vi.mock('./useLabels', () => ({
   useSetTaskLabels: () => ({ mutate: vi.fn() }),
 }));
 vi.mock('./useTaskActivity', () => ({ useTaskActivity: () => ({ data: [] }) }));
+vi.mock('./useTimeLogs', () => ({
+  useTimeLogs: () => ({ data: { timeLogs: [] }, isPending: false, isError: false }),
+}));
 vi.mock('../projects/useStatuses', () => ({
   useProjectStatuses: () => ({ data: state.statuses }),
   useSetTaskStatus: () => ({ mutate: setStatus }),

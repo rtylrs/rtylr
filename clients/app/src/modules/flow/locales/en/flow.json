@@ -209,6 +209,19 @@
       "merged": "Merged",
       "closed": "Closed"
     },
+    "assignToMe": "Assign to me",
+    "reporter": "Reporter",
+    "activityTabs": {
+      "all": "All",
+      "history": "History",
+      "time": "Time",
+      "timeLogged": "{{name}} logged {{duration}}",
+      "allEmpty": "Nothing here yet. Comments, changes and logged time will show up here."
+    },
+    "print": {
+      "action": "Print or save as PDF",
+      "printedOn": "Printed {{date}}"
+    },
     "noMilestone": "No milestone",
     "noMilestonesInProject": "No milestones in this project",
     "noCycle": "Backlog (no cycle)",
@@ -642,7 +655,7 @@
     "settingsTitle": "Board settings",
     "openSettings": "Open board settings",
     "closeSettings": "Close board settings",
-    "readOnlyReason": "You can see this board's setup but not change it. Column and card settings need manage project.",
+    "readOnlyReason": "You can see this board's setup but not change it. Column settings need manage project.",
     "columns": "Columns",
     "columnName": "Status name",
     "addColumn": "Add status",
@@ -650,20 +663,44 @@
     "promptsForHoursFor": "{{name}} prompts for hours",
     "promptsForHoursBlocked": "Which column prompts for hours cannot be saved yet: a column has no flag for it, so the prompt would be fixed to the column named Done.",
     "onTheCard": "On the card",
-    "cardFieldsBlocked": "Card fields cannot be saved yet. These are settings your whole team sees, and there is nowhere shared to keep them.",
+    "yourView": "Your view",
+    "boardSetup": "Board setup",
     "cardField": {
-      "loggedTime": "Logged time",
+      "key": "Key",
+      "priority": "Priority",
+      "labels": "Labels",
+      "assignee": "Assignee",
+      "subtasks": "Subtask summary",
+      "dueDate": "Due date",
       "estimate": "Estimate",
-      "overEstimate": "Over-estimate warning",
-      "assignee": "Assignee"
+      "cycle": "Cycle",
+      "milestone": "Milestone"
     },
     "groupByHeading": "Group by",
-    "scopeExplained": "Grouping is yours alone and follows you per project. Columns and card fields are shared, so changing them changes what your team sees.",
+    "scopeExplained": "These settings are yours alone and kept per project in this browser. Changing them changes nobody else's board.",
+    "hideDoneHeading": "Hide done cards",
+    "hideDoneExplained": "Done and cancelled cards leave the board this long after they close. Show older brings them back.",
+    "hideDone": {
+      "days1": "After 1 day",
+      "days7": "After 7 days",
+      "days14": "After 14 days",
+      "days30": "After 30 days",
+      "never": "Never"
+    },
+    "columnWidthHeading": "Column width",
+    "columnWidth": {
+      "fixed": "Fixed",
+      "flexible": "Flexible"
+    },
+    "resetView": "Reset my view",
     "groupBy": {
       "none": "None",
       "assignee": "Assignee",
       "priority": "Priority",
-      "due": "Due window"
+      "due": "Due window",
+      "label": "Label",
+      "cycle": "Cycle",
+      "milestone": "Milestone"
     },
     "moveTask": "Move {{title}} to another column",
     "moveTaskMenu": "Move to column",
@@ -680,6 +717,9 @@
     "addTask": "Add task",
     "emptyColumn": "Nothing here yet.",
     "emptyLane": "None",
+    "noLabel": "No label",
+    "noCycle": "No cycle",
+    "noMilestone": "No milestone",
     "columnsAreStatuses": "Each column is one of this project's statuses. Rename, recolour, reorder and add them in Statuses.",
     "columnMenu": "Actions for {{name}}",
     "renameStatus": "Rename",
@@ -740,7 +780,27 @@
     "creating": "Creating…",
     "prevMonthLabel": "Previous month",
     "nextMonthLabel": "Next month",
-    "agendaEmpty": "No tasks due this month."
+    "agendaEmpty": "No tasks due this month.",
+    "prevWeekLabel": "Previous week",
+    "nextWeekLabel": "Next week",
+    "viewLabel": "Calendar view",
+    "month": "Month",
+    "week": "Week",
+    "cycleTitle": "Cycle: {{name}}",
+    "milestoneTitle": "Milestone: {{name}}",
+    "leaveCount": "{{count}} on leave",
+    "resizeStart": "Drag to change the start date",
+    "resizeEnd": "Drag to change the due date",
+    "unscheduled": {
+      "title": "Unscheduled",
+      "toggle": "Unscheduled ({{count}})",
+      "hide": "Hide unscheduled tasks",
+      "search": "Search unscheduled tasks",
+      "hint": "Drag a task onto a day to set its due date.",
+      "readOnly": "You can open these tasks but not schedule them.",
+      "empty": "Every open task has a date.",
+      "noMatches": "No unscheduled tasks match."
+    }
   },
   "milestones": {
     "heading": "Milestones",
@@ -886,7 +946,29 @@
       "due": "Due date",
       "none": "None"
     },
-    "empty": "No tasks in this project yet."
+    "empty": "No tasks in this project yet.",
+    "columns": "Columns",
+    "resetColumns": "Reset columns",
+    "moveColumnEarlier": "Move {{column}} earlier",
+    "moveColumnLater": "Move {{column}} later",
+    "resizeColumn": "Resize {{column}}",
+    "exportCsv": "Export CSV",
+    "gridLabel": "Tasks in {{project}}",
+    "showSubtasks_one": "Show {{count}} subtask",
+    "showSubtasks_other": "Show {{count}} subtasks",
+    "hideSubtasks": "Hide subtasks",
+    "subtasksLoading": "Loading subtasks…",
+    "subtasksFailed": "Couldn't load subtasks",
+    "column": {
+      "priority": "Priority",
+      "status": "Status",
+      "assignee": "Assignee",
+      "startDate": "Start date",
+      "estimate": "Estimate",
+      "labels": "Labels",
+      "key": "Key",
+      "created": "Created"
+    }
   },
   "projectOverview": {
     "pageTitle": "Overview · rtylr",
@@ -922,7 +1004,29 @@
     "overdue": "Overdue",
     "labourCost": "Labour cost",
     "percentComplete": "{{percent}}% complete",
-    "unassigned": "Unassigned"
+    "unassigned": "Unassigned",
+    "summary": {
+      "recentTitle": "Last 7 days",
+      "created": "Created",
+      "completed": "Completed",
+      "updated": "Updated",
+      "dueSoon": "Due soon",
+      "last7Days": "last 7 days",
+      "next7Days": "next 7 days",
+      "openFiltered": "{{label}}: {{n}} tasks. Open them in the list",
+      "needsAttention": "Needs attention",
+      "overdue": "Overdue",
+      "unassignedInCycle": "Unassigned in {{cycle}}",
+      "allClear": "Nothing overdue and no unassigned work in the active cycle.",
+      "hoursTitle": "Logged vs estimate",
+      "hoursValue": "{{hours}} h",
+      "loggedOf": "logged of {{hours}} h estimated",
+      "openEstimate": "{{hours}} h estimated on open tasks",
+      "unestimated": "{{n}} open without an estimate",
+      "priorityTitle": "Open tasks by priority",
+      "noOpenTasks": "No open tasks.",
+      "workloadDetail": "{{open}} open · {{hours}} h est."
+    }
   },
   "projectCalendar": {
     "pageTitle": "Calendar · rtylr"
@@ -1209,6 +1313,11 @@
       "from": "From",
       "to": "To",
       "range": "{{from}} to {{to}}"
+    },
+    "changed": {
+      "created7d": "Created in the last 7 days",
+      "completed7d": "Completed in the last 7 days",
+      "updated7d": "Updated in the last 7 days"
     },
     "showCompleted": "Show completed",
     "completed": "Completed",

@@ -49,6 +49,8 @@ type harness struct {
 	clock      *testClock
 	businesses *fakeBusinesses
 	db         *sql.DB
+	service    *application.Service
+	memory     *memoryRepository
 	requests   atomic.Int64
 	a, b       venue
 }
@@ -74,11 +76,13 @@ func newHarness(t *testing.T, db *sql.DB) *harness {
 
 	var service *application.Service
 	if db == nil {
-		service = application.NewService(newMemoryRepository(), venues{h.businesses}, h.clock.Now)
+		h.memory = newMemoryRepository()
+		service = application.NewService(h.memory, venues{h.businesses}, h.clock.Now)
 	} else {
 		service = application.NewService(moduleinfra.NewRepository(db), venues{h.businesses}, h.clock.Now)
 		t.Cleanup(func() {
 			for _, statement := range []string{
+				"DELETE FROM pager_push_subscriptions WHERE business_id IN (?, ?)",
 				"DELETE FROM pager_tickets WHERE business_id IN (?, ?)",
 				"DELETE FROM pager_settings WHERE business_id IN (?, ?)",
 			} {
@@ -88,6 +92,7 @@ func newHarness(t *testing.T, db *sql.DB) *harness {
 			}
 		})
 	}
+	h.service = service
 	(&Module{service: service}).RegisterAPI(h.mux)
 	return h
 }

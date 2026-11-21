@@ -1,5 +1,6 @@
 import { useQueries } from '@tanstack/react-query';
 import { useUserStore } from '../stores/userStore';
+import { useFlowStore } from '../stores/flowStore';
 import { canEditTask, canDelete, mostRestrictiveProjectRole, canFlowPermission } from './roleUtils';
 import {
   projectMembersQueryOptions,
@@ -47,6 +48,8 @@ export function findProjectRole(
 }
 
 /**
+ * The signed-in user's role in one project, from whatever has loaded.
+ *
  * Owners and admins have full access; members also need a project role.
  *
  * Someone who is not on the roster can still open a project: a department
@@ -54,13 +57,21 @@ export function findProjectRole(
  * project only to those who may open it, so a loaded project with a loaded
  * roster that does not name the caller reads as 'viewer': they see the board
  * read only, with no edit controls the server would refuse.
+ *
+ * Pure so the one project hook and the mixed project predicate below resolve
+ * a role the same way.
  */
-export function useCurrentProjectRole(projectId?: string): FlowProjectRole | undefined {
-  const userId = useCurrentUserId();
-  const access = useUserStore((state) => state.user?.effectiveAccess);
-  const readableProjectId = canFlowPermission('flow:projects:view', access) ? projectId : undefined;
-  const { data: members } = useProjectMembers(readableProjectId);
-  const { data: project } = useProject(readableProjectId);
+export function resolveProjectRole({
+  access,
+  members,
+  project,
+  userId,
+}: {
+  access: { isOwner?: boolean; isAdmin?: boolean } | null | undefined;
+  members: ApiProjectMember[] | undefined;
+  project: { ownerId?: unknown; createdBy?: unknown } | undefined;
+  userId: string | null;
+}): FlowProjectRole | undefined {
   if (access?.isOwner || access?.isAdmin) return 'admin';
   const memberRole = findProjectRole(members, userId);
   if (memberRole !== undefined) return memberRole;
@@ -73,6 +84,16 @@ export function useCurrentProjectRole(projectId?: string): FlowProjectRole | und
   }
   if (members !== undefined && project !== undefined) return 'viewer';
   return undefined;
+}
+
+/** `resolveProjectRole` for one project, loading its roster and record. */
+export function useCurrentProjectRole(projectId?: string): FlowProjectRole | undefined {
+  const userId = useCurrentUserId();
+  const access = useUserStore((state) => state.user?.effectiveAccess);
+  const readableProjectId = canFlowPermission('flow:projects:view', access) ? projectId : undefined;
+  const { data: members } = useProjectMembers(readableProjectId);
+  const { data: project } = useProject(readableProjectId);
+  return resolveProjectRole({ access, members, project, userId });
 }
 
 /**
@@ -124,6 +145,50 @@ export function useCanEditTask(projectId?: string): boolean {
     projectRole !== undefined &&
     canEditTask(projectRole)
   );
+}
+
+/**
+ * `useCanEditTask` for a screen that mixes projects: a predicate answering, per
+ * project, whether the signed-in user may change a task's fields there.
+ *
+ * The Plan calendar shows every project's tasks together, and dragging one to
+ * another day is a task update, which onion gates on `flow:tasks:edit` plus a
+ * project role above viewer. So the drag handle has to be decided per task, not
+ * once for the screen.
+ *
+ * Same rules as `useCanEditTask`, through the same `resolveProjectRole`: a hub
+ * owner or admin may; otherwise the roster decides, and the project's owner
+ * counts as admin when the roster does not name them. The project record comes
+ * from the store's project list rather than one read per project. A project
+ * whose roster has not loaded, or does not name the caller, answers false. That
+ * fails closed: a department manager or Flow Admin who reaches a project without
+ * a roster row sees it read only, as useCurrentProjectRole already has it.
+ */
+export function useCanEditTaskIn(projectIds: readonly string[]): (projectId: string) => boolean {
+  const userId = useCurrentUserId();
+  const access = useUserStore((state) => state.user?.effectiveAccess);
+  const projects = useFlowStore((state) => state.projects);
+  const canEdit = canFlowPermission('flow:tasks:edit', access);
+  const bypass = Boolean(access?.isOwner || access?.isAdmin);
+  const ids = [...new Set(projectIds.filter(Boolean))].sort();
+  const results = useQueries({
+    queries: ids.map((id) => ({
+      ...projectMembersQueryOptions(id),
+      enabled: canEdit && !bypass && canFlowPermission('flow:projects:view', access),
+    })),
+  });
+
+  return (projectId: string): boolean => {
+    if (!canEdit) return false;
+    const index = ids.indexOf(String(projectId));
+    const role = resolveProjectRole({
+      access,
+      members: index === -1 ? undefined : results[index]?.data,
+      project: (projects ?? []).find((p) => String(p.id) === String(projectId)),
+      userId,
+    });
+    return role !== undefined && canEditTask(role);
+  };
 }
 
 /**

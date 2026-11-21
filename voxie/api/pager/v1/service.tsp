@@ -38,6 +38,18 @@ interface PagerService {
   @Onkt.meta("rate_limit", "30/m")
   acknowledgeTicket(...AcknowledgeTicketRequest): AcknowledgeTicketResponse;
 
+  /** Returns the key browsers subscribe to lock-screen notifications with. */
+  @get
+  @route("/public/push-key")
+  @Onkt.meta("rate_limit", "60/m")
+  getPushKey(...GetPushKeyRequest): GetPushKeyResponse;
+
+  /** Notifies this browser when the ticket turns ready and on every call again. */
+  @post
+  @route("/public/tickets/{public_token}/push")
+  @Onkt.meta("rate_limit", "30/m")
+  subscribePush(...SubscribePushRequest): SubscribePushResponse;
+
   // Staff routes act on the signed-in caller's business.
   /** Lists the open tickets, oldest first. */
   @get

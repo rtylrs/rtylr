@@ -213,6 +213,19 @@
       "merged": "مدموج",
       "closed": "مغلق"
     },
+    "assignToMe": "إسناد إليّ",
+    "reporter": "المُبلِّغ",
+    "activityTabs": {
+      "all": "الكل",
+      "history": "السجل",
+      "time": "الوقت",
+      "timeLogged": "سجّل {{name}} {{duration}}",
+      "allEmpty": "لا شيء هنا بعد. ستظهر هنا التعليقات والتغييرات والوقت المسجّل."
+    },
+    "print": {
+      "action": "طباعة أو حفظ بصيغة PDF",
+      "printedOn": "طُبع في {{date}}"
+    },
     "noMilestone": "بدون معلم",
     "noMilestonesInProject": "لا معالم في هذا المشروع",
     "noCycle": "قائمة الأعمال (بدون دورة)",
@@ -658,7 +671,7 @@
     "settingsTitle": "إعدادات اللوحة",
     "openSettings": "فتح إعدادات اللوحة",
     "closeSettings": "إغلاق إعدادات اللوحة",
-    "readOnlyReason": "يمكنك رؤية إعداد هذه اللوحة دون تغييره. إعدادات الأعمدة والبطاقات تحتاج صلاحية إدارة المشروع.",
+    "readOnlyReason": "يمكنك رؤية إعداد هذه اللوحة دون تغييره. إعدادات الأعمدة تحتاج صلاحية إدارة المشروع.",
     "columns": "الأعمدة",
     "columnName": "اسم الحالة",
     "addColumn": "إضافة حالة",
@@ -666,20 +679,44 @@
     "promptsForHoursFor": "{{name}} يطالب بالساعات",
     "promptsForHoursBlocked": "لا يمكن حفظ العمود الذي يطالب بالساعات بعد: لا يحتوي العمود على علامة لذلك، فتبقى المطالبة مرتبطة بالعمود المسمّى Done.",
     "onTheCard": "على البطاقة",
-    "cardFieldsBlocked": "لا يمكن حفظ حقول البطاقة بعد. هذه إعدادات يراها فريقك بالكامل، ولا يوجد مكان مشترك لحفظها.",
+    "yourView": "عرضك",
+    "boardSetup": "إعداد اللوحة",
     "cardField": {
-      "loggedTime": "الوقت المسجّل",
+      "key": "المعرّف",
+      "priority": "الأولوية",
+      "labels": "التسميات",
+      "assignee": "المسؤول",
+      "subtasks": "ملخص المهام الفرعية",
+      "dueDate": "تاريخ الاستحقاق",
       "estimate": "التقدير",
-      "overEstimate": "تنبيه تجاوز التقدير",
-      "assignee": "المسؤول"
+      "cycle": "الدورة",
+      "milestone": "المرحلة"
     },
     "groupByHeading": "التجميع حسب",
-    "scopeExplained": "التجميع خاص بك ويتبعك في كل مشروع. الأعمدة وحقول البطاقة مشتركة، فتغييرها يغيّر ما يراه فريقك.",
+    "scopeExplained": "هذه الإعدادات خاصة بك وتُحفظ لكل مشروع في هذا المتصفح. تغييرها لا يغيّر لوحة أي شخص آخر.",
+    "hideDoneHeading": "إخفاء البطاقات المنجزة",
+    "hideDoneExplained": "تغادر البطاقات المنجزة والملغاة اللوحة بعد هذه المدة من إغلاقها. «عرض الأقدم» يعيدها.",
+    "hideDone": {
+      "days1": "بعد يوم واحد",
+      "days7": "بعد 7 أيام",
+      "days14": "بعد 14 يومًا",
+      "days30": "بعد 30 يومًا",
+      "never": "أبدًا"
+    },
+    "columnWidthHeading": "عرض الأعمدة",
+    "columnWidth": {
+      "fixed": "ثابت",
+      "flexible": "مرن"
+    },
+    "resetView": "إعادة ضبط عرضي",
     "groupBy": {
       "none": "بلا تجميع",
       "assignee": "المسؤول",
       "priority": "الأولوية",
-      "due": "نطاق الاستحقاق"
+      "due": "نطاق الاستحقاق",
+      "label": "التصنيف",
+      "cycle": "الدورة",
+      "milestone": "المرحلة"
     },
     "moveTask": "نقل {{title}} إلى عمود آخر",
     "moveTaskMenu": "النقل إلى عمود",
@@ -696,6 +733,9 @@
     "addTask": "إضافة مهمة",
     "emptyColumn": "لا شيء هنا بعد.",
     "emptyLane": "لا شيء",
+    "noLabel": "بدون تصنيف",
+    "noCycle": "بدون دورة",
+    "noMilestone": "بدون مرحلة",
     "columnsAreStatuses": "كل عمود هو إحدى حالات هذا المشروع. يمكنك إعادة تسميتها وتغيير ألوانها وترتيبها وإضافتها من الحالات.",
     "columnMenu": "إجراءات {{name}}",
     "renameStatus": "إعادة التسمية",
@@ -760,7 +800,27 @@
     "creating": "جارٍ الإنشاء…",
     "prevMonthLabel": "الشهر السابق",
     "nextMonthLabel": "الشهر التالي",
-    "agendaEmpty": "لا مهام مستحقة هذا الشهر."
+    "agendaEmpty": "لا مهام مستحقة هذا الشهر.",
+    "prevWeekLabel": "الأسبوع السابق",
+    "nextWeekLabel": "الأسبوع التالي",
+    "viewLabel": "عرض التقويم",
+    "month": "شهر",
+    "week": "أسبوع",
+    "cycleTitle": "الدورة: {{name}}",
+    "milestoneTitle": "المرحلة: {{name}}",
+    "leaveCount": "في إجازة: {{count}}",
+    "resizeStart": "اسحب لتغيير تاريخ البدء",
+    "resizeEnd": "اسحب لتغيير تاريخ الاستحقاق",
+    "unscheduled": {
+      "title": "غير مجدولة",
+      "toggle": "غير مجدولة ({{count}})",
+      "hide": "إخفاء المهام غير المجدولة",
+      "search": "البحث في المهام غير المجدولة",
+      "hint": "اسحب مهمة إلى يوم لتحديد تاريخ استحقاقها.",
+      "readOnly": "يمكنك فتح هذه المهام لكن لا يمكنك جدولتها.",
+      "empty": "كل المهام المفتوحة لها تاريخ.",
+      "noMatches": "لا توجد مهام غير مجدولة مطابقة."
+    }
   },
   "milestones": {
     "heading": "المعالم",
@@ -926,7 +986,33 @@
       "due": "تاريخ الاستحقاق",
       "none": "بدون"
     },
-    "empty": "لا توجد مهام في هذا المشروع بعد."
+    "empty": "لا توجد مهام في هذا المشروع بعد.",
+    "columns": "الأعمدة",
+    "resetColumns": "إعادة تعيين الأعمدة",
+    "moveColumnEarlier": "تقديم عمود {{column}}",
+    "moveColumnLater": "تأخير عمود {{column}}",
+    "resizeColumn": "تغيير عرض عمود {{column}}",
+    "exportCsv": "تصدير CSV",
+    "gridLabel": "مهام {{project}}",
+    "showSubtasks_zero": "لا توجد مهام فرعية",
+    "showSubtasks_one": "إظهار مهمة فرعية واحدة",
+    "showSubtasks_two": "إظهار مهمتين فرعيتين",
+    "showSubtasks_few": "إظهار {{count}} مهام فرعية",
+    "showSubtasks_many": "إظهار {{count}} مهمة فرعية",
+    "showSubtasks_other": "إظهار {{count}} مهمة فرعية",
+    "hideSubtasks": "إخفاء المهام الفرعية",
+    "subtasksLoading": "جارٍ تحميل المهام الفرعية…",
+    "subtasksFailed": "تعذّر تحميل المهام الفرعية",
+    "column": {
+      "priority": "الأولوية",
+      "status": "الحالة",
+      "assignee": "المسند إليه",
+      "startDate": "تاريخ البدء",
+      "estimate": "التقدير",
+      "labels": "الوسوم",
+      "key": "المعرّف",
+      "created": "تاريخ الإنشاء"
+    }
   },
   "projectOverview": {
     "pageTitle": "نظرة عامة · rtylr",
@@ -962,7 +1048,29 @@
     "overdue": "متأخرة",
     "labourCost": "تكلفة العمل",
     "percentComplete": "{{percent}}% مكتمل",
-    "unassigned": "غير مسندة"
+    "unassigned": "غير مسندة",
+    "summary": {
+      "recentTitle": "آخر 7 أيام",
+      "created": "أُنشئت",
+      "completed": "اكتملت",
+      "updated": "حُدّثت",
+      "dueSoon": "تستحق قريبًا",
+      "last7Days": "آخر 7 أيام",
+      "next7Days": "الأيام السبعة القادمة",
+      "openFiltered": "{{label}}: {{n}} مهام. افتحها في القائمة",
+      "needsAttention": "تحتاج إلى انتباه",
+      "overdue": "متأخرة",
+      "unassignedInCycle": "غير مسندة في {{cycle}}",
+      "allClear": "لا توجد مهام متأخرة ولا عمل غير مسند في الدورة النشطة.",
+      "hoursTitle": "المسجّل مقابل التقدير",
+      "hoursValue": "{{hours}} س",
+      "loggedOf": "مسجّلة من أصل {{hours}} س مقدّرة",
+      "openEstimate": "{{hours}} س مقدّرة على المهام المفتوحة",
+      "unestimated": "{{n}} مفتوحة بلا تقدير",
+      "priorityTitle": "المهام المفتوحة حسب الأولوية",
+      "noOpenTasks": "لا توجد مهام مفتوحة.",
+      "workloadDetail": "{{open}} مفتوحة · {{hours}} س مقدّرة"
+    }
   },
   "projectCalendar": {
     "pageTitle": "التقويم · rtylr"
@@ -1273,6 +1381,11 @@
       "from": "من",
       "to": "إلى",
       "range": "من {{from}} إلى {{to}}"
+    },
+    "changed": {
+      "created7d": "أُنشئت في آخر 7 أيام",
+      "completed7d": "اكتملت في آخر 7 أيام",
+      "updated7d": "حُدّثت في آخر 7 أيام"
     },
     "showCompleted": "عرض المكتملة",
     "completed": "المكتملة",

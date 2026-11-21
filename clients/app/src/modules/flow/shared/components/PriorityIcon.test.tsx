@@ -64,14 +64,19 @@ describe('the project list uses the shared glyph', () => {
   // correct and tested while no screen renders it, leaving the reported
   // defect in place. The list's own suite mocks the row, so this is a source
   // assertion.
-  const list = fs.readFileSync(
-    path.resolve(__dirname, '../../features/projects/ProjectList.tsx'),
+  // The rows' cells live beside the list since it became a spreadsheet; both
+  // files are read so neither can bring a colour-only swatch back.
+  const cells = fs.readFileSync(
+    path.resolve(__dirname, '../../features/projects/list/ListCells.tsx'),
     'utf8'
   );
+  const list =
+    fs.readFileSync(path.resolve(__dirname, '../../features/projects/ProjectList.tsx'), 'utf8') +
+    cells;
 
   it('renders PriorityIcon rather than a bare dot', () => {
-    expect(list).toContain('<PriorityIcon priority={task.priority}');
-    expect(list).toContain("import PriorityIcon from '../../shared/components/PriorityIcon'");
+    expect(cells).toContain('<PriorityIcon priority={task.priority}');
+    expect(cells).toContain("import PriorityIcon from '../../../shared/components/PriorityIcon'");
   });
 
   it('keeps no colour-only priority map of its own', () => {
