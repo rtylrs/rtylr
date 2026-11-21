@@ -323,6 +323,10 @@ func isHRPolicyExemptPath(method, path string) bool {
 		path == "/hr/shift/v1/availability" || strings.HasPrefix(path, "/hr/shift/v1/availability/") {
 		return true
 	}
+	if path == "/hr/shifts/breaks" || strings.HasPrefix(path, "/hr/shifts/breaks/") ||
+		path == "/hr/shift/v1/breaks" || strings.HasPrefix(path, "/hr/shift/v1/breaks/") {
+		return true
+	}
 	if method == http.MethodGet &&
 		(path == "/hr/payroll/my-runs" || strings.HasPrefix(path, "/hr/payroll/my-runs/")) {
 		return true

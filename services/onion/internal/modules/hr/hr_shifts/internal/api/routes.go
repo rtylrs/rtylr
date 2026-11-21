@@ -38,4 +38,13 @@ func RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, service
 	serverHttp.RegisterDELETEWithValidation[DeleteAvailabilityRequest, DeleteAvailabilityResponse](
 		ctx, router, DeleteAvailabilityRoutes(), &DeleteAvailabilityHandler{Service: service},
 	)
+	serverHttp.RegisterGET[ListBreaksRequest, ListBreaksResponse](
+		ctx, router, ListBreaksRoutes(), &ListBreaksHandler{Service: service},
+	)
+	serverHttp.RegisterPOSTWithValidation[StartBreakRequest, StartBreakResponse](
+		ctx, router, StartBreakRoutes(), &StartBreakHandler{Service: service},
+	)
+	serverHttp.RegisterPOSTWithValidation[EndBreakRequest, EndBreakResponse](
+		ctx, router, EndBreakRoutes(), &EndBreakHandler{Service: service},
+	)
 }
