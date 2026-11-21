@@ -166,7 +166,11 @@
     "claimFailed": "We couldn't set up the pager. Try again.",
     "adminOnly": "Only the owner or an admin of this business can set up the pager.",
     "loadFailed": "We couldn't load your business.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "slugLabel": "Your customer link",
+    "slugHint": "Your QR opens {{link}}. Lowercase letters, numbers and dashes.",
+    "slugInvalid": "Use lowercase letters, numbers and dashes, starting and ending with a letter or number.",
+    "slugTaken": "That link is taken. Choose another one."
   },
   "landing": {
     "meta": {
