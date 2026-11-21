@@ -19,6 +19,11 @@ const status = vi.hoisted(() => (id: string, name: string, bucket: string, sortO
 }));
 const taskData = vi.hoisted(() => ({ rows: [] as unknown[] }));
 const saveAsView = vi.hoisted(() => ({ save: vi.fn(), pending: false }));
+// Custom fields come from their own query; none are defined here.
+vi.mock('./useFields', () => ({
+  useProjectFields: () => ({ data: [] }),
+  useSetTaskFieldValues: () => ({ mutate: vi.fn(), isPending: false }),
+}));
 vi.mock('../views/useSaveFiltersAsView', () => ({
   projectFiltersForView: (filters: unknown) => filters,
   useSaveFiltersAsView: () => saveAsView,

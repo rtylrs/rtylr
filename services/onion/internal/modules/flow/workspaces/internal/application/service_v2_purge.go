@@ -47,6 +47,10 @@ func (s *Service) ListTasksV2(ctx context.Context, callerID, businessID int64, f
 	if err := s.applyBlockedState(ctx, businessID, tasks); err != nil {
 		return nil, 0, err
 	}
+	// One extra query for the page, whatever its size.
+	if err := s.attachFieldValues(ctx, businessID, tasks); err != nil {
+		return nil, 0, err
+	}
 	return tasks, total, nil
 }
 

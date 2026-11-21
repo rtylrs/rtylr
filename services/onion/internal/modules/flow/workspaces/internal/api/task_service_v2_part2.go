@@ -132,11 +132,15 @@ func (a *TaskAPIV2) CreateTask(ctx context.Context, req *flowtaskv2.CreateTaskRe
 		StartDate:      startDate,
 		EstimatedHours: req.EstimatedHours,
 		Labels:         req.GetLabels(),
+		FieldValues:    fieldValueInputs(req.GetFieldValues()),
 		TaskType:       req.GetTaskType(),
 		EpicColor:      req.GetEpicColor(),
 	}
 
 	task, createErr := a.Service.CreateTask(ctx, input)
+	if isFieldInputError(createErr) {
+		return nil, fieldError(createErr, "Failed to create task")
+	}
 	if createErr != nil {
 		if mapped := hierarchyError(createErr); mapped != nil {
 			return nil, mapped

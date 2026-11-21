@@ -196,6 +196,11 @@ func (r *Repository) DeleteTaskDetachingEpicTasks(ctx context.Context, taskID, b
 		// Nothing in this business was deleted, so nothing may be detached.
 		return 0, nil
 	}
+	if _, err := tx.ExecContext(ctx,
+		"DELETE FROM flow_task_field_values WHERE task_id = ? AND business_id = ?", taskID, businessID); err != nil {
+		logger.Ctx(ctx).Error("DeleteTask field values cleanup failed", logger.Error(err))
+		return 0, err
+	}
 	res, err = tx.ExecContext(ctx, "UPDATE flow_tasks SET epic_id = NULL WHERE epic_id = ? AND business_id = ?", taskID, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("DeleteTask detach failed", logger.Error(err))

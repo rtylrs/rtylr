@@ -47,6 +47,10 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 			response, err := NewTaskAPI(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).UpdateTask(ctx, &flowtaskv1.UpdateTaskRequest{Id: 1, Body: &flowtaskv1.UpdateTaskBody{Title: "Direct Authorization Task"}})
 			return response, err
 		}},
+		{Name: "flow tasks edit field values", App: authorization.AppFlow, Permission: "flow:tasks:edit", Call: func(ctx context.Context) (any, error) {
+			response, err := NewTaskAPIV2(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).SetTaskFieldValues(ctx, &flowtaskv2.SetTaskFieldValuesRequest{TaskId: testutil.Int64Ptr(1), Values: []*flowtaskv2.TaskFieldValueInput{}})
+			return response, err
+		}},
 		{Name: "flow tasks assign", App: authorization.AppFlow, Permission: "flow:tasks:assign", Extra: []string{"flow:tasks:create"}, Call: func(ctx context.Context) (any, error) {
 			response, err := NewTaskAPI(application.NewService(ctx, testsupport.NewRepository(testutil.DirectAuthorizationDB(ctx)))).CreateTask(ctx, &flowtaskv1.CreateTaskRequest{AssigneeId: &assignedUserID})
 			return response, err

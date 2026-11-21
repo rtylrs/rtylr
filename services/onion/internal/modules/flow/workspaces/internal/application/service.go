@@ -305,6 +305,7 @@ func (s *Service) ResolveWorkspaceID(ctx context.Context, userID, businessID int
 
 type repository interface {
 	githubStore
+	customFieldStore
 	AddProjectMember(ctx context.Context, input domain.AddProjectMemberInput) error
 	AddTaskDependency(ctx context.Context, input domain.AddTaskDependencyInput) error
 	AddTaskRelation(ctx context.Context, edge domain.TaskRelationEdge, businessID int64) (int64, error)

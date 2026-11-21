@@ -91,8 +91,11 @@ export function boardViewStorageKey(userId: string, projectId: string): string {
 /** Group-by was kept per project, for whoever used the browser, before this. */
 const legacyGroupByKey = (projectId: string): string => `flow:board:groupBy:${projectId}`;
 
+// A custom field grouping is `field:<id>`. Whether the field still exists is
+// for the board to decide once the project's fields load.
 const isGroupKey = (value: unknown): value is BoardGroupKey =>
-  typeof value === 'string' && (BOARD_GROUP_KEYS as readonly string[]).includes(value);
+  typeof value === 'string' &&
+  ((BOARD_GROUP_KEYS as readonly string[]).includes(value) || /^field:\d+$/.test(value));
 
 /**
  * Settings from whatever was stored, field by field. A value that is missing or

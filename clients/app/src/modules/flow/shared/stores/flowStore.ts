@@ -141,16 +141,6 @@ export interface ProjectSection {
   order: number;
 }
 
-/** Custom field definitions (per project). */
-export interface CustomFieldDefinition {
-  id: string;
-  projectId: string;
-  name: string;
-  type: 'text' | 'number' | 'dropdown';
-  options?: string[];
-  order: number;
-}
-
 export type TaskType = 'task' | 'bug' | 'feature' | 'epic';
 
 export interface Task {
@@ -206,8 +196,8 @@ export interface Task {
   sectionId?: string;
   /** Position within a board column once arranged by hand (1-based); 0 or absent until then. */
   sortOrder?: number;
-  /** Values keyed by CustomFieldDefinition.id */
-  customFieldValues?: Record<string, string | number>;
+  /** Custom field values keyed by field id (flow.field.v2), held on the server. */
+  fieldValues?: Record<string, { value?: string; values?: string[] }>;
   /** F-A: the custom status (flow.status.v2) applied to this task, if any.
    * Undefined means the task is on its built-in string status alone. */
   statusId?: string;

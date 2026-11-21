@@ -93,6 +93,13 @@ func (s *Service) CreateTask(ctx context.Context, input domain.TaskInput) (domai
 		input.ProjectID = bucketID
 	}
 
+	// Resolved before anything is written, so a missing required custom field
+	// refuses the task without side effects.
+	fieldWrites, fieldErr := s.fieldValuesForNewTask(ctx, input.BusinessID, input.ProjectID, input.FieldValues)
+	if fieldErr != nil {
+		return domain.Task{}, fieldErr
+	}
+
 	if err := s.resolveNewTaskHierarchy(ctx, &input); err != nil {
 		return domain.Task{}, err
 	}
@@ -112,11 +119,23 @@ func (s *Service) CreateTask(ctx context.Context, input domain.TaskInput) (domai
 		return domain.Task{}, err
 	}
 
+	if err := s.storeNewTaskFieldValues(ctx, input.BusinessID, id, fieldWrites); err != nil {
+		return domain.Task{}, err
+	}
+
 	if actErr := s.repo.LogActivity(ctx, id, input.ReporterID, "created_task", "", input.Title); actErr != nil {
 		logger.Ctx(ctx).Error("CreateTask: failed to log activity", logger.Error(actErr))
 	}
 
-	return s.repo.GetTaskByID(ctx, id)
+	task, err := s.repo.GetTaskByID(ctx, id)
+	if err != nil {
+		return domain.Task{}, err
+	}
+	created := []domain.Task{task}
+	if err := s.attachFieldValues(ctx, input.BusinessID, created); err != nil {
+		return domain.Task{}, err
+	}
+	return created[0], nil
 }
 
 func (s *Service) GetTaskDetail(ctx context.Context, taskID int64) (domain.TaskDetail, error) {
@@ -152,6 +171,9 @@ func (s *Service) GetTaskDetail(ctx context.Context, taskID int64) (domain.TaskD
 	// One query covers the task and its subtasks.
 	withSubtasks := append([]domain.Task{task}, subtasks...)
 	if err := s.applyBlockedState(ctx, task.BusinessID, withSubtasks); err != nil {
+		return domain.TaskDetail{}, err
+	}
+	if err := s.attachFieldValues(ctx, task.BusinessID, withSubtasks); err != nil {
 		return domain.TaskDetail{}, err
 	}
 	task, subtasks = withSubtasks[0], withSubtasks[1:]

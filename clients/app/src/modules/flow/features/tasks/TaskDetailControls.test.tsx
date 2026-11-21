@@ -18,6 +18,11 @@ const state = vi.hoisted(() => ({
 const setStatus = vi.hoisted(() => vi.fn());
 const createStatus = vi.hoisted(() => vi.fn());
 const update = vi.hoisted(() => vi.fn());
+// Custom fields come from their own query; none are defined here.
+vi.mock('../projects/useFields', () => ({
+  useProjectFields: () => ({ data: [] }),
+  useSetTaskFieldValues: () => ({ mutate: vi.fn(), isPending: false }),
+}));
 vi.mock('@tanstack/react-router', () => ({
   useParams: () => ({ id: '1' }),
   useNavigate: () => vi.fn(),

@@ -178,5 +178,14 @@
     "removeFailed": "Couldn't remove the link"
   },
   "milestoneUpdated": "Milestone updated",
-  "milestoneDeleted": "Milestone deleted"
+  "milestoneDeleted": "Milestone deleted",
+  "field": {
+    "created": "Field added",
+    "updated": "Field saved",
+    "saveFailed": "Could not save the field",
+    "deleted_one": "Field deleted. {{count}} task lost its value.",
+    "deleted_other": "Field deleted. {{count}} tasks lost their value.",
+    "deleteFailed": "Could not delete the field",
+    "valueSaveFailed": "Could not save the value"
+  }
 }

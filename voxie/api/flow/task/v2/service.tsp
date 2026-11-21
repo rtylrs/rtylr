@@ -96,6 +96,16 @@ interface TaskService {
   @route("/tasks/links/{id}")
   deleteTaskLink(...DeleteTaskLinkRequest): DeleteTaskLinkResponse;
 
+  /**
+   * setTaskFieldValues writes or clears several custom field values of one
+   * task in a single transaction. Needs the right to edit the task. The task
+   * id travels in the body, like setTaskStatus, because a path of
+   * /tasks/{task_id}/fields would collide with PUT /tasks/comments/{id}.
+   */
+  @put
+  @route("/tasks/field-values")
+  setTaskFieldValues(...SetTaskFieldValuesRequest): SetTaskFieldValuesResponse;
+
   @post
   @route("/tasks/{task_id}/time-logs")
   createTimeLog(...CreateTimeLogRequest): CreateTimeLogResponse;

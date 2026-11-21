@@ -5,6 +5,7 @@ import { useTaskFilters, type TaskFilterState } from '../../shared/filters/useTa
 import { matchesTaskFilters } from '../../shared/filters/taskFilters';
 import {
   assigneeField,
+  customFieldFilters,
   epicField,
   labelField,
   namedField,
@@ -21,6 +22,7 @@ import { displayStatusName, sortStatuses, statusIdOf } from './statusUtils';
 import { useLabels } from '../tasks/useLabels';
 import { useCycles } from '../cycles/useCycles';
 import { useMilestones } from '../milestones/useMilestones';
+import { useProjectFields } from './useFields';
 import { epicsIn } from '../../shared/lib/taskHierarchy';
 import type { ApiCycle, ApiMilestone } from '../../shared/services/flowApi';
 
@@ -62,6 +64,7 @@ export function useProjectTaskFilters(projectId: string, tasks: Task[]): Project
   const statusesQuery = useProjectStatuses(projectId);
   const cyclesQuery = useCycles(projectId);
   const milestonesQuery = useMilestones(projectId);
+  const fieldsQuery = useProjectFields(projectId);
 
   const people = useMemo(
     () => peopleFrom(membersQuery.data ?? [], tasks),
@@ -96,6 +99,7 @@ export function useProjectTaskFilters(projectId: string, tasks: Task[]): Project
     // The epics are tasks on this board, so they come from the same list.
     const epics = epicsIn(tasks);
     if (epics.length > 0) out.push(epicField(epics, t));
+    out.push(...customFieldFilters(fieldsQuery.data ?? [], people, t));
     return out;
   }, [
     tasks,
@@ -105,6 +109,7 @@ export function useProjectTaskFilters(projectId: string, tasks: Task[]): Project
     statusesQuery.data,
     cyclesQuery.data,
     milestonesQuery.data,
+    fieldsQuery.data,
     t,
   ]);
 

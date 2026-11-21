@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useOpenTask } from '../../shared/lib/useOpenTask';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { motion } from 'motion/react';
@@ -73,6 +73,7 @@ import FlowSelect from '../../shared/components/FlowSelect';
 import PriorityIcon from '../../shared/components/PriorityIcon';
 import LabelChip from '../../shared/components/LabelChip';
 import DueDatePicker from '../../shared/components/DueDatePicker';
+import TaskTextField from '../../shared/components/TaskTextField';
 import { getInitials } from '../../shared/lib/utils';
 import { displayUserName } from '../../shared/lib/userDisplay';
 import { priorityLabelKey } from '../../shared/lib/priorityLabels';
@@ -88,6 +89,7 @@ import DevelopmentSection from './components/DevelopmentSection';
 import { useIsDeveloperProject } from '../projects-v2/useDeveloperMode';
 import LinksSection from './components/LinksSection';
 import RelationsSection from './components/RelationsSection';
+import TaskCustomFields from './components/TaskCustomFields';
 import TaskHierarchyFields from './components/TaskHierarchyFields';
 import EpicProgressSection from './components/EpicProgressSection';
 import { isEpic } from '../../shared/lib/taskHierarchy';
@@ -1005,6 +1007,17 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           </DetailField>
         )}
 
+        {task.projectId && (
+          <TaskCustomFields
+            taskId={String(task.id)}
+            projectId={String(task.projectId)}
+            values={task.fieldValues}
+            canEdit={canEdit}
+            people={projectMembers.map((m) => ({ id: String(m.userId), name: m.name }))}
+            Row={DetailField}
+          />
+        )}
+
         <DetailField icon={Link2} label={t('flow.taskDetail.relations')}>
           <RelationsSection
             taskId={String(task.id)}
@@ -1179,80 +1192,6 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
     </div>
   );
 };
-
-function TaskTextField({
-  value,
-  onSave,
-  multiline,
-  wrap,
-  ...props
-}: {
-  value: string;
-  onSave: (value: string) => void;
-  multiline?: boolean;
-  /** One logical line that wraps instead of being cut off. */
-  wrap?: boolean;
-  type?: React.HTMLInputTypeAttribute;
-  min?: number;
-  step?: string;
-  required?: boolean;
-  disabled?: boolean;
-  placeholder?: string;
-  rows?: number;
-  className?: string;
-  style?: React.CSSProperties;
-  'aria-label'?: string;
-}) {
-  const [draft, setDraft] = useState(value);
-  const focused = useRef(false);
-  useEffect(() => {
-    if (!focused.current) setDraft(value);
-  }, [value]);
-  const handlers = {
-    value: draft,
-    onFocus: () => {
-      focused.current = true;
-    },
-    onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-      setDraft(event.target.value),
-    onBlur: () => {
-      focused.current = false;
-      if (props.required && !draft.trim()) {
-        setDraft(value);
-      } else if (draft !== value) {
-        onSave(draft);
-      }
-    },
-  };
-  if (wrap) {
-    // The hidden copy shares the textarea's grid cell and sets its height, so
-    // the field is always as tall as its wrapped text.
-    return (
-      <div className="grid grid-cols-1">
-        <div
-          aria-hidden
-          className={`${props.className ?? ''} flow-wrap-mirror invisible col-start-1 row-start-1 whitespace-pre-wrap break-words`}
-        >
-          {draft}{' '}
-        </div>
-        <textarea
-          {...props}
-          {...handlers}
-          rows={1}
-          onChange={(event) => setDraft(event.target.value.replace(/\s*\n\s*/g, ' '))}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              event.preventDefault();
-              event.currentTarget.blur();
-            }
-          }}
-          className={`${props.className ?? ''} col-start-1 row-start-1 overflow-hidden`}
-        />
-      </div>
-    );
-  }
-  return multiline ? <textarea {...props} {...handlers} /> : <input {...props} {...handlers} />;
-}
 
 // ── DetailField ───────────────────────────────────────────────────────────────
 

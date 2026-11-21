@@ -107,4 +107,9 @@ describe('parseBoardViewSettings', () => {
   it('keeps never as a hide choice', () => {
     expect(parseBoardViewSettings({ hideDoneAfterDays: null }).hideDoneAfterDays).toBeNull();
   });
+
+  it('keeps a custom field grouping and drops a malformed one', () => {
+    expect(parseBoardViewSettings({ groupBy: 'field:12' }).groupBy).toBe('field:12');
+    expect(parseBoardViewSettings({ groupBy: 'field:abc' }).groupBy).toBe('none');
+  });
 });

@@ -200,6 +200,13 @@ model FlowTask {
   blocker_count: int32;
 
   /**
+   * Custom field values keyed by field id (flow.field.v2). Only fields with a
+   * value appear, so a task without any carries an empty map. Read-only
+   * projection on list and detail reads; write through setTaskFieldValues.
+   */
+  field_values: Record<TaskFieldValue>;
+
+  /**
    * What kind of work this is: task, bug, feature or epic. Every task that
    * predates types reads as task.
    */
@@ -403,13 +410,32 @@ model ListTasksRequest {
   @query("limit")
   limit: int32;
 
-  /** The field to sort results by. */
+  /**
+   * The field to sort results by. "field:<id>" sorts by a custom field of the
+   * project named by project_id; tasks without a value come last. Every type
+   * sorts except multi_select and person. Anything else keeps the board order.
+   */
   @query("sort_by")
   sort_by: string;
 
   /** The sort direction ("asc" or "desc"). */
   @query("sort_dir")
   sort_dir: string;
+
+  /**
+   * field_filter narrows the listing by custom field values. It is a JSON
+   * array of clauses that must all match, each
+   * `{"field_id":"12","op":"any","values":["a","b"]}`, and needs project_id.
+   *
+   * Operators by field type: `eq` (text, url, number, date, select,
+   * checkbox), `any` (select, multi_select, person: the task holds at least
+   * one of the values), `contains` (text, url), `range` (number, date: values
+   * are [min, max], either may be empty for an open end). Values use the
+   * encoding of `TaskFieldValue`. A checkbox `eq` "false" also matches tasks
+   * that never set the field.
+   */
+  @query("field_filter")
+  field_filter: string;
 
   /**
    * task_type narrows results to one type, or several separated by commas
@@ -577,6 +603,13 @@ model CreateTaskRequest {
   @minValueExclusive(0)
   @encode(string)
   milestone_id?: int64;
+
+  /**
+   * field_values sets custom field values on the new task. A field of the
+   * project that is left out receives its default, and a required field with
+   * neither a value nor a default rejects the request with 400.
+   */
+  field_values: TaskFieldValueInput[];
 
   /**
    * Upcoming or active cycle of the task's project to add the task to, at the
@@ -1390,4 +1423,60 @@ model DeleteTaskLinkRequest {
 model DeleteTaskLinkResponse {
   /** message is a human-readable result message. */
   message: string;
+}
+
+/**
+ * TaskFieldValue is a task's value for one custom field.
+ *
+ * Every value travels as a string so one shape serves all eight field types:
+ * text and url as written, number as a decimal ("12.5"), date as an ISO date
+ * ("2026-11-19"), checkbox as "true" or "false", select as the option id.
+ */
+model TaskFieldValue {
+  /** value is the value of a single-value field. Empty for multi_select and person. */
+  value: string;
+
+  /**
+   * values is the value of a multi_select (option ids) or person (user ids)
+   * field. Empty for every other type.
+   */
+  values: string[];
+}
+
+model TaskFieldValueInput {
+  /** field_id is the custom field to write. It must belong to the task's project. */
+  @Onkt.required
+  @minValueExclusive(0)
+  @encode(string)
+  field_id?: int64;
+
+  /** value is the new value for a single-value field. */
+  value: string;
+
+  /** values is the new value for a multi_select or person field. */
+  values: string[];
+}
+
+model SetTaskFieldValuesRequest {
+  /** task_id is the task to write to. */
+  @Onkt.required
+  @minValueExclusive(0)
+  @encode(string)
+  task_id?: int64;
+
+  /**
+   * values lists the fields to write, at most 50. An entry with an empty value
+   * and no values clears that field. Fields left out keep their value. The
+   * whole batch is applied or none of it.
+   */
+  @Onkt.required
+  values: TaskFieldValueInput[];
+}
+
+model SetTaskFieldValuesResponse {
+  /**
+   * field_values is the task's full set of values after the write, keyed by
+   * field id.
+   */
+  field_values: Record<TaskFieldValue>;
 }

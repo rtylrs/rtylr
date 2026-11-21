@@ -77,7 +77,7 @@ export function closedRecently(
  * or null when nothing would move. The server takes the whole set at once.
  */
 export function movedStatusIds(
-  ordered: readonly ApiStatus[],
+  ordered: readonly { id: string }[],
   from: number,
   to: number
 ): string[] | null {

@@ -102,6 +102,7 @@ export function apiTaskToTask(t: ApiTask): Task {
     // Both are omitted on the wire when the task is not blocked. The count
     // is what the badge shows; blocked alone still means at least one.
     blockerCount: t.blockerCount || (t.blocked ? 1 : 0),
+    fieldValues: t.fieldValues,
     // int64 ids are strings on the wire already. An empty or zero id is no
     // link at all, and a missing type is a plain task (omitempty).
     parentId: t.parentTaskId && t.parentTaskId !== '0' ? String(t.parentTaskId) : undefined,
