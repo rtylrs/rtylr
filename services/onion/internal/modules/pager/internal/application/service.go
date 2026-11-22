@@ -36,6 +36,10 @@ type repository interface {
 	// ExpireStaleUnlabelled closes the unlabelled tickets older than
 	// unlabelledSince, which frees their words.
 	ExpireStaleUnlabelled(ctx context.Context, businessID int64, unlabelledSince time.Time) error
+	// ExpireStaleLabelled closes the labelled tickets older than openSince.
+	ExpireStaleLabelled(ctx context.Context, businessID int64, openSince time.Time) error
+	// BusinessIDs lists every business that has saved pager settings.
+	BusinessIDs(ctx context.Context) ([]int64, error)
 	// ExpireStaleTicket closes the open ticket holding number if it is older
 	// than openSince, which frees the number.
 	ExpireStaleTicket(ctx context.Context, businessID int64, number string, openSince time.Time) error
@@ -407,6 +411,29 @@ func (s *Service) UpdateSettings(ctx context.Context, businessID int64, enabled 
 		return domain.Settings{}, err
 	}
 	return settings, nil
+}
+
+// Sweep closes every venue's tickets past their lifetime and drops the push
+// subscriptions of tickets that are over. Reads already treat such tickets as
+// expired; this keeps storage from holding them open at quiet venues. A
+// venue that fails is logged and the rest are still swept.
+func (s *Service) Sweep(ctx context.Context) error {
+	now := s.clock()
+	businesses, err := s.repo.BusinessIDs(ctx)
+	if err != nil {
+		return err
+	}
+	var failed error
+	for _, businessID := range businesses {
+		if err := s.repo.ExpireStaleUnlabelled(ctx, businessID, domain.UnlabelledSince(now)); err != nil {
+			failed = errors.Join(failed, fmt.Errorf("business %d: %w", businessID, err))
+			continue
+		}
+		if err := s.repo.ExpireStaleLabelled(ctx, businessID, domain.OpenSince(now)); err != nil {
+			failed = errors.Join(failed, fmt.Errorf("business %d: %w", businessID, err))
+		}
+	}
+	return errors.Join(failed, s.repo.DeleteStalePushSubscriptions(ctx, domain.OpenSince(now)))
 }
 
 // publicTokenBytes of randomness make a ticket's token: 192 bits, well past

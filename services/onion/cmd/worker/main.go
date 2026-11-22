@@ -41,6 +41,7 @@ import (
 	"github.com/voxire/onion/internal/modules/organization/subscriptions"
 	"github.com/voxire/onion/internal/modules/organization/team"
 	teamadapters "github.com/voxire/onion/internal/modules/organization/team/adapters"
+	"github.com/voxire/onion/internal/modules/pager"
 	"github.com/voxire/onion/internal/modules/pos/giftcards"
 	"github.com/voxire/onion/internal/modules/pos/locations"
 	"github.com/voxire/onion/internal/modules/recruit/voxhire"
@@ -291,6 +292,7 @@ type jobModules struct {
 	Subscriptions     *subscriptions.Module
 	Team              *team.Module
 	WebsiteLead       *websitelead.Module
+	Pager             *pager.Module
 }
 
 func initializeJobModules(ctx context.Context) *jobModules {
@@ -325,6 +327,7 @@ func initializeJobModules(ctx context.Context) *jobModules {
 	webhooksModule := webhooks.NewModule(ctx, db)
 	webhooksModule.SetNotificationContactResolver(teamModule.GetActiveMemberContact)
 	return &jobModules{
+		Pager:             pager.NewModule(ctx, db, businessModule),
 		CaretBuddy:        buddy.NewModule(ctx, db),
 		Automations:       automations.NewModule(ctx, db, automationContacts),
 		Customers:         customersModule,

@@ -109,6 +109,27 @@ func (r *memoryRepository) ExpireStaleUnlabelled(_ context.Context, businessID i
 	return nil
 }
 
+func (r *memoryRepository) BusinessIDs(context.Context) ([]int64, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	ids := make([]int64, 0, len(r.settings))
+	for id := range r.settings {
+		ids = append(ids, id)
+	}
+	return ids, nil
+}
+
+func (r *memoryRepository) ExpireStaleLabelled(_ context.Context, businessID int64, openSince time.Time) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	for _, t := range r.where(businessID, isOpen) {
+		if t.Labelled() && t.CreatedAt.Before(openSince) {
+			t.Status = domain.StatusExpired
+		}
+	}
+	return nil
+}
+
 func (r *memoryRepository) ExpireStaleTicket(_ context.Context, businessID int64, number string, openSince time.Time) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()

@@ -26,7 +26,7 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
-  window.sessionStorage.clear();
+  window.localStorage.clear();
   navigateSpy.mockReset();
   api.scanTicket.mockReset().mockResolvedValue(scanned);
   api.getPublicTicket.mockReset();
@@ -52,11 +52,11 @@ describe('pager scan page', () => {
     expect(api.scanTicket).toHaveBeenCalledTimes(1);
     expect(api.scanTicket).toHaveBeenCalledWith({ slug: 'acme' });
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
-    expect(window.sessionStorage.getItem(STORAGE_KEY)).toBe('tok-1');
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBe('tok-1');
   });
 
-  it('keeps the same ticket and code when the page is reloaded', async () => {
-    window.sessionStorage.setItem(STORAGE_KEY, 'tok-old');
+  it('keeps the same ticket and code on a reload or a scan in a new tab', async () => {
+    window.localStorage.setItem(STORAGE_KEY, 'tok-old');
     api.getPublicTicket.mockResolvedValue({ status: 'waiting', code: '318' });
     render(<Scan />);
 
@@ -71,27 +71,27 @@ describe('pager scan page', () => {
     ['expired', { status: 'expired' }],
     ['collected', { status: 'collected' }],
   ])('scans again when the remembered ticket is %s', async (_, ticket) => {
-    window.sessionStorage.setItem(STORAGE_KEY, 'tok-old');
+    window.localStorage.setItem(STORAGE_KEY, 'tok-old');
     api.getPublicTicket.mockResolvedValue(ticket);
     render(<Scan />);
 
     await waitFor(() =>
       expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-1', replace: true })
     );
-    expect(window.sessionStorage.getItem(STORAGE_KEY)).toBe('tok-1');
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBe('tok-1');
   });
 
   it('scans again when the remembered ticket is gone', async () => {
-    window.sessionStorage.setItem(STORAGE_KEY, 'tok-old');
+    window.localStorage.setItem(STORAGE_KEY, 'tok-old');
     api.getPublicTicket.mockRejectedValue({ statusCode: 404, code: 'ticket_not_found' });
     render(<Scan />);
 
     await waitFor(() => expect(api.scanTicket).toHaveBeenCalledTimes(1));
-    expect(window.sessionStorage.getItem(STORAGE_KEY)).toBe('tok-1');
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBe('tok-1');
   });
 
   it('keeps the remembered ticket when it cannot be checked, instead of a second phone', async () => {
-    window.sessionStorage.setItem(STORAGE_KEY, 'tok-old');
+    window.localStorage.setItem(STORAGE_KEY, 'tok-old');
     api.getPublicTicket.mockRejectedValue({ statusCode: 503 });
     render(<Scan />);
 
@@ -101,7 +101,7 @@ describe('pager scan page', () => {
     expect(api.scanTicket).not.toHaveBeenCalled();
   });
 
-  it('still works when the browser refuses session storage', async () => {
+  it('still works when the browser refuses storage', async () => {
     const getItem = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new DOMException('blocked', 'SecurityError');
     });
