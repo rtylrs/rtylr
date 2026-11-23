@@ -217,15 +217,16 @@ describe('pager staff board', () => {
     api.updateSettings.mockResolvedValue({ enabled: true, labelMode: 'name' });
     renderBoard();
 
-    const mode = await screen.findByLabelText('Label orders by');
+    const mode = await screen.findByRole('combobox', { name: 'Label orders by' });
     await waitFor(() => expect(mode).toBeEnabled());
-    expect(mode).toHaveValue('either');
+    expect(mode).toHaveTextContent('Order number or name');
     expect(screen.queryByText('Only numbers entered here')).not.toBeInTheDocument();
 
-    fireEvent.change(mode, { target: { value: 'name' } });
+    fireEvent.click(mode);
+    fireEvent.click(screen.getByRole('option', { name: 'Customer name' }));
 
     await waitFor(() => expect(api.updateSettings).toHaveBeenCalledWith({ labelMode: 'name' }));
-    await waitFor(() => expect(mode).toHaveValue('name'));
+    await waitFor(() => expect(mode).toHaveTextContent('Customer name'));
   });
 
   it('shows the settings to a member who is not an admin, without letting them change any', async () => {

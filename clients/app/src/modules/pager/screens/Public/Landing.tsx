@@ -4,20 +4,18 @@ import { MotionConfig } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
 import { RENNILI_URL } from '@voxire/config';
 import { PAGER_LANDING_PATH } from '../../pagerPaths';
-import { BentoShowcase } from './landing/BentoShowcase';
-import { ClosingCta } from './landing/ClosingCta';
-import { CompareSection } from './landing/CompareSection';
 import { FaqSection } from './landing/FaqSection';
-import { FreeSection } from './landing/FreeSection';
-import { HowItWorks } from './landing/HowItWorks';
 import { LandingFooter } from './landing/LandingFooter';
 import { LandingHero } from './landing/LandingHero';
 import { LandingNav } from './landing/LandingNav';
-import { RtylrUpsellBand } from './landing/RtylrUpsellBand';
-import { VenuesSection } from './landing/VenuesSection';
+import { CompareTable, FreeBand, HighlightsBand, StepsSection } from './landing/LandingStory';
 import { useScrolledPast } from './landing/useLandingObservers';
 
-/** Rennili's landing page, the root of rennili.rtylr.com. */
+/**
+ * Rennili's landing page, the root of rennili.rtylr.com. Each part of the
+ * story is told once; the longer versions live on the How it works, Features
+ * and FAQ pages.
+ */
 const Landing = (): React.JSX.Element => {
   const { t } = useTranslation('pager');
   const heroRef = useRef<HTMLElement>(null);
@@ -42,14 +40,11 @@ const Landing = (): React.JSX.Element => {
 
         <main>
           <LandingHero heroRef={heroRef} />
-          <VenuesSection />
-          <HowItWorks />
-          <BentoShowcase />
-          <CompareSection />
-          <FreeSection />
-          <RtylrUpsellBand />
+          <HighlightsBand />
+          <StepsSection />
+          <CompareTable />
+          <FreeBand />
           <FaqSection />
-          <ClosingCta />
         </main>
 
         <LandingFooter onLanding />

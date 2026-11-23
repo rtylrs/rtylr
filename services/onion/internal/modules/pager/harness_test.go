@@ -242,6 +242,30 @@ func (h *harness) scanned(v venue) (string, map[string]any) {
 	return "", nil
 }
 
+func (h *harness) sweep() {
+	h.Helper()
+	if err := h.service.Sweep(context.Background()); err != nil {
+		h.Fatalf("sweep: %v", err)
+	}
+}
+
+// storedStatus is a ticket's status as stored, before reads apply its lifetime.
+func (h *harness) storedStatus(token string) string {
+	h.Helper()
+	if h.db == nil {
+		ticket, found, err := h.memory.TicketByToken(context.Background(), token)
+		if err != nil || !found {
+			h.Fatalf("ticket %q: found=%v err=%v", token, found, err)
+		}
+		return ticket.Status
+	}
+	var status string
+	if err := h.db.QueryRow("SELECT status FROM pager_tickets WHERE public_token = ?", token).Scan(&status); err != nil {
+		h.Fatalf("ticket %q: %v", token, err)
+	}
+	return status
+}
+
 // label is the cashier typing a label on a ticket's card.
 func (h *harness) label(user *authPkg.AuthUser, id any, label string) reply {
 	h.Helper()

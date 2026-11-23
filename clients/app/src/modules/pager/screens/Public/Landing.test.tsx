@@ -26,6 +26,7 @@ vi.mock('@tanstack/react-router', () => ({
 vi.mock('../../../../shared/services/i18next', () => ({ selectLanguage: vi.fn() }));
 
 import Landing from './Landing';
+import FeaturesPage from './FeaturesPage';
 import RtylrServicesPage from './RtylrServicesPage';
 import { initTestI18n } from '../../shared/testing/i18n';
 
@@ -83,10 +84,9 @@ describe('Rennili landing page', () => {
     expect(menuButton).toHaveFocus();
   });
 
-  it('rings the hero simulator, shows the next match code, and toggles FAQ disclosures', async () => {
+  it('rings the hero simulator and toggles FAQ disclosures', () => {
     render(<Landing />);
 
-    // Hero interactive Tap Ready control
     const tapReady = screen.getByRole('button', { name: 'Tap Ready' });
     expect(tapReady).toHaveAttribute('aria-pressed', 'false');
     fireEvent.click(tapReady);
@@ -95,28 +95,49 @@ describe('Rennili landing page', () => {
       'true'
     );
 
-    // Bento interactive match code shuffler
-    const nextCode = screen.getByRole('button', { name: 'Next code' });
-    fireEvent.click(nextCode);
-    expect(await screen.findByText('318')).toBeInTheDocument();
-
-    // Bento interactive mini board toggle
-    const markReady = screen.getByRole('button', { name: 'Mark ready' });
-    expect(markReady).toHaveAttribute('aria-pressed', 'false');
-    fireEvent.click(markReady);
-    expect(screen.getByRole('button', { name: 'Reset' })).toHaveAttribute('aria-pressed', 'true');
-
-    // FAQ spring accordion toggle
     const secondQuestionButton = screen.getByRole('button', {
       name: 'Does it work with my existing POS, or without one?',
     });
     expect(secondQuestionButton).toHaveAttribute('aria-expanded', 'false');
-
     fireEvent.click(secondQuestionButton);
     expect(secondQuestionButton).toHaveAttribute('aria-expanded', 'true');
   });
 
-  it('links navigation items to dedicated SEO pages and shows target venues + RTYLR services', () => {
+  it('sets each plastic buzzer problem beside what replaces it', () => {
+    render(<Landing />);
+
+    const table = screen.getByRole('table');
+    const [head, ...rows] = within(table).getAllByRole('row');
+    expect(
+      within(head)
+        .getAllByRole('columnheader')
+        .map((cell) => cell.textContent)
+    ).toEqual(['Plastic pager rack', 'Rennili']);
+    expect(rows).toHaveLength(5);
+    expect(
+      within(rows[0])
+        .getAllByRole('cell')
+        .map((cell) => cell.textContent)
+    ).toEqual([
+      'Buy a full set upfront and keep replacing broken units',
+      'Nothing to buy: the guest brings the device',
+    ]);
+  });
+
+  it('keeps the match code shuffler and the mini board on the features page', async () => {
+    render(<FeaturesPage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next code' }));
+    expect(await screen.findByText('318')).toBeInTheDocument();
+
+    const markReady = screen.getByRole('button', { name: 'Mark ready' });
+    expect(markReady).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(markReady);
+    expect(screen.getByRole('button', { name: 'Reset' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('Coffee shops & cafés')).toBeInTheDocument();
+  });
+
+  it('links navigation items to dedicated SEO pages and shows the RTYLR services page', () => {
     render(<Landing />);
 
     const nav = screen.getByRole('navigation', { name: 'Main navigation' });
@@ -131,9 +152,10 @@ describe('Rennili landing page', () => {
     expect(within(nav).getByRole('link', { name: 'By RTYLR' })).toHaveAttribute('href', '/rtylr');
     expect(within(nav).getByRole('link', { name: 'FAQ' })).toHaveAttribute('href', '/faq');
 
-    // Target venues section near the top of the homepage
-    expect(screen.getByText('Coffee shops & cafés')).toBeInTheDocument();
-    expect(screen.getByText('Quick-service restaurants')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Explore RTYLR services/ })).toHaveAttribute(
+      'href',
+      '/rtylr'
+    );
 
     // Dedicated RTYLR services upsell page
     const { unmount } = render(<RtylrServicesPage />);

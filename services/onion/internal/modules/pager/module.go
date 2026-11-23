@@ -18,6 +18,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pager/internal/application"
 	"github.com/voxire/onion/internal/modules/pager/internal/domain"
 	moduleinfra "github.com/voxire/onion/internal/modules/pager/internal/infrastructure"
+	platformjobs "github.com/voxire/onion/internal/platform/jobs"
 	"github.com/voxire/onion/internal/platform/logger"
 	serverhttp "github.com/voxire/onion/internal/platform/server/http"
 	pagerv1 "github.com/voxire/voxie/gen/go/pager/v1"
@@ -76,10 +77,39 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := pagerv1.RegisterPagerServiceServer(
 		&api.PagerAPI{Service: m.service},
 		pagerv1.WithMux(mux),
-		pagerv1.WithMiddleware(rateLimit),
+		pagerv1.WithMiddleware(rateLimit, scanBudget()),
 		pagerv1.WithErrorWriter(api.WriteError),
 	); err != nil {
 		panic(fmt.Errorf("register pager service: %w", err))
+	}
+}
+
+// RegisterJobs schedules the sweep that closes tickets past their lifetime.
+func (m *Module) RegisterJobs(_ context.Context, registry *platformjobs.Registry) {
+	if registry == nil {
+		return
+	}
+	_ = registry.Register(platformjobs.Job{
+		Name:        "pager.sweep",
+		Description: "Close pager tickets past their lifetime and drop their push subscriptions.",
+		Schedule:    platformjobs.ScheduleFromEnv("PAGER_SWEEP_SCHEDULE", "*/15 * * * *"),
+		Handler:     m.service.Sweep,
+	})
+}
+
+// scanBudget limits each client's scans at a venue over an unlabelled ticket's
+// lifetime, on top of the contract's per-minute budget.
+func scanBudget() pagerv1.Middleware {
+	limit := serverhttp.PerRouteRateLimit(domain.MaxScansPerClient, domain.UnlabelledLifetime)
+	return func(next http.Handler) http.Handler {
+		limited := limit(next)
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if metadata, _ := pagerv1.RequestMetadataFromContext(r.Context()); metadata.Method == "scanTicket" {
+				limited.ServeHTTP(w, r)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
 	}
 }
 

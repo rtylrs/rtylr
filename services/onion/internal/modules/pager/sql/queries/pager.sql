@@ -36,6 +36,22 @@ SET status = 'expired'
 WHERE id = ? AND business_id = ? AND status IN ('waiting', 'ready') AND label_kind IS NULL
   AND created_at < sqlc.arg(unlabelled_since);
 
+-- name: ListPagerBusinessIDs :many
+SELECT business_id
+FROM pager_settings;
+
+-- name: ListStaleLabelledTicketIDs :many
+SELECT id
+FROM pager_tickets
+WHERE business_id = ? AND status IN ('waiting', 'ready') AND label_kind IS NOT NULL
+  AND created_at < sqlc.arg(open_since);
+
+-- name: ExpireStaleLabelledTicket :exec
+UPDATE pager_tickets
+SET status = 'expired'
+WHERE id = ? AND business_id = ? AND status IN ('waiting', 'ready') AND label_kind IS NOT NULL
+  AND created_at < sqlc.arg(open_since);
+
 -- name: ExpireStaleTicket :exec
 UPDATE pager_tickets
 SET status = 'expired'

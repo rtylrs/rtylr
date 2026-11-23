@@ -4,7 +4,7 @@ import { useParams } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
 import type { GetPublicTicketResponse } from '@voxire/voxie/pager/v1/types';
-import { SearchX } from 'lucide-react';
+import { Lock, SearchX } from 'lucide-react';
 import { readyAlarm } from '../../../../shared/alarm/readyAlarm';
 import { useAlarm } from '../../../../shared/alarm/useAlarm';
 import LanguageSwitch from '../../shared/components/LanguageSwitch';
@@ -12,21 +12,28 @@ import { ByRtylr, RenniliLogo, RenniliMark } from '../../shared/components/Renni
 import { VenueLogo } from '../../shared/components/VenueLogo';
 import MatchCode from '../../shared/components/MatchCode';
 import { DEPLOY_GAP_PATIENCE_MS } from '../../shared/lib/apiError';
-import { usePublicPagerClient } from '../../shared/lib/pagerClients';
-import { askPushPermission, followTicketByPush, usePushKey } from '../../shared/lib/pushAlerts';
+import { usePagerSandbox, usePublicPagerClient } from '../../shared/lib/pagerClients';
+import {
+  askPushPermission,
+  followTicketByPush,
+  iosTabWithoutPush,
+  usePushKey,
+} from '../../shared/lib/pushAlerts';
 import { ticketAlarmState } from '../../shared/lib/ticketAlarm';
 import { createTicketPoller, isOpenStatus, type TicketPoller } from '../../shared/lib/ticketPoller';
 
 // Shorter than the client's default so one stuck request on a weak signal
 // cannot hold up the polls behind it for half a minute.
 const POLL_TIMEOUT_MS = 10_000;
-const LONG_LABEL_LENGTH = 5;
 
 const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Element => {
   const { t, i18n } = useTranslation('pager');
   const { token: rawToken } = useParams({ strict: false });
   const token = givenToken ?? rawToken ?? '';
   const publicPagerClient = usePublicPagerClient();
+  const sandbox = usePagerSandbox();
+  // The demo phone is not the visitor's own, so it gets no device warning.
+  const [iosTab] = useState(() => !sandbox && iosTabWithoutPush());
   const alarm = useAlarm(readyAlarm);
   const pushKey = usePushKey();
   // Bumped by the "alert me" tap so a permission granted there subscribes.
@@ -153,6 +160,9 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
   const acknowledged = Boolean(ticket.acknowledgedAt) || answeredRing === ringMark;
   const ahead = ticket.ahead ?? 0;
   const labelled = Boolean(ticket.labelKind);
+  const labelSize: React.CSSProperties & { '--pager-label-chars': number } = {
+    '--pager-label-chars': Math.max(Array.from(label).length, 1),
+  };
   const code = ticket.code ?? '';
 
   const acknowledge = async (): Promise<void> => {
@@ -191,7 +201,8 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
             <VenueLogo src={ticket.venueLogoUrl} />
             <span>{ticket.venueName}</span>
           </p>
-          <LanguageSwitch />
+          {/* The demo page's own switch already changes both screens. */}
+          {!sandbox && <LanguageSwitch />}
         </div>
 
         <div className="pager-ticket">
@@ -202,13 +213,7 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
                   <span className="pager-order-label">{t('pager.ticket.orderLabel')}</span>{' '}
                 </>
               )}
-              <bdi
-                className={
-                  label.length > LONG_LABEL_LENGTH
-                    ? 'pager-order-number pager-order-number--long'
-                    : 'pager-order-number'
-                }
-              >
+              <bdi className="pager-order-number" style={labelSize}>
                 {label}
               </bdi>
             </h1>
@@ -290,6 +295,16 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
           </div>
         )}
 
+        {status === 'waiting' && iosTab && (
+          <div className="pager-warning" role="note">
+            <p className="pager-warning-title">
+              <Lock size={16} strokeWidth={2.4} aria-hidden="true" />
+              {t('pager.ticket.iphoneTitle')}
+            </p>
+            <p className="pager-warning-text">{t('pager.ticket.iphoneBody')}</p>
+          </div>
+        )}
+
         {/* The browser lets a page ring, buzz or ask to notify only after a tap,
             and the scan gave none, so this is the one tap the customer makes. */}
         {isOpenStatus(status) && !acknowledged && !alarm.unlocked && (
@@ -309,7 +324,9 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
           </div>
         )}
 
-        {status === 'waiting' && <p className="pager-text">{t('pager.ticket.keepOpen')}</p>}
+        {status === 'waiting' && !iosTab && (
+          <p className="pager-text">{t('pager.ticket.keepOpen')}</p>
+        )}
 
         {pollFailed && (
           <p className="pager-text" role="status">

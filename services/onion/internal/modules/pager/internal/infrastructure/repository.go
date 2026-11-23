@@ -96,6 +96,33 @@ func (r *Repository) ExpireStaleUnlabelled(ctx context.Context, businessID int64
 	return nil
 }
 
+func (r *Repository) BusinessIDs(ctx context.Context) ([]int64, error) {
+	return r.queries.ListPagerBusinessIDs(ctx)
+}
+
+// ExpireStaleLabelled goes through a plain read first, as ExpireStaleUnlabelled
+// does, so it never locks a venue's range of open tickets.
+func (r *Repository) ExpireStaleLabelled(ctx context.Context, businessID int64, openSince time.Time) error {
+	ids, err := r.queries.ListStaleLabelledTicketIDs(ctx, sqlc.ListStaleLabelledTicketIDsParams{
+		BusinessID: businessID,
+		OpenSince:  openSince,
+	})
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		err := r.queries.ExpireStaleLabelledTicket(ctx, sqlc.ExpireStaleLabelledTicketParams{
+			ID:         id,
+			BusinessID: businessID,
+			OpenSince:  openSince,
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (r *Repository) ExpireStaleTicket(ctx context.Context, businessID int64, number string, openSince time.Time) error {
 	return r.queries.ExpireStaleTicket(ctx, sqlc.ExpireStaleTicketParams{
 		BusinessID: businessID,

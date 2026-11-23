@@ -689,6 +689,70 @@ func TestRateLimitsComeFromTheContract(t *testing.T) {
 	}
 }
 
+// Reads already treat a ticket past its lifetime as expired; the sweep closes
+// it in storage too, at venues nobody has scanned at since.
+func TestSweepClosesTicketsPastTheirLifetime(t *testing.T) {
+	eachBackend(t, func(h *harness) {
+		h.enable(h.a)
+		unlabelled, _ := h.scanned(h.a)
+		number, _ := h.labelled(h.a, "42")
+		name, _ := h.labelled(h.a, "Sara")
+		h.clock.advance(domain.UnlabelledLifetime + time.Second)
+		recent, _ := h.labelled(h.a, "43")
+
+		h.sweep()
+		if got := h.storedStatus(unlabelled); got != domain.StatusExpired {
+			h.Fatalf("unlabelled ticket past 15 minutes is stored as %q, want expired", got)
+		}
+		if got := h.storedStatus(number); got != domain.StatusWaiting {
+			h.Fatalf("labelled ticket inside six hours is stored as %q, want waiting", got)
+		}
+
+		h.clock.advance(domain.OpenLifetime - domain.UnlabelledLifetime)
+		h.sweep()
+		for _, token := range []string{number, name} {
+			if got := h.storedStatus(token); got != domain.StatusExpired {
+				h.Fatalf("labelled ticket past six hours is stored as %q, want expired", got)
+			}
+		}
+		if got := h.storedStatus(recent); got != domain.StatusWaiting {
+			h.Fatalf("a ticket inside its lifetime is stored as %q, want waiting", got)
+		}
+	})
+}
+
+// One client looping the scan must not fill a venue's open unlabelled cap and
+// lock real customers out, so it gets a budget across an unlabelled ticket's
+// whole lifetime, not just the contract's per-minute one.
+func TestOneClientCannotFillAVenueWithScans(t *testing.T) {
+	h := newHarness(t, nil)
+	h.enable(h.a)
+	h.enable(h.b)
+	const phone = "203.0.113.7:5000"
+	scanPath := "/pager/v1/public/venues/" + h.a.slug + "/scan"
+
+	for i := range domain.MaxScansPerClient {
+		if r := h.callFrom(phone, nil, http.MethodPost, scanPath, "{}"); r.status != http.StatusOK {
+			t.Fatalf("scan %d = %d, want 200", i+1, r.status)
+		}
+	}
+	if r := h.callFrom(phone, nil, http.MethodPost, scanPath, "{}"); r.status != http.StatusTooManyRequests {
+		t.Fatalf("scan %d from one client = %d, want 429", domain.MaxScansPerClient+1, r.status)
+	}
+	// Other customers, and the same phone at another venue, still get in.
+	h.want(h.scan(h.a), http.StatusOK, "")
+	if r := h.callFrom(phone, nil, http.MethodPost, "/pager/v1/public/venues/"+h.b.slug+"/scan", "{}"); r.status != http.StatusOK {
+		t.Fatalf("same client at another venue = %d, want 200", r.status)
+	}
+	// Following a ticket is not a scan.
+	token, _ := h.scanned(h.a)
+	for range domain.MaxScansPerClient + 1 {
+		if r := h.callFrom(phone, nil, http.MethodGet, "/pager/v1/public/tickets/"+token, ""); r.status != http.StatusOK {
+			t.Fatalf("ticket poll = %d, want 200", r.status)
+		}
+	}
+}
+
 // The anonymous list is written by hand next to a generated route table, so
 // it is checked against the mounted routes behind the real bearer gate.
 func TestOnlyTheCustomerRoutesAreAnonymous(t *testing.T) {

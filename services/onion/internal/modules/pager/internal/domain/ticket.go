@@ -38,6 +38,11 @@ const UnlabelledLifetime = 15 * time.Minute
 // MaxOpenUnlabelledTickets bounds what anonymous scans can open at one venue.
 const MaxOpenUnlabelledTickets = 200
 
+// MaxScansPerClient is how many scans one client address gets at one venue
+// per UnlabelledLifetime, so it can hold at most that many open unlabelled
+// tickets and filling a venue's cap takes many addresses, not one loop.
+const MaxScansPerClient = 20
+
 // Match numbers are what a scanned phone shows the cashier: three digits while
 // any is free, four once every three digit number is taken. The open
 // unlabelled cap keeps a venue far below the 900 three digit numbers, so four
