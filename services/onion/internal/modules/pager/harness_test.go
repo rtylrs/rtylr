@@ -328,6 +328,11 @@ func (c *testClock) advance(d time.Duration) {
 type fakeBusinesses struct {
 	bySlug map[string]int64
 	names  map[int64]string
+	zones  map[int64]string
+}
+
+func (f *fakeBusinesses) ReportingTimezone(_ context.Context, businessID int64) (string, error) {
+	return f.zones[businessID], nil
 }
 
 func (f *fakeBusinesses) PublicBusinessBySlug(_ context.Context, slug string) (int64, string, string, error) {

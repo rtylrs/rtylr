@@ -6,6 +6,10 @@ export const PAGER_ERROR = {
   labelTaken: 'label_taken',
   invalidTransition: 'invalid_transition',
   tooManyOpenTickets: 'too_many_open_tickets',
+  joinByNumberOff: 'join_by_number_off',
+  typeYourNumber: 'type_your_number',
+  invalidReviewUrl: 'invalid_review_url',
+  invalidPrepMinutes: 'invalid_prep_minutes',
 } as const;
 
 /** Generated clients throw an `ApiError` carrying `statusCode` and `code`. */

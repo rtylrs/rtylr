@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
@@ -6,6 +6,7 @@ import { EmptyState } from '@voxire/ui';
 import { helpers } from '@voxire/utils';
 import { BellOff } from 'lucide-react';
 import { pagerTicketPath } from '../../pagerPaths';
+import { normaliseTicketNumber } from '../../shared/lib/ticketNumber';
 import {
   DEPLOY_GAP_ATTEMPTS,
   DEPLOY_GAP_FIRST_DELAY_MS,
@@ -15,16 +16,101 @@ import {
   isTransient,
 } from '../../shared/lib/apiError';
 import { usePagerSandbox, usePublicPagerClient } from '../../shared/lib/pagerClients';
-import { openScanTicket } from '../../shared/lib/scanSession';
+import { openScanTicket, rememberScan } from '../../shared/lib/scanSession';
 
-type ScanState = 'scanning' | 'unavailable' | 'venueBusy' | 'tooManyAttempts' | 'failed';
+type ScanState =
+  'scanning' | 'askNumber' | 'unavailable' | 'venueBusy' | 'tooManyAttempts' | 'failed';
 
 function stateFor(error: unknown): ScanState {
   if (errorCode(error) === PAGER_ERROR.venueNotFound) return 'unavailable';
+  // The venue has customers type their receipt number instead.
+  if (errorCode(error) === PAGER_ERROR.typeYourNumber) return 'askNumber';
   // Also a 429, but about the venue's queue rather than this phone's attempts.
   if (errorCode(error) === PAGER_ERROR.tooManyOpenTickets) return 'venueBusy';
   if (errorStatus(error) === 429) return 'tooManyAttempts';
   return 'failed';
+}
+
+type JoinError = 'numberTaken' | 'numberInvalid' | 'venueBusy' | 'tooManyAttempts' | 'failed';
+
+function joinErrorFor(error: unknown): JoinError {
+  switch (errorCode(error)) {
+    case PAGER_ERROR.labelTaken:
+      return 'numberTaken';
+    case PAGER_ERROR.invalidLabel:
+      return 'numberInvalid';
+    case PAGER_ERROR.tooManyOpenTickets:
+      return 'venueBusy';
+  }
+  return errorStatus(error) === 429 ? 'tooManyAttempts' : 'failed';
+}
+
+interface NumberFormProps {
+  slug: string;
+  remember: boolean;
+  onJoined: (publicToken: string) => void;
+}
+
+/** At a venue whose customers type the order number printed on their receipt. */
+function NumberForm({ slug, remember, onJoined }: NumberFormProps): React.JSX.Element {
+  const { t } = useTranslation('pager');
+  const client = usePublicPagerClient();
+  const inputId = useId();
+  const [value, setValue] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<JoinError | null>(null);
+
+  const join = async (): Promise<void> => {
+    setBusy(true);
+    setError(null);
+    try {
+      const { publicToken } = await client.joinTicket({ slug, number: value });
+      if (!publicToken) throw new Error('The pager answered without a ticket token');
+      if (remember) rememberScan(slug, publicToken);
+      onJoined(publicToken);
+    } catch (failure) {
+      setError(joinErrorFor(failure));
+      setBusy(false);
+    }
+  };
+
+  return (
+    <form
+      className="pager-number-form"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (value && !busy) void join();
+      }}
+    >
+      <h1 className="pager-status">{t('pager.scan.numberTitle')}</h1>
+      <p className="pager-text">{t('pager.scan.numberHint')}</p>
+      <label htmlFor={inputId} className="sr-only">
+        {t('pager.scan.numberLabel')}
+      </label>
+      <input
+        id={inputId}
+        className="pager-number-input"
+        dir="ltr"
+        inputMode="numeric"
+        enterKeyHint="go"
+        autoComplete="off"
+        autoCapitalize="characters"
+        spellCheck={false}
+        maxLength={12}
+        value={value}
+        aria-invalid={error === 'numberInvalid' || error === 'numberTaken'}
+        onChange={(event) => setValue(normaliseTicketNumber(event.target.value))}
+      />
+      {error && (
+        <p className="pager-error" role="alert">
+          {t(`pager.scan.${error}`)}
+        </p>
+      )}
+      <button type="submit" className="pager-button" disabled={!value || busy}>
+        {t('pager.scan.numberSubmit')}
+      </button>
+    </form>
+  );
 }
 
 interface ScanProps {
@@ -102,6 +188,22 @@ const Scan = ({ slug: givenSlug, onScanned }: ScanProps = {}): React.JSX.Element
           icon={BellOff}
           title={t('pager.scan.venueNotFoundTitle')}
           description={t('pager.scan.venueNotFoundDescription')}
+        />
+      </div>
+    );
+  }
+
+  if (state === 'askNumber') {
+    return (
+      <div className="pager-center">
+        <HelmetContainer title={t('pager.scan.pageTitle')} />
+        <NumberForm
+          slug={slug}
+          remember={!sandbox}
+          onJoined={(publicToken) => {
+            if (onScanned) onScanned(publicToken);
+            else void navigate({ to: pagerTicketPath(publicToken), replace: true });
+          }}
         />
       </div>
     );

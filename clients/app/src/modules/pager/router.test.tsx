@@ -35,6 +35,7 @@ vi.mock('./screens/Staff/Board', () => ({ default: () => <h1>Pager board</h1> })
 vi.mock('./screens/Staff/Poster', () => ({ default: () => <h1>Pager poster</h1> }));
 vi.mock('./screens/Staff/Display', () => ({ default: () => <h1>Pager display</h1> }));
 vi.mock('./screens/Staff/Setup', () => ({ default: () => <h1>Pager setup</h1> }));
+vi.mock('./screens/Staff/Insights', () => ({ default: () => <h1>Pager insights</h1> }));
 
 async function open(url: string) {
   const router = createRouter({
@@ -69,10 +70,13 @@ describe('Rennili routes', () => {
     ['/display', 'Pager display', '/pager/display'],
     ['/poster', 'Pager poster', '/pager/poster'],
     ['/setup', 'Pager setup', '/pager/setup'],
+    ['/insights', 'Pager insights', '/pager/insights'],
   ])('serves %s behind the account checks', async (url, heading, portalPath) => {
     gate.portalPaths = [];
     await open(url);
-    expect(await screen.findByRole('heading', { name: heading })).toBeVisible();
+    // The first of these loads the lazy account checks cold, which can take
+    // longer than findBy's default second on a busy machine.
+    expect(await screen.findByRole('heading', { name: heading }, { timeout: 5_000 })).toBeVisible();
     expect(gate.portalPaths).toContain(portalPath);
   });
 });

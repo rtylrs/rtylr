@@ -28,9 +28,10 @@ func (a *PagerAPI) GetPublicVenue(ctx context.Context, req *pagerv1.GetPublicVen
 		return nil, publicError(ctx, "get public venue", err)
 	}
 	return &pagerv1.GetPublicVenueResponse{
-		Name:    venue.Name,
-		LogoUrl: venue.LogoURL,
-		Enabled: settings.Enabled,
+		Name:            venue.Name,
+		LogoUrl:         venue.LogoURL,
+		Enabled:         settings.Enabled,
+		CustomerNumbers: settings.CustomerNumbers,
 	}, nil
 }
 
@@ -46,23 +47,38 @@ func (a *PagerAPI) ScanTicket(ctx context.Context, req *pagerv1.ScanTicketReques
 	}, nil
 }
 
+func (a *PagerAPI) JoinTicket(ctx context.Context, req *pagerv1.JoinTicketRequest) (*pagerv1.JoinTicketResponse, error) {
+	ticket, err := a.Service.JoinByNumber(ctx, req.GetSlug(), req.GetNumber())
+	if err != nil {
+		return nil, publicError(ctx, "join ticket", err)
+	}
+	return &pagerv1.JoinTicketResponse{
+		PublicToken: ticket.PublicToken,
+		Label:       ticket.Label,
+		Status:      ticket.Status,
+	}, nil
+}
+
 func (a *PagerAPI) GetPublicTicket(ctx context.Context, req *pagerv1.GetPublicTicketRequest) (*pagerv1.GetPublicTicketResponse, error) {
 	view, err := a.Service.PublicTicket(ctx, req.GetPublicToken())
 	if err != nil {
 		return nil, publicError(ctx, "get public ticket", err)
 	}
 	return &pagerv1.GetPublicTicketResponse{
-		Label:          view.Ticket.Label,
-		LabelKind:      view.Ticket.LabelKind,
-		Code:           shownCode(view.Ticket),
-		Status:         view.Ticket.Status,
-		VenueName:      view.VenueName,
-		VenueLogoUrl:   view.VenueLogoURL,
-		Ahead:          int32(view.Ahead),
-		ReadyAt:        timestamp(view.Ticket.ReadyAt),
-		RemindedAt:     timestamp(view.Ticket.RemindedAt),
-		AcknowledgedAt: timestamp(view.Ticket.AcknowledgedAt),
-		ServerTime:     timestamp(view.ServerTime),
+		Label:           view.Ticket.Label,
+		LabelKind:       view.Ticket.LabelKind,
+		Code:            shownCode(view.Ticket),
+		Status:          view.Ticket.Status,
+		VenueName:       view.VenueName,
+		VenueLogoUrl:    view.VenueLogoURL,
+		Ahead:           int32(view.Ahead),
+		ReadyAt:         timestamp(view.Ticket.ReadyAt),
+		RemindedAt:      timestamp(view.Ticket.RemindedAt),
+		AcknowledgedAt:  timestamp(view.Ticket.AcknowledgedAt),
+		ExpectedReadyAt: timestamp(view.Ticket.ExpectedReadyAt),
+		ReviewUrl:       view.ReviewURL,
+		Ringtone:        view.Ringtone,
+		ServerTime:      timestamp(view.ServerTime),
 	}, nil
 }
 
@@ -107,7 +123,7 @@ func (a *PagerAPI) ListTickets(ctx context.Context, _ *pagerv1.ListTicketsReques
 
 func (a *PagerAPI) LabelTicket(ctx context.Context, req *pagerv1.LabelTicketRequest) (*pagerv1.LabelTicketResponse, error) {
 	ticket, err := a.move(ctx, "label ticket", req.GetId(), func(ctx context.Context, businessID, id int64) (domain.Ticket, error) {
-		return a.Service.Label(ctx, businessID, id, req.GetLabel())
+		return a.Service.Label(ctx, businessID, id, req.GetLabel(), intOrNil(req.PrepMinutes))
 	})
 	if err != nil {
 		return nil, err
@@ -169,7 +185,14 @@ func (a *PagerAPI) GetSettings(ctx context.Context, _ *pagerv1.GetSettingsReques
 	if err != nil {
 		return nil, publicError(ctx, "get settings", err)
 	}
-	return &pagerv1.GetSettingsResponse{Enabled: settings.Enabled, LabelMode: settings.LabelMode}, nil
+	return &pagerv1.GetSettingsResponse{
+		Enabled:         settings.Enabled,
+		LabelMode:       settings.LabelMode,
+		ReviewUrl:       settings.ReviewURL,
+		PrepMinutes:     int32(settings.PrepMinutes),
+		CustomerNumbers: settings.CustomerNumbers,
+		Ringtone:        settings.Ringtone,
+	}, nil
 }
 
 // UpdateSettings is for owners and admins: turning the pager on publishes the
@@ -182,11 +205,72 @@ func (a *PagerAPI) UpdateSettings(ctx context.Context, req *pagerv1.UpdateSettin
 	if !authPkg.IsBusinessAdmin(authPkg.DeviceCtx(ctx).User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	settings, err := a.Service.UpdateSettings(ctx, businessID, req.Enabled, req.LabelMode)
+	settings, err := a.Service.UpdateSettings(ctx, businessID, application.SettingsPatch{
+		Enabled:         req.Enabled,
+		LabelMode:       req.LabelMode,
+		ReviewURL:       req.ReviewUrl,
+		PrepMinutes:     intOrNil(req.PrepMinutes),
+		CustomerNumbers: req.CustomerNumbers,
+		Ringtone:        req.Ringtone,
+	})
 	if err != nil {
 		return nil, publicError(ctx, "update settings", err)
 	}
-	return &pagerv1.UpdateSettingsResponse{Enabled: settings.Enabled, LabelMode: settings.LabelMode}, nil
+	return &pagerv1.UpdateSettingsResponse{
+		Enabled:         settings.Enabled,
+		LabelMode:       settings.LabelMode,
+		ReviewUrl:       settings.ReviewURL,
+		PrepMinutes:     int32(settings.PrepMinutes),
+		CustomerNumbers: settings.CustomerNumbers,
+		Ringtone:        settings.Ringtone,
+	}, nil
+}
+
+// GetStats is for any member of the business, like the board itself.
+func (a *PagerAPI) GetStats(ctx context.Context, req *pagerv1.GetStatsRequest) (*pagerv1.GetStatsResponse, error) {
+	businessID, err := staffBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	days := 0
+	if req.Days != nil {
+		days = int(*req.Days)
+	}
+	stats, err := a.Service.Stats(ctx, businessID, days)
+	if err != nil {
+		return nil, publicError(ctx, "get stats", err)
+	}
+	byHour := make([]int32, len(stats.ByHour))
+	for hour, orders := range stats.ByHour {
+		byHour[hour] = int32(orders)
+	}
+	byDay := make([]*pagerv1.DayCount, 0, len(stats.ByDay))
+	for _, day := range stats.ByDay {
+		byDay = append(byDay, &pagerv1.DayCount{Date: day.Date, Orders: int32(day.Orders)})
+	}
+	return &pagerv1.GetStatsResponse{
+		Days:               int32(stats.Days),
+		Timezone:           stats.Timezone,
+		Orders:             int32(stats.Orders),
+		ReadyOrders:        int32(stats.ReadyOrders),
+		AvgWaitSeconds:     seconds(stats.AvgWait),
+		MedianWaitSeconds:  seconds(stats.MedianWait),
+		LongestWaitSeconds: seconds(stats.LongestWait),
+		ByHour:             byHour,
+		ByDay:              byDay,
+	}, nil
+}
+
+func seconds(d time.Duration) int32 {
+	return int32(d.Round(time.Second) / time.Second)
+}
+
+func intOrNil(value *int32) *int {
+	if value == nil {
+		return nil
+	}
+	n := int(*value)
+	return &n
 }
 
 // staffBusinessID is the business of the signed-in caller, verified against
@@ -205,15 +289,16 @@ func staffBusinessID(ctx context.Context) (int64, error) {
 
 func toTicket(ticket domain.Ticket) *pagerv1.Ticket {
 	return &pagerv1.Ticket{
-		Id:             ticket.ID,
-		Label:          ticket.Label,
-		LabelKind:      ticket.LabelKind,
-		Code:           shownCode(ticket),
-		Status:         ticket.Status,
-		CreatedAt:      timestamp(ticket.CreatedAt),
-		ReadyAt:        timestamp(ticket.ReadyAt),
-		RemindedAt:     timestamp(ticket.RemindedAt),
-		AcknowledgedAt: timestamp(ticket.AcknowledgedAt),
+		Id:              ticket.ID,
+		Label:           ticket.Label,
+		LabelKind:       ticket.LabelKind,
+		Code:            shownCode(ticket),
+		Status:          ticket.Status,
+		CreatedAt:       timestamp(ticket.CreatedAt),
+		ReadyAt:         timestamp(ticket.ReadyAt),
+		RemindedAt:      timestamp(ticket.RemindedAt),
+		AcknowledgedAt:  timestamp(ticket.AcknowledgedAt),
+		ExpectedReadyAt: timestamp(ticket.ExpectedReadyAt),
 	}
 }
 

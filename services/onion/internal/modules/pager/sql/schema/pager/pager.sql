@@ -5,6 +5,10 @@ CREATE TABLE IF NOT EXISTS `pager_settings` (
   `enabled` tinyint(1) NOT NULL DEFAULT '0',
   `strict` tinyint(1) NOT NULL DEFAULT '0',
   `label_mode` varchar(8) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT 'either',
+  `review_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `prep_minutes` smallint NOT NULL DEFAULT '0',
+  `customer_numbers` tinyint(1) NOT NULL DEFAULT '0',
+  `ringtone` varchar(16) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT 'bell',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`business_id`)
@@ -40,6 +44,7 @@ CREATE TABLE IF NOT EXISTS `pager_tickets` (
   `ready_at` timestamp(3) NULL DEFAULT NULL,
   `reminded_at` timestamp(3) NULL DEFAULT NULL,
   `acknowledged_at` timestamp(3) NULL DEFAULT NULL,
+  `expected_ready_at` timestamp(3) NULL DEFAULT NULL,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `open_number` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci GENERATED ALWAYS AS (CASE WHEN `status` IN ('waiting','ready') THEN `number` ELSE NULL END) VIRTUAL,
   `open_match_code` char(2) CHARACTER SET ascii COLLATE ascii_bin GENERATED ALWAYS AS (CASE WHEN `status` IN ('waiting','ready') AND `label_kind` IS NULL THEN `match_code` ELSE NULL END) VIRTUAL,

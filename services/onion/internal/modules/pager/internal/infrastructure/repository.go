@@ -30,15 +30,75 @@ func (r *Repository) Settings(ctx context.Context, businessID int64) (domain.Set
 	if err != nil {
 		return domain.Settings{}, err
 	}
-	return domain.Settings{Enabled: row.Enabled, LabelMode: row.LabelMode}, nil
+	return domain.Settings{
+		Enabled:         row.Enabled,
+		LabelMode:       row.LabelMode,
+		ReviewURL:       row.ReviewUrl.String,
+		PrepMinutes:     int(row.PrepMinutes),
+		CustomerNumbers: row.CustomerNumbers,
+		Ringtone:        row.Ringtone,
+	}, nil
 }
 
 func (r *Repository) SaveSettings(ctx context.Context, businessID int64, settings domain.Settings) error {
 	return r.queries.UpsertSettings(ctx, sqlc.UpsertSettingsParams{
-		BusinessID: businessID,
-		Enabled:    settings.Enabled,
-		LabelMode:  settings.LabelMode,
+		BusinessID:      businessID,
+		Enabled:         settings.Enabled,
+		LabelMode:       settings.LabelMode,
+		ReviewUrl:       sql.NullString{String: settings.ReviewURL, Valid: settings.ReviewURL != ""},
+		PrepMinutes:     int16(settings.PrepMinutes),
+		CustomerNumbers: settings.CustomerNumbers,
+		Ringtone:        settings.Ringtone,
 	})
+}
+
+// CreateNumberTicket opens a ticket labelled with the number a customer typed.
+// uk_pager_tickets_open_number refuses one that already has an open ticket.
+func (r *Repository) CreateNumberTicket(ctx context.Context, ticket domain.Ticket) (domain.Ticket, error) {
+	result, err := r.queries.CreateNumberTicket(ctx, sqlc.CreateNumberTicketParams{
+		BusinessID:      ticket.BusinessID,
+		Number:          sql.NullString{String: ticket.Label, Valid: true},
+		Label:           sql.NullString{String: ticket.Label, Valid: true},
+		PublicToken:     ticket.PublicToken,
+		CreatedAt:       ticket.CreatedAt,
+		ExpectedReadyAt: nullTime(ticket.ExpectedReadyAt),
+	})
+	if isDuplicate(err) {
+		return domain.Ticket{}, domain.ErrLabelTaken
+	}
+	if err != nil {
+		return domain.Ticket{}, err
+	}
+	ticket.ID, err = result.LastInsertId()
+	if err != nil {
+		return domain.Ticket{}, err
+	}
+	ticket.LabelKind = domain.LabelNumber
+	ticket.Status = domain.StatusWaiting
+	return ticket, nil
+}
+
+func (r *Repository) CountOpenTickets(ctx context.Context, businessID int64, openSince, unlabelledSince time.Time) (int64, error) {
+	return r.queries.CountOpenTickets(ctx, sqlc.CountOpenTicketsParams{
+		BusinessID:      businessID,
+		OpenSince:       openSince,
+		UnlabelledSince: unlabelledSince,
+	})
+}
+
+func (r *Repository) TicketTimes(ctx context.Context, businessID int64, since time.Time) ([]domain.TicketTimes, error) {
+	rows, err := r.queries.ListLabelledTicketTimes(ctx, sqlc.ListLabelledTicketTimesParams{
+		BusinessID: businessID,
+		Since:      since,
+	})
+	if err != nil {
+		return nil, err
+	}
+	times := make([]domain.TicketTimes, 0, len(rows))
+	for _, row := range rows {
+		times = append(times, domain.TicketTimes{CreatedAt: row.CreatedAt, ReadyAt: row.ReadyAt.Time})
+	}
+	return times, nil
 }
 
 // CreateTicket relies on uk_pager_tickets_open_match_number: a second open
@@ -166,11 +226,12 @@ func (r *Repository) CountWaitingAhead(ctx context.Context, businessID, id int64
 
 // Label relies on uk_pager_tickets_open_number for a number. Only a number
 // fills the number column, so names repeat freely.
-func (r *Repository) Label(ctx context.Context, businessID, id int64, label, kind string, openSince, unlabelledSince time.Time) error {
+func (r *Repository) Label(ctx context.Context, businessID, id int64, label, kind string, expectedReadyAt, openSince, unlabelledSince time.Time) error {
 	err := r.queries.LabelTicket(ctx, sqlc.LabelTicketParams{
 		Label:           sql.NullString{String: label, Valid: true},
 		LabelKind:       sql.NullString{String: kind, Valid: true},
 		Number:          sql.NullString{String: label, Valid: kind == domain.LabelNumber},
+		ExpectedReadyAt: nullTime(expectedReadyAt),
 		ID:              id,
 		BusinessID:      businessID,
 		OpenSince:       openSince,
@@ -254,16 +315,22 @@ func matchOf(row sqlc.GetTicketRow) string {
 // columns, so their row types convert to sqlc.GetTicketRow.
 func ticketFromRow(row sqlc.GetTicketRow) domain.Ticket {
 	return domain.Ticket{
-		ID:             row.ID,
-		BusinessID:     row.BusinessID,
-		Label:          row.Label.String,
-		LabelKind:      row.LabelKind.String,
-		Code:           matchOf(row),
-		Status:         row.Status,
-		PublicToken:    row.PublicToken,
-		CreatedAt:      row.CreatedAt,
-		ReadyAt:        row.ReadyAt.Time,
-		RemindedAt:     row.RemindedAt.Time,
-		AcknowledgedAt: row.AcknowledgedAt.Time,
+		ID:              row.ID,
+		BusinessID:      row.BusinessID,
+		Label:           row.Label.String,
+		LabelKind:       row.LabelKind.String,
+		Code:            matchOf(row),
+		Status:          row.Status,
+		PublicToken:     row.PublicToken,
+		CreatedAt:       row.CreatedAt,
+		ReadyAt:         row.ReadyAt.Time,
+		RemindedAt:      row.RemindedAt.Time,
+		AcknowledgedAt:  row.AcknowledgedAt.Time,
+		ExpectedReadyAt: row.ExpectedReadyAt.Time,
 	}
+}
+
+// nullTime stores a zero time as NULL.
+func nullTime(t time.Time) sql.NullTime {
+	return sql.NullTime{Time: t, Valid: !t.IsZero()}
 }

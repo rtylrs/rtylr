@@ -27,6 +27,12 @@ interface PagerService {
   @Onkt.meta("rate_limit", "60/m")
   scanTicket(...ScanTicketRequest): ScanTicketResponse;
 
+  /** Opens a ticket from the number on the customer's receipt, when the venue allows it. */
+  @post
+  @route("/public/venues/{slug}/join")
+  @Onkt.meta("rate_limit", "60/m")
+  joinTicket(...JoinTicketRequest): JoinTicketResponse;
+
   /** Returns the ticket a phone is following. Polled every few seconds. */
   @get
   @route("/public/tickets/{public_token}")
@@ -81,6 +87,11 @@ interface PagerService {
   @post
   @route("/tickets/{id}/collect")
   collectTicket(...CollectTicketRequest): CollectTicketResponse;
+
+  /** How the business's orders went: counts, waits and busy hours. */
+  @get
+  @route("/stats")
+  getStats(...GetStatsRequest): GetStatsResponse;
 
   /** Returns the business's pager settings. */
   @get

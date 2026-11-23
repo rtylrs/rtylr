@@ -235,7 +235,7 @@ test.describe('Pager (staff board)', () => {
     const label = page.getByLabel('Order number for code 427');
     await expect(label).toHaveAttribute('inputmode', 'numeric');
     await label.fill('42');
-    await page.getByRole('button', { name: 'Save' }).click();
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
 
     await expect(page.getByRole('heading', { name: 'Waiting (2)' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'New phones (0)' })).toBeVisible();

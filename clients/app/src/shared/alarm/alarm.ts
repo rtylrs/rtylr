@@ -31,6 +31,11 @@ export interface AlarmState {
   ringKey: string | null;
   /** Alternates with the page title while ringing. */
   title?: string;
+  /**
+   * The sound to ring with; the alarm's bellSrc when absent. Swapped on the
+   * same element the tap unlocked, which is what lets an iPhone play it later.
+   */
+  bellSrc?: string;
 }
 
 export interface AlarmSnapshot {
@@ -86,6 +91,7 @@ export function createAlarm(options: AlarmOptions): Alarm {
   };
 
   let bell: HTMLAudioElement | null = null;
+  let bellSrc = options.bellSrc;
   let context: AudioContext | null = null;
   let chimeVoices: OscillatorNode[] = [];
   let lastRingKey: string | null = null;
@@ -115,7 +121,7 @@ export function createAlarm(options: AlarmOptions): Alarm {
     }
 
     try {
-      bell ??= createAudio(options.bellSrc);
+      bell ??= createAudio(bellSrc);
       bell.preload = 'auto';
       // While ringing, the restart below plays the bell out loud instead.
       if (!snapshot.ringing) {
@@ -219,7 +225,7 @@ export function createAlarm(options: AlarmOptions): Alarm {
     }
 
     try {
-      bell ??= createAudio(options.bellSrc);
+      bell ??= createAudio(bellSrc);
       const audio = bell;
       audio.onended = () => next(RING_GAP_MS);
       audio.muted = false;
@@ -332,8 +338,20 @@ export function createAlarm(options: AlarmOptions): Alarm {
     }
   }
 
+  function setBellSrc(src: string): void {
+    if (src === bellSrc) return;
+    bellSrc = src;
+    if (!bell) return;
+    try {
+      bell.src = src;
+    } catch {
+      // Keeps the sound it had.
+    }
+  }
+
   function sync(state: AlarmState): void {
     flashTitle = state.title ?? '';
+    setBellSrc(state.bellSrc ?? options.bellSrc);
     setKeepAwake(state.keepAwake);
     if (state.ringKey === null) {
       stopRing();

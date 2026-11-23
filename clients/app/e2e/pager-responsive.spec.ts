@@ -176,7 +176,7 @@ test.describe('Rennili on phones and tablets', () => {
     const label = page.getByRole('textbox', { name: /for code/ });
     expect((await label.boundingBox())?.width).toBeGreaterThan(120);
     for (const button of [
-      page.getByRole('button', { name: 'Save' }),
+      page.getByRole('button', { name: 'Save', exact: true }),
       page.getByRole('button', { name: 'Ready: 1234567890AB' }),
       page.getByRole('button', { name: 'Collected: Sara' }),
     ]) {

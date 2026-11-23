@@ -25,11 +25,13 @@ import (
 )
 
 // BusinessDirectory is what the pager reads from the business module: the
-// slug lookup the public menu uses, and the public profile by id. Both return
-// sql.ErrNoRows for an unknown or inactive business.
+// slug lookup the public menu uses, the public profile by id, and the zone
+// its reports count days in. The first two return sql.ErrNoRows for an
+// unknown or inactive business.
 type BusinessDirectory interface {
 	PublicBusinessBySlug(ctx context.Context, slug string) (id int64, name, logoURL string, err error)
 	PublicBusinessByID(ctx context.Context, businessID int64) (name, logoURL string, err error)
+	ReportingTimezone(ctx context.Context, businessID int64) (string, error)
 }
 
 type Module struct {
@@ -97,14 +99,14 @@ func (m *Module) RegisterJobs(_ context.Context, registry *platformjobs.Registry
 	})
 }
 
-// scanBudget limits each client's scans at a venue over an unlabelled ticket's
-// lifetime, on top of the contract's per-minute budget.
+// scanBudget limits each client's scans and typed-number joins at a venue over
+// an unlabelled ticket's lifetime, on top of the contract's per-minute budget.
 func scanBudget() pagerv1.Middleware {
 	limit := serverhttp.PerRouteRateLimit(domain.MaxScansPerClient, domain.UnlabelledLifetime)
 	return func(next http.Handler) http.Handler {
 		limited := limit(next)
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if metadata, _ := pagerv1.RequestMetadataFromContext(r.Context()); metadata.Method == "scanTicket" {
+			if metadata, _ := pagerv1.RequestMetadataFromContext(r.Context()); metadata.Method == "scanTicket" || metadata.Method == "joinTicket" {
 				limited.ServeHTTP(w, r)
 				return
 			}
@@ -119,6 +121,7 @@ func (m *Module) GetAnonymousRoutes() []string {
 	return []string{
 		"/pager/v1/public/venues/{slug}",
 		"/pager/v1/public/venues/{slug}/scan",
+		"/pager/v1/public/venues/{slug}/join",
 		"/pager/v1/public/tickets/{public_token}",
 		"/pager/v1/public/tickets/{public_token}/acknowledge",
 		"/pager/v1/public/push-key",
@@ -145,6 +148,10 @@ func (v venues) VenueByID(ctx context.Context, businessID int64) (domain.Venue, 
 		return domain.Venue{}, venueError(err)
 	}
 	return domain.Venue{BusinessID: businessID, Name: name, LogoURL: logoURL}, nil
+}
+
+func (v venues) Timezone(ctx context.Context, businessID int64) (string, error) {
+	return v.businesses.ReportingTimezone(ctx, businessID)
 }
 
 func venueError(err error) error {

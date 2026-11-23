@@ -4,6 +4,8 @@ package domain
 
 import (
 	"errors"
+	"net/url"
+	"slices"
 	"strings"
 	"time"
 	"unicode"
@@ -38,6 +40,16 @@ const UnlabelledLifetime = 15 * time.Minute
 // MaxOpenUnlabelledTickets bounds what anonymous scans can open at one venue.
 const MaxOpenUnlabelledTickets = 200
 
+// MaxOpenTickets bounds what customers typing their receipt number can open
+// at one venue, labelled or not.
+const MaxOpenTickets = 300
+
+// MaxPrepMinutes is the longest ready-time estimate a venue or cashier can give.
+const MaxPrepMinutes = 120
+
+// maxReviewURLLength fits pager_settings.review_url.
+const maxReviewURLLength = 500
+
 // MaxScansPerClient is how many scans one client address gets at one venue
 // per UnlabelledLifetime, so it can hold at most that many open unlabelled
 // tickets and filling a venue's cap takes many addresses, not one loop.
@@ -71,6 +83,13 @@ var (
 	// ErrCodeTaken is the storage layer reporting that another open
 	// unlabelled ticket already shows the match number.
 	ErrCodeTaken = errors.New("pager match number already in use")
+	// ErrJoinByNumberOff means the venue has customers scan, not type a number.
+	ErrJoinByNumberOff = errors.New("pager venue does not take typed numbers")
+	// ErrTypeNumber means the venue has customers type their number, not scan.
+	ErrTypeNumber       = errors.New("pager venue takes typed numbers instead of scans")
+	ErrInvalidReviewURL = errors.New("pager review link is invalid")
+	ErrInvalidPrepTime  = errors.New("pager prep minutes are invalid")
+	ErrInvalidRingtone  = errors.New("pager ringtone is unknown")
 )
 
 // Ticket is one phone waiting for its order. Label and LabelKind are empty
@@ -90,6 +109,8 @@ type Ticket struct {
 	ReadyAt        time.Time
 	RemindedAt     time.Time
 	AcknowledgedAt time.Time
+	// ExpectedReadyAt is the venue's estimate, zero when it gave none.
+	ExpectedReadyAt time.Time
 }
 
 func (t Ticket) Labelled() bool {
@@ -134,11 +155,64 @@ type Settings struct {
 	Enabled bool
 	// LabelMode is what the cashier labels a ticket with.
 	LabelMode string
+	// ReviewURL is the venue's review page, offered after pickup; empty when unset.
+	ReviewURL string
+	// PrepMinutes is the usual time from label to ready; 0 gives no estimate.
+	PrepMinutes int
+	// CustomerNumbers has customers type their receipt number instead of
+	// scanning for a code the cashier labels.
+	CustomerNumbers bool
+	// Ringtone is the sound the venue's customers' phones ring with; each
+	// customer can pick another on their own phone.
+	Ringtone string
+}
+
+// DefaultRingtone is the bell the pager always rang with.
+const DefaultRingtone = "bell"
+
+// Ringtones are the sounds the customer pages ship, by name.
+var Ringtones = []string{DefaultRingtone, "chime", "marimba", "ring", "beep"}
+
+func ValidRingtone(name string) bool {
+	return slices.Contains(Ringtones, name)
 }
 
 // DefaultSettings is what a business that never saved any has.
 func DefaultSettings() Settings {
-	return Settings{LabelMode: LabelModeEither}
+	return Settings{LabelMode: LabelModeEither, Ringtone: DefaultRingtone}
+}
+
+// ValidPrepMinutes reports whether minutes is an estimate the pager accepts.
+func ValidPrepMinutes(minutes int) bool {
+	return minutes >= 0 && minutes <= MaxPrepMinutes
+}
+
+// ExpectedReady is the estimate for an order labelled at now, zero for none.
+func ExpectedReady(now time.Time, minutes int) time.Time {
+	if minutes <= 0 {
+		return time.Time{}
+	}
+	return now.Add(time.Duration(minutes) * time.Minute)
+}
+
+// NormalizeReviewURL checks a venue's review link: empty clears it, otherwise
+// an absolute https URL with a host, since customers open it from the venue's
+// page.
+func NormalizeReviewURL(raw string) (string, error) {
+	link := strings.TrimSpace(raw)
+	if link == "" {
+		return "", nil
+	}
+	u, err := url.Parse(link)
+	if err != nil || u.Scheme != "https" || u.Host == "" || u.User != nil || len(link) > maxReviewURLLength {
+		return "", ErrInvalidReviewURL
+	}
+	return link, nil
+}
+
+// ParseOrderNumber reads a number a customer typed from their receipt.
+func ParseOrderNumber(raw string) (string, error) {
+	return orderNumber(raw)
 }
 
 func ValidLabelMode(mode string) bool {
