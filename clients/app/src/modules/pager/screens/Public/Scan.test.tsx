@@ -12,7 +12,11 @@ vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => navigateSpy,
 }));
 
-const api = vi.hoisted(() => ({ scanTicket: vi.fn(), getPublicTicket: vi.fn() }));
+const api = vi.hoisted(() => ({
+  scanTicket: vi.fn(),
+  joinTicket: vi.fn(),
+  getPublicTicket: vi.fn(),
+}));
 vi.mock('../../shared/lib/clients', () => ({ publicPagerClient: api }));
 
 import Scan from './Scan';
@@ -123,6 +127,44 @@ describe('pager scan page', () => {
 
     await waitFor(() => expect(onScanned).toHaveBeenCalledWith('tok-1'));
     expect(navigateSpy).not.toHaveBeenCalled();
+  });
+
+  describe('at a venue whose customers type their receipt number', () => {
+    beforeEach(() => {
+      api.scanTicket.mockRejectedValue({ statusCode: 409, code: 'type_your_number' });
+      api.joinTicket.mockReset();
+    });
+
+    it('asks for the number instead of showing a code, then follows that order', async () => {
+      api.joinTicket.mockResolvedValue({ publicToken: 'tok-42', label: '42', status: 'waiting' });
+      render(<Scan />);
+
+      const field = await screen.findByLabelText('Order number');
+      expect(screen.getByRole('heading', { name: 'Type your order number' })).toBeInTheDocument();
+      // Arabic-Indic digits are typed as the receipt prints them.
+      fireEvent.change(field, { target: { value: '٤٢' } });
+      expect(field).toHaveValue('42');
+      fireEvent.click(screen.getByRole('button', { name: 'Follow my order' }));
+
+      await waitFor(() =>
+        expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-42', replace: true })
+      );
+      expect(api.joinTicket).toHaveBeenCalledWith({ slug: 'acme', number: '42' });
+      expect(window.localStorage.getItem(STORAGE_KEY)).toBe('tok-42');
+    });
+
+    it('says when someone else already follows that number', async () => {
+      api.joinTicket.mockRejectedValue({ statusCode: 409, code: 'label_taken' });
+      render(<Scan />);
+
+      fireEvent.change(await screen.findByLabelText('Order number'), { target: { value: '42' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Follow my order' }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(
+        'Someone is already following this number. Ask at the counter.'
+      );
+      expect(navigateSpy).not.toHaveBeenCalled();
+    });
   });
 
   it('says so when the venue has no pager', async () => {

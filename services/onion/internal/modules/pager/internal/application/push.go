@@ -45,7 +45,7 @@ func (s *Service) PushKey() string {
 // venue whose pager is on.
 func (s *Service) SubscribePush(ctx context.Context, token string, sub domain.PushSubscription) error {
 	now := s.clock()
-	ticket, err := s.ticketByToken(ctx, token)
+	ticket, _, err := s.ticketByToken(ctx, token)
 	if err != nil {
 		return err
 	}

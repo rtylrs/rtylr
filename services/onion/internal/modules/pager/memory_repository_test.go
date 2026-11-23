@@ -75,6 +75,41 @@ func (r *memoryRepository) CreateTicket(_ context.Context, ticket domain.Ticket)
 	return ticket, nil
 }
 
+func (r *memoryRepository) CreateNumberTicket(_ context.Context, ticket domain.Ticket) (domain.Ticket, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	for _, t := range r.where(ticket.BusinessID, isOpen) {
+		if numberOf(t) == ticket.Label {
+			return domain.Ticket{}, domain.ErrLabelTaken
+		}
+	}
+	ticket.ID = int64(len(r.tickets) + 1)
+	ticket.LabelKind = domain.LabelNumber
+	ticket.Status = domain.StatusWaiting
+	r.tickets = append(r.tickets, &ticket)
+	return ticket, nil
+}
+
+func (r *memoryRepository) CountOpenTickets(_ context.Context, businessID int64, openSince, unlabelledSince time.Time) (int64, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return int64(len(r.where(businessID, func(t *domain.Ticket) bool {
+		return isOpen(t) && fresh(t, openSince, unlabelledSince)
+	}))), nil
+}
+
+func (r *memoryRepository) TicketTimes(_ context.Context, businessID int64, since time.Time) ([]domain.TicketTimes, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	var times []domain.TicketTimes
+	for _, t := range r.where(businessID, func(t *domain.Ticket) bool {
+		return t.Labelled() && !t.CreatedAt.Before(since)
+	}) {
+		times = append(times, domain.TicketTimes{CreatedAt: t.CreatedAt, ReadyAt: t.ReadyAt})
+	}
+	return times, nil
+}
+
 // where returns the tickets of a business matching keep, oldest first.
 func (r *memoryRepository) where(businessID int64, keep func(*domain.Ticket) bool) []*domain.Ticket {
 	var out []*domain.Ticket
@@ -181,7 +216,7 @@ func (r *memoryRepository) CountWaitingAhead(_ context.Context, businessID, id i
 	}))), nil
 }
 
-func (r *memoryRepository) Label(_ context.Context, businessID, id int64, label, kind string, openSince, unlabelledSince time.Time) error {
+func (r *memoryRepository) Label(_ context.Context, businessID, id int64, label, kind string, expectedReadyAt, openSince, unlabelledSince time.Time) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if kind == domain.LabelNumber {
@@ -193,7 +228,7 @@ func (r *memoryRepository) Label(_ context.Context, businessID, id int64, label,
 	}
 	for _, t := range r.where(businessID, func(t *domain.Ticket) bool { return t.ID == id }) {
 		if t.Status == domain.StatusWaiting && fresh(t, openSince, unlabelledSince) {
-			t.Label, t.LabelKind = label, kind
+			t.Label, t.LabelKind, t.ExpectedReadyAt = label, kind, expectedReadyAt
 		}
 	}
 	return nil

@@ -8,6 +8,7 @@
 /pager/display  https://rennili.rtylr.com/display  302
 /pager/poster  https://rennili.rtylr.com/poster  302
 /pager/setup  https://rennili.rtylr.com/setup  302
+/pager/insights  https://rennili.rtylr.com/insights  302
 /pager  https://rennili.rtylr.com/board  302
 /:slug/pager  https://rennili.rtylr.com/:slug  302
 

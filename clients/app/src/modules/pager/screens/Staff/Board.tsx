@@ -4,12 +4,16 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { resolveAppUrl } from '@voxire/config';
 import { HelmetContainer } from '@voxire/components';
 import { Alert, Switch } from '@voxire/ui';
-import type { ListTicketsResponse, Ticket } from '@voxire/voxie/pager/v1/types';
+import type {
+  ListTicketsResponse,
+  Ticket,
+  UpdateSettingsRequest,
+} from '@voxire/voxie/pager/v1/types';
 import { Link } from '@tanstack/react-router';
-import { BellRing, MonitorSmartphone, Printer } from 'lucide-react';
+import { BarChart3, BellRing, MonitorSmartphone, Play, Printer } from 'lucide-react';
 import { Badge, Button } from '../../../../shared/components/ui';
 import { useUserStore } from '../../../../shared/stores/userStore';
-import { PAGER_DISPLAY_PATH, PAGER_POSTER_PATH } from '../../pagerPaths';
+import { PAGER_DISPLAY_PATH, PAGER_POSTER_PATH, PAGER_STATS_PATH } from '../../pagerPaths';
 import { PAGER_ERROR, errorCode, errorStatus } from '../../shared/lib/apiError';
 import MatchCode from '../../shared/components/MatchCode';
 import {
@@ -22,6 +26,7 @@ import { TICKET_POLL_INTERVAL_MS, isStaleAnswer } from '../../shared/lib/ticketP
 import { usePagerVenue } from '../../shared/lib/usePagerVenue';
 import { VenueLogo } from '../../shared/components/VenueLogo';
 import { Dropdown } from '../../shared/components/Dropdown';
+import { RINGTONES, asRingtone, previewRingtone } from '../../shared/lib/ringtones';
 import { VenueQr } from './VenueQr';
 
 const TICKETS_KEY = ['pager', 'tickets'] as const;
@@ -29,8 +34,17 @@ const SETTINGS_KEY = ['pager', 'settings'] as const;
 const LABEL_MODES = ['either', 'number', 'name'] as const;
 type LabelMode = (typeof LABEL_MODES)[number];
 
+// Minutes a venue or cashier can pick for the ready-time estimate; 0 is none.
+const PREP_OPTIONS = [0, 3, 5, 8, 10, 15, 20, 30] as const;
+const QUICK_PREP_OPTIONS = [0, 5, 10, 15, 20, 30] as const;
+
 type BoardError =
-  'invalidLabel' | 'labelTaken' | 'invalidTransition' | 'settingsAdminOnly' | 'actionFailed';
+  | 'invalidLabel'
+  | 'labelTaken'
+  | 'invalidTransition'
+  | 'invalidReviewUrl'
+  | 'settingsAdminOnly'
+  | 'actionFailed';
 
 function boardErrorFor(error: unknown): BoardError {
   switch (errorCode(error)) {
@@ -40,6 +54,8 @@ function boardErrorFor(error: unknown): BoardError {
       return 'labelTaken';
     case PAGER_ERROR.invalidTransition:
       return 'invalidTransition';
+    case PAGER_ERROR.invalidReviewUrl:
+      return 'invalidReviewUrl';
     default:
       return errorStatus(error) === 403 ? 'settingsAdminOnly' : 'actionFailed';
   }
@@ -74,12 +90,23 @@ function minutesSince(createdAt: string | undefined, serverTime: string | undefi
   return Number.isNaN(since) ? 0 : Math.max(0, Math.floor(since / 60_000));
 }
 
+/** Minutes left until an order's estimate, rounded up; null without one. */
+function minutesUntil(
+  expectedAt: string | undefined,
+  serverTime: string | undefined
+): number | null {
+  const left = Date.parse(expectedAt ?? '') - Date.parse(serverTime ?? '');
+  return Number.isNaN(left) ? null : Math.max(0, Math.ceil(left / 60_000));
+}
+
 interface NewPhoneCardProps {
   ticket: Ticket;
   labelMode: LabelMode;
+  /** The venue's usual minutes; 0 when it gives no estimate. */
+  prepMinutes: number;
   serverTime: string | undefined;
   busy: boolean;
-  onLabel: (label: string, done: () => void) => void;
+  onLabel: (label: string, prepMinutes: number | undefined, done: () => void) => void;
   onRemove: () => void;
 }
 
@@ -87,6 +114,7 @@ interface NewPhoneCardProps {
 function NewPhoneCard({
   ticket,
   labelMode,
+  prepMinutes,
   serverTime,
   busy,
   onLabel,
@@ -95,8 +123,14 @@ function NewPhoneCard({
   const { t } = useTranslation('pager');
   const inputId = useId();
   const [value, setValue] = useState('');
+  // Follows the venue's usual time, which can load or change after the card
+  // appears, until the cashier gives this order its own.
+  const [picked, setPicked] = useState<number | null>(null);
+  const minutes = picked ?? prepMinutes;
+  const estimates = prepMinutes > 0;
+  const choices = [...new Set([...QUICK_PREP_OPTIONS, prepMinutes])].sort((a, b) => a - b);
   const code = ticket.code ?? '';
-  const minutes = minutesSince(ticket.createdAt, serverTime);
+  const scannedMinutes = minutesSince(ticket.createdAt, serverTime);
   const numeric = labelMode === 'number';
 
   return (
@@ -117,9 +151,9 @@ function NewPhoneCard({
           />
         </div>
         <span className="min-w-[5rem] flex-1 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-          {minutes < 1
+          {scannedMinutes < 1
             ? t('pager.board.scannedNow')
-            : t('pager.board.scannedAgo', { count: minutes })}
+            : t('pager.board.scannedAgo', { count: scannedMinutes })}
         </span>
         <Button
           size="sm"
@@ -136,7 +170,9 @@ function NewPhoneCard({
         className="space-y-1"
         onSubmit={(event) => {
           event.preventDefault();
-          if (value.trim() && !busy) onLabel(value.trim(), () => setValue(''));
+          if (value.trim() && !busy) {
+            onLabel(value.trim(), estimates ? minutes : undefined, () => setValue(''));
+          }
         }}
       >
         {/* What to type, in sight; the input's name also says which code it is for. */}
@@ -175,8 +211,109 @@ function NewPhoneCard({
             {t('pager.board.saveLabel')}
           </Button>
         </div>
+        {estimates && (
+          <div
+            className="flex flex-wrap items-center gap-1 pt-1"
+            role="group"
+            aria-label={t('pager.board.readyInLabel')}
+          >
+            <span className="me-1 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+              {t('pager.board.readyInLabel')}
+            </span>
+            {choices.map((choice) => (
+              <button
+                key={choice}
+                type="button"
+                aria-pressed={minutes === choice}
+                onClick={() => setPicked(choice)}
+                className="min-h-8 rounded-full px-2.5 text-xs font-semibold"
+                style={
+                  minutes === choice
+                    ? { background: 'var(--dash-text)', color: 'var(--dash-surface)' }
+                    : { border: '1px solid var(--dash-border)', color: 'var(--dash-text-muted)' }
+                }
+              >
+                {choice === 0
+                  ? t('pager.board.prepNone')
+                  : t('pager.board.prepMinutes', { count: choice })}
+              </button>
+            ))}
+          </div>
+        )}
       </form>
     </li>
+  );
+}
+
+interface ReviewLinkFieldProps {
+  saved: string;
+  disabled: boolean;
+  saving: boolean;
+  onSave: (link: string) => void;
+}
+
+/** The venue's review link: typed freely, saved on Save or Enter. */
+function ReviewLinkField({
+  saved,
+  disabled,
+  saving,
+  onSave,
+}: ReviewLinkFieldProps): React.JSX.Element {
+  const { t } = useTranslation('pager');
+  const id = useId();
+  const [value, setValue] = useState(saved);
+  const changed = value.trim() !== saved;
+
+  return (
+    <form
+      className="space-y-1"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (changed && !disabled) onSave(value.trim());
+      }}
+    >
+      <label
+        htmlFor={id}
+        className="block text-xs font-semibold"
+        style={{ color: 'var(--dash-text-muted)' }}
+      >
+        {t('pager.board.reviewLabel')}
+      </label>
+      <div className="flex gap-2">
+        <input
+          id={id}
+          type="url"
+          inputMode="url"
+          dir="ltr"
+          autoComplete="off"
+          spellCheck={false}
+          maxLength={500}
+          placeholder="https://g.page/r/..."
+          aria-describedby={`${id}-hint`}
+          value={value}
+          disabled={disabled}
+          onChange={(event) => setValue(event.target.value)}
+          className="h-11 min-w-0 flex-1 rounded-lg px-3 text-sm outline-none focus:border-[var(--dash-border-focus)] disabled:opacity-50"
+          style={{
+            background: 'var(--dash-input-bg)',
+            border: '1px solid var(--dash-border)',
+            color: 'var(--dash-text)',
+          }}
+        />
+        <Button
+          type="submit"
+          size="sm"
+          variant="outline"
+          className="h-11"
+          disabled={!changed || disabled || saving}
+        >
+          {t('pager.board.reviewSave')}
+        </Button>
+      </div>
+      <p id={`${id}-hint`} className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+        {t('pager.board.reviewHint')}
+      </p>
+    </form>
   );
 }
 
@@ -185,6 +322,9 @@ const Board = (): React.JSX.Element => {
   const queryClient = useQueryClient();
   const enabledId = useId();
   const labelModeId = useId();
+  const prepId = useId();
+  const numbersId = useId();
+  const ringtoneId = useId();
   const [boardError, setBoardError] = useState<BoardError | null>(null);
   const shown = useRef<ListTicketsResponse | null>(null);
   const staffPagerClient = useStaffPagerClient();
@@ -222,8 +362,8 @@ const Board = (): React.JSX.Element => {
   const onChangeFailed = (error: unknown): void => setBoardError(boardErrorFor(error));
 
   const labelTicket = useMutation({
-    mutationFn: ({ id, label }: { id: string; label: string }) =>
-      staffPagerClient.labelTicket({ id, label }),
+    mutationFn: ({ id, label, prepMinutes }: { id: string; label: string; prepMinutes?: number }) =>
+      staffPagerClient.labelTicket({ id, label, prepMinutes }),
     onMutate: beforeChange,
     onError: onChangeFailed,
     onSettled: afterChange,
@@ -238,8 +378,7 @@ const Board = (): React.JSX.Element => {
   });
 
   const updateSettings = useMutation({
-    mutationFn: (patch: { enabled?: boolean; labelMode?: string }) =>
-      staffPagerClient.updateSettings(patch),
+    mutationFn: (patch: UpdateSettingsRequest) => staffPagerClient.updateSettings(patch),
     onMutate: () => setBoardError(null),
     onSuccess: (next) => queryClient.setQueryData(SETTINGS_KEY, next),
     onError: onChangeFailed,
@@ -254,6 +393,7 @@ const Board = (): React.JSX.Element => {
       Boolean(state.user?.effectiveAccess?.isOwner) || Boolean(state.user?.effectiveAccess?.isAdmin)
   );
   const canEditSettings = sandbox || isOwnerOrAdmin;
+  const settingsLocked = !canEditSettings || !settings.data || updateSettings.isPending;
 
   if (errorStatus(tickets.error) === 403 || errorStatus(settings.error) === 403) {
     return (
@@ -289,6 +429,16 @@ const Board = (): React.JSX.Element => {
       {label}
     </Button>
   );
+
+  const dueText = (ticket: Ticket): React.ReactNode => {
+    const left = minutesUntil(ticket.expectedReadyAt, tickets.data?.serverTime);
+    if (left === null) return null;
+    return (
+      <span className="text-xs font-semibold" style={{ color: 'var(--dash-text-dim)' }}>
+        {left === 0 ? t('pager.board.dueNow') : t('pager.board.dueIn', { count: left })}
+      </span>
+    );
+  };
 
   const columnShell = (
     title: string,
@@ -351,6 +501,7 @@ const Board = (): React.JSX.Element => {
             {ticket.acknowledgedAt && (
               <Badge variant="success">{t('pager.board.acknowledged')}</Badge>
             )}
+            {ticket.status === 'waiting' && dueText(ticket)}
           </div>
           <div className="flex flex-wrap gap-2">{actions(ticket)}</div>
         </li>
@@ -383,6 +534,13 @@ const Board = (): React.JSX.Element => {
             </div>
             <div className="flex flex-wrap gap-2">
               {/* The Portal's Button renders a <button> only, so the links wear its classes. */}
+              <Link
+                to={PAGER_STATS_PATH}
+                className="portal-button portal-button--outline portal-button--sm"
+              >
+                <BarChart3 size={16} aria-hidden="true" />
+                {t('pager.board.statsLink')}
+              </Link>
               <Link
                 to={PAGER_DISPLAY_PATH}
                 className="portal-button portal-button--outline portal-button--sm"
@@ -477,10 +635,14 @@ const Board = (): React.JSX.Element => {
                       key={ticket.id}
                       ticket={ticket}
                       labelMode={labelMode}
+                      prepMinutes={settings.data?.prepMinutes ?? 0}
                       serverTime={tickets.data.serverTime}
                       busy={busyId === ticket.id}
-                      onLabel={(label, done) =>
-                        labelTicket.mutate({ id: ticket.id ?? '', label }, { onSuccess: done })
+                      onLabel={(label, prepMinutes, done) =>
+                        labelTicket.mutate(
+                          { id: ticket.id ?? '', label, prepMinutes },
+                          { onSuccess: done }
+                        )
                       }
                       onRemove={() =>
                         changeTicket.mutate({ id: ticket.id ?? '', action: 'collect' })
@@ -574,6 +736,113 @@ const Board = (): React.JSX.Element => {
                     {t('pager.board.labelModeHint')}
                   </p>
                 </div>
+                <div className="space-y-1">
+                  <label
+                    id={`${prepId}-label`}
+                    htmlFor={prepId}
+                    className="block text-xs font-semibold"
+                    style={{ color: 'var(--dash-text-muted)' }}
+                  >
+                    {t('pager.board.prepLabel')}
+                  </label>
+                  <Dropdown
+                    id={prepId}
+                    labelId={`${prepId}-label`}
+                    aria-describedby={`${prepId}-hint`}
+                    value={String(settings.data?.prepMinutes ?? 0)}
+                    options={PREP_OPTIONS.map((minutes) => ({
+                      value: String(minutes),
+                      label:
+                        minutes === 0
+                          ? t('pager.board.prepNone')
+                          : t('pager.board.prepMinutes', { count: minutes }),
+                    }))}
+                    disabled={settingsLocked}
+                    onChange={(minutes) => updateSettings.mutate({ prepMinutes: Number(minutes) })}
+                  />
+                  <p
+                    id={`${prepId}-hint`}
+                    className="text-xs"
+                    style={{ color: 'var(--dash-text-dim)' }}
+                  >
+                    {t('pager.board.prepHint')}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <label
+                    id={`${ringtoneId}-label`}
+                    htmlFor={ringtoneId}
+                    className="block text-xs font-semibold"
+                    style={{ color: 'var(--dash-text-muted)' }}
+                  >
+                    {t('pager.board.ringtoneLabel')}
+                  </label>
+                  <div className="flex gap-2">
+                    <div className="min-w-0 flex-1">
+                      <Dropdown
+                        id={ringtoneId}
+                        labelId={`${ringtoneId}-label`}
+                        aria-describedby={`${ringtoneId}-hint`}
+                        value={asRingtone(settings.data?.ringtone)}
+                        options={RINGTONES.map((tone) => ({
+                          value: tone.id,
+                          label: t(`pager.ringtones.${tone.id}`),
+                        }))}
+                        disabled={settingsLocked}
+                        onChange={(ringtone) => {
+                          previewRingtone(ringtone);
+                          updateSettings.mutate({ ringtone });
+                        }}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-11"
+                      aria-label={t('pager.board.ringtonePlay', {
+                        tone: t(`pager.ringtones.${asRingtone(settings.data?.ringtone)}`),
+                      })}
+                      onClick={() => previewRingtone(asRingtone(settings.data?.ringtone))}
+                    >
+                      <Play size={15} aria-hidden="true" />
+                    </Button>
+                  </div>
+                  <p
+                    id={`${ringtoneId}-hint`}
+                    className="text-xs"
+                    style={{ color: 'var(--dash-text-dim)' }}
+                  >
+                    {t('pager.board.ringtoneHint')}
+                  </p>
+                </div>
+                <div>
+                  <Switch
+                    id={numbersId}
+                    label={t('pager.board.customerNumbersLabel')}
+                    aria-describedby={`${numbersId}-hint`}
+                    checked={settings.data?.customerNumbers ?? false}
+                    disabled={settingsLocked}
+                    onCheckedChange={(customerNumbers) =>
+                      updateSettings.mutate({ customerNumbers })
+                    }
+                  />
+                  <p
+                    id={`${numbersId}-hint`}
+                    className="mt-1 text-xs"
+                    style={{ color: 'var(--dash-text-dim)' }}
+                  >
+                    {t('pager.board.customerNumbersHint')}
+                  </p>
+                </div>
+                {/* Keyed on the saved link, so a save or another tab's change refills it. */}
+                <ReviewLinkField
+                  key={settings.data?.reviewUrl ?? ''}
+                  saved={settings.data?.reviewUrl ?? ''}
+                  disabled={settingsLocked}
+                  saving={updateSettings.isPending}
+                  onSave={(reviewUrl) => updateSettings.mutate({ reviewUrl })}
+                />
                 {/* The logo is the business's own, set where the Portal sets it. */}
                 {!sandbox && (
                   <div className="space-y-1">

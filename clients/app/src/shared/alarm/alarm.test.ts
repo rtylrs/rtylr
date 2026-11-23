@@ -106,6 +106,23 @@ describe('ringing', () => {
     expect(bell.play).toHaveBeenCalledTimes(2);
   });
 
+  it('rings the chosen sound on the element the tap unlocked', async () => {
+    const { alarm, bell, env } = setup();
+    alarm.unlock();
+    await flush();
+    bell.play.mockClear();
+
+    alarm.sync({ ...ring('a'), bellSrc: 'chime.wav' });
+    expect(bell.src).toBe('chime.wav');
+    expect(bell.play).toHaveBeenCalledTimes(1);
+    // A new element would not be unlocked on an iPhone.
+    expect(env.createAudio).toHaveBeenCalledTimes(1);
+
+    // Without a choice it goes back to the alarm's own bell.
+    alarm.sync({ keepAwake: true, ringKey: null });
+    expect(bell.src).toBe('bell.wav');
+  });
+
   it('moves on when the bell never reports that it ended', async () => {
     const { alarm, bell } = setup();
     alarm.sync(ring('a'));
