@@ -7,7 +7,7 @@ import { Alert, Switch } from '@voxire/ui';
 import type { ListTicketsResponse, Ticket } from '@voxire/voxie/pager/v1/types';
 import { Link } from '@tanstack/react-router';
 import { BellRing, MonitorSmartphone, Printer } from 'lucide-react';
-import { Badge, Button, Select } from '../../../../shared/components/ui';
+import { Badge, Button } from '../../../../shared/components/ui';
 import { useUserStore } from '../../../../shared/stores/userStore';
 import { PAGER_DISPLAY_PATH, PAGER_POSTER_PATH } from '../../pagerPaths';
 import { PAGER_ERROR, errorCode, errorStatus } from '../../shared/lib/apiError';
@@ -21,6 +21,7 @@ import { normaliseTicketNumber } from '../../shared/lib/ticketNumber';
 import { TICKET_POLL_INTERVAL_MS, isStaleAnswer } from '../../shared/lib/ticketPoller';
 import { usePagerVenue } from '../../shared/lib/usePagerVenue';
 import { VenueLogo } from '../../shared/components/VenueLogo';
+import { Dropdown } from '../../shared/components/Dropdown';
 import { VenueQr } from './VenueQr';
 
 const TICKETS_KEY = ['pager', 'tickets'] as const;
@@ -361,20 +362,25 @@ const Board = (): React.JSX.Element => {
       <HelmetContainer title={t('pager.board.pageTitle')} />
       {/* Laid out by its own width, not the window's: the demo shows it beside a phone. */}
       <div className="@container w-full min-w-0 space-y-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <BellRing size={17} aria-hidden="true" style={{ color: 'var(--dash-text-muted)' }} />
-              <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
-                {t('pager.board.heading')}
-              </h1>
+        {/* The demo page names the board itself and has no venue to show a QR
+            for, and the display and poster pages need a sign in. */}
+        {!sandbox && (
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <BellRing
+                  size={17}
+                  aria-hidden="true"
+                  style={{ color: 'var(--dash-text-muted)' }}
+                />
+                <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
+                  {t('pager.board.heading')}
+                </h1>
+              </div>
+              <p className="mt-1 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+                {t('pager.board.subheading')}
+              </p>
             </div>
-            <p className="mt-1 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-              {t('pager.board.subheading')}
-            </p>
-          </div>
-          {/* The demo has no venue to show a QR for, and these pages need a sign in. */}
-          {!sandbox && (
             <div className="flex flex-wrap gap-2">
               {/* The Portal's Button renders a <button> only, so the links wear its classes. */}
               <Link
@@ -392,8 +398,8 @@ const Board = (): React.JSX.Element => {
                 {t('pager.board.posterLink')}
               </Link>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {boardError && <Alert variant="destructive">{t(`pager.board.${boardError}`)}</Alert>}
         {/* The API leaves a false flag out of the answer altogether. */}
@@ -541,26 +547,25 @@ const Board = (): React.JSX.Element => {
                 </div>
                 <div className="space-y-1">
                   <label
+                    id={`${labelModeId}-label`}
                     htmlFor={labelModeId}
                     className="block text-xs font-semibold"
                     style={{ color: 'var(--dash-text-muted)' }}
                   >
                     {t('pager.board.labelModeLabel')}
                   </label>
-                  <Select
+                  <Dropdown
                     id={labelModeId}
+                    labelId={`${labelModeId}-label`}
                     aria-describedby={`${labelModeId}-hint`}
                     value={labelMode}
-                    className="h-11"
+                    options={LABEL_MODES.map((mode) => ({
+                      value: mode,
+                      label: t(`pager.board.labelMode.${mode}`),
+                    }))}
                     disabled={!canEditSettings || !settings.data || updateSettings.isPending}
-                    onChange={(event) => updateSettings.mutate({ labelMode: event.target.value })}
-                  >
-                    {LABEL_MODES.map((mode) => (
-                      <option key={mode} value={mode}>
-                        {t(`pager.board.labelMode.${mode}`)}
-                      </option>
-                    ))}
-                  </Select>
+                    onChange={(mode) => updateSettings.mutate({ labelMode: mode })}
+                  />
                   <p
                     id={`${labelModeId}-hint`}
                     className="text-xs"

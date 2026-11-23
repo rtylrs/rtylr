@@ -1,8 +1,18 @@
-import React, { useMemo, useState } from 'react';
+import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetContainer } from '@voxire/components';
-import { ArrowRight, Check, LayoutGrid, RotateCcw, Smartphone } from 'lucide-react';
+import {
+  ArrowRight,
+  BatteryFull,
+  Check,
+  LayoutGrid,
+  Plus,
+  RotateCcw,
+  Signal,
+  Smartphone,
+  Wifi,
+} from 'lucide-react';
 import Board from '../Staff/Board';
 import Scan from './Scan';
 import Ticket from './Ticket';
@@ -15,6 +25,49 @@ import { LandingFooter } from './landing/LandingFooter';
 import './Try.css';
 
 const SANDBOX_SLUG = 'demo';
+
+type DemoView = 'phone' | 'board';
+
+// The customer screens are laid out at an iPhone's size and scaled to fit the
+// frame, so the demo shows the proportions a real phone would.
+const SCREEN_WIDTH = 390;
+
+const DemoPhone = ({ children }: { children: React.ReactNode }): React.JSX.Element => {
+  const screen = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.75);
+
+  useLayoutEffect(() => {
+    const element = screen.current;
+    if (!element) return undefined;
+    const fit = (): void => {
+      if (element.clientWidth > 0) setScale(element.clientWidth / SCREEN_WIDTH);
+    };
+    fit();
+    if (typeof ResizeObserver === 'undefined') return undefined;
+    const observer = new ResizeObserver(fit);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div className="pager-try-phone">
+      <div ref={screen} className="pager-try-phone-screen">
+        <div className="pager-try-phone-canvas" style={{ transform: `scale(${scale})` }}>
+          <div className="pager-try-statusbar" aria-hidden="true">
+            <span className="pager-try-statusbar-time">9:41</span>
+            <span className="pager-try-island" />
+            <span className="pager-try-statusbar-icons">
+              <Signal size={17} strokeWidth={2.6} />
+              <Wifi size={17} strokeWidth={2.6} />
+              <BatteryFull size={22} strokeWidth={2} />
+            </span>
+          </div>
+          <div className="pager-try-phone-viewport">{children}</div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 /**
  * The public demo: the real staff board and the real customer screens side by
@@ -34,26 +87,20 @@ const Try = (): React.JSX.Element => {
   const [phoneToken, setPhoneToken] = useState<string | null>(null);
   // Each "scan with another phone" mounts a fresh scan screen.
   const [phone, setPhone] = useState(0);
-  const [hasLabelled, setHasLabelled] = useState(false);
   const [hasMarkedReady, setHasMarkedReady] = useState(false);
-  const [mobileView, setMobileView] = useState<'phone' | 'board'>('phone');
+  const [mobileView, setMobileView] = useState<DemoView>('phone');
 
-  // Observe label/ready mutations locally to drive the live 3-step checklist.
+  // The checklist moves on when the visitor marks an order ready on the board.
   const trackedSandbox = useMemo(
     () => ({
       ...sandbox,
-      labelTicket: async (
-        args: Parameters<typeof sandbox.labelTicket>[0]
-      ): ReturnType<typeof sandbox.labelTicket> => {
-        const res = await sandbox.labelTicket(args);
-        setHasLabelled(true);
-        return res;
-      },
       markReady: async (
         args: Parameters<typeof sandbox.markReady>[0]
       ): ReturnType<typeof sandbox.markReady> => {
         const res = await sandbox.markReady(args);
         setHasMarkedReady(true);
+        // On a phone-sized screen, show the phone ringing.
+        setMobileView('phone');
         return res;
       },
     }),
@@ -72,7 +119,6 @@ const Try = (): React.JSX.Element => {
     setQueryClient(new QueryClient({ defaultOptions: { queries: { retry: false } } }));
     setPhoneToken(null);
     setPhone((n) => n + 1);
-    setHasLabelled(false);
     setHasMarkedReady(false);
     setMobileView('phone');
     setSessionId((n) => n + 1);
@@ -80,21 +126,17 @@ const Try = (): React.JSX.Element => {
 
   const steps = [
     {
+      label: t('pager.try.stepPhoneShort'),
       text: t('pager.try.stepPhone'),
       done: phoneToken !== null,
-      active: phoneToken === null,
     },
-    {
-      text: t('pager.try.stepBoard'),
-      done: hasLabelled,
-      active: phoneToken !== null && !hasLabelled,
-    },
-    {
-      text: t('pager.try.stepRing'),
-      done: hasMarkedReady,
-      active: hasLabelled && !hasMarkedReady,
-    },
+    { label: t('pager.try.stepBoardShort'), text: t('pager.try.stepBoard'), done: hasMarkedReady },
+    { label: t('pager.try.stepRingShort'), text: t('pager.try.stepRing'), done: hasMarkedReady },
   ];
+  const current = steps.findIndex((step) => !step.done);
+  const finished = current === -1;
+  // Where the next move happens, so a phone-sized screen can send the visitor there.
+  const nextView: DemoView | null = finished ? null : current === 2 ? 'phone' : 'board';
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -130,37 +172,60 @@ const Try = (): React.JSX.Element => {
           </header>
 
           <main className="pager-try">
-            <div className="pager-try-intro-block">
-              <div className="pager-try-header">
-                <h1 className="pager-try-title">{t('pager.try.heading')}</h1>
-                <p className="pager-try-lead">{t('pager.try.intro')}</p>
-              </div>
-
-              <ol className="pager-try-steps">
-                {steps.map((step, index) => (
-                  <li
-                    key={step.text}
-                    className={[
-                      'pager-try-step',
-                      step.done ? 'pager-try-step--done' : '',
-                      step.active ? 'pager-try-step--active' : '',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                  >
-                    <span className="pager-try-step-num" aria-hidden="true">
-                      {step.done ? <Check size={14} strokeWidth={3} /> : index + 1}
-                    </span>
-                    <span>{step.text}</span>
-                  </li>
-                ))}
-              </ol>
-
-              <p className="pager-try-note">{t('pager.try.sandboxNotice')}</p>
-            </div>
+            <header className="pager-try-hero">
+              <p className="pager-try-badge">
+                <span className="pager-try-badge-dot" aria-hidden="true" />
+                {t('pager.try.demoBadge')}
+              </p>
+              <h1 className="pager-try-title">{t('pager.try.heading')}</h1>
+              <p className="pager-try-lead">{t('pager.try.intro')}</p>
+            </header>
 
             <div className="pager-try-stage">
-              {/* Mobile segmented switcher (<940px); both panels stay mounted for desktop & accessibility. */}
+              <div className="pager-try-guide">
+                <ol className="pager-try-steps">
+                  {steps.map((step, index) => (
+                    <li
+                      key={step.label}
+                      className={[
+                        'pager-try-step',
+                        step.done ? 'pager-try-step--done' : '',
+                        index === current ? 'pager-try-step--active' : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                      aria-current={index === current ? 'step' : undefined}
+                    >
+                      <span className="pager-try-step-num" aria-hidden="true">
+                        {step.done ? <Check size={13} strokeWidth={3} /> : index + 1}
+                      </span>
+                      <span className="pager-try-step-label">{step.label}</span>
+                    </li>
+                  ))}
+                </ol>
+                <div
+                  className={`pager-try-instruction ${finished ? 'pager-try-instruction--done' : ''}`}
+                  role="status"
+                >
+                  <p>{finished ? t('pager.try.doneBanner') : steps[current].text}</p>
+                  {nextView && nextView !== mobileView && (
+                    <button
+                      type="button"
+                      className="pager-try-jump"
+                      onClick={() => setMobileView(nextView)}
+                    >
+                      {t(nextView === 'board' ? 'pager.try.goToCounter' : 'pager.try.goToPhone')}
+                      <ArrowRight
+                        size={15}
+                        strokeWidth={2.4}
+                        aria-hidden="true"
+                        className="rtl:rotate-180"
+                      />
+                    </button>
+                  )}
+                </div>
+              </div>
+
               <div
                 className="pager-try-mobile-tabs"
                 role="group"
@@ -173,8 +238,10 @@ const Try = (): React.JSX.Element => {
                   className={`pager-try-mobile-tab ${mobileView === 'phone' ? 'pager-try-mobile-tab--active' : ''}`}
                 >
                   <Smartphone size={15} strokeWidth={2.2} aria-hidden="true" />
-                  <span>{t('pager.try.phoneHeading')}</span>
-                  {hasMarkedReady && <span className="pager-try-tab-pulse" aria-hidden="true" />}
+                  <span>{t('pager.try.phoneTab')}</span>
+                  {nextView === 'phone' && mobileView !== 'phone' && (
+                    <span className="pager-try-tab-pulse" aria-hidden="true" />
+                  )}
                 </button>
                 <button
                   type="button"
@@ -183,7 +250,10 @@ const Try = (): React.JSX.Element => {
                   className={`pager-try-mobile-tab ${mobileView === 'board' ? 'pager-try-mobile-tab--active' : ''}`}
                 >
                   <LayoutGrid size={15} strokeWidth={2.2} aria-hidden="true" />
-                  <span>{t('pager.try.counterHeading')}</span>
+                  <span>{t('pager.try.counterTab')}</span>
+                  {nextView === 'board' && mobileView !== 'board' && (
+                    <span className="pager-try-tab-pulse" aria-hidden="true" />
+                  )}
                 </button>
               </div>
 
@@ -193,32 +263,30 @@ const Try = (): React.JSX.Element => {
                   aria-labelledby="pager-try-phone-heading"
                 >
                   <h2 id="pager-try-phone-heading" className="pager-try-label">
+                    <Smartphone size={14} strokeWidth={2.4} aria-hidden="true" />
                     {t('pager.try.phoneHeading')}
                   </h2>
-                  <div className="pager-try-phone">
-                    <div className="pager-try-phone-notch" aria-hidden="true" />
-                    <div className="pager-try-phone-viewport">
-                      {phoneToken ? (
-                        <Ticket key={`${sessionId}-${phoneToken}`} token={phoneToken} />
-                      ) : (
-                        <Scan
-                          key={`${sessionId}-${phone}`}
-                          slug={SANDBOX_SLUG}
-                          onScanned={setPhoneToken}
-                        />
-                      )}
-                    </div>
-                  </div>
+                  <DemoPhone>
+                    {phoneToken ? (
+                      <Ticket key={`${sessionId}-${phoneToken}`} token={phoneToken} />
+                    ) : (
+                      <Scan
+                        key={`${sessionId}-${phone}`}
+                        slug={SANDBOX_SLUG}
+                        onScanned={setPhoneToken}
+                      />
+                    )}
+                  </DemoPhone>
                   {phoneToken && (
                     <button
                       type="button"
-                      className="rl-btn rl-btn--secondary rl-btn--full"
+                      className="pager-try-another"
                       onClick={() => {
                         setPhoneToken(null);
                         setPhone((n) => n + 1);
                       }}
                     >
-                      <Smartphone size={17} strokeWidth={2.1} aria-hidden="true" />
+                      <Plus size={15} strokeWidth={2.4} aria-hidden="true" />
                       <span>{t('pager.try.anotherPhone')}</span>
                     </button>
                   )}
@@ -226,17 +294,12 @@ const Try = (): React.JSX.Element => {
 
                 <section className="pager-try-counter" aria-labelledby="pager-try-counter-heading">
                   <h2 id="pager-try-counter-heading" className="pager-try-label">
+                    <LayoutGrid size={14} strokeWidth={2.4} aria-hidden="true" />
                     {t('pager.try.counterHeading')}
                   </h2>
                   <div className="pager-try-board">
                     <Board key={sessionId} />
                   </div>
-                  {hasMarkedReady && (
-                    <p className="pager-try-done" role="status">
-                      <Check size={16} strokeWidth={2.8} aria-hidden="true" />
-                      <span>{t('pager.try.doneBanner')}</span>
-                    </p>
-                  )}
                 </section>
               </div>
             </div>

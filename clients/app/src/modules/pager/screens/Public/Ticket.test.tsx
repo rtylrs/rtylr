@@ -17,7 +17,9 @@ const push = vi.hoisted(() => ({
   ask: vi.fn(),
   follow: vi.fn(),
 }));
-vi.mock('../../shared/lib/pushAlerts', () => ({
+// Device detection stays real: the iPhone tests fake the browser instead.
+vi.mock('../../shared/lib/pushAlerts', async (importOriginal) => ({
+  iosTabWithoutPush: (await importOriginal<typeof PushAlerts>()).iosTabWithoutPush,
   usePushKey: () => push.key,
   askPushPermission: push.ask,
   followTicketByPush: push.follow,
@@ -36,8 +38,10 @@ vi.mock('../../../../shared/alarm/readyAlarm', async () => {
 import Ticket from './Ticket';
 import * as readyAlarmModule from '../../../../shared/alarm/readyAlarm';
 import type { createFakeAlarmEnvironment } from '../../../../shared/alarm/testing/fakeAlarmEnvironment';
+import type * as PushAlerts from '../../shared/lib/pushAlerts';
 import { TICKET_POLL_INTERVAL_MS } from '../../shared/lib/ticketPoller';
 import { initTestI18n } from '../../shared/testing/i18n';
+import { installFakePushBrowser } from '../../shared/testing/fakePushBrowser';
 
 const { readyAlarm } = readyAlarmModule;
 const { bell, navigator: fakeNavigator } = (
@@ -190,6 +194,44 @@ describe('pager ticket page', () => {
     // The alarm is fed from an effect, which can run a moment after the
     // heading is already in the document.
     await waitFor(() => expect(fakeNavigator.wakeLock.request).toHaveBeenCalledWith('screen'));
+  });
+
+  describe('on an iPhone', () => {
+    const IPHONE_SAFARI =
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Mobile/15E148 Safari/604.1';
+
+    it('warns that a Safari tab rings only while the page is on screen', async () => {
+      const userAgent = vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(IPHONE_SAFARI);
+      try {
+        api.getPublicTicket.mockResolvedValue(waiting);
+        render(<Ticket />);
+
+        expect(await screen.findByText('On iPhone, keep this page open')).toBeInTheDocument();
+        expect(screen.getByText(/can only ring while this page is on screen/)).toBeInTheDocument();
+        expect(
+          screen.queryByText(/^Keep this page open with the sound on/)
+        ).not.toBeInTheDocument();
+      } finally {
+        userAgent.mockRestore();
+      }
+    });
+
+    it('does not warn a home screen app, which gets lock-screen notifications', async () => {
+      const userAgent = vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(IPHONE_SAFARI);
+      const pushBrowser = installFakePushBrowser();
+      try {
+        api.getPublicTicket.mockResolvedValue(waiting);
+        render(<Ticket />);
+
+        expect(
+          await screen.findByText(/^Keep this page open with the sound on/)
+        ).toBeInTheDocument();
+        expect(screen.queryByText('On iPhone, keep this page open')).not.toBeInTheDocument();
+      } finally {
+        pushBrowser.restore();
+        userAgent.mockRestore();
+      }
+    });
   });
 
   it('says "next" when nobody is ahead', async () => {

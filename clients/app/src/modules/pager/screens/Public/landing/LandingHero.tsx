@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
 import { motion } from 'motion/react';
-import { ArrowRight, Check } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { PAGER_HOW_PATH, PAGER_TRY_PATH } from '../../../pagerPaths';
 import { HeroInteractiveStage } from './PhoneMockups';
 
@@ -13,23 +13,11 @@ interface LandingHeroProps {
 export const LandingHero = ({ heroRef }: LandingHeroProps): React.JSX.Element => {
   const { t } = useTranslation('pager');
   const [titleFirst, ...titleRest] = t('pager.landing.hero.title').split('\n');
-  const rawStrip = t('pager.landing.hero.strip', { returnObjects: true });
-  const stripItems = Array.isArray(rawStrip) ? (rawStrip as string[]) : [];
 
   return (
     <section ref={heroRef} className="rl-hero">
       <div className="rl-wrap rl-hero-layout">
         <div className="rl-hero-copy">
-          <motion.p
-            className="rl-eyebrow"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <span className="rl-eyebrow-dot" aria-hidden="true" />
-            {t('pager.landing.hero.eyebrow')}
-          </motion.p>
-
           <h1 className="rl-hero-title">
             <span className="rl-line-mask">
               <motion.span
@@ -95,18 +83,6 @@ export const LandingHero = ({ heroRef }: LandingHeroProps): React.JSX.Element =>
         </div>
 
         <HeroInteractiveStage />
-      </div>
-
-      {/* Calm studio proof strip anchoring the hero */}
-      <div className="rl-hero-specbar">
-        <ul className="rl-wrap rl-hero-speclist">
-          {stripItems.map((item) => (
-            <li key={item} className="rl-hero-specitem">
-              <Check size={14} strokeWidth={2.8} aria-hidden="true" />
-              <span>{item}</span>
-            </li>
-          ))}
-        </ul>
       </div>
     </section>
   );

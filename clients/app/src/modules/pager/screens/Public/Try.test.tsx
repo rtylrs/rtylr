@@ -82,6 +82,8 @@ describe('pager demo', () => {
     expect(code).toMatch(/^[1-9]\d{2}$/);
     expect(within(phone).getByText('Show this number to the cashier')).toBeInTheDocument();
     expect(within(phone).queryByRole('textbox')).not.toBeInTheDocument();
+    const guide = screen.getByText(/^On the board, type an order number/);
+    expect(guide).toBeInTheDocument();
 
     await nextPoll();
     fireEvent.change(
@@ -96,10 +98,13 @@ describe('pager demo', () => {
     expect(await within(phone).findByRole('heading', { name: 'Order 42' })).toBeInTheDocument();
     expect(within(phone).queryByText(code)).not.toBeInTheDocument();
     expect(within(phone).getByText("We're preparing your order")).toBeInTheDocument();
+    // Saving the label is half of the step: it still asks for Ready.
+    expect(screen.getByText(/^On the board, type an order number/)).toBeInTheDocument();
     fireEvent.click(await within(counter).findByRole('button', { name: 'Ready: 42' }));
     await nextPoll();
 
     expect(await within(phone).findByText('Your order is ready!')).toBeInTheDocument();
+    expect(screen.getByText(/^That's the whole flow/)).toBeInTheDocument();
     expect(syncSpy).toHaveBeenLastCalledWith(
       expect.objectContaining({ ringKey: expect.any(String) })
     );
