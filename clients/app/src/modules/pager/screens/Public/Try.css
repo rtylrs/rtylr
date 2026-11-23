@@ -1,6 +1,6 @@
 /*
  * The public demo (`/try`): the real staff board beside the real guest phone,
- * styled in Rennili's crisp pure-white, soft-gray, and botanical-forest palette.
+ * both on one screen on a laptop, one at a time behind tabs on a phone.
  */
 .pager-try-shell {
   --dash-bg: #f8f9f7;
@@ -103,36 +103,55 @@
 
 .pager-try {
   width: 100%;
-  max-width: 1360px;
+  max-width: 1240px;
   margin-inline: auto;
-  padding: 28px 20px 64px;
+  padding: 24px 16px 56px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
 @media (min-width: 900px) {
   .pager-try {
-    padding: 40px 28px 72px;
-    gap: 28px;
+    padding: 32px 28px 72px;
+    gap: 24px;
   }
 }
 
-.pager-try-intro-block {
+.pager-try-hero {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 680px;
 }
 
-.pager-try-header {
-  max-width: 700px;
+.pager-try-badge {
+  margin: 0;
+  padding: 4px 11px 4px 9px;
+  border-radius: 999px;
+  background: var(--rl-sage-wash);
+  color: var(--rl-forest);
+  font-size: 12.5px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.pager-try-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--rl-ready);
+  box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.18);
 }
 
 .pager-try-title {
   margin: 0;
   font-family: var(--rl-font-display);
-  font-size: clamp(28px, 4vw, 44px);
-  line-height: 1.16;
+  font-size: clamp(26px, 3.2vw, 38px);
+  line-height: 1.15;
   font-weight: 800;
   letter-spacing: -0.025em;
   color: var(--rl-ink);
@@ -140,130 +159,208 @@
 
 [dir='rtl'] .pager-try-title {
   letter-spacing: 0;
-  line-height: 1.26;
+  line-height: 1.3;
 }
 
 .pager-try-lead {
-  margin: 10px 0 0;
+  margin: 0;
   color: var(--rl-muted);
-  font-size: clamp(15px, 1.35vw, 18px);
-  line-height: 1.65;
+  font-size: clamp(15px, 1.2vw, 16.5px);
+  line-height: 1.6;
 }
 
-/* Reactive 3-step guided progress bar */
+/* One surface holds the guide, the view switcher and both screens. */
+
+.pager-try-stage {
+  padding: 12px;
+  border-radius: 24px;
+  background: var(--rl-gray);
+  border: 1px solid var(--rl-border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 900px) {
+  .pager-try-stage {
+    padding: 18px;
+    gap: 18px;
+  }
+}
+
+.pager-try-guide {
+  padding: 10px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid var(--rl-border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (min-width: 940px) {
+  .pager-try-guide {
+    padding: 8px 8px 8px 16px;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+  }
+
+  [dir='rtl'] .pager-try-guide {
+    padding: 8px 16px 8px 8px;
+  }
+}
 
 .pager-try-steps {
   margin: 0;
   padding: 0;
   list-style: none;
-  display: grid;
-  gap: 12px;
-}
-
-@media (min-width: 840px) {
-  .pager-try-steps {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: none;
 }
 
 .pager-try-step {
-  padding: 14px 16px;
-  border-radius: 18px;
-  border: 1px solid var(--rl-border);
-  background: var(--rl-offwhite);
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  font-size: 14px;
-  line-height: 1.55;
+  padding: 4px 11px 4px 4px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
   color: var(--rl-muted);
-  font-weight: 600;
   transition:
-    background-color 0.25s ease,
-    border-color 0.25s ease,
-    box-shadow 0.25s ease,
-    color 0.25s ease;
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
-.pager-try-step--active {
-  background: #ffffff;
-  border-color: var(--rl-forest);
-  color: var(--rl-ink);
-  box-shadow: 0 10px 26px -14px rgba(14, 77, 59, 0.22);
-}
-
-.pager-try-step--done {
-  background: var(--rl-sage-wash);
-  border-color: rgba(21, 128, 61, 0.28);
-  color: var(--rl-ink);
+[dir='rtl'] .pager-try-step {
+  padding: 4px 4px 4px 11px;
 }
 
 .pager-try-step-num {
   flex: none;
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   border-radius: 999px;
-  background: #ffffff;
-  border: 1px solid var(--rl-border);
+  background: var(--rl-gray);
   color: var(--rl-muted);
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 800;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition:
-    background-color 0.25s ease,
-    color 0.25s ease,
-    border-color 0.25s ease;
 }
 
-.pager-try-step--active .pager-try-step-num {
-  background: var(--rl-forest);
-  border-color: var(--rl-forest);
-  color: #ffffff;
+.pager-try-step--done {
+  color: var(--rl-ink);
 }
 
 .pager-try-step--done .pager-try-step-num {
   background: var(--rl-ready);
-  border-color: var(--rl-ready);
   color: #ffffff;
 }
 
-.pager-try-note {
-  margin: 0;
-  color: var(--rl-muted);
-  font-size: 13px;
+.pager-try-step--active {
+  background: var(--rl-forest);
+  color: #ffffff;
 }
 
-/* Soft neutral gray stage housing the phone & live counter board */
-
-.pager-try-stage {
-  padding: 18px;
-  border-radius: 28px;
-  background: var(--rl-gray);
-  border: 1px solid var(--rl-border);
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+.pager-try-step--active .pager-try-step-num {
+  background: #ffffff;
+  color: var(--rl-forest);
 }
 
-@media (min-width: 900px) {
-  .pager-try-stage {
-    padding: 26px;
+/* On a phone only the current step keeps its words. */
+@media (max-width: 639px) {
+  .pager-try-step:not(.pager-try-step--active) {
+    padding: 4px;
+  }
+
+  .pager-try-step:not(.pager-try-step--active) .pager-try-step-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 }
 
-/* Mobile segmented view switcher (<940px) */
+.pager-try-instruction {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  padding: 2px 4px;
+}
+
+.pager-try-instruction p {
+  margin: 0;
+  color: var(--rl-ink);
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+@media (min-width: 940px) {
+  .pager-try-instruction {
+    padding: 8px 14px;
+    border-radius: 12px;
+    background: var(--rl-offwhite);
+  }
+}
+
+.pager-try-instruction--done p {
+  color: var(--rl-forest);
+}
+
+@media (min-width: 940px) {
+  .pager-try-instruction--done {
+    background: var(--rl-sage-wash);
+  }
+}
+
+.pager-try-jump {
+  min-height: 40px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 999px;
+  background: var(--rl-forest);
+  color: #ffffff;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (min-width: 940px) {
+  .pager-try-jump {
+    display: none;
+  }
+}
+
+/* Phone or counter, on screens too narrow for both. */
 
 .pager-try-mobile-tabs {
+  position: sticky;
+  top: 68px;
+  z-index: 20;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-  padding: 5px;
+  gap: 4px;
+  padding: 4px;
   border-radius: 999px;
   background: #ffffff;
   border: 1px solid var(--rl-border);
-  box-shadow: 0 6px 18px -10px rgba(20, 27, 23, 0.14);
+  box-shadow: 0 6px 18px -12px rgba(20, 27, 23, 0.2);
 }
 
 @media (min-width: 940px) {
@@ -273,14 +370,14 @@
 }
 
 .pager-try-mobile-tab {
-  min-height: 42px;
-  padding: 8px 12px;
+  min-height: 40px;
+  padding: 6px 12px;
   border: none;
   border-radius: 999px;
   background: transparent;
   color: var(--rl-muted);
   font: inherit;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 700;
   cursor: pointer;
   display: inline-flex;
@@ -307,15 +404,11 @@
 
 .pager-try-grid {
   display: grid;
-  gap: 24px;
-  align-items: start;
+  gap: 18px;
 }
 
 @media (max-width: 939px) {
-  .pager-try-grid[data-mobile-view='phone'] .pager-try-counter {
-    display: none;
-  }
-
+  .pager-try-grid[data-mobile-view='phone'] .pager-try-counter,
   .pager-try-grid[data-mobile-view='board'] .pager-try-phone-column {
     display: none;
   }
@@ -323,16 +416,14 @@
 
 @media (min-width: 940px) {
   .pager-try-grid {
-    /* Compact 300px phone column at 940–1199px leaves generous room for the board inputs. */
-    grid-template-columns: 300px minmax(0, 1fr);
-    gap: 20px;
+    grid-template-columns: 310px minmax(0, 1fr);
   }
 }
 
 @media (min-width: 1200px) {
   .pager-try-grid {
-    grid-template-columns: 344px minmax(0, 1fr);
-    gap: 28px;
+    grid-template-columns: 340px minmax(0, 1fr);
+    gap: 24px;
   }
 }
 
@@ -342,7 +433,10 @@
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--rl-forest);
+  color: var(--rl-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 [dir='rtl'] .pager-try-label {
@@ -351,116 +445,208 @@
   font-size: 13px;
 }
 
+/* The tabs already say which side is showing. */
+@media (max-width: 939px) {
+  .pager-try-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
 .pager-try-phone-column {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 12px;
-  max-width: 350px;
   width: 100%;
+  max-width: 340px;
   margin-inline: auto;
 }
 
 @media (min-width: 940px) {
   .pager-try-phone-column {
+    align-items: stretch;
     max-width: none;
     margin-inline: 0;
   }
 }
 
-/* Realistic phone bezel housing the live customer screen */
-
+/* A slim frame around a screen with an iPhone's proportions. Its height sets
+   its width, so the whole phone fits beside the board on a laptop. */
 .pager-try-phone {
   position: relative;
-  height: 620px;
-  max-height: 76dvh;
-  padding: 10px;
-  border-radius: 42px;
-  background: linear-gradient(155deg, #252c28 0%, #141a17 50%, #1d2420 100%);
-  border: 1px solid rgba(20, 27, 23, 0.16);
-  box-shadow: 0 26px 56px -22px rgba(20, 27, 23, 0.3);
+  align-self: center;
+  height: min(620px, 72dvh);
+  padding: 7px;
+  border-radius: 46px;
+  background: #1b211e;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 0 0 1px rgba(20, 27, 23, 0.12),
+    0 28px 56px -26px rgba(20, 27, 23, 0.4);
+}
+
+@media (min-width: 940px) {
+  .pager-try-phone {
+    height: clamp(560px, calc(100dvh - 250px), 660px);
+  }
+}
+
+/* Volume and side buttons. */
+.pager-try-phone::before,
+.pager-try-phone::after {
+  content: '';
+  position: absolute;
+  width: 3px;
+  border-radius: 2px;
+  background: #1b211e;
+}
+
+.pager-try-phone::before {
+  top: 22%;
+  left: -3px;
+  height: 11%;
+  box-shadow: 0 calc(11% + 52px) 0 #1b211e;
+}
+
+.pager-try-phone::after {
+  top: 28%;
+  right: -3px;
+  height: 14%;
+}
+
+.pager-try-phone-screen {
+  position: relative;
+  height: 100%;
+  aspect-ratio: 390 / 844;
+  overflow: hidden;
+  border-radius: 39px;
+  background: var(--pager-bg);
+}
+
+.pager-try-phone-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 390px;
+  height: 844px;
+  transform-origin: 0 0;
   display: flex;
   flex-direction: column;
 }
 
-.pager-try-phone-notch {
+.pager-try-statusbar {
   position: absolute;
-  top: 16px;
+  inset: 0 0 auto;
+  z-index: 2;
+  height: 54px;
+  padding: 0 30px 0 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--rl-ink);
+  pointer-events: none;
+  direction: ltr;
+}
+
+.pager-try-phone-canvas:has(.pager-screen--ready) .pager-try-statusbar {
+  color: #ffffff;
+}
+
+.pager-try-statusbar-time {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.pager-try-statusbar-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pager-try-island {
+  position: absolute;
+  top: 11px;
   left: 50%;
+  width: 124px;
+  height: 36px;
   transform: translateX(-50%);
-  width: 82px;
-  height: 18px;
   border-radius: 999px;
-  background: #141b17;
-  z-index: 3;
+  background: #0b0d0c;
 }
 
 .pager-try-phone-viewport {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  border-radius: 32px;
-  background: var(--pager-bg);
+  scrollbar-width: none;
   display: flex;
   flex-direction: column;
+}
+
+.pager-try-phone-viewport::-webkit-scrollbar {
+  display: none;
 }
 
 .pager-try-phone-viewport .pager-screen {
   flex: 1;
 }
 
+/* Below the status bar, as on a phone that lets the page run under it. */
 .pager-try-phone-viewport .pager-page {
-  padding-top: 32px;
-  padding-bottom: 24px;
+  padding-top: 58px;
+  padding-bottom: 28px;
 }
 
-.pager-try-phone-viewport .pager-order-number {
-  font-size: 88px;
+.pager-try-another {
+  align-self: center;
+  min-height: 38px;
+  padding: 6px 14px;
+  border: 1px solid var(--rl-border-strong);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--rl-ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.pager-try-phone-viewport .pager-order-number--long {
-  font-size: 38px;
-}
-
-/* Override viewport-relative clamp() so the code stays cleanly inside the demo phone frame. */
-.pager-try-phone-viewport .pager-code {
-  font-size: 64px;
-}
-
-.pager-try-phone-viewport .pager-code--long {
-  font-size: 32px;
+.pager-try-another:hover {
+  background: var(--rl-offwhite);
 }
 
 .pager-try-counter {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 
 .pager-try-board {
-  padding: 18px;
-  border-radius: 22px;
+  flex: 1;
+  padding: 16px;
+  border-radius: 20px;
   border: 1px solid var(--rl-border);
   background: #ffffff;
   color: var(--dash-text);
-  box-shadow: 0 12px 32px -18px rgba(20, 27, 23, 0.12);
+  box-shadow: 0 12px 32px -20px rgba(20, 27, 23, 0.14);
 }
 
-.pager-try-done {
-  margin: 0;
-  padding: 14px 18px;
-  border-radius: 16px;
-  background: var(--rl-sage-wash);
-  border: 1px solid rgba(21, 128, 61, 0.25);
-  color: var(--rl-forest);
-  font-size: 14px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+@media (min-width: 900px) {
+  .pager-try-board {
+    padding: 20px;
+  }
 }
 
-/* Botanical forest claim banner */
+/* Sign-up banner */
 
 .pager-try-claim {
   padding: 28px;

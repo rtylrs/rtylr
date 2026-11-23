@@ -1,26 +1,36 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence, motion, useMotionValue, useSpring } from 'motion/react';
-import { BellRing, Check, QrCode, RotateCcw, VolumeX } from 'lucide-react';
+import {
+  BatteryFull,
+  BellRing,
+  Check,
+  QrCode,
+  RotateCcw,
+  Signal,
+  VolumeX,
+  Wifi,
+} from 'lucide-react';
 import MatchCode from '../../../shared/components/MatchCode';
 import { RenniliLogo, RenniliMark } from '../../../shared/components/RenniliLogo';
 import { useInView, useReducedMotion } from './useLandingObservers';
 
 const SAMPLE_CODE = '427';
 
-/** Sleek bezel phone frame with fixed dimensions (zero CLS) and optional morphing Dynamic Island. */
+/**
+ * The phone the landing pages draw: the same slim frame, status bar and
+ * Dynamic Island as the demo's phone on /try, at an iPhone's proportions.
+ */
 export const PhoneFrame = ({
   children,
   variant = 'default',
   ready = false,
-  islandText,
   className = '',
   decorative = true,
 }: {
   children: React.ReactNode;
   variant?: 'default' | 'compact' | 'hero';
   ready?: boolean;
-  islandText?: string;
   className?: string;
   decorative?: boolean;
 }): React.JSX.Element => (
@@ -35,29 +45,18 @@ export const PhoneFrame = ({
       .join(' ')}
     aria-hidden={decorative ? 'true' : undefined}
   >
-    {islandText ? (
-      <motion.div
-        className={`rl-phone-island ${ready ? 'rl-phone-island--ready' : ''}`}
-        animate={{ width: ready ? 196 : 148 }}
-        transition={{ type: 'spring', stiffness: 380, damping: 28 }}
-        aria-hidden="true"
-      >
-        {ready ? (
-          <span className="rl-island-eq" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-            <span />
-          </span>
-        ) : (
-          <span className="rl-phone-island-dot" />
-        )}
-        <span className="rl-phone-island-text">{islandText}</span>
-      </motion.div>
-    ) : (
-      <div className="rl-phone-notch" aria-hidden="true" />
-    )}
-    <div className="rl-phone-screen">{children}</div>
+    <div className="rl-phone-screen">
+      <div className="rl-phone-status" aria-hidden="true">
+        <span className="rl-phone-time">9:41</span>
+        <span className="rl-phone-island" />
+        <span className="rl-phone-icons">
+          <Signal size={12} strokeWidth={2.8} />
+          <Wifi size={12} strokeWidth={2.8} />
+          <BatteryFull size={16} strokeWidth={2.2} />
+        </span>
+      </div>
+      {children}
+    </div>
   </div>
 );
 
@@ -68,7 +67,6 @@ export const ScreenScan = ({ active = true }: { active?: boolean }): React.JSX.E
     <div className="rl-screen rl-screen--scan">
       <div className="rl-screen-top">
         <span className="rl-screen-venue">{t('pager.landing.hero.demoVenue')}</span>
-        <span className="rl-screen-lang">EN · ع</span>
       </div>
       <div className="rl-scan-finder">
         <div className="rl-scan-poster">
@@ -96,7 +94,6 @@ export const ScreenCode = (): React.JSX.Element => {
     <div className="rl-screen rl-screen--code">
       <div className="rl-screen-top">
         <span className="rl-screen-venue">{t('pager.landing.hero.demoVenue')}</span>
-        <span className="rl-screen-lang">EN · ع</span>
       </div>
       <div className="rl-screen-body">
         <div className="rl-code-card rl-code-card--mock">
@@ -120,7 +117,6 @@ export const ScreenWaiting = ({ ahead = 2 }: { ahead?: number }): React.JSX.Elem
     <div className="rl-screen rl-screen--waiting">
       <div className="rl-screen-top">
         <span className="rl-screen-venue">{t('pager.landing.hero.demoVenue')}</span>
-        <span className="rl-screen-lang">EN · ع</span>
       </div>
       <div className="rl-screen-body">
         <span className="rl-screen-kicker">{t('pager.ticket.orderLabel')}</span>
@@ -272,25 +268,7 @@ export const HeroInteractiveStage = (): React.JSX.Element => {
         </motion.button>
       </div>
 
-      {/* Customer phone + minimalist counter QR stand so the product reads visually in 2 seconds */}
       <div className="rl-hero-studio-scene">
-        <motion.div
-          className="rl-hero-qr-stand"
-          aria-hidden="true"
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.16, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <span className="rl-hero-qr-pill">{t('pager.landing.hero.qrStandLabel')}</span>
-          <div className="rl-hero-qr-glyph">
-            <QrCode size={52} strokeWidth={1.55} />
-          </div>
-          <span className="rl-hero-qr-sub">{t('pager.landing.hero.qrStandCaption')}</span>
-          <span className="rl-hero-qr-foot">
-            <RenniliLogo size={13} />
-          </span>
-        </motion.div>
-
         <div className="rl-hero-tilt-stage">
           <motion.div
             className="rl-hero-phone-shell"
@@ -302,37 +280,7 @@ export const HeroInteractiveStage = (): React.JSX.Element => {
             }
             transition={{ duration: 0.55, ease: 'easeInOut' }}
           >
-            <AnimatePresence>
-              {isReady && (
-                <motion.div
-                  key="hero-toast"
-                  className="rl-hero-toast"
-                  initial={{ opacity: 0, y: 14, scale: 0.94 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                  transition={{ type: 'spring', stiffness: 420, damping: 28 }}
-                  aria-hidden="true"
-                >
-                  <span className="rl-hero-toast-icon">
-                    <BellRing size={15} strokeWidth={2.4} />
-                  </span>
-                  <span className="rl-hero-toast-copy">
-                    <strong>{t('pager.landing.hero.toastTitle')}</strong>
-                    <span>{t('pager.landing.hero.toastBody')}</span>
-                  </span>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <PhoneFrame
-              variant="hero"
-              ready={isReady}
-              islandText={
-                isReady
-                  ? t('pager.landing.hero.islandReady')
-                  : t('pager.landing.hero.islandWaiting')
-              }
-            >
+            <PhoneFrame variant="hero" ready={isReady}>
               <AnimatePresence mode="wait" initial={false}>
                 {isReady ? (
                   <motion.div

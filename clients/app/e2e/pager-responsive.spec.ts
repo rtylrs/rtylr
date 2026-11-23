@@ -118,6 +118,45 @@ test.describe('Rennili on phones and tablets', () => {
     });
   }
 
+  // A name is as wide as its letters, not its count: "Ahmad" once split as "Ahma / d".
+  for (const [label, kind] of [
+    ['Ahmad', 'name'],
+    ['WWMMW', 'name'],
+    ['Mohammad', 'name'],
+    ['1234567890AB', 'number'],
+  ] as const) {
+    test(`the order label "${label}" stays on one line on a small phone`, async ({ page }) => {
+      await page.setViewportSize({ width: 360, height: 740 });
+      await page.route('**/pager/v1/public/push-key', (route) =>
+        route.fulfill({ json: { public_key: '' } })
+      );
+      await page.route('**/pager/v1/public/tickets/tok-label', (route) =>
+        route.fulfill({
+          json: {
+            label,
+            label_kind: kind,
+            status: 'waiting',
+            venue_name: 'Acme Cafe',
+            server_time: new Date().toISOString(),
+          },
+        })
+      );
+
+      await page.goto(`${RENNILI_URL}/t/tok-label`);
+      const shown = page.locator('.pager-order-number');
+      await expect(shown).toHaveText(label);
+      const layout = await shown.evaluate((element) => {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const lines = new Set(Array.from(range.getClientRects()).map((r) => Math.round(r.top)));
+        const text = range.getBoundingClientRect();
+        return { lines: lines.size, inside: text.left >= 0 && text.right <= window.innerWidth };
+      });
+      expect(layout.lines).toBe(1);
+      expect(layout.inside).toBe(true);
+    });
+  }
+
   test('the board puts its three columns side by side on a landscape tablet', async ({
     page,
     context,

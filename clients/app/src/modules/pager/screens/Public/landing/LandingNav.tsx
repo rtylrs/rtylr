@@ -83,9 +83,21 @@ export const LandingNav = ({
 
   return (
     <>
-      <div className="rl-nav-shell">
-        <header className={`rl-nav-pill ${scrolled ? 'rl-nav-pill--scrolled' : ''}`}>
-          <div className="rl-nav-brand">
+      {/* The strip scrolls away; the bar under it stays pinned. */}
+      <div className={`rl-nav-shell ${scrolled ? 'rl-nav-shell--scrolled' : ''}`}>
+        <div className="rl-strip">
+          <div className="rl-strip-inner">
+            <p className="rl-strip-text">
+              <span className="rl-strip-tagline">{t('pager.landing.nav.strip')}</span>
+              <span className="rl-strip-dot" aria-hidden="true" />
+              <ByRtylr />
+            </p>
+            <LanguageSwitch />
+          </div>
+        </div>
+
+        <header className="rl-nav-bar">
+          <div className="rl-nav-bar-inner">
             <Link
               to={PAGER_LANDING_PATH}
               className="rl-nav-logo-link"
@@ -93,51 +105,47 @@ export const LandingNav = ({
             >
               <RenniliLogo size={26} />
             </Link>
-            <span className="rl-nav-by">
-              <ByRtylr />
-            </span>
-          </div>
 
-          <nav className="rl-nav-links" aria-label={t('pager.landing.nav.label')}>
-            {links.map((item) => {
-              const active = currentPath === item.to;
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={`rl-nav-link ${active ? 'rl-nav-link--active' : ''}`}
-                  aria-current={active ? 'page' : undefined}
-                >
-                  {active && (
-                    <motion.span
-                      layoutId="rl-nav-active-bg"
-                      className="rl-nav-active-bg"
-                      transition={{ type: 'spring', stiffness: 420, damping: 34 }}
-                      aria-hidden="true"
-                    />
-                  )}
-                  <span className="rl-nav-link-text">{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
+            <nav className="rl-nav-links" aria-label={t('pager.landing.nav.label')}>
+              {links.map((item) => {
+                const active = currentPath === item.to;
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className={`rl-nav-link ${active ? 'rl-nav-link--active' : ''}`}
+                    aria-current={active ? 'page' : undefined}
+                  >
+                    {active && (
+                      <motion.span
+                        layoutId="rl-nav-active-bg"
+                        className="rl-nav-active-bg"
+                        transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                        aria-hidden="true"
+                      />
+                    )}
+                    <span className="rl-nav-link-text">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
 
-          <div className="rl-nav-end">
-            <LanguageSwitch />
-            <Link to={PAGER_TRY_PATH} className="rl-btn rl-btn--primary rl-btn--nav">
-              {t('pager.landing.nav.tryCta')}
-            </Link>
-            <button
-              ref={triggerRef}
-              type="button"
-              className="rl-menu-btn"
-              aria-label={t('pager.landing.nav.menuOpen')}
-              aria-expanded={sheetOpen}
-              aria-controls="rl-mobile-sheet"
-              onClick={() => setSheetOpen(true)}
-            >
-              <Menu size={20} strokeWidth={2.2} aria-hidden="true" />
-            </button>
+            <div className="rl-nav-end">
+              <Link to={PAGER_TRY_PATH} className="rl-btn rl-btn--primary rl-btn--nav">
+                {t('pager.landing.nav.tryCta')}
+              </Link>
+              <button
+                ref={triggerRef}
+                type="button"
+                className="rl-menu-btn"
+                aria-label={t('pager.landing.nav.menuOpen')}
+                aria-expanded={sheetOpen}
+                aria-controls="rl-mobile-sheet"
+                onClick={() => setSheetOpen(true)}
+              >
+                <Menu size={20} strokeWidth={2.2} aria-hidden="true" />
+              </button>
+            </div>
           </div>
         </header>
       </div>

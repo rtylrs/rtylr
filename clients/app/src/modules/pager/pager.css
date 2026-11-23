@@ -212,6 +212,34 @@
   border-color: rgba(255, 255, 255, 0.6);
 }
 
+/* What an iPhone tab cannot do, said before the customer pockets the phone. */
+.pager-warning {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid #f1d48f;
+  border-radius: 16px;
+  background: #fff8e8;
+  color: #6b4500;
+  text-align: start;
+}
+
+.pager-warning-title {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.pager-warning-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
 .pager-ticket {
   display: flex;
   flex-direction: column;
@@ -238,17 +266,15 @@
 }
 
 /* Sized to be read from arm's length, and to shrink for a twelve-character number. */
+/* Sized by the label's length so it fits one line even in wide letters ("WM"
+   run near 0.95em each). A name too long for that wraps between its words. */
 .pager-order-number {
   max-width: 100%;
-  font-size: clamp(64px, 33cqi, 168px);
+  font-size: clamp(28px, min(33cqi, 92cqi / var(--pager-label-chars, 3)), 168px);
   line-height: 1;
   font-weight: 900;
   letter-spacing: -0.02em;
-  overflow-wrap: anywhere;
-}
-
-.pager-order-number--long {
-  font-size: clamp(28px, 11.5cqi, 72px);
+  overflow-wrap: break-word;
 }
 
 /*

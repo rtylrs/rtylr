@@ -34,6 +34,19 @@ export function pushSupported(): boolean {
   );
 }
 
+/**
+ * An iPhone or iPad browser tab. iOS gives Web Push only to a site added to the
+ * home screen, so a tab rings only while it is on screen. iPadOS reports a Mac,
+ * told apart by its touch screen.
+ */
+export function iosTabWithoutPush(): boolean {
+  if (typeof navigator === 'undefined' || pushSupported()) return false;
+  const agent = navigator.userAgent;
+  return (
+    /iPhone|iPad|iPod/.test(agent) || (/Macintosh/.test(agent) && navigator.maxTouchPoints > 1)
+  );
+}
+
 let pushKey: Promise<string> | null = null;
 
 /** The server's VAPID key, fetched once per document; empty while push is off. */
