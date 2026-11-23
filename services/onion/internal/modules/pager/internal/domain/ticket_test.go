@@ -85,11 +85,14 @@ func TestUnlabelledTicketsExpireSoonerThanLabelledOnes(t *testing.T) {
 	if got := unlabelled.StatusAt(created.Add(UnlabelledLifetime + time.Millisecond)); got != StatusExpired {
 		t.Fatalf("unlabelled past 15 minutes = %s", got)
 	}
-	if got := labelled.StatusAt(created.Add(UnlabelledLifetime + time.Hour)); got != StatusWaiting {
-		t.Fatalf("labelled after an hour and a quarter = %s", got)
+	if got := labelled.StatusAt(created.Add(UnlabelledLifetime + 15*time.Minute)); got != StatusWaiting {
+		t.Fatalf("labelled after half an hour = %s", got)
+	}
+	if got := labelled.StatusAt(created.Add(OpenLifetime)); got != StatusWaiting {
+		t.Fatalf("labelled at exactly one hour = %s", got)
 	}
 	if got := labelled.StatusAt(created.Add(OpenLifetime + time.Millisecond)); got != StatusExpired {
-		t.Fatalf("labelled past six hours = %s", got)
+		t.Fatalf("labelled past one hour = %s", got)
 	}
 }
 

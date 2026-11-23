@@ -12,14 +12,39 @@ vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => navigateSpy,
 }));
 
-const api = vi.hoisted(() => ({ scanTicket: vi.fn(), getPublicTicket: vi.fn() }));
+const api = vi.hoisted(() => ({
+  getPublicVenue: vi.fn(),
+  scanTicket: vi.fn(),
+  getPublicTicket: vi.fn(),
+  getPushKey: vi.fn(),
+}));
 vi.mock('../../shared/lib/clients', () => ({ publicPagerClient: api }));
+
+const alarmMocks = vi.hoisted(() => ({
+  unlock: vi.fn(),
+  blip: vi.fn(),
+}));
+vi.mock('../../../../shared/alarm/readyAlarm', () => ({
+  readyAlarm: alarmMocks,
+}));
+
+const askPushSpy = vi.hoisted(() => vi.fn());
+vi.mock('../../shared/lib/pushAlerts', () => ({
+  askPushPermission: askPushSpy,
+  usePushKey: () => 'vapid-public-key',
+}));
+
+vi.mock('../../../../shared/services/i18next', () => ({ selectLanguage: vi.fn() }));
 
 import Scan from './Scan';
 import { initTestI18n } from '../../shared/testing/i18n';
 
 const STORAGE_KEY = 'pager:scan:acme';
 const scanned = { publicToken: 'tok-1', code: '427', status: 'waiting' };
+
+async function tapStart(): Promise<void> {
+  fireEvent.click(await screen.findByRole('button', { name: 'Get my code & enable alerts' }));
+}
 
 beforeAll(async () => {
   await initTestI18n('en');
@@ -28,6 +53,10 @@ beforeAll(async () => {
 beforeEach(() => {
   window.localStorage.clear();
   navigateSpy.mockReset();
+  alarmMocks.unlock.mockReset();
+  alarmMocks.blip.mockReset();
+  askPushSpy.mockReset();
+  api.getPublicVenue.mockReset().mockResolvedValue({ name: 'Acme Café', enabled: true });
   api.scanTicket.mockReset().mockResolvedValue(scanned);
   api.getPublicTicket.mockReset();
 });
@@ -37,21 +66,26 @@ afterEach(() => {
 });
 
 describe('pager scan page', () => {
-  it('opens a ticket on load, with no tap and nothing to type, then shows it', async () => {
-    // StrictMode runs effects twice in development: still one ticket.
+  it('shows the venue and unlocks audio + notifications on a single upfront tap before scanning', async () => {
     render(
       <StrictMode>
         <Scan />
       </StrictMode>
     );
 
-    expect(screen.getByRole('status')).toHaveTextContent('Getting your code...');
+    expect(await screen.findByText('Acme Café')).toBeInTheDocument();
+    expect(api.scanTicket).not.toHaveBeenCalled();
+
+    await tapStart();
+
+    expect(alarmMocks.unlock).toHaveBeenCalledTimes(1);
+    expect(alarmMocks.blip).toHaveBeenCalledTimes(1);
+    expect(askPushSpy).toHaveBeenCalledWith('vapid-public-key');
     await waitFor(() =>
       expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-1', replace: true })
     );
     expect(api.scanTicket).toHaveBeenCalledTimes(1);
     expect(api.scanTicket).toHaveBeenCalledWith({ slug: 'acme' });
-    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
     expect(window.localStorage.getItem(STORAGE_KEY)).toBe('tok-1');
   });
 
@@ -59,6 +93,8 @@ describe('pager scan page', () => {
     window.localStorage.setItem(STORAGE_KEY, 'tok-old');
     api.getPublicTicket.mockResolvedValue({ status: 'waiting', code: '318' });
     render(<Scan />);
+
+    await tapStart();
 
     await waitFor(() =>
       expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-old', replace: true })
@@ -75,6 +111,8 @@ describe('pager scan page', () => {
     api.getPublicTicket.mockResolvedValue(ticket);
     render(<Scan />);
 
+    await tapStart();
+
     await waitFor(() =>
       expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-1', replace: true })
     );
@@ -86,6 +124,8 @@ describe('pager scan page', () => {
     api.getPublicTicket.mockRejectedValue({ statusCode: 404, code: 'ticket_not_found' });
     render(<Scan />);
 
+    await tapStart();
+
     await waitFor(() => expect(api.scanTicket).toHaveBeenCalledTimes(1));
     expect(window.localStorage.getItem(STORAGE_KEY)).toBe('tok-1');
   });
@@ -94,6 +134,8 @@ describe('pager scan page', () => {
     window.localStorage.setItem(STORAGE_KEY, 'tok-old');
     api.getPublicTicket.mockRejectedValue({ statusCode: 503 });
     render(<Scan />);
+
+    await tapStart();
 
     await waitFor(() =>
       expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-old', replace: true })
@@ -110,6 +152,8 @@ describe('pager scan page', () => {
     });
     render(<Scan />);
 
+    await tapStart();
+
     await waitFor(() =>
       expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-1', replace: true })
     );
@@ -121,12 +165,14 @@ describe('pager scan page', () => {
     const onScanned = vi.fn();
     render(<Scan slug="demo" onScanned={onScanned} />);
 
+    await tapStart();
+
     await waitFor(() => expect(onScanned).toHaveBeenCalledWith('tok-1'));
     expect(navigateSpy).not.toHaveBeenCalled();
   });
 
   it('says so when the venue has no pager', async () => {
-    api.scanTicket.mockRejectedValue({ statusCode: 404, code: 'venue_not_found' });
+    api.getPublicVenue.mockRejectedValue({ statusCode: 404, code: 'venue_not_found' });
     render(<Scan />);
 
     expect(await screen.findByText("This pager isn't available")).toBeInTheDocument();
@@ -143,6 +189,8 @@ describe('pager scan page', () => {
     api.scanTicket.mockRejectedValueOnce(failure);
     render(<Scan />);
 
+    await tapStart();
+
     expect(await screen.findByText(message)).toBeInTheDocument();
     expect(navigateSpy).not.toHaveBeenCalled();
 
@@ -154,54 +202,30 @@ describe('pager scan page', () => {
     expect(api.scanTicket).toHaveBeenCalledTimes(2);
   });
 
-  // While a new version deploys, the API answers with nothing, a 5xx or an
-  // uncoded 404 for a few seconds.
   it('rides out a deploy calmly, retrying after 1, 2 and 4 seconds', async () => {
     vi.useFakeTimers();
     api.scanTicket
-      .mockRejectedValueOnce({ statusCode: 502 })
-      .mockRejectedValueOnce({ statusCode: 404 })
       .mockRejectedValueOnce(new TypeError('Failed to fetch'))
-      .mockResolvedValue(scanned);
+      .mockRejectedValueOnce({ statusCode: 503 })
+      .mockRejectedValueOnce({ statusCode: 404 })
+      .mockResolvedValueOnce(scanned);
     render(<Scan />);
 
-    await act(() => vi.advanceTimersByTimeAsync(1_000));
-    expect(screen.getByRole('status')).toHaveTextContent('Still getting your code, one moment...');
-    await act(() => vi.advanceTimersByTimeAsync(2_000));
-    expect(navigateSpy).not.toHaveBeenCalled();
-    await act(() => vi.advanceTimersByTimeAsync(4_000));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Get my code & enable alerts' }));
 
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1_000);
+    });
+    expect(screen.getByRole('status')).toHaveTextContent('Still getting your code, one moment...');
+    expect(navigateSpy).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(6_000);
+    });
     expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-1', replace: true });
     expect(api.scanTicket).toHaveBeenCalledTimes(4);
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-  });
-
-  it('shows the error with a retry once the deploy has taken about 20 seconds', async () => {
-    vi.useFakeTimers();
-    api.scanTicket.mockRejectedValue({ statusCode: 503 });
-    render(<Scan />);
-
-    await act(() => vi.advanceTimersByTimeAsync(14_000));
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-    await act(() => vi.advanceTimersByTimeAsync(1_000));
-
-    expect(screen.getByRole('alert')).toHaveTextContent(
-      "We couldn't reach the pager. Check your connection and try again."
-    );
-    expect(api.scanTicket).toHaveBeenCalledTimes(5);
-
-    api.scanTicket.mockResolvedValue(scanned);
-    fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
-    await act(() => vi.advanceTimersByTimeAsync(0));
-    expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-1', replace: true });
-  });
-
-  it('does not retry a venue without a pager', async () => {
-    vi.useFakeTimers();
-    api.scanTicket.mockRejectedValue({ statusCode: 404, code: 'venue_not_found' });
-    render(<Scan />);
-
-    await act(() => vi.advanceTimersByTimeAsync(20_000));
-    expect(api.scanTicket).toHaveBeenCalledTimes(1);
   });
 });

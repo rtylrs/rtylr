@@ -15,7 +15,11 @@
     "failed": "تعذّر الوصول إلى الجرس. تحقق من اتصالك وحاول مجددًا.",
     "retry": "حاول مجددًا",
     "venueNotFoundTitle": "هذا الجرس غير متاح",
-    "venueNotFoundDescription": "قد يكون الرابط غير صحيح، أو أن المكان أوقف الجرس. يرجى السؤال عند الكاونتر."
+    "venueNotFoundDescription": "قد يكون الرابط غير صحيح، أو أن المكان أوقف الجرس. يرجى السؤال عند الكاونتر.",
+    "readyTitle": "فعّل تنبيه طلبك",
+    "readyHint": "اضغط مرة واحدة لتفعيل الصوت والاهتزاز والإشعارات ليرنّ هاتفك فور جاهزية طلبك.",
+    "startButton": "خذ رمزك وفعّل التنبيهات",
+    "permissionsNote": "صوت · اهتزاز · إشعارات"
   },
   "ticket": {
     "pageTitle": "الطلب {{label}} · $t(pager.brand.name)",
@@ -56,7 +60,8 @@
     "notifyHint": "اضغط مرة واحدة ليتمكن هاتفك من الرنين والاهتزاز عندما يجهز طلبك. لا حاجة لكتابة أي شيء.",
     "readyTitleName": "{{label}}، طلبك جاهز",
     "codeExpired": "انتهت صلاحية هذا الرمز",
-    "codeExpiredHint": "امسح رمز QR عند الكاونتر من جديد للحصول على رمز جديد."
+    "codeExpiredHint": "امسح رمز QR عند الكاونتر من جديد للحصول على رمز جديد.",
+    "alertsActive": "التنبيهات مفعّلة"
   },
   "push": {
     "readyTitle": "الطلب {{label}} جاهز",
@@ -132,7 +137,21 @@
     "logoLabel": "شعار المحل",
     "logoAdd": "أضف شعارك",
     "logoChange": "غيّر الشعار",
-    "logoHint": "يظهر على هواتف زبائنك وعلى الملصق وشاشة الكاونتر. تضبطه من إعدادات نشاطك التجاري."
+    "logoHint": "يظهر على هواتف زبائنك وعلى الملصق وشاشة الكاونتر. تضبطه من إعدادات نشاطك التجاري.",
+    "settingsButton": "الإعدادات",
+    "qrButton": "رمز الكاونتر",
+    "statusOn": "الجرس يعمل",
+    "statusOff": "الجرس متوقف",
+    "selectPhone": "اختر الرمز {{code}}",
+    "tabsLabel": "قوائم الطلبات",
+    "labelSelected": "تسمية الرمز {{code}}",
+    "waitAgo_zero": "{{count}} د",
+    "waitAgo_one": "1 د",
+    "waitAgo_two": "2 د",
+    "waitAgo_few": "{{count}} د",
+    "waitAgo_many": "{{count}} د",
+    "waitAgo_other": "{{count}} د",
+    "waitNow": "الآن"
   },
   "poster": {
     "pageTitle": "ملصق الكاونتر · $t(pager.brand.name)",

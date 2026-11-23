@@ -15,7 +15,11 @@
     "failed": "We couldn't reach the pager. Check your connection and try again.",
     "retry": "Try again",
     "venueNotFoundTitle": "This pager isn't available",
-    "venueNotFoundDescription": "The link may be wrong, or the venue has switched its pager off. Please ask at the counter."
+    "venueNotFoundDescription": "The link may be wrong, or the venue has switched its pager off. Please ask at the counter.",
+    "readyTitle": "Get your order alert",
+    "readyHint": "Tap once to turn on sound, vibration, and notifications so your phone rings the moment your order is ready.",
+    "startButton": "Get my code & enable alerts",
+    "permissionsNote": "Sound · Vibration · Notifications"
   },
   "ticket": {
     "pageTitle": "Order {{label}} · $t(pager.brand.name)",
@@ -52,7 +56,8 @@
     "notifyHint": "Tap once so your phone can ring and vibrate when your order is ready. There is nothing to type.",
     "readyTitleName": "{{label}}, your order is ready",
     "codeExpired": "This code has expired",
-    "codeExpiredHint": "Scan the QR at the counter again to get a new one."
+    "codeExpiredHint": "Scan the QR at the counter again to get a new one.",
+    "alertsActive": "Alerts active"
   },
   "push": {
     "readyTitle": "Order {{label}} is ready",
@@ -124,7 +129,17 @@
     "logoLabel": "Venue logo",
     "logoAdd": "Add your logo",
     "logoChange": "Change logo",
-    "logoHint": "Shown on your customers' phones, the poster and the counter display. You set it in your business settings."
+    "logoHint": "Shown on your customers' phones, the poster and the counter display. You set it in your business settings.",
+    "settingsButton": "Settings",
+    "qrButton": "Counter QR",
+    "statusOn": "Pager live",
+    "statusOff": "Pager off",
+    "selectPhone": "Select code {{code}}",
+    "tabsLabel": "Order queues",
+    "labelSelected": "Assign code {{code}}",
+    "waitAgo_one": "{{count}}m",
+    "waitAgo_other": "{{count}}m",
+    "waitNow": "Now"
   },
   "poster": {
     "pageTitle": "Counter poster · $t(pager.brand.name)",

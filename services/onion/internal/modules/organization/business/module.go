@@ -90,6 +90,24 @@ func (m *Module) PublicBusinessByID(ctx context.Context, businessID int64) (name
 	return business.Name, business.LogoURL, nil
 }
 
+// BusinessLeadContact returns the business contact details and owner ID used
+// when capturing a product sign-up lead into the Voxire CRM workspace.
+func (m *Module) BusinessLeadContact(ctx context.Context, businessID int64) (name, slug, email, phone string, ownerID int64, err error) {
+	profile, err := m.service.GetProfile(ctx, businessID)
+	if err != nil {
+		return "", "", "", "", 0, err
+	}
+	name = strings.TrimSpace(profile.SiteName)
+	if name == "" {
+		name = strings.TrimSpace(profile.Name)
+	}
+	if pub, pubErr := m.repository.GetPublicBusiness(ctx, businessID); pubErr == nil {
+		slug = strings.TrimSpace(pub.Slug)
+	}
+	ownerID, _ = m.service.GetBusinessOwnerID(ctx, businessID)
+	return name, slug, strings.TrimSpace(profile.ContactEmail), strings.TrimSpace(profile.ContactPhone), ownerID, nil
+}
+
 func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	businessAPI := api.NewBusinessAPI(m.service)
 	if m.userService != nil {

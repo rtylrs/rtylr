@@ -33,8 +33,9 @@ type Module struct {
 }
 
 type UserProfile struct {
-	ID   int64
-	Name string
+	ID    int64
+	Name  string
+	Email string
 }
 
 type EmployeeProvisioner interface {
@@ -156,7 +157,7 @@ func (m *Module) GetUserProfile(ctx context.Context, userID int64) (UserProfile,
 	if name == "" {
 		name = user.Email
 	}
-	return UserProfile{ID: user.ID, Name: name}, nil
+	return UserProfile{ID: user.ID, Name: name, Email: strings.TrimSpace(user.Email)}, nil
 }
 
 func (m *Module) GetTokenValidator() authPkg.TokenValidator {

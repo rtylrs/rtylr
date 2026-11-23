@@ -625,19 +625,19 @@ func TestAheadCountsTheWaitingTicketsEnteredEarlier(t *testing.T) {
 	})
 }
 
-func TestOpenTicketsExpireAfterSixHours(t *testing.T) {
+func TestOpenTicketsExpireAfterOneHour(t *testing.T) {
 	eachBackend(t, func(h *harness) {
 		h.enable(h.a)
 		token, id := h.labelled(h.a, "42")
 
 		h.clock.advance(domain.OpenLifetime)
 		if h.want(h.publicTicket(token), http.StatusOK, "").text("status") != domain.StatusWaiting || len(h.open(h.a)) != 1 {
-			h.Fatal("a ticket exactly six hours old is not open any more")
+			h.Fatal("a ticket exactly one hour old is not open any more")
 		}
 
 		h.clock.advance(time.Millisecond)
 		if got := h.want(h.publicTicket(token), http.StatusOK, "").text("status"); got != domain.StatusExpired {
-			h.Fatalf("status past six hours = %q, want expired", got)
+			h.Fatalf("status past one hour = %q, want expired", got)
 		}
 		if open := h.open(h.a); len(open) != 0 {
 			h.Fatalf("an expired ticket is still on the board: %v", open)
@@ -705,14 +705,14 @@ func TestSweepClosesTicketsPastTheirLifetime(t *testing.T) {
 			h.Fatalf("unlabelled ticket past 15 minutes is stored as %q, want expired", got)
 		}
 		if got := h.storedStatus(number); got != domain.StatusWaiting {
-			h.Fatalf("labelled ticket inside six hours is stored as %q, want waiting", got)
+			h.Fatalf("labelled ticket inside one hour is stored as %q, want waiting", got)
 		}
 
 		h.clock.advance(domain.OpenLifetime - domain.UnlabelledLifetime)
 		h.sweep()
 		for _, token := range []string{number, name} {
 			if got := h.storedStatus(token); got != domain.StatusExpired {
-				h.Fatalf("labelled ticket past six hours is stored as %q, want expired", got)
+				h.Fatalf("labelled ticket past one hour is stored as %q, want expired", got)
 			}
 		}
 		if got := h.storedStatus(recent); got != domain.StatusWaiting {
@@ -848,4 +848,27 @@ func TestVenueIsTheBusinessBehindTheMenuSlug(t *testing.T) {
 	}
 	h.want(h.call(nil, http.MethodGet, "/pager/v1/public/venues/"+slug, ""), http.StatusNotFound, "venue_not_found")
 	h.want(h.publicTicket(token), http.StatusNotFound, "ticket_not_found")
+}
+
+func TestOnEnabledFiresOnlyWhenPagerTurnsOn(t *testing.T) {
+	h := newHarness(t, nil)
+	var captured []int64
+	h.service.SetOnEnabled(func(_ context.Context, businessID int64) {
+		captured = append(captured, businessID)
+	})
+
+	h.enable(h.a)
+	if len(captured) != 1 || captured[0] != h.a.businessID {
+		t.Fatalf("captured after first enable = %v, want [%d]", captured, h.a.businessID)
+	}
+	// Updating label_mode while already enabled does not re-trigger lead capture.
+	h.want(h.call(h.a.owner, http.MethodPut, "/pager/v1/settings", `{"label_mode":"number"}`), http.StatusOK, "")
+	if len(captured) != 1 {
+		t.Fatalf("captured after label_mode update = %v, want 1", captured)
+	}
+	// Turning off does not trigger.
+	h.want(h.call(h.a.owner, http.MethodPut, "/pager/v1/settings", `{"enabled":false}`), http.StatusOK, "")
+	if len(captured) != 1 {
+		t.Fatalf("captured after disable = %v, want 1", captured)
+	}
 }

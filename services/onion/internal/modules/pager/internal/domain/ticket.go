@@ -29,7 +29,7 @@ const (
 // OpenLifetime is how long a labelled ticket stays open. Receipt numbers repeat
 // every day, so an older open ticket reads as expired and its number is free
 // again.
-const OpenLifetime = 6 * time.Hour
+const OpenLifetime = time.Hour
 
 // UnlabelledLifetime is how long a scanned phone waits for the cashier to label
 // it before its ticket expires and leaves the board.

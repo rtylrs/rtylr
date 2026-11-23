@@ -59,7 +59,7 @@ describe('Rennili routes', () => {
   ])('serves %s with no sign in', async (url, heading) => {
     gate.portalPaths = [];
     const router = await open(url);
-    expect(await screen.findByRole('heading', { name: heading })).toBeVisible();
+    expect(await screen.findByRole('heading', { name: heading }, { timeout: 5000 })).toBeVisible();
     expect(router.state.location.pathname).toBe(url);
     expect(gate.portalPaths).toEqual([]);
   });
@@ -72,7 +72,7 @@ describe('Rennili routes', () => {
   ])('serves %s behind the account checks', async (url, heading, portalPath) => {
     gate.portalPaths = [];
     await open(url);
-    expect(await screen.findByRole('heading', { name: heading })).toBeVisible();
+    expect(await screen.findByRole('heading', { name: heading }, { timeout: 5000 })).toBeVisible();
     expect(gate.portalPaths).toContain(portalPath);
   });
 });

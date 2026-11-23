@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, Minus } from 'lucide-react';
 import { RenniliMark } from '../../../shared/components/RenniliLogo';
+import { PhonePagerSvg, PlasticPagerSvg } from './PagerIllustration';
 import { useInView } from './useLandingObservers';
 
 export const CompareSection = (): React.JSX.Element => {
@@ -30,6 +31,7 @@ export const CompareSection = (): React.JSX.Element => {
         >
           <div className="rl-ledger-col rl-ledger-col--old">
             <div className="rl-ledger-head">
+              <PlasticPagerSvg className="rl-ledger-svg" />
               <span className="rl-ledger-badge rl-ledger-badge--old">
                 {t('pager.landing.compare.oldBadge')}
               </span>
@@ -49,6 +51,7 @@ export const CompareSection = (): React.JSX.Element => {
 
           <div className="rl-ledger-col rl-ledger-col--new">
             <div className="rl-ledger-head">
+              <PhonePagerSvg className="rl-ledger-svg" />
               <span className="rl-ledger-badge rl-ledger-badge--new">
                 <RenniliMark size={15} />
                 {t('pager.landing.compare.newBadge')}

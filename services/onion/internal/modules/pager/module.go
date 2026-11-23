@@ -42,6 +42,25 @@ func NewModule(ctx context.Context, db *sql.DB, businesses BusinessDirectory) *M
 	return &Module{service: service}
 }
 
+// WithOnEnabled runs fn asynchronously whenever a business turns its pager on
+// from off, on a detached timeout context so CRM or notification hooks never
+// delay the venue's setup.
+func (m *Module) WithOnEnabled(fn func(ctx context.Context, businessID int64)) *Module {
+	if fn == nil {
+		m.service.SetOnEnabled(nil)
+		return m
+	}
+	m.service.SetOnEnabled(func(ctx context.Context, businessID int64) {
+		detached := context.WithoutCancel(ctx)
+		go func() {
+			runCtx, cancel := context.WithTimeout(detached, 15*time.Second)
+			defer cancel()
+			fn(runCtx, businessID)
+		}()
+	})
+	return m
+}
+
 // defaultPushSubject is who the push services can contact about our pushes
 // when WEB_PUSH_SUBJECT is unset.
 const defaultPushSubject = "mailto:info@voxire.com"

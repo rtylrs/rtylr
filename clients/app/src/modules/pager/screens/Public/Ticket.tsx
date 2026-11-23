@@ -4,7 +4,7 @@ import { useParams } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
 import type { GetPublicTicketResponse } from '@voxire/voxie/pager/v1/types';
-import { Lock, SearchX } from 'lucide-react';
+import { BellRing, Check, Lock, SearchX } from 'lucide-react';
 import { readyAlarm } from '../../../../shared/alarm/readyAlarm';
 import { useAlarm } from '../../../../shared/alarm/useAlarm';
 import LanguageSwitch from '../../shared/components/LanguageSwitch';
@@ -206,41 +206,50 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
         </div>
 
         <div className="pager-ticket">
-          {labelled ? (
-            <h1 className="pager-order">
-              {ticket.labelKind === 'number' && (
-                <>
-                  <span className="pager-order-label">{t('pager.ticket.orderLabel')}</span>{' '}
-                </>
-              )}
-              <bdi className="pager-order-number" style={labelSize}>
-                {label}
-              </bdi>
-            </h1>
-          ) : (
-            <h1 className="pager-code-card">
-              <span className="pager-code-caption">{t('pager.ticket.codeLabel')}</span>{' '}
-              <MatchCode code={code} className="pager-code" longClassName="pager-code--long" />
-            </h1>
-          )}
-
-          {status === 'waiting' && !labelled && (
-            <p className="pager-status" role="status">
-              {t('pager.ticket.showCode')}
+          {status === 'waiting' && alarm.unlocked && (
+            <p className="pager-live-pill">
+              <Check size={14} strokeWidth={2.8} aria-hidden="true" />
+              <span>{t('pager.ticket.alertsActive')}</span>
             </p>
           )}
 
-          {status === 'waiting' && labelled && (
-            <div role="status">
-              <p className="pager-status">{t('pager.ticket.waiting')}</p>
-              <p className="pager-text">
-                {ahead > 0 ? t('pager.ticket.ahead', { count: ahead }) : t('pager.ticket.next')}
-              </p>
+          {labelled ? (
+            <div className={ready ? 'pager-order-hero' : 'pager-code-card pager-code-card--order'}>
+              <h1 className="pager-order">
+                {ticket.labelKind === 'number' && (
+                  <>
+                    <span className="pager-order-label">{t('pager.ticket.orderLabel')}</span>{' '}
+                  </>
+                )}
+                <bdi className="pager-order-number" style={labelSize}>
+                  {label}
+                </bdi>
+              </h1>
+              {status === 'waiting' && (
+                <div className="pager-card-status" role="status">
+                  <p className="pager-status">{t('pager.ticket.waiting')}</p>
+                  <p className="pager-text">
+                    {ahead > 0 ? t('pager.ticket.ahead', { count: ahead }) : t('pager.ticket.next')}
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="pager-code-card">
+              <h1 className="pager-code-heading">
+                <span className="pager-code-caption">{t('pager.ticket.codeLabel')}</span>{' '}
+                <MatchCode code={code} className="pager-code" longClassName="pager-code--long" />
+              </h1>
+              {status === 'waiting' && (
+                <p className="pager-card-instruction" role="status">
+                  {t('pager.ticket.showCode')}
+                </p>
+              )}
             </div>
           )}
 
           {ready && (
-            <div role="alert">
+            <div className="pager-ready-block" role="alert">
               {/* Keyed on the ring, so a call again shakes it once more. */}
               <RenniliMark key={ringMark} size={56} wiggle className="pager-ready-mark" />
               <p className="pager-status">{t('pager.ticket.ready')}</p>
@@ -305,8 +314,7 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
           </div>
         )}
 
-        {/* The browser lets a page ring, buzz or ask to notify only after a tap,
-            and the scan gave none, so this is the one tap the customer makes. */}
+        {/* Fallback if the visitor reloaded directly on /t/$token without going through the scan tap. */}
         {isOpenStatus(status) && !acknowledged && !alarm.unlocked && (
           <div className="pager-panel">
             <p className="pager-text">{t('pager.ticket.notifyHint')}</p>
@@ -315,17 +323,19 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
               className="pager-button"
               onClick={() => {
                 readyAlarm.unlock();
+                readyAlarm.blip();
                 askPushPermission(pushKey);
                 setPushAsked((count) => count + 1);
               }}
             >
-              {t('pager.ticket.notify')}
+              <BellRing size={18} strokeWidth={2.3} aria-hidden="true" />
+              <span>{t('pager.ticket.notify')}</span>
             </button>
           </div>
         )}
 
-        {status === 'waiting' && !iosTab && (
-          <p className="pager-text">{t('pager.ticket.keepOpen')}</p>
+        {status === 'waiting' && !iosTab && alarm.unlocked && (
+          <p className="pager-subtle-note">{t('pager.ticket.keepOpen')}</p>
         )}
 
         {pollFailed && (
