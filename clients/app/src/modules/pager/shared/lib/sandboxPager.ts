@@ -116,6 +116,11 @@ export function createSandboxPager({
   };
 
   return {
+    getPublicVenue: async () => {
+      if (!settings.enabled) throw new SandboxPagerError(404, PAGER_ERROR.venueNotFound);
+      return { name: venueName(), enabled: true };
+    },
+
     scanTicket: async () => {
       if (!settings.enabled) throw new SandboxPagerError(404, PAGER_ERROR.venueNotFound);
       const code = freeCode();

@@ -15,7 +15,11 @@
     "failed": "Impossible de joindre le bipeur. Vérifiez votre connexion et réessayez.",
     "retry": "Réessayer",
     "venueNotFoundTitle": "Ce bipeur n'est pas disponible",
-    "venueNotFoundDescription": "Le lien est peut-être erroné, ou l'établissement a désactivé son bipeur. Merci de demander au comptoir."
+    "venueNotFoundDescription": "Le lien est peut-être erroné, ou l'établissement a désactivé son bipeur. Merci de demander au comptoir.",
+    "readyTitle": "Activez votre alerte de commande",
+    "readyHint": "Touchez une fois pour activer le son, la vibration et les notifications afin que votre téléphone sonne dès que c'est prêt.",
+    "startButton": "Obtenir mon code et activer les alertes",
+    "permissionsNote": "Son · Vibration · Notifications"
   },
   "ticket": {
     "pageTitle": "Commande {{label}} · $t(pager.brand.name)",
@@ -53,7 +57,8 @@
     "notifyHint": "Touchez une fois pour que votre téléphone puisse sonner et vibrer quand votre commande sera prête. Rien à saisir.",
     "readyTitleName": "{{label}}, votre commande est prête",
     "codeExpired": "Ce code a expiré",
-    "codeExpiredHint": "Scannez à nouveau le QR au comptoir pour en obtenir un nouveau."
+    "codeExpiredHint": "Scannez à nouveau le QR au comptoir pour en obtenir un nouveau.",
+    "alertsActive": "Alertes activées"
   },
   "push": {
     "readyTitle": "La commande {{label}} est prête",
@@ -126,7 +131,18 @@
     "logoLabel": "Logo de l'établissement",
     "logoAdd": "Ajouter votre logo",
     "logoChange": "Changer le logo",
-    "logoHint": "Affiché sur le téléphone de vos clients, l'affiche et l'écran du comptoir. Il se règle dans les paramètres de votre entreprise."
+    "logoHint": "Affiché sur le téléphone de vos clients, l'affiche et l'écran du comptoir. Il se règle dans les paramètres de votre entreprise.",
+    "settingsButton": "Réglages",
+    "qrButton": "QR du comptoir",
+    "statusOn": "Bipeur actif",
+    "statusOff": "Bipeur arrêté",
+    "selectPhone": "Sélectionner le code {{code}}",
+    "tabsLabel": "Files de commandes",
+    "labelSelected": "Nommer le code {{code}}",
+    "waitAgo_one": "{{count}} min",
+    "waitAgo_many": "{{count}} min",
+    "waitAgo_other": "{{count}} min",
+    "waitNow": "À l'instant"
   },
   "poster": {
     "pageTitle": "Affiche du comptoir · $t(pager.brand.name)",

@@ -6,14 +6,14 @@
 .pager-root {
   --pager-ink: #141b17;
   --pager-muted: #525e57;
-  --pager-line: #dce1dc;
-  --pager-bg: #ffffff;
+  --pager-line: #dce3de;
+  --pager-bg: #f4f7f5;
   --pager-danger: #b91c1c;
   --pager-ready: #15803d;
   /* Rennili's botanical forest accent. Ready stays bright emerald so alerts pop unmistakably. */
   --pager-accent: #0e4d3b;
   --pager-accent-strong: #0a3b2d;
-  --pager-accent-soft: #e7f3ec;
+  --pager-accent-soft: #e6f2ec;
 
   /* Always light, whatever the Portal theme. */
   color-scheme: light;
@@ -29,8 +29,21 @@
 [dir='rtl'] .pager-root,
 .pager-root[dir='rtl'],
 [dir='rtl'] .pager-poster,
-[dir='rtl'] .pager-display {
+[dir='rtl'] .pager-display,
+[dir='rtl'] .pager-board-root {
   font-family: 'Cairo', 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+/* Any positive letter-spacing breaks joined Arabic script; reset it in RTL except on LTR digits. */
+[dir='rtl'] .pager-order-label,
+[dir='rtl'] .pager-code-caption,
+[dir='rtl'] .pager-order-number,
+[dir='rtl'] .pager-gate-title,
+[dir='rtl'] .pager-gate-pill,
+[dir='rtl'] .pager-board-assign-caption,
+[dir='rtl'] .pager-board-tile-caption {
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .pager-root *,
@@ -138,16 +151,28 @@
 
 .pager-button {
   width: 100%;
-  min-height: 60px;
+  min-height: 56px;
   padding: 12px 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   border: 2px solid var(--pager-accent);
   border-radius: 16px;
   background: var(--pager-accent);
   color: #ffffff;
   font: inherit;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 800;
   cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    transform 100ms ease;
+}
+
+.pager-button:active:not(:disabled) {
+  transform: scale(0.99);
 }
 
 .pager-button:disabled {
@@ -319,20 +344,22 @@
 .pager-code {
   max-width: 100%;
   color: var(--pager-ink);
-  font-size: clamp(72px, 28cqi, 132px);
+  font-size: clamp(56px, 24cqi, 108px);
   line-height: 1;
   font-weight: 800;
   font-variant-numeric: lining-nums tabular-nums;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
   /* The spacing after the last digit would push the number off centre. */
-  margin-inline-end: -0.08em;
-  overflow-wrap: anywhere;
+  margin-inline-end: -0.06em;
 }
 
 /* A code from before the numbers, such as "PANDA2", is longer. */
 .pager-code--long {
-  font-size: clamp(36px, 13cqi, 64px);
+  font-size: clamp(32px, 12cqi, 56px);
   letter-spacing: 0.02em;
+  white-space: normal;
+  overflow-wrap: anywhere;
   margin-inline-end: 0;
 }
 
@@ -656,4 +683,606 @@
   max-width: 120px;
   object-fit: contain;
   border-radius: 8px;
+}
+
+/* ── Customer Scan Gate & Polished Ticket Elements ── */
+.pager-scan-mark {
+  color: var(--pager-accent);
+}
+
+.pager-gate {
+  margin-block: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  padding: 28px 22px 24px;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid var(--pager-line);
+  box-shadow:
+    0 2px 6px rgba(14, 77, 59, 0.05),
+    0 18px 36px -22px rgba(14, 77, 59, 0.22);
+}
+
+.pager-gate-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--pager-accent-soft);
+  color: var(--pager-accent);
+}
+
+.pager-gate-title {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.25;
+  font-weight: 800;
+  color: var(--pager-ink);
+}
+
+.pager-gate-hint {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--pager-muted);
+  max-width: 32ch;
+}
+
+.pager-gate-pill {
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--pager-bg);
+  color: var(--pager-accent);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.pager-gate-cta {
+  margin-top: 4px;
+}
+
+.pager-live-pill {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--pager-accent-soft);
+  color: var(--pager-accent);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pager-code-heading {
+  margin: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.pager-card-instruction {
+  margin: 8px 0 0;
+  padding-top: 12px;
+  width: 100%;
+  border-top: 1px solid #eef2ef;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--pager-ink);
+}
+
+.pager-card-status {
+  margin-top: 10px;
+  padding-top: 12px;
+  width: 100%;
+  border-top: 1px solid #eef2ef;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pager-order-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pager-ready-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.pager-subtle-note {
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--pager-muted);
+}
+
+/* ── High-Volume Redesigned Staff Counter Board ── */
+.pager-board-root {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pager-board-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pager-board-toolbar-start {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.pager-board-heading {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--dash-text, #141b17);
+}
+
+.pager-board-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pager-board-status-pill--on {
+  background: #e6f4ec;
+  color: #0e4d3b;
+}
+
+.pager-board-status-pill--off {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.pager-board-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.pager-board-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.pager-board-drawer {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--dash-card, #ffffff);
+  border: 1px solid var(--dash-border, #dce3de);
+}
+
+.pager-board-qr-drawer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.pager-board-settings-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  align-items: start;
+}
+
+/* Mobile / narrow segmented queue switcher */
+.pager-board-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--dash-bg-subtle, #eef2ef);
+}
+
+.pager-board-tab {
+  min-height: 40px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--dash-text-muted, #525e57);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.pager-board-tab--active {
+  background: var(--dash-card, #ffffff);
+  color: var(--dash-text, #141b17);
+  box-shadow: 0 1px 3px rgba(20, 27, 23, 0.08);
+}
+
+.pager-board-tab-count {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(14, 77, 59, 0.1);
+  color: #0e4d3b;
+  font-size: 11px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.pager-board-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* On narrow containers, show only the selected tab to avoid stacked box clutter. */
+.pager-board-section {
+  display: none;
+}
+
+.pager-board-workspace[data-active-tab='new'] .pager-board-section--new,
+.pager-board-workspace[data-active-tab='waiting'] .pager-board-section--waiting,
+.pager-board-workspace[data-active-tab='ready'] .pager-board-section--ready {
+  display: block;
+}
+
+.pager-board-lanes {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@container (min-width: 640px) {
+  .pager-board-tabs {
+    display: none;
+  }
+
+  .pager-board-section {
+    display: block;
+  }
+
+  .pager-board-lanes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+.pager-board-dock,
+.pager-board-lane {
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--dash-card, #ffffff);
+  border: 1px solid var(--dash-border, #dce3de);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pager-board-lane--ready {
+  border-color: rgba(21, 128, 61, 0.28);
+  background: linear-gradient(180deg, rgba(21, 128, 61, 0.04) 0%, var(--dash-card, #ffffff) 56px);
+}
+
+.pager-board-lane-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pager-board-lane-title {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dash-text, #141b17);
+}
+
+.pager-board-count {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: #eef2ef;
+  color: #525e57;
+  font-size: 12px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.pager-board-count--accent {
+  background: #e6f4ec;
+  color: #0e4d3b;
+}
+
+.pager-board-count--ready {
+  background: #15803d;
+  color: #ffffff;
+}
+
+.pager-board-empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--dash-text-dim, #6b7670);
+}
+
+/* Compact scanned-phone chips */
+.pager-board-chips {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pager-board-chip-item {
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: 11px;
+  overflow: hidden;
+  border: 1px solid var(--dash-border, #dce3de);
+  background: var(--dash-bg-subtle, #f7f9f8);
+}
+
+.pager-board-chip {
+  padding: 7px 11px;
+  border: 0;
+  background: transparent;
+  color: var(--dash-text, #141b17);
+  font: inherit;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  cursor: pointer;
+}
+
+.pager-board-chip--selected {
+  background: #0e4d3b;
+  color: #ffffff;
+}
+
+.pager-board-chip-code {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.pager-board-chip-code--long {
+  font-size: 13px;
+}
+
+.pager-board-chip-time {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.72;
+}
+
+.pager-board-chip-remove {
+  width: 30px;
+  border: 0;
+  border-inline-start: 1px solid rgba(20, 27, 23, 0.08);
+  background: transparent;
+  color: var(--dash-text-dim, #6b7670);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.pager-board-chip-remove:hover:not(:disabled) {
+  background: rgba(185, 28, 28, 0.08);
+  color: #b91c1c;
+}
+
+/* Single shared quick-label bar */
+.pager-board-assign {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 12px;
+  background: var(--dash-bg-subtle, #f4f7f5);
+  border: 1px solid rgba(14, 77, 59, 0.16);
+}
+
+.pager-board-assign-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 9px;
+  background: #ffffff;
+  border: 1px solid var(--dash-border, #dce3de);
+}
+
+.pager-board-assign-caption {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--dash-text-dim, #6b7670);
+}
+
+.pager-board-assign-code {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #0e4d3b;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.pager-board-assign-code--long {
+  font-size: 14px;
+}
+
+.pager-board-assign-input {
+  height: 40px;
+  min-width: 140px;
+  flex: 1 1 160px;
+  border-radius: 10px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 15px;
+  outline: none;
+  background: var(--dash-input-bg, #ffffff);
+  border: 1px solid var(--dash-border, #cfd8d2);
+  color: var(--dash-text, #141b17);
+}
+
+.pager-board-assign-input:focus {
+  border-color: #0e4d3b;
+  box-shadow: 0 0 0 2px rgba(14, 77, 59, 0.14);
+}
+
+.pager-board-assign-submit {
+  height: 40px;
+  padding-inline: 16px;
+}
+
+.pager-board-assign-submit:not(:disabled),
+.pager-board-ready-btn:not(:disabled) {
+  background: #0e4d3b !important;
+  border-color: #0e4d3b !important;
+  color: #ffffff !important;
+}
+
+.pager-board-assign-submit:hover:not(:disabled),
+.pager-board-ready-btn:hover:not(:disabled) {
+  background: #0a3b2d !important;
+  border-color: #0a3b2d !important;
+}
+
+.pager-board-collect-btn:not(:disabled) {
+  background: #15803d !important;
+  border-color: #15803d !important;
+  color: #ffffff !important;
+}
+
+.pager-board-collect-btn:hover:not(:disabled) {
+  background: #166534 !important;
+  border-color: #166534 !important;
+}
+
+/* High-density order grid */
+.pager-board-grid {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+}
+
+.pager-board-tile {
+  padding: 11px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--dash-border, #dce3de);
+  background: var(--dash-bg-subtle, #fbfcfb);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pager-board-tile--ready {
+  border-color: rgba(21, 128, 61, 0.35);
+  background: #f2fbf5;
+}
+
+.pager-board-tile-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pager-board-tile-id {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.pager-board-tile-caption {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--dash-text-dim, #6b7670);
+}
+
+.pager-board-tile-label {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--dash-text, #141b17);
+  overflow-wrap: anywhere;
+}
+
+.pager-board-tile-label--num {
+  font-size: 22px;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.pager-board-tile-time {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--dash-text-dim, #6b7670);
+  flex-shrink: 0;
+}
+
+.pager-board-tile-meta {
+  margin-top: -4px;
+}
+
+.pager-board-tile-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }

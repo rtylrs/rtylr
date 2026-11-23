@@ -13,7 +13,7 @@ namespace pager.v1;
 // label yet and shows a match code: a number such as "427". The customer shows
 // the number, the cashier finds it on the board and gives the ticket its label,
 // the order number or the customer's name. An unlabelled ticket expires after
-// 15 minutes, a labelled one after 6 hours.
+// 15 minutes, a labelled one after 1 hour.
 //
 // Errors carry a stable `code` next to `message`: venue_not_found (404),
 // ticket_not_found (404), invalid_label (400), label_taken (409),

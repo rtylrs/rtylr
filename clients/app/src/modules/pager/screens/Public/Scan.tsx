@@ -4,8 +4,12 @@ import { useNavigate, useParams } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
 import { helpers } from '@voxire/utils';
-import { BellOff } from 'lucide-react';
+import { BellOff, BellRing } from 'lucide-react';
+import { readyAlarm } from '../../../../shared/alarm/readyAlarm';
 import { pagerTicketPath } from '../../pagerPaths';
+import LanguageSwitch from '../../shared/components/LanguageSwitch';
+import { ByRtylr, RenniliLogo, RenniliMark } from '../../shared/components/RenniliLogo';
+import { VenueLogo } from '../../shared/components/VenueLogo';
 import {
   DEPLOY_GAP_ATTEMPTS,
   DEPLOY_GAP_FIRST_DELAY_MS,
@@ -15,9 +19,11 @@ import {
   isTransient,
 } from '../../shared/lib/apiError';
 import { usePagerSandbox, usePublicPagerClient } from '../../shared/lib/pagerClients';
+import { askPushPermission, usePushKey } from '../../shared/lib/pushAlerts';
 import { openScanTicket } from '../../shared/lib/scanSession';
 
-type ScanState = 'scanning' | 'unavailable' | 'venueBusy' | 'tooManyAttempts' | 'failed';
+type ScanState =
+  'loading' | 'ready' | 'scanning' | 'unavailable' | 'venueBusy' | 'tooManyAttempts' | 'failed';
 
 function stateFor(error: unknown): ScanState {
   if (errorCode(error) === PAGER_ERROR.venueNotFound) return 'unavailable';
@@ -25,6 +31,11 @@ function stateFor(error: unknown): ScanState {
   if (errorCode(error) === PAGER_ERROR.tooManyOpenTickets) return 'venueBusy';
   if (errorStatus(error) === 429) return 'tooManyAttempts';
   return 'failed';
+}
+
+interface VenuePreview {
+  name: string;
+  logoUrl?: string;
 }
 
 interface ScanProps {
@@ -35,24 +46,24 @@ interface ScanProps {
 }
 
 /**
- * Where the venue's QR lands. The customer does nothing here: the page opens
- * this phone's ticket on load, so the cashier sees it even if the customer
- * never taps anything, and moves on to the ticket page with the code.
+ * Where the venue's QR lands. Shows a single upfront tap so the browser grants
+ * audio and notification permissions before the customer enters the queue, then
+ * opens (or resumes) the phone's ticket and navigates to the ticket screen.
  */
 const Scan = ({ slug: givenSlug, onScanned }: ScanProps = {}): React.JSX.Element => {
-  const { t } = useTranslation('pager');
+  const { t, i18n } = useTranslation('pager');
   const { slug: rawSlug } = useParams({ strict: false });
   const slug = (givenSlug ?? rawSlug ?? '').toLowerCase();
   const navigate = useNavigate();
   const client = usePublicPagerClient();
   // The demo starts a new phone each time, and must not leave a token behind.
   const sandbox = usePagerSandbox();
-  const [state, setState] = useState<ScanState>(slug ? 'scanning' : 'unavailable');
-  const [attempt, setAttempt] = useState(0);
+  const pushKey = usePushKey();
+  const [venue, setVenue] = useState<VenuePreview | null>(null);
+  const [state, setState] = useState<ScanState>(slug ? 'loading' : 'unavailable');
   const [slow, setSlow] = useState(false);
-  // React runs effects twice in development; one scan per attempt.
-  const started = useRef(-1);
   const mounted = useRef(true);
+  const scanning = useRef(false);
 
   useEffect(() => {
     mounted.current = true;
@@ -62,13 +73,53 @@ const Scan = ({ slug: givenSlug, onScanned }: ScanProps = {}): React.JSX.Element
   }, []);
 
   useEffect(() => {
-    if (!slug || started.current === attempt) return;
-    started.current = attempt;
+    if (!slug) {
+      setState('unavailable');
+      return;
+    }
+    let active = true;
+    setState('loading');
+    setSlow(false);
+    let tries = 0;
+    helpers
+      .retry(
+        () => {
+          tries += 1;
+          if (tries > 1 && active) setSlow(true);
+          return client.getPublicVenue({ slug });
+        },
+        DEPLOY_GAP_ATTEMPTS,
+        DEPLOY_GAP_FIRST_DELAY_MS,
+        (error) => active && isTransient(error)
+      )
+      .then(
+        (info) => {
+          if (!active) return;
+          setVenue({ name: info.name ?? '', logoUrl: info.logoUrl });
+          setState('ready');
+        },
+        (error: unknown) => {
+          if (!active) return;
+          setState(stateFor(error));
+        }
+      );
+    return () => {
+      active = false;
+    };
+  }, [slug, client, i18n.language]);
+
+  const startScan = (): void => {
+    if (!slug || scanning.current) return;
+    scanning.current = true;
+    // Unlock sound, play a short confirmation chime, and ask notification
+    // permission synchronously inside the tap handler before any await.
+    readyAlarm.unlock();
+    readyAlarm.blip();
+    askPushPermission(pushKey);
+
     setState('scanning');
     setSlow(false);
     let tries = 0;
-    // A deploy makes the pager unreachable for a few seconds; waiting 1, 2, 4
-    // and 8 seconds rides it out before the customer sees an error.
     helpers
       .retry(
         () => {
@@ -82,17 +133,18 @@ const Scan = ({ slug: givenSlug, onScanned }: ScanProps = {}): React.JSX.Element
       )
       .then(
         (publicToken) => {
+          scanning.current = false;
           if (!mounted.current) return;
           if (onScanned) onScanned(publicToken);
-          // A router navigation, not a page load: the unlocked audio lives in
-          // this document. Replace, so Back does not land on this page again.
+          // Router navigation preserves unlocked audio in this document.
           else void navigate({ to: pagerTicketPath(publicToken), replace: true });
         },
         (error: unknown) => {
+          scanning.current = false;
           if (mounted.current) setState(stateFor(error));
         }
       );
-  }, [slug, attempt, client, sandbox, onScanned, navigate]);
+  };
 
   if (state === 'unavailable') {
     return (
@@ -107,13 +159,49 @@ const Scan = ({ slug: givenSlug, onScanned }: ScanProps = {}): React.JSX.Element
     );
   }
 
-  if (state === 'scanning') {
+  if (state === 'loading' || state === 'scanning') {
     return (
       <div className="pager-center">
         <HelmetContainer title={t('pager.scan.pageTitle')} />
+        <RenniliMark size={44} className="pager-scan-mark" />
         <p className="pager-text" role="status">
           {t(slow ? 'pager.scan.slow' : 'pager.scan.scanning')}
         </p>
+      </div>
+    );
+  }
+
+  if (state === 'ready') {
+    return (
+      <div className="pager-screen">
+        <HelmetContainer title={t('pager.scan.pageTitle')} />
+        <main className="pager-page">
+          <div className="pager-topbar">
+            <p className="pager-venue">
+              <VenueLogo src={venue?.logoUrl} />
+              <span>{venue?.name}</span>
+            </p>
+            {!sandbox && <LanguageSwitch />}
+          </div>
+
+          <section className="pager-gate">
+            <div className="pager-gate-icon" aria-hidden="true">
+              <BellRing size={28} strokeWidth={2.2} />
+            </div>
+            <h1 className="pager-gate-title">{t('pager.scan.readyTitle')}</h1>
+            <p className="pager-gate-hint">{t('pager.scan.readyHint')}</p>
+            <p className="pager-gate-pill">{t('pager.scan.permissionsNote')}</p>
+            <button type="button" className="pager-button pager-gate-cta" onClick={startScan}>
+              <BellRing size={19} strokeWidth={2.4} aria-hidden="true" />
+              <span>{t('pager.scan.startButton')}</span>
+            </button>
+          </section>
+
+          <footer className="pager-footer">
+            <RenniliLogo size={20} />
+            <ByRtylr />
+          </footer>
+        </main>
       </div>
     );
   }
@@ -124,7 +212,7 @@ const Scan = ({ slug: givenSlug, onScanned }: ScanProps = {}): React.JSX.Element
       <p className="pager-error" role="alert">
         {t(`pager.scan.${state}`)}
       </p>
-      <button type="button" className="pager-button" onClick={() => setAttempt((n) => n + 1)}>
+      <button type="button" className="pager-button" onClick={startScan}>
         {t('pager.scan.retry')}
       </button>
     </div>

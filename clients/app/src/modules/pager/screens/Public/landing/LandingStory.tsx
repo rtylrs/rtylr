@@ -9,6 +9,7 @@ import {
   pagerClaimUrl,
 } from '../../../pagerPaths';
 import { PhoneFrame, ScreenCode, ScreenReady, ScreenScan, ScreenWaiting } from './PhoneMockups';
+import { PhonePagerSvg, PlasticPagerSvg } from './PagerIllustration';
 
 // The landing page tells each part of the story once: the highlights, the steps,
 // the comparison, then one band that says it is free and who makes it.
@@ -106,6 +107,18 @@ export const CompareTable = (): React.JSX.Element => {
             {t('pager.landing.compare.title')}
           </h2>
           <p className="rl-section-intro">{t('pager.landing.compare.intro')}</p>
+        </div>
+
+        <div className="rl-vs-visual" aria-hidden="true">
+          <div className="rl-vs-figure rl-vs-figure--old">
+            <PlasticPagerSvg className="rl-vs-svg" />
+            <span>{t('pager.landing.compare.oldTitle')}</span>
+          </div>
+          <ArrowRight size={24} strokeWidth={2.4} className="rl-vs-arrow rtl:rotate-180" />
+          <div className="rl-vs-figure rl-vs-figure--new">
+            <PhonePagerSvg className="rl-vs-svg" />
+            <span>{t('pager.landing.compare.newTitle')}</span>
+          </div>
         </div>
 
         <table className="rl-vs">

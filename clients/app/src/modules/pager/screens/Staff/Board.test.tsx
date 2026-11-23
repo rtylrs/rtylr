@@ -102,12 +102,12 @@ describe('pager staff board', () => {
   it('sorts open tickets into new phones, waiting and ready', async () => {
     renderBoard();
 
-    const fresh = await section(/^New phones \(1\)$/);
-    const waiting = await section(/^Waiting \(2\)$/);
-    const ready = await section(/^Ready \(1\)$/);
+    const fresh = await section(/^New phones\s*1$/);
+    const waiting = await section(/^Waiting\s*2$/);
+    const ready = await section(/^Ready\s*1$/);
 
-    expect(within(fresh).getByText('427')).toBeInTheDocument();
-    expect(within(fresh).getByText('Scanned 3 min ago')).toBeInTheDocument();
+    expect(within(fresh).getAllByText('427').length).toBeGreaterThan(0);
+    expect(within(fresh).getByText('3m')).toBeInTheDocument();
     expect(within(waiting).getByText('41')).toBeInTheDocument();
     expect(within(waiting).getByText('Sara')).toBeInTheDocument();
     expect(within(ready).getByText('40')).toBeInTheDocument();
@@ -119,31 +119,29 @@ describe('pager staff board', () => {
     api.listTickets.mockResolvedValueOnce({ tickets: [], serverTime });
     api.listTickets.mockResolvedValue({ tickets: [newPhone], serverTime });
     renderBoard();
-    await section(/^New phones \(0\)$/);
+    await section(/^New phones\s*0$/);
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(TICKET_POLL_INTERVAL_MS);
     });
 
-    const fresh = await section(/^New phones \(1\)$/);
-    expect(within(fresh).getByText('427')).toBeInTheDocument();
+    const fresh = await section(/^New phones\s*1$/);
+    expect(within(fresh).getAllByText('427').length).toBeGreaterThan(0);
   });
 
   // The cashier types an order number on a card that shows a code number, so
   // the two must never read alike.
   it('captions the code apart from the order number it is labelled with', async () => {
     renderBoard();
-    const fresh = await section(/^New phones \(1\)$/);
-    const code = within(fresh).getByText('427');
-    expect(code.previousElementSibling).toHaveTextContent('Code');
-    expect(code).toHaveAttribute('dir', 'ltr');
-    // The input is captioned with what to type, and has no example number in it.
+    const fresh = await section(/^New phones\s*1$/);
+    const codeBadge = within(fresh).getByText('Code');
+    expect(codeBadge.nextElementSibling).toHaveTextContent('427');
+    expect(codeBadge.nextElementSibling).toHaveAttribute('dir', 'ltr');
     const input = within(fresh).getByLabelText('Order number or name for code 427');
-    expect(within(fresh).getByText('Order number or name')).toBeVisible();
-    expect(input).not.toHaveAttribute('placeholder');
+    expect(input).toHaveAttribute('placeholder', 'Order number or name');
 
     // Once labelled, the order number is the card's text, captioned Order.
-    const waiting = await section(/^Waiting \(2\)$/);
+    const waiting = await section(/^Waiting\s*2$/);
     expect(within(waiting).getByText('41').previousElementSibling).toHaveTextContent('Order');
     expect(within(waiting).queryByText('427')).not.toBeInTheDocument();
   });
@@ -154,8 +152,8 @@ describe('pager staff board', () => {
       serverTime,
     });
     renderBoard();
-    const fresh = await section(/^New phones \(1\)$/);
-    expect(within(fresh).getByText('PANDA2')).toBeInTheDocument();
+    const fresh = await section(/^New phones\s*1$/);
+    expect(within(fresh).getAllByText('PANDA2').length).toBeGreaterThan(0);
     expect(within(fresh).getByLabelText('Order number or name for code PANDA2')).toBeEnabled();
   });
 
@@ -217,6 +215,7 @@ describe('pager staff board', () => {
     api.updateSettings.mockResolvedValue({ enabled: true, labelMode: 'name' });
     renderBoard();
 
+    fireEvent.click(await screen.findByRole('button', { name: 'Settings' }));
     const mode = await screen.findByRole('combobox', { name: 'Label orders by' });
     await waitFor(() => expect(mode).toBeEnabled());
     expect(mode).toHaveTextContent('Order number or name');
@@ -235,6 +234,7 @@ describe('pager staff board', () => {
     });
     renderBoard();
 
+    fireEvent.click(await screen.findByRole('button', { name: 'Settings' }));
     const enabled = await screen.findByRole('switch', { name: 'Pager on' });
     await waitFor(() => expect(enabled).toBeChecked());
     expect(enabled).toBeDisabled();
@@ -260,6 +260,7 @@ describe('pager staff board', () => {
   it('shows the venue QR and the link it opens', async () => {
     renderBoard();
 
+    fireEvent.click(await screen.findByRole('button', { name: 'Counter QR' }));
     const link = await screen.findByRole('link', { name: /\/acme$/ });
     expect(link).toHaveAttribute('href', `${RENNILI_URL}/acme`);
     expect(qrValues).toContain(`${RENNILI_URL}/acme`);

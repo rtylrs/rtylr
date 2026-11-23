@@ -8,6 +8,10 @@ import (
 
 	"context"
 	"crypto/sha256"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/activity"
 	"github.com/voxire/onion/internal/modules/aiquery"
@@ -390,7 +394,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Notifications:         notificationsModule,
 		OAuth:                 oauth.NewModule(ctx, dbclient.Pool(), platformConfig.GlobalConfig.AuthAppURL),
 		OneOnOnes:             oneonones.NewModule(ctx, dbclient.Pool()),
-		Pager:                 pager.NewModule(ctx, dbclient.Pool(), businessModule),
+		Pager:                 pager.NewModule(ctx, dbclient.Pool(), businessModule).WithOnEnabled(renniliLeadRecorder(businessModule, userModule, crmSalesModule)),
 		Payroll:               payroll.NewModule(ctx, dbclient.Pool(), hrCoreModule),
 		PosAudit:              audit.NewModule(ctx, dbclient.Pool()),
 		PosCashMovements:      posCashMovementsModule,
@@ -498,4 +502,82 @@ func crmCampaignSender(settings *config.Module, businesses *business.Module) fun
 func crmUnsubscribeKey(jwtSecret string) []byte {
 	key := sha256.Sum256([]byte("crm-unsubscribe:" + jwtSecret))
 	return key[:]
+}
+
+// renniliLeadRecorder captures venues that activate the free Rennili pager as
+// CRM leads in the Voxire CRM workspace (resolved via VOXIRE_CRM_BUSINESS_ID or
+// slug VOXIRE_CRM_BUSINESS_SLUG, defaulting to "voxire").
+func renniliLeadRecorder(businesses *business.Module, users *user.Module, crmSales *crmsales.Module) func(context.Context, int64) {
+	return func(ctx context.Context, businessID int64) {
+		targetBusinessID := resolveVoxireCRMBusinessID(ctx, businesses)
+		if targetBusinessID <= 0 || targetBusinessID == businessID {
+			return
+		}
+		targetOwnerID, err := businesses.GetBusinessOwnerID(ctx, targetBusinessID)
+		if err != nil || targetOwnerID <= 0 {
+			logger.Ctx(ctx).Warn("rennili crm lead skipped: voxire workspace owner missing", logger.Error(err))
+			return
+		}
+
+		name, slug, email, phone, ownerID, err := businesses.BusinessLeadContact(ctx, businessID)
+		if err != nil {
+			logger.Ctx(ctx).Warn("rennili crm lead skipped: could not read venue profile", logger.Any("business_id", businessID), logger.Error(err))
+			return
+		}
+		var firstName, lastName string
+		if ownerID > 0 {
+			if profile, profileErr := users.GetUserProfile(ctx, ownerID); profileErr == nil {
+				firstName, lastName = splitLeadName(profile.Name)
+				if email == "" {
+					email = profile.Email
+				}
+			}
+		}
+		website := ""
+		if slug != "" {
+			website = "https://rennili.rtylr.com/" + slug
+		}
+		notes := fmt.Sprintf("Signed up for free Rennili pager (business #%d)", businessID)
+		if _, err := crmSales.CaptureLeadIfNew(ctx, targetBusinessID, targetOwnerID, crmsales.ExternalLead{
+			FirstName:   firstName,
+			LastName:    lastName,
+			Email:       email,
+			Phone:       phone,
+			CompanyName: name,
+			Website:     website,
+			Source:      "rennili",
+			Notes:       notes,
+		}); err != nil {
+			logger.Ctx(ctx).Warn("rennili crm lead capture failed", logger.Any("business_id", businessID), logger.Error(err))
+		}
+	}
+}
+
+func resolveVoxireCRMBusinessID(ctx context.Context, businesses *business.Module) int64 {
+	if raw := strings.TrimSpace(os.Getenv("VOXIRE_CRM_BUSINESS_ID")); raw != "" {
+		if id, err := strconv.ParseInt(raw, 10, 64); err == nil && id > 0 {
+			return id
+		}
+	}
+	slug := strings.TrimSpace(os.Getenv("VOXIRE_CRM_BUSINESS_SLUG"))
+	if slug == "" {
+		slug = "voxire"
+	}
+	id, _, _, err := businesses.PublicBusinessBySlug(ctx, slug)
+	if err != nil {
+		return 0
+	}
+	return id
+}
+
+func splitLeadName(full string) (first, last string) {
+	parts := strings.Fields(strings.TrimSpace(full))
+	switch len(parts) {
+	case 0:
+		return "", ""
+	case 1:
+		return parts[0], ""
+	default:
+		return parts[0], strings.Join(parts[1:], " ")
+	}
 }

@@ -76,9 +76,17 @@ const DemoPhone = ({ children }: { children: React.ReactNode }): React.JSX.Eleme
  */
 const Try = (): React.JSX.Element => {
   const { t, i18n } = useTranslation('pager');
+  const demoVenueName = t('pager.try.venueName');
+  const venueNameRef = useRef(demoVenueName);
+  venueNameRef.current = demoVenueName;
   const [sessionId, setSessionId] = useState(0);
   const [sandbox, setSandbox] = useState(() =>
-    createSandboxPager({ venueName: () => i18n.t('pager.try.venueName', { ns: 'pager' }) })
+    createSandboxPager({
+      venueName: () =>
+        venueNameRef.current !== 'pager.try.venueName'
+          ? venueNameRef.current
+          : i18n.t('pager.try.venueName'),
+    })
   );
   // Its own cache, so the demo's tickets never mix with a signed-in board's.
   const [queryClient, setQueryClient] = useState(
@@ -114,7 +122,12 @@ const Try = (): React.JSX.Element => {
 
   const handleStartOver = (): void => {
     setSandbox(
-      createSandboxPager({ venueName: () => i18n.t('pager.try.venueName', { ns: 'pager' }) })
+      createSandboxPager({
+        venueName: () =>
+          venueNameRef.current !== 'pager.try.venueName'
+            ? venueNameRef.current
+            : i18n.t('pager.try.venueName'),
+      })
     );
     setQueryClient(new QueryClient({ defaultOptions: { queries: { retry: false } } }));
     setPhoneToken(null);

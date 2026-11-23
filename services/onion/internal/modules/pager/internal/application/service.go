@@ -86,10 +86,19 @@ type Service struct {
 	// push is nil while lock-screen notifications are off.
 	push    PushSender
 	runPush func(func())
+
+	// onEnabled runs when a business transitions its pager from off to on.
+	onEnabled func(ctx context.Context, businessID int64)
 }
 
 func NewService(repo repository, venues venueReader, now func() time.Time) *Service {
 	return &Service{repo: repo, venues: venues, now: now}
+}
+
+// SetOnEnabled registers a callback invoked after a business switches its pager
+// from off to on.
+func (s *Service) SetOnEnabled(fn func(ctx context.Context, businessID int64)) {
+	s.onEnabled = fn
 }
 
 // clock is the current time at the precision the tickets are stored with.
@@ -401,6 +410,7 @@ func (s *Service) UpdateSettings(ctx context.Context, businessID int64, enabled 
 	if err != nil {
 		return domain.Settings{}, err
 	}
+	wasEnabled := settings.Enabled
 	if enabled != nil {
 		settings.Enabled = *enabled
 	}
@@ -409,6 +419,9 @@ func (s *Service) UpdateSettings(ctx context.Context, businessID int64, enabled 
 	}
 	if err := s.repo.SaveSettings(ctx, businessID, settings); err != nil {
 		return domain.Settings{}, err
+	}
+	if !wasEnabled && settings.Enabled && s.onEnabled != nil {
+		s.onEnabled(ctx, businessID)
 	}
 	return settings, nil
 }

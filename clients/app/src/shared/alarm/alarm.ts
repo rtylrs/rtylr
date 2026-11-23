@@ -52,6 +52,8 @@ export interface AlarmOptions {
 
 export interface Alarm {
   unlock: () => void;
+  /** Short friendly confirmation tone right after the customer unlocks sound. */
+  blip: () => void;
   sync: (state: AlarmState) => void;
   /** Stops the current ring on this device only. */
   silence: () => void;
@@ -154,6 +156,31 @@ export function createAlarm(options: AlarmOptions): Alarm {
 
     update({ unlocked: true });
     if (snapshot.ringing) startCycle();
+  }
+
+  function blip(): void {
+    try {
+      context ??= createAudioContext();
+      if (!context) return;
+      resumeContext();
+      const ctx = context;
+      [880, 1318.5].forEach((hz, index) => {
+        const at = ctx.currentTime + index * 0.09;
+        const oscillator = ctx.createOscillator();
+        const gain = ctx.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.value = hz;
+        gain.gain.setValueAtTime(0.0001, at);
+        gain.gain.exponentialRampToValueAtTime(0.2, at + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.16);
+        oscillator.connect(gain);
+        gain.connect(ctx.destination);
+        oscillator.start(at);
+        oscillator.stop(at + 0.17);
+      });
+    } catch {
+      // Audible confirmation is a bonus.
+    }
   }
 
   function playChime(): void {
@@ -353,6 +380,7 @@ export function createAlarm(options: AlarmOptions): Alarm {
 
   return {
     unlock,
+    blip,
     sync,
     silence: stopRing,
     release,

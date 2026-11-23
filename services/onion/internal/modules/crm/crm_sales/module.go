@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	crmcontract "github.com/voxire/onion/internal/contracts/crm"
@@ -124,4 +125,61 @@ func (m *Module) WonDealsBetween(ctx context.Context, businessID int64, from, to
 func (m *Module) RecurringRevenue(ctx context.Context, businessID int64, monthStart, now time.Time) (contracts, mrr, mrrAtMonthStart int64, err error) {
 	contracts, current, atMonthStart, err := m.repository.RecurringRevenue(ctx, businessID, monthStart, now)
 	return contracts, int64(current), int64(atMonthStart), err
+}
+
+// ExternalLead is a product sign-up captured into a workspace's CRM leads.
+type ExternalLead struct {
+	FirstName   string
+	LastName    string
+	Email       string
+	Phone       string
+	CompanyName string
+	Website     string
+	Source      string
+	Notes       string
+}
+
+// CaptureLeadIfNew inserts a CRM lead for businessID unless a lead with the
+// same source and email (or company name when email is absent) already exists.
+func (m *Module) CaptureLeadIfNew(ctx context.Context, businessID, actorID int64, in ExternalLead) (bool, error) {
+	email := strings.ToLower(strings.TrimSpace(in.Email))
+	company := strings.TrimSpace(in.CompanyName)
+	source := strings.TrimSpace(in.Source)
+	search := email
+	if search == "" {
+		search = company
+	}
+	if search != "" {
+		now := time.Now().UTC()
+		existing, err := m.service.ListLeads(ctx, businessID, domain.LeadFilter{
+			Sources: []string{source},
+			Search:  search,
+			Limit:   20,
+		}, domain.CallerDay{Date: now, StartUTC: now})
+		if err != nil {
+			return false, err
+		}
+		for _, item := range existing.Leads {
+			if email != "" && strings.EqualFold(item.Email, email) {
+				return false, nil
+			}
+			if email == "" && company != "" && strings.EqualFold(item.CompanyName, company) {
+				return false, nil
+			}
+		}
+	}
+	_, err := m.service.CreateLead(ctx, businessID, actorID, domain.LeadInput{
+		FirstName:   in.FirstName,
+		LastName:    in.LastName,
+		Email:       email,
+		Phone:       in.Phone,
+		CompanyName: company,
+		Website:     in.Website,
+		Source:      source,
+		Notes:       in.Notes,
+	})
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

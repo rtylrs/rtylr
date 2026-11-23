@@ -5,9 +5,9 @@ import { selectLanguage } from '../../../../shared/services/i18next';
 // The three locales this module ships. A customer arrives from a QR code with
 // no language chosen, so the choice has to be on the page itself.
 const LANGUAGES = [
+  { code: 'ar', short: 'ع', name: 'العربية' },
   { code: 'en', short: 'EN', name: 'English' },
   { code: 'fr', short: 'FR', name: 'Français' },
-  { code: 'ar', short: 'ع', name: 'العربية' },
 ] as const;
 
 const LanguageSwitch = (): React.JSX.Element => {

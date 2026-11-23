@@ -35,7 +35,13 @@ vi.mock('../../../../shared/lib/clients', () => ({ configClient: realApi }));
 
 const syncSpy = vi.hoisted(() => vi.fn());
 vi.mock('../../../../shared/alarm/readyAlarm', () => ({
-  readyAlarm: { unlock: vi.fn(), sync: syncSpy, release: vi.fn(), silence: vi.fn() },
+  readyAlarm: {
+    unlock: vi.fn(),
+    blip: vi.fn(),
+    sync: syncSpy,
+    release: vi.fn(),
+    silence: vi.fn(),
+  },
 }));
 // Unlocked unless a test needs the ticket's "Notify me" tap on screen.
 const alarmState = vi.hoisted(() => ({ ringing: false, unlocked: true }));
@@ -75,7 +81,10 @@ describe('pager demo', () => {
     const phone = screen.getByRole('region', { name: "Your customer's phone" });
     const counter = screen.getByRole('region', { name: 'Your counter' });
 
-    // The phone has "scanned": a code and nothing to type.
+    // Tap the upfront permission gate on the demo phone to get a code.
+    fireEvent.click(
+      await within(phone).findByRole('button', { name: 'Get my code & enable alerts' })
+    );
     const heading = await within(phone).findByRole('heading', { name: /^Your code / });
     // The board names the card by the same number the phone shows.
     const code = heading.querySelector('bdi')?.textContent ?? '';
@@ -119,6 +128,9 @@ describe('pager demo', () => {
       render(<Try />);
       const phone = screen.getByRole('region', { name: "Your customer's phone" });
 
+      fireEvent.click(
+        await within(phone).findByRole('button', { name: 'Get my code & enable alerts' })
+      );
       expect(await within(phone).findByText('Show this number to the cashier')).toBeInTheDocument();
       fireEvent.click(within(phone).getByRole('button', { name: "Notify me when it's ready" }));
       await nextPoll();
@@ -134,6 +146,7 @@ describe('pager demo', () => {
   it('lets the visitor change the demo venue settings', async () => {
     render(<Try />);
     const counter = screen.getByRole('region', { name: 'Your counter' });
+    fireEvent.click(await within(counter).findByRole('button', { name: 'Settings' }));
     const mode = await within(counter).findByLabelText('Label orders by');
     expect(mode).toBeEnabled();
     expect(within(counter).queryByText(/Only owners and admins/)).not.toBeInTheDocument();
@@ -142,8 +155,8 @@ describe('pager demo', () => {
   it('gives the demo counter no venue QR, no display and no poster link', async () => {
     render(<Try />);
     const counter = screen.getByRole('region', { name: 'Your counter' });
-    await within(counter).findByLabelText('Label orders by');
-    expect(within(counter).queryByText('Your pager QR')).not.toBeInTheDocument();
+    await within(counter).findByRole('button', { name: 'Settings' });
+    expect(within(counter).queryByRole('button', { name: 'Counter QR' })).not.toBeInTheDocument();
     expect(screen.queryByText('Counter display')).not.toBeInTheDocument();
     expect(screen.queryByText('Print the counter poster')).not.toBeInTheDocument();
   });
@@ -151,17 +164,23 @@ describe('pager demo', () => {
   it('starts over with a new code for another phone', async () => {
     render(<Try />);
     const phone = screen.getByRole('region', { name: "Your customer's phone" });
+    fireEvent.click(
+      await within(phone).findByRole('button', { name: 'Get my code & enable alerts' })
+    );
     const first = await within(phone).findByRole('heading', { name: /^Your code / });
     const firstCode = first.textContent;
 
     fireEvent.click(screen.getByRole('button', { name: 'Scan with another phone' }));
+    fireEvent.click(
+      await within(phone).findByRole('button', { name: 'Get my code & enable alerts' })
+    );
 
     const second = await within(phone).findByRole('heading', { name: /^Your code / });
     expect(second.textContent).not.toBe(firstCode);
     await nextPoll();
     const counter = screen.getByRole('region', { name: 'Your counter' });
     expect(
-      await within(counter).findByRole('heading', { name: 'New phones (2)' })
+      await within(counter).findByRole('heading', { name: /^New phones\s*2$/ })
     ).toBeInTheDocument();
   });
 
