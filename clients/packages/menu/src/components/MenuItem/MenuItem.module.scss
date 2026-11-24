@@ -1,38 +1,44 @@
 .item {
   cursor: pointer;
-  overflow: hidden;
-  background: var(--menu-card-bg, #ffffff);
-  border: 1px solid var(--menu-border, rgba(0, 0, 0, 0.08));
-  transition:
-    box-shadow 0.18s ease,
-    transform 0.15s ease,
-    border-color 0.15s ease;
-
-  &:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
-    transform: translateY(-1px);
-  }
+  overflow: visible;
+  background: transparent;
+  border: none;
+  transition: opacity 0.14s ease;
 
   &:active {
-    transform: translateY(0);
+    opacity: 0.88;
   }
 
   &--unavailable {
-    opacity: 0.5;
+    opacity: 0.45;
     pointer-events: none;
   }
 
   &--grid {
     display: flex;
     flex-direction: column;
+
+    .item__image {
+      border-radius: inherit;
+    }
+
+    .item__content {
+      padding: 8px 2px 4px;
+    }
   }
 
   &--list {
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 10px;
-    gap: 12px;
+    padding: 14px 0;
+    gap: 14px;
+    border-bottom: 1px solid var(--menu-border, #ebebeb);
+    border-radius: 0 !important;
+
+    &:last-child {
+      border-bottom: none;
+    }
 
     .item__image {
       border-radius: 10px;
@@ -114,14 +120,13 @@
   position: absolute;
   inset-block-start: 8px;
   inset-inline-start: 8px;
-  padding: 3px 8px;
-  border-radius: 999px;
-  background: rgba(15, 17, 21, 0.72);
-  backdrop-filter: blur(8px);
-  color: #ffffff;
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  padding: 3px 7px;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #111111;
+  font-size: 0.64rem;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.16);
 }
 
 .item__photoAddBtn {
@@ -131,21 +136,25 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: none;
-  background: var(--menu-accent, #1a1a1a);
-  color: var(--menu-accent-text, #ffffff);
-  font-size: 1.2rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+  color: #111111;
+  font-size: 1.25rem;
   font-weight: 500;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
-  transition: transform 0.14s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  transition: transform 0.12s ease, background 0.12s ease;
+
+  &:hover {
+    background: #f5f5f5;
+  }
 
   &:active {
-    transform: scale(0.9);
+    transform: scale(0.92);
   }
 }
 

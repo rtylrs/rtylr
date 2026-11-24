@@ -989,18 +989,18 @@ const Design: React.FC = () => {
                       colors:
                         mode === 'dark'
                           ? {
-                              primary: '#f8fafc',
+                              primary: '#ffffff',
                               accent: colorAccent,
-                              bg: '#0c0e14',
-                              surface: '#161923',
-                              text: '#f3f4f6',
+                              bg: '#141414',
+                              surface: '#1c1c1c',
+                              text: '#f5f5f5',
                             }
                           : {
-                              primary: '#111827',
+                              primary: '#111111',
                               accent: colorAccent,
-                              bg: '#f9f9f7',
+                              bg: '#ffffff',
                               surface: '#ffffff',
-                              text: '#1a1a1a',
+                              text: '#111111',
                             },
                     })
                   }
@@ -1709,23 +1709,17 @@ const Design: React.FC = () => {
             )}
           </aside>
 
-          {/* Framer-Style Dot-Grid Interactive Preview Stage */}
-          <main
-            className="flex-1 min-w-0 overflow-auto p-6 flex items-start justify-center"
-            style={{
-              backgroundImage: 'radial-gradient(var(--dash-border) 1px, transparent 1px)',
-              backgroundSize: '20px 20px',
-            }}
-          >
+          {/* Calm Neutral Preview Stage */}
+          <main className="flex-1 min-w-0 overflow-auto p-6 flex items-start justify-center">
             <div
-              className="transition-all duration-200 overflow-hidden shadow-2xl"
+              className="transition-all duration-200 overflow-hidden"
               style={{
                 width: deviceWidth,
                 maxWidth: viewport === 'desktop' ? 880 : undefined,
                 height: viewport === 'mobile' ? 780 : 'calc(100vh - 116px)',
-                borderRadius: viewport === 'mobile' ? 40 : 18,
-                border:
-                  viewport === 'mobile' ? '8px solid #18181b' : '1px solid var(--dash-border)',
+                borderRadius: viewport === 'mobile' ? 28 : 14,
+                border: '1px solid var(--dash-border)',
+                boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08)',
                 transform: 'translateZ(0)',
                 background: colorBg,
               }}

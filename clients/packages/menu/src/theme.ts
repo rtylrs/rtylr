@@ -56,16 +56,16 @@ export function buildMenuThemeStyle(config: MenuLayoutConfig): React.CSSProperti
   const colors = config.colors;
   const typography = config.typography;
 
-  const bg = colors?.bg || (isDark ? '#0f1115' : '#f9f9f7');
-  const surface = colors?.surface || (isDark ? '#181b22' : '#ffffff');
-  const text = colors?.text || (isDark ? '#f3f4f6' : '#1a1a1a');
+  const bg = colors?.bg || (isDark ? '#141414' : '#ffffff');
+  const surface = colors?.surface || (isDark ? '#1c1c1c' : '#ffffff');
+  const text = colors?.text || (isDark ? '#f5f5f5' : '#111111');
   const heading = colors?.primary || text;
-  const subtext = colors?.subtext || (isDark ? 'rgba(243,244,246,0.68)' : 'rgba(26,26,26,0.62)');
-  const accent = colors?.accent || colors?.primary || (isDark ? '#f59e0b' : '#1a1a1a');
-  const border = colors?.border || (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)');
-  const imageBg = isDark ? '#222631' : '#f0f0ee';
-  const bubbleBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
-  const inputBg = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)';
+  const subtext = colors?.subtext || (isDark ? 'rgba(245,245,245,0.64)' : '#6b6b6b');
+  const accent = colors?.accent || colors?.primary || (isDark ? '#ffffff' : '#111111');
+  const border = colors?.border || (isDark ? 'rgba(255,255,255,0.1)' : '#ebebeb');
+  const imageBg = isDark ? '#242424' : '#f4f4f4';
+  const bubbleBg = isDark ? 'rgba(255,255,255,0.08)' : '#f5f5f5';
+  const inputBg = isDark ? 'rgba(255,255,255,0.06)' : '#f5f5f5';
 
   const headingFont = MENU_FONT_STACKS[typography?.headingFont ?? 'system'] ?? typography?.headingFont ?? MENU_FONT_STACKS.system;
   const bodyFont = MENU_FONT_STACKS[typography?.bodyFont ?? 'system'] ?? typography?.bodyFont ?? MENU_FONT_STACKS.system;
@@ -127,58 +127,32 @@ export interface MenuStarterTheme {
 }
 
 export const MENU_ACCENT_SWATCHES: readonly string[] = [
-  '#c8a96e',
-  '#4583c4',
+  '#111111',
+  '#059669',
+  '#2563eb',
+  '#dc2626',
   '#b45309',
-  '#10b981',
-  '#e07a5f',
-  '#8b5cf6',
-  '#e11d48',
-  '#111827',
+  '#0f766e',
+  '#4f46e5',
+  '#374151',
 ];
 
 export const MENU_STARTER_THEMES: readonly MenuStarterTheme[] = [
   {
-    id: 'noir-bistro',
-    name: 'Noir Bistro',
-    subtitle: 'Dark fine dining · Gold accent',
-    swatches: ['#0c0e14', '#161923', '#d4b483'],
-    patch: {
-      mode: 'dark',
-      colors: {
-        primary: '#f8fafc',
-        accent: '#d4b483',
-        bg: '#0c0e14',
-        surface: '#161923',
-        text: '#f3f4f6',
-      },
-      typography: { headingFont: 'playfair', bodyFont: 'inter', fontSize: 'md' },
-      items: {
-        layout: 'grid',
-        columns: 2,
-        imagePosition: 'top',
-        imageSize: 'md',
-        showDescription: true,
-        showBadges: true,
-        cardRadius: 'lg',
-      },
-    },
-  },
-  {
-    id: 'warm-artisan',
-    name: 'Warm Artisan Café',
-    subtitle: 'Cream editorial · Espresso tone',
-    swatches: ['#faf6f0', '#ffffff', '#b45309'],
+    id: 'crisp-utility',
+    name: 'Crisp Utility',
+    subtitle: 'Pure white · High-contrast grid',
+    swatches: ['#ffffff', '#f5f5f5', '#111111'],
     patch: {
       mode: 'light',
       colors: {
-        primary: '#2c1e16',
-        accent: '#b45309',
-        bg: '#faf6f0',
+        primary: '#111111',
+        accent: '#111111',
+        bg: '#ffffff',
         surface: '#ffffff',
-        text: '#292018',
+        text: '#111111',
       },
-      typography: { headingFont: 'merriweather', bodyFont: 'jakarta', fontSize: 'md' },
+      typography: { headingFont: 'inter', bodyFont: 'inter', fontSize: 'md' },
       items: {
         layout: 'grid',
         columns: 2,
@@ -191,20 +165,20 @@ export const MENU_STARTER_THEMES: readonly MenuStarterTheme[] = [
     },
   },
   {
-    id: 'crisp-commerce',
-    name: 'Crisp Commerce',
-    subtitle: 'High-speed retail & QSR list',
-    swatches: ['#f8fafc', '#ffffff', '#2563eb'],
+    id: 'compact-list',
+    name: 'Compact List',
+    subtitle: 'Fast scannable rows · Hairline dividers',
+    swatches: ['#ffffff', '#f5f5f5', '#059669'],
     patch: {
       mode: 'light',
       colors: {
-        primary: '#0f172a',
-        accent: '#2563eb',
-        bg: '#f8fafc',
+        primary: '#111111',
+        accent: '#059669',
+        bg: '#ffffff',
         surface: '#ffffff',
-        text: '#1e293b',
+        text: '#111111',
       },
-      typography: { headingFont: 'jakarta', bodyFont: 'inter', fontSize: 'md' },
+      typography: { headingFont: 'inter', bodyFont: 'inter', fontSize: 'md' },
       items: {
         layout: 'list',
         columns: 2,
@@ -212,25 +186,25 @@ export const MENU_STARTER_THEMES: readonly MenuStarterTheme[] = [
         imageSize: 'md',
         showDescription: true,
         showBadges: true,
-        cardRadius: 'md',
+        cardRadius: 'sm',
       },
     },
   },
   {
-    id: 'botanical-fresh',
-    name: 'Botanical Fresh',
-    subtitle: 'Organic bowls · Soft mint',
-    swatches: ['#f3f8f5', '#ffffff', '#10b981'],
+    id: 'warm-paper',
+    name: 'Warm Paper',
+    subtitle: 'Off-white café · Calm neutral ink',
+    swatches: ['#faf9f6', '#ffffff', '#2c1e16'],
     patch: {
       mode: 'light',
       colors: {
-        primary: '#064e3b',
-        accent: '#10b981',
-        bg: '#f3f8f5',
-        surface: '#ffffff',
-        text: '#14332a',
+        primary: '#1c1917',
+        accent: '#2c1e16',
+        bg: '#faf9f6',
+        surface: '#faf9f6',
+        text: '#1c1917',
       },
-      typography: { headingFont: 'poppins', bodyFont: 'inter', fontSize: 'md' },
+      typography: { headingFont: 'jakarta', bodyFont: 'inter', fontSize: 'md' },
       items: {
         layout: 'grid',
         columns: 2,
@@ -238,24 +212,24 @@ export const MENU_STARTER_THEMES: readonly MenuStarterTheme[] = [
         imageSize: 'md',
         showDescription: true,
         showBadges: true,
-        cardRadius: 'lg',
+        cardRadius: 'md',
       },
     },
   },
   {
-    id: 'beirut-rtl',
-    name: 'Beirut Contemporary (RTL)',
-    subtitle: 'Native Arabic Cairo · Terracotta',
-    swatches: ['#12100e', '#1c1815', '#e07a5f'],
+    id: 'arabic-clean',
+    name: 'Arabic Clean (RTL)',
+    subtitle: 'Pure white · Native Cairo typography',
+    swatches: ['#ffffff', '#f5f5f5', '#0f766e'],
     locale: 'ar',
     patch: {
-      mode: 'dark',
+      mode: 'light',
       colors: {
-        primary: '#faf3eb',
-        accent: '#e07a5f',
-        bg: '#12100e',
-        surface: '#1c1815',
-        text: '#f5ece3',
+        primary: '#111111',
+        accent: '#0f766e',
+        bg: '#ffffff',
+        surface: '#ffffff',
+        text: '#111111',
       },
       typography: { headingFont: 'cairo', bodyFont: 'cairo', fontSize: 'md' },
       items: {
@@ -265,7 +239,33 @@ export const MENU_STARTER_THEMES: readonly MenuStarterTheme[] = [
         imageSize: 'md',
         showDescription: true,
         showBadges: true,
-        cardRadius: 'lg',
+        cardRadius: 'md',
+      },
+    },
+  },
+  {
+    id: 'matte-dark',
+    name: 'Matte Charcoal',
+    subtitle: 'Neutral dark · Restrained monochrome',
+    swatches: ['#141414', '#1c1c1c', '#ffffff'],
+    patch: {
+      mode: 'dark',
+      colors: {
+        primary: '#ffffff',
+        accent: '#ffffff',
+        bg: '#141414',
+        surface: '#1c1c1c',
+        text: '#f5f5f5',
+      },
+      typography: { headingFont: 'inter', bodyFont: 'inter', fontSize: 'md' },
+      items: {
+        layout: 'grid',
+        columns: 2,
+        imagePosition: 'top',
+        imageSize: 'md',
+        showDescription: true,
+        showBadges: true,
+        cardRadius: 'md',
       },
     },
   },
