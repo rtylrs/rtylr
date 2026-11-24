@@ -191,3 +191,57 @@ describe('the screens push key', () => {
     expect(api.getPushKey).not.toHaveBeenCalled();
   });
 });
+
+describe('local notification vibration fallback and Android WebView detection', () => {
+  it('shows a vibrating Service Worker notification when permission is granted', async () => {
+    browser.setPermission('granted');
+    const { showTicketNotification } = await load();
+
+    await expect(
+      showTicketNotification({
+        token: 'tok-1',
+        title: 'Order 42 is ready',
+        body: 'Collect it at the counter of Acme.',
+      })
+    ).resolves.toBe(true);
+
+    expect(browser.showNotification).toHaveBeenCalledWith(
+      'Order 42 is ready',
+      expect.objectContaining({
+        body: 'Collect it at the counter of Acme.',
+        tag: 'pager-tok-1',
+        renotify: true,
+        requireInteraction: true,
+        vibrate: expect.any(Array),
+      })
+    );
+  });
+
+  it('skips local notification when permission is not granted', async () => {
+    browser.setPermission('default');
+    const { showTicketNotification } = await load();
+
+    await expect(
+      showTicketNotification({ token: 'tok-1', title: 'Ready', body: 'Acme' })
+    ).resolves.toBe(false);
+    expect(browser.showNotification).not.toHaveBeenCalled();
+  });
+
+  it('detects Android in-app WebViews and builds a Chrome intent URL', async () => {
+    const originalUA = navigator.userAgent;
+    Object.defineProperty(navigator, 'userAgent', {
+      configurable: true,
+      value:
+        'Mozilla/5.0 (Linux; Android 14; Pixel 8; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/120.0.0.0 Mobile Safari/537.36',
+    });
+    try {
+      const { androidWebView, openInChromeUrl } = await load();
+      expect(androidWebView()).toBe(true);
+      expect(openInChromeUrl('https://rennili.rtylr.com/t/tok-1')).toBe(
+        'intent://rennili.rtylr.com/t/tok-1#Intent;scheme=https;package=com.android.chrome;end'
+      );
+    } finally {
+      Object.defineProperty(navigator, 'userAgent', { configurable: true, value: originalUA });
+    }
+  });
+});

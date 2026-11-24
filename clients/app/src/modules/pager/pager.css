@@ -265,6 +265,44 @@
   line-height: 1.5;
 }
 
+.pager-warning-pwa {
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(107, 69, 0, 0.16);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pager-warning-pwa-title {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.pager-warning-cta {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  background: #0e4d3b;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.pager-warning-cta:active {
+  background: #0a3b2d;
+}
+
 .pager-ticket {
   display: flex;
   flex-direction: column;

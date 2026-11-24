@@ -3,6 +3,7 @@ import { vi } from 'vitest';
 export interface FakePushBrowser {
   requestPermission: ReturnType<typeof vi.fn>;
   register: ReturnType<typeof vi.fn>;
+  showNotification: ReturnType<typeof vi.fn>;
   subscribe: ReturnType<typeof vi.fn>;
   unsubscribe: ReturnType<typeof vi.fn>;
   setPermission: (permission: NotificationPermission) => void;
@@ -34,8 +35,11 @@ export function installFakePushBrowser(): FakePushBrowser {
     toJSON: () => FAKE_SUBSCRIPTION,
     unsubscribe,
   }));
+  const showNotification = vi.fn(async () => undefined);
   const registration = {
     active: {},
+    showNotification,
+    getNotifications: vi.fn(async () => []),
     pushManager: {
       subscribe,
       getSubscription: vi.fn(async () =>
@@ -44,6 +48,7 @@ export function installFakePushBrowser(): FakePushBrowser {
     },
   };
   const register = vi.fn(async () => registration);
+  const getRegistration = vi.fn(async () => registration);
   const requestPermission = vi.fn(async () => permission);
   const cacheEntries = new Map<string, Response>();
   const cache = {
@@ -64,12 +69,13 @@ export function installFakePushBrowser(): FakePushBrowser {
   vi.stubGlobal('caches', { open: vi.fn(async () => cache) });
   Object.defineProperty(navigator, 'serviceWorker', {
     configurable: true,
-    value: { register },
+    value: { register, getRegistration },
   });
 
   return {
     requestPermission,
     register,
+    showNotification,
     subscribe,
     unsubscribe,
     setPermission: (next) => {

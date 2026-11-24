@@ -18,16 +18,25 @@ const push = vi.hoisted(() => ({
   ask: vi.fn(),
   askNow: vi.fn(),
   follow: vi.fn(),
+  showLocal: vi.fn(),
+  closeLocal: vi.fn(),
 }));
-// Device detection stays real: the iPhone tests fake the browser instead.
-vi.mock('../../shared/lib/pushAlerts', async (importOriginal) => ({
-  iosTabWithoutPush: (await importOriginal<typeof PushAlerts>()).iosTabWithoutPush,
-  usePushKey: () => push.key,
-  notificationPermission: () => push.perm,
-  askPushPermission: push.ask,
-  askPushPermissionNow: push.askNow,
-  followTicketByPush: push.follow,
-}));
+// Device detection stays real: the iPhone and Android WebView tests fake the browser instead.
+vi.mock('../../shared/lib/pushAlerts', async (importOriginal) => {
+  const actual = await importOriginal<typeof PushAlerts>();
+  return {
+    iosTabWithoutPush: actual.iosTabWithoutPush,
+    androidWebView: actual.androidWebView,
+    openInChromeUrl: actual.openInChromeUrl,
+    usePushKey: () => push.key,
+    notificationPermission: () => push.perm,
+    askPushPermission: push.ask,
+    askPushPermissionNow: push.askNow,
+    followTicketByPush: push.follow,
+    showTicketNotification: push.showLocal,
+    closeTicketNotification: push.closeLocal,
+  };
+});
 
 // The real alarm, with only the browser's audio, vibration and wake lock
 // faked, so what the screen shows and what the phone would do stay in step.
@@ -575,5 +584,46 @@ describe('pager ticket page', () => {
     const link = await screen.findByRole('link', { name: 'Start a new order' });
     expect(link).toHaveAttribute('href', '/acme?new=1');
     expect(window.localStorage.getItem('pager:scan:acme')).toBeNull();
+  });
+
+  it('triggers a local Service Worker notification when ready and closes it on acknowledge', async () => {
+    push.showLocal.mockReset().mockResolvedValue(true);
+    push.closeLocal.mockReset().mockResolvedValue(undefined);
+    api.getPublicTicket.mockResolvedValue(ready);
+    api.acknowledgeTicket.mockResolvedValue({});
+    render(<Ticket />);
+
+    await screen.findByText('Your order is ready!');
+    await waitFor(() =>
+      expect(push.showLocal).toHaveBeenCalledWith(
+        expect.objectContaining({
+          token: 'tok-1',
+          title: 'Order 42 is ready',
+        })
+      )
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'I have it' }));
+    await waitFor(() => expect(push.closeLocal).toHaveBeenCalledWith('tok-1'));
+  });
+
+  it('shows the Open in Chrome helper when opened inside an Android QR WebView', async () => {
+    const originalUA = navigator.userAgent;
+    Object.defineProperty(navigator, 'userAgent', {
+      configurable: true,
+      value:
+        'Mozilla/5.0 (Linux; Android 14; Pixel 8; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/120.0.0.0 Mobile Safari/537.36',
+    });
+    api.getPublicTicket.mockResolvedValue(waiting);
+    try {
+      render(<Ticket />);
+      expect(
+        await screen.findByText('Open in Chrome for vibration & lock-screen alerts')
+      ).toBeInTheDocument();
+      const link = screen.getByRole('link', { name: 'Open in Chrome' });
+      expect(link.getAttribute('href')).toContain('package=com.android.chrome');
+    } finally {
+      Object.defineProperty(navigator, 'userAgent', { configurable: true, value: originalUA });
+    }
   });
 });

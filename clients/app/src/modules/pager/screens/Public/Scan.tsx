@@ -21,6 +21,7 @@ import {
 } from '../../shared/lib/apiError';
 import { usePagerSandbox, usePublicPagerClient } from '../../shared/lib/pagerClients';
 import { askPushPermission, askPushPermissionNow, usePushKey } from '../../shared/lib/pushAlerts';
+import { useDynamicManifest } from '../../shared/lib/pwaManifest';
 import { openScanTicket, rememberScan, rememberedScan } from '../../shared/lib/scanSession';
 
 type ScanState =
@@ -161,6 +162,7 @@ const Scan = ({ slug: givenSlug, onScanned }: ScanProps = {}): React.JSX.Element
   const queryWantsNew =
     typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('new') === '1';
   const hasRemembered = !sandbox && !queryWantsNew && Boolean(slug && rememberedScan(slug));
+  useDynamicManifest(!sandbox && slug ? `/${slug}` : null, venue?.name || undefined);
 
   useEffect(() => {
     mounted.current = true;

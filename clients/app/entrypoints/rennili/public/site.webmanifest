@@ -2,7 +2,7 @@
   "name": "Rennili",
   "short_name": "Rennili",
   "description": "The free pager that rings your customer's phone. By RTYLR.",
-  "start_url": "/board",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
