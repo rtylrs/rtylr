@@ -241,6 +241,78 @@ describe('pager ticket page', () => {
     });
   });
 
+  it('counts down to the venue estimate, then says it is coming any moment', async () => {
+    api.getPublicTicket.mockResolvedValue({
+      ...waiting,
+      expectedReadyAt: '2026-11-19T10:03:30.000Z',
+    });
+    render(<Ticket />);
+
+    expect(await screen.findByText('Ready in about 4 min')).toBeInTheDocument();
+
+    api.getPublicTicket.mockResolvedValue({
+      ...waiting,
+      expectedReadyAt: '2026-11-19T10:03:30.000Z',
+      serverTime: '2026-11-19T10:04:00.000Z',
+    });
+    await nextPoll();
+    expect(await screen.findByText('Ready any moment now')).toBeInTheDocument();
+  });
+
+  it('offers the venue review page only once the order is in hand', async () => {
+    const reviewUrl = 'https://g.page/r/acme/review';
+    api.getPublicTicket.mockResolvedValue({ ...waiting, reviewUrl });
+    render(<Ticket />);
+
+    expect(await screen.findByRole('heading', { name: 'Order 42' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Leave a Google review' })).not.toBeInTheDocument();
+
+    api.getPublicTicket.mockResolvedValue({ ...ready, status: 'collected', reviewUrl });
+    await nextPoll();
+    const link = await screen.findByRole('link', { name: 'Leave a Google review' });
+    expect(link).toHaveAttribute('href', reviewUrl);
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link.getAttribute('rel')).toContain('noopener');
+  });
+
+  describe('ringtone', () => {
+    afterEach(() => {
+      window.localStorage.removeItem('pager:ringtone');
+    });
+
+    const lastSound = (sync: ReturnType<typeof vi.spyOn>): string =>
+      String((sync.mock.calls.at(-1)?.[0] as { bellSrc?: string } | undefined)?.bellSrc);
+
+    it("rings with the venue's tone until the customer picks their own, and keeps it", async () => {
+      const sync = vi.spyOn(readyAlarm, 'sync');
+      try {
+        api.getPublicTicket.mockResolvedValue({ ...waiting, ringtone: 'marimba' });
+        const { unmount } = render(<Ticket />);
+
+        const tones = await screen.findByRole('group', { name: 'Your ringtone' });
+        expect(within(tones).getByRole('button', { name: 'Marimba' })).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
+        expect(lastSound(sync)).toContain('marimba');
+
+        fireEvent.click(within(tones).getByRole('button', { name: 'Classic ring' }));
+        await waitFor(() => expect(lastSound(sync)).toContain('ring'));
+        unmount();
+
+        // The pick outlasts the page: the next visit rings the same.
+        render(<Ticket />);
+        const again = await screen.findByRole('group', { name: 'Your ringtone' });
+        expect(within(again).getByRole('button', { name: 'Classic ring' })).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
+      } finally {
+        sync.mockRestore();
+      }
+    });
+  });
+
   it('says "next" when nobody is ahead', async () => {
     api.getPublicTicket.mockResolvedValue({ ...waiting, ahead: 0 });
     render(<Ticket />);

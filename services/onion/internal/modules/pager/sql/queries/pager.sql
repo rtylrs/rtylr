@@ -2,18 +2,32 @@
 -- counts as open, unlabelled_since the same for a ticket nobody labelled.
 
 -- name: GetSettings :one
-SELECT enabled, label_mode
+SELECT enabled, label_mode, review_url, prep_minutes, customer_numbers, ringtone
 FROM pager_settings
 WHERE business_id = ?;
 
 -- name: UpsertSettings :exec
-INSERT INTO pager_settings (business_id, enabled, label_mode)
-VALUES (?, ?, ?)
-ON DUPLICATE KEY UPDATE enabled = VALUES(enabled), label_mode = VALUES(label_mode);
+INSERT INTO pager_settings (business_id, enabled, label_mode, review_url, prep_minutes, customer_numbers, ringtone)
+VALUES (?, ?, ?, ?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE enabled = VALUES(enabled), label_mode = VALUES(label_mode),
+  review_url = VALUES(review_url), prep_minutes = VALUES(prep_minutes),
+  customer_numbers = VALUES(customer_numbers), ringtone = VALUES(ringtone);
 
 -- name: CreateTicket :execresult
 INSERT INTO pager_tickets (business_id, match_number, status, source, public_token, phone_linked, created_at)
 VALUES (?, ?, 'waiting', 'customer', ?, TRUE, ?);
+
+-- A customer who typed their receipt number: labelled from the start.
+-- uk_pager_tickets_open_number refuses a number that already has an open ticket.
+-- name: CreateNumberTicket :execresult
+INSERT INTO pager_tickets (business_id, number, label, label_kind, status, source, public_token, phone_linked, created_at, expected_ready_at)
+VALUES (?, ?, ?, 'number', 'waiting', 'customer', ?, TRUE, ?, ?);
+
+-- name: CountOpenTickets :one
+SELECT COUNT(*)
+FROM pager_tickets
+WHERE business_id = ? AND status IN ('waiting', 'ready') AND created_at >= sqlc.arg(open_since)
+  AND (label_kind IS NOT NULL OR created_at >= sqlc.arg(unlabelled_since));
 
 -- name: ListOpenMatchCodes :many
 SELECT COALESCE(match_number, match_word, match_code, '') AS code
@@ -59,7 +73,7 @@ WHERE business_id = ? AND open_number = ? AND created_at < sqlc.arg(open_since);
 
 -- name: ListOpenTickets :many
 SELECT id, business_id, label, label_kind, match_code, match_word, match_number, status, public_token,
-       created_at, ready_at, reminded_at, acknowledged_at
+       created_at, ready_at, reminded_at, acknowledged_at, expected_ready_at
 FROM pager_tickets
 WHERE business_id = ? AND status IN ('waiting', 'ready') AND created_at >= sqlc.arg(open_since)
   AND (label_kind IS NOT NULL OR created_at >= sqlc.arg(unlabelled_since))
@@ -67,13 +81,13 @@ ORDER BY id;
 
 -- name: GetTicket :one
 SELECT id, business_id, label, label_kind, match_code, match_word, match_number, status, public_token,
-       created_at, ready_at, reminded_at, acknowledged_at
+       created_at, ready_at, reminded_at, acknowledged_at, expected_ready_at
 FROM pager_tickets
 WHERE id = ? AND business_id = ?;
 
 -- name: GetTicketByToken :one
 SELECT id, business_id, label, label_kind, match_code, match_word, match_number, status, public_token,
-       created_at, ready_at, reminded_at, acknowledged_at
+       created_at, ready_at, reminded_at, acknowledged_at, expected_ready_at
 FROM pager_tickets
 WHERE public_token = ?;
 
@@ -85,7 +99,7 @@ WHERE business_id = ? AND status = 'waiting' AND label_kind IS NOT NULL
 
 -- name: LabelTicket :exec
 UPDATE pager_tickets
-SET label = ?, label_kind = ?, number = ?
+SET label = ?, label_kind = ?, number = ?, expected_ready_at = ?
 WHERE id = ? AND business_id = ? AND status = 'waiting' AND created_at >= sqlc.arg(open_since)
   AND (label_kind IS NOT NULL OR created_at >= sqlc.arg(unlabelled_since));
 
@@ -116,3 +130,11 @@ UPDATE pager_tickets
 SET acknowledged_at = ?
 WHERE id = ? AND business_id = ? AND status = 'ready' AND acknowledged_at IS NULL
   AND created_at >= sqlc.arg(open_since);
+
+-- Bounded so a venue's busiest month cannot load an unbounded number of rows.
+-- name: ListLabelledTicketTimes :many
+SELECT created_at, ready_at
+FROM pager_tickets
+WHERE business_id = ? AND label_kind IS NOT NULL AND created_at >= sqlc.arg(since)
+ORDER BY id
+LIMIT 50000;

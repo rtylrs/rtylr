@@ -7,6 +7,7 @@ import type { AlarmEnvironment } from '../alarm';
  */
 export function createFakeAlarmEnvironment() {
   const bell = {
+    src: '',
     muted: false,
     currentTime: 0,
     preload: '',

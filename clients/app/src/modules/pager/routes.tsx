@@ -18,6 +18,7 @@ const Board = React.lazy(() => import('./screens/Staff/Board'));
 const Display = React.lazy(() => import('./screens/Staff/Display'));
 const Poster = React.lazy(() => import('./screens/Staff/Poster'));
 const Setup = React.lazy(() => import('./screens/Staff/Setup'));
+const Insights = React.lazy(() => import('./screens/Staff/Insights'));
 // The account checks and the Portal code behind them load only for staff.
 const StaffGate = React.lazy(() => import('./shared/components/RenniliStaffGate'));
 
@@ -116,6 +117,7 @@ function createStaffRoutes<TParent extends AnyRoute>(rootRoute: TParent) {
     staffPage('/display', Display),
     staffPage('/poster', Poster),
     staffPage('/setup', Setup),
+    staffPage('/insights', Insights),
   ]);
 }
 

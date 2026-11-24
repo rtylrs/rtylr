@@ -4,7 +4,7 @@ import { publicPagerClient, staffPagerClient } from './clients';
 
 export type PublicPagerClient = Pick<
   PagerServiceClient,
-  'getPublicVenue' | 'scanTicket' | 'getPublicTicket' | 'acknowledgeTicket'
+  'getPublicVenue' | 'scanTicket' | 'joinTicket' | 'getPublicTicket' | 'acknowledgeTicket'
 >;
 
 export type StaffPagerClient = Pick<

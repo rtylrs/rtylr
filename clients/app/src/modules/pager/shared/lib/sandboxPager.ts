@@ -48,10 +48,20 @@ export function createSandboxPager({
   random?: () => number;
 }): SandboxPager {
   const tickets: SandboxTicket[] = [];
-  const settings: Required<GetSettingsResponse> = { enabled: true, labelMode: 'either' };
+  const settings: Required<GetSettingsResponse> = {
+    enabled: true,
+    labelMode: 'either',
+    reviewUrl: '',
+    prepMinutes: 0,
+    customerNumbers: false,
+    ringtone: 'bell',
+  };
   let lastId = 0;
 
   const clock = (): string => now().toISOString();
+  // As the server: an estimate from now, none for 0 minutes.
+  const expectedAt = (minutes: number): string | undefined =>
+    minutes > 0 ? new Date(now().getTime() + minutes * 60_000).toISOString() : undefined;
   const isOpen = (ticket: SandboxTicket): boolean =>
     ticket.status === 'waiting' || ticket.status === 'ready';
   const staffView = ({ publicToken: _token, ...ticket }: SandboxTicket): Ticket => ({
@@ -118,11 +128,43 @@ export function createSandboxPager({
   return {
     getPublicVenue: async () => {
       if (!settings.enabled) throw new SandboxPagerError(404, PAGER_ERROR.venueNotFound);
-      return { name: venueName(), enabled: true };
+      return {
+        name: venueName(),
+        enabled: true,
+        customerNumbers: settings.customerNumbers,
+      };
+    },
+
+    joinTicket: async ({ number: raw }) => {
+      if (!settings.enabled) throw new SandboxPagerError(404, PAGER_ERROR.venueNotFound);
+      if (!settings.customerNumbers) {
+        throw new SandboxPagerError(409, PAGER_ERROR.joinByNumberOff);
+      }
+      const number = normaliseTicketNumber((raw ?? '').trim());
+      if (!/\d/.test(number) || !/^[A-Z0-9]{1,12}$/.test(number)) {
+        throw new SandboxPagerError(400, PAGER_ERROR.invalidLabel);
+      }
+      const taken = tickets.some(
+        (other) => isOpen(other) && other.labelKind === 'number' && other.label === number
+      );
+      if (taken) throw new SandboxPagerError(409, PAGER_ERROR.labelTaken);
+      lastId += 1;
+      const ticket: SandboxTicket = {
+        id: String(lastId),
+        label: number,
+        labelKind: 'number',
+        status: 'waiting',
+        createdAt: clock(),
+        expectedReadyAt: expectedAt(settings.prepMinutes),
+        publicToken: `sandbox-${lastId}`,
+      };
+      tickets.push(ticket);
+      return { publicToken: ticket.publicToken, label: number, status: ticket.status };
     },
 
     scanTicket: async () => {
       if (!settings.enabled) throw new SandboxPagerError(404, PAGER_ERROR.venueNotFound);
+      if (settings.customerNumbers) throw new SandboxPagerError(409, PAGER_ERROR.typeYourNumber);
       const code = freeCode();
       lastId += 1;
       const ticket: SandboxTicket = {
@@ -161,6 +203,9 @@ export function createSandboxPager({
         readyAt: ticket.readyAt,
         remindedAt: ticket.remindedAt,
         acknowledgedAt: ticket.acknowledgedAt,
+        expectedReadyAt: ticket.expectedReadyAt,
+        reviewUrl: settings.reviewUrl || undefined,
+        ringtone: settings.ringtone,
         serverTime: clock(),
       };
     },
@@ -176,7 +221,7 @@ export function createSandboxPager({
       serverTime: clock(),
     }),
 
-    labelTicket: async ({ id, label: raw }) => {
+    labelTicket: async ({ id, label: raw, prepMinutes }) => {
       const parsed = parseLabel(raw);
       const ticket = byId(id);
       if (ticket.status !== 'waiting') {
@@ -193,6 +238,7 @@ export function createSandboxPager({
       if (taken) throw new SandboxPagerError(409, PAGER_ERROR.labelTaken);
       ticket.label = parsed.label;
       ticket.labelKind = parsed.labelKind;
+      ticket.expectedReadyAt = expectedAt(prepMinutes ?? settings.prepMinutes);
       return { ticket: staffView(ticket) };
     },
 
@@ -225,9 +271,26 @@ export function createSandboxPager({
 
     getSettings: async () => ({ ...settings }),
 
-    updateSettings: async ({ enabled, labelMode }) => {
+    updateSettings: async ({
+      enabled,
+      labelMode,
+      reviewUrl,
+      prepMinutes,
+      customerNumbers,
+      ringtone,
+    }) => {
+      if (reviewUrl !== undefined) {
+        const link = reviewUrl.trim();
+        if (link && !/^https:\/\/[^\s/@]+/.test(link)) {
+          throw new SandboxPagerError(400, PAGER_ERROR.invalidReviewUrl);
+        }
+        settings.reviewUrl = link;
+      }
       if (enabled !== undefined) settings.enabled = enabled;
       if (labelMode !== undefined) settings.labelMode = labelMode;
+      if (prepMinutes !== undefined) settings.prepMinutes = prepMinutes;
+      if (customerNumbers !== undefined) settings.customerNumbers = customerNumbers;
+      if (ringtone !== undefined) settings.ringtone = ringtone;
       return { ...settings };
     },
   };

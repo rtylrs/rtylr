@@ -18,8 +18,11 @@ namespace pager.v1;
 // Errors carry a stable `code` next to `message`: venue_not_found (404),
 // ticket_not_found (404), invalid_label (400), label_taken (409),
 // invalid_label_mode (400), invalid_transition (409),
-// too_many_open_tickets (429), invalid_push_subscription (400) and
-// too_many_push_subscriptions (429).
+// too_many_open_tickets (429), invalid_push_subscription (400),
+// too_many_push_subscriptions (429), join_by_number_off (409),
+// type_your_number (409, a scan at a venue whose customers type their
+// receipt number), invalid_review_url (400), invalid_prep_minutes (400) and
+// invalid_ringtone (400).
 /** A ticket as the venue's staff see it. */
 model Ticket {
   @encode(string)
@@ -51,6 +54,9 @@ model Ticket {
 
   /** Set when a customer silences the bell; cleared by the next reminder. */
   acknowledged_at: string;
+
+  /** When the venue expects the order ready; absent when it gave no estimate. */
+  expected_ready_at: string;
 }
 
 // ── Public ────────────────────────────────────────────────────────
@@ -67,6 +73,12 @@ model GetPublicVenueResponse {
   logo_url: string;
 
   enabled: boolean;
+
+  /**
+   * True when customers join by typing the number on their receipt instead
+   * of scanning for a code the cashier labels.
+   */
+  customer_numbers: boolean;
 }
 
 model ScanTicketRequest {
@@ -81,6 +93,28 @@ model ScanTicketResponse {
   /** The match code the customer shows the cashier, as on Ticket. */
   code: string;
 
+  status: string;
+}
+
+model JoinTicketRequest {
+  slug: string;
+
+  /**
+   * The order number on the customer's receipt, normalised like a label
+   * number. Only while the venue lets customers type their number
+   * (join_by_number_off otherwise); label_taken when that number already has
+   * an open ticket, so a second phone cannot follow someone else's order.
+   */
+  @Onkt.required
+  @minLength(1)
+  @maxLength(32)
+  number: string;
+}
+
+/** A new waiting ticket, already labelled with the customer's number. */
+model JoinTicketResponse {
+  public_token: string;
+  label: string;
   status: string;
 }
 
@@ -112,6 +146,15 @@ model GetPublicTicketResponse {
   ready_at: string;
   reminded_at: string;
   acknowledged_at: string;
+
+  /** When the venue expects the order ready; absent when it gave no estimate. */
+  expected_ready_at: string;
+
+  /** The venue's review page, offered once the order is in hand; absent when unset. */
+  review_url: string;
+
+  /** The venue's ringtone: bell, chime, marimba, ring or beep. The customer may pick another. */
+  ringtone: string;
 
   /**
    * When the server built this answer; drop an answer older than the one
@@ -191,6 +234,14 @@ model LabelTicketRequest {
   @minLength(1)
   @maxLength(64)
   label: string;
+
+  /**
+   * Minutes until the order should be ready, 0 for no estimate. The venue's
+   * prep_minutes when absent. Labelling again starts the estimate again.
+   */
+  @minValue(0)
+  @maxValue(120)
+  prep_minutes?: int32;
 }
 
 /**
@@ -249,6 +300,18 @@ model GetSettingsResponse {
 
   /** What the cashier labels a ticket with: number, name or either. */
   label_mode: string;
+
+  /** The venue's review page shown after pickup; absent when unset. */
+  review_url: string;
+
+  /** The usual minutes from labelling to ready; 0 for no estimate. */
+  prep_minutes: int32;
+
+  /** Customers type their receipt number instead of scanning for a code. */
+  customer_numbers: boolean;
+
+  /** What the customers' phones ring with: bell, chime, marimba, ring or beep. */
+  ringtone: string;
 }
 
 model UpdateSettingsRequest {
@@ -257,9 +320,69 @@ model UpdateSettingsRequest {
 
   /** number, name or either. Unchanged when absent. */
   label_mode?: string;
+
+  /** An https link of up to 500 characters; empty clears it. Unchanged when absent. */
+  @maxLength(500)
+  review_url?: string;
+
+  /** 0 to 120. Unchanged when absent. */
+  @minValue(0)
+  @maxValue(120)
+  prep_minutes?: int32;
+
+  /** Unchanged when absent. */
+  customer_numbers?: boolean;
+
+  /** bell, chime, marimba, ring or beep. Unchanged when absent. */
+  @maxLength(16)
+  ringtone?: string;
 }
 
 model UpdateSettingsResponse {
   enabled: boolean;
   label_mode: string;
+  review_url: string;
+  prep_minutes: int32;
+  customer_numbers: boolean;
+  ringtone: string;
+}
+
+model GetStatsRequest {
+  /** How many days back, today included: 1 to 90, 30 when absent. */
+  @query("days")
+  days?: int32;
+}
+
+/** Orders a day, counted in the venue's own time zone. */
+model DayCount {
+  /** The local date, YYYY-MM-DD. */
+  date: string;
+
+  orders: int32;
+}
+
+/**
+ * How the venue's orders went over the period: labelled tickets only, and
+ * waits measured from the scan or join to Ready.
+ */
+model GetStatsResponse {
+  days: int32;
+
+  /** The IANA zone the hours and dates are counted in. */
+  timezone: string;
+
+  orders: int32;
+
+  /** Orders that were marked ready, which the waits are measured on. */
+  ready_orders: int32;
+
+  avg_wait_seconds: int32;
+  median_wait_seconds: int32;
+  longest_wait_seconds: int32;
+
+  /** Orders by the local hour they started in, 24 entries from 00:00. */
+  by_hour: int32[];
+
+  /** One entry per day of the period, oldest first. */
+  by_day: DayCount[];
 }

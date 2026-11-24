@@ -18,10 +18,15 @@ export function ticketRingKey(ticket: AlarmTicket | null): string | null {
   return `${ticket.readyAt ?? ''}|${ticket.remindedAt ?? ''}`;
 }
 
-export function ticketAlarmState(ticket: AlarmTicket | null, title?: string): AlarmState {
+export function ticketAlarmState(
+  ticket: AlarmTicket | null,
+  title?: string,
+  bellSrc?: string
+): AlarmState {
   return {
     keepAwake: isOpenStatus(ticket?.status),
     ringKey: ticketRingKey(ticket),
     title,
+    bellSrc,
   };
 }

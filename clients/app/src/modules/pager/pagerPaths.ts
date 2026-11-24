@@ -4,7 +4,7 @@ import { RENNILI_URL, resolveAuthUrl } from '@voxire/config';
  * Paths on the Rennili origin (rennili.rtylr.com), where the whole pager lives.
  * Shapes (see `routes.tsx`): the landing at `/`, the venue page the QR opens
  * at `/$slug`, the ticket at `/t/$token`, the demo at `/try`, and the staff
- * board at `/board` with its `/display`, `/poster` and `/setup`.
+ * board at `/board` with its `/display`, `/poster`, `/setup` and `/insights`.
  *
  * The Portal paths these replaced (`/$slug/pager`, `/pager/t/$token`,
  * `/pager`...) redirect here from `clients/app/public/_redirects`, because
@@ -21,6 +21,7 @@ export const PAGER_BOARD_PATH = '/board';
 export const PAGER_POSTER_PATH = '/poster';
 export const PAGER_DISPLAY_PATH = '/display';
 export const PAGER_SETUP_PATH = '/setup';
+export const PAGER_STATS_PATH = '/insights';
 export const PAGER_TICKET_PREFIX = '/t/';
 
 /** `/{slug}` - where the venue's one QR points. */
@@ -48,6 +49,7 @@ const PORTAL_STAFF_PATHS: Record<string, string> = {
   [PAGER_DISPLAY_PATH]: '/pager/display',
   [PAGER_POSTER_PATH]: '/pager/poster',
   [PAGER_SETUP_PATH]: '/pager/setup',
+  [PAGER_STATS_PATH]: '/pager/insights',
 };
 
 export function portalPathForStaffPage(pathname: string): string {
