@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { QueryClientContext } from '@tanstack/react-query';
 import { cn } from '@voxire/ui';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { QRCode } from 'react-qrcode-logo';
 import { saveAs } from 'file-saver';
 import { useUserStore } from '../../shared/stores/userStore';
+import { configClient, posLocationClient, tableClient } from '../../shared/lib/clients';
 import { QrCodeTemplate, QrCodeTemplates, QrOptions } from './templates';
 
 import { PORTAL_URL, buildPublicMenuUrl, buildPublicMenuUrlById } from '@voxire/config';
@@ -14,15 +16,66 @@ import { PORTAL_URL, buildPublicMenuUrl, buildPublicMenuUrlById } from '@voxire/
 function QrCode() {
   const { t } = useTranslation();
   const { user } = useUserStore();
+  const queryClient = useContext(QueryClientContext);
   const businessSlug = user?.businessSlug || user?.business_slug || '';
   const businessId = user?.businessId ?? user?.id;
+
+  const [branches, setBranches] = useState<Array<{ id: string; name: string; slug: string }>>([]);
+  const [tables, setTables] = useState<Array<{ id: string; label: string }>>([]);
+  const [selectedBranchSlug, setSelectedBranchSlug] = useState('');
+  const [selectedTableId, setSelectedTableId] = useState('');
+  const [customDomain, setCustomDomain] = useState('');
+  const [useCustomDomain, setUseCustomDomain] = useState(false);
+
+  useEffect(() => {
+    if (!queryClient) return;
+    let cancelled = false;
+    void Promise.all([
+      posLocationClient.listLocations({}).catch(() => ({ locations: [] })),
+      tableClient.listTables({}).catch(() => ({ tables: [] })),
+      configClient.getCustomDomain({}).catch(() => ({ domain: undefined })),
+    ]).then(([locRes, tableRes, domainRes]) => {
+      if (cancelled) return;
+      setBranches(
+        (locRes.locations ?? []).map((loc) => ({
+          id: String(loc.id ?? ''),
+          name: loc.name ?? '',
+          slug: (loc.name ?? '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, ''),
+        }))
+      );
+      setTables(
+        (tableRes.tables ?? []).map((tb) => ({
+          id: String(tb.id ?? ''),
+          label: tb.label ?? `Table ${tb.id ?? ''}`,
+        }))
+      );
+      if (domainRes.domain?.status === 'verified' && domainRes.domain.domain) {
+        setCustomDomain(domainRes.domain.domain);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [queryClient]);
+
   // A slug gives the canonical /<slug>/menu URL; without one the business is
   // addressed by id in the POS-style /b/<id>/menu form.
-  const menuUrl = businessSlug
-    ? buildPublicMenuUrl(businessSlug)
-    : businessId != null
-      ? buildPublicMenuUrlById(businessId)
-      : PORTAL_URL;
+  const baseMenuUrl =
+    useCustomDomain && customDomain
+      ? `https://${customDomain}${selectedBranchSlug ? `/menu/${selectedBranchSlug}` : '/menu'}`
+      : businessSlug
+        ? `${buildPublicMenuUrl(businessSlug)}${selectedBranchSlug ? `/${selectedBranchSlug}` : ''}`
+        : businessId != null
+          ? buildPublicMenuUrlById(businessId)
+          : PORTAL_URL;
+
+  const selectedTable = tables.find((tb) => tb.id === selectedTableId);
+  const menuUrl = selectedTable
+    ? `${baseMenuUrl}?table=${encodeURIComponent(selectedTable.id)}&tableLabel=${encodeURIComponent(selectedTable.label)}`
+    : baseMenuUrl;
   const initialUrl = menuUrl;
 
   const [qrOptions, setQrOptions] = useState<QrOptions>({
@@ -118,6 +171,69 @@ function QrCode() {
       <HelmetContainer title="QR code generator · rtylr" />
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-primary">QR Code Generator</h1>
+        {(branches.length > 0 || tables.length > 0 || customDomain) && (
+          <div
+            className="flex flex-wrap items-center gap-3 rounded-xl border p-4"
+            style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
+          >
+            {branches.length > 0 && (
+              <label className="flex items-center gap-2 text-xs text-muted">
+                <span>Branch</span>
+                <select
+                  aria-label="Branch"
+                  value={selectedBranchSlug}
+                  onChange={(e) => setSelectedBranchSlug(e.target.value)}
+                  className="rounded-lg border px-2.5 py-1.5 text-sm"
+                  style={{
+                    background: 'var(--dash-input-bg)',
+                    borderColor: 'var(--dash-border)',
+                    color: 'var(--dash-text)',
+                  }}
+                >
+                  <option value="">All branches</option>
+                  {branches.map((b) => (
+                    <option key={b.id} value={b.slug}>
+                      {b.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            {tables.length > 0 && (
+              <label className="flex items-center gap-2 text-xs text-muted">
+                <span>Table / Counter</span>
+                <select
+                  aria-label="Table"
+                  value={selectedTableId}
+                  onChange={(e) => setSelectedTableId(e.target.value)}
+                  className="rounded-lg border px-2.5 py-1.5 text-sm"
+                  style={{
+                    background: 'var(--dash-input-bg)',
+                    borderColor: 'var(--dash-border)',
+                    color: 'var(--dash-text)',
+                  }}
+                >
+                  <option value="">General menu QR</option>
+                  {tables.map((tb) => (
+                    <option key={tb.id} value={tb.id}>
+                      {tb.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            {customDomain && (
+              <label className="flex items-center gap-2 text-xs text-muted">
+                <input
+                  type="checkbox"
+                  checked={useCustomDomain}
+                  onChange={(e) => setUseCustomDomain(e.target.checked)}
+                />
+                <span>Use custom domain ({customDomain})</span>
+              </label>
+            )}
+          </div>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div
             className="rounded-xl p-5 border shadow-card space-y-4"

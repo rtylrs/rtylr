@@ -35,13 +35,38 @@ type PaddlePaymentResult struct {
 	CheckoutURL   string
 }
 
+// PublicOrderHook is invoked after a public menu order lands in POS (stamps, webhooks, CRM).
+type PublicOrderHook func(ctx context.Context, businessID, locationID, tableID, orderID int64, orderNumber, fulfillmentMode, customerName, customerPhone string, total float64)
+
+// PaymentRedirectResolver resolves an optional third-party payment redirect URL for a branch.
+type PaymentRedirectResolver func(ctx context.Context, businessID, locationID int64) string
+
 type Service struct {
-	repo     repository
-	settings settingsReader
+	repo                    repository
+	settings                settingsReader
+	publicOrderHook         PublicOrderHook
+	paymentRedirectResolver PaymentRedirectResolver
 }
 
 func NewService(repo repository, settings settingsReader) *Service {
 	return &Service{repo: repo, settings: settings}
+}
+
+func (s *Service) WithPublicOrderHook(fn PublicOrderHook) *Service {
+	s.publicOrderHook = fn
+	return s
+}
+
+func (s *Service) WithPaymentRedirectResolver(fn PaymentRedirectResolver) *Service {
+	s.paymentRedirectResolver = fn
+	return s
+}
+
+func (s *Service) ResolvePaymentRedirectURL(ctx context.Context, businessID, locationID int64) string {
+	if s.paymentRedirectResolver == nil {
+		return ""
+	}
+	return s.paymentRedirectResolver(ctx, businessID, locationID)
 }
 
 func defaultOrderTypeForProfile(profile string) domain.OrderType {

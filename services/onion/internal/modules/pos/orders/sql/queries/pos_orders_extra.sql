@@ -57,9 +57,9 @@ LIMIT 1;
 
 -- name: CreatePublicOrder :execresult
 INSERT INTO pos_orders
-(owner_id, business_id, order_number, type, status, customer_id, customer_name, customer_phone,
+(owner_id, business_id, location_id, table_id, order_number, type, status, customer_id, customer_name, customer_phone,
  subtotal, tax_amount, total, payment_status, notes, created_at, updated_at)
-VALUES (?, ?, ?, 'online', 'pending', ?, ?, ?, ?, ?, ?, 'unpaid', ?, NOW(), NOW());
+VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, 'unpaid', ?, NOW(), NOW());
 
 -- name: CreatePublicOrderItem :exec
 INSERT INTO pos_order_items

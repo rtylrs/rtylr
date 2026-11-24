@@ -13,6 +13,10 @@ interface CartState {
   items: CartItem[];
   businessId: number;
   locationId?: number;
+  tableId?: number;
+  tableLabel?: string;
+  fulfillmentMode: 'dine_in' | 'self_service' | 'pickup' | 'delivery';
+  availableFulfillmentModes: Array<'dine_in' | 'self_service' | 'pickup' | 'delivery'>;
   currency: string;
   addItem: (item: Omit<CartItem, 'quantity' | 'notes'> & { quantity?: number }) => void;
   removeItem: (menuItemId: number) => void;
@@ -20,6 +24,11 @@ interface CartState {
   setItemNote: (menuItemId: number, note: string) => void;
   setBusinessId: (id: number) => void;
   setLocationId: (id?: number) => void;
+  setTable: (id?: number, label?: string) => void;
+  setFulfillmentMode: (mode: 'dine_in' | 'self_service' | 'pickup' | 'delivery') => void;
+  setAvailableFulfillmentModes: (
+    modes: Array<'dine_in' | 'self_service' | 'pickup' | 'delivery'>
+  ) => void;
   setCurrency: (currency: string) => void;
   clearCart: () => void;
   total: () => number;
@@ -32,6 +41,10 @@ export const useCartStore = create<CartState>()(
       items: [],
       businessId: 0,
       locationId: undefined,
+      tableId: undefined,
+      tableLabel: undefined,
+      fulfillmentMode: 'dine_in',
+      availableFulfillmentModes: ['dine_in', 'self_service', 'pickup'],
       currency: 'USD',
 
       addItem: (item) => {
@@ -92,12 +105,38 @@ export const useCartStore = create<CartState>()(
         set({ locationId: id });
       },
 
+      setTable: (id, label) => {
+        set({ tableId: id, tableLabel: label });
+      },
+
+      setFulfillmentMode: (mode) => {
+        set({ fulfillmentMode: mode });
+      },
+
+      setAvailableFulfillmentModes: (modes) => {
+        set((state) => ({
+          availableFulfillmentModes: modes.length > 0 ? modes : ['dine_in'],
+          fulfillmentMode:
+            modes.length > 0 && !modes.includes(state.fulfillmentMode)
+              ? modes[0]
+              : state.fulfillmentMode,
+        }));
+      },
+
       setCurrency: (currency) => {
         set({ currency: currency || 'USD' });
       },
 
       clearCart: () => {
-        set({ items: [], businessId: 0, locationId: undefined, currency: 'USD' });
+        set({
+          items: [],
+          businessId: 0,
+          locationId: undefined,
+          tableId: undefined,
+          tableLabel: undefined,
+          fulfillmentMode: 'dine_in',
+          currency: 'USD',
+        });
       },
 
       total: () => {

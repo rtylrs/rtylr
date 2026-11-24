@@ -1,83 +1,574 @@
 .layout {
+  position: relative;
   min-height: 100vh;
   background: var(--menu-bg, #f9f9f7);
+  color: var(--menu-text, #1a1a1a);
+  font-family: var(--menu-font-body, system-ui, sans-serif);
   display: flex;
   flex-direction: column;
 }
 
-.layout__main {
-  flex: 1;
-  padding: 16px 12px 120px;
-  width: 100%;
+// ─── Floating Hero Glass Pills ───────────────────────────────────────────────
 
-  @media (min-width: 480px) {
-    padding: 20px 16px 120px;
+.glassPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(15, 17, 21, 0.65);
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+  font-size: 0.74rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.glassDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--menu-accent, #c8a96e);
+}
+
+.glassIconBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(15, 17, 21, 0.62);
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.14s ease, background 0.14s ease;
+
+  &:hover {
+    background: rgba(15, 17, 21, 0.82);
   }
 
+  &--active {
+    background: var(--menu-accent, #c8a96e);
+    color: var(--menu-accent-text, #111827);
+    border-color: transparent;
+  }
+}
+
+.glassPillBtn {
+  height: 32px;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(15, 17, 21, 0.62);
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+
+  &:hover {
+    background: rgba(15, 17, 21, 0.82);
+  }
+}
+
+.toastBar {
+  margin: 10px 14px 0;
+  padding: 9px 14px;
+  border-radius: 12px;
+  background: var(--menu-accent, #1a1a1a);
+  color: var(--menu-accent-text, #ffffff);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.activeFiltersStrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 14px 0;
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.filterTag {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: none;
+  background: var(--menu-accent, #1a1a1a);
+  color: var(--menu-accent-text, #ffffff);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+// ─── Main Content ────────────────────────────────────────────────────────────
+
+.layout__main {
+  flex: 1;
+  padding: 12px 14px 104px;
+  width: 100%;
+
   @media (min-width: 768px) {
-    padding: 24px 20px 120px;
+    padding: 18px 20px 110px;
     max-width: 960px;
     margin: 0 auto;
   }
 }
 
-.layout__cartBar {
-  position: fixed;
-  bottom: 90px;
-  left: 50%;
-  transform: translateX(-50%);
+.compactHighlights {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.highlightPill {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--menu-border, rgba(0, 0, 0, 0.08));
+  background: var(--menu-card-bg, #ffffff);
+  color: var(--menu-text, #1a1a1a);
+  font-size: 0.76rem;
+  font-family: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.highlightDot {
+  color: var(--menu-accent, #c8a96e);
+  font-size: 0.9rem;
+}
+
+.highlightText {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.highlightChevron {
+  opacity: 0.5;
+  font-size: 1rem;
+}
+
+.bannerStrip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.bannerPill {
+  flex: 0 0 auto;
+  min-width: 100%;
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 13px 26px;
-  background: var(--menu-accent, #1a1a1a);
-  color: var(--menu-accent-text, #ffffff);
-  border: none;
-  border-radius: 30px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  z-index: 150;
-  transition:
-    transform 0.15s ease,
-    opacity 0.15s ease;
-  white-space: nowrap;
-
-  &:hover {
-    opacity: 0.9;
-    transform: translateX(-50%) translateY(-2px);
-  }
-
-  @media (min-width: 480px) {
-    padding: 14px 28px;
-    font-size: 0.95rem;
-  }
-}
-
-.layout__cartCount {
-  background: rgba(255, 255, 255, 0.25);
+  padding: 10px 12px;
   border-radius: 12px;
-  padding: 1px 8px;
-  font-size: 0.8rem;
-  font-weight: 700;
+  background: var(--menu-card-bg, #ffffff);
+  border: 1px solid var(--menu-border, rgba(0, 0, 0, 0.08));
 }
 
-.layout__bookPlaceholder {
+.bannerPillImg {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.bannerPillText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+
+  strong {
+    font-size: 0.8rem;
+    color: var(--menu-heading, #1a1a1a);
+  }
+
+  span {
+    font-size: 0.72rem;
+    color: var(--menu-subtext, rgba(26, 26, 26, 0.6));
+  }
+}
+
+.layout__poweredBy {
+  text-align: center;
+  padding: 6px 16px 86px;
+  font-size: 0.7rem;
+  color: var(--menu-subtext, rgba(26, 26, 26, 0.45));
+}
+
+// ─── Floating Bottom Dock ────────────────────────────────────────────────────
+
+.bottomDock {
+  position: sticky;
+  bottom: 12px;
+  margin: 0 12px 12px;
+  padding: 7px;
+  border-radius: 18px;
+  background: rgba(17, 20, 28, 0.86);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 60;
+
+  &--compact {
+    width: fit-content;
+    margin: 0 auto 12px;
+    padding: 5px;
+    border-radius: 999px;
+    gap: 6px;
+
+    .dockIconBtn {
+      flex-direction: row;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+    }
+  }
+}
+
+.dockIconBtn {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
-  gap: 12px;
-  color: var(--menu-subtext, rgba(26, 26, 26, 0.5));
+  gap: 2px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.07);
+  color: #f3f4f6;
+  font-size: 0.64rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
 
-  span {
-    font-size: 2.5rem;
+  &:hover {
+    background: rgba(255, 255, 255, 0.14);
+  }
+}
+
+.dockCartBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: none;
+  background: var(--menu-accent, #c8a96e);
+  color: var(--menu-accent-text, #111827);
+  font-size: 0.84rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.dockCartBadge {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.dockCartTotal {
+  font-weight: 700;
+}
+
+// ─── Slide-Up Sheets ─────────────────────────────────────────────────────────
+
+.sheetBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 200;
+}
+
+.sheetPanel {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  border-radius: 22px 22px 0 0;
+  background: var(--menu-card-bg, #ffffff);
+  color: var(--menu-text, #1a1a1a);
+  border-top: 1px solid var(--menu-border, rgba(0, 0, 0, 0.08));
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.sheetCloseBtn {
+  position: absolute;
+  top: 12px;
+  inset-inline-end: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(15, 17, 24, 0.68);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-size: 1rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+
+  &:hover {
+    background: rgba(15, 17, 24, 0.88);
+  }
+}
+
+.sheetHandle {
+  width: 38px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--menu-border, rgba(128, 128, 128, 0.35));
+  margin: 10px auto 2px;
+}
+
+.sheetBody {
+  padding: 16px 18px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sheetTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--menu-heading, #1a1a1a);
+}
+
+.sheetSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sheetLabel {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--menu-subtext, rgba(26, 26, 26, 0.6));
+}
+
+.sheetInput {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--menu-border, rgba(0, 0, 0, 0.14));
+  background: var(--menu-input-bg, rgba(0, 0, 0, 0.04));
+  color: var(--menu-text, #1a1a1a);
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+}
+
+.optionGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.optionPill {
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--menu-border, rgba(0, 0, 0, 0.12));
+  background: var(--menu-input-bg, rgba(0, 0, 0, 0.03));
+  color: var(--menu-text, #1a1a1a);
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+
+  &--active {
+    background: var(--menu-accent, #1a1a1a);
+    color: var(--menu-accent-text, #ffffff);
+    border-color: transparent;
+  }
+}
+
+.sheetPrimaryBtn {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: none;
+  background: var(--menu-accent, #1a1a1a);
+  color: var(--menu-accent-text, #ffffff);
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.serviceList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.serviceCard {
+  width: 100%;
+  text-align: start;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--menu-border, rgba(0, 0, 0, 0.1));
+  background: var(--menu-input-bg, rgba(0, 0, 0, 0.03));
+  color: var(--menu-text, #1a1a1a);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  cursor: pointer;
+  font-family: inherit;
+
+  strong {
+    font-size: 0.9rem;
   }
 
+  span {
+    font-size: 0.76rem;
+    color: var(--menu-subtext, rgba(26, 26, 26, 0.6));
+  }
+}
+
+.loyaltyModalCard {
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--menu-border, rgba(0, 0, 0, 0.1));
+  background: var(--menu-input-bg, rgba(0, 0, 0, 0.03));
+
   p {
-    margin: 0;
-    font-size: 0.9rem;
+    margin: 4px 0 12px;
+    font-size: 0.8rem;
+    color: var(--menu-subtext, rgba(26, 26, 26, 0.65));
+  }
+}
+
+.stampDots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stampDot {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--menu-border, rgba(128, 128, 128, 0.4));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--menu-subtext, rgba(26, 26, 26, 0.5));
+
+  &--filled {
+    border-style: solid;
+    border-color: var(--menu-accent, #c8a96e);
+    background: var(--menu-accent, #c8a96e);
+    color: var(--menu-accent-text, #111827);
+  }
+}
+
+.detailHeroImg {
+  width: 100%;
+  height: 210px;
+  object-fit: cover;
+  display: block;
+}
+
+.detailHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.detailPrice {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--menu-accent, #c8a96e);
+}
+
+.detailDesc {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--menu-subtext, rgba(26, 26, 26, 0.7));
+}
+
+.detailChip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--menu-bubble-bg, rgba(0, 0, 0, 0.06));
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.detailFooter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.qtyStepper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--menu-border, rgba(0, 0, 0, 0.14));
+
+  button {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: none;
+    background: var(--menu-bubble-bg, rgba(0, 0, 0, 0.08));
+    color: var(--menu-text, #1a1a1a);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  span {
+    font-weight: 700;
+    min-width: 18px;
+    text-align: center;
   }
 }
