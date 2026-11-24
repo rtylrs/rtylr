@@ -56,6 +56,14 @@ describe('asking for notification permission', () => {
     expect(browser.requestPermission).not.toHaveBeenCalled();
   });
 
+  it('asks immediately via askPushPermissionNow without waiting for the server key', async () => {
+    const { askPushPermissionNow } = await load();
+
+    void askPushPermissionNow();
+
+    expect(browser.requestPermission).toHaveBeenCalledTimes(1);
+  });
+
   it('does not ask again once the visitor has answered', async () => {
     const { askPushPermission } = await load();
     for (const answered of ['granted', 'denied'] as const) {

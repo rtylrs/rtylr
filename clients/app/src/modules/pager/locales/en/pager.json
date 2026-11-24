@@ -19,7 +19,8 @@
     "readyTitle": "Get your order alert",
     "readyHint": "Tap once to turn on sound, vibration, and notifications so your phone rings the moment your order is ready.",
     "startButton": "Get my code & enable alerts",
-    "permissionsNote": "Sound · Vibration · Notifications"
+    "permissionsNote": "Sound · Vibration · Notifications",
+    "newOrderButton": "Start a new order instead"
   },
   "ticket": {
     "pageTitle": "Order {{label}} · $t(pager.brand.name)",
@@ -57,7 +58,10 @@
     "readyTitleName": "{{label}}, your order is ready",
     "codeExpired": "This code has expired",
     "codeExpiredHint": "Scan the QR at the counter again to get a new one.",
-    "alertsActive": "Alerts active"
+    "alertsActive": "Alerts active",
+    "newOrder": "Start a new order",
+    "newOrderLink": "Ordering again? Get a new code",
+    "notificationsBlocked": "Browser notifications are blocked in your browser settings. Keep this page open so it can still ring."
   },
   "push": {
     "readyTitle": "Order {{label}} is ready",

@@ -19,7 +19,8 @@
     "readyTitle": "Activez votre alerte de commande",
     "readyHint": "Touchez une fois pour activer le son, la vibration et les notifications afin que votre téléphone sonne dès que c'est prêt.",
     "startButton": "Obtenir mon code et activer les alertes",
-    "permissionsNote": "Son · Vibration · Notifications"
+    "permissionsNote": "Son · Vibration · Notifications",
+    "newOrderButton": "Commencer une nouvelle commande"
   },
   "ticket": {
     "pageTitle": "Commande {{label}} · $t(pager.brand.name)",
@@ -58,7 +59,10 @@
     "readyTitleName": "{{label}}, votre commande est prête",
     "codeExpired": "Ce code a expiré",
     "codeExpiredHint": "Scannez à nouveau le QR au comptoir pour en obtenir un nouveau.",
-    "alertsActive": "Alertes activées"
+    "alertsActive": "Alertes activées",
+    "newOrder": "Nouvelle commande",
+    "newOrderLink": "Une autre commande ? Obtenir un nouveau code",
+    "notificationsBlocked": "Les notifications sont bloquées dans les réglages du navigateur. Gardez cette page ouverte pour entendre la sonnerie."
   },
   "push": {
     "readyTitle": "La commande {{label}} est prête",
