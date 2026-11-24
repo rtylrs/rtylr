@@ -15,6 +15,7 @@ vi.mock('@tanstack/react-router', () => ({
 const api = vi.hoisted(() => ({
   getPublicVenue: vi.fn(),
   scanTicket: vi.fn(),
+  joinTicket: vi.fn(),
   getPublicTicket: vi.fn(),
   getPushKey: vi.fn(),
 }));
@@ -203,6 +204,64 @@ describe('pager scan page', () => {
 
     await waitFor(() => expect(onScanned).toHaveBeenCalledWith('tok-1'));
     expect(navigateSpy).not.toHaveBeenCalled();
+  });
+
+  describe('at a venue whose customers type their receipt number', () => {
+    beforeEach(() => {
+      api.getPublicVenue.mockResolvedValue({
+        name: 'Acme Café',
+        enabled: true,
+        customerNumbers: true,
+      });
+      api.scanTicket.mockRejectedValue({ statusCode: 409, code: 'type_your_number' });
+      api.joinTicket.mockReset();
+    });
+
+    it('asks for the number after the one tap, then follows that order', async () => {
+      api.joinTicket.mockResolvedValue({ publicToken: 'tok-42', label: '42', status: 'waiting' });
+      render(<Scan />);
+      await tapStart();
+
+      // The tap still unlocks the bell and asks for notifications.
+      expect(alarmMocks.unlock).toHaveBeenCalled();
+      expect(pushMocks.ask).toHaveBeenCalledWith('vapid-public-key');
+      const field = await screen.findByLabelText('Order number');
+      expect(screen.getByRole('heading', { name: 'Type your order number' })).toBeInTheDocument();
+      expect(api.scanTicket).not.toHaveBeenCalled();
+      // Arabic-Indic digits are typed as the receipt prints them.
+      fireEvent.change(field, { target: { value: '٤٢' } });
+      expect(field).toHaveValue('42');
+      fireEvent.click(screen.getByRole('button', { name: 'Follow my order' }));
+
+      await waitFor(() =>
+        expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-42', replace: true })
+      );
+      expect(api.joinTicket).toHaveBeenCalledWith({ slug: 'acme', number: '42' });
+      expect(window.localStorage.getItem(STORAGE_KEY)).toBe('tok-42');
+    });
+
+    it('asks for the number when the venue turned it on after the page loaded', async () => {
+      api.getPublicVenue.mockResolvedValue({ name: 'Acme Café', enabled: true });
+      render(<Scan />);
+      await tapStart();
+
+      expect(await screen.findByLabelText('Order number')).toBeInTheDocument();
+      expect(api.scanTicket).toHaveBeenCalledWith({ slug: 'acme' });
+    });
+
+    it('says when someone else already follows that number', async () => {
+      api.joinTicket.mockRejectedValue({ statusCode: 409, code: 'label_taken' });
+      render(<Scan />);
+      await tapStart();
+
+      fireEvent.change(await screen.findByLabelText('Order number'), { target: { value: '42' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Follow my order' }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(
+        'Someone is already following this number. Ask at the counter.'
+      );
+      expect(navigateSpy).not.toHaveBeenCalled();
+    });
   });
 
   it('says so when the venue has no pager', async () => {

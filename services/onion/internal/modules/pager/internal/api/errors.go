@@ -35,6 +35,11 @@ var (
 	errTooManyOpenTickets = &codedError{http.StatusTooManyRequests, "too_many_open_tickets", "This venue has too many open tickets right now"}
 	errInvalidPush        = &codedError{http.StatusBadRequest, "invalid_push_subscription", "This browser's push subscription is not accepted"}
 	errTooManyPushes      = &codedError{http.StatusTooManyRequests, "too_many_push_subscriptions", "Too many browsers are following this ticket"}
+	errJoinByNumberOff    = &codedError{http.StatusConflict, "join_by_number_off", "This venue gives you a code to show at the counter instead"}
+	errInvalidReviewURL   = &codedError{http.StatusBadRequest, "invalid_review_url", "Enter a review link that starts with https://"}
+	errInvalidPrepTime    = &codedError{http.StatusBadRequest, "invalid_prep_minutes", "Enter a time from 0 to 120 minutes"}
+	errTypeNumber         = &codedError{http.StatusConflict, "type_your_number", "Type the order number on your receipt"}
+	errInvalidRingtone    = &codedError{http.StatusBadRequest, "invalid_ringtone", "Choose bell, chime, marimba, ring or beep"}
 )
 
 // publicError maps a service failure to what the client is told. Anything
@@ -59,6 +64,16 @@ func publicError(ctx context.Context, action string, err error) error {
 		return errInvalidPush
 	case errors.Is(err, domain.ErrTooManyPushSubscriptions):
 		return errTooManyPushes
+	case errors.Is(err, domain.ErrJoinByNumberOff):
+		return errJoinByNumberOff
+	case errors.Is(err, domain.ErrInvalidReviewURL):
+		return errInvalidReviewURL
+	case errors.Is(err, domain.ErrInvalidPrepTime):
+		return errInvalidPrepTime
+	case errors.Is(err, domain.ErrTypeNumber):
+		return errTypeNumber
+	case errors.Is(err, domain.ErrInvalidRingtone):
+		return errInvalidRingtone
 	}
 	logger.Ctx(ctx).Error("pager request failed", logger.String("action", action), logger.Error(err))
 	return onekiterrors.New(http.StatusInternalServerError, "Something went wrong, please try again")

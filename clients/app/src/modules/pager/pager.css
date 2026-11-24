@@ -374,6 +374,117 @@
   font-size: 30px;
 }
 
+/* At a venue whose customers type the number on their receipt. */
+.pager-number-form {
+  width: min(100%, 360px);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+}
+
+.pager-number-input {
+  height: 72px;
+  padding: 0 16px;
+  border: 2px solid var(--pager-line);
+  border-radius: 16px;
+  background: var(--pager-bg);
+  color: var(--pager-ink);
+  font: inherit;
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.pager-number-input:focus {
+  outline: none;
+  border-color: var(--pager-accent);
+}
+
+.pager-number-input[aria-invalid='true'] {
+  border-color: var(--pager-danger);
+}
+
+/* The customer's ringtone: tap to hear it and keep it. */
+.pager-ringtones {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pager-ringtones-label {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--pager-muted);
+}
+
+.pager-ringtones-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pager-ringtone {
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid var(--pager-line);
+  border-radius: 999px;
+  background: var(--pager-bg);
+  color: var(--pager-ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pager-ringtone[aria-pressed='true'] {
+  border-color: var(--pager-accent);
+  background: var(--pager-accent);
+  color: #ffffff;
+}
+
+/* After pickup: the venue's review page, when it has one. */
+.pager-review {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--pager-accent-soft);
+  color: var(--pager-ink);
+  text-align: center;
+}
+
+.pager-screen--ready .pager-review {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+.pager-review-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid var(--pager-line);
+  color: var(--pager-ink);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.pager-eta {
+  margin: 4px 0 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--pager-accent);
+}
+
 .pager-actions {
   width: 100%;
   display: flex;
@@ -1309,6 +1420,10 @@
 }
 
 .pager-board-tile-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
   margin-top: -4px;
 }
 

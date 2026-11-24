@@ -53,8 +53,16 @@ type repository interface {
 	// state the move starts from.
 
 	// Label returns domain.ErrLabelTaken when kind is a number and another
-	// open ticket of the business holds it.
-	Label(ctx context.Context, businessID, id int64, label, kind string, openSince, unlabelledSince time.Time) error
+	// open ticket of the business holds it. A zero expectedReadyAt clears the
+	// estimate.
+	Label(ctx context.Context, businessID, id int64, label, kind string, expectedReadyAt, openSince, unlabelledSince time.Time) error
+	// CreateNumberTicket opens a waiting ticket labelled with the number a
+	// customer typed; domain.ErrLabelTaken when that number is already open.
+	CreateNumberTicket(ctx context.Context, ticket domain.Ticket) (domain.Ticket, error)
+	// CountOpenTickets counts the business's open tickets, labelled or not.
+	CountOpenTickets(ctx context.Context, businessID int64, openSince, unlabelledSince time.Time) (int64, error)
+	// TicketTimes reads the labelled tickets created since since, oldest first.
+	TicketTimes(ctx context.Context, businessID int64, since time.Time) ([]domain.TicketTimes, error)
 	// MarkReady needs a labelled ticket.
 	MarkReady(ctx context.Context, businessID, id int64, at, openSince time.Time) error
 	Remind(ctx context.Context, businessID, id int64, at, openSince time.Time) error
@@ -76,6 +84,8 @@ type repository interface {
 type venueReader interface {
 	VenueBySlug(ctx context.Context, slug string) (domain.Venue, error)
 	VenueByID(ctx context.Context, businessID int64) (domain.Venue, error)
+	// Timezone is the business's IANA zone; empty when it has none.
+	Timezone(ctx context.Context, businessID int64) (string, error)
 }
 
 type Service struct {
@@ -129,9 +139,13 @@ const matchCodeAttempts = 10
 // Scan opens a waiting, unlabelled ticket for the phone that scanned the
 // venue's QR, with a match number no other open unlabelled ticket shows.
 func (s *Service) Scan(ctx context.Context, slug string) (domain.Ticket, error) {
-	venue, _, err := s.PublicVenue(ctx, slug)
+	venue, settings, err := s.PublicVenue(ctx, slug)
 	if err != nil {
 		return domain.Ticket{}, err
+	}
+	// Nobody labels codes at a venue whose customers type their number.
+	if settings.CustomerNumbers {
+		return domain.Ticket{}, domain.ErrTypeNumber
 	}
 	now := s.clock()
 	unlabelledSince := domain.UnlabelledSince(now)
@@ -201,9 +215,10 @@ func freeMatchNumber(used map[string]bool) (string, error) {
 }
 
 // Label gives a waiting ticket of the business its order number or customer
-// name, as the venue's label mode allows. A labelled waiting ticket can be
-// labelled again to fix a typo.
-func (s *Service) Label(ctx context.Context, businessID, id int64, raw string) (domain.Ticket, error) {
+// name, as the venue's label mode allows, and its ready-time estimate:
+// prepMinutes, or the venue's usual minutes when nil. A labelled waiting
+// ticket can be labelled again to fix a typo, which starts the estimate again.
+func (s *Service) Label(ctx context.Context, businessID, id int64, raw string, prepMinutes *int) (domain.Ticket, error) {
 	settings, err := s.repo.Settings(ctx, businessID)
 	if err != nil {
 		return domain.Ticket{}, err
@@ -211,6 +226,13 @@ func (s *Service) Label(ctx context.Context, businessID, id int64, raw string) (
 	label, kind, err := domain.ParseLabel(raw, settings.LabelMode)
 	if err != nil {
 		return domain.Ticket{}, err
+	}
+	minutes := settings.PrepMinutes
+	if prepMinutes != nil {
+		minutes = *prepMinutes
+	}
+	if !domain.ValidPrepMinutes(minutes) {
+		return domain.Ticket{}, domain.ErrInvalidPrepTime
 	}
 	now := s.clock()
 	openSince := domain.OpenSince(now)
@@ -221,7 +243,8 @@ func (s *Service) Label(ctx context.Context, businessID, id int64, raw string) (
 	if ticket.Status != domain.StatusWaiting {
 		return domain.Ticket{}, domain.ErrInvalidTransition
 	}
-	if ticket.Label == label && ticket.LabelKind == kind {
+	expectedReadyAt := domain.ExpectedReady(now, minutes)
+	if ticket.Label == label && ticket.LabelKind == kind && prepMinutes == nil {
 		return ticket, nil
 	}
 	if kind == domain.LabelNumber {
@@ -230,7 +253,7 @@ func (s *Service) Label(ctx context.Context, businessID, id int64, raw string) (
 			return domain.Ticket{}, err
 		}
 	}
-	if err := s.repo.Label(ctx, businessID, id, label, kind, openSince, domain.UnlabelledSince(now)); err != nil {
+	if err := s.repo.Label(ctx, businessID, id, label, kind, expectedReadyAt, openSince, domain.UnlabelledSince(now)); err != nil {
 		return domain.Ticket{}, err
 	}
 	ticket, err = s.staffTicket(ctx, businessID, id, now)
@@ -244,6 +267,50 @@ func (s *Service) Label(ctx context.Context, businessID, id int64, raw string) (
 	return ticket, nil
 }
 
+// JoinByNumber opens a waiting ticket from the number on a customer's
+// receipt, at a venue that lets customers type it. A number that already has
+// an open ticket is refused rather than shared, so a phone cannot follow, or
+// silence, someone else's order.
+func (s *Service) JoinByNumber(ctx context.Context, slug, raw string) (domain.Ticket, error) {
+	venue, settings, err := s.PublicVenue(ctx, slug)
+	if err != nil {
+		return domain.Ticket{}, err
+	}
+	if !settings.CustomerNumbers {
+		return domain.Ticket{}, domain.ErrJoinByNumberOff
+	}
+	number, err := domain.ParseOrderNumber(raw)
+	if err != nil {
+		return domain.Ticket{}, err
+	}
+	now := s.clock()
+	openSince := domain.OpenSince(now)
+	open, err := s.repo.CountOpenTickets(ctx, venue.BusinessID, openSince, domain.UnlabelledSince(now))
+	if err != nil {
+		return domain.Ticket{}, err
+	}
+	if open >= domain.MaxOpenTickets {
+		return domain.Ticket{}, domain.ErrTooManyOpenTickets
+	}
+	// Yesterday's order 42 still holds the number in storage.
+	if err := s.repo.ExpireStaleTicket(ctx, venue.BusinessID, number, openSince); err != nil {
+		return domain.Ticket{}, err
+	}
+	token, err := newPublicToken()
+	if err != nil {
+		return domain.Ticket{}, err
+	}
+	return s.repo.CreateNumberTicket(ctx, domain.Ticket{
+		BusinessID:      venue.BusinessID,
+		Label:           number,
+		LabelKind:       domain.LabelNumber,
+		Status:          domain.StatusWaiting,
+		PublicToken:     token,
+		CreatedAt:       now,
+		ExpectedReadyAt: domain.ExpectedReady(now, settings.PrepMinutes),
+	})
+}
+
 // PublicTicket is what a phone following a ticket is told on every poll.
 type PublicTicket struct {
 	// Ticket carries the status as read at ServerTime.
@@ -252,13 +319,17 @@ type PublicTicket struct {
 	// VenueLogoURL is empty when the business has no logo.
 	VenueLogoURL string
 	// Ahead counts the labelled waiting tickets opened before this one.
-	Ahead      int64
+	Ahead int64
+	// ReviewURL is the venue's review page; empty when unset.
+	ReviewURL string
+	// Ringtone is the venue's sound; the customer may have picked another.
+	Ringtone   string
 	ServerTime time.Time
 }
 
 func (s *Service) PublicTicket(ctx context.Context, token string) (PublicTicket, error) {
 	now := s.clock()
-	ticket, err := s.ticketByToken(ctx, token)
+	ticket, settings, err := s.ticketByToken(ctx, token)
 	if err != nil {
 		return PublicTicket{}, err
 	}
@@ -277,14 +348,22 @@ func (s *Service) PublicTicket(ctx context.Context, token string) (PublicTicket,
 			return PublicTicket{}, err
 		}
 	}
-	return PublicTicket{Ticket: ticket, VenueName: venue.Name, VenueLogoURL: venue.LogoURL, Ahead: ahead, ServerTime: now}, nil
+	return PublicTicket{
+		Ticket:       ticket,
+		VenueName:    venue.Name,
+		VenueLogoURL: venue.LogoURL,
+		Ahead:        ahead,
+		ReviewURL:    settings.ReviewURL,
+		Ringtone:     settings.Ringtone,
+		ServerTime:   now,
+	}, nil
 }
 
 // Acknowledge records that a customer silenced the bell. It leaves the status
 // alone, and a ticket that is not ringing is left as it is.
 func (s *Service) Acknowledge(ctx context.Context, token string) error {
 	now := s.clock()
-	ticket, err := s.ticketByToken(ctx, token)
+	ticket, _, err := s.ticketByToken(ctx, token)
 	if err != nil {
 		return err
 	}
@@ -294,26 +373,27 @@ func (s *Service) Acknowledge(ctx context.Context, token string) error {
 	return s.repo.Acknowledge(ctx, ticket.BusinessID, ticket.ID, now, domain.OpenSince(now))
 }
 
-// ticketByToken resolves a public token while the venue's pager is on.
-func (s *Service) ticketByToken(ctx context.Context, token string) (domain.Ticket, error) {
+// ticketByToken resolves a public token, and its venue's settings, while the
+// venue's pager is on.
+func (s *Service) ticketByToken(ctx context.Context, token string) (domain.Ticket, domain.Settings, error) {
 	if !validPublicToken(token) {
-		return domain.Ticket{}, domain.ErrTicketNotFound
+		return domain.Ticket{}, domain.Settings{}, domain.ErrTicketNotFound
 	}
 	ticket, found, err := s.repo.TicketByToken(ctx, token)
 	if err != nil {
-		return domain.Ticket{}, err
+		return domain.Ticket{}, domain.Settings{}, err
 	}
 	if !found {
-		return domain.Ticket{}, domain.ErrTicketNotFound
+		return domain.Ticket{}, domain.Settings{}, domain.ErrTicketNotFound
 	}
 	settings, err := s.repo.Settings(ctx, ticket.BusinessID)
 	if err != nil {
-		return domain.Ticket{}, err
+		return domain.Ticket{}, domain.Settings{}, err
 	}
 	if !settings.Enabled {
-		return domain.Ticket{}, domain.ErrTicketNotFound
+		return domain.Ticket{}, domain.Settings{}, domain.ErrTicketNotFound
 	}
-	return ticket, nil
+	return ticket, settings, nil
 }
 
 // ListOpen returns the business's open tickets, labelled or not, oldest first,
@@ -401,21 +481,56 @@ func (s *Service) Settings(ctx context.Context, businessID int64) (domain.Settin
 	return s.repo.Settings(ctx, businessID)
 }
 
+// SettingsPatch holds the settings to change; nil leaves one as it is.
+type SettingsPatch struct {
+	Enabled         *bool
+	LabelMode       *string
+	ReviewURL       *string
+	PrepMinutes     *int
+	CustomerNumbers *bool
+	Ringtone        *string
+}
+
 // UpdateSettings changes the settings that are given and leaves the rest.
-func (s *Service) UpdateSettings(ctx context.Context, businessID int64, enabled *bool, labelMode *string) (domain.Settings, error) {
-	if labelMode != nil && !domain.ValidLabelMode(*labelMode) {
+func (s *Service) UpdateSettings(ctx context.Context, businessID int64, patch SettingsPatch) (domain.Settings, error) {
+	if patch.LabelMode != nil && !domain.ValidLabelMode(*patch.LabelMode) {
 		return domain.Settings{}, domain.ErrInvalidLabelMode
+	}
+	if patch.PrepMinutes != nil && !domain.ValidPrepMinutes(*patch.PrepMinutes) {
+		return domain.Settings{}, domain.ErrInvalidPrepTime
+	}
+	if patch.Ringtone != nil && !domain.ValidRingtone(*patch.Ringtone) {
+		return domain.Settings{}, domain.ErrInvalidRingtone
+	}
+	var reviewURL string
+	if patch.ReviewURL != nil {
+		var err error
+		if reviewURL, err = domain.NormalizeReviewURL(*patch.ReviewURL); err != nil {
+			return domain.Settings{}, err
+		}
 	}
 	settings, err := s.repo.Settings(ctx, businessID)
 	if err != nil {
 		return domain.Settings{}, err
 	}
 	wasEnabled := settings.Enabled
-	if enabled != nil {
-		settings.Enabled = *enabled
+	if patch.Enabled != nil {
+		settings.Enabled = *patch.Enabled
 	}
-	if labelMode != nil {
-		settings.LabelMode = *labelMode
+	if patch.LabelMode != nil {
+		settings.LabelMode = *patch.LabelMode
+	}
+	if patch.ReviewURL != nil {
+		settings.ReviewURL = reviewURL
+	}
+	if patch.PrepMinutes != nil {
+		settings.PrepMinutes = *patch.PrepMinutes
+	}
+	if patch.CustomerNumbers != nil {
+		settings.CustomerNumbers = *patch.CustomerNumbers
+	}
+	if patch.Ringtone != nil {
+		settings.Ringtone = *patch.Ringtone
 	}
 	if err := s.repo.SaveSettings(ctx, businessID, settings); err != nil {
 		return domain.Settings{}, err
@@ -447,6 +562,24 @@ func (s *Service) Sweep(ctx context.Context) error {
 		}
 	}
 	return errors.Join(failed, s.repo.DeleteStalePushSubscriptions(ctx, domain.OpenSince(now)))
+}
+
+// Stats counts the business's orders over its last days days, in its own time
+// zone, falling back to UTC when it has none or an unknown one.
+func (s *Service) Stats(ctx context.Context, businessID int64, days int) (domain.Stats, error) {
+	days = domain.StatsDays(days)
+	loc := time.UTC
+	if zone, err := s.venues.Timezone(ctx, businessID); err != nil {
+		return domain.Stats{}, err
+	} else if found, err := time.LoadLocation(zone); zone != "" && err == nil {
+		loc = found
+	}
+	now := s.clock()
+	times, err := s.repo.TicketTimes(ctx, businessID, domain.StatsSince(now, loc, days))
+	if err != nil {
+		return domain.Stats{}, err
+	}
+	return domain.BuildStats(times, now, loc, days), nil
 }
 
 // publicTokenBytes of randomness make a ticket's token: 192 bits, well past

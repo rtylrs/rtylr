@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/organization/business"
+	"github.com/voxire/onion/internal/modules/pager/internal/application"
 	"github.com/voxire/onion/internal/modules/pager/internal/domain"
 	moduleinfra "github.com/voxire/onion/internal/modules/pager/internal/infrastructure"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -455,7 +456,7 @@ func TestDatabaseRefusesDuplicateOpenCodesAndNumbers(t *testing.T) {
 		t.Fatalf("same match number at another business: %v", err)
 	}
 	// Labelling frees the match number.
-	if err := repo.Label(ctx, businessID, first.ID, "42", domain.LabelNumber, openSince, unlabelledSince); err != nil {
+	if err := repo.Label(ctx, businessID, first.ID, "42", domain.LabelNumber, time.Time{}, openSince, unlabelledSince); err != nil {
 		t.Fatal(err)
 	}
 	second, err := scan(businessID, "427")
@@ -463,10 +464,10 @@ func TestDatabaseRefusesDuplicateOpenCodesAndNumbers(t *testing.T) {
 		t.Fatalf("match number of a labelled ticket: %v", err)
 	}
 
-	if err := repo.Label(ctx, businessID, second.ID, "42", domain.LabelNumber, openSince, unlabelledSince); !errors.Is(err, domain.ErrLabelTaken) {
+	if err := repo.Label(ctx, businessID, second.ID, "42", domain.LabelNumber, time.Time{}, openSince, unlabelledSince); !errors.Is(err, domain.ErrLabelTaken) {
 		t.Fatalf("second open ticket with the number: err = %v, want ErrLabelTaken", err)
 	}
-	if err := repo.Label(ctx, businessID, second.ID, "42", domain.LabelName, openSince, unlabelledSince); err != nil {
+	if err := repo.Label(ctx, businessID, second.ID, "42", domain.LabelName, time.Time{}, openSince, unlabelledSince); err != nil {
 		t.Fatalf("a name equal to an open number: %v", err)
 	}
 	// Ready is still open; collected frees the number.
@@ -477,13 +478,13 @@ func TestDatabaseRefusesDuplicateOpenCodesAndNumbers(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := repo.Label(ctx, businessID, third.ID, "42", domain.LabelNumber, openSince, unlabelledSince); !errors.Is(err, domain.ErrLabelTaken) {
+	if err := repo.Label(ctx, businessID, third.ID, "42", domain.LabelNumber, time.Time{}, openSince, unlabelledSince); !errors.Is(err, domain.ErrLabelTaken) {
 		t.Fatalf("number of a ready ticket: err = %v, want ErrLabelTaken", err)
 	}
 	if err := repo.Collect(ctx, businessID, first.ID, openSince, unlabelledSince); err != nil {
 		t.Fatal(err)
 	}
-	if err := repo.Label(ctx, businessID, third.ID, "42", domain.LabelNumber, openSince, unlabelledSince); err != nil {
+	if err := repo.Label(ctx, businessID, third.ID, "42", domain.LabelNumber, time.Time{}, openSince, unlabelledSince); err != nil {
 		t.Fatalf("number of a collected ticket: %v", err)
 	}
 }
@@ -524,11 +525,11 @@ func TestPublicRepliesNeverCarryTheTicketID(t *testing.T) {
 		h.want(h.label(h.a.member, id, "42"), http.StatusOK, "")
 
 		followed := h.want(h.publicTicket(token), http.StatusOK, "")
-		allowed("ticket", followed, "label", "label_kind", "code", "status", "venue_name", "venue_logo_url", "ahead", "ready_at", "reminded_at", "acknowledged_at", "server_time")
+		allowed("ticket", followed, "label", "label_kind", "code", "status", "venue_name", "venue_logo_url", "ahead", "ready_at", "reminded_at", "acknowledged_at", "expected_ready_at", "review_url", "ringtone", "server_time")
 		if followed.text("venue_name") != "Cedar Café" || followed.text("server_time") != "2026-11-19T12:00:00.000Z" {
 			h.Fatalf("ticket = %v", followed.body)
 		}
-		allowed("venue", h.call(nil, http.MethodGet, "/pager/v1/public/venues/"+h.a.slug, ""), "name", "logo_url", "enabled")
+		allowed("venue", h.call(nil, http.MethodGet, "/pager/v1/public/venues/"+h.a.slug, ""), "name", "logo_url", "enabled", "customer_numbers")
 
 		// The id is not a way in, and neither is a token nobody was given.
 		h.want(h.publicTicket(id), http.StatusNotFound, "ticket_not_found")
@@ -689,6 +690,139 @@ func TestRateLimitsComeFromTheContract(t *testing.T) {
 	}
 }
 
+func TestCustomersTypeTheirReceiptNumberOnlyWhereTheVenueAllowsIt(t *testing.T) {
+	eachBackend(t, func(h *harness) {
+		h.enable(h.a)
+		joinPath := "/pager/v1/public/venues/" + h.a.slug + "/join"
+		join := func(number string) reply {
+			return h.call(nil, http.MethodPost, joinPath, fmt.Sprintf(`{"number":%q}`, number))
+		}
+
+		h.want(join("42"), http.StatusConflict, "join_by_number_off")
+		if venue := h.want(h.call(nil, http.MethodGet, "/pager/v1/public/venues/"+h.a.slug, ""), http.StatusOK, ""); venue.body["customer_numbers"] == true {
+			h.Fatal("a scanning venue tells phones to type their number")
+		}
+
+		h.want(h.call(h.a.owner, http.MethodPut, "/pager/v1/settings", `{"customer_numbers":true}`), http.StatusOK, "")
+		if venue := h.want(h.call(nil, http.MethodGet, "/pager/v1/public/venues/"+h.a.slug, ""), http.StatusOK, ""); venue.body["customer_numbers"] != true {
+			h.Fatal("the venue does not tell phones to type their number")
+		}
+
+		// Nobody would label a scanned code here, so a scan is turned away.
+		h.want(h.scan(h.a), http.StatusConflict, "type_your_number")
+
+		joined := h.want(join(" ٤٢ "), http.StatusOK, "")
+		if joined.text("label") != "42" || joined.text("status") != domain.StatusWaiting {
+			h.Fatalf("join = %v, want a waiting ticket labelled 42", joined.body)
+		}
+		public := h.want(h.publicTicket(joined.text("public_token")), http.StatusOK, "")
+		if public.text("label") != "42" || public.text("label_kind") != domain.LabelNumber {
+			h.Fatalf("the phone reads %v", public.body)
+		}
+		if open := h.open(h.a); len(open) != 1 || open[0]["label"] != "42" {
+			h.Fatalf("board = %v, want order 42 waiting with no cashier step", open)
+		}
+
+		// A second phone cannot follow, or silence, the same order.
+		h.want(join("42"), http.StatusConflict, "label_taken")
+		h.want(join("Sara"), http.StatusBadRequest, "invalid_label")
+		// Nor can the cashier give a phone scanned before the switch the number.
+		h.want(h.call(h.a.owner, http.MethodPut, "/pager/v1/settings", `{"customer_numbers":false}`), http.StatusOK, "")
+		_, scanned := h.scanned(h.a)
+		h.want(h.label(h.a.member, scanned["id"], "42"), http.StatusConflict, "label_taken")
+	})
+}
+
+func TestTheVenueEstimateReachesThePhone(t *testing.T) {
+	eachBackend(t, func(h *harness) {
+		h.enable(h.a)
+		h.want(h.call(h.a.owner, http.MethodPut, "/pager/v1/settings", `{"prep_minutes":5}`), http.StatusOK, "")
+
+		token, _ := h.labelled(h.a, "42")
+		want := h.clock.Now().Add(5 * time.Minute).UTC().Format("2006-01-02T15:04:05.000Z")
+		if got := h.want(h.publicTicket(token), http.StatusOK, "").text("expected_ready_at"); got != want {
+			h.Fatalf("expected_ready_at = %q, want the venue's 5 minutes, %q", got, want)
+		}
+
+		// The cashier can give one order its own time, or none.
+		token, ticket := h.scanned(h.a)
+		h.want(h.call(h.a.member, http.MethodPost, fmt.Sprintf("/pager/v1/tickets/%v/label", ticket["id"]), `{"label":"43","prep_minutes":12}`), http.StatusOK, "")
+		want = h.clock.Now().Add(12 * time.Minute).UTC().Format("2006-01-02T15:04:05.000Z")
+		if got := h.want(h.publicTicket(token), http.StatusOK, "").text("expected_ready_at"); got != want {
+			h.Fatalf("expected_ready_at = %q, want 12 minutes, %q", got, want)
+		}
+		h.want(h.call(h.a.member, http.MethodPost, fmt.Sprintf("/pager/v1/tickets/%v/label", ticket["id"]), `{"label":"43","prep_minutes":0}`), http.StatusOK, "")
+		if got := h.want(h.publicTicket(token), http.StatusOK, "").text("expected_ready_at"); got != "" {
+			h.Fatalf("expected_ready_at = %q after the cashier cleared it", got)
+		}
+	})
+}
+
+func TestTheReviewLinkIsHTTPSAndReachesThePhone(t *testing.T) {
+	eachBackend(t, func(h *harness) {
+		h.enable(h.a)
+		h.want(h.call(h.a.owner, http.MethodPut, "/pager/v1/settings", `{"review_url":"http://g.page/r/cedar"}`), http.StatusBadRequest, "invalid_review_url")
+		h.want(h.call(h.a.owner, http.MethodPut, "/pager/v1/settings", `{"review_url":" https://g.page/r/cedar/review "}`), http.StatusOK, "")
+
+		token, _ := h.labelled(h.a, "42")
+		if got := h.want(h.publicTicket(token), http.StatusOK, "").text("review_url"); got != "https://g.page/r/cedar/review" {
+			h.Fatalf("review_url = %q", got)
+		}
+		settings := h.want(h.call(h.a.member, http.MethodGet, "/pager/v1/settings", ""), http.StatusOK, "")
+		if settings.text("review_url") != "https://g.page/r/cedar/review" {
+			h.Fatalf("settings = %v", settings.body)
+		}
+
+		h.want(h.call(h.a.owner, http.MethodPut, "/pager/v1/settings", `{"review_url":""}`), http.StatusOK, "")
+		if got := h.want(h.publicTicket(token), http.StatusOK, "").text("review_url"); got != "" {
+			h.Fatalf("review_url = %q after the owner cleared it", got)
+		}
+	})
+}
+
+func TestTheVenueRingtoneReachesThePhone(t *testing.T) {
+	eachBackend(t, func(h *harness) {
+		h.enable(h.a)
+		token, _ := h.labelled(h.a, "42")
+		if got := h.want(h.publicTicket(token), http.StatusOK, "").text("ringtone"); got != domain.DefaultRingtone {
+			h.Fatalf("ringtone = %q, want the bell by default", got)
+		}
+
+		h.want(h.call(h.a.owner, http.MethodPut, "/pager/v1/settings", `{"ringtone":"siren"}`), http.StatusBadRequest, "invalid_ringtone")
+		h.want(h.call(h.a.owner, http.MethodPut, "/pager/v1/settings", `{"ringtone":"marimba"}`), http.StatusOK, "")
+		if got := h.want(h.publicTicket(token), http.StatusOK, "").text("ringtone"); got != "marimba" {
+			h.Fatalf("ringtone = %q, want marimba", got)
+		}
+	})
+}
+
+func TestStatsCountTheVenuesOrdersAndWaits(t *testing.T) {
+	eachBackend(t, func(h *harness) {
+		h.enable(h.a)
+		h.enable(h.b)
+		_, first := h.labelled(h.a, "41")
+		h.labelled(h.a, "42")
+		h.scanned(h.a) // a phone nobody labelled is not an order
+		h.labelled(h.b, "7")
+		h.clock.advance(4 * time.Minute)
+		h.want(h.move(h.a.member, first, "ready"), http.StatusOK, "")
+
+		stats := h.want(h.call(h.a.member, http.MethodGet, "/pager/v1/stats?days=7", ""), http.StatusOK, "")
+		if stats.body["orders"] != float64(2) || stats.body["ready_orders"] != float64(1) {
+			h.Fatalf("stats = %v, want 2 orders and 1 ready", stats.body)
+		}
+		if stats.body["avg_wait_seconds"] != float64(240) || stats.body["longest_wait_seconds"] != float64(240) {
+			h.Fatalf("waits = %v, want 240 seconds", stats.body)
+		}
+		byHour, _ := stats.body["by_hour"].([]any)
+		byDay, _ := stats.body["by_day"].([]any)
+		if len(byHour) != 24 || byHour[12] != float64(2) || len(byDay) != 7 {
+			h.Fatalf("by_hour = %v, by_day = %v", byHour, byDay)
+		}
+		h.want(h.call(nil, http.MethodGet, "/pager/v1/stats", ""), http.StatusForbidden, "forbidden")
+	})
+}
+
 // Reads already treat a ticket past its lifetime as expired; the sweep closes
 // it in storage too, at venues nobody has scanned at since.
 func TestSweepClosesTicketsPastTheirLifetime(t *testing.T) {
@@ -823,7 +957,7 @@ func TestVenueIsTheBusinessBehindTheMenuSlug(t *testing.T) {
 	h := &harness{T: t, mux: http.NewServeMux()}
 	module.RegisterAPI(h.mux)
 	enabled := true
-	if _, err := module.service.UpdateSettings(ctx, businessID, &enabled, nil); err != nil {
+	if _, err := module.service.UpdateSettings(ctx, businessID, application.SettingsPatch{Enabled: &enabled}); err != nil {
 		t.Fatalf("enable: %v", err)
 	}
 

@@ -239,6 +239,12 @@ describe('pager staff board', () => {
     await waitFor(() => expect(enabled).toBeChecked());
     expect(enabled).toBeDisabled();
     expect(screen.getByLabelText('Label orders by')).toBeDisabled();
+    expect(screen.getByLabelText('Usual time to prepare an order')).toBeDisabled();
+    expect(screen.getByLabelText('Ringtone')).toBeDisabled();
+    expect(
+      screen.getByRole('switch', { name: 'Customers type their receipt number' })
+    ).toBeDisabled();
+    expect(screen.getByLabelText('Google review link')).toBeDisabled();
     expect(
       screen.getByText('Only owners and admins can change these settings.')
     ).toBeInTheDocument();
@@ -297,5 +303,117 @@ describe('pager staff board', () => {
 
     expect(await screen.findByText("You don't have access to the pager.")).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: /New phones/ })).not.toBeInTheDocument();
+  });
+
+  describe('ready-time estimates', () => {
+    it('presets the venue time on a new phone and lets the cashier pick another', async () => {
+      api.getSettings.mockResolvedValue({ enabled: true, labelMode: 'either', prepMinutes: 8 });
+      renderBoard();
+
+      const newPhones = await section(/^New phones/);
+      const times = await within(newPhones).findByRole('group', { name: 'Ready in' });
+      expect(within(times).getByRole('button', { name: '8 min' })).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
+      fireEvent.click(within(times).getByRole('button', { name: '15 min' }));
+      fireEvent.change(within(newPhones).getByLabelText(/for code 427/), {
+        target: { value: '43' },
+      });
+      fireEvent.click(within(newPhones).getByRole('button', { name: 'Save' }));
+
+      await waitFor(() =>
+        expect(api.labelTicket).toHaveBeenCalledWith({ id: '5', label: '43', prepMinutes: 15 })
+      );
+    });
+
+    it('follows the venue time when it loads after the phone appears', async () => {
+      let loadSettings: (value: object) => void = () => undefined;
+      api.getSettings.mockReturnValue(
+        new Promise((resolve) => {
+          loadSettings = resolve;
+        })
+      );
+      renderBoard();
+      const newPhones = await section(/^New phones/);
+      await within(newPhones).findByLabelText(/for code 427/);
+
+      loadSettings({ enabled: true, labelMode: 'either', prepMinutes: 10 });
+      const times = await within(newPhones).findByRole('group', { name: 'Ready in' });
+      expect(within(times).getByRole('button', { name: '10 min' })).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
+    });
+
+    it('shows no time picker when the venue gives no estimate', async () => {
+      renderBoard();
+      const newPhones = await section(/^New phones/);
+      await within(newPhones).findByLabelText(/for code 427/);
+      expect(within(newPhones).queryByRole('group', { name: 'Ready in' })).not.toBeInTheDocument();
+    });
+
+    it('shows how long is left on a waiting order', async () => {
+      api.listTickets.mockResolvedValue({
+        tickets: [
+          {
+            id: '1',
+            label: '41',
+            labelKind: 'number',
+            status: 'waiting',
+            expectedReadyAt: '2026-11-19T10:09:00.000Z',
+          },
+        ],
+        serverTime,
+      });
+      renderBoard();
+
+      expect(await screen.findByText('Due in 3 min')).toBeInTheDocument();
+    });
+  });
+
+  it('saves the venue review link and turns on typed receipt numbers', async () => {
+    api.updateSettings.mockImplementation(async (patch: object) => ({
+      enabled: true,
+      labelMode: 'either',
+      ...patch,
+    }));
+    renderBoard();
+    fireEvent.click(await screen.findByRole('button', { name: 'Settings' }));
+
+    const link = await screen.findByLabelText('Google review link');
+    await waitFor(() => expect(link).toBeEnabled());
+    fireEvent.change(link, { target: { value: 'https://g.page/r/acme/review' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save link' }));
+    await waitFor(() =>
+      expect(api.updateSettings).toHaveBeenCalledWith({
+        reviewUrl: 'https://g.page/r/acme/review',
+      })
+    );
+
+    const numbers = screen.getByRole('switch', { name: 'Customers type their receipt number' });
+    await waitFor(() => expect(numbers).toBeEnabled());
+    fireEvent.click(numbers);
+    await waitFor(() => expect(api.updateSettings).toHaveBeenCalledWith({ customerNumbers: true }));
+  });
+
+  it("saves the venue's ringtone", async () => {
+    api.updateSettings.mockImplementation(async (patch: object) => ({
+      enabled: true,
+      labelMode: 'either',
+      ringtone: 'bell',
+      ...patch,
+    }));
+    renderBoard();
+    fireEvent.click(await screen.findByRole('button', { name: 'Settings' }));
+
+    const tone = await screen.findByRole('combobox', { name: 'Ringtone' });
+    await waitFor(() => expect(tone).toBeEnabled());
+    expect(tone).toHaveTextContent('Bell');
+    fireEvent.click(tone);
+    fireEvent.click(screen.getByRole('option', { name: 'Chime' }));
+
+    await waitFor(() => expect(api.updateSettings).toHaveBeenCalledWith({ ringtone: 'chime' }));
+    await waitFor(() => expect(tone).toHaveTextContent('Chime'));
   });
 });

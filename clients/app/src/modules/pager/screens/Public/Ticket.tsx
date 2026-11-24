@@ -4,7 +4,7 @@ import { useParams } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
 import type { GetPublicTicketResponse } from '@voxire/voxie/pager/v1/types';
-import { BellRing, Check, Lock, SearchX } from 'lucide-react';
+import { BellRing, Check, Lock, SearchX, Star } from 'lucide-react';
 import { readyAlarm } from '../../../../shared/alarm/readyAlarm';
 import { useAlarm } from '../../../../shared/alarm/useAlarm';
 import LanguageSwitch from '../../shared/components/LanguageSwitch';
@@ -24,6 +24,15 @@ import {
 import { forgetScanByToken, rememberedSlugForToken } from '../../shared/lib/scanSession';
 import { ticketAlarmState } from '../../shared/lib/ticketAlarm';
 import { createTicketPoller, isOpenStatus, type TicketPoller } from '../../shared/lib/ticketPoller';
+import {
+  RINGTONES,
+  type RingtoneId,
+  asRingtone,
+  previewRingtone,
+  rememberRingtone,
+  rememberedRingtone,
+  ringtoneSrc,
+} from '../../shared/lib/ringtones';
 
 // Shorter than the client's default so one stuck request on a weak signal
 // cannot hold up the polls behind it for half a minute.
@@ -37,6 +46,10 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
   const sandbox = usePagerSandbox();
   // The demo phone is not the visitor's own, so it gets no device warning.
   const [iosTab] = useState(() => !sandbox && iosTabWithoutPush());
+  // The customer's own tone, kept on this phone; the demo phone keeps none.
+  const [pickedTone, setPickedTone] = useState<RingtoneId | null>(() =>
+    sandbox ? null : rememberedRingtone()
+  );
   const alarm = useAlarm(readyAlarm);
   const pushKey = usePushKey();
   // Bumped by the "alert me" tap so a permission granted there subscribes.
@@ -90,9 +103,10 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
   const readyTitle = byKind('pager.ticket.readyTitle');
   const readyPushTitle = byKind('pager.push.readyTitle');
   const remindPushTitle = byKind('pager.push.remindTitle');
+  const ringtone = pickedTone ?? asRingtone(ticket?.ringtone);
   useEffect(() => {
-    readyAlarm.sync(ticketAlarmState(notFound ? null : ticket, readyTitle));
-  }, [ticket, notFound, readyTitle]);
+    readyAlarm.sync(ticketAlarmState(notFound ? null : ticket, readyTitle, ringtoneSrc(ringtone)));
+  }, [ticket, notFound, readyTitle, ringtone]);
   useEffect(() => () => readyAlarm.release(), []);
 
   const open = isOpenStatus(ticket?.status);
@@ -179,6 +193,9 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
   const acknowledged = Boolean(ticket.acknowledgedAt) || answeredRing === ringMark;
   const ahead = ticket.ahead ?? 0;
   const labelled = Boolean(ticket.labelKind);
+  // Whole minutes to the venue's estimate, by the server's clock; null without one.
+  const etaLeft = Date.parse(ticket.expectedReadyAt ?? '') - Date.parse(ticket.serverTime ?? '');
+  const etaMinutes = Number.isNaN(etaLeft) ? null : Math.max(0, Math.ceil(etaLeft / 60_000));
   const labelSize: React.CSSProperties & { '--pager-label-chars': number } = {
     '--pager-label-chars': Math.max(Array.from(label).length, 1),
   };
@@ -260,6 +277,13 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
                   <p className="pager-text">
                     {ahead > 0 ? t('pager.ticket.ahead', { count: ahead }) : t('pager.ticket.next')}
                   </p>
+                  {etaMinutes !== null && (
+                    <p className="pager-eta">
+                      {etaMinutes > 0
+                        ? t('pager.ticket.etaMinutes', { count: etaMinutes })
+                        : t('pager.ticket.etaSoon')}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -305,6 +329,21 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
             </div>
           )}
         </div>
+
+        {ticket.reviewUrl && ((ready && acknowledged) || status === 'collected') && (
+          <div className="pager-review">
+            <p className="pager-text">{t('pager.ticket.reviewPrompt', { venue: venueName })}</p>
+            <a
+              className="pager-review-link"
+              href={ticket.reviewUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Star size={17} strokeWidth={2.4} aria-hidden="true" />
+              {t('pager.ticket.reviewCta')}
+            </a>
+          </div>
+        )}
 
         {ready && !acknowledged && (
           <div className="pager-actions">
@@ -371,6 +410,35 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
               <BellRing size={18} strokeWidth={2.3} aria-hidden="true" />
               <span>{t('pager.ticket.notify')}</span>
             </button>
+          </div>
+        )}
+
+        {status === 'waiting' && (
+          <div className="pager-ringtones">
+            <p className="pager-ringtones-label" id="pager-ringtones-label">
+              {t('pager.ticket.ringtoneLabel')}
+            </p>
+            <div
+              className="pager-ringtones-list"
+              role="group"
+              aria-labelledby="pager-ringtones-label"
+            >
+              {RINGTONES.map((tone) => (
+                <button
+                  key={tone.id}
+                  type="button"
+                  className="pager-ringtone"
+                  aria-pressed={ringtone === tone.id}
+                  onClick={() => {
+                    setPickedTone(tone.id);
+                    if (!sandbox) rememberRingtone(tone.id);
+                    previewRingtone(tone.id);
+                  }}
+                >
+                  {t(`pager.ringtones.${tone.id}`)}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
