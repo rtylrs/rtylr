@@ -1,15 +1,22 @@
 import { Link } from '@tanstack/react-router';
-import { resolveAppUrl } from '@voxire/config';
+import { RENNILI_URL, resolveAppUrl } from '@voxire/config';
 import { useTranslation } from 'react-i18next';
-import { Search, Users, Folder, ChevronRight, Settings } from 'lucide-react';
+import { Search, Users, Folder, ChevronRight, ExternalLink, Settings } from 'lucide-react';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useCommandPalette } from '../../shared/stores/commandPaletteStore';
 import { canAccessPortalPath } from '../../shared/utils/canAccessPortalPath';
 import { APP_NAMES } from '../../shared/config/appNames';
-import { AppIconTile } from '@voxire/ui';
+import { AppIconTile, type AppIconProps } from '@voxire/ui';
 import { APP_ICONS, WORKSPACE_APP_IDS } from '../../shared/config/appIcons';
 import { insightsNavItems } from '../../modules/insights/navigation';
+import { RenniliMark } from '../../modules/pager/shared/components/RenniliLogo';
 import './home.css';
+
+const RenniliTileIcon = ({ size }: AppIconProps) => (
+  <RenniliMark size={typeof size === 'number' ? size : 19} />
+);
+
+const RENNILI_BOARD_URL = new URL('/board', RENNILI_URL).href;
 
 const shortcuts = [
   { path: '/team', key: 'team', description: 'teamDescription', icon: Users },
@@ -24,6 +31,9 @@ export default function Home() {
   const visibleApps = WORKSPACE_APP_IDS.filter((id) =>
     user?.effectiveAccess?.apps.some((app) => app.appId === id && app.licensed && app.hasAccess)
   );
+  const canOpenRennili = canAccessPortalPath(user, '/pager');
+  const hasVisibleApps = visibleApps.length > 0 || canOpenRennili;
+  const renniliName = t('appNames.short.rennili');
   return (
     <div className="portal-home">
       <div className="portal-home-intro">
@@ -58,7 +68,7 @@ export default function Home() {
         <div className="portal-home-section-heading">
           <h2>{t('common.nav.apps')}</h2>
         </div>
-        {visibleApps.length ? (
+        {hasVisibleApps ? (
           <div className="portal-home-app-grid">
             {visibleApps.map((id) => {
               const Icon = APP_ICONS[id];
@@ -92,6 +102,23 @@ export default function Home() {
                 </Link>
               );
             })}
+            {canOpenRennili ? (
+              <a
+                href={RENNILI_BOARD_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={t('common.portal.openWorkspaceApp', { app: renniliName })}
+              >
+                <AppIconTile
+                  icon={RenniliTileIcon}
+                  color="var(--app-rennili)"
+                  size={32}
+                  className="portal-app-tile"
+                />
+                <span>{renniliName}</span>
+                <ExternalLink size={14} className="rtl:-scale-x-100" />
+              </a>
+            ) : null}
           </div>
         ) : (
           <p className="portal-home-no-apps">{t('common.portal.noApps')}</p>

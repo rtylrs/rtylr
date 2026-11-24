@@ -5,7 +5,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { initTestI18nFrom } from '../../../test/i18nTestInstance';
 import { createEffectiveAccess } from '../../../test/effectiveAccess';
 import Home from './Home';
-import { resolveAppUrl } from '@voxire/config';
+import { RENNILI_URL, resolveAppUrl } from '@voxire/config';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useCommandPalette } from '../../shared/stores/commandPaletteStore';
 
@@ -70,7 +70,7 @@ describe('Portal Home', () => {
       resolveAppUrl('pos')
     );
   });
-  it('does not offer unlicensed apps or infer access from a stale role field', () => {
+  it('opens Rennili board in a new tab for every signed-in business member', () => {
     useUserStore.setState({
       user: {
         id: 2,
@@ -81,6 +81,14 @@ describe('Portal Home', () => {
     render(<Home />);
     expect(screen.queryByRole('link', { name: /Members and access/ })).toBeNull();
     expect(screen.queryByRole('link', { name: 'Work', exact: true })).toBeNull();
+    const rennili = screen.getByRole('link', { name: /Open Rennili/ });
+    expect(rennili).toHaveAttribute('href', new URL('/board', RENNILI_URL).href);
+    expect(rennili).toHaveAttribute('target', '_blank');
+    expect(rennili).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+  it('shows the no-apps message when no user is loaded', () => {
+    render(<Home />);
+    expect(screen.queryByRole('link', { name: /Open Rennili/ })).toBeNull();
     expect(screen.getByText(/No apps are assigned/)).toBeVisible();
   });
 });
