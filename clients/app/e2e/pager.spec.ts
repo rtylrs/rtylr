@@ -1,4 +1,4 @@
-import { test, expect, type Page } from './fixtures';
+import { test, expect, type BrowserContext, type Page } from './fixtures';
 import { stubPortalSession } from './portal-session';
 
 const RENNILI_URL = process.env.RENNILI_URL ?? 'http://localhost:5198';
@@ -8,9 +8,12 @@ const RENNILI_URL = process.env.RENNILI_URL ?? 'http://localhost:5198';
  * they need no auth cookie; the staff board needs the signed-in business, read
  * from the same token cookie the Portal uses.
  *
- * What only a browser can show: the scan opens the ticket with no tap, the
- * one "notify me" tap and the later ring happen in the same document, with the
- * bell unlocked by that tap, and a reload keeps the same ticket.
+ * What only a browser can show: the QR lands on one upfront tap, which opens
+ * the ticket and unlocks the bell; that tap and the later ring happen in the
+ * same document; and a reload or a second scan keeps the same ticket.
+ *
+ * Rennili opens in Arabic unless a language was chosen, so the specs that read
+ * English copy choose English first, as the language switch would.
  */
 
 type TicketState = 'scanned' | 'waiting' | 'ready' | 'acknowledged';
@@ -50,6 +53,11 @@ async function recordBellPlays(page: Page): Promise<void> {
   });
 }
 
+/** The language cookie the switch sets; without it Rennili opens in Arabic. */
+async function chooseEnglish(context: BrowserContext): Promise<void> {
+  await context.addCookies([{ name: 'language', value: 'en', url: RENNILI_URL }]);
+}
+
 const bellPlays = (page: Page): Promise<BellPlay[]> => page.evaluate(() => window.__bellPlays);
 const audiblePlays = async (page: Page): Promise<number> =>
   (await bellPlays(page)).filter((play) => !play.muted && play.outcome === 'played').length;
@@ -57,6 +65,14 @@ const audiblePlays = async (page: Page): Promise<number> =>
 async function stubPublicPager(page: Page): Promise<{ ticket: TicketState; scans: number }> {
   const state: { ticket: TicketState; scans: number } = { ticket: 'scanned', scans: 0 };
 
+  // The scan page reads the venue before it offers the tap. No push key: the
+  // bell on the page is what these specs follow.
+  await page.route('**/pager/v1/public/venues/acme', (route) =>
+    route.fulfill({ json: { name: 'Acme Cafe', enabled: true } })
+  );
+  await page.route('**/pager/v1/public/push-key', (route) =>
+    route.fulfill({ json: { public_key: '' } })
+  );
   await page.route('**/pager/v1/public/venues/acme/scan', (route) => {
     state.scans += 1;
     return route.fulfill({
@@ -87,7 +103,11 @@ async function stubPublicPager(page: Page): Promise<{ ticket: TicketState; scans
 }
 
 test.describe('Pager (landing)', () => {
-  test('renders the landing page, toggles FAQ items and reaches /try', async ({ page }) => {
+  test('renders the landing page, toggles FAQ items and reaches /try', async ({
+    page,
+    context,
+  }) => {
+    await chooseEnglish(context);
     await page.goto(`${RENNILI_URL}/`);
 
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
@@ -112,36 +132,41 @@ test.describe('Pager (landing)', () => {
 });
 
 test.describe('Pager (customer)', () => {
-  test('the scan opens a code with nothing to type; the one tap unlocks the bell, which rings once the order is ready', async ({
+  test('the one tap on the scan page opens a code with nothing to type and unlocks the bell, which rings once the order is ready', async ({
     page,
+    context,
   }) => {
+    await chooseEnglish(context);
     await recordBellPlays(page);
     const state = await stubPublicPager(page);
 
     await page.goto(`${RENNILI_URL}/acme`);
 
-    // The ticket exists before any tap: the scan itself opened it.
+    // The QR lands on a single tap, with nothing to type and no ticket yet.
+    const start = page.getByRole('button', { name: 'Get my code & enable alerts' });
+    await expect(start).toBeVisible();
+    await expect(page.getByText('Acme Cafe')).toBeVisible();
+    await expect(page.getByRole('textbox')).toHaveCount(0);
+    expect(state.scans).toBe(0);
+    expect(await bellPlays(page)).toEqual([]);
+
+    await page.evaluate(() => {
+      window.__pagerDocument = 'scan';
+    });
+    await start.click();
+
+    // That tap opened the ticket and primed the bell silently.
     await expect(page).toHaveURL(`${RENNILI_URL}/t/tok-e2e`);
     await expect(page.getByRole('heading', { name: 'Your code 427' })).toBeVisible();
     await expect(page.getByText('Show this number to the cashier')).toBeVisible();
     await expect(page.getByRole('textbox')).toHaveCount(0);
     expect(state.scans).toBe(1);
-
-    // A reload keeps the same ticket and code.
-    await page.reload();
-    await expect(page.getByRole('heading', { name: 'Your code 427' })).toBeVisible();
-    await page.goto(`${RENNILI_URL}/acme`);
-    await expect(page).toHaveURL(`${RENNILI_URL}/t/tok-e2e`);
-    expect(state.scans).toBe(1);
-
-    await page.evaluate(() => {
-      window.__pagerDocument = 'ticket';
-    });
-    await page.getByRole('button', { name: "Notify me when it's ready" }).click();
     await expect
       .poll(async () => (await bellPlays(page))[0])
       .toEqual({ muted: true, outcome: 'played' });
     expect(await audiblePlays(page)).toBe(0);
+    // No second ask on the ticket: the alerts are already on.
+    await expect(page.getByText('Alerts active')).toBeVisible();
     await expect(page.getByRole('button', { name: "Notify me when it's ready" })).toHaveCount(0);
 
     // The cashier labels the phone.
@@ -156,7 +181,7 @@ test.describe('Pager (customer)', () => {
     await expect.poll(() => audiblePlays(page)).toBeGreaterThan(0);
     await expect(page.getByRole('button', { name: 'Stop sound' })).toBeVisible();
     // Still the document the tap happened in.
-    expect(await page.evaluate(() => window.__pagerDocument)).toBe('ticket');
+    expect(await page.evaluate(() => window.__pagerDocument)).toBe('scan');
 
     await page.getByRole('button', { name: 'I have it' }).click();
 
@@ -170,20 +195,81 @@ test.describe('Pager (customer)', () => {
     expect(await audiblePlays(page)).toBe(rungSoFar);
   });
 
-  test('a venue without a pager shows a dead end', async ({ page }) => {
-    await page.route('**/pager/v1/public/venues/nowhere/scan', (route) =>
+  test('a reload or a second scan keeps the same ticket, and a reloaded page offers the tap again', async ({
+    page,
+    context,
+  }) => {
+    await chooseEnglish(context);
+    await recordBellPlays(page);
+    const state = await stubPublicPager(page);
+
+    await page.goto(`${RENNILI_URL}/acme`);
+    await page.getByRole('button', { name: 'Get my code & enable alerts' }).click();
+    await expect(page).toHaveURL(`${RENNILI_URL}/t/tok-e2e`);
+    expect(state.scans).toBe(1);
+
+    // A reload keeps the same ticket and code.
+    await page.reload();
+    await expect(page.getByRole('heading', { name: 'Your code 427' })).toBeVisible();
+
+    // A reload is a new document with the bell locked again, so the page asks
+    // for the one tap here; it unlocks the bell without ringing out loud.
+    const notify = page.getByRole('button', { name: "Notify me when it's ready" });
+    await expect(notify).toBeVisible();
+    await notify.click();
+    await expect
+      .poll(async () => (await bellPlays(page))[0])
+      .toEqual({ muted: true, outcome: 'played' });
+    expect(await audiblePlays(page)).toBe(0);
+    await expect(notify).toHaveCount(0);
+    await expect(page.getByText('Alerts active')).toBeVisible();
+
+    // Scanning the QR again resumes the same ticket rather than adding a phone.
+    await page.goto(`${RENNILI_URL}/acme`);
+    await expect(page.getByRole('button', { name: 'Start a new order instead' })).toBeVisible();
+    await page.getByRole('button', { name: 'Get my code & enable alerts' }).click();
+    await expect(page).toHaveURL(`${RENNILI_URL}/t/tok-e2e`);
+    await expect(page.getByRole('heading', { name: 'Your code 427' })).toBeVisible();
+    expect(state.scans).toBe(1);
+  });
+
+  test('a venue without a pager shows a dead end', async ({ page, context }) => {
+    await chooseEnglish(context);
+    let scans = 0;
+    await page.route('**/pager/v1/public/venues/nowhere', (route) =>
       route.fulfill({
         status: 404,
         json: { code: 'venue_not_found', message: 'venue not found' },
       })
     );
+    await page.route('**/pager/v1/public/venues/nowhere/scan', (route) => {
+      scans += 1;
+      return route.fulfill({
+        status: 404,
+        json: { code: 'venue_not_found', message: 'venue not found' },
+      });
+    });
 
     await page.goto(`${RENNILI_URL}/nowhere`);
 
     await expect(page.getByText("This pager isn't available")).toBeVisible();
     await expect(page.getByRole('textbox')).toHaveCount(0);
+    // No tap to offer and nothing put on the board.
+    await expect(page.getByRole('button', { name: 'Get my code & enable alerts' })).toHaveCount(0);
+    expect(scans).toBe(0);
   });
 });
+
+/**
+ * The count on a queue's heading. A narrow board shows one queue at a time
+ * behind tabs, so that queue's tab is picked first, as a cashier would.
+ */
+async function queueCount(page: Page, name: string) {
+  await page.locator('.pager-board-workspace').waitFor();
+  const tab = page.getByRole('tab', { name });
+  if (await tab.isVisible()) await tab.click();
+  return page.getByRole('heading', { name }).locator('.pager-board-count');
+}
 
 test.describe('Pager (staff board)', () => {
   test('a member who is not an admin labels a new phone and marks it ready', async ({
@@ -221,29 +307,40 @@ test.describe('Pager (staff board)', () => {
       route.fulfill({ json: { enabled: true, label_mode: 'number' } })
     );
 
+    await chooseEnglish(context);
     await page.goto(`${RENNILI_URL}/board`);
 
     // Rennili's own header, not the Portal shell.
     await expect(page.getByRole('link', { name: 'Rennili' }).first()).toBeVisible();
     await expect(page.getByRole('link', { name: 'Open RTYLR' })).toBeVisible();
 
-    await expect(page.getByRole('heading', { name: 'New phones (1)' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Waiting (1)' })).toBeVisible();
+    await expect(await queueCount(page, 'Waiting')).toHaveText('1');
+    await expect(await queueCount(page, 'New phones')).toHaveText('1');
+    await expect(page.getByText('Pager live')).toBeVisible();
+
+    // Settings sit in a drawer; a member sees them but cannot change them.
+    await page.getByRole('button', { name: 'Settings', exact: true }).click();
     await expect(page.getByRole('switch', { name: 'Pager on' })).toBeChecked();
     await expect(page.getByRole('switch', { name: 'Pager on' })).toBeDisabled();
+    await expect(page.getByText('Only owners and admins can change these settings.')).toBeVisible();
 
+    await expect(page.getByRole('button', { name: 'Select code 427' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
     const label = page.getByLabel('Order number for code 427');
     await expect(label).toHaveAttribute('inputmode', 'numeric');
     await label.fill('42');
-    await page.getByRole('button', { name: 'Save' }).click();
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
 
-    await expect(page.getByRole('heading', { name: 'Waiting (2)' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'New phones (0)' })).toBeVisible();
+    await expect(await queueCount(page, 'New phones')).toHaveText('0');
+    await expect(page.getByText('No phones waiting.')).toBeVisible();
+    await expect(await queueCount(page, 'Waiting')).toHaveText('2');
     expect(labelCalls).toEqual([{ id: '2', label: '42' }]);
 
     await page.getByRole('button', { name: 'Ready: 42' }).click();
 
-    await expect(page.getByRole('heading', { name: 'Ready (1)' })).toBeVisible();
+    await expect(await queueCount(page, 'Ready')).toHaveText('1');
     await expect(page.getByRole('button', { name: 'Call again: 42' })).toBeVisible();
     expect(readyCalls).toEqual(['2']);
   });
