@@ -4,9 +4,10 @@ import { useParams } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
 import type { GetPublicTicketResponse } from '@voxire/voxie/pager/v1/types';
-import { BellRing, Check, Lock, SearchX, Star } from 'lucide-react';
+import { BellRing, Check, ExternalLink, Lock, SearchX, Share, Star } from 'lucide-react';
 import { readyAlarm } from '../../../../shared/alarm/readyAlarm';
 import { useAlarm } from '../../../../shared/alarm/useAlarm';
+import { pagerTicketPath } from '../../pagerPaths';
 import LanguageSwitch from '../../shared/components/LanguageSwitch';
 import { ByRtylr, RenniliLogo, RenniliMark } from '../../shared/components/RenniliLogo';
 import { VenueLogo } from '../../shared/components/VenueLogo';
@@ -14,13 +15,18 @@ import MatchCode from '../../shared/components/MatchCode';
 import { DEPLOY_GAP_PATIENCE_MS } from '../../shared/lib/apiError';
 import { usePagerSandbox, usePublicPagerClient } from '../../shared/lib/pagerClients';
 import {
+  androidWebView,
   askPushPermission,
   askPushPermissionNow,
+  closeTicketNotification,
   followTicketByPush,
   iosTabWithoutPush,
   notificationPermission,
+  openInChromeUrl,
+  showTicketNotification,
   usePushKey,
 } from '../../shared/lib/pushAlerts';
+import { useDynamicManifest } from '../../shared/lib/pwaManifest';
 import { forgetScanByToken, rememberedSlugForToken } from '../../shared/lib/scanSession';
 import { ticketAlarmState } from '../../shared/lib/ticketAlarm';
 import { createTicketPoller, isOpenStatus, type TicketPoller } from '../../shared/lib/ticketPoller';
@@ -50,6 +56,11 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
   const [pickedTone, setPickedTone] = useState<RingtoneId | null>(() =>
     sandbox ? null : rememberedRingtone()
   );
+  const [isAndroidWebView] = useState(
+    () => !sandbox && typeof androidWebView === 'function' && androidWebView()
+  );
+  const chromeIntentUrl =
+    isAndroidWebView && typeof openInChromeUrl === 'function' ? openInChromeUrl() : null;
   const alarm = useAlarm(readyAlarm);
   const pushKey = usePushKey();
   // Bumped by the "alert me" tap so a permission granted there subscribes.
@@ -115,6 +126,62 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
     ticket?.status === 'collected' ||
     ticket?.status === 'expired' ||
     (ticket?.status === 'ready' && Boolean(ticket.acknowledgedAt));
+
+  // Keep the active PWA manifest pinned to this ticket so "Add to Home Screen"
+  // on iPhone launches straight back to `/t/<token>` with Web Push enabled.
+  useDynamicManifest(!sandbox && token ? pagerTicketPath(token) : null, venueName || undefined);
+
+  // If the customer reloaded `/t/<token>`, browsers lock audio/vibration again
+  // until the next gesture: let any tap on the ticket re-unlock immediately.
+  useEffect(() => {
+    if (sandbox || !open || alarm.unlocked || typeof document === 'undefined') return undefined;
+    const onFirstTap = (): void => {
+      readyAlarm.unlock();
+    };
+    document.addEventListener('pointerdown', onFirstTap, { once: true, passive: true });
+    return () => document.removeEventListener('pointerdown', onFirstTap);
+  }, [sandbox, open, alarm.unlocked]);
+
+  // Fire a local Service Worker notification once per ready/remind ring so
+  // Android Chrome vibrates through the OS notification motor even while open
+  // or when Touch Feedback haptics are off.
+  const notifiedRing = useRef<string | null>(null);
+  const currentRingMark =
+    ticket?.status === 'ready' && !ticket.acknowledgedAt
+      ? `${ticket.readyAt ?? ''}|${ticket.remindedAt ?? ''}`
+      : null;
+  const isRemindedRing = Boolean(ticket?.remindedAt);
+  useEffect(() => {
+    if (sandbox || !token) return;
+    if (!currentRingMark) {
+      notifiedRing.current = null;
+      if (ticketFinished && typeof closeTicketNotification === 'function') {
+        void closeTicketNotification(token);
+      }
+      return;
+    }
+    if (notifiedRing.current === currentRingMark) return;
+    notifiedRing.current = currentRingMark;
+    if (typeof showTicketNotification === 'function') {
+      void showTicketNotification({
+        token,
+        title: isRemindedRing ? remindPushTitle : readyPushTitle,
+        body: t(isRemindedRing ? 'pager.push.remindBody' : 'pager.push.readyBody', {
+          venue: venueName,
+        }),
+      });
+    }
+  }, [
+    sandbox,
+    token,
+    currentRingMark,
+    isRemindedRing,
+    ticketFinished,
+    readyPushTitle,
+    remindPushTitle,
+    venueName,
+    t,
+  ]);
 
   useEffect(() => {
     if (!sandbox && ticketFinished && token) {
@@ -203,6 +270,9 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
 
   const acknowledge = async (): Promise<void> => {
     readyAlarm.silence();
+    if (!sandbox && token && typeof closeTicketNotification === 'function') {
+      void closeTicketNotification(token);
+    }
     setAcknowledging(true);
     setAcknowledgeFailed(false);
     try {
@@ -372,6 +442,22 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
           </div>
         )}
 
+        {status === 'waiting' && isAndroidWebView && (
+          <div className="pager-warning" role="note">
+            <p className="pager-warning-title">
+              <ExternalLink size={16} strokeWidth={2.4} aria-hidden="true" />
+              {t('pager.ticket.androidWebViewTitle')}
+            </p>
+            <p className="pager-warning-text">{t('pager.ticket.androidWebViewBody')}</p>
+            {chromeIntentUrl && (
+              <a href={chromeIntentUrl} className="pager-warning-cta">
+                <ExternalLink size={15} strokeWidth={2.4} aria-hidden="true" />
+                <span>{t('pager.ticket.openInChrome')}</span>
+              </a>
+            )}
+          </div>
+        )}
+
         {status === 'waiting' && iosTab && (
           <div className="pager-warning" role="note">
             <p className="pager-warning-title">
@@ -379,6 +465,13 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
               {t('pager.ticket.iphoneTitle')}
             </p>
             <p className="pager-warning-text">{t('pager.ticket.iphoneBody')}</p>
+            <div className="pager-warning-pwa">
+              <p className="pager-warning-pwa-title">
+                <Share size={14} strokeWidth={2.4} aria-hidden="true" />
+                <span>{t('pager.ticket.iphonePwaTitle')}</span>
+              </p>
+              <p className="pager-warning-text">{t('pager.ticket.iphonePwaSteps')}</p>
+            </div>
           </div>
         )}
 

@@ -14,7 +14,8 @@ export const RING_GAP_MS = 700;
 /** How long to wait for the bell's `ended` event before moving on anyway. */
 export const BELL_WATCHDOG_MS = 4_000;
 export const TITLE_FLASH_MS = 1_000;
-export const VIBRATION_PATTERN = [280, 120, 280, 120, 520];
+export const VIBRATION_PATTERN = [400, 150, 400, 150, 600];
+const BLIP_VIBRATION_MS = 50;
 
 const CHIME_NOTES_HZ = [1046.5, 1318.5, 1568];
 const CHIME_NOTE_SPACING_S = 0.18;
@@ -165,6 +166,12 @@ export function createAlarm(options: AlarmOptions): Alarm {
   }
 
   function blip(): void {
+    try {
+      const vibrator = nav();
+      if (typeof vibrator.vibrate === 'function') vibrator.vibrate(BLIP_VIBRATION_MS);
+    } catch {
+      // Haptic confirmation is a bonus.
+    }
     try {
       context ??= createAudioContext();
       if (!context) return;

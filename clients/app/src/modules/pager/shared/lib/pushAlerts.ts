@@ -13,6 +13,7 @@ export const PAGER_SW_SCOPE = PAGER_TICKET_PREFIX;
 /** Read by entrypoints/rennili/public/pager-sw.js; keep the two in step. */
 export const PUSH_TEXT_CACHE = 'pager-push-text';
 const MAX_STORED_TEXTS = 20;
+const NOTIFICATION_VIBRATION = [600, 250, 600, 250, 600, 250, 600];
 
 export interface PushMessageText {
   title: string;
@@ -50,6 +51,32 @@ export function iosTabWithoutPush(): boolean {
   return (
     /iPhone|iPad|iPod/.test(agent) || (/Macintosh/.test(agent) && navigator.maxTouchPoints > 1)
   );
+}
+
+/**
+ * An Android in-app QR scanner or social WebView rather than full Chrome.
+ * These embedded browsers commonly block both `navigator.vibrate()` and Web Push.
+ */
+export function androidWebView(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const agent = navigator.userAgent;
+  if (!/Android/i.test(agent)) return false;
+  if (/;\s*wv\)|FBAN|FBAV|Instagram|Line\/|MicroMessenger|Snapchat/i.test(agent)) return true;
+  return !pushSupported();
+}
+
+/** Android intent URL that hands the current HTTPS page directly to Chrome. */
+export function openInChromeUrl(href?: string): string | null {
+  const target = href ?? (typeof window !== 'undefined' ? window.location.href : '');
+  if (!target) return null;
+  try {
+    const parsed = new URL(target);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null;
+    const scheme = parsed.protocol.slice(0, -1);
+    return `intent://${parsed.host}${parsed.pathname}${parsed.search}${parsed.hash}#Intent;scheme=${scheme};package=com.android.chrome;end`;
+  } catch {
+    return null;
+  }
 }
 
 let pushKey: Promise<string> | null = null;
@@ -201,4 +228,56 @@ export async function followTicketByPush(options: {
     auth: keys.auth,
   });
   return true;
+}
+
+/**
+ * Triggers a local Service Worker notification for an order that just became
+ * ready. On Android Chrome this routes vibration through the OS notification
+ * channel (working even when Touch Feedback haptics are disabled or the tab
+ * was reloaded), and shares the `pager-<token>` tag with server Web Push so
+ * notifications never duplicate.
+ */
+export async function showTicketNotification(options: {
+  token: string;
+  title: string;
+  body: string;
+}): Promise<boolean> {
+  const { token, title, body } = options;
+  if (!token || !title || !pushSupported()) return false;
+  if (Notification.permission !== 'granted') return false;
+  try {
+    const registration = await navigator.serviceWorker.register(PAGER_SW_URL, {
+      scope: PAGER_SW_SCOPE,
+    });
+    await activated(registration);
+    if (typeof registration.showNotification !== 'function') return false;
+    await registration.showNotification(title, {
+      body,
+      tag: `pager-${token}`,
+      renotify: true,
+      requireInteraction: true,
+      vibrate: NOTIFICATION_VIBRATION,
+      icon: '/favicon/android-chrome-192x192.png',
+      badge: '/favicon/android-chrome-192x192.png',
+      data: { url: `${PAGER_SW_SCOPE}${token}` },
+    } as NotificationOptions);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Dismisses any active notification for this ticket once collected or acknowledged. */
+export async function closeTicketNotification(token: string): Promise<void> {
+  if (!token || !pushSupported()) return;
+  try {
+    const sw = navigator.serviceWorker;
+    if (typeof sw.getRegistration !== 'function') return;
+    const registration = await sw.getRegistration(PAGER_SW_SCOPE);
+    if (!registration || typeof registration.getNotifications !== 'function') return;
+    const active = await registration.getNotifications({ tag: `pager-${token}` });
+    for (const notification of active) notification.close();
+  } catch {
+    // Best-effort cleanup.
+  }
 }
