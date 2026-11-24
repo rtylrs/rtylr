@@ -119,6 +119,12 @@ describe('flow locale parity', () => {
       // (taskDetail.relationKinds) differs, which is the check that this is a
       // cognate rather than a missed translation.
       'taskDetail.relations',
+      // "Points" is the French agile term for story points as well. Its
+      // siblings taskDetail.noPoints and cycles.detail.points.* differ, which
+      // is the check that these are cognates rather than missed translations.
+      'taskDetail.points',
+      'cycles.detail.unitPointsLabel',
+      'cycles.detail.unitPoints',
     ]);
 
     const copied = keyPaths(en).filter((path) => {

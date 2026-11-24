@@ -76,6 +76,8 @@ const developerProjectMock = vi.hoisted(() => vi.fn(() => false));
 vi.mock('../projects-v2/useDeveloperMode', () => ({
   useIsDeveloperProject: () => developerProjectMock(),
   useSetProjectDeveloperMode: () => ({ mutate: vi.fn(), isPending: false }),
+  useProjectPointsScale: () => 'fibonacci',
+  useSetProjectPointsScale: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 vi.mock('../../../../shared/hooks/queries/useGitHub', () => ({
   useGitHubConnection: () => ({ data: { configured: true, connected: false }, isLoading: false }),

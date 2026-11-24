@@ -529,3 +529,77 @@ func TestDeleteTaskRemovesItsCycleMembership(t *testing.T) {
 		t.Fatalf("receiving cycle scope %d carried %+v after the delete", receiving.Scope, receiving.CarriedOver)
 	}
 }
+
+func TestCyclePointsSplitCommittedAddedAndCompleted(t *testing.T) {
+	f := newPlanningFixture(t)
+	sprint := f.cycle(t, "Sprint 1", "2026-12-07", "2026-12-18")
+	planned := f.task(t, "planned", nil, 0)
+	shipped := f.task(t, "shipped", nil, 0)
+	late := f.task(t, "late", nil, 0)
+	for id, points := range map[int64]int32{planned: 5, shipped: 3, late: 8} {
+		if err := f.svc.SetTaskStoryPoints(f.ctx, v2Business, id, f.project.ID, points); err != nil {
+			t.Fatalf("SetTaskStoryPoints(%d): %v", points, err)
+		}
+	}
+	if err := f.svc.SetTaskStoryPoints(f.ctx, v2Business, planned, f.project.ID, 4); !errors.Is(err, domain.ErrInvalidStoryPoints) {
+		t.Fatalf("4 on the Fibonacci scale: err = %v", err)
+	}
+	f.move(t, planned, sprint, 0, 0)
+	f.move(t, shipped, sprint, 0, 0)
+	if _, err := f.svc.StartCycle(f.ctx, domain.StartCycleInput{ID: sprint, BusinessID: v2Business}); err != nil {
+		t.Fatalf("StartCycle: %v", err)
+	}
+	// added_at has second precision, so a task moved in the same second as
+	// the start would count as committed.
+	time.Sleep(1100 * time.Millisecond)
+	f.move(t, late, sprint, 0, 0)
+	if err := f.svc.UpdateTaskStatus(f.ctx, domain.UpdateTaskStatusInput{
+		ID: shipped, OwnerID: v2UserA, BusinessID: v2Business, Status: domain.TaskStatusDone,
+	}, v2UserA); err != nil {
+		t.Fatalf("UpdateTaskStatus: %v", err)
+	}
+
+	c, err := f.svc.GetCycleV2(f.ctx, v2Business, sprint)
+	if err != nil {
+		t.Fatalf("GetCycleV2: %v", err)
+	}
+	if c.CommittedPoints != 8 || c.CompletedPoints != 3 || c.ScopeAddedPoints != 8 || c.ScopeAddedCount != 1 {
+		t.Fatalf("points: committed %d completed %d added %d (%d tasks), want 8 3 8 (1)",
+			c.CommittedPoints, c.CompletedPoints, c.ScopeAddedPoints, c.ScopeAddedCount)
+	}
+
+	// Unfinished work sent back to the backlog still counts as committed.
+	closed, err := f.svc.CompleteCycle(f.ctx, domain.CompleteCycleInput{ID: sprint, BusinessID: v2Business, ActorID: v2UserA})
+	if err != nil {
+		t.Fatalf("CompleteCycle: %v", err)
+	}
+	if closed.CommittedPoints+closed.ScopeAddedPoints != 16 || closed.CompletedPoints != 3 {
+		t.Fatalf("after completion: committed %d + added %d, completed %d; want 16 in all, 3 done",
+			closed.CommittedPoints, closed.ScopeAddedPoints, closed.CompletedPoints)
+	}
+
+	tasks := []domain.Task{{ID: planned}, {ID: late}}
+	if err := f.svc.AttachTaskMemberships(f.ctx, tasks); err != nil {
+		t.Fatalf("AttachTaskMemberships: %v", err)
+	}
+	if tasks[0].StoryPoints == nil || *tasks[0].StoryPoints != 5 {
+		t.Fatalf("attached points = %v, want 5", tasks[0].StoryPoints)
+	}
+	if err := f.svc.SetTaskStoryPoints(f.ctx, v2Business, planned, f.project.ID, 0); err != nil {
+		t.Fatalf("clear points: %v", err)
+	}
+	if err := f.svc.AttachTaskMemberships(f.ctx, tasks); err != nil || tasks[0].StoryPoints != nil {
+		t.Fatalf("points after clear = %v, %v", tasks[0].StoryPoints, err)
+	}
+
+	if _, err := f.svc.SetProjectPointsScale(f.ctx, f.project.ID, v2UserA, v2Business, "hours"); !errors.Is(err, domain.ErrInvalidPointsScale) {
+		t.Fatalf("unknown scale: err = %v", err)
+	}
+	p, err := f.svc.SetProjectPointsScale(f.ctx, f.project.ID, v2UserA, v2Business, domain.PointsScaleLinear)
+	if err != nil || p.PointsScale != domain.PointsScaleLinear {
+		t.Fatalf("SetProjectPointsScale = %q, %v", p.PointsScale, err)
+	}
+	if err := f.svc.SetTaskStoryPoints(f.ctx, v2Business, planned, f.project.ID, 4); err != nil {
+		t.Fatalf("4 on the linear scale: %v", err)
+	}
+}

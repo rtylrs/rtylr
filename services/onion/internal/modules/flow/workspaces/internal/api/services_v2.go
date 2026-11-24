@@ -329,6 +329,10 @@ func toContractCycleV2(c domain.Cycle) *flowcyclev2.Cycle {
 		Cancelled: int32(c.Totals.Cancelled), // #nosec G115 -- task counts per cycle stay far below int32.
 	}
 	out.EstimateMinutes = clampInt32(c.EstimateMinutes)
+	out.CommittedPoints = clampInt32(int64(c.CommittedPoints))
+	out.CompletedPoints = clampInt32(int64(c.CompletedPoints))
+	out.ScopeAddedPoints = clampInt32(int64(c.ScopeAddedPoints))
+	out.ScopeAddedCount = clampInt32(int64(c.ScopeAddedCount))
 	for _, carry := range c.CarriedOver {
 		out.CarriedOver = append(out.CarriedOver, &flowcyclev2.CycleCarryOver{
 			FromCycleId: carry.FromCycleID, FromCycleName: carry.FromCycleName, TaskIds: carry.TaskIDs,

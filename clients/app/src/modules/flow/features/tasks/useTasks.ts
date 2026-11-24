@@ -109,6 +109,7 @@ export function useCreateTask() {
       taskType?: string;
       epicColor?: string;
       cycleId?: string;
+      storyPoints?: number;
     }) => {
       return unwrap(flowApi.createTask(data));
     },

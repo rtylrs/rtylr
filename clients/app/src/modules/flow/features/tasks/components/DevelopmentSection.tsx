@@ -26,12 +26,15 @@ const DevelopmentSection = ({
   taskId,
   typeLabel,
   branchName,
+  points,
 }: {
   taskId: string;
   /** The task's type, translated. */
   typeLabel?: string;
   /** A suggested git branch for the task, prefixed by its type (T-380). */
   branchName?: string;
+  /** The task's story points as the project's scale shows them. */
+  points?: string;
 }): React.JSX.Element => {
   const { t } = useTranslation();
   const { data: links = [] } = useTaskLinks(taskId);
@@ -41,7 +44,7 @@ const DevelopmentSection = ({
   const pullRequestByRef = new Map(pullRequests.map((pr) => [pr.ref ?? '', pr]));
   const fields = [
     { key: 'type', label: t('flow.taskDetail.devType'), value: typeLabel },
-    { key: 'points', label: t('flow.taskDetail.devPoints'), value: undefined },
+    { key: 'points', label: t('flow.taskDetail.devPoints'), value: points },
     { key: 'branch', label: t('flow.taskDetail.devBranch'), value: branchName },
   ];
   return (

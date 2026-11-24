@@ -254,6 +254,8 @@
     "closeDuplicateKeepOpen": "Laisser ouverte",
     "noCycle": "Carnet (aucun cycle)",
     "noCyclesInProject": "Aucun cycle ouvert",
+    "points": "Points",
+    "noPoints": "Aucun",
     "startDate": "Date de début",
     "copyBranch": "Copier le nom de branche",
     "branchCopied": "Nom de branche copié",
@@ -997,7 +999,28 @@
       "deleteTitle": "Supprimer ce cycle ?",
       "deleteDescription_one": "{{name}} sera supprimé. Sa {{count}} tâche reste dans le projet et revient au carnet.",
       "deleteDescription_many": "{{name}} sera supprimé. Ses {{count}} tâches restent dans le projet et reviennent au carnet.",
-      "deleteDescription_other": "{{name}} sera supprimé. Ses {{count}} tâches restent dans le projet et reviennent au carnet."
+      "deleteDescription_other": "{{name}} sera supprimé. Ses {{count}} tâches restent dans le projet et reviennent au carnet.",
+      "unit": "Unité du burndown",
+      "unitTasksLabel": "Tâches",
+      "unitPointsLabel": "Points",
+      "unitPoints": "points",
+      "addedValue_one": "{{points}} pts, {{count}} tâche",
+      "addedValue_many": "{{points}} pts, {{count}} tâches",
+      "addedValue_other": "{{points}} pts, {{count}} tâches",
+      "points": {
+        "committed": "Points engagés",
+        "completed": "Points terminés",
+        "added": "Ajoutés en cours"
+      }
+    },
+    "velocity": {
+      "title": "Vélocité",
+      "summary": "Moyenne de {{average}} points terminés sur les {{count}} dernières itérations",
+      "committed": "Engagés",
+      "completed": "Terminés",
+      "committedValue": "{{value}} points engagés",
+      "completedValue": "{{value}} points terminés",
+      "average": "Moyenne de {{average}} points par itération"
     }
   },
   "myIssues": {
@@ -1245,7 +1268,15 @@
     "memberCount_one": "{{count}} membre",
     "memberCount_many": "{{count}} membres",
     "memberCount_other": "{{count}} membres",
-    "addMemberShort": "Ajouter"
+    "addMemberShort": "Ajouter",
+    "pointsScale": "Échelle des points",
+    "pointsScaleHint": "Les valeurs parmi lesquelles les tâches choisissent leurs points. Les points déjà saisis sont conservés.",
+    "pointsScaleSaved": "Échelle des points enregistrée",
+    "pointsScales": {
+      "fibonacci": "Suite de Fibonacci (1, 2, 3, 5, 8, 13)",
+      "linear": "Linéaire (1 à 10)",
+      "tshirt": "Tailles (XS à XL)"
+    }
   },
   "bulkEdit": {
     "clearSelectionLabel": "Effacer la sélection",

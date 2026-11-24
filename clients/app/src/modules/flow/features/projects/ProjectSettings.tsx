@@ -42,6 +42,7 @@ import { displayDescription } from '../../shared/lib/stringUtils';
 import { useCanAdministerProject } from '../../shared/lib/currentUser';
 import ProjectVisibilityField from './components/ProjectVisibilityField';
 import ProjectDeveloperModeField from './components/ProjectDeveloperModeField';
+import ProjectPointsScaleField from './components/ProjectPointsScaleField';
 import { useIsDeveloperProject } from '../projects-v2/useDeveloperMode';
 import ProjectRepositoriesPanel from './components/ProjectRepositoriesPanel';
 import ProjectFieldsSettings from './components/ProjectFieldsSettings';
@@ -224,6 +225,7 @@ const ProjectSettings: React.FC = () => {
 
             <ProjectVisibilityField projectId={projectId} canAdminister={canManageProject} />
             <ProjectDeveloperModeField projectId={projectId} canAdminister={canManageProject} />
+            <ProjectPointsScaleField projectId={projectId} canAdminister={canManageProject} />
 
             <button
               type="button"

@@ -91,12 +91,16 @@ func (s *Service) AttachTaskCycles(ctx context.Context, tasks []domain.Task) err
 }
 
 // AttachTaskMemberships fills what a task read from flow_tasks carries in
-// side tables: its milestone and its cycle with plan rank.
+// side tables or columns the generated reads skip: its milestone, its story
+// points and its cycle with plan rank.
 func (s *Service) AttachTaskMemberships(ctx context.Context, tasks []domain.Task) error {
 	if err := s.AttachMilestoneIDs(ctx, tasks); err != nil {
 		return err
 	}
 	if err := s.attachTaskChecksStates(ctx, tasks); err != nil {
+		return err
+	}
+	if err := s.repo.AttachTaskStoryPoints(ctx, tasks); err != nil {
 		return err
 	}
 	return s.AttachTaskCycles(ctx, tasks)

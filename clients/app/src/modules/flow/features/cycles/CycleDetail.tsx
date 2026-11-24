@@ -46,6 +46,7 @@ const CycleDetail: React.FC = () => {
   const deleteCycle = useDeleteCycle();
   const [editing, setEditing] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [unit, setUnit] = useState<'tasks' | 'points'>('tasks');
 
   const statusesById = useMemo(
     () => new Map<string, ApiStatus>((rawStatuses ?? []).map((s) => [s.id, s])),
@@ -74,14 +75,15 @@ const CycleDetail: React.FC = () => {
             cycle.startDate,
             cycle.endDate,
             scoped.map((x) => ({
-              weight: 1,
+              weight: unit === 'points' ? (x.storyPoints ?? 0) : 1,
               completedAt: taskBucket(x, statusesById) === 'done' ? x.completedAt : undefined,
             })),
             todayIso()
           )
         : [],
-    [cycle, scoped, statusesById]
+    [cycle, scoped, statusesById, unit]
   );
+  const hasPoints = scoped.some((x) => (x.storyPoints ?? 0) > 0);
   // The soonest upcoming cycle after this one; the list is not in date order.
   const nextCycle = projectCycles
     .filter((c) => c.status === 'upcoming' && cycle !== undefined && c.startDate >= cycle.endDate)
@@ -190,6 +192,35 @@ const CycleDetail: React.FC = () => {
           <CycleProgress cycle={cycle} />
         </section>
 
+        {(hasPoints || (cycle.committedPoints ?? 0) > 0) && (
+          <dl className="grid grid-cols-2 sm:grid-cols-3 gap-2 -mt-4">
+            {[
+              { key: 'committed', value: cycle.committedPoints ?? 0 },
+              { key: 'completed', value: cycle.completedPoints ?? 0 },
+              {
+                key: 'added',
+                value: t('flow.cycles.detail.addedValue', {
+                  points: cycle.scopeAddedPoints ?? 0,
+                  count: cycle.scopeAddedCount ?? 0,
+                }),
+              },
+            ].map((stat) => (
+              <div
+                key={stat.key}
+                className="rounded-md px-3 py-2"
+                style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
+              >
+                <dt className="text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>
+                  {t(`flow.cycles.detail.points.${stat.key}`)}
+                </dt>
+                <dd className="text-flow-body font-semibold" style={{ color: 'var(--flow-text)' }}>
+                  {stat.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
         <section>
           <h2
             className="text-flow-meta font-semibold uppercase tracking-wider mb-3"
@@ -197,7 +228,40 @@ const CycleDetail: React.FC = () => {
           >
             {t('flow.cycles.detail.burndown')}
           </h2>
-          <BurndownChart points={burndown} unitLabel={t('flow.cycles.detail.unitTasks')} />
+          {hasPoints && (
+            <div
+              className="mb-3 inline-flex rounded-md p-0.5"
+              role="group"
+              aria-label={t('flow.cycles.detail.unit')}
+              style={{ border: '1px solid var(--flow-border-control)' }}
+            >
+              {(['tasks', 'points'] as const).map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={unit === value}
+                  onClick={() => setUnit(value)}
+                  className="px-2 py-0.5 rounded-sm text-flow-meta"
+                  style={{
+                    background: unit === value ? 'var(--accent-muted)' : 'transparent',
+                    color: 'var(--flow-text)',
+                  }}
+                >
+                  {t(
+                    value === 'tasks'
+                      ? 'flow.cycles.detail.unitTasksLabel'
+                      : 'flow.cycles.detail.unitPointsLabel'
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+          <BurndownChart
+            points={burndown}
+            unitLabel={t(
+              unit === 'points' ? 'flow.cycles.detail.unitPoints' : 'flow.cycles.detail.unitTasks'
+            )}
+          />
         </section>
 
         {carriedOver.length > 0 && (

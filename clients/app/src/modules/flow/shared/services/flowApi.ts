@@ -171,6 +171,7 @@ export interface ApiTask {
   epicColor?: ContractTask['epicColor'];
   // UI-only fields stored in local store
   effortMinutes?: number;
+  storyPoints?: ContractTask['storyPoints'];
   waitingOn?: string;
   decisionNote?: string;
   focusPin?: boolean;
@@ -366,6 +367,11 @@ export interface ApiCycle {
   totals?: ApiCycleTotals;
   estimateMinutes?: number;
   carriedOver?: ApiCycleCarryOver[];
+  // Story points (T-381); omitted on the wire when zero.
+  committedPoints?: number;
+  completedPoints?: number;
+  scopeAddedPoints?: number;
+  scopeAddedCount?: number;
 }
 
 export interface ApiCycleMemberCapacity {
@@ -972,6 +978,7 @@ export const flowApi = {
     taskType?: string;
     epicColor?: string;
     cycleId?: string;
+    storyPoints?: number;
   }) =>
     flowResult<{ task: ApiTask }>(() => {
       const payload = toTaskCreatePayload(data);
@@ -994,6 +1001,7 @@ export const flowApi = {
         taskType: data.taskType || undefined,
         epicColor: data.epicColor || undefined,
         cycleId: data.cycleId || undefined,
+        storyPoints: data.storyPoints || undefined,
       });
     }),
 
@@ -1042,6 +1050,8 @@ export const flowApi = {
           parentTaskId: data.parentTaskId !== undefined ? data.parentTaskId || '0' : undefined,
           // Empty string returns the task to the backlog ('0' on the wire).
           cycleId: data.cycleId !== undefined ? data.cycleId || '0' : undefined,
+          // 0 clears the points.
+          storyPoints: data.storyPoints,
         },
       })
     ),

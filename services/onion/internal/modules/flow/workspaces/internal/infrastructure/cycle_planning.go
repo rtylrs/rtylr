@@ -40,6 +40,10 @@ const taskUnplannedSQL = `NOT EXISTS (SELECT 1 FROM flow_cycle_tasks ct
 // chips value, or estimated_hours for a task that only has hours.
 const taskEstimateMinutesSQL = `COALESCE(t.effort_minutes, ROUND(t.estimated_hours * 60), 0)`
 
+// addedAfterStartSQL is true for a cycle task row (ct, cycle cy) that joined
+// the cycle after it was started: scope added mid-cycle.
+const addedAfterStartSQL = `(cy.started_at IS NOT NULL AND ct.added_at > cy.started_at)`
+
 // backlogOrderSQL orders the unplanned backlog. Tasks that were never placed
 // follow the ranked ones, oldest first.
 const backlogOrderSQL = `(t.backlog_rank IS NULL) ASC, t.backlog_rank ASC, t.created_at ASC, t.id ASC`
@@ -177,6 +181,9 @@ func (r *Repository) enrichCycles(ctx context.Context, businessID int64, cycles 
 	if err := r.readCycleTotals(ctx, placeholders, args, index); err != nil {
 		return err
 	}
+	if err := r.readCycleCarriedOutPoints(ctx, placeholders, args, index); err != nil {
+		return err
+	}
 	return r.readCycleCarryOvers(ctx, placeholders, args, index)
 }
 
@@ -211,7 +218,10 @@ func (r *Repository) readCycleFields(ctx context.Context, placeholders string, a
 // still committed to that is finished; Totals.Cancelled still reports them.
 func (r *Repository) readCycleTotals(ctx context.Context, placeholders string, args []any, index map[int64]*domain.Cycle) error {
 	rows, err := r.pool.QueryContext(ctx, `SELECT ct.cycle_id, COALESCE(fs.bucket, ''), COALESCE(t.status, 'todo'),
-       COUNT(*), COALESCE(SUM(`+taskEstimateMinutesSQL+`), 0)
+       COUNT(*), COALESCE(SUM(`+taskEstimateMinutesSQL+`), 0),
+       COALESCE(SUM(COALESCE(t.story_points, 0)), 0),
+       COALESCE(SUM(`+addedAfterStartSQL+`), 0),
+       COALESCE(SUM(CASE WHEN `+addedAfterStartSQL+` THEN COALESCE(t.story_points, 0) ELSE 0 END), 0)
   FROM flow_cycle_tasks ct
   JOIN flow_cycles cy ON cy.id = ct.cycle_id AND cy.business_id = ?
   JOIN flow_tasks t ON t.id = ct.task_id AND t.business_id = cy.business_id
@@ -224,13 +234,15 @@ func (r *Repository) readCycleTotals(ctx context.Context, placeholders string, a
 	defer func() { _ = rows.Close() }()
 	for _, c := range index {
 		c.Totals, c.EstimateMinutes, c.Scope, c.Completed = domain.CycleTotals{}, 0, 0, 0
+		c.CommittedPoints, c.CompletedPoints, c.ScopeAddedPoints, c.ScopeAddedCount = 0, 0, 0, 0
 	}
 	for rows.Next() {
 		var cycleID int64
 		var customBucket, legacyStatus string
-		var count int
+		var count, points, addedCount, addedPoints int
 		var minutes float64
-		if err := rows.Scan(&cycleID, &customBucket, &legacyStatus, &count, &minutes); err != nil {
+		if err := rows.Scan(&cycleID, &customBucket, &legacyStatus, &count, &minutes,
+			&points, &addedCount, &addedPoints); err != nil {
 			return err
 		}
 		c := index[cycleID]
@@ -241,15 +253,44 @@ func (r *Repository) readCycleTotals(ctx context.Context, placeholders string, a
 		}
 		c.Scope += count
 		c.EstimateMinutes += int64(minutes)
+		c.CommittedPoints += points - addedPoints
+		c.ScopeAddedPoints += addedPoints
+		c.ScopeAddedCount += addedCount
 		switch bucket {
 		case domain.StatusBucketActive:
 			c.Totals.Active += count
 		case domain.StatusBucketDone:
 			c.Totals.Done += count
 			c.Completed += count
+			c.CompletedPoints += points
 		default:
 			c.Totals.Backlog += count
 		}
+	}
+	return rows.Err()
+}
+
+// readCycleCarriedOutPoints adds to a completed cycle's committed points the
+// unfinished tasks that left it when it closed. Sending a task to the backlog
+// drops its row from the cycle, so only the carry-over record remembers it.
+func (r *Repository) readCycleCarriedOutPoints(ctx context.Context, placeholders string, args []any, index map[int64]*domain.Cycle) error {
+	rows, err := r.pool.QueryContext(ctx, `SELECT co.cycle_id, COALESCE(SUM(COALESCE(t.story_points, 0)), 0)
+  FROM flow_cycle_carryovers co
+  JOIN flow_tasks t ON t.id = co.task_id AND t.business_id = co.business_id
+ WHERE co.business_id = ? AND co.cycle_id IN (`+placeholders+`) AND co.decision IN ('move', 'backlog')
+   AND NOT EXISTS (SELECT 1 FROM flow_cycle_tasks ct WHERE ct.cycle_id = co.cycle_id AND ct.task_id = co.task_id)
+ GROUP BY co.cycle_id`, args...)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = rows.Close() }()
+	for rows.Next() {
+		var cycleID int64
+		var points int
+		if err := rows.Scan(&cycleID, &points); err != nil {
+			return err
+		}
+		index[cycleID].CommittedPoints += points
 	}
 	return rows.Err()
 }

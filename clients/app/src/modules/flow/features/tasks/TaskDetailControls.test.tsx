@@ -58,7 +58,10 @@ vi.mock('../projects/useStatuses', () => ({
   useSetTaskStatus: () => ({ mutate: setStatus }),
   useCreateStatus: () => ({ mutate: createStatus, isPending: false }),
 }));
-vi.mock('../projects-v2/useDeveloperMode', () => ({ useIsDeveloperProject: () => false }));
+vi.mock('../projects-v2/useDeveloperMode', () => ({
+  useIsDeveloperProject: () => false,
+  useProjectPointsScale: () => 'fibonacci',
+}));
 vi.mock('./components/LinksSection', () => ({ default: () => null }));
 vi.mock('./components/RelationsSection', () => ({ default: () => null }));
 vi.mock('../projects/useCurrentProject', () => ({

@@ -22,6 +22,7 @@ import {
   Plus,
   Link2,
   Gauge,
+  Hash,
   Hourglass,
   Pin,
   Lightbulb,
@@ -86,13 +87,14 @@ import { priorityLabelKey } from '../../shared/lib/priorityLabels';
 import { assigneeOptions } from '../../shared/lib/memberUtils';
 import { displayDescription } from '../../shared/lib/stringUtils';
 import { EFFORT_PRESETS, formatEffortMinutes } from '../../shared/lib/effortPresets';
+import { formatPoints, pointsOptions } from '../../shared/lib/storyPoints';
 import { TASK_STATUSES, STATUS_LABEL_KEYS } from '../../shared/lib/constantsFlow';
 import { withAlpha } from '../../shared/lib/colorUtils';
 import { toLocalIso, todayIso } from '../../shared/lib/dateUtils';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import DevelopmentSection from './components/DevelopmentSection';
-import { useIsDeveloperProject } from '../projects-v2/useDeveloperMode';
+import { useIsDeveloperProject, useProjectPointsScale } from '../projects-v2/useDeveloperMode';
 import { branchNameFor } from '../../shared/lib/taskTemplates';
 import LinksSection from './components/LinksSection';
 import RelationsSection from './components/RelationsSection';
@@ -182,6 +184,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const canDuplicate = useCanCreateTask(taskProjectId);
   const duplicateTask = useDuplicateTask();
   const isDeveloperProject = useIsDeveloperProject(taskProjectId);
+  const pointsScale = useProjectPointsScale(taskProjectId);
   const { project: taskProject } = useCurrentProject(taskProjectId);
   const { data: projectMembers = [] } = useProjectMembers(taskProjectId);
   const { data: allLabels = [] } = useLabels();
@@ -647,6 +650,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
                 taskId={task.id}
                 typeLabel={t(`flow.taskType.${task.taskType ?? 'task'}`)}
                 branchName={branchNameFor(task)}
+                points={task.storyPoints ? formatPoints(task.storyPoints, pointsScale) : undefined}
               />
             )}
 
@@ -967,6 +971,52 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
             ))}
           </div>
         </DetailField>
+
+        {isDeveloperProject && (
+          <DetailField icon={Hash} label={t('flow.taskDetail.points')}>
+            <div
+              className="flex flex-wrap gap-1"
+              role="group"
+              aria-label={t('flow.taskDetail.points')}
+            >
+              <button
+                type="button"
+                onClick={() => updateTask(task.id, { storyPoints: 0 })}
+                disabled={!canEdit}
+                aria-pressed={!task.storyPoints}
+                className="text-flow-meta px-2 py-1 rounded-md disabled:opacity-40"
+                style={{
+                  background: !task.storyPoints ? 'var(--flow-hover)' : 'transparent',
+                  color: 'var(--flow-text-muted)',
+                  border: '1px solid var(--flow-border)',
+                }}
+              >
+                {t('flow.taskDetail.noPoints')}
+              </button>
+              {pointsOptions(pointsScale).map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => updateTask(task.id, { storyPoints: p })}
+                  disabled={!canEdit}
+                  aria-pressed={task.storyPoints === p}
+                  className="text-flow-meta px-2 py-1 rounded-md transition-colors disabled:opacity-40"
+                  style={{
+                    background: task.storyPoints === p ? 'var(--accent-muted)' : 'transparent',
+                    color: 'var(--flow-text)',
+                    border:
+                      task.storyPoints === p
+                        ? `1px solid ${withAlpha('var(--accent)', 40)}`
+                        : '1px solid var(--flow-border)',
+                  }}
+                  title={!canEdit ? t('flowCommon.readOnlyAccess') : undefined}
+                >
+                  {formatPoints(p, pointsScale)}
+                </button>
+              ))}
+            </div>
+          </DetailField>
+        )}
 
         <DetailField icon={Hourglass} label={t('flow.taskDetail.waitingOn')}>
           <TaskTextField

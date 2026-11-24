@@ -265,6 +265,8 @@
     "closeDuplicateKeepOpen": "إبقاؤها مفتوحة",
     "noCycle": "قائمة الأعمال (بدون دورة)",
     "noCyclesInProject": "لا توجد دورات مفتوحة",
+    "points": "النقاط",
+    "noPoints": "بلا",
     "startDate": "تاريخ البدء",
     "copyBranch": "نسخ اسم الفرع",
     "branchCopied": "تم نسخ اسم الفرع",
@@ -1038,7 +1040,31 @@
       "deleteDescription_two": "سيتم حذف {{name}}. تبقى مهمتاها في المشروع وتعودان إلى قائمة الانتظار.",
       "deleteDescription_few": "سيتم حذف {{name}}. تبقى مهامها الـ{{count}} في المشروع وتعود إلى قائمة الانتظار.",
       "deleteDescription_many": "سيتم حذف {{name}}. تبقى مهامها الـ{{count}} في المشروع وتعود إلى قائمة الانتظار.",
-      "deleteDescription_other": "سيتم حذف {{name}}. تبقى مهامها الـ{{count}} في المشروع وتعود إلى قائمة الانتظار."
+      "deleteDescription_other": "سيتم حذف {{name}}. تبقى مهامها الـ{{count}} في المشروع وتعود إلى قائمة الانتظار.",
+      "unit": "وحدة مخطط الإنجاز",
+      "unitTasksLabel": "المهام",
+      "unitPointsLabel": "النقاط",
+      "unitPoints": "نقاط",
+      "addedValue_zero": "{{points}} نقطة، لا مهام",
+      "addedValue_one": "{{points}} نقطة، مهمة واحدة",
+      "addedValue_two": "{{points}} نقطة، مهمتان",
+      "addedValue_few": "{{points}} نقطة، {{count}} مهام",
+      "addedValue_many": "{{points}} نقطة، {{count}} مهمة",
+      "addedValue_other": "{{points}} نقطة، {{count}} مهمة",
+      "points": {
+        "committed": "النقاط الملتزم بها",
+        "completed": "النقاط المنجزة",
+        "added": "أضيفت أثناء الدورة"
+      }
+    },
+    "velocity": {
+      "title": "السرعة",
+      "summary": "متوسط {{average}} نقطة منجزة في آخر {{count}} دورات",
+      "committed": "ملتزم بها",
+      "completed": "منجزة",
+      "committedValue": "{{value}} نقطة ملتزم بها",
+      "completedValue": "{{value}} نقطة منجزة",
+      "average": "متوسط {{average}} نقطة لكل دورة"
     }
   },
   "myIssues": {
@@ -1302,7 +1328,15 @@
     "memberCount_few": "{{count}} أعضاء",
     "memberCount_many": "{{count}} عضوًا",
     "memberCount_other": "{{count}} عضو",
-    "addMemberShort": "إضافة"
+    "addMemberShort": "إضافة",
+    "pointsScale": "مقياس النقاط",
+    "pointsScaleHint": "القيم التي تختار منها المهام نقاطها. تبقى النقاط المحددة مسبقًا كما هي.",
+    "pointsScaleSaved": "تم حفظ مقياس النقاط",
+    "pointsScales": {
+      "fibonacci": "فيبوناتشي (1، 2، 3، 5، 8، 13)",
+      "linear": "خطي (1 إلى 10)",
+      "tshirt": "مقاسات (XS إلى XL)"
+    }
   },
   "bulkEdit": {
     "clearSelectionLabel": "إلغاء التحديد",

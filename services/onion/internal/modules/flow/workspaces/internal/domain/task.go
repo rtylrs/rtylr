@@ -54,6 +54,7 @@ type Task struct {
 	EstimatedHours *float64
 	ActualHours    *float64
 	EffortMinutes  *int32
+	StoryPoints    *int32 // from flow_tasks.story_points, attached after the read
 	FocusPin       bool
 	SortOrder      int
 	Labels         []int64

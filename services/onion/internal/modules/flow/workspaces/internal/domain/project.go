@@ -28,6 +28,7 @@ type Project struct {
 	IsPersonal  bool
 	// DeveloperMode marks a software project; developer features check it.
 	DeveloperMode bool
+	PointsScale   string // the scale tasks pick story points from (T-381)
 	StartDate     *time.Time
 	DueDate       *time.Time
 	CreatedBy     int64

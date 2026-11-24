@@ -105,8 +105,10 @@ vi.mock('../../shared/hooks/queries/useApprovedLeaveInRange', () => ({
 }));
 
 const developerProjectMock = vi.hoisted(() => vi.fn(() => false));
+const pointsScaleMock = vi.hoisted(() => vi.fn((): string => 'fibonacci'));
 vi.mock('../projects-v2/useDeveloperMode', () => ({
   useIsDeveloperProject: () => developerProjectMock(),
+  useProjectPointsScale: () => pointsScaleMock(),
 }));
 vi.mock('./components/LinksSection', () => ({ default: () => null }));
 vi.mock('./components/RelationsSection', () => ({ default: () => null }));
@@ -745,6 +747,24 @@ describe('TaskDetail Development section (T-365)', () => {
       screen.getByRole('heading', { name: 'flow.taskDetail.development' })
     ).toBeInTheDocument();
     expect(screen.getByText('flow.taskDetail.devPoints')).toBeInTheDocument();
+  });
+
+  it('sets story points from the project scale (T-381)', () => {
+    developerProjectMock.mockReturnValue(true);
+    pointsScaleMock.mockReturnValue('tshirt');
+    taskDetailData.data = detail();
+    renderTaskDetail();
+    const group = screen.getByRole('group', { name: 'flow.taskDetail.points' });
+    expect(within(group).queryByRole('button', { name: '13' })).not.toBeInTheDocument();
+    fireEvent.click(within(group).getByRole('button', { name: 'L' }));
+    expect(updateTaskMutate).toHaveBeenCalledWith({ id: 't-1', data: { storyPoints: 5 } });
+    pointsScaleMock.mockReturnValue('fibonacci');
+  });
+
+  it('shows no points field outside developer projects', () => {
+    taskDetailData.data = detail();
+    renderTaskDetail();
+    expect(screen.queryByRole('group', { name: 'flow.taskDetail.points' })).not.toBeInTheDocument();
   });
 });
 
