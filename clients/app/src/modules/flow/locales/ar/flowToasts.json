@@ -65,7 +65,10 @@
     "startFailed": "تعذّر بدء الدورة",
     "completed": "اكتملت الدورة",
     "completeFailed": "تعذّر إنهاء الدورة",
-    "moveFailed": "تعذّر نقل المهمة"
+    "moveFailed": "تعذّر نقل المهمة",
+    "updated": "تم تحديث الدورة",
+    "deleted": "تم حذف الدورة",
+    "deleteFailed": "فشل حذف الدورة"
   },
   "label": {
     "created": "تم إنشاء التسمية",

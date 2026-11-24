@@ -471,6 +471,7 @@ type repository interface {
 	TaskMilestoneIDs(ctx context.Context, taskIDs []int64) (map[int64]int64, error)
 	GetCycleV2(ctx context.Context, businessID, cycleID int64) (domain.Cycle, error)
 	UpdateCycleV2(ctx context.Context, in domain.UpdateCycleV2Input) error
+	DeleteCycle(ctx context.Context, businessID, cycleID int64) error
 	StartCycle(ctx context.Context, in domain.StartCycleInput) error
 	CompleteCycle(ctx context.Context, in domain.CompleteCycleInput) ([]domain.CompletedCycleTask, error)
 	MoveCycleTask(ctx context.Context, in domain.MoveCycleTaskInput) (domain.MovedCycleTask, error)

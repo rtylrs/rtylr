@@ -53,7 +53,10 @@
     "startFailed": "Failed to start cycle",
     "completed": "Cycle completed",
     "completeFailed": "Failed to complete cycle",
-    "moveFailed": "Failed to move task"
+    "moveFailed": "Failed to move task",
+    "updated": "Cycle updated",
+    "deleted": "Cycle deleted",
+    "deleteFailed": "Failed to delete cycle"
   },
   "label": {
     "created": "Label created",

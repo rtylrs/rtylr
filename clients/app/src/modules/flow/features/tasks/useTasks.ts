@@ -328,6 +328,25 @@ export function useBulkUpdatePriority() {
   });
 }
 
+/** Puts every task in one cycle; an empty cycleId sends them to the backlog. */
+export function useBulkUpdateCycle() {
+  const qc = useQueryClient();
+  return useMutation<BulkResult, unknown, { ids: string[]; cycleId: string }>({
+    mutationFn: ({ ids, cycleId }) =>
+      bulkSettle(ids, (id) => unwrap(flowApi.updateTask(id, { cycleId }))),
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['task'] });
+      qc.invalidateQueries({ queryKey: ['cycles'] });
+      qc.invalidateQueries({ queryKey: ['cycle-capacity'] });
+    },
+    onSuccess: (res) =>
+      reportBulk(res, 'flowToasts.task.bulkUpdated', 'flowToasts.task.bulkUpdateFailed'),
+    onError: () => toast.error(t('flowToasts.task.bulkUpdateFailed')),
+  });
+}
+
 export function useBulkUpdateArchive() {
   const qc = useQueryClient();
   return useMutation<BulkResult, unknown, { ids: string[] }>({

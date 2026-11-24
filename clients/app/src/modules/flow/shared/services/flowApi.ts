@@ -1385,6 +1385,9 @@ export const flowApi = {
 
   getCycle: (id: string) => flowResult<{ cycle: ApiCycle }>(() => cycleV2.getCycle({ id })),
 
+  // Project admins only. The cycle's tasks go back to the unplanned backlog.
+  deleteCycle: (id: string) => flowResult<Record<string, never>>(() => cycleV2.deleteCycle({ id })),
+
   // Answers 409 when the project already has an active cycle.
   startCycle: (id: string, data: { lengthWeeks: number; goal?: string; startDate?: string }) =>
     flowResult<{ cycle: ApiCycle }>(() =>

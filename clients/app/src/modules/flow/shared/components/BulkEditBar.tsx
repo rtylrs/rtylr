@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Check, Trash2, Archive, Flag } from 'lucide-react';
+import { X, Check, Trash2, Archive, Flag, Timer } from 'lucide-react';
 import { toast } from 'sonner';
 import i18next from '../services/i18next';
 import { useFlowStore } from '../stores/flowStore';
@@ -8,15 +8,19 @@ import {
   useBulkUpdateStatus,
   useBulkUpdatePriority,
   useBulkUpdateArchive,
+  useBulkUpdateCycle,
   useBulkDelete,
   useTasks,
   useTaskDetails,
 } from '../../features/tasks/useTasks';
 import { useMostRestrictiveProjectRole } from '../lib/currentUser';
+import { useCycles } from '../../features/cycles/useCycles';
 import { canEditTask, canDelete } from '../lib/roleUtils';
 
 const t = (key: string, options?: Record<string, unknown>): string =>
   i18next.t(key, options) as string;
+
+const BACKLOG_OPTION = 'backlog';
 
 export const BulkEditBar: React.FC = () => {
   const selectedTaskIds = useFlowStore((state) => state.selectedTaskIds);
@@ -37,6 +41,7 @@ export const BulkEditBar: React.FC = () => {
   const bulkStatus = useBulkUpdateStatus();
   const bulkPriority = useBulkUpdatePriority();
   const bulkArchive = useBulkUpdateArchive();
+  const bulkCycle = useBulkUpdateCycle();
   const bulkDelete = useBulkDelete();
 
   // Selection is global and cross-project views (Triage, My issues) let it span
@@ -68,6 +73,12 @@ export const BulkEditBar: React.FC = () => {
     return { projectIds: [...ids].sort(), allResolved: resolved };
   }, [selectedTaskIds, taskList, taskDetails, unresolvedIds]);
 
+  // Cycles belong to one project, so the picker shows only for a selection
+  // inside a single project.
+  const singleProjectId = allResolved && projectIds.length === 1 ? projectIds[0] : undefined;
+  const { data: projectCycles = [] } = useCycles(singleProjectId);
+  const openCycles = projectCycles.filter((c) => c.status !== 'completed');
+
   const restrictingRole = useMostRestrictiveProjectRole(projectIds);
   const effectiveRole = allResolved ? restrictingRole : undefined;
   const canEdit = effectiveRole !== undefined && canEditTask(effectiveRole);
@@ -83,7 +94,11 @@ export const BulkEditBar: React.FC = () => {
   if (selectedTaskIds.length === 0) return null;
 
   const isPending =
-    bulkStatus.isPending || bulkPriority.isPending || bulkArchive.isPending || bulkDelete.isPending;
+    bulkStatus.isPending ||
+    bulkPriority.isPending ||
+    bulkArchive.isPending ||
+    bulkCycle.isPending ||
+    bulkDelete.isPending;
 
   return (
     <AnimatePresence>
@@ -138,6 +153,41 @@ export const BulkEditBar: React.FC = () => {
         >
           <Flag size={11} /> {t('flow.bulkEdit.setUrgent')}
         </button>
+        {singleProjectId && openCycles.length > 0 && (
+          <label
+            className="h-7 px-2 rounded-sm text-flow-meta flex items-center gap-1 hover:bg-[var(--flow-hover)]"
+            style={{ color: 'var(--flow-text-muted)' }}
+            title={!canEdit ? t(editBlockedReason) : undefined}
+          >
+            <Timer size={11} aria-hidden />
+            <select
+              value=""
+              disabled={isPending || !canEdit}
+              aria-label={t('flow.bulkEdit.moveToCycle')}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === '') return;
+                bulkCycle
+                  .mutateAsync({
+                    ids: selectedTaskIds,
+                    cycleId: value === BACKLOG_OPTION ? '' : value,
+                  })
+                  .then(() => clearSelection())
+                  .catch(() => toast.error(t('flowErrors.generic')));
+              }}
+              className="bg-transparent text-flow-meta disabled:opacity-40"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              <option value="">{t('flow.bulkEdit.moveToCycle')}</option>
+              <option value={BACKLOG_OPTION}>{t('flow.taskDetail.noCycle')}</option>
+              {openCycles.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <button
           type="button"
           disabled={isPending || !canEdit}

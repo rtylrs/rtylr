@@ -109,6 +109,20 @@ func (a *CycleAPIV2) GetCycle(ctx context.Context, req *flowcyclev2.GetCycleRequ
 	return &flowcyclev2.GetCycleResponse{Cycle: toContractCycleV2(cycle)}, nil
 }
 
+// DeleteCycle needs the admin tier on the cycle's project, like deleting a
+// milestone. The cycle's tasks stay in the project, unplanned.
+func (a *CycleAPIV2) DeleteCycle(ctx context.Context, req *flowcyclev2.DeleteCycleRequest) (*flowcyclev2.DeleteCycleResponse, error) {
+	c, err := a.authorizeCycle(ctx, req.GetId(), domain.FlowRoleAdmin)
+	if err != nil {
+		return nil, err
+	}
+	if err := a.Service.DeleteCycle(ctx, c.BusinessID, req.GetId()); err != nil {
+		return nil, cyclePlanningError(ctx, "DeleteCycle", err)
+	}
+	publishCycleEvent("cycle.deleted", c, req.GetId())
+	return &flowcyclev2.DeleteCycleResponse{}, nil
+}
+
 // UpdateCycle edits name, dates and goal. A status change goes through the
 // same rules as StartCycle and CompleteCycle, so this older entry point cannot
 // open a second active cycle or strand unfinished tasks.

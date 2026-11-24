@@ -56,7 +56,10 @@
     "startFailed": "Échec du démarrage du cycle",
     "completed": "Cycle terminé",
     "completeFailed": "Échec de la clôture du cycle",
-    "moveFailed": "Échec du déplacement de la tâche"
+    "moveFailed": "Échec du déplacement de la tâche",
+    "updated": "Itération mise à jour",
+    "deleted": "Itération supprimée",
+    "deleteFailed": "Échec de la suppression de l'itération"
   },
   "label": {
     "created": "Étiquette créée",

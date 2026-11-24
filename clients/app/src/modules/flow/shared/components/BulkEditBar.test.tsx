@@ -38,7 +38,12 @@ vi.mock('../../features/tasks/useTasks', () => ({
   useBulkUpdateStatus: () => ({ isPending: false, mutateAsync: vi.fn() }),
   useBulkUpdatePriority: () => ({ isPending: false, mutateAsync: vi.fn() }),
   useBulkUpdateArchive: () => ({ isPending: false, mutateAsync: vi.fn() }),
+  useBulkUpdateCycle: () => ({ isPending: false, mutateAsync: vi.fn() }),
   useBulkDelete: () => ({ isPending: false, mutateAsync: vi.fn() }),
+}));
+
+vi.mock('../../features/cycles/useCycles', () => ({
+  useCycles: () => ({ data: [] }),
 }));
 
 vi.mock('../lib/currentUser', () => ({

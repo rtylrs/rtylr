@@ -370,3 +370,41 @@ func TestCycleCapacityTakesLeaveFromAvailableTime(t *testing.T) {
 		}
 	}
 }
+
+func TestDeleteCycleReturnsItsTasksToTheBacklog(t *testing.T) {
+	f := newPlanningFixture(t)
+	sprint := f.cycle(t, "Sprint 1", "2026-12-07", "2026-12-18")
+	next := f.cycle(t, "Sprint 2", "2026-12-21", "2027-01-01")
+	carry := f.task(t, "carry", nil, 30)
+	f.move(t, carry, sprint, 0, 0)
+	if _, err := f.svc.StartCycle(f.ctx, domain.StartCycleInput{ID: sprint, BusinessID: v2Business}); err != nil {
+		t.Fatalf("StartCycle: %v", err)
+	}
+	if _, err := f.svc.CompleteCycle(f.ctx, domain.CompleteCycleInput{
+		ID: sprint, BusinessID: v2Business, ActorID: v2UserA,
+		Decisions: []domain.CycleTaskDecision{{TaskID: carry, Decision: domain.CycleDecisionMove, ToCycleID: next}},
+	}); err != nil {
+		t.Fatalf("CompleteCycle: %v", err)
+	}
+
+	if err := f.svc.DeleteCycle(f.ctx, v2Business+1, next); !errors.Is(err, domain.ErrCycleNotFound) {
+		t.Fatalf("DeleteCycle from another business: err = %v", err)
+	}
+	if err := f.svc.DeleteCycle(f.ctx, v2Business, next); err != nil {
+		t.Fatalf("DeleteCycle: %v", err)
+	}
+	if _, err := f.svc.GetCycleV2(f.ctx, v2Business, next); !errors.Is(err, domain.ErrCycleNotFound) {
+		t.Fatalf("deleted cycle still readable: err = %v", err)
+	}
+	if got := f.order(t, 0, carry); !sameIDs(got, []int64{carry}) {
+		t.Fatalf("backlog after delete = %v, want the carried task back in it", got)
+	}
+
+	// The closed cycle that sent work into it still loads.
+	if _, err := f.svc.GetCycleV2(f.ctx, v2Business, sprint); err != nil {
+		t.Fatalf("GetCycleV2 on the sending cycle: %v", err)
+	}
+	if err := f.svc.DeleteCycle(f.ctx, v2Business, sprint); err != nil {
+		t.Fatalf("DeleteCycle on a completed cycle: %v", err)
+	}
+}

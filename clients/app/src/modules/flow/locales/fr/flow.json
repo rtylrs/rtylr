@@ -911,7 +911,7 @@
   },
   "cycles": {
     "loading": "Chargement des cycles...",
-    "subtitle": "Sprints de livraison de deux semaines",
+    "subtitle": "Sprints de livraison à durée fixe pour un projet",
     "newCycle": "Nouveau cycle",
     "namePlaceholder": "Nom du cycle",
     "startDate": "Date de début",
@@ -925,11 +925,50 @@
     "sectionCompleted": "Terminés",
     "dateRange": "{{start}} au {{end}}",
     "emptyTitle": "Aucun cycle pour le moment",
-    "emptyDescription": "Démarrez votre premier sprint de livraison de deux semaines pour suivre le périmètre et la progression.",
+    "emptyDescription": "Démarrez votre premier sprint pour suivre le périmètre et la progression.",
     "createFirst": "Créer le premier cycle",
     "project": "Projet",
     "noProjects": "Aucun projet pour le moment",
-    "newCycleGate": "Un cycle appartient à un projet, et cette entreprise n'en a encore aucun. Créez d'abord un projet."
+    "newCycleGate": "Un cycle appartient à un projet, et cette entreprise n'en a encore aucun. Créez d'abord un projet.",
+    "length": "Durée",
+    "customLength": "Dates personnalisées",
+    "state": {
+      "upcoming": "À venir",
+      "active": "Active",
+      "completed": "Terminée"
+    },
+    "edit": {
+      "title": "Modifier l'itération",
+      "description": "Modifiez le nom, les dates ou l'objectif.",
+      "name": "Nom",
+      "save": "Enregistrer",
+      "saving": "Enregistrement..."
+    },
+    "detail": {
+      "back": "Toutes les itérations",
+      "openBacklog": "Planifier dans le carnet",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "progress": "Progression",
+      "burndown": "Burndown",
+      "burndownEmpty": "Le burndown s'affiche dès que l'itération a des dates.",
+      "burndownSummary": "{{remaining}} {{unit}} restants",
+      "remaining": "Restant",
+      "ideal": "Idéal",
+      "unitTasks": "tâches",
+      "carriedOver": "Reportées",
+      "carriedFrom_one": "{{count}} tâche depuis {{name}}",
+      "carriedFrom_many": "{{count}} tâches depuis {{name}}",
+      "carriedFrom_other": "{{count}} tâches depuis {{name}}",
+      "openTasks": "Ouvertes ({{count}})",
+      "doneTasks": "Terminées ({{count}})",
+      "carryHint": "À la fin de cette itération, les tâches non terminées pourront passer à {{name}}.",
+      "carryHintBacklog": "À la fin de cette itération, les tâches non terminées pourront passer à l'itération suivante ou revenir au carnet.",
+      "deleteTitle": "Supprimer cette itération ?",
+      "deleteDescription_one": "{{name}} sera supprimée. Sa {{count}} tâche reste dans le projet et revient au carnet.",
+      "deleteDescription_many": "{{name}} sera supprimée. Ses {{count}} tâches restent dans le projet et reviennent au carnet.",
+      "deleteDescription_other": "{{name}} sera supprimée. Ses {{count}} tâches restent dans le projet et reviennent au carnet."
+    }
   },
   "myIssues": {
     "buckets": {
@@ -1163,7 +1202,8 @@
     "markDone": "Marquer comme terminé",
     "setUrgent": "Définir comme urgent",
     "archive": "Archiver",
-    "selectedCount": "{{count}} sélectionnée(s)"
+    "selectedCount": "{{count}} sélectionnée(s)",
+    "moveToCycle": "Déplacer vers l'itération"
   },
   "allProjects": {
     "title": "Tous les projets",

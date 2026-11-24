@@ -11,6 +11,14 @@ import type {
 } from '../../shared/services/flowApi';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 
+// The wire omits zero counts, so a cycle with nothing done yet arrives without
+// `completed` (and an empty one without `scope`).
+const withCounts = (cycle: ApiCycle): ApiCycle => ({
+  ...cycle,
+  scope: cycle.scope ?? 0,
+  completed: cycle.completed ?? 0,
+});
+
 /**
  * The query behind useCycles, shared so a screen that needs several projects'
  * cycles at once (the Plan calendar) reads and fills the same cache entries.
@@ -20,7 +28,7 @@ export function cyclesQueryOptions(projectId?: string) {
     queryKey: ['cycles', projectId],
     queryFn: async (): Promise<ApiCycle[]> => {
       const res = await unwrap(flowApi.getCycles(projectId!));
-      return unwrapListResponse<ApiCycle>(res, 'cycles');
+      return unwrapListResponse<ApiCycle>(res, 'cycles').map(withCounts);
     },
     enabled: projectId !== undefined && projectId !== '',
   };
@@ -57,6 +65,25 @@ export function useUpdateCycle() {
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['cycles'] }),
     onError: () => toast.error(t('flowToasts.cycle.updateFailed')),
+  });
+}
+
+/** One cycle, for its detail page. */
+export function useCycle(id: string | undefined) {
+  return useQuery<ApiCycle>({
+    queryKey: ['cycles', 'detail', id],
+    queryFn: async () => withCounts((await unwrap(flowApi.getCycle(id!))).cycle),
+    enabled: id !== undefined && id !== '',
+  });
+}
+
+export function useDeleteCycle() {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => unwrap(flowApi.deleteCycle(id)).then(() => {}),
+    onSuccess: () => invalidatePlanning(qc),
+    onError: () => toast.error(t('flowToasts.cycle.deleteFailed')),
   });
 }
 
