@@ -252,7 +252,6 @@ export function usePublicBrandBundle(
         pages: { menu: true, ...parsed.pages },
         typography: { ...DEFAULT_LAYOUT_CONFIG.typography!, ...parsed.typography },
         customCss: customCss || parsed.customCss,
-        hidePoweredBy: profile?.whiteLabelHideBadge ?? parsed.hidePoweredBy ?? false,
       };
 
       const branchItems = new Map<number, BranchItemOverride>();

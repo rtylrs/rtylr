@@ -17,7 +17,7 @@
     "currencies": "Currencies",
     "languages": "Languages & AI translation",
     "loyalty": "Loyalty & stamp cards",
-    "advanced": "White-label & custom CSS",
+    "advanced": "Custom CSS",
     "aiDesigner": "AI design stylist"
   },
   "studio": {
@@ -48,7 +48,7 @@
     "themesTitle": "Starter themes",
     "themesSubtitle": "One-click branded presets for restaurants, cafés, and retail stores.",
     "brandTitle": "Brand & typography",
-    "brandSubtitle": "Customize appearance, colors, fonts, and white-label branding.",
+    "brandSubtitle": "Customize cover photo, logo, appearance, colors, and fonts.",
     "brandMedia": "Brand media",
     "coverImage": "Hero cover image",
     "logoImage": "Brand logo",
@@ -63,8 +63,6 @@
     "modeLight": "Light",
     "modeDark": "Dark",
     "surfaceColor": "Surface",
-    "hidePoweredBy": "Hide Powered by RTYLR",
-    "hidePoweredByHint": "Full white-label storefront footer",
     "layoutTitle": "Layout & structure",
     "layoutSubtitle": "Control cards, images, hero header, navigation, and pages.",
     "featuresSubtitle": "Toggle ordering channels, table actions, currencies, languages, and loyalty.",

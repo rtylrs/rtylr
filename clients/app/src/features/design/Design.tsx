@@ -210,7 +210,6 @@ const Design: React.FC = () => {
   const [cloneSourceId, setCloneSourceId] = useState<number>(0);
   const [previewLocale, setPreviewLocale] = useState<string>('en');
   const [customCss, setCustomCss] = useState<string>('');
-  const [whiteLabelHideBadge, setWhiteLabelHideBadge] = useState<boolean>(false);
   const [enabledLocales, setEnabledLocales] = useState<string[]>(['en', 'fr', 'ar']);
   const [newPresetName, setNewPresetName] = useState('');
   const [newCurrencyCode, setNewCurrencyCode] = useState('');
@@ -273,7 +272,6 @@ const Design: React.FC = () => {
       // Keep current local draft if stored JSON cannot be parsed.
     }
     setCustomCss(remoteProfile.customCss ?? '');
-    setWhiteLabelHideBadge(Boolean(remoteProfile.whiteLabelHideBadge));
     if (remoteProfile.enabledLocales && remoteProfile.enabledLocales.length > 0) {
       setEnabledLocales(remoteProfile.enabledLocales);
     }
@@ -396,14 +394,12 @@ const Design: React.FC = () => {
     const mergedDraft: MenuLayoutConfig = {
       ...latestDraft,
       customCss,
-      hidePoweredBy: whiteLabelHideBadge,
     };
     const defaultCurrency = currencies.find((c) => c.isDefault)?.code ?? 'USD';
     saveDraftMutation.mutate({
       locationId: selectedLocationId,
       draftConfigJson: JSON.stringify(mergedDraft),
       customCss,
-      whiteLabelHideBadge,
       defaultLocale: enabledLocales[0] ?? 'en',
       enabledLocales,
       defaultCurrency,
@@ -455,7 +451,6 @@ const Design: React.FC = () => {
   const previewConfig: MenuLayoutConfig = {
     ...draftConfig,
     customCss,
-    hidePoweredBy: whiteLabelHideBadge,
     features,
   };
 
@@ -1109,16 +1104,6 @@ const Design: React.FC = () => {
                     }
                   />
                 </div>
-
-                <Separator />
-
-                <SwitchRow
-                  id="white-label-hide"
-                  label={t('design.studio.hidePoweredBy')}
-                  hint={t('design.studio.hidePoweredByHint')}
-                  checked={whiteLabelHideBadge}
-                  onChange={setWhiteLabelHideBadge}
-                />
               </div>
             )}
 

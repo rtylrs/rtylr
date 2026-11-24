@@ -17,7 +17,7 @@
     "currencies": "Devises",
     "languages": "Langues et traduction IA",
     "loyalty": "Fidélité et cartes à tampons",
-    "advanced": "Marque blanche et CSS personnalisé",
+    "advanced": "CSS personnalisé",
     "aiDesigner": "Styliste IA"
   },
   "studio": {
@@ -48,7 +48,7 @@
     "themesTitle": "Thèmes de départ",
     "themesSubtitle": "Préréglages en un clic pour restaurants, cafés et boutiques.",
     "brandTitle": "Marque et typographie",
-    "brandSubtitle": "Personnalisez l’apparence, les couleurs, les polices et la marque blanche.",
+    "brandSubtitle": "Personnalisez la couverture, le logo, l’apparence, les couleurs et les polices.",
     "brandMedia": "Médias de marque",
     "coverImage": "Image de couverture",
     "logoImage": "Logo de la marque",
@@ -63,8 +63,6 @@
     "modeLight": "Clair",
     "modeDark": "Sombre",
     "surfaceColor": "Surface",
-    "hidePoweredBy": "Masquer Powered by RTYLR",
-    "hidePoweredByHint": "Pied de page entièrement en marque blanche",
     "layoutTitle": "Mise en page et structure",
     "layoutSubtitle": "Contrôlez les cartes, images, en-tête, navigation et pages.",
     "featuresSubtitle": "Activez les modes de commande, actions à table, devises, langues et fidélité.",

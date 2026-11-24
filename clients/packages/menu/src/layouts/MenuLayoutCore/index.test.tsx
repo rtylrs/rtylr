@@ -42,7 +42,7 @@ describe("MenuLayoutCore", () => {
     expect(screen.queryByText("No photos yet.")).toBeNull();
   });
 
-  it("applies custom colors, scoped CSS, RTL direction, and hides Powered by RTYLR when white-labeled", () => {
+  it("applies custom colors, scoped CSS, RTL direction, and keeps Powered by RTYLR visible", () => {
     const { container } = render(
       <MenuLayoutCore
         business={{ name: "Maison Cafe" }}
@@ -51,7 +51,6 @@ describe("MenuLayoutCore", () => {
         config={{
           colors: { primary: "#111827", accent: "#c8a96e", bg: "#101014" },
           customCss: ".rtylr-menu-root { letter-spacing: 0.02em; }",
-          hidePoweredBy: true,
         }}
       />,
     );
@@ -61,7 +60,7 @@ describe("MenuLayoutCore", () => {
     expect(root.style.getPropertyValue("--menu-accent")).toBe("#c8a96e");
     expect(root.style.getPropertyValue("--menu-bg")).toBe("#101014");
     expect(screen.getByTestId("menu-custom-css").textContent).toContain("letter-spacing");
-    expect(screen.queryByText("Powered by RTYLR")).toBeNull();
+    expect(screen.getByText("Powered by RTYLR")).toBeTruthy();
   });
 
   it("switches currencies dynamically and triggers table actions", async () => {

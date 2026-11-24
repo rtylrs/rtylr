@@ -103,9 +103,6 @@ func (m *Module) executeUpdateMenuDesign(ctx context.Context, input map[string]a
 	if css, ok := input["custom_css"].(string); ok {
 		req.CustomCSS = &css
 	}
-	if hide, ok := input["white_label_hide_badge"].(bool); ok {
-		req.WhiteLabelHideBadge = &hide
-	}
 	if loc, ok := input["default_locale"].(string); ok && strings.TrimSpace(loc) != "" {
 		req.DefaultLocale = &loc
 	}
@@ -156,15 +153,14 @@ func (m *Module) executeCloneMenuDesign(ctx context.Context, input map[string]an
 
 func profileToMap(p domain.MenuProfile) map[string]any {
 	return map[string]any{
-		"location_id":            p.LocationID,
-		"draft_config_json":      p.DraftConfigJSON,
-		"published_config_json":  p.PublishedConfigJSON,
-		"custom_css":             p.CustomCSS,
-		"white_label_hide_badge": p.WhiteLabelHideBadge,
-		"default_locale":         p.DefaultLocale,
-		"enabled_locales":        p.EnabledLocales,
-		"default_currency":       p.DefaultCurrency,
-		"is_published":           p.IsPublished,
+		"location_id":           p.LocationID,
+		"draft_config_json":     p.DraftConfigJSON,
+		"published_config_json": p.PublishedConfigJSON,
+		"custom_css":            p.CustomCSS,
+		"default_locale":        p.DefaultLocale,
+		"enabled_locales":       p.EnabledLocales,
+		"default_currency":      p.DefaultCurrency,
+		"is_published":          p.IsPublished,
 	}
 }
 

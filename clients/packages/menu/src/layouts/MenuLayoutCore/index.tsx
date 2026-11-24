@@ -422,9 +422,7 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
         {renderedPage === "offers" && <OffersPage offers={business.offers ?? []} />}
       </main>
 
-      {!config.hidePoweredBy && (
-        <footer className={styles.layout__poweredBy}>Powered by RTYLR</footer>
-      )}
+      <footer className={styles.layout__poweredBy}>Powered by RTYLR</footer>
 
       {/* Sleek floating frosted-glass bottom dock */}
       {showBottomDock && (

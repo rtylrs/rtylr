@@ -185,7 +185,6 @@ export interface MenuLayoutConfig {
   features?: Partial<MenuFeaturesConfig>;
   payment?: MenuPaymentConfig;
   customCss?: string;
-  hidePoweredBy?: boolean;
 }
 
 export const DEFAULT_FEATURES_CONFIG: MenuFeaturesConfig = {

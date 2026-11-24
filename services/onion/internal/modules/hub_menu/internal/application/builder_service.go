@@ -74,9 +74,7 @@ func (s *Service) SaveMenuProfileDraft(ctx context.Context, businessID int64, in
 		}
 		current.CustomCSS = sanitized
 	}
-	if input.WhiteLabelHideBadge != nil {
-		current.WhiteLabelHideBadge = *input.WhiteLabelHideBadge
-	}
+	current.WhiteLabelHideBadge = false
 	if input.DefaultLocale != nil {
 		loc := normalizeLocale(*input.DefaultLocale)
 		if loc == "" {
