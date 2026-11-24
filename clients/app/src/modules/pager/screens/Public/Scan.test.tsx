@@ -28,10 +28,15 @@ vi.mock('../../../../shared/alarm/readyAlarm', () => ({
   readyAlarm: alarmMocks,
 }));
 
-const askPushSpy = vi.hoisted(() => vi.fn());
+const pushMocks = vi.hoisted(() => ({
+  key: 'vapid-public-key',
+  ask: vi.fn(),
+  askNow: vi.fn(),
+}));
 vi.mock('../../shared/lib/pushAlerts', () => ({
-  askPushPermission: askPushSpy,
-  usePushKey: () => 'vapid-public-key',
+  askPushPermission: pushMocks.ask,
+  askPushPermissionNow: pushMocks.askNow,
+  usePushKey: () => pushMocks.key,
 }));
 
 vi.mock('../../../../shared/services/i18next', () => ({ selectLanguage: vi.fn() }));
@@ -55,7 +60,9 @@ beforeEach(() => {
   navigateSpy.mockReset();
   alarmMocks.unlock.mockReset();
   alarmMocks.blip.mockReset();
-  askPushSpy.mockReset();
+  pushMocks.key = 'vapid-public-key';
+  pushMocks.ask.mockReset();
+  pushMocks.askNow.mockReset();
   api.getPublicVenue.mockReset().mockResolvedValue({ name: 'Acme Café', enabled: true });
   api.scanTicket.mockReset().mockResolvedValue(scanned);
   api.getPublicTicket.mockReset();
@@ -80,7 +87,7 @@ describe('pager scan page', () => {
 
     expect(alarmMocks.unlock).toHaveBeenCalledTimes(1);
     expect(alarmMocks.blip).toHaveBeenCalledTimes(1);
-    expect(askPushSpy).toHaveBeenCalledWith('vapid-public-key');
+    expect(pushMocks.ask).toHaveBeenCalledWith('vapid-public-key');
     await waitFor(() =>
       expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-1', replace: true })
     );
@@ -106,6 +113,7 @@ describe('pager scan page', () => {
   it.each([
     ['expired', { status: 'expired' }],
     ['collected', { status: 'collected' }],
+    ['acknowledged', { status: 'ready', acknowledgedAt: '2026-11-24T08:00:00.000Z' }],
   ])('scans again when the remembered ticket is %s', async (_, ticket) => {
     window.localStorage.setItem(STORAGE_KEY, 'tok-old');
     api.getPublicTicket.mockResolvedValue(ticket);
@@ -116,6 +124,32 @@ describe('pager scan page', () => {
     await waitFor(() =>
       expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-1', replace: true })
     );
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBe('tok-1');
+  });
+
+  it('requests notification permission synchronously even before the VAPID key finishes loading', async () => {
+    pushMocks.key = '';
+    render(<Scan />);
+
+    await tapStart();
+
+    expect(pushMocks.askNow).toHaveBeenCalledTimes(1);
+    await waitFor(() =>
+      expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-1', replace: true })
+    );
+  });
+
+  it('lets a returning customer start a fresh order even when an old scan is remembered', async () => {
+    window.localStorage.setItem(STORAGE_KEY, 'tok-old');
+    api.getPublicTicket.mockResolvedValue({ status: 'waiting', code: '318' });
+    render(<Scan />);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Start a new order instead' }));
+
+    await waitFor(() =>
+      expect(navigateSpy).toHaveBeenCalledWith({ to: '/t/tok-1', replace: true })
+    );
+    expect(api.scanTicket).toHaveBeenCalledTimes(1);
     expect(window.localStorage.getItem(STORAGE_KEY)).toBe('tok-1');
   });
 

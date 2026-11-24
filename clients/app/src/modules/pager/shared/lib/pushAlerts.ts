@@ -34,6 +34,11 @@ export function pushSupported(): boolean {
   );
 }
 
+export function notificationPermission(): NotificationPermission | 'unsupported' {
+  if (!pushSupported()) return 'unsupported';
+  return Notification.permission;
+}
+
 /**
  * An iPhone or iPad browser tab. iOS gives Web Push only to a site added to the
  * home screen, so a tab rings only while it is on screen. iPadOS reports a Mac,
@@ -86,18 +91,30 @@ export function usePushKey(): string {
 let pendingPermission: Promise<NotificationPermission> | null = null;
 
 /**
- * Asks for notification permission. Browsers only show the prompt from a tap,
- * so this runs synchronously in the click handler, before any await. It asks
- * only when the server has push on and the visitor has not answered yet.
+ * Requests browser notification permission synchronously inside a tap handler,
+ * without waiting for the VAPID public key network round-trip. Returns the
+ * in-flight permission promise so callers can refresh UI once the user answers.
  */
-export function askPushPermission(publicKey: string): void {
-  if (!publicKey || !pushSupported() || pendingPermission) return;
-  if (Notification.permission !== 'default') return;
+export function askPushPermissionNow(): Promise<NotificationPermission> | null {
+  if (!pushSupported()) return null;
+  if (pendingPermission) return pendingPermission;
+  if (Notification.permission !== 'default') return Promise.resolve(Notification.permission);
   pendingPermission = Notification.requestPermission()
     .catch((): NotificationPermission => 'default')
     .finally(() => {
       pendingPermission = null;
     });
+  return pendingPermission;
+}
+
+/**
+ * Asks for notification permission. Browsers only show the prompt from a tap,
+ * so this runs synchronously in the click handler, before any await. It asks
+ * only when the server has push on and the visitor has not answered yet.
+ */
+export function askPushPermission(publicKey: string): void {
+  if (!publicKey) return;
+  void askPushPermissionNow();
 }
 
 function permissionSettled(): Promise<NotificationPermission> {

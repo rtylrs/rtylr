@@ -19,8 +19,8 @@ import {
   isTransient,
 } from '../../shared/lib/apiError';
 import { usePagerSandbox, usePublicPagerClient } from '../../shared/lib/pagerClients';
-import { askPushPermission, usePushKey } from '../../shared/lib/pushAlerts';
-import { openScanTicket } from '../../shared/lib/scanSession';
+import { askPushPermission, askPushPermissionNow, usePushKey } from '../../shared/lib/pushAlerts';
+import { openScanTicket, rememberedScan } from '../../shared/lib/scanSession';
 
 type ScanState =
   'loading' | 'ready' | 'scanning' | 'unavailable' | 'venueBusy' | 'tooManyAttempts' | 'failed';
@@ -64,6 +64,9 @@ const Scan = ({ slug: givenSlug, onScanned }: ScanProps = {}): React.JSX.Element
   const [slow, setSlow] = useState(false);
   const mounted = useRef(true);
   const scanning = useRef(false);
+  const queryWantsNew =
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('new') === '1';
+  const hasRemembered = !sandbox && !queryWantsNew && Boolean(slug && rememberedScan(slug));
 
   useEffect(() => {
     mounted.current = true;
@@ -108,14 +111,17 @@ const Scan = ({ slug: givenSlug, onScanned }: ScanProps = {}): React.JSX.Element
     };
   }, [slug, client, i18n.language]);
 
-  const startScan = (): void => {
+  const startScan = (forceNew = false): void => {
     if (!slug || scanning.current) return;
     scanning.current = true;
     // Unlock sound, play a short confirmation chime, and ask notification
     // permission synchronously inside the tap handler before any await.
     readyAlarm.unlock();
     readyAlarm.blip();
-    askPushPermission(pushKey);
+    if (!sandbox) {
+      if (pushKey) askPushPermission(pushKey);
+      else void askPushPermissionNow();
+    }
 
     setState('scanning');
     setSlow(false);
@@ -125,7 +131,10 @@ const Scan = ({ slug: givenSlug, onScanned }: ScanProps = {}): React.JSX.Element
         () => {
           tries += 1;
           if (tries > 1 && mounted.current) setSlow(true);
-          return openScanTicket(client, slug, { remember: !sandbox });
+          return openScanTicket(client, slug, {
+            remember: !sandbox,
+            forceNew: forceNew || queryWantsNew,
+          });
         },
         DEPLOY_GAP_ATTEMPTS,
         DEPLOY_GAP_FIRST_DELAY_MS,
@@ -191,10 +200,19 @@ const Scan = ({ slug: givenSlug, onScanned }: ScanProps = {}): React.JSX.Element
             <h1 className="pager-gate-title">{t('pager.scan.readyTitle')}</h1>
             <p className="pager-gate-hint">{t('pager.scan.readyHint')}</p>
             <p className="pager-gate-pill">{t('pager.scan.permissionsNote')}</p>
-            <button type="button" className="pager-button pager-gate-cta" onClick={startScan}>
+            <button
+              type="button"
+              className="pager-button pager-gate-cta"
+              onClick={() => startScan(false)}
+            >
               <BellRing size={19} strokeWidth={2.4} aria-hidden="true" />
               <span>{t('pager.scan.startButton')}</span>
             </button>
+            {hasRemembered && (
+              <button type="button" className="pager-text-action" onClick={() => startScan(true)}>
+                {t('pager.scan.newOrderButton')}
+              </button>
+            )}
           </section>
 
           <footer className="pager-footer">
@@ -212,7 +230,7 @@ const Scan = ({ slug: givenSlug, onScanned }: ScanProps = {}): React.JSX.Element
       <p className="pager-error" role="alert">
         {t(`pager.scan.${state}`)}
       </p>
-      <button type="button" className="pager-button" onClick={startScan}>
+      <button type="button" className="pager-button" onClick={() => startScan(false)}>
         {t('pager.scan.retry')}
       </button>
     </div>

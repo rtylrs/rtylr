@@ -19,7 +19,8 @@
     "readyTitle": "فعّل تنبيه طلبك",
     "readyHint": "اضغط مرة واحدة لتفعيل الصوت والاهتزاز والإشعارات ليرنّ هاتفك فور جاهزية طلبك.",
     "startButton": "خذ رمزك وفعّل التنبيهات",
-    "permissionsNote": "صوت · اهتزاز · إشعارات"
+    "permissionsNote": "صوت · اهتزاز · إشعارات",
+    "newOrderButton": "ابدأ طلبًا جديدًا بدلًا من ذلك"
   },
   "ticket": {
     "pageTitle": "الطلب {{label}} · $t(pager.brand.name)",
@@ -61,7 +62,10 @@
     "readyTitleName": "{{label}}، طلبك جاهز",
     "codeExpired": "انتهت صلاحية هذا الرمز",
     "codeExpiredHint": "امسح رمز QR عند الكاونتر من جديد للحصول على رمز جديد.",
-    "alertsActive": "التنبيهات مفعّلة"
+    "alertsActive": "التنبيهات مفعّلة",
+    "newOrder": "ابدأ طلبًا جديدًا",
+    "newOrderLink": "تطلب مجددًا؟ احصل على رمز جديد",
+    "notificationsBlocked": "إشعارات المتصفح محظورة من إعدادات المتصفح. أبقِ هذه الصفحة مفتوحة ليظل الجرس يرنّ."
   },
   "push": {
     "readyTitle": "الطلب {{label}} جاهز",

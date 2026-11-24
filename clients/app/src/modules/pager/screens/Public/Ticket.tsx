@@ -15,10 +15,13 @@ import { DEPLOY_GAP_PATIENCE_MS } from '../../shared/lib/apiError';
 import { usePagerSandbox, usePublicPagerClient } from '../../shared/lib/pagerClients';
 import {
   askPushPermission,
+  askPushPermissionNow,
   followTicketByPush,
   iosTabWithoutPush,
+  notificationPermission,
   usePushKey,
 } from '../../shared/lib/pushAlerts';
+import { forgetScanByToken, rememberedSlugForToken } from '../../shared/lib/scanSession';
 import { ticketAlarmState } from '../../shared/lib/ticketAlarm';
 import { createTicketPoller, isOpenStatus, type TicketPoller } from '../../shared/lib/ticketPoller';
 
@@ -38,6 +41,12 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
   const pushKey = usePushKey();
   // Bumped by the "alert me" tap so a permission granted there subscribes.
   const [pushAsked, setPushAsked] = useState(0);
+  const [notifPerm, setNotifPerm] = useState<NotificationPermission | 'unsupported'>(() =>
+    typeof notificationPermission === 'function' ? notificationPermission() : 'unsupported'
+  );
+  const [venueSlug] = useState<string | null>(() =>
+    !sandbox ? rememberedSlugForToken(token) : null
+  );
 
   const [ticket, setTicket] = useState<GetPublicTicketResponse | null>(null);
   const [notFound, setNotFound] = useState(token === '');
@@ -88,6 +97,16 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
 
   const open = isOpenStatus(ticket?.status);
   const venueName = ticket?.venueName ?? '';
+  const ticketFinished =
+    ticket?.status === 'collected' ||
+    ticket?.status === 'expired' ||
+    (ticket?.status === 'ready' && Boolean(ticket.acknowledgedAt));
+
+  useEffect(() => {
+    if (!sandbox && ticketFinished && token) {
+      forgetScanByToken(token);
+    }
+  }, [sandbox, ticketFinished, token]);
   useEffect(() => {
     if (!open || !pushKey) return;
     const text = {
@@ -172,6 +191,7 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
     try {
       await publicPagerClient.acknowledgeTicket({ publicToken: token });
       setAnsweredRing(ringMark);
+      if (!sandbox && token) forgetScanByToken(token);
       poller.current?.pollNow();
     } catch {
       setAcknowledgeFailed(true);
@@ -179,6 +199,15 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
       setAcknowledging(false);
     }
   };
+
+  const needsPushPrompt = !sandbox && Boolean(pushKey) && notifPerm === 'default';
+  const showNotifyPanel =
+    isOpenStatus(status) && !acknowledged && (!alarm.unlocked || needsPushPrompt);
+  const showNewOrderCta =
+    !sandbox &&
+    Boolean(venueSlug) &&
+    (status === 'collected' || status === 'expired' || (ready && acknowledged));
+  const showNewOrderLink = !sandbox && Boolean(venueSlug) && isOpenStatus(status) && !acknowledged;
 
   const screenClass = [
     'pager-screen',
@@ -206,7 +235,7 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
         </div>
 
         <div className="pager-ticket">
-          {status === 'waiting' && alarm.unlocked && (
+          {status === 'waiting' && alarm.unlocked && !needsPushPrompt && (
             <p className="pager-live-pill">
               <Check size={14} strokeWidth={2.8} aria-hidden="true" />
               <span>{t('pager.ticket.alertsActive')}</span>
@@ -314,8 +343,8 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
           </div>
         )}
 
-        {/* Fallback if the visitor reloaded directly on /t/$token without going through the scan tap. */}
-        {isOpenStatus(status) && !acknowledged && !alarm.unlocked && (
+        {/* Shown when sound is still locked OR browser notification permission hasn't been asked yet. */}
+        {showNotifyPanel && (
           <div className="pager-panel">
             <p className="pager-text">{t('pager.ticket.notifyHint')}</p>
             <button
@@ -324,8 +353,19 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
               onClick={() => {
                 readyAlarm.unlock();
                 readyAlarm.blip();
-                askPushPermission(pushKey);
-                setPushAsked((count) => count + 1);
+                if (pushKey) askPushPermission(pushKey);
+                const pending =
+                  !sandbox && typeof askPushPermissionNow === 'function'
+                    ? askPushPermissionNow()
+                    : null;
+                if (pending) {
+                  void pending.then((next) => {
+                    setNotifPerm(next);
+                    setPushAsked((count) => count + 1);
+                  });
+                } else {
+                  setPushAsked((count) => count + 1);
+                }
               }}
             >
               <BellRing size={18} strokeWidth={2.3} aria-hidden="true" />
@@ -334,8 +374,28 @@ const Ticket = ({ token: givenToken }: { token?: string } = {}): React.JSX.Eleme
           </div>
         )}
 
-        {status === 'waiting' && !iosTab && alarm.unlocked && (
+        {!sandbox && isOpenStatus(status) && !acknowledged && notifPerm === 'denied' && (
+          <p className="pager-subtle-note" role="note">
+            {t('pager.ticket.notificationsBlocked')}
+          </p>
+        )}
+
+        {status === 'waiting' && !iosTab && alarm.unlocked && !needsPushPrompt && (
           <p className="pager-subtle-note">{t('pager.ticket.keepOpen')}</p>
+        )}
+
+        {showNewOrderCta && venueSlug && (
+          <div className="pager-actions">
+            <a href={`/${venueSlug}?new=1`} className="pager-button">
+              {t('pager.ticket.newOrder')}
+            </a>
+          </div>
+        )}
+
+        {showNewOrderLink && venueSlug && (
+          <a href={`/${venueSlug}?new=1`} className="pager-text-action">
+            {t('pager.ticket.newOrderLink')}
+          </a>
         )}
 
         {pollFailed && (

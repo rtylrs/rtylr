@@ -811,6 +811,24 @@
   color: var(--pager-muted);
 }
 
+.pager-text-action {
+  align-self: center;
+  padding: 8px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--pager-accent);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.pager-screen--ready .pager-text-action {
+  color: #ffffff;
+}
+
 /* ── High-Volume Redesigned Staff Counter Board ── */
 .pager-board-root {
   width: 100%;

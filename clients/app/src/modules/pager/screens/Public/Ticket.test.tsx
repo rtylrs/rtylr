@@ -14,14 +14,18 @@ vi.mock('../../../../shared/services/i18next', () => ({ selectLanguage: vi.fn() 
 
 const push = vi.hoisted(() => ({
   key: '',
+  perm: 'unsupported' as NotificationPermission | 'unsupported',
   ask: vi.fn(),
+  askNow: vi.fn(),
   follow: vi.fn(),
 }));
 // Device detection stays real: the iPhone tests fake the browser instead.
 vi.mock('../../shared/lib/pushAlerts', async (importOriginal) => ({
   iosTabWithoutPush: (await importOriginal<typeof PushAlerts>()).iosTabWithoutPush,
   usePushKey: () => push.key,
+  notificationPermission: () => push.perm,
   askPushPermission: push.ask,
+  askPushPermissionNow: push.askNow,
   followTicketByPush: push.follow,
 }));
 
@@ -79,10 +83,13 @@ const nextPoll = (): Promise<void> =>
 
 beforeEach(async () => {
   await initTestI18n('en');
+  window.localStorage.clear();
   vi.useFakeTimers({ shouldAdvanceTime: true });
   params.token = 'tok-1';
   push.key = '';
+  push.perm = 'unsupported';
   push.ask.mockReset();
+  push.askNow.mockReset().mockReturnValue(null);
   push.follow.mockReset().mockResolvedValue(true);
   api.getPublicTicket.mockReset();
   api.acknowledgeTicket.mockReset().mockResolvedValue({});
@@ -467,5 +474,34 @@ describe('pager ticket page', () => {
     unmount();
 
     expect(readyAlarm.getSnapshot().ringing).toBe(false);
+  });
+
+  it('keeps the notify button visible when sound is unlocked but notification permission is still default', async () => {
+    push.key = 'server-key';
+    push.perm = 'default';
+    push.askNow.mockReturnValue(Promise.resolve('granted' as NotificationPermission));
+    api.getPublicTicket.mockResolvedValue(scanned);
+    render(<Ticket />);
+
+    const notify = await screen.findByRole('button', { name: "Notify me when it's ready" });
+    fireEvent.click(notify);
+
+    expect(push.askNow).toHaveBeenCalledTimes(1);
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('button', { name: "Notify me when it's ready" })
+      ).not.toBeInTheDocument()
+    );
+  });
+
+  it('clears the remembered venue scan and shows Start a new order once collected', async () => {
+    window.localStorage.setItem('pager:scan:acme', 'tok-1');
+    window.localStorage.setItem('pager:token:tok-1', 'acme');
+    api.getPublicTicket.mockResolvedValue({ ...waiting, status: 'collected' });
+    render(<Ticket />);
+
+    const link = await screen.findByRole('link', { name: 'Start a new order' });
+    expect(link).toHaveAttribute('href', '/acme?new=1');
+    expect(window.localStorage.getItem('pager:scan:acme')).toBeNull();
   });
 });
