@@ -12,6 +12,7 @@ import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import { useCanAdministerProject, useCanEditTask } from '../../shared/lib/currentUser';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import { formatShortDate } from '../../shared/lib/utils';
+import { todayIso } from '../../shared/lib/dateUtils';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import TaskRow from '../../shared/components/TaskRow';
@@ -21,8 +22,6 @@ import BurndownChart from './BurndownChart';
 import CycleStateBadge from './CycleStateBadge';
 import EditCycleDialog from './EditCycleDialog';
 import { buildBurndown, cyclePercent } from './cycleModel';
-
-const todayIso = (): string => new Date().toISOString().slice(0, 10);
 
 /**
  * One cycle: its tasks, progress, a burndown and what was carried over into it

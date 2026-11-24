@@ -1,4 +1,9 @@
 import type { ApiCycle } from '../../shared/services/flowApi';
+import { addDays, toLocalIso } from '../../shared/lib/dateUtils';
+
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
+// A cycle is at most a few weeks; this only stops a bad date from looping.
+const MAX_DAYS = 366;
 
 export interface BurndownPoint {
   /** yyyy-mm-dd */
@@ -16,24 +21,10 @@ export interface BurndownItem {
   completedAt?: string;
 }
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-function parseDay(value: string): number {
-  return Date.UTC(
-    Number(value.slice(0, 4)),
-    Number(value.slice(5, 7)) - 1,
-    Number(value.slice(8, 10))
-  );
-}
-
-function formatDay(ms: number): string {
-  return new Date(ms).toISOString().slice(0, 10);
-}
-
 /**
- * One point per day of the cycle. `remaining` counts an item as done from the
- * day its completedAt falls on (UTC), so a task finished at 23:00 counts that
- * day. Days after `today` have no actual value.
+ * One point per day of the cycle, in the viewer's time zone. `remaining`
+ * counts an item as done from the local day its completedAt falls on. Days
+ * after `today` have no actual value.
  */
 export function buildBurndown(
   startDate: string,
@@ -41,29 +32,29 @@ export function buildBurndown(
   items: readonly BurndownItem[],
   today: string
 ): BurndownPoint[] {
-  if (!startDate || !endDate) return [];
-  const start = parseDay(startDate);
-  const end = parseDay(endDate);
-  if (Number.isNaN(start) || Number.isNaN(end) || end < start) return [];
-  const todayMs = parseDay(today);
+  if (!ISO_DAY.test(startDate) || !ISO_DAY.test(endDate) || endDate < startDate) return [];
+  const doneDays = items.map((item) => {
+    if (!item.completedAt) return null;
+    const at = new Date(item.completedAt);
+    return Number.isNaN(at.getTime()) ? null : toLocalIso(at);
+  });
   const total = items.reduce((sum, item) => sum + item.weight, 0);
-  const days = Math.round((end - start) / DAY_MS);
-  const points: BurndownPoint[] = [];
-  for (let i = 0; i <= days; i++) {
-    const day = start + i * DAY_MS;
-    const dayEnd = day + DAY_MS;
-    const done = items.reduce((sum, item) => {
-      if (!item.completedAt) return sum;
-      const at = Date.parse(item.completedAt);
-      return !Number.isNaN(at) && at < dayEnd ? sum + item.weight : sum;
-    }, 0);
-    points.push({
-      date: formatDay(day),
-      remaining: day <= todayMs ? total - done : null,
-      ideal: days === 0 ? 0 : Math.round(total * (1 - i / days) * 10) / 10,
-    });
+  const days: string[] = [];
+  for (let day = startDate; day <= endDate && days.length <= MAX_DAYS; day = addDays(day, 1)) {
+    days.push(day);
   }
-  return points;
+  const span = days.length - 1;
+  return days.map((day, i) => {
+    const done = items.reduce((sum, item, j) => {
+      const doneDay = doneDays[j];
+      return doneDay !== null && doneDay <= day ? sum + item.weight : sum;
+    }, 0);
+    return {
+      date: day,
+      remaining: day <= today ? total - done : null,
+      ideal: span === 0 ? 0 : Math.round(total * (1 - i / span) * 10) / 10,
+    };
+  });
 }
 
 export function cyclePercent(cycle: Pick<ApiCycle, 'scope' | 'completed'>): number {
@@ -72,8 +63,5 @@ export function cyclePercent(cycle: Pick<ApiCycle, 'scope' | 'completed'>): numb
 
 /** The end date `weeks` after a start date, inclusive of the start day. */
 export function endDateForLength(startDate: string, weeks: number): string {
-  if (!startDate) return '';
-  const start = parseDay(startDate);
-  if (Number.isNaN(start)) return '';
-  return formatDay(start + (weeks * 7 - 1) * DAY_MS);
+  return ISO_DAY.test(startDate) ? addDays(startDate, weeks * 7 - 1) : '';
 }

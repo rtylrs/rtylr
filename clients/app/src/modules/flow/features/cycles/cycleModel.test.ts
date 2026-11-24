@@ -3,13 +3,13 @@ import { buildBurndown, endDateForLength } from './cycleModel';
 
 describe('buildBurndown', () => {
   const items = [
-    { weight: 1, completedAt: '2026-11-17T09:00:00Z' },
-    { weight: 1, completedAt: '2026-11-18T23:30:00Z' },
+    { weight: 1, completedAt: '2026-11-17T09:00:00' },
+    { weight: 1, completedAt: '2026-11-18T23:30:00' },
     { weight: 1 },
     { weight: 1 },
   ];
 
-  it('drops remaining work on the day each task was finished', () => {
+  it('drops remaining work on the local day each task was finished', () => {
     const points = buildBurndown('2026-11-16', '2026-11-19', items, '2026-11-19');
     expect(points.map((p) => p.remaining)).toEqual([4, 3, 2, 2]);
     expect(points.map((p) => p.ideal)).toEqual([4, 2.7, 1.3, 0]);
@@ -24,7 +24,7 @@ describe('buildBurndown', () => {
     const points = buildBurndown(
       '2026-11-16',
       '2026-11-17',
-      [{ weight: 5, completedAt: '2026-11-16T10:00:00Z' }, { weight: 3 }],
+      [{ weight: 5, completedAt: '2026-11-16T10:00:00' }, { weight: 3 }],
       '2026-11-17'
     );
     expect(points.map((p) => p.remaining)).toEqual([3, 3]);

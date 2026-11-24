@@ -934,7 +934,7 @@
     "customLength": "Dates personnalisées",
     "state": {
       "upcoming": "À venir",
-      "active": "Active",
+      "active": "En cours",
       "completed": "Terminée"
     },
     "edit": {
@@ -950,7 +950,7 @@
       "edit": "Modifier",
       "delete": "Supprimer",
       "progress": "Progression",
-      "burndown": "Burndown",
+      "burndown": "Reste à faire",
       "burndownEmpty": "Le burndown s'affiche dès que l'itération a des dates.",
       "burndownSummary": "{{remaining}} {{unit}} restants",
       "remaining": "Restant",
