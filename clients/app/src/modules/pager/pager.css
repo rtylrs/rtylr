@@ -898,6 +898,12 @@
   gap: 6px;
 }
 
+.pager-board-toggle-active {
+  background: #e6f4ec !important;
+  border-color: rgba(14, 77, 59, 0.38) !important;
+  color: #0e4d3b !important;
+}
+
 .pager-board-drawer {
   padding: 14px 16px;
   border-radius: 14px;
@@ -996,17 +1002,23 @@
   }
 
   .pager-board-section {
-    display: block;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pager-board-section > .pager-board-lane {
+    flex: 1;
   }
 
   .pager-board-lanes {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
+    align-items: stretch;
   }
 }
 
 .pager-board-dock,
 .pager-board-lane {
+  min-width: 0;
   padding: 14px;
   border-radius: 16px;
   background: var(--dash-card, #ffffff);
@@ -1235,12 +1247,13 @@
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 248px), 1fr));
 }
 
 .pager-board-tile {
-  padding: 11px 12px;
+  min-width: 0;
+  padding: 12px;
   border-radius: 12px;
   border: 1px solid var(--dash-border, #dce3de);
   background: var(--dash-bg-subtle, #fbfcfb);
@@ -1303,4 +1316,26 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
+}
+
+.pager-board-tile-actions .pager-board-ready-btn,
+.pager-board-tile-actions .pager-board-collect-btn {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-inline: 12px;
+}
+
+.pager-board-tile-actions .pager-board-icon-btn {
+  width: 40px;
+  min-width: 40px;
+  padding: 0;
+  flex-shrink: 0;
+  border-radius: 10px;
+}
+
+.rennili-staff .pager-board-tile-actions .pager-board-icon-btn,
+.pager-try-board .pager-board-tile-actions .pager-board-icon-btn {
+  width: 44px;
+  min-width: 44px;
 }

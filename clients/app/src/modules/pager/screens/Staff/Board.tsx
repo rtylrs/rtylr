@@ -389,8 +389,9 @@ const Board = (): React.JSX.Element => {
                 {t('pager.board.markReady')}
               </Button>
               <Button
-                size="sm"
-                variant="ghost"
+                size="icon"
+                variant="outline"
+                className="pager-board-icon-btn"
                 aria-label={t('pager.board.actionFor', {
                   action: t('pager.board.remove'),
                   label: ticket.label ?? '',
@@ -418,8 +419,9 @@ const Board = (): React.JSX.Element => {
                 {t('pager.board.collect')}
               </Button>
               <Button
-                size="sm"
+                size="icon"
                 variant="outline"
+                className="pager-board-icon-btn"
                 aria-label={t('pager.board.actionFor', {
                   action: t('pager.board.remind'),
                   label: ticket.label ?? '',
@@ -427,11 +429,12 @@ const Board = (): React.JSX.Element => {
                 disabled={isBusy}
                 onClick={() => changeTicket.mutate({ id: ticket.id ?? '', action: 'remind' })}
               >
-                <BellRing size={14} aria-hidden="true" />
+                <BellRing size={15} aria-hidden="true" />
               </Button>
               <Button
-                size="sm"
-                variant="ghost"
+                size="icon"
+                variant="outline"
+                className="pager-board-icon-btn"
                 aria-label={t('pager.board.actionFor', {
                   action: t('pager.board.undo'),
                   label: ticket.label ?? '',
@@ -439,7 +442,7 @@ const Board = (): React.JSX.Element => {
                 disabled={isBusy}
                 onClick={() => changeTicket.mutate({ id: ticket.id ?? '', action: 'undo' })}
               >
-                <RotateCcw size={14} aria-hidden="true" />
+                <RotateCcw size={15} aria-hidden="true" />
               </Button>
             </>
           )}
@@ -502,7 +505,8 @@ const Board = (): React.JSX.Element => {
             {!sandbox && customerLink && (
               <Button
                 size="sm"
-                variant={qrOpen ? 'default' : 'outline'}
+                variant="outline"
+                className={qrOpen ? 'pager-board-toggle-active' : undefined}
                 aria-expanded={qrOpen}
                 onClick={() => setQrOpen((openState) => !openState)}
               >
@@ -530,7 +534,8 @@ const Board = (): React.JSX.Element => {
             )}
             <Button
               size="sm"
-              variant={settingsOpen ? 'default' : 'outline'}
+              variant="outline"
+              className={settingsOpen ? 'pager-board-toggle-active' : undefined}
               aria-expanded={settingsOpen}
               onClick={() => setSettingsOpen((openState) => !openState)}
             >
