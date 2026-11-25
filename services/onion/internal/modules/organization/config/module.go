@@ -19,8 +19,13 @@ import (
 )
 
 type Module struct {
-	ConfigService *application.Service
-	CustomDomains *custom_domains.API
+	ConfigService       *application.Service
+	CustomDomains       *custom_domains.API
+	customDomainService *custom_domains.Service
+}
+
+func (m *Module) ResolveVerifiedDomainBusinessID(ctx context.Context, host string) (int64, bool, error) {
+	return m.customDomainService.ResolveVerifiedBusinessID(ctx, host)
 }
 
 type emailQueueAdapter struct{ db *sql.DB }
@@ -41,8 +46,9 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	customDomainService := custom_domains.NewService(ctx, db)
 
 	return &Module{
-		ConfigService: configService,
-		CustomDomains: custom_domains.NewAPI(customDomainService),
+		ConfigService:       configService,
+		CustomDomains:       custom_domains.NewAPI(customDomainService),
+		customDomainService: customDomainService,
 	}
 }
 func (m *Module) RegisterAPI(mux *http.ServeMux) {

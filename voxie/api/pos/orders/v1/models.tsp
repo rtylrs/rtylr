@@ -156,6 +156,20 @@ model CreatePublicOrderRequest {
   @encode(string)
   owner_id: int64;
 
+  @encode(string)
+  location_id?: int64;
+
+  @encode(string)
+  table_id?: int64;
+
+  /** dine_in, self_service, pickup, takeaway, delivery, or online. */
+  fulfillment_mode?: string;
+
+  delivery_address?: string;
+  currency_code?: string;
+  loyalty_phone?: string;
+  crm_opt_in?: boolean;
+
   customer_name: string;
   customer_phone: string;
   customer_email: string;
@@ -174,6 +188,9 @@ model CreatePublicOrderResponse {
 
   /** Opaque credential required to retrieve this order's public status. */
   public_token: string;
+
+  /** Optional third-party payment gateway redirect URL configured by the branch. */
+  payment_redirect_url?: string;
 }
 
 // ── Get Order Detail ──────────────────────────────────────────────

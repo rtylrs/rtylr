@@ -252,7 +252,8 @@
     "closeDuplicateConfirm": "Close duplicate",
     "closeDuplicateKeepOpen": "Keep open",
     "noCycle": "Backlog (no cycle)",
-    "noCyclesInProject": "No open cycles"
+    "noCyclesInProject": "No open cycles",
+    "startDate": "Start date"
   },
   "time": {
     "add": {
@@ -1052,10 +1053,28 @@
   },
   "projectTimeline": {
     "pageTitle": "Timeline · rtylr",
-    "emptyTitle": "No tasks with due dates yet",
-    "emptyDescription": "Add due dates to see the timeline.",
-    "goToBoardCta": "Go to Board",
-    "taskColumn": "Task"
+    "emptyTitle": "No dated tasks yet",
+    "emptyDescription": "Give a task a start or due date to see it on the timeline.",
+    "goToBoardCta": "Go to List",
+    "taskColumn": "Task",
+    "noMilestone": "No milestone",
+    "unassigned": "Unassigned",
+    "groupBy": "Group by",
+    "group": {
+      "none": "No grouping",
+      "assignee": "Assignee",
+      "milestone": "Milestone"
+    },
+    "zoom": "Zoom",
+    "zoomLevel": {
+      "days": "Days",
+      "weeks": "Weeks"
+    },
+    "unscheduled_one": "{{count}} task without dates:",
+    "unscheduled_other": "{{count}} tasks without dates:",
+    "more_one": "and {{count}} more",
+    "more_other": "and {{count}} more",
+    "barLabel": "{{title}}, {{start}} to {{end}}"
   },
   "projectDashboard": {
     "pageTitle": "Project dashboard · rtylr",

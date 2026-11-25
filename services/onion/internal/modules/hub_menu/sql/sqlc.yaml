@@ -5,6 +5,7 @@ sql:
     schema:
       - "schema/hub/hub_menu_banners.sql"
       - "schema/hub/hub_navigation_menus.sql"
+      - "schema/hub/hub_menu_builder.sql"
     gen:
       go:
         package: "sqlc"

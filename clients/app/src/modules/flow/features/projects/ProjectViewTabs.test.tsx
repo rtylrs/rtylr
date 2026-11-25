@@ -67,12 +67,13 @@ function renderTabs(
 }
 
 describe('ProjectViewTabs preview-route gating', () => {
-  it('hides Overview and Timeline tabs when the preview-routes flag is off', () => {
+  it('hides Overview, but not Timeline, when the preview-routes flag is off', () => {
     mockUseFeatureFlag.mockReturnValue(false);
     renderTabs();
 
     expect(screen.queryByText('Overview')).not.toBeInTheDocument();
-    expect(screen.queryByText('Timeline')).not.toBeInTheDocument();
+    // Timeline shipped with T-342.
+    expect(screen.getByText('Timeline')).toBeInTheDocument();
 
     // The Dashboard view shows server figures since T-567, so it is no longer
     // a preview.

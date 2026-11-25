@@ -1,11 +1,17 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate, useRouter } from '@tanstack/react-router';
 import { FullScreenLoader, HelmetContainer } from '@voxire/components';
-import { GridLayout, MenuCategoryData, BusinessInfo } from '@voxire/menu';
+import { GridLayout, MenuCategoryData, BusinessInfo, type FulfillmentMode } from '@voxire/menu';
 import { EmptyState } from '@voxire/ui';
 import { SearchX, MapPinOff, UtensilsCrossed } from 'lucide-react';
 import { usePublicBusinessBySlug, usePublicMenu } from '../../../shared/hooks/usePublicMenu';
+import {
+  submitPublicTableActionSafe,
+  trackPublicMenuEventSafe,
+  translationKey,
+  usePublicBrandBundleSafe,
+} from '../../../shared/hooks/usePublicBrandBundle';
 import { useCartStore } from '../../../shared/stores/cartStore';
 import { menuCheckoutPath, menuHomePath } from '../../../menuPaths';
 
@@ -41,11 +47,45 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
     clearCart,
     setBusinessId,
     setLocationId,
+    setTable,
+    setAvailableFulfillmentModes,
     setCurrency,
     addItem,
     updateQuantity,
     businessId: cartBusinessId,
   } = useCartStore();
+
+  const [activeLocale, setActiveLocale] = useState<string>('');
+  const [activeCurrency, setActiveCurrency] = useState<string>('');
+  const brandBundle = usePublicBrandBundleSafe(
+    businessId,
+    location?.id ?? null,
+    activeLocale || undefined
+  );
+
+  const tableContext = useMemo(() => {
+    if (typeof window === 'undefined') return { tableId: undefined, tableLabel: undefined };
+    const params = new URLSearchParams(window.location.search);
+    const rawTable = params.get('table');
+    const parsedTable = rawTable ? Number(rawTable) : NaN;
+    const tableId = Number.isFinite(parsedTable) && parsedTable > 0 ? parsedTable : undefined;
+    const tableLabel = params.get('tableLabel') || (tableId ? `Table ${tableId}` : undefined);
+    return { tableId, tableLabel };
+  }, []);
+
+  const effectiveLocale = activeLocale || brandBundle?.defaultLocale || 'en';
+
+  useEffect(() => {
+    if (!businessId || !location?.id) return;
+    trackPublicMenuEventSafe({
+      businessId,
+      locationId: location.id,
+      tableId: tableContext.tableId,
+      eventType: tableContext.tableId ? 'qr_scan' : 'menu_view',
+      locale: effectiveLocale,
+      currency: activeCurrency || brandBundle?.defaultCurrency || menu?.business.currency,
+    });
+  }, [businessId, location?.id, tableContext.tableId]);
 
   React.useEffect(() => {
     if (businessId) {
@@ -56,31 +96,95 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
       setBusinessId(businessId);
     }
     if (location?.id) setLocationId(location.id);
-    if (menu?.business.currency) setCurrency(menu.business.currency);
+    if (typeof setTable === 'function' && tableContext.tableId) {
+      setTable(tableContext.tableId, tableContext.tableLabel);
+    }
+    if (
+      typeof setAvailableFulfillmentModes === 'function' &&
+      brandBundle?.config.features?.fulfillmentModes
+    ) {
+      const fm = brandBundle.config.features.fulfillmentModes;
+      const enabled: FulfillmentMode[] = [];
+      if (fm.dineIn) enabled.push('dine_in');
+      if (fm.selfService) enabled.push('self_service');
+      if (fm.pickup) enabled.push('pickup');
+      if (fm.delivery) enabled.push('delivery');
+      if (enabled.length > 0) setAvailableFulfillmentModes(enabled);
+    }
+    const resolvedCurrency =
+      activeCurrency || brandBundle?.defaultCurrency || menu?.business.currency;
+    if (resolvedCurrency) setCurrency(resolvedCurrency);
   }, [
     businessId,
     cartBusinessId,
     location?.id,
+    activeCurrency,
+    brandBundle?.defaultCurrency,
+    brandBundle?.config.features?.fulfillmentModes,
     menu?.business.currency,
+    tableContext.tableId,
+    tableContext.tableLabel,
     clearCart,
     setBusinessId,
     setLocationId,
+    setTable,
+    setAvailableFulfillmentModes,
     setCurrency,
   ]);
 
   const categories = useMemo<MenuCategoryData[]>(() => {
     if (!menu) return [];
-    const items = menu.items.map((i) => ({
-      id: String(i.id),
-      name: i.name,
-      price: i.salePrice,
-      currency: menu.business.currency,
-      description: undefined,
-      image: i.imageUrl,
-      available: i.isActive,
+    const overrides = brandBundle?.branchItems;
+    const tr = brandBundle?.translations;
+
+    const visibleItems = menu.items
+      .filter((i) => {
+        const ov = overrides?.get(i.id);
+        return ov ? ov.isVisible : true;
+      })
+      .sort((a, b) => {
+        const orderA = overrides?.get(a.id)?.displayOrder ?? 0;
+        const orderB = overrides?.get(b.id)?.displayOrder ?? 0;
+        return orderA - orderB;
+      });
+
+    const grouped = new Map<string, MenuCategoryData['items']>();
+    for (const i of visibleItems) {
+      const ov = overrides?.get(i.id);
+      const localizedName =
+        tr?.get(translationKey('item', i.id, effectiveLocale, 'name')) || i.name;
+      const localizedDesc =
+        tr?.get(translationKey('item', i.id, effectiveLocale, 'description')) ||
+        i.description ||
+        undefined;
+      const catName = i.category?.trim() || t('locationmenu.allItems');
+      const list = grouped.get(catName) ?? [];
+      list.push({
+        id: String(i.id),
+        name: localizedName,
+        price: ov?.hasPriceOverride ? ov.priceOverride : i.salePrice,
+        currency: activeCurrency || brandBundle?.defaultCurrency || menu.business.currency,
+        description: localizedDesc,
+        image: i.imageUrl,
+        badges: ov?.featuredBadge ? [ov.featuredBadge] : undefined,
+        dietaryTags: ov?.dietaryTags,
+        allergens: ov?.allergens,
+        calories: ov?.calories,
+        available: i.isActive,
+      });
+      grouped.set(catName, list);
+    }
+
+    if (grouped.size <= 1) {
+      const onlyItems = Array.from(grouped.values())[0] ?? [];
+      return [{ id: 'all', name: t('locationmenu.allItems'), items: onlyItems }];
+    }
+    return Array.from(grouped.entries()).map(([catName, items], idx) => ({
+      id: `cat-${idx}`,
+      name: catName,
+      items,
     }));
-    return [{ id: 'all', name: t('locationmenu.allItems'), items }];
-  }, [menu, t]);
+  }, [menu, brandBundle, effectiveLocale, activeCurrency, t]);
 
   if (bizLoading || menuLoading) return <FullScreenLoader />;
   if (bizError || !biz) {
@@ -180,18 +284,60 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
     );
   }
 
+  const orderingEnabled =
+    isOnlineOrderingEnabled() && (brandBundle?.config.features?.enableOrdering ?? true);
+
   return (
     <>
       <HelmetContainer title={t('locationmenu.pageTitle')} />
       <GridLayout
         business={businessInfo}
         categories={categories}
-        enableCart={isOnlineOrderingEnabled()}
+        config={brandBundle?.config}
+        banners={brandBundle?.banners}
+        currencies={brandBundle?.currencies}
+        activeCurrencyCode={activeCurrency || brandBundle?.defaultCurrency}
+        onCurrencyChange={(code) => setActiveCurrency(code)}
+        availableLocales={brandBundle?.enabledLocales}
+        activeLocale={effectiveLocale}
+        onLocaleChange={(loc) => setActiveLocale(loc)}
+        stampCards={brandBundle?.stampCards}
+        tableLabel={tableContext.tableLabel}
+        onTableAction={
+          tableContext.tableId && businessId
+            ? (actionType) =>
+                submitPublicTableActionSafe({
+                  businessId,
+                  locationId: location.id,
+                  tableId: tableContext.tableId,
+                  tableLabel: tableContext.tableLabel,
+                  actionType,
+                })
+            : undefined
+        }
+        onAddItem={(item) => {
+          if (businessId) {
+            trackPublicMenuEventSafe({
+              businessId,
+              locationId: location.id,
+              tableId: tableContext.tableId,
+              eventType: 'add_to_cart',
+              itemId: Number(item.id),
+              locale: effectiveLocale,
+              currency: activeCurrency || brandBundle?.defaultCurrency,
+            });
+          }
+        }}
+        enableCart={orderingEnabled}
         onCheckout={
-          isOnlineOrderingEnabled()
+          orderingEnabled
             ? (cartItems) => {
                 clearCart();
                 setBusinessId(biz.business.id);
+                if (location?.id) setLocationId(location.id);
+                if (typeof setTable === 'function' && tableContext.tableId) {
+                  setTable(tableContext.tableId, tableContext.tableLabel);
+                }
                 cartItems.forEach((item) => {
                   const menuItemId = Number(item.id);
                   addItem({ menuItemId, name: item.name, unitPrice: item.price });

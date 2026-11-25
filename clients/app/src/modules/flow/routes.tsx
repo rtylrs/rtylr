@@ -143,7 +143,7 @@ export function createFlowRoutes<TParent extends AnyRoute>(parent: TParent) {
   const projectTimelineRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/p/$projectId/timeline',
-    component: () => previewRoute(<ProjectTimeline />),
+    component: () => withLayout(<ProjectTimeline />),
   });
 
   const projectCalendarRoute = createRoute({

@@ -6,7 +6,7 @@ import { AutomationsIcon } from '@voxire/ui';
 import { CaretIcon } from '@voxire/caret';
 import type { ComponentType } from 'react';
 import { Bell, UserPlus, Plus } from 'lucide-react';
-import { resolveAppUrl } from '@voxire/config';
+import { RENNILI_URL, resolveAppUrl } from '@voxire/config';
 import { canEffectiveAccess, hasEffectiveAppAccess } from '@voxire/permissions';
 import { APP_ICONS, WORKSPACE_APP_IDS } from '../../shared/config/appIcons';
 import { APP_NAMES } from '../../shared/config/appNames';
@@ -16,7 +16,10 @@ import { erpNavItems } from '../../modules/erp/navigation';
 import { crmNavItems, crmSalesNavItems } from '../../modules/crm/navigation';
 import { flowNavItems } from '../../modules/flow/navigation';
 import { insightsNavItems } from '../../modules/insights/navigation';
+import { RenniliMark } from '../../modules/pager/shared/components/RenniliLogo';
 import { rawNavItems, rawMenuSubItems, settingsNavItems, type PortalNavItem } from '../navigation';
+
+const RENNILI_BOARD_URL = new URL('/board', RENNILI_URL).href;
 
 export const COMMAND_GROUPS = [
   'apps',
@@ -104,6 +107,16 @@ export function getPortalCommands(
                 : ['finance', 'hr', 'recruit'].includes(id)
                   ? { path: `/${id}` }
                   : { href: resolveAppUrl(id) },
+    });
+  }
+  if (canAccessPortalPath(user, '/pager')) {
+    commands.push({
+      id: 'app-rennili',
+      label: t('appNames.short.rennili'),
+      description: t('appNames.desc.rennili'),
+      group: 'apps',
+      icon: RenniliMark,
+      destination: { href: RENNILI_BOARD_URL },
     });
   }
   const addPages = (pages: PortalNavItem[], group: CommandGroup, namespace = 'common.nav') => {

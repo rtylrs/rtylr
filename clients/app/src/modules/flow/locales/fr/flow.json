@@ -253,7 +253,8 @@
     "closeDuplicateConfirm": "Fermer le doublon",
     "closeDuplicateKeepOpen": "Laisser ouverte",
     "noCycle": "Carnet (aucun cycle)",
-    "noCyclesInProject": "Aucun cycle ouvert"
+    "noCyclesInProject": "Aucun cycle ouvert",
+    "startDate": "Date de début"
   },
   "time": {
     "add": {
@@ -1064,10 +1065,30 @@
   },
   "projectTimeline": {
     "pageTitle": "Chronologie · rtylr",
-    "emptyTitle": "Aucune tâche avec date d'échéance",
-    "emptyDescription": "Ajoutez des dates d'échéance pour voir la chronologie.",
-    "goToBoardCta": "Aller au tableau",
-    "taskColumn": "Tâche"
+    "emptyTitle": "Aucune tâche datée",
+    "emptyDescription": "Donnez une date de début ou d’échéance à une tâche pour la voir sur la chronologie.",
+    "goToBoardCta": "Aller à la liste",
+    "taskColumn": "Tâche",
+    "noMilestone": "Sans jalon",
+    "unassigned": "Non assignée",
+    "groupBy": "Grouper par",
+    "group": {
+      "none": "Aucun groupe",
+      "assignee": "Assigné",
+      "milestone": "Jalon"
+    },
+    "zoom": "Échelle",
+    "zoomLevel": {
+      "days": "Jours",
+      "weeks": "Semaines"
+    },
+    "unscheduled_one": "{{count}} tâche sans dates :",
+    "unscheduled_many": "{{count}} tâches sans dates :",
+    "unscheduled_other": "{{count}} tâches sans dates :",
+    "more_one": "et {{count}} de plus",
+    "more_many": "et {{count}} de plus",
+    "more_other": "et {{count}} de plus",
+    "barLabel": "{{title}}, du {{start}} au {{end}}"
   },
   "projectDashboard": {
     "pageTitle": "Tableau de bord du projet · rtylr",
