@@ -46,3 +46,52 @@ export function downloadCsv(fileName: string, csv: string): void {
   // Revoked after the click has been handled, not during it.
   setTimeout(() => URL.revokeObjectURL(url), 0);
 }
+
+/**
+ * Reads a CSV document into rows of cells (RFC 4180: quoted fields, doubled
+ * quotes, line breaks inside quotes, CRLF or LF). A leading byte order mark is
+ * dropped, and a leading apostrophe that buildCsv added to stop a formula is
+ * kept, since the reader cannot tell it from a real one.
+ */
+export function parseCsv(text: string): string[][] {
+  const input = text.startsWith('﻿') ? text.slice(1) : text;
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cell = '';
+  let quoted = false;
+  for (let i = 0; i < input.length; i++) {
+    const ch = input[i];
+    if (quoted) {
+      if (ch === '"') {
+        if (input[i + 1] === '"') {
+          cell += '"';
+          i++;
+        } else {
+          quoted = false;
+        }
+      } else {
+        cell += ch;
+      }
+      continue;
+    }
+    if (ch === '"' && cell === '') {
+      quoted = true;
+    } else if (ch === ',') {
+      row.push(cell);
+      cell = '';
+    } else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && input[i + 1] === '\n') i++;
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = '';
+    } else {
+      cell += ch;
+    }
+  }
+  if (cell !== '' || row.length > 0) {
+    row.push(cell);
+    rows.push(row);
+  }
+  return rows.filter((r) => r.some((c) => c.trim() !== ''));
+}

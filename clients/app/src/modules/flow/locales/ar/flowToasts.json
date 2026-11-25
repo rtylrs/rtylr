@@ -40,7 +40,16 @@
     "epicDeleted_two": "حُذفت الملحمة. بقيت مهمتان بلا ملحمة",
     "epicDeleted_few": "حُذفت الملحمة. بقيت {{count}} مهام بلا ملحمة",
     "epicDeleted_many": "حُذفت الملحمة. بقيت {{count}} مهمة بلا ملحمة",
-    "epicDeleted_other": "حُذفت الملحمة. بقيت {{count}} مهمة بلا ملحمة"
+    "epicDeleted_other": "حُذفت الملحمة. بقيت {{count}} مهمة بلا ملحمة",
+    "duplicated": "تم التكرار باسم {{id}}",
+    "duplicateFailed": "فشل تكرار المهمة",
+    "imported_zero": "لم تُستورد أي مهمة",
+    "imported_one": "تم استيراد مهمة واحدة",
+    "imported_two": "تم استيراد مهمتين",
+    "imported_few": "تم استيراد {{count}} مهام",
+    "imported_many": "تم استيراد {{count}} مهمة",
+    "imported_other": "تم استيراد {{count}} مهمة",
+    "importFailed": "فشل استيراد المهام"
   },
   "comment": {
     "postFailed": "تعذّر نشر التعليق",

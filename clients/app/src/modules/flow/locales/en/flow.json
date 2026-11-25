@@ -252,7 +252,10 @@
     "closeDuplicateConfirm": "Close duplicate",
     "closeDuplicateKeepOpen": "Keep open",
     "noCycle": "Backlog (no cycle)",
-    "noCyclesInProject": "No open cycles"
+    "noCyclesInProject": "No open cycles",
+    "duplicate": "Duplicate",
+    "duplicateHint": "Copy this task with its description, fields and subtasks",
+    "duplicateTitle": "{{title}} (copy)"
   },
   "time": {
     "add": {
@@ -1517,6 +1520,48 @@
       "rowLabel": "Where {{title}} goes",
       "confirm": "Complete cycle",
       "completing": "Completing..."
+    }
+  },
+  "taskImport": {
+    "open": "Import CSV",
+    "title": "Import tasks from CSV",
+    "description": "Up to {{max}} tasks at once. Check the preview, then import.",
+    "choose": "Choose a CSV file",
+    "chooseAnother": "Choose another file",
+    "sampleFile": "Download a sample file",
+    "columns": "Columns: Title (required), Description, Assignee email, Due date (YYYY-MM-DD), Priority (none, low, medium, high, urgent), Effort (e.g. 90, 1h, 1h 30m), Section (a status of this project), Subtasks (separated by ;).",
+    "noTitleColumn": "The file has no Title column, so no task can be created from it.",
+    "summary_one": "{{count}} task ready to import.",
+    "summary_other": "{{count}} tasks ready to import.",
+    "summaryIssues_one": "{{count}} row, {{issues}} with problems. Fix the file and choose it again.",
+    "summaryIssues_other": "{{count}} rows, {{issues}} with problems. Fix the file and choose it again.",
+    "truncated": "Only the first {{max}} rows are read.",
+    "more_one": "And {{count}} more row.",
+    "more_other": "And {{count}} more rows.",
+    "refused": "Nothing was imported. These rows were refused:",
+    "rowError": "Row {{row}}: {{message}}",
+    "importing": "Importing...",
+    "import_one": "Import {{count}} task",
+    "import_other": "Import {{count}} tasks",
+    "col": {
+      "title": "Title",
+      "assignee": "Assignee",
+      "due": "Due",
+      "section": "Section",
+      "subtasks": "Subtasks"
+    },
+    "issue": {
+      "noTitle": "No title",
+      "unknownAssignee": "No team member has the email {{value}}",
+      "badDate": "Due date \"{{value}}\" is not YYYY-MM-DD",
+      "badPriority": "Priority \"{{value}}\" is not none, low, medium, high or urgent",
+      "badEffort": "Effort \"{{value}}\" is not a duration",
+      "unknownSection": "No status called \"{{value}}\" in this project"
+    },
+    "sample": {
+      "title": "Build the login page",
+      "description": "What and why, where to look, steps, QA",
+      "subtasks": "Design; Build; Test"
     }
   }
 }

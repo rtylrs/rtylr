@@ -31,7 +31,13 @@
     "parentFailed": "Impossible de déplacer la tâche",
     "epicDeleted_one": "Épopée supprimée. {{count}} tâche conservée sans épopée",
     "epicDeleted_many": "Épopée supprimée. {{count}} tâches conservées sans épopée",
-    "epicDeleted_other": "Épopée supprimée. {{count}} tâches conservées sans épopée"
+    "epicDeleted_other": "Épopée supprimée. {{count}} tâches conservées sans épopée",
+    "duplicated": "Dupliquée en {{id}}",
+    "duplicateFailed": "Échec de la duplication de la tâche",
+    "imported_one": "{{count}} tâche importée",
+    "imported_many": "{{count}} tâches importées",
+    "imported_other": "{{count}} tâches importées",
+    "importFailed": "Échec de l’import des tâches"
   },
   "comment": {
     "postFailed": "Impossible de publier le commentaire",

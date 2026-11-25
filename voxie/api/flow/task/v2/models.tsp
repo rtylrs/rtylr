@@ -1480,3 +1480,76 @@ model SetTaskFieldValuesResponse {
    */
   field_values: Record<TaskFieldValue>;
 }
+
+model DuplicateTaskRequest {
+  @minValueExclusive(0)
+  @encode(string)
+  id: int64;
+
+  /** title for the copy; empty keeps the original title. */
+  @maxLength(500)
+  title?: string;
+}
+
+model DuplicateTaskResponse {
+  task: FlowTask;
+}
+
+/** ImportTaskRow is one task to create. Ids are resolved by the client from names and emails. */
+model ImportTaskRow {
+  @Onkt.required
+  @maxLength(500)
+  title: string;
+
+  @maxLength(20000)
+  description?: string;
+
+  @encode(string)
+  assignee_id?: int64;
+
+  /** due_date is YYYY-MM-DD. */
+  due_date?: string;
+
+  /** priority is none, low, medium, high or urgent. */
+  priority?: string;
+
+  @minValue(0)
+  effort_minutes?: int32;
+
+  /** section_id is the status (board column) of the project to put the task in. */
+  @encode(string)
+  section_id?: int64;
+
+  /** subtasks are titles of subtasks to create under the task. */
+  @maxItems(50)
+  subtasks?: string[];
+}
+
+model ImportTasksRequest {
+  @Onkt.required
+  @minValueExclusive(0)
+  @encode(string)
+  project_id: int64;
+
+  @Onkt.required
+  @maxItems(500)
+  rows: ImportTaskRow[];
+}
+
+/** ImportRowError says why one row was refused. row is 1-based, in the order sent. */
+model ImportRowError {
+  row: int32;
+  message: string;
+}
+
+model ImportTasksResponse {
+  /** created is how many tasks were created, not counting subtasks. */
+  created: int32;
+
+  /** task_ids are the new tasks, in row order. */
+  @Onkt.encode("string")
+  task_ids: int64[];
+
+  /** errors lists the invalid rows. When it is not empty nothing was created. */
+  errors: ImportRowError[];
+}
