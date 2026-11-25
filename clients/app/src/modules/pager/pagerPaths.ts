@@ -52,6 +52,11 @@ const PORTAL_STAFF_PATHS: Record<string, string> = {
   [PAGER_STATS_PATH]: '/pager/insights',
 };
 
+export function isRenniliStaffPath(pathname: string): boolean {
+  const clean = pathname.replace(/\/+$/, '') || '/';
+  return Object.prototype.hasOwnProperty.call(PORTAL_STAFF_PATHS, clean);
+}
+
 export function portalPathForStaffPage(pathname: string): string {
   const clean = pathname.replace(/\/+$/, '') || '/';
   return PORTAL_STAFF_PATHS[clean] ?? '/pager';
