@@ -70,8 +70,10 @@ export function sectionTotals(
   const totals: BacklogTotals = { todo: 0, active: 0, done: 0, estimateMinutes: 0 };
   for (const task of tasks) {
     const bucket = taskBucket(task, statusesById);
+    // Cancelled work is out of scope, as in the server's cycle totals.
+    if (bucket === 'cancelled') continue;
     if (bucket === 'active') totals.active += 1;
-    else if (bucket === 'done' || bucket === 'cancelled') totals.done += 1;
+    else if (bucket === 'done') totals.done += 1;
     else totals.todo += 1;
     totals.estimateMinutes += task.effortMinutes ?? 0;
   }

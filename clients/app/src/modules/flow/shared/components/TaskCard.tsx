@@ -21,6 +21,7 @@ import AssigneeAvatar from './AssigneeAvatar';
 import LabelChip from './LabelChip';
 import BlockedBadge from './BlockedBadge';
 import EpicChip from './EpicChip';
+import TaskTypeIcon from './TaskTypeIcon';
 import { TaskContextMenu, ContextMenuState } from './TaskContextMenu';
 import { withAlpha, onTint } from '../lib/colorUtils';
 import { displayStatusName } from '../../features/projects/statusUtils';
@@ -242,7 +243,14 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         </p>
 
         {/* Epic: the one this task sits under, or "Epic" on an epic. */}
-        <EpicChip task={task} className="mb-2" />
+        {task.taskType && task.taskType !== 'task' && task.taskType !== 'epic' ? (
+          <div className="flex items-center gap-1.5 mb-2 min-w-0">
+            <TaskTypeIcon type={task.taskType} />
+            <EpicChip task={task} />
+          </div>
+        ) : (
+          <EpicChip task={task} className="mb-2" />
+        )}
 
         {/* Labels */}
         {fields.labels && taskLabels.length > 0 && (

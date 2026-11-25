@@ -55,12 +55,14 @@ vi.mock('./useTask', () => ({
 }));
 
 const updateTaskMutate = vi.hoisted(() => vi.fn());
+const duplicateTaskMutate = vi.hoisted(() => vi.fn());
 const deleteTaskMutate = vi.hoisted(() => vi.fn());
 vi.mock('./useTasks', () => ({
   useTasks: () => ({ data: [], isLoading: false, isError: false }),
   useSetTaskParent: () => ({ mutate: vi.fn(), isPending: false }),
   useEpicRollups: () => ({ data: [] }),
   useUpdateTask: () => ({ mutate: updateTaskMutate, isPending: false }),
+  useDuplicateTask: () => ({ mutate: duplicateTaskMutate, isPending: false }),
   useDeleteTask: () => ({ mutate: deleteTaskMutate, isPending: false }),
   useAddComment: () => ({ mutate: vi.fn(), isPending: false }),
   useUpdateComment: () => ({ mutate: vi.fn(), isPending: false }),
@@ -142,6 +144,7 @@ const canEditMock = vi.hoisted(() => vi.fn(() => true));
 vi.mock('../../shared/lib/currentUser', () => ({
   useCanEditTask: () => canEditMock(),
   useCanDeleteResource: () => canEditMock(),
+  useCanCreateTask: () => canEditMock(),
 }));
 
 vi.mock('../../shared/components/Breadcrumbs', () => ({
@@ -688,6 +691,34 @@ describe('every task detail control has an accessible name (#1079)', () => {
     };
     renderTaskDetail();
     expect(flowSelectTrigger('flow.taskDetail.status')).toBeInTheDocument();
+  });
+});
+
+describe('TaskDetail Duplicate (T-343)', () => {
+  const detail = () =>
+    ({
+      task: apiTask({ title: 'Ship it' }) as ApiTask,
+      subtasks: [],
+      comments: [],
+      activity: [],
+    }) as unknown as ApiTaskDetail;
+
+  it('duplicates the task for someone who can create tasks', () => {
+    taskDetailData.data = detail();
+    renderTaskDetail();
+    fireEvent.click(screen.getByTitle('flow.taskDetail.duplicateHint'));
+    expect(duplicateTaskMutate).toHaveBeenCalledWith(
+      { id: 't-1', title: 'flow.taskDetail.duplicateTitle' },
+      expect.anything()
+    );
+  });
+
+  it('offers no Duplicate to a viewer', () => {
+    canEditMock.mockReturnValue(false);
+    taskDetailData.data = detail();
+    renderTaskDetail();
+    expect(screen.queryByTitle('flow.taskDetail.duplicateHint')).not.toBeInTheDocument();
+    canEditMock.mockReturnValue(true);
   });
 });
 

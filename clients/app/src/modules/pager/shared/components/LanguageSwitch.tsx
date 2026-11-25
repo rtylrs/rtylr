@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { selectLanguage } from '../../../../shared/services/i18next';
+import { selectRenniliLanguage } from '../lib/renniliLanguage';
 
 // The three locales this module ships. A customer arrives from a QR code with
 // no language chosen, so the choice has to be on the page itself.
@@ -24,7 +24,7 @@ const LanguageSwitch = (): React.JSX.Element => {
           lang={language.code}
           aria-label={language.name}
           aria-pressed={current === language.code}
-          onClick={() => selectLanguage(language.code)}
+          onClick={() => selectRenniliLanguage(language.code)}
         >
           {language.short}
         </button>

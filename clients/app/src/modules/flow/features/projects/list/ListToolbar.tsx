@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, ChevronUp, Columns3, Download } from 'lucide-react';
+import { ChevronDown, ChevronUp, Columns3, Download, Upload } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@voxire/ui';
 import {
   DEFAULT_LIST_PREFS,
@@ -159,6 +159,23 @@ export function ExportCsvButton({
     >
       <Download size={14} aria-hidden="true" />
       <span className={toolbarLabel}>{t('flow.projectList.exportCsv')}</span>
+    </button>
+  );
+}
+
+export function ImportCsvButton({ onImport }: { onImport: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <button
+      type="button"
+      onClick={onImport}
+      aria-label={t('flow.taskImport.open')}
+      title={t('flow.taskImport.open')}
+      className={toolbarButton}
+      style={toolbarButtonStyle}
+    >
+      <Upload size={14} aria-hidden="true" />
+      <span className={toolbarLabel}>{t('flow.taskImport.open')}</span>
     </button>
   );
 }

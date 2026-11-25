@@ -125,6 +125,33 @@ func (r *Repository) UpdateCycleV2(ctx context.Context, in domain.UpdateCycleV2I
 	return err
 }
 
+// DeleteCycle removes the cycle and its memberships, so its tasks fall back
+// to the unplanned backlog. Carry-over records written when it closed go with
+// it, and records that pointed at it as the destination keep the decision but
+// lose the destination.
+func (r *Repository) DeleteCycle(ctx context.Context, businessID, cycleID int64) error {
+	return r.inCycleTx(ctx, "DeleteCycle", func(tx *sql.Tx) error {
+		if _, err := lockCycle(ctx, tx, businessID, cycleID); err != nil {
+			return err
+		}
+		for _, stmt := range []string{
+			"DELETE FROM flow_cycle_tasks WHERE cycle_id = ?",
+			"DELETE FROM flow_cycle_carryovers WHERE cycle_id = ? AND business_id = ?",
+			"UPDATE flow_cycle_carryovers SET to_cycle_id = NULL WHERE to_cycle_id = ? AND business_id = ?",
+			"DELETE FROM flow_cycles WHERE id = ? AND business_id = ?",
+		} {
+			args := []any{cycleID}
+			if strings.Count(stmt, "?") == 2 {
+				args = append(args, businessID)
+			}
+			if _, err := tx.ExecContext(ctx, stmt, args...); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
 // StartCycle makes an upcoming cycle the project's active one. It fails with
 // ErrCycleAlreadyActive when another cycle of the project is active.
 func (r *Repository) StartCycle(ctx context.Context, in domain.StartCycleInput) error {

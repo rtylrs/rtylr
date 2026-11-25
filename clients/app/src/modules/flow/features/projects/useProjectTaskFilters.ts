@@ -9,6 +9,7 @@ import {
   epicField,
   labelField,
   namedField,
+  typeField,
   peopleFrom,
   priorityField,
   type FilterFieldConfig,
@@ -23,7 +24,7 @@ import { useLabels } from '../tasks/useLabels';
 import { useCycles } from '../cycles/useCycles';
 import { useMilestones } from '../milestones/useMilestones';
 import { useProjectFields } from './useFields';
-import { epicsIn } from '../../shared/lib/taskHierarchy';
+import { TASK_TYPES, epicsIn } from '../../shared/lib/taskHierarchy';
 import type { ApiCycle, ApiMilestone } from '../../shared/services/flowApi';
 
 const NO_CYCLES: ApiCycle[] = [];
@@ -99,6 +100,7 @@ export function useProjectTaskFilters(projectId: string, tasks: Task[]): Project
     // The epics are tasks on this board, so they come from the same list.
     const epics = epicsIn(tasks);
     if (epics.length > 0) out.push(epicField(epics, t));
+    out.push(typeField(TASK_TYPES, t));
     out.push(...customFieldFilters(fieldsQuery.data ?? [], people, t));
     return out;
   }, [

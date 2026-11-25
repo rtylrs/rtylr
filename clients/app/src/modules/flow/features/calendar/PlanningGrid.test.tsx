@@ -17,6 +17,14 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ children, to: _to, params: _params, ...rest }: Record<string, unknown>) => (
+    <a {...(rest as React.AnchorHTMLAttributes<HTMLAnchorElement>)}>
+      {children as React.ReactNode}
+    </a>
+  ),
+}));
+
 const updateMutate = vi.hoisted(() => vi.fn());
 vi.mock('../tasks/useTasks', () => ({
   useUpdateTask: () => ({ mutate: updateMutate }),

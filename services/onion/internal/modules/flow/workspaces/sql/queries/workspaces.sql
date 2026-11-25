@@ -42,12 +42,15 @@ WITH project_page AS (
     ORDER BY p.created_at DESC, p.id DESC
     LIMIT ? OFFSET ?
 ),
+-- Project progress, as in projects_v2.sql.
 task_counts AS (
     SELECT t.project_id,
-           COUNT(*) AS task_count,
-           SUM(t.status = 'done') AS completed_count
+           COUNT(CASE WHEN COALESCE(fs.bucket, t.status, 'todo') <> 'cancelled' THEN 1 END) AS task_count,
+           COUNT(CASE WHEN COALESCE(fs.bucket, t.status) = 'done' THEN 1 END) AS completed_count
     FROM flow_tasks t
     JOIN project_page p ON p.id = t.project_id
+    LEFT JOIN flow_statuses fs ON fs.id = t.status_id AND fs.project_id = t.project_id
+    WHERE t.parent_task_id IS NULL AND COALESCE(t.archived, FALSE) = FALSE
     GROUP BY t.project_id
 ),
 member_counts AS (

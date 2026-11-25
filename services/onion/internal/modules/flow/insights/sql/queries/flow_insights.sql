@@ -49,6 +49,7 @@ WHERE ft.business_id = ?
   AND ft.assignee_id IS NOT NULL
 GROUP BY ft.assignee_id;
 
+-- Progress as in GetProjectTaskProgress, over tasks created in the last year.
 -- name: GetRoadmapProjects :many
 SELECT
     fp.id,
@@ -57,12 +58,14 @@ SELECT
     fp.visibility,
     COALESCE(DATE_FORMAT(fp.start_date, '%Y-%m-%d'), '') AS start_date,
     COALESCE(DATE_FORMAT(fp.due_date, '%Y-%m-%d'), '') AS due_date,
-    COUNT(ft.id) AS total_tasks,
-    COUNT(CASE WHEN ft.status = 'done' THEN 1 END) AS done_tasks
+    COUNT(CASE WHEN ft.id IS NOT NULL AND COALESCE(fs.bucket, ft.status, 'todo') <> 'cancelled' THEN 1 END) AS total_tasks,
+    COUNT(CASE WHEN COALESCE(fs.bucket, ft.status) = 'done' THEN 1 END) AS done_tasks
 FROM flow_projects fp
 LEFT JOIN flow_tasks ft ON ft.project_id = fp.id
  AND ft.parent_task_id IS NULL
+ AND COALESCE(ft.archived, 0) = 0
  AND ft.created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
+LEFT JOIN flow_statuses fs ON fs.id = ft.status_id AND fs.project_id = ft.project_id
 WHERE fp.business_id = ? AND fp.status != 'archived'
 GROUP BY fp.id, fp.name, fp.status, fp.visibility, fp.start_date, fp.due_date
 ORDER BY fp.created_at ASC;
@@ -173,16 +176,19 @@ WHERE fp.business_id = sqlc.arg('business_id')
   AND fp.id IN (sqlc.slice('project_ids'))
 ORDER BY fp.name ASC, fp.id ASC;
 
--- Progress counts top-level tasks, like the roadmap, without its 12-month
--- window. Overdue counts every open task past its due date, subtasks
--- included, like the business-wide overdue count. Archived tasks are hidden
--- in Flow, so neither counts them.
+-- Progress is Flow's project progress (projects_v2.sql in workspaces): top-level
+-- tasks, cancelled ones out of the total, done decided by the status bucket
+-- (the custom status in the project, else the legacy status, whose 'done' and
+-- 'cancelled' are their own bucket). Overdue counts every open task past its
+-- due date, subtasks included, like the business-wide overdue count. Archived
+-- tasks are hidden in Flow, so neither counts them.
 -- name: GetProjectTaskProgress :one
 SELECT
-    CAST(COUNT(CASE WHEN ft.parent_task_id IS NULL THEN 1 END) AS SIGNED) AS total_tasks,
-    CAST(COUNT(CASE WHEN ft.parent_task_id IS NULL AND ft.status = 'done' THEN 1 END) AS SIGNED) AS completed_tasks,
+    CAST(COUNT(CASE WHEN ft.parent_task_id IS NULL AND COALESCE(fs.bucket, ft.status, 'todo') <> 'cancelled' THEN 1 END) AS SIGNED) AS total_tasks,
+    CAST(COUNT(CASE WHEN ft.parent_task_id IS NULL AND COALESCE(fs.bucket, ft.status) = 'done' THEN 1 END) AS SIGNED) AS completed_tasks,
     CAST(COUNT(CASE WHEN ft.status NOT IN ('done','cancelled') AND ft.due_date < CURDATE() THEN 1 END) AS SIGNED) AS overdue_tasks
 FROM flow_tasks ft
+LEFT JOIN flow_statuses fs ON fs.id = ft.status_id AND fs.project_id = ft.project_id
 WHERE ft.business_id = sqlc.arg('business_id')
   AND ft.project_id = sqlc.arg('project_id')
   AND COALESCE(ft.archived, 0) = 0;

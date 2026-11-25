@@ -1,5 +1,5 @@
 import { unwrap } from '@voxire/api';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { flowApi } from '../../shared/services/flowApi';
@@ -10,6 +10,15 @@ import type {
   ApiTask,
 } from '../../shared/services/flowApi';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
+import { invalidateTaskProgress } from '../../shared/lib/invalidateTaskProgress';
+
+// The wire omits zero counts, so a cycle with nothing done yet arrives without
+// `completed` (and an empty one without `scope`).
+const withCounts = (cycle: ApiCycle): ApiCycle => ({
+  ...cycle,
+  scope: cycle.scope ?? 0,
+  completed: cycle.completed ?? 0,
+});
 
 /**
  * The query behind useCycles, shared so a screen that needs several projects'
@@ -20,7 +29,7 @@ export function cyclesQueryOptions(projectId?: string) {
     queryKey: ['cycles', projectId],
     queryFn: async (): Promise<ApiCycle[]> => {
       const res = await unwrap(flowApi.getCycles(projectId!));
-      return unwrapListResponse<ApiCycle>(res, 'cycles');
+      return unwrapListResponse<ApiCycle>(res, 'cycles').map(withCounts);
     },
     enabled: projectId !== undefined && projectId !== '',
   };
@@ -60,6 +69,25 @@ export function useUpdateCycle() {
   });
 }
 
+/** One cycle, for its detail page. */
+export function useCycle(id: string | undefined) {
+  return useQuery<ApiCycle>({
+    queryKey: ['cycles', 'detail', id],
+    queryFn: async () => withCounts((await unwrap(flowApi.getCycle(id!))).cycle),
+    enabled: id !== undefined && id !== '',
+  });
+}
+
+export function useDeleteCycle() {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => unwrap(flowApi.deleteCycle(id)).then(() => {}),
+    onSuccess: () => invalidatePlanning(qc),
+    onError: () => toast.error(t('flowToasts.cycle.deleteFailed')),
+  });
+}
+
 /** Whether a failed request was refused as a conflict (HTTP 409). */
 function isConflict(error: unknown): boolean {
   return (
@@ -71,15 +99,12 @@ function isConflict(error: unknown): boolean {
 }
 
 /**
- * Everything a cycle change can move: the cycle list (totals, carry-over), the
- * tasks it holds, and the task panel's cycle field.
+ * Everything a cycle change can move: cycle totals and carry-over, the tasks
+ * it holds, the task panel's cycle field, and the project progress that
+ * completing a cycle (which can cancel tasks) changes.
  */
-function invalidatePlanning(qc: ReturnType<typeof useQueryClient>) {
-  void qc.invalidateQueries({ queryKey: ['cycles'] });
-  void qc.invalidateQueries({ queryKey: ['cycle-capacity'] });
-  void qc.invalidateQueries({ queryKey: ['tasks'] });
-  void qc.invalidateQueries({ queryKey: ['my-tasks'] });
-  void qc.invalidateQueries({ queryKey: ['task'] });
+export function invalidatePlanning(qc: QueryClient): void {
+  invalidateTaskProgress(qc);
 }
 
 export function useStartCycle() {

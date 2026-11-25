@@ -33,6 +33,7 @@ vi.mock('./useTask', () => ({ useTask: () => ({ data: state.detail, isLoading: f
 vi.mock('./useTasks', () => ({
   useTasks: () => ({ data: state.tasks, isLoading: false }),
   useUpdateTask: () => ({ mutate: update }),
+  useDuplicateTask: () => ({ mutate: vi.fn(), isPending: false }),
   useSetTaskParent: () => ({ mutate: vi.fn(), isPending: false }),
   useEpicRollups: () => ({ data: [] }),
   useDeleteTask: () => ({ mutate: vi.fn() }),
@@ -74,6 +75,7 @@ vi.mock('../../shared/lib/useTaskRealtime', () => ({ useTaskRealtime: () => {} }
 vi.mock('../../shared/lib/currentUser', () => ({
   useCanEditTask: () => state.canEdit,
   useCanDeleteResource: () => state.canEdit,
+  useCanCreateTask: () => state.canEdit,
 }));
 vi.mock('./components/TimePanel', () => ({ default: () => null }));
 

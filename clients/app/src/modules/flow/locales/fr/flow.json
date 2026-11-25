@@ -6,7 +6,7 @@
     "teamTasks": "Tâches de l’équipe",
     "triage": "Tri",
     "roadmap": "Feuille de route",
-    "cycles": "Itérations",
+    "cycles": "Cycles",
     "milestones": "Jalons",
     "timeline": "Chronologie",
     "calendar": "Calendrier",
@@ -115,7 +115,7 @@
     "commentPlaceholder": "Laisser un commentaire… @mention pour notifier",
     "comments": "Commentaires",
     "copyId": "Copier l'identifiant",
-    "cycle": "Itération",
+    "cycle": "Cycle",
     "dateLocale": "fr-FR",
     "daysAgo": "il y a {{count}} j",
     "decision": "Décision",
@@ -254,7 +254,12 @@
     "closeDuplicateKeepOpen": "Laisser ouverte",
     "noCycle": "Carnet (aucun cycle)",
     "noCyclesInProject": "Aucun cycle ouvert",
-    "startDate": "Date de début"
+    "startDate": "Date de début",
+    "copyBranch": "Copier le nom de branche",
+    "branchCopied": "Nom de branche copié",
+    "duplicate": "Dupliquer",
+    "duplicateHint": "Copier cette tâche avec sa description, ses champs et ses sous-tâches",
+    "duplicateTitle": "{{title}} (copie)"
   },
   "time": {
     "add": {
@@ -734,7 +739,7 @@
       "subtasks": "Résumé des sous-tâches",
       "dueDate": "Date d'échéance",
       "estimate": "Estimation",
-      "cycle": "Itération",
+      "cycle": "Cycle",
       "milestone": "Jalon",
       "blocked": "Badge Bloquée"
     },
@@ -761,7 +766,7 @@
       "priority": "Priorité",
       "due": "Échéance",
       "label": "Étiquette",
-      "cycle": "Itération",
+      "cycle": "Cycle",
       "milestone": "Jalon",
       "epic": "Épopée"
     },
@@ -781,7 +786,7 @@
     "emptyColumn": "Rien ici pour le moment.",
     "emptyLane": "Aucune",
     "noLabel": "Sans étiquette",
-    "noCycle": "Sans itération",
+    "noCycle": "Sans cycle",
     "noMilestone": "Sans jalon",
     "columnsAreStatuses": "Chaque colonne est l'un des statuts de ce projet. Renommez-les, changez leur couleur, réordonnez-les et ajoutez-en dans Statuts.",
     "columnMenu": "Actions pour {{name}}",
@@ -941,7 +946,7 @@
   },
   "cycles": {
     "loading": "Chargement des cycles...",
-    "subtitle": "Sprints de livraison de deux semaines",
+    "subtitle": "Sprints de livraison à durée fixe pour un projet",
     "newCycle": "Nouveau cycle",
     "namePlaceholder": "Nom du cycle",
     "startDate": "Date de début",
@@ -955,11 +960,45 @@
     "sectionCompleted": "Terminés",
     "dateRange": "{{start}} au {{end}}",
     "emptyTitle": "Aucun cycle pour le moment",
-    "emptyDescription": "Démarrez votre premier sprint de livraison de deux semaines pour suivre le périmètre et la progression.",
+    "emptyDescription": "Démarrez votre premier sprint pour suivre le périmètre et la progression.",
     "createFirst": "Créer le premier cycle",
     "project": "Projet",
     "noProjects": "Aucun projet pour le moment",
-    "newCycleGate": "Un cycle appartient à un projet, et cette entreprise n'en a encore aucun. Créez d'abord un projet."
+    "newCycleGate": "Un cycle appartient à un projet, et cette entreprise n'en a encore aucun. Créez d'abord un projet.",
+    "length": "Durée",
+    "customLength": "Dates personnalisées",
+    "edit": {
+      "title": "Modifier le cycle",
+      "description": "Modifiez le nom, les dates ou l'objectif.",
+      "name": "Nom",
+      "save": "Enregistrer",
+      "saving": "Enregistrement..."
+    },
+    "detail": {
+      "back": "Tous les cycles",
+      "openBacklog": "Planifier dans le carnet",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "progress": "Progression",
+      "burndown": "Reste à faire",
+      "burndownEmpty": "Le burndown s'affiche dès que le cycle a des dates.",
+      "burndownSummary": "{{remaining}} {{unit}} restants",
+      "remaining": "Restant",
+      "ideal": "Idéal",
+      "unitTasks": "tâches",
+      "carriedOver": "Reportées",
+      "carriedFrom_one": "{{count}} tâche depuis {{name}}",
+      "carriedFrom_many": "{{count}} tâches depuis {{name}}",
+      "carriedFrom_other": "{{count}} tâches depuis {{name}}",
+      "openTasks": "Ouvertes ({{count}})",
+      "doneTasks": "Terminées ({{count}})",
+      "carryHint": "À la fin de ce cycle, les tâches non terminées pourront passer à {{name}}.",
+      "carryHintBacklog": "À la fin de ce cycle, les tâches non terminées pourront passer au cycle suivant ou revenir au carnet.",
+      "deleteTitle": "Supprimer ce cycle ?",
+      "deleteDescription_one": "{{name}} sera supprimé. Sa {{count}} tâche reste dans le projet et revient au carnet.",
+      "deleteDescription_many": "{{name}} sera supprimé. Ses {{count}} tâches restent dans le projet et reviennent au carnet.",
+      "deleteDescription_other": "{{name}} sera supprimé. Ses {{count}} tâches restent dans le projet et reviennent au carnet."
+    }
   },
   "myIssues": {
     "buckets": {
@@ -1153,7 +1192,8 @@
       "members": "Membres",
       "fields": "Champs",
       "integrations": "Intégrations",
-      "danger": "Zone sensible"
+      "danger": "Zone sensible",
+      "templates": "Modèles"
     },
     "transferConfirmHint": "La propriété sera transférée immédiatement. Cliquez sur Confirmer pour continuer.",
     "transferCta": "Transférer",
@@ -1213,7 +1253,8 @@
     "markDone": "Marquer comme terminé",
     "setUrgent": "Définir comme urgent",
     "archive": "Archiver",
-    "selectedCount": "{{count}} sélectionnée(s)"
+    "selectedCount": "{{count}} sélectionnée(s)",
+    "moveToCycle": "Déplacer vers le cycle"
   },
   "allProjects": {
     "title": "Tous les projets",
@@ -1393,10 +1434,11 @@
       "label": "Étiquette",
       "due": "Échéance",
       "status": "Statut",
-      "cycle": "Itération",
+      "cycle": "Cycle",
       "milestone": "Jalon",
       "project": "Projet",
-      "epic": "Épopée"
+      "epic": "Épopée",
+      "type": "Type de tâche"
     },
     "due": {
       "overdue": "En retard",
@@ -1491,7 +1533,9 @@
     "task": "Tâche",
     "bug": "Bogue",
     "feature": "Fonctionnalité",
-    "epic": "Épopée"
+    "epic": "Épopée",
+    "chore": "Maintenance",
+    "spike": "Exploration"
   },
   "epics": {
     "noEpic": "Sans épopée",
@@ -1587,6 +1631,63 @@
       "rowLabel": "Destination de {{title}}",
       "confirm": "Terminer le cycle",
       "completing": "Clôture..."
+    }
+  },
+  "taskTemplates": {
+    "intro": "Chaque type de tâche peut commencer avec sa propre description dans le formulaire Nouvelle tâche. Les bugs utilisent le modèle intégré tant que vous n’en enregistrez pas un.",
+    "gateReason": "Seuls les administrateurs du projet peuvent modifier les modèles.",
+    "usingDefault": "Modèle intégré utilisé",
+    "none": "Aucun modèle",
+    "placeholder": "Markdown de départ de la description",
+    "save": "Enregistrer le modèle",
+    "remove": "Supprimer le modèle",
+    "startFromDefault": "Partir du modèle intégré",
+    "defaultBug": "**Où**\nApplication > écran > URL\n\n**Étapes pour reproduire**\n1. \n2. \n3. \n\n**Attendu**\n\n\n**Constaté**\n\n\n**Environnement**\nNavigateur ou appareil, langue (EN ou AR)\n\n**Capture d'écran**\nJoignez-en une ci-dessous.\n"
+  },
+  "taskImport": {
+    "open": "Importer un CSV",
+    "title": "Importer des tâches depuis un CSV",
+    "description": "Jusqu’à {{max}} tâches à la fois. Vérifiez l’aperçu, puis importez.",
+    "choose": "Choisir un fichier CSV",
+    "chooseAnother": "Choisir un autre fichier",
+    "sampleFile": "Télécharger un fichier exemple",
+    "columns": "Colonnes : Titre (obligatoire), Description, E-mail de l’assigné, Échéance (AAAA-MM-JJ), Priorité (none, low, medium, high, urgent), Effort (ex. 90, 1h, 1h 30m), Section (un statut de ce projet), Sous-tâches (séparées par ;).",
+    "noTitleColumn": "Le fichier n’a pas de colonne Titre : aucune tâche ne peut en être créée.",
+    "summary_one": "{{count}} tâche prête à importer.",
+    "summary_many": "{{count}} tâches prêtes à importer.",
+    "summary_other": "{{count}} tâches prêtes à importer.",
+    "summaryIssues_one": "{{count}} ligne, {{issues}} avec des problèmes. Corrigez le fichier et choisissez-le à nouveau.",
+    "summaryIssues_many": "{{count}} lignes, {{issues}} avec des problèmes. Corrigez le fichier et choisissez-le à nouveau.",
+    "summaryIssues_other": "{{count}} lignes, {{issues}} avec des problèmes. Corrigez le fichier et choisissez-le à nouveau.",
+    "truncated": "Seules les {{max}} premières lignes sont lues.",
+    "more_one": "Et {{count}} ligne de plus.",
+    "more_many": "Et {{count}} lignes de plus.",
+    "more_other": "Et {{count}} lignes de plus.",
+    "refused": "Rien n’a été importé. Ces lignes ont été refusées :",
+    "rowError": "Ligne {{row}} : {{message}}",
+    "importing": "Import en cours...",
+    "import_one": "Importer {{count}} tâche",
+    "import_many": "Importer {{count}} tâches",
+    "import_other": "Importer {{count}} tâches",
+    "col": {
+      "title": "Titre",
+      "assignee": "Assigné",
+      "due": "Échéance",
+      "section": "Colonne",
+      "subtasks": "Sous-tâches"
+    },
+    "issue": {
+      "noTitle": "Sans titre",
+      "unknownAssignee": "Aucun membre de l’équipe n’a l’e-mail {{value}}",
+      "badDate": "L’échéance « {{value}} » n’est pas au format AAAA-MM-JJ",
+      "badPriority": "La priorité « {{value}} » n’est pas none, low, medium, high ou urgent",
+      "badEffort": "L’effort « {{value}} » n’est pas une durée",
+      "unknownSection": "Aucun statut « {{value}} » dans ce projet"
+    },
+    "sample": {
+      "title": "Créer la page de connexion",
+      "description": "Quoi et pourquoi, où regarder, étapes, QA",
+      "subtasks": "Maquette; Développement; Test"
     }
   }
 }
