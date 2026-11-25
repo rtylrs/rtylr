@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Check, Trash2, Archive, Flag } from 'lucide-react';
+import { X, Check, Trash2, Archive, Flag, Timer } from 'lucide-react';
 import { toast } from 'sonner';
 import i18next from '../services/i18next';
 import { useFlowStore } from '../stores/flowStore';
@@ -8,15 +8,20 @@ import {
   useBulkUpdateStatus,
   useBulkUpdatePriority,
   useBulkUpdateArchive,
+  useBulkUpdateCycle,
   useBulkDelete,
   useTasks,
   useTaskDetails,
 } from '../../features/tasks/useTasks';
 import { useMostRestrictiveProjectRole } from '../lib/currentUser';
+import { useCycles } from '../../features/cycles/useCycles';
 import { canEditTask, canDelete } from '../lib/roleUtils';
+import FlowSelect from './FlowSelect';
 
 const t = (key: string, options?: Record<string, unknown>): string =>
   i18next.t(key, options) as string;
+
+const BACKLOG_OPTION = 'backlog';
 
 export const BulkEditBar: React.FC = () => {
   const selectedTaskIds = useFlowStore((state) => state.selectedTaskIds);
@@ -37,6 +42,7 @@ export const BulkEditBar: React.FC = () => {
   const bulkStatus = useBulkUpdateStatus();
   const bulkPriority = useBulkUpdatePriority();
   const bulkArchive = useBulkUpdateArchive();
+  const bulkCycle = useBulkUpdateCycle();
   const bulkDelete = useBulkDelete();
 
   // Selection is global and cross-project views (Triage, My issues) let it span
@@ -68,6 +74,14 @@ export const BulkEditBar: React.FC = () => {
     return { projectIds: [...ids].sort(), allResolved: resolved };
   }, [selectedTaskIds, taskList, taskDetails, unresolvedIds]);
 
+  // Cycles belong to one project, so the picker shows only for a selection
+  // inside a single project.
+  const singleProjectId = allResolved && projectIds.length === 1 ? projectIds[0] : undefined;
+  const { data: projectCycles = [] } = useCycles(singleProjectId);
+  const openCycles = projectCycles
+    .filter((c) => c.status !== 'completed')
+    .sort((a, b) => a.startDate.localeCompare(b.startDate));
+
   const restrictingRole = useMostRestrictiveProjectRole(projectIds);
   const effectiveRole = allResolved ? restrictingRole : undefined;
   const canEdit = effectiveRole !== undefined && canEditTask(effectiveRole);
@@ -83,7 +97,11 @@ export const BulkEditBar: React.FC = () => {
   if (selectedTaskIds.length === 0) return null;
 
   const isPending =
-    bulkStatus.isPending || bulkPriority.isPending || bulkArchive.isPending || bulkDelete.isPending;
+    bulkStatus.isPending ||
+    bulkPriority.isPending ||
+    bulkArchive.isPending ||
+    bulkCycle.isPending ||
+    bulkDelete.isPending;
 
   return (
     <AnimatePresence>
@@ -138,6 +156,35 @@ export const BulkEditBar: React.FC = () => {
         >
           <Flag size={11} /> {t('flow.bulkEdit.setUrgent')}
         </button>
+        {singleProjectId && openCycles.length > 0 && (
+          <span
+            className="inline-flex shrink-0"
+            title={!canEdit ? t(editBlockedReason) : undefined}
+          >
+            <FlowSelect
+              value=""
+              placeholder={t('flow.bulkEdit.moveToCycle')}
+              label={t('flow.bulkEdit.moveToCycle')}
+              leading={<Timer size={11} aria-hidden />}
+              muted
+              disabled={isPending || !canEdit}
+              options={[
+                { value: BACKLOG_OPTION, label: t('flow.taskDetail.noCycle') },
+                ...openCycles.map((c) => ({ value: c.id, label: c.name })),
+              ]}
+              onChange={(value) =>
+                bulkCycle
+                  .mutateAsync({
+                    ids: selectedTaskIds,
+                    cycleId: value === BACKLOG_OPTION ? '' : value,
+                  })
+                  .then(() => clearSelection())
+                  .catch(() => toast.error(t('flowErrors.generic')))
+              }
+              className="h-7 text-flow-meta"
+            />
+          </span>
+        )}
         <button
           type="button"
           disabled={isPending || !canEdit}

@@ -947,7 +947,7 @@
   },
   "cycles": {
     "loading": "جارٍ تحميل الدورات...",
-    "subtitle": "دورات تسليم مدتها أسبوعان",
+    "subtitle": "دورات تسليم محددة المدة لمشروع",
     "newCycle": "دورة جديدة",
     "namePlaceholder": "اسم الدورة",
     "startDate": "تاريخ البدء",
@@ -961,11 +961,51 @@
     "sectionCompleted": "المكتملة",
     "dateRange": "{{start}} إلى {{end}}",
     "emptyTitle": "لا توجد دورات بعد",
-    "emptyDescription": "ابدأ أول دورة تسليم مدتها أسبوعان لتتبع النطاق والتقدم.",
+    "emptyDescription": "ابدأ أول دورة لتتبع النطاق والتقدم.",
     "createFirst": "إنشاء أول دورة",
     "project": "المشروع",
     "noProjects": "لا توجد مشاريع بعد",
-    "newCycleGate": "الدورة تنتمي إلى مشروع، ولا يوجد أي مشروع في هذا النشاط بعد. أنشئ مشروعاً أولاً."
+    "newCycleGate": "الدورة تنتمي إلى مشروع، ولا يوجد أي مشروع في هذا النشاط بعد. أنشئ مشروعاً أولاً.",
+    "length": "المدة",
+    "customLength": "تواريخ مخصصة",
+    "edit": {
+      "title": "تعديل الدورة",
+      "description": "غيّر الاسم أو التواريخ أو الهدف.",
+      "name": "الاسم",
+      "save": "حفظ",
+      "saving": "جارٍ الحفظ..."
+    },
+    "detail": {
+      "back": "كل الدورات",
+      "openBacklog": "التخطيط في قائمة الانتظار",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "progress": "التقدم",
+      "burndown": "مخطط الإنجاز",
+      "burndownEmpty": "يظهر مخطط الإنجاز عندما تكون للدورة تواريخ.",
+      "burndownSummary": "متبقٍ {{remaining}} {{unit}}",
+      "remaining": "المتبقي",
+      "ideal": "المثالي",
+      "unitTasks": "مهام",
+      "carriedOver": "مُرحّلة",
+      "carriedFrom_zero": "لا مهام من {{name}}",
+      "carriedFrom_one": "مهمة واحدة من {{name}}",
+      "carriedFrom_two": "مهمتان من {{name}}",
+      "carriedFrom_few": "{{count}} مهام من {{name}}",
+      "carriedFrom_many": "{{count}} مهمة من {{name}}",
+      "carriedFrom_other": "{{count}} مهمة من {{name}}",
+      "openTasks": "مفتوحة ({{count}})",
+      "doneTasks": "منجزة ({{count}})",
+      "carryHint": "عند إنهاء هذه الدورة يمكن نقل المهام غير المنجزة إلى {{name}}.",
+      "carryHintBacklog": "عند إنهاء هذه الدورة يمكن نقل المهام غير المنجزة إلى الدورة التالية أو إعادتها إلى قائمة الانتظار.",
+      "deleteTitle": "حذف هذه الدورة؟",
+      "deleteDescription_zero": "سيتم حذف {{name}}. لا توجد مهام فيها.",
+      "deleteDescription_one": "سيتم حذف {{name}}. تبقى مهمتها في المشروع وتعود إلى قائمة الانتظار.",
+      "deleteDescription_two": "سيتم حذف {{name}}. تبقى مهمتاها في المشروع وتعودان إلى قائمة الانتظار.",
+      "deleteDescription_few": "سيتم حذف {{name}}. تبقى مهامها الـ{{count}} في المشروع وتعود إلى قائمة الانتظار.",
+      "deleteDescription_many": "سيتم حذف {{name}}. تبقى مهامها الـ{{count}} في المشروع وتعود إلى قائمة الانتظار.",
+      "deleteDescription_other": "سيتم حذف {{name}}. تبقى مهامها الـ{{count}} في المشروع وتعود إلى قائمة الانتظار."
+    }
   },
   "myIssues": {
     "buckets": {
@@ -1235,7 +1275,8 @@
     "markDone": "وضع علامة مكتمل",
     "setUrgent": "تعيين كعاجل",
     "archive": "أرشفة",
-    "selectedCount": "{{count}} محددة"
+    "selectedCount": "{{count}} محددة",
+    "moveToCycle": "نقل إلى دورة"
   },
   "allProjects": {
     "title": "جميع المشاريع",

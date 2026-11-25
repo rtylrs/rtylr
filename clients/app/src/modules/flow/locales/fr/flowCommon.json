@@ -70,9 +70,9 @@
     "pickDate": "Choisir une date"
   },
   "insights": {
-    "burndown": "Burndown (itération active)",
+    "burndown": "Burndown (cycle actif)",
     "throughput": "Débit (tâches/semaine)",
-    "velocity": "Vélocité (dernières itérations)",
+    "velocity": "Vélocité (derniers cycles)",
     "timeByPerson": "Temps suivi par personne",
     "heading": "Aperçus",
     "subtitle": "Vélocité, burndown et statistiques d'équipe",
@@ -87,7 +87,7 @@
       "throughputHint": "6 semaines"
     },
     "noData": "Aucune donnée disponible",
-    "noDataCta": "Aller aux itérations"
+    "noDataCta": "Aller aux cycles"
   },
   "settings": {
     "profile": "Profil",

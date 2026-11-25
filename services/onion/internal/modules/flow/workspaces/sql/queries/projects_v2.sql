@@ -2,6 +2,12 @@
 -- Curation rule: without bypass, callers see only projects they created or are
 -- members of; the My Tasks bucket is always excluded from shared lists because
 -- GetMyTasksProject addresses it directly.
+--
+-- Project progress (task_count / completed_count) counts unarchived top-level
+-- tasks. Cancelled tasks are left out of the total, and done is the task's
+-- status bucket: its custom status when it has one in the project, else the
+-- legacy status. The legacy names 'done' and 'cancelled' are their own bucket
+-- (domain.BucketForTaskStatus), so COALESCE(fs.bucket, t.status) decides both.
 
 -- name: GetProjectV2ByID :one
 SELECT
@@ -15,8 +21,14 @@ SELECT
     p.start_date, p.due_date,
     p.created_by, p.created_at, p.updated_at,
     p.archived_at, p.purge_at,
-    (SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id) AS task_count,
-    (SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id AND t.status = 'done') AS completed_count,
+    (SELECT COUNT(*) FROM flow_tasks t
+       LEFT JOIN flow_statuses fs ON fs.id = t.status_id AND fs.project_id = t.project_id
+      WHERE t.project_id = p.id AND t.parent_task_id IS NULL AND COALESCE(t.archived, FALSE) = FALSE
+        AND COALESCE(fs.bucket, t.status, 'todo') <> 'cancelled') AS task_count,
+    (SELECT COUNT(*) FROM flow_tasks t
+       LEFT JOIN flow_statuses fs ON fs.id = t.status_id AND fs.project_id = t.project_id
+      WHERE t.project_id = p.id AND t.parent_task_id IS NULL AND COALESCE(t.archived, FALSE) = FALSE
+        AND COALESCE(fs.bucket, t.status) = 'done') AS completed_count,
     (SELECT COUNT(*) FROM flow_project_members pm WHERE pm.project_id = p.id) AS member_count
 FROM flow_projects p
 WHERE p.id = ? AND p.business_id = ?;
@@ -57,8 +69,14 @@ SELECT
     p.start_date, p.due_date,
     p.created_by, p.created_at, p.updated_at,
     p.archived_at, p.purge_at,
-    (SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id) AS task_count,
-    (SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id AND t.status = 'done') AS completed_count,
+    (SELECT COUNT(*) FROM flow_tasks t
+       LEFT JOIN flow_statuses fs ON fs.id = t.status_id AND fs.project_id = t.project_id
+      WHERE t.project_id = p.id AND t.parent_task_id IS NULL AND COALESCE(t.archived, FALSE) = FALSE
+        AND COALESCE(fs.bucket, t.status, 'todo') <> 'cancelled') AS task_count,
+    (SELECT COUNT(*) FROM flow_tasks t
+       LEFT JOIN flow_statuses fs ON fs.id = t.status_id AND fs.project_id = t.project_id
+      WHERE t.project_id = p.id AND t.parent_task_id IS NULL AND COALESCE(t.archived, FALSE) = FALSE
+        AND COALESCE(fs.bucket, t.status) = 'done') AS completed_count,
     (SELECT COUNT(*) FROM flow_project_members pm WHERE pm.project_id = p.id) AS member_count
 FROM flow_projects p
 WHERE p.business_id = ?
@@ -110,8 +128,14 @@ SELECT
     p.start_date, p.due_date,
     p.created_by, p.created_at, p.updated_at,
     p.archived_at, p.purge_at,
-    (SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id) AS task_count,
-    (SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id AND t.status = 'done') AS completed_count,
+    (SELECT COUNT(*) FROM flow_tasks t
+       LEFT JOIN flow_statuses fs ON fs.id = t.status_id AND fs.project_id = t.project_id
+      WHERE t.project_id = p.id AND t.parent_task_id IS NULL AND COALESCE(t.archived, FALSE) = FALSE
+        AND COALESCE(fs.bucket, t.status, 'todo') <> 'cancelled') AS task_count,
+    (SELECT COUNT(*) FROM flow_tasks t
+       LEFT JOIN flow_statuses fs ON fs.id = t.status_id AND fs.project_id = t.project_id
+      WHERE t.project_id = p.id AND t.parent_task_id IS NULL AND COALESCE(t.archived, FALSE) = FALSE
+        AND COALESCE(fs.bucket, t.status) = 'done') AS completed_count,
     (SELECT COUNT(*) FROM flow_project_members pm WHERE pm.project_id = p.id) AS member_count
 FROM flow_projects p
 WHERE p.business_id = ?
@@ -227,8 +251,14 @@ SELECT
     COALESCE(p.color, '') AS color,
     COALESCE(p.description, '') AS description,
     COALESCE(p.status, 'active') AS status,
-    (SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id) AS task_count,
-    (SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id AND t.status = 'done') AS completed_count
+    (SELECT COUNT(*) FROM flow_tasks t
+       LEFT JOIN flow_statuses fs ON fs.id = t.status_id AND fs.project_id = t.project_id
+      WHERE t.project_id = p.id AND t.parent_task_id IS NULL AND COALESCE(t.archived, FALSE) = FALSE
+        AND COALESCE(fs.bucket, t.status, 'todo') <> 'cancelled') AS task_count,
+    (SELECT COUNT(*) FROM flow_tasks t
+       LEFT JOIN flow_statuses fs ON fs.id = t.status_id AND fs.project_id = t.project_id
+      WHERE t.project_id = p.id AND t.parent_task_id IS NULL AND COALESCE(t.archived, FALSE) = FALSE
+        AND COALESCE(fs.bucket, t.status) = 'done') AS completed_count
 FROM flow_projects p
 WHERE p.business_id = ?
   AND p.created_by = ?

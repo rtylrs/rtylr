@@ -2,14 +2,19 @@
 SELECT COUNT(*) FROM flow_cycles WHERE workspace_id = ?;
 
 -- name: ListCycles :many
+-- Scope and completed match the v2 cycle totals: archived tasks are left out,
+-- cancelled ones are not in scope, and done is the task's status bucket. The
+-- legacy names 'done' and 'cancelled' are their own bucket, so
+-- COALESCE(fs.bucket, t.status) decides both exactly.
 SELECT
     c.id, c.workspace_id, c.project_id, c.name, c.description, c.status,
     c.start_date, c.end_date, c.created_by, c.created_at,
-    COUNT(ct.task_id) AS scope,
-    COUNT(CASE WHEN t.status = 'done' THEN 1 END) AS completed
+    COUNT(CASE WHEN t.id IS NOT NULL AND COALESCE(fs.bucket, t.status, 'todo') <> 'cancelled' THEN 1 END) AS scope,
+    COUNT(CASE WHEN COALESCE(fs.bucket, t.status) = 'done' THEN 1 END) AS completed
 FROM flow_cycles c
 LEFT JOIN flow_cycle_tasks ct ON ct.cycle_id = c.id
-LEFT JOIN flow_tasks t ON t.id = ct.task_id
+LEFT JOIN flow_tasks t ON t.id = ct.task_id AND COALESCE(t.archived, FALSE) = FALSE
+LEFT JOIN flow_statuses fs ON fs.id = t.status_id AND fs.project_id = t.project_id
 WHERE c.workspace_id = ?
 GROUP BY c.id
 ORDER BY c.start_date DESC
@@ -286,22 +291,27 @@ ON DUPLICATE KEY UPDATE
     email_notifications = VALUES(email_notifications),
     sidebar_preferences_json = VALUES(sidebar_preferences_json);
 
+-- Project progress, as in projects_v2.sql: unarchived top-level tasks, with
+-- cancelled ones out of the total and done decided by the status bucket.
 -- name: GetProjectTaskCounts :one
 SELECT
-    COUNT(*) AS total,
-    COALESCE(SUM(status = 'done'), 0) AS done
-FROM flow_tasks
-WHERE project_id = ? AND parent_task_id IS NULL;
+    COUNT(CASE WHEN COALESCE(fs.bucket, t.status, 'todo') <> 'cancelled' THEN 1 END) AS total,
+    COUNT(CASE WHEN COALESCE(fs.bucket, t.status) = 'done' THEN 1 END) AS done
+FROM flow_tasks t
+LEFT JOIN flow_statuses fs ON fs.id = t.status_id AND fs.project_id = t.project_id
+WHERE t.project_id = ? AND t.parent_task_id IS NULL AND COALESCE(t.archived, FALSE) = FALSE;
 
 -- name: GetProjectTaskCountsByProjectIDs :many
 SELECT
-    project_id,
-    COUNT(*) AS total,
-    COALESCE(SUM(status = 'done'), 0) AS done
-FROM flow_tasks
-WHERE project_id IN (sqlc.slice('project_ids'))
-  AND parent_task_id IS NULL
-GROUP BY project_id;
+    t.project_id,
+    COUNT(CASE WHEN COALESCE(fs.bucket, t.status, 'todo') <> 'cancelled' THEN 1 END) AS total,
+    COUNT(CASE WHEN COALESCE(fs.bucket, t.status) = 'done' THEN 1 END) AS done
+FROM flow_tasks t
+LEFT JOIN flow_statuses fs ON fs.id = t.status_id AND fs.project_id = t.project_id
+WHERE t.project_id IN (sqlc.slice('project_ids'))
+  AND t.parent_task_id IS NULL
+  AND COALESCE(t.archived, FALSE) = FALSE
+GROUP BY t.project_id;
 
 -- ── v2: business/project-scoped replacements ─────────────────────────────
 

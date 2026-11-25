@@ -89,6 +89,11 @@ const storeProjects = vi.hoisted(() => ({
 
 const mockNavigate = vi.fn();
 vi.mock('@tanstack/react-router', () => ({
+  Link: ({ children, to: _to, params: _params, ...rest }: Record<string, unknown>) => (
+    <a {...(rest as React.AnchorHTMLAttributes<HTMLAnchorElement>)}>
+      {children as React.ReactNode}
+    </a>
+  ),
   useNavigate: () => mockNavigate,
 }));
 

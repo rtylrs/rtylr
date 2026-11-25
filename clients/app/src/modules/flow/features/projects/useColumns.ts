@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { unwrap } from '@voxire/api';
 import { flowApi, type ApiTask } from '../../shared/services/flowApi';
 import { applyBoardMove } from './boardOrder';
+import { invalidateTaskProgress } from '../../shared/lib/invalidateTaskProgress';
 
 export interface MoveTaskVars {
   taskId: string;
@@ -39,9 +40,6 @@ export function useMoveTaskToColumn() {
       context?.snapshot.forEach(([queryKey, data]) => qc.setQueryData(queryKey, data));
       toast.error(t('flowToasts.task.moveFailed'));
     },
-    onSettled: (_data, _error, { taskId }) => {
-      qc.invalidateQueries({ queryKey: ['tasks'] });
-      qc.invalidateQueries({ queryKey: ['task', taskId] });
-    },
+    onSettled: () => invalidateTaskProgress(qc),
   });
 }
