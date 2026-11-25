@@ -243,7 +243,7 @@ func initializeModules(ctx context.Context) *apiModules {
 			if cfgErr != nil {
 				return bizID, "", true, nil
 			}
-			return bizID, strings.TrimSpace(cfg.Slug), true, nil
+			return bizID, strings.TrimSpace(cfg.BusinessSlug), true, nil
 		}).
 		WithEventDispatcher(webhooksModule.DispatchEvent)
 	posOrdersModule := orders.NewModule(ctx, dbclient.Pool()).
