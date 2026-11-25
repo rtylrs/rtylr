@@ -406,7 +406,13 @@ export default function PortalShell({ children }: { children: ReactNode }) {
         contentClassName={`portal-rail-tooltip portal-rail-tooltip-${entry.id}`}
       >
         {entry.href ? (
-          <a href={entry.href} className="portal-rail-button" aria-label={entry.label}>
+          <a
+            href={entry.href}
+            target={entry.external ? '_blank' : undefined}
+            rel={entry.external ? 'noopener noreferrer' : undefined}
+            className="portal-rail-button"
+            aria-label={entry.label}
+          >
             <entry.icon size={21} />
           </a>
         ) : (

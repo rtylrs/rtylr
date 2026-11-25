@@ -123,6 +123,7 @@ hub/hub_api_keys.sql	internal/modules/organization/sql/schema/hub/hub_api_keys.s
 hub/hub_integrations.sql	internal/modules/integrations/sql/schema/hub/hub_integrations.sql
 hub/hub_menu_banners.sql	internal/modules/hub_menu/sql/schema/hub/hub_menu_banners.sql
 hub/hub_navigation_menus.sql	internal/modules/hub_menu/sql/schema/hub/hub_navigation_menus.sql
+hub/hub_menu_builder.sql	internal/modules/hub_menu/sql/schema/hub/hub_menu_builder.sql
 hub/hub_notifications.sql	internal/modules/notifications/sql/schema/hub/hub_notifications.sql
 hub/hub_webhooks.sql	internal/modules/webhooks/sql/schema/hub/hub_webhooks.sql
 store/schema.sql	internal/modules/store/sql/schema/store/schema.sql|internal/modules/erp/sql/schema/erp/store_catalog.sql|internal/modules/erp/sql/schema/erp/online_orders.sql

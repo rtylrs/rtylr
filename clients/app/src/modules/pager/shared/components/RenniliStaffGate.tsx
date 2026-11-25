@@ -30,7 +30,11 @@ function StaffShell({ page }: { page: React.ReactNode }): React.JSX.Element {
         </Link>
         <ByRtylr />
         <StaffVenue />
-        <a className="rennili-staff-portal" href={resolveAppUrl('dash')}>
+        <a
+          className="rennili-staff-portal"
+          href={resolveAppUrl('dash')}
+          aria-label={t('pager.staff.portal')}
+        >
           {t('pager.staff.portal')}
         </a>
       </header>

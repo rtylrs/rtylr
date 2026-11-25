@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
-import { PAGER_HOW_PATH, PAGER_TRY_PATH } from '../../../pagerPaths';
+import { PAGER_TRY_PATH, pagerClaimUrl } from '../../../pagerPaths';
 import { HeroInteractiveStage } from './PhoneMockups';
 
 interface LandingHeroProps {
@@ -18,6 +18,16 @@ export const LandingHero = ({ heroRef }: LandingHeroProps): React.JSX.Element =>
     <section ref={heroRef} className="rl-hero">
       <div className="rl-wrap rl-hero-layout">
         <div className="rl-hero-copy">
+          <motion.p
+            className="rl-hero-free-pill"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <span className="rl-hero-free-dot" aria-hidden="true" />
+            <span>{t('pager.landing.hero.freeBadge')}</span>
+          </motion.p>
+
           <h1 className="rl-hero-title">
             <span className="rl-line-mask">
               <motion.span
@@ -58,17 +68,17 @@ export const LandingHero = ({ heroRef }: LandingHeroProps): React.JSX.Element =>
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.48, delay: 0.26, ease: [0.22, 1, 0.36, 1] }}
           >
-            <Link to={PAGER_TRY_PATH} className="rl-btn rl-btn--primary rl-btn--lg">
-              {t('pager.landing.hero.primaryCta')}
+            <a href={pagerClaimUrl('register')} className="rl-btn rl-btn--primary rl-btn--lg">
+              {t('pager.landing.free.primaryCta')}
               <ArrowRight
                 size={18}
                 strokeWidth={2.4}
                 aria-hidden="true"
                 className="rtl:rotate-180"
               />
-            </Link>
-            <Link to={PAGER_HOW_PATH} className="rl-btn rl-btn--secondary rl-btn--lg">
-              {t('pager.landing.hero.secondaryCta')}
+            </a>
+            <Link to={PAGER_TRY_PATH} className="rl-btn rl-btn--secondary rl-btn--lg">
+              {t('pager.landing.hero.primaryCta')}
             </Link>
           </motion.div>
 

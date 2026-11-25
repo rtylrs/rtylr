@@ -265,6 +265,7 @@
     "closeDuplicateKeepOpen": "إبقاؤها مفتوحة",
     "noCycle": "قائمة الأعمال (بدون دورة)",
     "noCyclesInProject": "لا توجد دورات مفتوحة",
+    "startDate": "تاريخ البدء",
     "copyBranch": "نسخ اسم الفرع",
     "branchCopied": "تم نسخ اسم الفرع"
   },
@@ -1069,10 +1070,36 @@
   },
   "projectTimeline": {
     "pageTitle": "الخط الزمني · rtylr",
-    "emptyTitle": "لا توجد مهام بتاريخ استحقاق بعد",
-    "emptyDescription": "أضف تواريخ استحقاق لعرض الخط الزمني.",
-    "goToBoardCta": "الانتقال إلى اللوحة",
-    "taskColumn": "المهمة"
+    "emptyTitle": "لا توجد مهام بتواريخ بعد",
+    "emptyDescription": "أضف تاريخ بدء أو استحقاق لمهمة لتظهر على المخطط الزمني.",
+    "goToBoardCta": "الانتقال إلى القائمة",
+    "taskColumn": "المهمة",
+    "noMilestone": "بلا مرحلة",
+    "unassigned": "غير مسندة",
+    "groupBy": "التجميع حسب",
+    "group": {
+      "none": "بلا تجميع",
+      "assignee": "المسؤول",
+      "milestone": "المرحلة"
+    },
+    "zoom": "التكبير",
+    "zoomLevel": {
+      "days": "أيام",
+      "weeks": "أسابيع"
+    },
+    "unscheduled_zero": "لا مهام بلا تواريخ",
+    "unscheduled_one": "مهمة واحدة بلا تواريخ:",
+    "unscheduled_two": "مهمتان بلا تواريخ:",
+    "unscheduled_few": "{{count}} مهام بلا تواريخ:",
+    "unscheduled_many": "{{count}} مهمة بلا تواريخ:",
+    "unscheduled_other": "{{count}} مهمة بلا تواريخ:",
+    "more_zero": "ولا شيء آخر",
+    "more_one": "وواحدة أخرى",
+    "more_two": "واثنتان أخريان",
+    "more_few": "و{{count}} أخرى",
+    "more_many": "و{{count}} أخرى",
+    "more_other": "و{{count}} أخرى",
+    "barLabel": "{{title}}، من {{start}} إلى {{end}}"
   },
   "projectDashboard": {
     "pageTitle": "لوحة معلومات المشروع · rtylr",

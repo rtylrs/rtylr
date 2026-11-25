@@ -101,6 +101,9 @@
 .portal-rail-tooltip-pos {
   background: var(--app-pos) !important;
 }
+.portal-rail-tooltip-rennili {
+  background: var(--app-rennili) !important;
+}
 .portal-rail-tooltip-automations {
   background: #64748b !important;
 }

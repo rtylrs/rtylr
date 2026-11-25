@@ -46,6 +46,16 @@ func (m *Module) WithOnlineOrderingReader(read func(context.Context, int64) (boo
 	return m
 }
 
+func (m *Module) WithPublicOrderHook(fn application.PublicOrderHook) *Module {
+	m.service.WithPublicOrderHook(fn)
+	return m
+}
+
+func (m *Module) WithPaymentRedirectResolver(fn application.PaymentRedirectResolver) *Module {
+	m.service.WithPaymentRedirectResolver(fn)
+	return m
+}
+
 func (m *Module) CountOrdersCreatedBetween(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
 	return m.repository.CountOrdersCreatedBetween(ctx, businessID, from, to)
 }

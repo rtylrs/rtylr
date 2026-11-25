@@ -319,11 +319,12 @@
       "backHome": "Accueil $t(pager.brand.name)"
     },
     "hero": {
+      "freeBadge": "100 % gratuit à vie · Sans matériel",
       "title": "Fini les bipeurs plastique.\nFaites sonner leur téléphone.",
       "subtitle": "Remplacez les boîtiers et bipeurs de restaurant par un seul QR au comptoir. Le client scanne, s’installe où il veut, et son téléphone sonne dès que sa commande est prête.",
       "primaryCta": "Essayer la démo",
       "secondaryCta": "Voir comment ça marche",
-      "note": "Sans appli · Sans compte · Zéro boîtier à acheter ou recharger",
+      "note": "Gratuit à vie · Sans appli · Zéro boîtier à acheter ou recharger",
       "demoVenue": "Café du Cèdre",
       "simLabel": "Tableau comptoir",
       "simOrder": "Commande #42",

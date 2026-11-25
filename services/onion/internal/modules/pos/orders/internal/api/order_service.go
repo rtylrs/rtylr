@@ -159,22 +159,33 @@ func (a *OrderAPI) CreatePublicOrder(ctx context.Context, req *posordersv1.Creat
 	}
 
 	orderID, orderNumber, publicToken, err := a.Service.CreatePublicOrder(ctx, req.GetOwnerId(), application.PublicOrderInput{
-		CustomerName:  req.GetCustomerName(),
-		CustomerPhone: req.GetCustomerPhone(),
-		CustomerEmail: req.GetCustomerEmail(),
-		Notes:         req.GetNotes(),
-		Items:         items,
+		LocationID:      req.GetLocationId(),
+		TableID:         req.GetTableId(),
+		FulfillmentMode: req.GetFulfillmentMode(),
+		DeliveryAddress: req.GetDeliveryAddress(),
+		CurrencyCode:    req.GetCurrencyCode(),
+		LoyaltyPhone:    req.GetLoyaltyPhone(),
+		CRMOptIn:        req.GetCrmOptIn(),
+		CustomerName:    req.GetCustomerName(),
+		CustomerPhone:   req.GetCustomerPhone(),
+		CustomerEmail:   req.GetCustomerEmail(),
+		Notes:           req.GetNotes(),
+		Items:           items,
 	})
 	if err != nil {
 		return nil, orderAPIStatusError(http.StatusInternalServerError, "Failed to create order")
 	}
 
-	return &posordersv1.CreatePublicOrderResponse{
+	resp := &posordersv1.CreatePublicOrderResponse{
 		OrderId:     orderID,
 		OrderNumber: orderNumber,
 		Status:      "pending",
 		PublicToken: publicToken,
-	}, nil
+	}
+	if redirectURL := a.Service.ResolvePaymentRedirectURL(ctx, req.GetOwnerId(), req.GetLocationId()); redirectURL != "" {
+		resp.PaymentRedirectUrl = &redirectURL
+	}
+	return resp, nil
 }
 
 func (a *OrderAPI) GetPublicOrderStatus(ctx context.Context, req *posordersv1.GetPublicOrderStatusRequest) (*posordersv1.GetPublicOrderStatusResponse, error) {
