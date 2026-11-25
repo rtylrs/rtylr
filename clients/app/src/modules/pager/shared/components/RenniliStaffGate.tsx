@@ -5,7 +5,7 @@ import { resolveAppUrl } from '@voxire/config';
 import { BusinessRoute, type StandaloneSurface } from '../../../../shared/utils/BusinessRoute';
 import { PAGER_BOARD_PATH, pagerSignedOutUrl, portalPathForStaffPage } from '../../pagerPaths';
 import { usePagerVenue } from '../lib/usePagerVenue';
-import { ByRtylr, RenniliLogo } from './RenniliLogo';
+import { ByRtylr, RenniliLogo, RtylrBrandText } from './RenniliLogo';
 import { VenueLogo } from './VenueLogo';
 
 /** Whose board this is: the business's logo and name. */
@@ -30,8 +30,12 @@ function StaffShell({ page }: { page: React.ReactNode }): React.JSX.Element {
         </Link>
         <ByRtylr />
         <StaffVenue />
-        <a className="rennili-staff-portal" href={resolveAppUrl('dash')}>
-          {t('pager.staff.portal')}
+        <a
+          className="rennili-staff-portal"
+          href={resolveAppUrl('dash')}
+          aria-label={t('pager.staff.portal')}
+        >
+          <RtylrBrandText text={t('pager.staff.portal')} />
         </a>
       </header>
       <main className="rennili-staff-main">{page}</main>

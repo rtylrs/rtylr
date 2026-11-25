@@ -4,7 +4,7 @@ import { APP_URLS, RTYLR_CONTACT_CHANNELS, type RtylrContactChannelId } from '@v
 import { Mail, MessageCircle, Phone } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import LanguageSwitch from '../../../shared/components/LanguageSwitch';
-import { ByRtylr, RenniliLogo } from '../../../shared/components/RenniliLogo';
+import { ByRtylr, RenniliLogo, RtylrBrandText } from '../../../shared/components/RenniliLogo';
 import {
   PAGER_FAQ_PATH,
   PAGER_FEATURES_PATH,
@@ -48,7 +48,9 @@ export const LandingFooter = (_props: LandingFooterProps): React.JSX.Element => 
     <footer className="rl-footer">
       <div className="rl-wrap">
         <div className="rl-footer-contact">
-          <h2 className="rl-footer-heading">{t('pager.landing.footer.contactTitle')}</h2>
+          <h2 className="rl-footer-heading">
+            <RtylrBrandText text={t('pager.landing.footer.contactTitle')} />
+          </h2>
           <div className="rl-footer-channels">
             {RTYLR_CONTACT_CHANNELS.map((channel, index) => {
               const Icon = CHANNEL_ICONS[channel.id];
@@ -87,7 +89,9 @@ export const LandingFooter = (_props: LandingFooterProps): React.JSX.Element => 
               <RenniliLogo size={26} />
               <ByRtylr />
             </div>
-            <p className="rl-footer-tagline">{t('pager.landing.footer.tagline')}</p>
+            <p className="rl-footer-tagline">
+              <RtylrBrandText text={t('pager.landing.footer.tagline')} />
+            </p>
           </div>
 
           <div className="rl-footer-links-col">
@@ -95,7 +99,7 @@ export const LandingFooter = (_props: LandingFooterProps): React.JSX.Element => 
               {navLinks.map((link) => (
                 <li key={link.href}>
                   <a href={link.href} className="rl-footer-link">
-                    {link.label}
+                    <RtylrBrandText text={link.label} />
                   </a>
                 </li>
               ))}
@@ -119,7 +123,7 @@ export const LandingFooter = (_props: LandingFooterProps): React.JSX.Element => 
           <div className="rl-footer-end">
             <LanguageSwitch />
             <p className="rl-footer-copy" dir="ltr">
-              {t('pager.landing.footer.copyright', { year })}
+              <RtylrBrandText text={t('pager.landing.footer.copyright', { year })} />
             </p>
           </div>
         </div>
