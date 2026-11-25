@@ -74,7 +74,10 @@
     "startFailed": "تعذّر بدء الدورة",
     "completed": "اكتملت الدورة",
     "completeFailed": "تعذّر إنهاء الدورة",
-    "moveFailed": "تعذّر نقل المهمة"
+    "moveFailed": "تعذّر نقل المهمة",
+    "updated": "تم تحديث الدورة",
+    "deleted": "تم حذف الدورة",
+    "deleteFailed": "فشل حذف الدورة"
   },
   "label": {
     "created": "تم إنشاء التسمية",
@@ -224,5 +227,10 @@
     "deleted_other": "تم حذف الحقل. فقدت {{count}} مهمة قيمها.",
     "deleteFailed": "تعذّر حذف الحقل",
     "valueSaveFailed": "تعذّر حفظ القيمة"
+  },
+  "template": {
+    "saved": "تم حفظ القالب",
+    "removed": "تمت إزالة القالب",
+    "saveFailed": "فشل حفظ القالب"
   }
 }

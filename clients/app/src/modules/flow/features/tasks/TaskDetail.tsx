@@ -93,6 +93,7 @@ import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import DevelopmentSection from './components/DevelopmentSection';
 import { useIsDeveloperProject } from '../projects-v2/useDeveloperMode';
+import { branchNameFor } from '../../shared/lib/taskTemplates';
 import LinksSection from './components/LinksSection';
 import RelationsSection from './components/RelationsSection';
 import TaskCustomFields from './components/TaskCustomFields';
@@ -641,7 +642,13 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
               />
             </section>
 
-            {isDeveloperProject && <DevelopmentSection taskId={task.id} />}
+            {isDeveloperProject && (
+              <DevelopmentSection
+                taskId={task.id}
+                typeLabel={t(`flow.taskType.${task.taskType ?? 'task'}`)}
+                branchName={branchNameFor(task)}
+              />
+            )}
 
             <section className="mb-8">
               <h3

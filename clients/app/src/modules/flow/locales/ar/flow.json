@@ -266,6 +266,8 @@
     "noCycle": "قائمة الأعمال (بدون دورة)",
     "noCyclesInProject": "لا توجد دورات مفتوحة",
     "startDate": "تاريخ البدء",
+    "copyBranch": "نسخ اسم الفرع",
+    "branchCopied": "تم نسخ اسم الفرع",
     "duplicate": "تكرار",
     "duplicateHint": "نسخ هذه المهمة مع وصفها وحقولها ومهامها الفرعية",
     "duplicateTitle": "{{title}} (نسخة)"
@@ -950,7 +952,7 @@
   },
   "cycles": {
     "loading": "جارٍ تحميل الدورات...",
-    "subtitle": "دورات تسليم مدتها أسبوعان",
+    "subtitle": "دورات تسليم محددة المدة لمشروع",
     "newCycle": "دورة جديدة",
     "namePlaceholder": "اسم الدورة",
     "startDate": "تاريخ البدء",
@@ -964,11 +966,51 @@
     "sectionCompleted": "المكتملة",
     "dateRange": "{{start}} إلى {{end}}",
     "emptyTitle": "لا توجد دورات بعد",
-    "emptyDescription": "ابدأ أول دورة تسليم مدتها أسبوعان لتتبع النطاق والتقدم.",
+    "emptyDescription": "ابدأ أول دورة لتتبع النطاق والتقدم.",
     "createFirst": "إنشاء أول دورة",
     "project": "المشروع",
     "noProjects": "لا توجد مشاريع بعد",
-    "newCycleGate": "الدورة تنتمي إلى مشروع، ولا يوجد أي مشروع في هذا النشاط بعد. أنشئ مشروعاً أولاً."
+    "newCycleGate": "الدورة تنتمي إلى مشروع، ولا يوجد أي مشروع في هذا النشاط بعد. أنشئ مشروعاً أولاً.",
+    "length": "المدة",
+    "customLength": "تواريخ مخصصة",
+    "edit": {
+      "title": "تعديل الدورة",
+      "description": "غيّر الاسم أو التواريخ أو الهدف.",
+      "name": "الاسم",
+      "save": "حفظ",
+      "saving": "جارٍ الحفظ..."
+    },
+    "detail": {
+      "back": "كل الدورات",
+      "openBacklog": "التخطيط في قائمة الانتظار",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "progress": "التقدم",
+      "burndown": "مخطط الإنجاز",
+      "burndownEmpty": "يظهر مخطط الإنجاز عندما تكون للدورة تواريخ.",
+      "burndownSummary": "متبقٍ {{remaining}} {{unit}}",
+      "remaining": "المتبقي",
+      "ideal": "المثالي",
+      "unitTasks": "مهام",
+      "carriedOver": "مُرحّلة",
+      "carriedFrom_zero": "لا مهام من {{name}}",
+      "carriedFrom_one": "مهمة واحدة من {{name}}",
+      "carriedFrom_two": "مهمتان من {{name}}",
+      "carriedFrom_few": "{{count}} مهام من {{name}}",
+      "carriedFrom_many": "{{count}} مهمة من {{name}}",
+      "carriedFrom_other": "{{count}} مهمة من {{name}}",
+      "openTasks": "مفتوحة ({{count}})",
+      "doneTasks": "منجزة ({{count}})",
+      "carryHint": "عند إنهاء هذه الدورة يمكن نقل المهام غير المنجزة إلى {{name}}.",
+      "carryHintBacklog": "عند إنهاء هذه الدورة يمكن نقل المهام غير المنجزة إلى الدورة التالية أو إعادتها إلى قائمة الانتظار.",
+      "deleteTitle": "حذف هذه الدورة؟",
+      "deleteDescription_zero": "سيتم حذف {{name}}. لا توجد مهام فيها.",
+      "deleteDescription_one": "سيتم حذف {{name}}. تبقى مهمتها في المشروع وتعود إلى قائمة الانتظار.",
+      "deleteDescription_two": "سيتم حذف {{name}}. تبقى مهمتاها في المشروع وتعودان إلى قائمة الانتظار.",
+      "deleteDescription_few": "سيتم حذف {{name}}. تبقى مهامها الـ{{count}} في المشروع وتعود إلى قائمة الانتظار.",
+      "deleteDescription_many": "سيتم حذف {{name}}. تبقى مهامها الـ{{count}} في المشروع وتعود إلى قائمة الانتظار.",
+      "deleteDescription_other": "سيتم حذف {{name}}. تبقى مهامها الـ{{count}} في المشروع وتعود إلى قائمة الانتظار."
+    }
   },
   "myIssues": {
     "buckets": {
@@ -1175,7 +1217,8 @@
       "members": "الأعضاء",
       "fields": "الحقول",
       "integrations": "التكاملات",
-      "danger": "منطقة الخطر"
+      "danger": "منطقة الخطر",
+      "templates": "القوالب"
     },
     "transferConfirmHint": "سيتم نقل الملكية فورًا. اضغط تأكيد للمتابعة.",
     "transferCta": "نقل",
@@ -1238,7 +1281,8 @@
     "markDone": "وضع علامة مكتمل",
     "setUrgent": "تعيين كعاجل",
     "archive": "أرشفة",
-    "selectedCount": "{{count}} محددة"
+    "selectedCount": "{{count}} محددة",
+    "moveToCycle": "نقل إلى دورة"
   },
   "allProjects": {
     "title": "جميع المشاريع",
@@ -1439,7 +1483,8 @@
       "cycle": "الدورة",
       "milestone": "المرحلة",
       "project": "المشروع",
-      "epic": "الملحمة"
+      "epic": "الملحمة",
+      "type": "النوع"
     },
     "due": {
       "overdue": "متأخرة",
@@ -1546,7 +1591,9 @@
     "task": "مهمة",
     "bug": "خلل",
     "feature": "ميزة",
-    "epic": "ملحمة"
+    "epic": "ملحمة",
+    "chore": "صيانة",
+    "spike": "استكشاف"
   },
   "epics": {
     "noEpic": "بلا ملحمة",
@@ -1664,6 +1711,17 @@
     "unassigned_few": "{{count}} مهام غير مسندة ({{hours}})",
     "unassigned_many": "{{count}} مهمة غير مسندة ({{hours}})",
     "unassigned_other": "{{count}} مهمة غير مسندة ({{hours}})"
+  },
+  "taskTemplates": {
+    "intro": "يمكن لكل نوع مهمة أن يبدأ بوصفه الخاص في نموذج المهمة الجديدة. تستخدم الأخطاء القالب المدمج حتى تحفظ قالبًا خاصًا.",
+    "gateReason": "يمكن لمسؤولي المشروع فقط تعديل القوالب.",
+    "usingDefault": "يُستخدم القالب المدمج",
+    "none": "لا يوجد قالب",
+    "placeholder": "نص Markdown الذي يبدأ به الوصف",
+    "save": "حفظ القالب",
+    "remove": "إزالة القالب",
+    "startFromDefault": "البدء من القالب المدمج",
+    "defaultBug": "**المكان**\nالتطبيق > الشاشة > الرابط\n\n**خطوات إعادة المشكلة**\n1. \n2. \n3. \n\n**المتوقع**\n\n\n**ما حدث فعلًا**\n\n\n**البيئة**\nالمتصفح أو الجهاز، اللغة (EN أو AR)\n\n**لقطة شاشة**\nأرفق واحدة أدناه.\n"
   },
   "taskImport": {
     "open": "استيراد CSV",

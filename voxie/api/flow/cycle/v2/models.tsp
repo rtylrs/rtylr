@@ -166,6 +166,14 @@ model UpdateCycleRequest {
 
 model UpdateCycleResponse {}
 
+model DeleteCycleRequest {
+  @minValueExclusive(0)
+  @encode(string)
+  id: int64;
+}
+
+model DeleteCycleResponse {}
+
 model GetCycleRequest {
   @minValueExclusive(0)
   @encode(string)

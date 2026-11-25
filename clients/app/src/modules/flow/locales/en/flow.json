@@ -254,6 +254,8 @@
     "noCycle": "Backlog (no cycle)",
     "noCyclesInProject": "No open cycles",
     "startDate": "Start date",
+    "copyBranch": "Copy branch name",
+    "branchCopied": "Branch name copied",
     "duplicate": "Duplicate",
     "duplicateHint": "Copy this task with its description, fields and subtasks",
     "duplicateTitle": "{{title}} (copy)"
@@ -906,7 +908,7 @@
   },
   "cycles": {
     "loading": "Loading cycles...",
-    "subtitle": "Two-week delivery sprints",
+    "subtitle": "Time-boxed delivery sprints for a project",
     "newCycle": "New cycle",
     "namePlaceholder": "Cycle name",
     "startDate": "Start date",
@@ -920,11 +922,43 @@
     "sectionCompleted": "Completed",
     "dateRange": "{{start}} to {{end}}",
     "emptyTitle": "No cycles yet",
-    "emptyDescription": "Start your first two-week sprint to track scope and progress.",
+    "emptyDescription": "Start your first sprint to track scope and progress.",
     "createFirst": "Create first cycle",
     "project": "Project",
     "noProjects": "No projects yet",
-    "newCycleGate": "A cycle belongs to a project, and this business has none yet. Create a project first."
+    "newCycleGate": "A cycle belongs to a project, and this business has none yet. Create a project first.",
+    "length": "Length",
+    "customLength": "Custom dates",
+    "edit": {
+      "title": "Edit cycle",
+      "description": "Change the name, dates or goal.",
+      "name": "Name",
+      "save": "Save",
+      "saving": "Saving..."
+    },
+    "detail": {
+      "back": "All cycles",
+      "openBacklog": "Plan in Backlog",
+      "edit": "Edit",
+      "delete": "Delete",
+      "progress": "Progress",
+      "burndown": "Burndown",
+      "burndownEmpty": "The burndown appears once the cycle has dates.",
+      "burndownSummary": "{{remaining}} {{unit}} left",
+      "remaining": "Remaining",
+      "ideal": "Ideal",
+      "unitTasks": "tasks",
+      "carriedOver": "Carried over",
+      "carriedFrom_one": "{{count}} task from {{name}}",
+      "carriedFrom_other": "{{count}} tasks from {{name}}",
+      "openTasks": "Open ({{count}})",
+      "doneTasks": "Done ({{count}})",
+      "carryHint": "When this cycle is completed, unfinished tasks can move to {{name}}.",
+      "carryHintBacklog": "When this cycle is completed, unfinished tasks can move to the next cycle or back to the backlog.",
+      "deleteTitle": "Delete this cycle?",
+      "deleteDescription_one": "{{name}} will be deleted. Its {{count}} task stays in the project and goes back to the backlog.",
+      "deleteDescription_other": "{{name}} will be deleted. Its {{count}} tasks stay in the project and go back to the backlog."
+    }
   },
   "myIssues": {
     "buckets": {
@@ -1115,7 +1149,8 @@
       "members": "Members",
       "fields": "Fields",
       "integrations": "Integrations",
-      "danger": "Danger zone"
+      "danger": "Danger zone",
+      "templates": "Templates"
     },
     "transferConfirmHint": "Ownership will transfer immediately. Click Confirm to proceed.",
     "transferCta": "Transfer",
@@ -1174,7 +1209,8 @@
     "markDone": "Mark done",
     "setUrgent": "Set urgent",
     "archive": "Archive",
-    "selectedCount": "{{count}} selected"
+    "selectedCount": "{{count}} selected",
+    "moveToCycle": "Move to cycle"
   },
   "allProjects": {
     "title": "All projects",
@@ -1355,7 +1391,8 @@
       "cycle": "Cycle",
       "milestone": "Milestone",
       "project": "Project",
-      "epic": "Epic"
+      "epic": "Epic",
+      "type": "Type"
     },
     "due": {
       "overdue": "Overdue",
@@ -1450,7 +1487,9 @@
     "task": "Task",
     "bug": "Bug",
     "feature": "Feature",
-    "epic": "Epic"
+    "epic": "Epic",
+    "chore": "Chore",
+    "spike": "Spike"
   },
   "epics": {
     "noEpic": "No epic",
@@ -1540,6 +1579,17 @@
       "confirm": "Complete cycle",
       "completing": "Completing..."
     }
+  },
+  "taskTemplates": {
+    "intro": "Each task type can start with its own description in the New task form. Bugs use the built-in template until you save one.",
+    "gateReason": "Only project admins can change templates.",
+    "usingDefault": "Using the built-in template",
+    "none": "No template",
+    "placeholder": "Markdown the description starts with",
+    "save": "Save template",
+    "remove": "Remove template",
+    "startFromDefault": "Start from the built-in template",
+    "defaultBug": "**Where**\nApp > screen > URL\n\n**Steps to reproduce**\n1. \n2. \n3. \n\n**Expected**\n\n\n**Actual**\n\n\n**Environment**\nBrowser or device, language (EN or AR)\n\n**Screenshot**\nAttach one below.\n"
   },
   "taskImport": {
     "open": "Import CSV",

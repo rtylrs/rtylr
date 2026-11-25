@@ -58,7 +58,10 @@
     "startFailed": "Failed to start cycle",
     "completed": "Cycle completed",
     "completeFailed": "Failed to complete cycle",
-    "moveFailed": "Failed to move task"
+    "moveFailed": "Failed to move task",
+    "updated": "Cycle updated",
+    "deleted": "Cycle deleted",
+    "deleteFailed": "Failed to delete cycle"
   },
   "label": {
     "created": "Label created",
@@ -192,5 +195,10 @@
     "deleted_other": "Field deleted. {{count}} tasks lost their value.",
     "deleteFailed": "Could not delete the field",
     "valueSaveFailed": "Could not save the value"
+  },
+  "template": {
+    "saved": "Template saved",
+    "removed": "Template removed",
+    "saveFailed": "Failed to save the template"
   }
 }

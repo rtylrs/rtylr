@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from '@tanstack/react-router';
 import { Flag, TreePalm } from 'lucide-react';
 import type { MonthCell } from '../../shared/lib/monthGrid';
 import {
@@ -264,11 +265,13 @@ export function PlanningGrid<T extends GridTask>({
           className={['min-w-0 px-0.5', dragging ? '' : 'pointer-events-auto'].join(' ')}
           style={placement}
         >
-          <div
+          <Link
+            to="/flow/cycles/$cycleId"
+            params={{ cycleId: entry.cycle.id }}
             title={label}
             aria-label={label}
             data-cycle={entry.cycle.id}
-            className={`flex h-4 items-center px-1.5 text-flow-meta truncate ${rounding}`}
+            className={`flow-focus flex h-4 items-center px-1.5 text-flow-meta truncate hover:underline ${rounding}`}
             style={{
               ['--tone' as string]: color,
               background: withAlpha('var(--tone)', 22),
@@ -279,7 +282,7 @@ export function PlanningGrid<T extends GridTask>({
             <span dir="auto" className="truncate">
               {entry.cycle.name}
             </span>
-          </div>
+          </Link>
         </div>
       );
     }

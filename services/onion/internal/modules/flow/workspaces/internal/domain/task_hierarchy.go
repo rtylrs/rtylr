@@ -18,12 +18,14 @@ const (
 	TaskTypeBug     = "bug"
 	TaskTypeFeature = "feature"
 	TaskTypeEpic    = "epic"
+	TaskTypeChore   = "chore"
+	TaskTypeSpike   = "spike"
 
 	maxEpicColorLength = 20
 )
 
 var (
-	ErrInvalidTaskType        = errors.New("task_type must be one of task, bug, feature, epic")
+	ErrInvalidTaskType        = errors.New("task_type must be one of task, bug, feature, chore, spike, epic")
 	ErrInvalidEpicColor       = errors.New("epic_color must be at most 20 characters")
 	ErrEpicColorOnNonEpic     = errors.New("epic_color can only be set on an epic")
 	ErrTaskParentNotFound     = errors.New("parent task not found")
@@ -53,7 +55,7 @@ func HierarchyRuleError(err error) error {
 
 func IsValidTaskType(taskType string) bool {
 	switch taskType {
-	case TaskTypeTask, TaskTypeBug, TaskTypeFeature, TaskTypeEpic:
+	case TaskTypeTask, TaskTypeBug, TaskTypeFeature, TaskTypeChore, TaskTypeSpike, TaskTypeEpic:
 		return true
 	}
 	return false

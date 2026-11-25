@@ -18,6 +18,13 @@ const taskFinishedSQL = `(EXISTS (SELECT 1 FROM flow_statuses fsb
    OR (NOT EXISTS (SELECT 1 FROM flow_statuses fsb WHERE fsb.id = t.status_id AND fsb.project_id = t.project_id)
        AND t.status IN ('done', 'cancelled')))`
 
+// taskBucketSQL is the status bucket of a task (alias t) whose custom status is
+// LEFT JOINed as fs on the task's project. It mirrors bucketOf.
+const taskBucketSQL = `COALESCE(fs.bucket, CASE COALESCE(t.status, 'todo')
+	WHEN 'backlog' THEN 'backlog' WHEN 'todo' THEN 'backlog'
+	WHEN 'in_progress' THEN 'active' WHEN 'in_review' THEN 'active'
+	WHEN 'done' THEN 'done' WHEN 'cancelled' THEN 'cancelled' END)`
+
 // taskCycleMembershipSQL is the membership that gives a task (alias t) its
 // cycle: a row in a cycle that is not completed, or in a completed cycle the
 // task was finished in. An unfinished task left in a completed cycle is back in
@@ -199,6 +206,9 @@ func (r *Repository) readCycleFields(ctx context.Context, placeholders string, a
 	return rows.Err()
 }
 
+// readCycleTotals counts each cycle's unarchived tasks by bucket. Scope and the
+// estimate leave cancelled tasks out, so done/scope is the share of the work
+// still committed to that is finished; Totals.Cancelled still reports them.
 func (r *Repository) readCycleTotals(ctx context.Context, placeholders string, args []any, index map[int64]*domain.Cycle) error {
 	rows, err := r.pool.QueryContext(ctx, `SELECT ct.cycle_id, COALESCE(fs.bucket, ''), COALESCE(t.status, 'todo'),
        COUNT(*), COALESCE(SUM(`+taskEstimateMinutesSQL+`), 0)
@@ -206,7 +216,7 @@ func (r *Repository) readCycleTotals(ctx context.Context, placeholders string, a
   JOIN flow_cycles cy ON cy.id = ct.cycle_id AND cy.business_id = ?
   JOIN flow_tasks t ON t.id = ct.task_id AND t.business_id = cy.business_id
   LEFT JOIN flow_statuses fs ON fs.id = t.status_id AND fs.project_id = t.project_id
- WHERE ct.cycle_id IN (`+placeholders+`)
+ WHERE ct.cycle_id IN (`+placeholders+`) AND COALESCE(t.archived, FALSE) = FALSE
  GROUP BY ct.cycle_id, COALESCE(fs.bucket, ''), COALESCE(t.status, 'todo')`, args...)
 	if err != nil {
 		return err
@@ -224,16 +234,19 @@ func (r *Repository) readCycleTotals(ctx context.Context, placeholders string, a
 			return err
 		}
 		c := index[cycleID]
+		bucket := bucketOf(customBucket, legacyStatus)
+		if bucket == domain.StatusBucketCancelled {
+			c.Totals.Cancelled += count
+			continue
+		}
 		c.Scope += count
 		c.EstimateMinutes += int64(minutes)
-		switch bucketOf(customBucket, legacyStatus) {
+		switch bucket {
 		case domain.StatusBucketActive:
 			c.Totals.Active += count
 		case domain.StatusBucketDone:
 			c.Totals.Done += count
 			c.Completed += count
-		case domain.StatusBucketCancelled:
-			c.Totals.Cancelled += count
 		default:
 			c.Totals.Backlog += count
 		}
@@ -269,13 +282,16 @@ func (r *Repository) readCycleCarryOvers(ctx context.Context, placeholders strin
 	return rows.Err()
 }
 
-// CycleMemberLoads sums the estimate of a cycle's tasks per assignee.
+// CycleMemberLoads sums the estimate of a cycle's tasks per assignee, over the
+// same tasks as the cycle's scope: archived and cancelled tasks are left out.
 func (r *Repository) CycleMemberLoads(ctx context.Context, businessID, cycleID int64) ([]domain.CycleMemberLoad, error) {
 	rows, err := r.pool.QueryContext(ctx, `SELECT COALESCE(t.assignee_id, 0), COUNT(*), COALESCE(SUM(`+taskEstimateMinutesSQL+`), 0)
   FROM flow_cycle_tasks ct
   JOIN flow_cycles cy ON cy.id = ct.cycle_id AND cy.business_id = ?
   JOIN flow_tasks t ON t.id = ct.task_id AND t.business_id = cy.business_id
- WHERE ct.cycle_id = ?
+  LEFT JOIN flow_statuses fs ON fs.id = t.status_id AND fs.project_id = t.project_id
+ WHERE ct.cycle_id = ? AND COALESCE(t.archived, FALSE) = FALSE
+   AND COALESCE(`+taskBucketSQL+`, '') <> 'cancelled'
  GROUP BY COALESCE(t.assignee_id, 0)`, businessID, cycleID)
 	if err != nil {
 		logger.Ctx(ctx).Error("CycleMemberLoads failed", logger.Error(err))

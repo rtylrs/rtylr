@@ -29,6 +29,22 @@ export function useProjectRealtime(projectId: string | undefined): void {
       if (e.actor_id && currentUserId && String(e.actor_id) === currentUserId) {
         return;
       }
+      // The project's cycle list and any open cycle page. A cycle's page is
+      // keyed by its id, not the project's, so it needs its own prefix.
+      const invalidateProjectCycles = () => {
+        qc.invalidateQueries({ queryKey: ['cycles', projectId] });
+        qc.invalidateQueries({ queryKey: ['cycles', 'detail'] });
+      };
+      // Project progress shown outside this project's views: the project
+      // lists, epic and milestone rollups, and the Insights dashboards.
+      const invalidateProjectProgress = () => {
+        qc.invalidateQueries({ queryKey: ['projects'] });
+        qc.invalidateQueries({ queryKey: ['projects-v2'] });
+        qc.invalidateQueries({ queryKey: ['epic-rollups', projectId] });
+        qc.invalidateQueries({ queryKey: ['insights-dashboard-project', projectId] });
+        qc.invalidateQueries({ queryKey: ['insights-dashboard-projects'] });
+        qc.invalidateQueries({ queryKey: ['insights-dashboard-work'] });
+      };
       // Invalidation is keyed by prefix - react-query invalidates every
       // query whose key starts with the given array, which is exactly
       // what we want here (any filter of tasks, columns for this
@@ -48,16 +64,18 @@ export function useProjectRealtime(projectId: string | undefined): void {
         qc.invalidateQueries({ queryKey: ['milestones', projectId] });
         // A task's estimate, assignee or status changes its cycle's totals
         // and capacity, and a cycle move arrives as task.updated.
-        qc.invalidateQueries({ queryKey: ['cycles', projectId] });
+        invalidateProjectCycles();
         qc.invalidateQueries({ queryKey: ['cycle-capacity'] });
+        invalidateProjectProgress();
       }
       // Started, completed, created or edited cycles: the Backlog sections, the
-      // Cycles page and every task's cycle field.
+      // Cycles page, a cycle's own page and every task's cycle field.
       if (e.type.startsWith('cycle.')) {
-        qc.invalidateQueries({ queryKey: ['cycles', projectId] });
+        invalidateProjectCycles();
         qc.invalidateQueries({ queryKey: ['cycle-capacity'] });
         qc.invalidateQueries({ queryKey: ['tasks'] });
         qc.invalidateQueries({ queryKey: ['task'] });
+        invalidateProjectProgress();
       }
       // The server names these `status.*`; `column.*` writes the same rows,
       // because a project's board columns are its statuses.
@@ -75,6 +93,7 @@ export function useProjectRealtime(projectId: string | undefined): void {
       }
       if (e.type.startsWith('project.')) {
         qc.invalidateQueries({ queryKey: ['projects'] });
+        qc.invalidateQueries({ queryKey: ['projects-v2'] });
         qc.invalidateQueries({ queryKey: ['project-overview', projectId] });
       }
     },

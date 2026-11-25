@@ -309,6 +309,14 @@ export interface ApiMilestone {
   project?: { name: string; color: string };
 }
 
+export interface ApiTaskTemplate {
+  id: string;
+  projectId: string;
+  taskType: string;
+  body: string;
+  updatedAt?: string;
+}
+
 export interface ApiImportTaskRow {
   title: string;
   description?: string;
@@ -1049,6 +1057,16 @@ export const flowApi = {
   listEpicRollups: (projectId: string) =>
     flowResult<{ epics: ApiEpicRollup[] }>(() => taskV2.listEpicRollups({ projectId })),
 
+  // A project's description templates, one per task type at most (T-380).
+  listTaskTemplates: (projectId: string) =>
+    flowResult<{ templates?: ApiTaskTemplate[] }>(() => taskV2.listTaskTemplates({ projectId })),
+
+  // Project admins only. An empty body removes the type's template.
+  setTaskTemplate: (projectId: string, taskType: string, body: string) =>
+    flowResult<{ template?: ApiTaskTemplate }>(() =>
+      taskV2.setTaskTemplate({ projectId, taskType, body })
+    ),
+
   // Copies the task (fields, labels, milestone, subtasks) into its project and
   // links the copy to it. An empty title keeps the original's.
   duplicateTask: (id: string, title?: string) =>
@@ -1411,6 +1429,9 @@ export const flowApi = {
     ),
 
   getCycle: (id: string) => flowResult<{ cycle: ApiCycle }>(() => cycleV2.getCycle({ id })),
+
+  // Project admins only. The cycle's tasks go back to the unplanned backlog.
+  deleteCycle: (id: string) => flowResult<Record<string, never>>(() => cycleV2.deleteCycle({ id })),
 
   // Answers 409 when the project already has an active cycle.
   startCycle: (id: string, data: { lengthWeeks: number; goal?: string; startDate?: string }) =>

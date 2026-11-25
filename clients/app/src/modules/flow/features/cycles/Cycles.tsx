@@ -10,7 +10,11 @@ import { DatePicker } from '@voxire/ui';
 import { useCycles, useCreateCycle } from './useCycles';
 import { type ApiCycle } from '../../shared/services/flowApi';
 import { formatShortDate } from '../../shared/lib/utils';
+import { Link } from '@tanstack/react-router';
 import CycleBadge from '../../shared/components/CycleBadge';
+import { endDateForLength } from './cycleModel';
+import { CycleProgress } from './CycleProgress';
+import { CycleLengthPresets, fieldStyle, presetWeeks } from '../projects/backlog/CycleDialogs';
 import { useProjects } from '../projects/useProjects';
 import GateNotice from '../../shared/components/GateNotice';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
@@ -40,6 +44,8 @@ const Cycles: React.FC = () => {
   const [newName, setNewName] = useState('');
   const [newStart, setNewStart] = useState('');
   const [newEnd, setNewEnd] = useState('');
+  // The preset the dates match; null for a custom length.
+  const [newWeeks, setNewWeeks] = useState<number | null>(2);
 
   if (projectsLoadFailed) {
     return <ListLoadFailed onRetry={() => void projectsQuery.refetch()} />;
@@ -59,7 +65,10 @@ const Cycles: React.FC = () => {
   }
 
   const activeCycles = cycles.filter((c) => c.status === 'active');
-  const upcoming = cycles.filter((c) => c.status === 'upcoming');
+  // Soonest first, so the next cycle reads first.
+  const upcoming = cycles
+    .filter((c) => c.status === 'upcoming')
+    .sort((a, b) => a.startDate.localeCompare(b.startDate));
   const completed = cycles.filter((c) => c.status === 'completed');
 
   return (
@@ -94,11 +103,7 @@ const Cycles: React.FC = () => {
               onChange={(e) => setProjectId(e.target.value)}
               aria-label={t('flow.cycles.project')}
               className="min-h-[44px] rounded-md px-2 text-flow-title sm:min-h-0 sm:py-1.5 sm:text-flow-meta"
-              style={{
-                background: 'var(--flow-input-bg)',
-                border: '1px solid var(--flow-border-control)',
-                color: 'var(--flow-text)',
-              }}
+              style={fieldStyle}
             >
               {projects.length === 0 ? (
                 <option value="">{t('flow.cycles.noProjects')}</option>
@@ -146,17 +151,16 @@ const Cycles: React.FC = () => {
             onChange={(e) => setNewName(e.target.value)}
             placeholder={t('flow.cycles.namePlaceholder')}
             className="w-full rounded-md px-3 py-2 text-flow-meta"
-            style={{
-              background: 'var(--flow-input-bg)',
-              border: '1px solid var(--flow-border-control)',
-              color: 'var(--flow-text)',
-            }}
+            style={fieldStyle}
             autoFocus
           />
           <div className="flex gap-2">
             <DatePicker
               value={newStart}
-              onChange={setNewStart}
+              onChange={(value) => {
+                setNewStart(value);
+                if (newWeeks !== null) setNewEnd(endDateForLength(value, newWeeks));
+              }}
               locale={i18n.language}
               aria-label={t('flow.cycles.startDate')}
               labels={{
@@ -168,7 +172,10 @@ const Cycles: React.FC = () => {
             />
             <DatePicker
               value={newEnd}
-              onChange={setNewEnd}
+              onChange={(value) => {
+                setNewEnd(value);
+                setNewWeeks(presetWeeks(newStart, value));
+              }}
               minDate={newStart || undefined}
               locale={i18n.language}
               aria-label={t('flow.cycles.endDate')}
@@ -180,6 +187,14 @@ const Cycles: React.FC = () => {
               className="text-flow-meta"
             />
           </div>
+          <CycleLengthPresets
+            weeks={newWeeks}
+            showCustom={Boolean(newStart && newEnd)}
+            onPick={(weeks) => {
+              setNewWeeks(weeks);
+              if (newStart) setNewEnd(endDateForLength(newStart, weeks));
+            }}
+          />
           <div className="flex gap-2">
             <button
               type="button"
@@ -202,6 +217,7 @@ const Cycles: React.FC = () => {
                       setNewName('');
                       setNewStart('');
                       setNewEnd('');
+                      setNewWeeks(2);
                     },
                   }
                 );
@@ -219,6 +235,7 @@ const Cycles: React.FC = () => {
                 setNewName('');
                 setNewStart('');
                 setNewEnd('');
+                setNewWeeks(2);
               }}
               className="px-3 py-1.5 rounded-sm text-flow-meta"
               style={{ color: 'var(--flow-text-muted)' }}
@@ -274,7 +291,13 @@ const Cycles: React.FC = () => {
                 </span>
               </div>
               <h2 className="text-flow-screen font-bold mb-2" style={{ color: 'var(--flow-text)' }}>
-                {active.name}
+                <Link
+                  to="/flow/cycles/$cycleId"
+                  params={{ cycleId: active.id }}
+                  className="hover:underline"
+                >
+                  {active.name}
+                </Link>
               </h2>
               <div
                 className="flex items-center gap-2 text-flow-meta"
@@ -285,29 +308,7 @@ const Cycles: React.FC = () => {
                 <span>{formatShortDate(active.endDate, i18n.language)}</span>
               </div>
               <div className="mt-4">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>
-                    {t('flow.cycles.taskCount', { done: active.completed, total: active.scope })}
-                  </span>
-                  <span
-                    className="text-flow-meta font-semibold"
-                    style={{ color: 'var(--flow-text)' }}
-                  >
-                    {active.scope > 0 ? Math.round((active.completed / active.scope) * 100) : 0}%
-                  </span>
-                </div>
-                <div
-                  className="h-2 rounded-full overflow-hidden"
-                  style={{ background: 'var(--flow-hover)' }}
-                >
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width: `${active.scope > 0 ? (active.completed / active.scope) * 100 : 0}%`,
-                      background: 'var(--flow-action-bg)',
-                    }}
-                  />
-                </div>
+                <CycleProgress cycle={active} />
               </div>
             </motion.section>
           ))}
@@ -336,19 +337,21 @@ const CycleSection: React.FC<{ title: string; cycles: ApiCycle[] }> = ({ title, 
       </h3>
       <div className="space-y-2">
         {cycles.map((c) => (
-          <div
+          <Link
             key={c.id}
-            className="rounded-lg px-4 py-3 flex items-center gap-4"
+            to="/flow/cycles/$cycleId"
+            params={{ cycleId: c.id }}
+            className="flow-focus rounded-lg px-4 py-3 flex items-center gap-4 transition-colors hover:bg-[var(--flow-hover)]"
             style={{
               background: 'var(--flow-card)',
               border: '1px solid var(--flow-border)',
             }}
           >
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <Timer size={12} style={{ color: 'var(--flow-text-muted)' }} />
                 <span
-                  className="text-flow-body font-semibold"
+                  className="text-flow-body font-semibold truncate"
                   style={{ color: 'var(--flow-text)' }}
                 >
                   {c.name}
@@ -359,10 +362,16 @@ const CycleSection: React.FC<{ title: string; cycles: ApiCycle[] }> = ({ title, 
                   start: formatShortDate(c.startDate, t('flowCommon.dateLocale')),
                   end: formatShortDate(c.endDate, t('flowCommon.dateLocale')),
                 })}
+                {c.scope > 0 && (
+                  <>
+                    {' · '}
+                    {t('flow.cycles.taskCount', { done: c.completed, total: c.scope })}
+                  </>
+                )}
               </p>
             </div>
-            <CycleBadge cycle={c} compact />
-          </div>
+            <CycleBadge cycle={c} compact showState />
+          </Link>
         ))}
       </div>
     </section>

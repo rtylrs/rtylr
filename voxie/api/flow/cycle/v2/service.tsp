@@ -23,6 +23,14 @@ interface CycleService {
   @route("/cycles/{id}")
   updateCycle(...UpdateCycleRequest): UpdateCycleResponse;
 
+  /**
+   * deleteCycle removes the cycle. Its tasks stay in the project and go back to
+   * the unplanned backlog.
+   */
+  @delete
+  @route("/cycles/{id}")
+  deleteCycle(...DeleteCycleRequest): DeleteCycleResponse;
+
   @get
   @route("/cycles/{id}")
   getCycle(...GetCycleRequest): GetCycleResponse;

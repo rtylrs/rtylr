@@ -69,13 +69,14 @@ describe('useCycles (remote mode)', () => {
     expect(flowApi.getCycles).not.toHaveBeenCalled();
   });
 
-  it('unwraps the enveloped { cycles: [...] } shape', async () => {
+  it('unwraps the enveloped { cycles: [...] } shape and reads omitted counts as 0', async () => {
     const cycles = [{ id: 'c-2', name: 'Sprint 1' }];
     (flowApi.getCycles as unknown as Mock).mockResolvedValue({ cycles });
     const { wrapper } = createWrapper();
     const { result } = renderHook(() => useCycles('p-1'), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual(cycles);
+    // The wire drops zero values, so a cycle with nothing done has no `completed`.
+    expect(result.current.data).toEqual([{ id: 'c-2', name: 'Sprint 1', scope: 0, completed: 0 }]);
   });
 });
 

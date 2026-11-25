@@ -39,6 +39,8 @@ const overviewState = vi.hoisted(() => ({
   failureCount: 0,
   refetch: vi.fn(),
 }));
+vi.mock('../cycles/useCycles', () => ({ useCycles: () => ({ data: [] }) }));
+
 vi.mock('./useProjectOverview', () => ({
   useProjectOverview: () => overviewState,
 }));

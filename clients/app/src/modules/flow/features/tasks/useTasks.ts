@@ -10,6 +10,8 @@ import type {
 } from '../../shared/services/flowApi';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 import { fetchAllMyTasks } from './useMyIssues';
+import { invalidateTaskProgress } from '../../shared/lib/invalidateTaskProgress';
+import { invalidatePlanning } from '../cycles/useCycles';
 
 const t = (key: string, opts?: Record<string, unknown>): string => i18next.t(key, opts) as string;
 
@@ -111,13 +113,7 @@ export function useCreateTask() {
       return unwrap(flowApi.createTask(data));
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['cycles'] });
-      qc.invalidateQueries({ queryKey: ['tasks'] });
-      qc.invalidateQueries({ queryKey: ['epic-rollups'] });
-      qc.invalidateQueries({ queryKey: ['my-tasks'] });
-      qc.invalidateQueries({ queryKey: ['projects'] });
-      qc.invalidateQueries({ queryKey: ['projects-v2'] });
-      qc.invalidateQueries({ queryKey: ['milestones'] });
+      invalidateTaskProgress(qc);
     },
     onError: () => toast.error(t('flowToasts.task.createFailed')),
   });
@@ -130,14 +126,7 @@ export function useUpdateTask() {
       return unwrap(flowApi.updateTask(id, data)).then(() => {});
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['tasks'] });
-      qc.invalidateQueries({ queryKey: ['epic-rollups'] });
-      qc.invalidateQueries({ queryKey: ['my-tasks'] });
-      qc.invalidateQueries({ queryKey: ['projects'] });
-      qc.invalidateQueries({ queryKey: ['projects-v2'] });
-      qc.invalidateQueries({ queryKey: ['milestones'] });
-      qc.invalidateQueries({ queryKey: ['cycles'] });
-      qc.invalidateQueries({ queryKey: ['task'] });
+      invalidateTaskProgress(qc);
     },
     onError: () => toast.error(t('flowToasts.task.updateFailed')),
   });
@@ -150,12 +139,7 @@ export function useDeleteTask() {
       return unwrap(flowApi.deleteTask(id));
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['tasks'] });
-      qc.invalidateQueries({ queryKey: ['epic-rollups'] });
-      qc.invalidateQueries({ queryKey: ['my-tasks'] });
-      qc.invalidateQueries({ queryKey: ['projects'] });
-      qc.invalidateQueries({ queryKey: ['projects-v2'] });
-      qc.invalidateQueries({ queryKey: ['milestones'] });
+      invalidateTaskProgress(qc);
     },
     onError: () => toast.error(t('flowToasts.task.deleteFailed')),
   });
@@ -256,13 +240,7 @@ export function useUpdateTaskStatus() {
       return unwrap(flowApi.updateTaskStatus(id, status));
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['tasks'] });
-      qc.invalidateQueries({ queryKey: ['epic-rollups'] });
-      qc.invalidateQueries({ queryKey: ['my-tasks'] });
-      qc.invalidateQueries({ queryKey: ['projects'] });
-      qc.invalidateQueries({ queryKey: ['projects-v2'] });
-      qc.invalidateQueries({ queryKey: ['milestones'] });
-      qc.invalidateQueries({ queryKey: ['task'] });
+      invalidateTaskProgress(qc);
     },
     onError: () => toast.error(t('flowToasts.task.statusUpdateFailed')),
   });
@@ -302,12 +280,7 @@ export function useBulkUpdateStatus() {
     mutationFn: ({ ids, status }) =>
       bulkSettle(ids, (id) => unwrap(flowApi.updateTaskStatus(id, status))),
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: ['tasks'] });
-      qc.invalidateQueries({ queryKey: ['epic-rollups'] });
-      qc.invalidateQueries({ queryKey: ['my-tasks'] });
-      qc.invalidateQueries({ queryKey: ['projects'] });
-      qc.invalidateQueries({ queryKey: ['projects-v2'] });
-      qc.invalidateQueries({ queryKey: ['milestones'] });
+      invalidateTaskProgress(qc);
     },
     onSuccess: (res) =>
       reportBulk(res, 'flowToasts.task.bulkUpdated', 'flowToasts.task.bulkUpdateFailed'),
@@ -332,18 +305,26 @@ export function useBulkUpdatePriority() {
   });
 }
 
+/** Puts every task in one cycle; an empty cycleId sends them to the backlog. */
+export function useBulkUpdateCycle() {
+  const qc = useQueryClient();
+  return useMutation<BulkResult, unknown, { ids: string[]; cycleId: string }>({
+    mutationFn: ({ ids, cycleId }) =>
+      bulkSettle(ids, (id) => unwrap(flowApi.updateTask(id, { cycleId }))),
+    onSettled: () => invalidatePlanning(qc),
+    onSuccess: (res) =>
+      reportBulk(res, 'flowToasts.task.bulkUpdated', 'flowToasts.task.bulkUpdateFailed'),
+    onError: () => toast.error(t('flowToasts.task.bulkUpdateFailed')),
+  });
+}
+
 export function useBulkUpdateArchive() {
   const qc = useQueryClient();
   return useMutation<BulkResult, unknown, { ids: string[] }>({
     mutationFn: ({ ids }) =>
       bulkSettle(ids, (id) => unwrap(flowApi.updateTask(id, { archived: true }))),
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: ['tasks'] });
-      qc.invalidateQueries({ queryKey: ['epic-rollups'] });
-      qc.invalidateQueries({ queryKey: ['my-tasks'] });
-      qc.invalidateQueries({ queryKey: ['projects'] });
-      qc.invalidateQueries({ queryKey: ['projects-v2'] });
-      qc.invalidateQueries({ queryKey: ['milestones'] });
+      invalidateTaskProgress(qc);
     },
     onSuccess: (res) =>
       reportBulk(res, 'flowToasts.task.bulkUpdated', 'flowToasts.task.bulkUpdateFailed'),
@@ -356,12 +337,7 @@ export function useBulkDelete() {
   return useMutation<BulkResult, unknown, string[]>({
     mutationFn: (ids) => bulkSettle(ids, (id) => unwrap(flowApi.deleteTask(id))),
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: ['tasks'] });
-      qc.invalidateQueries({ queryKey: ['epic-rollups'] });
-      qc.invalidateQueries({ queryKey: ['my-tasks'] });
-      qc.invalidateQueries({ queryKey: ['projects'] });
-      qc.invalidateQueries({ queryKey: ['projects-v2'] });
-      qc.invalidateQueries({ queryKey: ['milestones'] });
+      invalidateTaskProgress(qc);
     },
     onSuccess: (res) =>
       reportBulk(res, 'flowToasts.task.bulkDeleted', 'flowToasts.task.bulkDeleteFailed'),

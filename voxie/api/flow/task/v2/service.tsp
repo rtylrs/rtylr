@@ -182,4 +182,17 @@ interface TaskService {
   @post
   @route("/tasks/import")
   importTasks(...ImportTasksRequest): ImportTasksResponse;
+
+  /** listTaskTemplates returns a project's description templates, one per task type at most. */
+  @get
+  @route("/tasks/templates")
+  listTaskTemplates(...ListTaskTemplatesRequest): ListTaskTemplatesResponse;
+
+  /**
+   * setTaskTemplate saves the project's template for a task type. An empty body
+   * removes it. Requires project admin.
+   */
+  @put
+  @route("/tasks/templates")
+  setTaskTemplate(...SetTaskTemplateRequest): SetTaskTemplateResponse;
 }
