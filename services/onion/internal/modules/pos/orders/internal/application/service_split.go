@@ -252,6 +252,12 @@ func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input Pu
 		}
 	}
 
+	if s.publicOrderTenancyValidator != nil {
+		if err := s.publicOrderTenancyValidator(ctx, ownerID, input.LocationID, input.TableID); err != nil {
+			return 0, "", "", err
+		}
+	}
+
 	enabled, err := s.repo.IsOnlineOrderingEnabled(ctx, ownerID)
 	if err != nil {
 		return 0, "", "", fmt.Errorf("check online ordering entitlement: %w", err)
@@ -268,6 +274,18 @@ func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input Pu
 				return 0, "", "", fmt.Errorf("item[%d]: menu item is not available", i)
 			}
 			return 0, "", "", fmt.Errorf("load menu item: %w", err)
+		}
+		if s.branchItemPriceResolver != nil {
+			visible, hasOverride, priceOverride, ovErr := s.branchItemPriceResolver(ctx, ownerID, input.LocationID, it.MenuItemID)
+			if ovErr != nil {
+				return 0, "", "", fmt.Errorf("resolve branch menu item: %w", ovErr)
+			}
+			if !visible {
+				return 0, "", "", fmt.Errorf("item[%d]: menu item is not available at this branch", i)
+			}
+			if hasOverride && priceOverride >= 0 {
+				item.UnitPrice = priceOverride
+			}
 		}
 		item.Quantity = it.Quantity
 		item.Notes = it.Notes
@@ -318,7 +336,7 @@ func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input Pu
 		if phone == "" {
 			phone = input.CustomerPhone
 		}
-		s.publicOrderHook(ctx, ownerID, input.LocationID, input.TableID, orderID, orderNumber, input.FulfillmentMode, input.CustomerName, phone, totals.Total)
+		s.publicOrderHook(ctx, ownerID, input.LocationID, input.TableID, orderID, orderNumber, input.FulfillmentMode, input.CustomerName, phone, input.CRMOptIn, totals.Total)
 	}
 
 	return orderID, orderNumber, publicToken, nil

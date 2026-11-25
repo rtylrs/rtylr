@@ -18,6 +18,33 @@ export const MENU_FONT_STACKS: Record<string, string> = {
   tajawal: '"Tajawal", "Segoe UI", Tahoma, sans-serif',
 };
 
+const MENU_GOOGLE_FONTS: Record<string, string> = {
+  inter: 'family=Inter:wght@400;500;600;700',
+  jakarta: 'family=Plus+Jakarta+Sans:wght@400;500;600;700',
+  poppins: 'family=Poppins:wght@400;500;600;700',
+  merriweather: 'family=Merriweather:wght@400;700',
+  playfair: 'family=Playfair+Display:wght@600;700',
+  cairo: 'family=Cairo:wght@400;600;700',
+  tajawal: 'family=Tajawal:wght@400;500;700',
+};
+
+/**
+ * Idempotently injects a Google Fonts stylesheet for a menu font token.
+ * Mirrors the webfont loader used by Recruit career templates.
+ */
+export function loadMenuFont(fontId?: string): void {
+  if (!fontId || typeof document === 'undefined') return;
+  const query = MENU_GOOGLE_FONTS[fontId];
+  if (!query) return;
+  const markerId = `menu-font-${fontId}`;
+  if (document.getElementById(markerId)) return;
+  const link = document.createElement('link');
+  link.id = markerId;
+  link.rel = 'stylesheet';
+  link.href = `https://fonts.googleapis.com/css2?${query}&display=swap`;
+  document.head.appendChild(link);
+}
+
 const FONT_SCALE_MAP: Record<MenuFontSize, string> = {
   sm: '14px',
   md: '16px',

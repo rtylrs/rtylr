@@ -122,6 +122,18 @@ func (f *fakeBuilderRepo) InsertMenuEvents(_ context.Context, _ int64, events []
 	return nil
 }
 
+func (f *fakeBuilderRepo) ListActivePublicBanners(_ context.Context, _ int64) ([]domain.Banner, error) {
+	return nil, nil
+}
+
+func (f *fakeBuilderRepo) ListBranchMenuItems(_ context.Context, _ int64, _ int64) ([]domain.BranchMenuItem, error) {
+	return nil, nil
+}
+
+func (f *fakeBuilderRepo) GetCustomerStampProgress(_ context.Context, _ int64, _ string) ([]domain.CustomerStampProgress, error) {
+	return []domain.CustomerStampProgress{{StampCardID: 7, StampsCount: 3, StampsRequired: 5}}, nil
+}
+
 func TestSavePublishAndCloneMenuProfile(t *testing.T) {
 	repo := newFakeBuilderRepo()
 	var emitted []eventbus.Event
@@ -243,5 +255,130 @@ func TestMenuCurrenciesAndTableActionsAndStamps(t *testing.T) {
 	}
 	if len(emitted) != 2 {
 		t.Fatalf("expected 2 emitted webhook events (table action + stamp), got %d", len(emitted))
+	}
+}
+
+func TestGetPublicMenuBundleNeverLeaksUnpublishedDraft(t *testing.T) {
+	repo := newFakeBuilderRepo()
+	svc := NewService(context.Background(), repo)
+
+	css := ".rtylr-menu-root { color: red; }"
+	if _, err := svc.SaveMenuProfileDraft(context.Background(), 42, domain.SaveMenuProfileDraftInput{
+		LocationID:      0,
+		DraftConfigJSON: `{"payment":{"mode":"redirect","redirectUrl":"https://evil.example/pay"}}`,
+		CustomCSS:       &css,
+	}); err != nil {
+		t.Fatalf("SaveMenuProfileDraft failed: %v", err)
+	}
+
+	bundle, err := svc.GetPublicMenuBundle(context.Background(), 42, 0, "en")
+	if err != nil {
+		t.Fatalf("GetPublicMenuBundle failed: %v", err)
+	}
+	if bundle.Profile.DraftConfigJSON != "" || bundle.Profile.CustomCSS != "" || bundle.Profile.PublishedConfigJSON != "" || bundle.Profile.PublishedCustomCSS != "" {
+		t.Fatalf("unpublished draft leaked into public bundle: %+v", bundle.Profile)
+	}
+	if got := svc.ResolvePaymentRedirectURL(context.Background(), 42, 0); got != "" {
+		t.Fatalf("ResolvePaymentRedirectURL must ignore unpublished drafts, got %q", got)
+	}
+
+	// Publish, then edit draft again: public bundle must still expose only published values.
+	if _, err := svc.PublishMenuProfile(context.Background(), 42, 0); err != nil {
+		t.Fatalf("PublishMenuProfile failed: %v", err)
+	}
+	newDraftCSS := ".rtylr-menu-root { color: blue; }"
+	if _, err := svc.SaveMenuProfileDraft(context.Background(), 42, domain.SaveMenuProfileDraftInput{
+		LocationID:      0,
+		DraftConfigJSON: `{"payment":{"mode":"redirect","redirectUrl":"https://draft.example/pay"}}`,
+		CustomCSS:       &newDraftCSS,
+	}); err != nil {
+		t.Fatalf("second SaveMenuProfileDraft failed: %v", err)
+	}
+	bundle, err = svc.GetPublicMenuBundle(context.Background(), 42, 0, "en")
+	if err != nil {
+		t.Fatalf("GetPublicMenuBundle after publish failed: %v", err)
+	}
+	if bundle.Profile.DraftConfigJSON != "" || bundle.Profile.CustomCSS != "" {
+		t.Fatalf("draft fields must be stripped even after publish: %+v", bundle.Profile)
+	}
+	if bundle.Profile.PublishedCustomCSS != css {
+		t.Fatalf("expected published CSS %q, got %q", css, bundle.Profile.PublishedCustomCSS)
+	}
+	if got := svc.ResolvePaymentRedirectURL(context.Background(), 42, 0); got != "https://evil.example/pay" {
+		t.Fatalf("expected published redirect URL, got %q", got)
+	}
+}
+
+func TestGetPublicCustomerStampsGating(t *testing.T) {
+	repo := newFakeBuilderRepo()
+	svc := NewService(context.Background(), repo)
+
+	// Too-short phone returns empty without probing repo.
+	res, err := svc.GetPublicCustomerStamps(context.Background(), 42, "123")
+	if err != nil || len(res) != 0 {
+		t.Fatalf("expected empty for short phone, got %+v (%v)", res, err)
+	}
+
+	// Published profile with enableLoyaltyStamps disabled hides progress.
+	_, _ = svc.SaveMenuProfileDraft(context.Background(), 42, domain.SaveMenuProfileDraftInput{
+		LocationID:      0,
+		DraftConfigJSON: `{"features":{"enableLoyaltyStamps":false}}`,
+	})
+	_, _ = svc.PublishMenuProfile(context.Background(), 42, 0)
+	res, err = svc.GetPublicCustomerStamps(context.Background(), 42, "+15551234567")
+	if err != nil || len(res) != 0 {
+		t.Fatalf("expected empty when loyaltyStamps disabled, got %+v (%v)", res, err)
+	}
+
+	// Enabled enableLoyaltyStamps allows lookup.
+	_, _ = svc.SaveMenuProfileDraft(context.Background(), 42, domain.SaveMenuProfileDraftInput{
+		LocationID:      0,
+		DraftConfigJSON: `{"features":{"enableLoyaltyStamps":true}}`,
+	})
+	_, _ = svc.PublishMenuProfile(context.Background(), 42, 0)
+	res, err = svc.GetPublicCustomerStamps(context.Background(), 42, "+15551234567")
+	if err != nil || len(res) != 1 {
+		t.Fatalf("expected stamp progress when enabled, got %+v (%v)", res, err)
+	}
+}
+
+func TestTenantValidatorRejectsForeignIDs(t *testing.T) {
+	repo := newFakeBuilderRepo()
+	svc := NewService(context.Background(), repo).WithTenantValidator(TenantValidator{
+		ValidateLocation: func(_ context.Context, _, locationID int64) error {
+			if locationID == 999 {
+				return errors.New("foreign location")
+			}
+			return nil
+		},
+		ValidateTable: func(_ context.Context, _, tableID int64) error {
+			if tableID == 888 {
+				return errors.New("foreign table")
+			}
+			return nil
+		},
+		ValidateMenuItem: func(_ context.Context, _, menuItemID int64) error {
+			if menuItemID == 777 {
+				return errors.New("foreign item")
+			}
+			return nil
+		},
+	})
+
+	if _, err := svc.SaveMenuProfileDraft(context.Background(), 42, domain.SaveMenuProfileDraftInput{
+		LocationID:      999,
+		DraftConfigJSON: `{}`,
+	}); !errors.Is(err, domain.ErrMenuProfileInvalidInput) {
+		t.Fatalf("expected ErrMenuProfileInvalidInput for foreign location, got %v", err)
+	}
+	if _, err := svc.CreatePublicTableAction(context.Background(), 42, domain.TableAction{
+		TableID: 888, ActionType: "call_waiter",
+	}); !errors.Is(err, domain.ErrTableActionInvalidInput) {
+		t.Fatalf("expected ErrTableActionInvalidInput for foreign table, got %v", err)
+	}
+	if _, err := svc.UpsertBranchMenuItem(context.Background(), 42, domain.BranchMenuItem{
+		LocationID: 1, MenuItemID: 777, IsVisible: true,
+	}); !errors.Is(err, domain.ErrBranchItemInvalidInput) {
+		t.Fatalf("expected ErrBranchItemInvalidInput for foreign item, got %v", err)
 	}
 }

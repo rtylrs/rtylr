@@ -13,7 +13,11 @@ import (
 const maxWebhookURLLength = 2048
 
 var supportedEvents = map[string]struct{}{
-	eventbus.TypeOrderCreated: {},
+	eventbus.TypeOrderCreated:             {},
+	eventbus.TypeMenuProfilePublished:     {},
+	eventbus.TypeMenuOrderCreated:         {},
+	eventbus.TypeMenuTableActionRequested: {},
+	eventbus.TypeMenuStampEarned:          {},
 }
 
 func invalidRegistration(format string, args ...any) error {

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import classNames from "classnames";
 import { cdnImageUrl } from "@voxire/config";
 import MenuHeader from "../../components/MenuHeader";
@@ -8,21 +8,76 @@ import AiChat, { ChatMessage } from "../../components/AiChat";
 import { MenuItemData } from "../../components/MenuItem";
 import {
   BusinessInfo,
+  CustomerStampProgressData,
   DEFAULT_FEATURES_CONFIG,
   DEFAULT_LAYOUT_CONFIG,
   MenuBannerData,
   MenuCurrencyOption,
   MenuFeaturesConfig,
   MenuLayoutConfig,
+  MenuLayoutLabels,
   MenuStampCardSummary,
   TableActionType,
 } from "../../types";
-import { buildMenuThemeStyle, formatConvertedPrice, isRtlLocale } from "../../theme";
+import {
+  buildMenuThemeStyle,
+  formatConvertedPrice,
+  isRtlLocale,
+  loadMenuFont,
+} from "../../theme";
 import AboutPage from "../../pages/AboutPage";
 import GalleryPage from "../../pages/GalleryPage";
 import ReviewsPage from "../../pages/ReviewsPage";
 import OffersPage from "../../pages/OffersPage";
 import styles from "./MenuLayoutCore.module.scss";
+
+const DEFAULT_LABELS: MenuLayoutLabels = {
+  searchMenu: "Search Menu",
+  searchPlaceholder: "Search dishes, drinks, products...",
+  showResults: "Show Results",
+  dietaryFilters: "Dietary filters",
+  dietaryPreferences: "Dietary Preferences",
+  allItems: "All Items",
+  applyFilter: "Apply Filter",
+  languageAndCurrency: "Language & Currency",
+  language: "Language",
+  currency: "Currency",
+  done: "Done",
+  tableService: "Table service",
+  service: "Service",
+  callStaff: "Call Staff",
+  callStaffSubtitle: "Alert a team member to your table",
+  requestBill: "Request Bill",
+  requestBillSubtitle: "Bring the check or card terminal",
+  splitBill: "Split Bill",
+  splitBillSubtitle: "Divide the table tab between guests",
+  callWaiterSuccess: "Staff notified — someone is on the way",
+  requestBillSuccess: "Bill requested for your table",
+  splitBillSuccess: "Split bill requested",
+  tableActionError: "Could not send request — please try again",
+  rewards: "Rewards",
+  digitalStampCards: "Digital Stamp Cards",
+  stampsPhonePlaceholder: "Enter phone number to check stamps",
+  checkStamps: "Check",
+  checkingStamps: "Checking…",
+  gotIt: "Got it",
+  viewOrder: "View Order",
+  addToOrder: "Add to Order",
+  yourOrder: "Your Order",
+  closeCart: "Close cart",
+  emptyCart: "Your cart is empty",
+  subtotal: "Subtotal",
+  placeOrder: "Place Order",
+  askAi: "Ask AI",
+  aiPlaceholder: "Ask about items, allergens, specials…",
+};
+
+function safeExternalHref(url?: string): string | null {
+  if (!url) return null;
+  const trimmed = url.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return null;
+}
 
 export interface MenuLayoutCoreProps {
   business: BusinessInfo;
@@ -32,12 +87,16 @@ export interface MenuLayoutCoreProps {
   currencies?: MenuCurrencyOption[];
   activeCurrencyCode?: string;
   onCurrencyChange?: (code: string) => void;
+  onCurrencyOptionChange?: (currency: MenuCurrencyOption) => void;
   availableLocales?: string[];
   activeLocale?: string;
   onLocaleChange?: (locale: string) => void;
   stampCards?: MenuStampCardSummary[];
+  customerStamps?: CustomerStampProgressData[];
+  onLookupStamps?: (phone: string) => Promise<void> | void;
   tableLabel?: string;
   onTableAction?: (action: TableActionType) => Promise<void> | void;
+  labels?: Partial<MenuLayoutLabels>;
   enableCart?: boolean;
   enableAiChat?: boolean;
   onAiMessage?: (message: string, history: ChatMessage[]) => Promise<string>;
@@ -63,12 +122,16 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
   currencies = [],
   activeCurrencyCode,
   onCurrencyChange,
+  onCurrencyOptionChange,
   availableLocales = [],
   activeLocale,
   onLocaleChange,
   stampCards = [],
+  customerStamps = [],
+  onLookupStamps,
   tableLabel,
   onTableAction,
+  labels: labelsOverride,
   enableCart = true,
   enableAiChat = true,
   onAiMessage,
@@ -77,6 +140,10 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
   onCheckout,
   className,
 }) => {
+  const t = useMemo(
+    () => ({ ...DEFAULT_LABELS, ...labelsOverride }),
+    [labelsOverride],
+  );
   const features: MenuFeaturesConfig = {
     ...DEFAULT_FEATURES_CONFIG,
     ...configOverride?.features,
@@ -117,9 +184,28 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
     activeCurrencyCode ?? currencies.find((c) => c.isDefault)?.code ?? currencies[0]?.code ?? "",
   );
   const [tableActionNotice, setTableActionNotice] = useState<string | null>(null);
+  const [stampLookupPhone, setStampLookupPhone] = useState("");
+  const [lookingUpStamps, setLookingUpStamps] = useState(false);
   const [activeCategoryId, setActiveCategoryId] = useState<string>(
     categories[0]?.id ?? "",
   );
+
+  useEffect(() => {
+    loadMenuFont(config.typography?.headingFont);
+    loadMenuFont(config.typography?.bodyFont);
+  }, [config.typography?.headingFont, config.typography?.bodyFont]);
+
+  useEffect(() => {
+    if (!activeSheet && !detailItem) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setActiveSheet(null);
+        setDetailItem(null);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [activeSheet, detailItem]);
 
   const effectiveCurrencyCode = activeCurrencyCode ?? internalCurrency;
   const activeCurrency = useMemo(
@@ -202,15 +288,30 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
 
   const triggerTableAction = async (action: TableActionType) => {
     if (!onTableAction) return;
-    await onTableAction(action);
-    const labels: Record<TableActionType, string> = {
-      call_waiter: "Staff notified — someone is on the way",
-      request_bill: "Bill requested for your table",
-      split_bill: "Split bill requested",
-    };
-    setTableActionNotice(labels[action]);
-    setActiveSheet(null);
+    try {
+      await onTableAction(action);
+      const noticeByAction: Record<TableActionType, string> = {
+        call_waiter: t.callWaiterSuccess,
+        request_bill: t.requestBillSuccess,
+        split_bill: t.splitBillSuccess,
+      };
+      setTableActionNotice(noticeByAction[action]);
+      setActiveSheet(null);
+    } catch {
+      setTableActionNotice(t.tableActionError);
+    }
     setTimeout(() => setTableActionNotice(null), 3500);
+  };
+
+  const handleLookupStamps = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!onLookupStamps || !stampLookupPhone.trim()) return;
+    setLookingUpStamps(true);
+    try {
+      await onLookupStamps(stampLookupPhone.trim());
+    } finally {
+      setLookingUpStamps(false);
+    }
   };
 
   const totalItems = cartItems.reduce((sum, c) => sum + c.quantity, 0);
@@ -375,8 +476,9 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
                   <div className={styles.bannerStrip}>
                     {banners.map((banner) => {
                       const img = cdnImageUrl(banner.imageUrl);
-                      return (
-                        <div key={banner.id} className={styles.bannerPill}>
+                      const href = safeExternalHref(banner.linkUrl);
+                      const inner = (
+                        <>
                           {img && (
                             <img
                               src={img}
@@ -388,6 +490,22 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
                             <strong>{banner.title}</strong>
                             {banner.body && <span>{banner.body}</span>}
                           </div>
+                        </>
+                      );
+                      return href ? (
+                        <a
+                          key={banner.id}
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.bannerPill}
+                          style={{ textDecoration: "none", color: "inherit" }}
+                        >
+                          {inner}
+                        </a>
+                      ) : (
+                        <div key={banner.id} className={styles.bannerPill}>
+                          {inner}
                         </div>
                       );
                     })}
@@ -422,9 +540,11 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
         {renderedPage === "offers" && <OffersPage offers={business.offers ?? []} />}
       </main>
 
-      <footer className={styles.layout__poweredBy}>Powered by RTYLR</footer>
+      <footer className={styles.layout__poweredBy} data-rtylr-powered-by="true">
+        Powered by RTYLR
+      </footer>
 
-      {/* Sleek floating frosted-glass bottom dock */}
+      {/* Sleek floating bottom dock */}
       {showBottomDock && (
         <div
           className={classNames(styles.bottomDock, {
@@ -435,27 +555,27 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
             <button
               type="button"
               className={styles.dockIconBtn}
-              aria-label="Table service"
+              aria-label={t.tableService}
               onClick={() => setActiveSheet("service")}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
               </svg>
-              <span>Service</span>
+              <span>{t.service}</span>
             </button>
           )}
           {showLoyalty && (
             <button
               type="button"
               className={styles.dockIconBtn}
-              aria-label="Rewards"
+              aria-label={t.rewards}
               onClick={() => setActiveSheet("loyalty")}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
               </svg>
-              <span>Rewards</span>
+              <span>{t.rewards}</span>
             </button>
           )}
           {cartEnabled && totalItems > 0 && (
@@ -465,7 +585,7 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
               onClick={() => setCartOpen(true)}
             >
               <span className={styles.dockCartBadge}>{totalItems}</span>
-              <span>View Order</span>
+              <span>{t.viewOrder}</span>
               <span className={styles.dockCartTotal}>
                 {formatConvertedPrice(totalBasePrice, activeCurrency)}
               </span>
@@ -484,37 +604,49 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
             className={styles.sheetPanel}
             onClick={(e) => e.stopPropagation()}
             role="dialog"
+            aria-modal="true"
+            aria-label={
+              activeSheet === "search"
+                ? t.searchMenu
+                : activeSheet === "preferences"
+                  ? t.languageAndCurrency
+                  : activeSheet === "filters"
+                    ? t.dietaryPreferences
+                    : activeSheet === "service"
+                      ? t.tableService
+                      : t.digitalStampCards
+            }
           >
             <div className={styles.sheetHandle} />
 
             {activeSheet === "search" && (
               <div className={styles.sheetBody}>
-                <h3 className={styles.sheetTitle}>Search Menu</h3>
+                <h3 className={styles.sheetTitle}>{t.searchMenu}</h3>
                 <input
                   autoFocus
                   type="search"
                   className={styles.sheetInput}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search dishes, drinks, products..."
-                  aria-label="Search menu input"
+                  placeholder={t.searchPlaceholder}
+                  aria-label={t.searchMenu}
                 />
                 <button
                   type="button"
                   className={styles.sheetPrimaryBtn}
                   onClick={() => setActiveSheet(null)}
                 >
-                  Show Results
+                  {t.showResults}
                 </button>
               </div>
             )}
 
             {activeSheet === "preferences" && (
               <div className={styles.sheetBody}>
-                <h3 className={styles.sheetTitle}>Language &amp; Currency</h3>
+                <h3 className={styles.sheetTitle}>{t.languageAndCurrency}</h3>
                 {features.enableLanguageSwitcher && availableLocales.length > 1 && (
                   <div className={styles.sheetSection}>
-                    <span className={styles.sheetLabel}>Language</span>
+                    <span className={styles.sheetLabel}>{t.language}</span>
                     <div className={styles.optionGrid}>
                       {availableLocales.map((loc) => (
                         <button
@@ -534,7 +666,7 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
                 )}
                 {features.enableCurrencySwitcher && currencies.length > 1 && (
                   <div className={styles.sheetSection}>
-                    <span className={styles.sheetLabel}>Currency</span>
+                    <span className={styles.sheetLabel}>{t.currency}</span>
                     <div className={styles.optionGrid}>
                       {currencies.map((cur) => (
                         <button
@@ -546,6 +678,7 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
                           onClick={() => {
                             setInternalCurrency(cur.code);
                             onCurrencyChange?.(cur.code);
+                            onCurrencyOptionChange?.(cur);
                           }}
                         >
                           {cur.code} ({cur.symbol.trim()})
@@ -559,14 +692,14 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
                   className={styles.sheetPrimaryBtn}
                   onClick={() => setActiveSheet(null)}
                 >
-                  Done
+                  {t.done}
                 </button>
               </div>
             )}
 
             {activeSheet === "filters" && (
               <div className={styles.sheetBody}>
-                <h3 className={styles.sheetTitle}>Dietary Preferences</h3>
+                <h3 className={styles.sheetTitle}>{t.dietaryPreferences}</h3>
                 <div className={styles.optionGrid}>
                   <button
                     type="button"
@@ -575,7 +708,7 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
                     })}
                     onClick={() => setSelectedDietary(null)}
                   >
-                    All Items
+                    {t.allItems}
                   </button>
                   {dietaryOptions.map((tag) => (
                     <button
@@ -595,7 +728,7 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
                   className={styles.sheetPrimaryBtn}
                   onClick={() => setActiveSheet(null)}
                 >
-                  Apply Filter
+                  {t.applyFilter}
                 </button>
               </div>
             )}
@@ -603,7 +736,7 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
             {activeSheet === "service" && (
               <div className={styles.sheetBody}>
                 <h3 className={styles.sheetTitle}>
-                  Table Service {tableLabel ? `· ${tableLabel}` : ""}
+                  {t.tableService} {tableLabel ? `· ${tableLabel}` : ""}
                 </h3>
                 <div className={styles.serviceList}>
                   {features.tableActions.callWaiter && (
@@ -612,8 +745,8 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
                       className={styles.serviceCard}
                       onClick={() => void triggerTableAction("call_waiter")}
                     >
-                      <strong>Call Staff</strong>
-                      <span>Alert a team member to your table</span>
+                      <strong>{t.callStaff}</strong>
+                      <span>{t.callStaffSubtitle}</span>
                     </button>
                   )}
                   {features.tableActions.requestBill && (
@@ -622,8 +755,8 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
                       className={styles.serviceCard}
                       onClick={() => void triggerTableAction("request_bill")}
                     >
-                      <strong>Request Bill</strong>
-                      <span>Bring the check or card terminal</span>
+                      <strong>{t.requestBill}</strong>
+                      <span>{t.requestBillSubtitle}</span>
                     </button>
                   )}
                   {features.tableActions.splitBill && (
@@ -632,8 +765,8 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
                       className={styles.serviceCard}
                       onClick={() => void triggerTableAction("split_bill")}
                     >
-                      <strong>Split Bill</strong>
-                      <span>Divide the table tab between guests</span>
+                      <strong>{t.splitBill}</strong>
+                      <span>{t.splitBillSubtitle}</span>
                     </button>
                   )}
                 </div>
@@ -642,34 +775,67 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
 
             {activeSheet === "loyalty" && (
               <div className={styles.sheetBody}>
-                <h3 className={styles.sheetTitle}>Digital Stamp Cards</h3>
-                {stampCards.map((card) => (
-                  <div key={card.id} className={styles.loyaltyModalCard}>
-                    <strong>{card.title}</strong>
-                    <p>
-                      Collect {card.stampsRequired} stamps to unlock{" "}
-                      <strong>{card.rewardLabel}</strong>.
-                    </p>
-                    <div className={styles.stampDots}>
-                      {Array.from({ length: Math.min(card.stampsRequired, 10) }).map((_, i) => (
-                        <span
-                          key={i}
-                          className={classNames(styles.stampDot, {
-                            [styles["stampDot--filled"]]: i < 2,
-                          })}
-                        >
-                          {i < 2 ? "★" : i + 1}
-                        </span>
-                      ))}
+                <h3 className={styles.sheetTitle}>{t.digitalStampCards}</h3>
+                {onLookupStamps && (
+                  <form
+                    onSubmit={(e) => void handleLookupStamps(e)}
+                    style={{ display: "flex", gap: 8, marginBottom: 12 }}
+                  >
+                    <input
+                      type="tel"
+                      className={styles.sheetInput}
+                      value={stampLookupPhone}
+                      onChange={(e) => setStampLookupPhone(e.target.value)}
+                      placeholder={t.stampsPhonePlaceholder}
+                      aria-label={t.stampsPhonePlaceholder}
+                      style={{ flex: 1, margin: 0 }}
+                    />
+                    <button
+                      type="submit"
+                      className={styles.optionPill}
+                      disabled={lookingUpStamps || !stampLookupPhone.trim()}
+                    >
+                      {lookingUpStamps ? t.checkingStamps : t.checkStamps}
+                    </button>
+                  </form>
+                )}
+                {stampCards.map((card) => {
+                  const progress = customerStamps.find(
+                    (s) => String(s.stampCardId) === String(card.id),
+                  );
+                  const earned = progress
+                    ? progress.stampsCount % Math.max(card.stampsRequired, 1)
+                    : 0;
+                  const unlocked = progress?.rewardsUnlocked ?? 0;
+                  return (
+                    <div key={card.id} className={styles.loyaltyModalCard}>
+                      <strong>{card.title}</strong>
+                      <p>
+                        Collect {card.stampsRequired} stamps to unlock{" "}
+                        <strong>{card.rewardLabel}</strong>.
+                        {unlocked > 0 ? ` (${unlocked} unlocked)` : ""}
+                      </p>
+                      <div className={styles.stampDots}>
+                        {Array.from({ length: Math.min(card.stampsRequired, 10) }).map((_, i) => (
+                          <span
+                            key={i}
+                            className={classNames(styles.stampDot, {
+                              [styles["stampDot--filled"]]: i < earned,
+                            })}
+                          >
+                            {i < earned ? "★" : i + 1}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 <button
                   type="button"
                   className={styles.sheetPrimaryBtn}
                   onClick={() => setActiveSheet(null)}
                 >
-                  Got it
+                  {t.gotIt}
                 </button>
               </div>
             )}
@@ -687,6 +853,8 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
             className={styles.sheetPanel}
             onClick={(e) => e.stopPropagation()}
             role="dialog"
+            aria-modal="true"
+            aria-label={detailItem.name}
           >
             <button
               type="button"
@@ -752,7 +920,7 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
                       setDetailItem(null);
                     }}
                   >
-                    Add to Order ·{" "}
+                    {t.addToOrder} ·{" "}
                     {formatConvertedPrice(detailItem.price * detailQty, activeCurrency, detailItem.currency)}
                   </button>
                 </div>
@@ -769,6 +937,8 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
           isOpen={cartOpen}
           onClose={() => setCartOpen(false)}
           onQuantityChange={handleQuantityChange}
+          activeCurrency={activeCurrency}
+          labels={t}
           onCheckout={(items) => {
             setCartOpen(false);
             onCheckout?.(items);
@@ -781,8 +951,8 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
         <AiChat
           onSendMessage={onAiMessage}
           businessName={business.name}
-          buttonLabel="Ask AI"
-          placeholder="Ask about items, allergens, specials…"
+          buttonLabel={t.askAi}
+          placeholder={t.aiPlaceholder}
         />
       )}
     </div>

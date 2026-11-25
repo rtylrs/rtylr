@@ -7,6 +7,8 @@ export type {
   MenuBannerData,
   MenuCurrencyOption,
   MenuStampCardSummary,
+  CustomerStampProgressData,
+  MenuLayoutLabels,
   PageConfig,
   HeaderConfig,
   NavConfig,
@@ -45,6 +47,7 @@ export {
   buildMenuThemeStyle,
   formatConvertedPrice,
   isRtlLocale,
+  loadMenuFont,
 } from './theme';
 export type { MenuStarterTheme, MenuStylePromptResult } from './theme';
 

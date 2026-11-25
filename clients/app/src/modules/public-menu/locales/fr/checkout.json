@@ -27,5 +27,11 @@
   "nameRequired": "Veuillez entrer votre nom.",
   "phoneRequired": "Veuillez entrer votre numéro de téléphone.",
   "emailInvalid": "Veuillez entrer une adresse e-mail valide.",
-  "orderFailed": "Échec de la commande. Veuillez réessayer."
+  "orderFailed": "Échec de la commande. Veuillez réessayer.",
+  "fulfillmentDineIn": "Sur place",
+  "fulfillmentSelfService": "Libre-service",
+  "fulfillmentPickup": "À emporter",
+  "fulfillmentDelivery": "Livraison",
+  "deliveryAddressPlaceholder": "Adresse de livraison",
+  "crmOptInLabel": "Cumuler des tampons de fidélité et enregistrer l’historique"
 }

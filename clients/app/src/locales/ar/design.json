@@ -37,6 +37,7 @@
       "brand": "الهوية",
       "layout": "التخطيط",
       "features": "الميزات",
+      "ops": "مباشر",
       "ai": "Caret AI",
       "css": "CSS"
     },
@@ -90,7 +91,44 @@
     "quickStylePrompt": "تعديل سريع بالوصف",
     "aiPromptPlaceholder": "مثلاً تصميم عربي داكن بخط القاهرة",
     "apply": "تطبيق",
-    "cssSubtitle": "تنسيقات CSS مخصصة تعمل داخل .rtylr-menu-root وتُفحص أمنياً عند الحفظ."
+    "cssSubtitle": "تنسيقات CSS مخصصة تعمل داخل .rtylr-menu-root وتُفحص أمنياً عند الحفظ.",
+    "opsTitle": "العمليات والتحليلات المباشرة",
+    "opsSubtitle": "تابع المسحات وأدر طلبات الطاولات وتحكم بظهور وأسعار الأصناف لكل فرع.",
+    "analyticsTitle": "آخر 30 يوماً",
+    "metricScans": "مسحات QR",
+    "metricViews": "مشاهدات القائمة",
+    "metricCarts": "إضافة للسلة",
+    "metricOrders": "الطلبات",
+    "tableQueueTitle": "طلبات خدمة الطاولات",
+    "tableQueueEmpty": "لا توجد طلبات خدمة مفتوحة حالياً.",
+    "acknowledge": "استلام",
+    "resolve": "إغلاق",
+    "branchItemsTitle": "تخصيص أصناف الفرع",
+    "branchItemsEmpty": "أضف أصنافاً في نقطة البيع لضبط الظهور والأسعار لكل فرع.",
+    "priceOverridePlaceholder": "سعر مخصص"
+  },
+  "toasts": {
+    "draftSaved": "تم حفظ المسودة",
+    "draftSaveFailed": "فشل حفظ المسودة",
+    "published": "تم نشر القائمة بنجاح",
+    "publishFailed": "فشل نشر القائمة",
+    "cloned": "تم نسخ إعدادات الفرع",
+    "cloneFailed": "فشل نسخ إعدادات الفرع",
+    "branchItemSaved": "تم تحديث الصنف للفرع",
+    "branchItemFailed": "فشل تحديث الصنف",
+    "currencySaved": "تم حفظ العملة",
+    "stampCardSaved": "تم حفظ بطاقة الأختام",
+    "translated": "تمت ترجمة {{count}} عناصر (مع الإبقاء على {{skipped}} تعديلات يدوية)",
+    "translationFailed": "فشلت الترجمة",
+    "tableActionUpdated": "تم تحديث طلب الطاولة",
+    "tableActionFailed": "فشل تحديث طلب الطاولة"
+  },
+  "qr": {
+    "branch": "الفرع",
+    "allBranches": "جميع الفروع",
+    "tableCounter": "الطاولة / الكاونتر",
+    "generalMenuQr": "رمز القائمة العام",
+    "useCustomDomain": "استخدام النطاق المخصص ({{domain}})"
   },
   "pages": {
     "about": "من نحن",

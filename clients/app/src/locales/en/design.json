@@ -37,6 +37,7 @@
       "brand": "Brand",
       "layout": "Layout",
       "features": "Features",
+      "ops": "Live",
       "ai": "Caret AI",
       "css": "CSS"
     },
@@ -90,7 +91,44 @@
     "quickStylePrompt": "Quick style prompt",
     "aiPromptPlaceholder": "e.g. dark gold luxury bistro",
     "apply": "Apply",
-    "cssSubtitle": "Scoped custom CSS applied inside .rtylr-menu-root and sanitized on save."
+    "cssSubtitle": "Scoped custom CSS applied inside .rtylr-menu-root and sanitized on save.",
+    "opsTitle": "Live operations & analytics",
+    "opsSubtitle": "Monitor scans, manage table requests, and override item availability or prices per branch.",
+    "analyticsTitle": "Last 30 days",
+    "metricScans": "QR scans",
+    "metricViews": "Menu views",
+    "metricCarts": "Add to cart",
+    "metricOrders": "Orders",
+    "tableQueueTitle": "Table service queue",
+    "tableQueueEmpty": "No open table service requests.",
+    "acknowledge": "Acknowledge",
+    "resolve": "Resolve",
+    "branchItemsTitle": "Branch item overrides",
+    "branchItemsEmpty": "Add POS menu items to configure branch visibility and price overrides.",
+    "priceOverridePlaceholder": "Override price"
+  },
+  "toasts": {
+    "draftSaved": "Draft saved",
+    "draftSaveFailed": "Failed to save draft",
+    "published": "Branded menu published live",
+    "publishFailed": "Failed to publish menu",
+    "cloned": "Copied branch menu configuration",
+    "cloneFailed": "Failed to copy branch menu",
+    "branchItemSaved": "Branch item updated",
+    "branchItemFailed": "Failed to update branch item",
+    "currencySaved": "Currency saved",
+    "stampCardSaved": "Stamp card saved",
+    "translated": "Translated {{count}} entries ({{skipped}} manual kept)",
+    "translationFailed": "Translation failed",
+    "tableActionUpdated": "Table request updated",
+    "tableActionFailed": "Failed to update table request"
+  },
+  "qr": {
+    "branch": "Branch",
+    "allBranches": "All branches",
+    "tableCounter": "Table / Counter",
+    "generalMenuQr": "General menu QR",
+    "useCustomDomain": "Use custom domain ({{domain}})"
   },
   "pages": {
     "about": "About",

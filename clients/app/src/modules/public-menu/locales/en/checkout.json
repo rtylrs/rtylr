@@ -27,5 +27,11 @@
   "nameRequired": "Please enter your name.",
   "phoneRequired": "Please enter your phone number.",
   "emailInvalid": "Please enter a valid email address.",
-  "orderFailed": "Failed to place order. Please try again."
+  "orderFailed": "Failed to place order. Please try again.",
+  "fulfillmentDineIn": "Dine-in",
+  "fulfillmentSelfService": "Self-service",
+  "fulfillmentPickup": "Pickup",
+  "fulfillmentDelivery": "Delivery",
+  "deliveryAddressPlaceholder": "Delivery address",
+  "crmOptInLabel": "Earn loyalty stamps & save order history"
 }

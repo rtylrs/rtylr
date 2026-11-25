@@ -367,7 +367,7 @@ func (a *MenuAPI) ListTableActions(ctx context.Context, req *hubmenuv1.ListTable
 }
 
 func (a *MenuAPI) UpdateTableActionStatus(ctx context.Context, req *hubmenuv1.UpdateTableActionStatusRequest) (*hubmenuv1.UpdateTableActionStatusResponse, error) {
-	businessID, err := requireMenuPermission(ctx, "menu:orders:view")
+	businessID, err := requireMenuPermission(ctx, "menu:menus:edit")
 	if err != nil {
 		return nil, err
 	}
@@ -433,11 +433,13 @@ func (a *MenuAPI) GetPublicMenuBundle(ctx context.Context, req *hubmenuv1.GetPub
 	for _, tr := range bundle.Translations {
 		translations = append(translations, toProtoTranslation(tr))
 	}
-	// Strip draft fields from public response so unpublished edits are never leaked.
+	// Always strip draft fields from public response so unpublished edits/CSS never leak.
 	publicProfile := bundle.Profile
-	if publicProfile.IsPublished && publicProfile.PublishedConfigJSON != "" {
-		publicProfile.DraftConfigJSON = ""
-		publicProfile.CustomCSS = ""
+	publicProfile.DraftConfigJSON = ""
+	publicProfile.CustomCSS = ""
+	if !publicProfile.IsPublished {
+		publicProfile.PublishedConfigJSON = ""
+		publicProfile.PublishedCustomCSS = ""
 	}
 	return &hubmenuv1.GetPublicMenuBundleResponse{
 		Profile:      toProtoProfile(publicProfile),

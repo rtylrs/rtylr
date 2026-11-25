@@ -5,6 +5,7 @@ import { APP_URLS } from '@voxire/config';
 import { motion } from 'motion/react';
 import { ArrowRight, ArrowUpRight, Check } from 'lucide-react';
 import { PAGER_RTYLR_PATH, PAGER_TRY_PATH } from '../../pagerPaths';
+import { RtylrBrandText } from '../../shared/components/RenniliLogo';
 import { ClosingCta } from './landing/ClosingCta';
 import { PublicPageShell } from './landing/PublicPageShell';
 import { RTYLR_SERVICES } from './landing/RtylrUpsellBand';
@@ -27,7 +28,9 @@ const RtylrServicesPage = (): React.JSX.Element => {
     >
       <section className="rl-subhero">
         <div className="rl-wrap rl-subhero-inner">
-          <p className="rl-kicker">{t('pager.landing.rtylr.eyebrow')}</p>
+          <p className="rl-kicker">
+            <RtylrBrandText text={t('pager.landing.rtylr.eyebrow')} />
+          </p>
           <h1 className="rl-subhero-title">{t('pager.landing.rtylr.heading')}</h1>
           <p className="rl-subhero-lead">{t('pager.landing.rtylr.intro')}</p>
           <div className="rl-subhero-actions">

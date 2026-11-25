@@ -8,6 +8,7 @@ import (
 
 	"context"
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -15,6 +16,7 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/platform/eventbus"
+	"github.com/voxire/onion/internal/platform/snips"
 
 	"github.com/voxire/onion/internal/modules/activity"
 	"github.com/voxire/onion/internal/modules/aiquery"
@@ -233,6 +235,51 @@ func initializeModules(ctx context.Context) *apiModules {
 	teamModule.SetTerminatedEmployeeSource(teamadapters.NewTerminatedEmployeeSource(hrCoreModule))
 	expensesModule := expenses.NewModule(ctx, dbclient.Pool())
 	webhooksModule := webhooks.NewModule(ctx, dbclient.Pool())
+	validateMenuLocation := func(vCtx context.Context, businessID, locationID int64) error {
+		if locationID <= 0 {
+			return nil
+		}
+		var exists int
+		err := dbclient.Pool().QueryRowContext(vCtx, `
+			SELECT 1 FROM hr_locations WHERE id = ? AND (business_id = ? OR owner_id = ?)
+			UNION ALL
+			SELECT 1 FROM pos_locations WHERE id = ? AND (business_id = ? OR owner_id = ?)
+			LIMIT 1`,
+			locationID, businessID, businessID, locationID, businessID, businessID,
+		).Scan(&exists)
+		if err != nil {
+			return fmt.Errorf("location %d does not belong to business", locationID)
+		}
+		return nil
+	}
+	validateMenuTable := func(vCtx context.Context, businessID, tableID int64) error {
+		if tableID <= 0 {
+			return nil
+		}
+		var exists int
+		err := dbclient.Pool().QueryRowContext(vCtx, `
+			SELECT 1 FROM pos_tables WHERE id = ? AND (business_id = ? OR owner_id = ?) LIMIT 1`,
+			tableID, businessID, businessID,
+		).Scan(&exists)
+		if err != nil {
+			return fmt.Errorf("table %d does not belong to business", tableID)
+		}
+		return nil
+	}
+	validateMenuItem := func(vCtx context.Context, businessID, menuItemID int64) error {
+		if menuItemID <= 0 {
+			return nil
+		}
+		var exists int
+		err := dbclient.Pool().QueryRowContext(vCtx, `
+			SELECT 1 FROM erp_products WHERE id = ? AND (business_id = ? OR owner_id = ?) LIMIT 1`,
+			menuItemID, businessID, businessID,
+		).Scan(&exists)
+		if err != nil {
+			return fmt.Errorf("menu item %d does not belong to business", menuItemID)
+		}
+		return nil
+	}
 	hubMenuModule := hubmenu.NewModule(ctx, dbclient.Pool()).
 		WithHostResolver(func(resolveCtx context.Context, host string) (int64, string, bool, error) {
 			bizID, found, err := configModule.ResolveVerifiedDomainBusinessID(resolveCtx, host)
@@ -245,13 +292,55 @@ func initializeModules(ctx context.Context) *apiModules {
 			}
 			return bizID, strings.TrimSpace(cfg.BusinessSlug), true, nil
 		}).
-		WithEventDispatcher(webhooksModule.DispatchEvent)
+		WithEventDispatcher(webhooksModule.DispatchEvent).
+		WithTenantValidator(hubmenu.TenantValidator{
+			ValidateLocation: validateMenuLocation,
+			ValidateTable:    validateMenuTable,
+			ValidateMenuItem: validateMenuItem,
+		}).
+		WithTranslator(func(trCtx context.Context, targetLocale string, inputs []string) ([]string, error) {
+			if len(inputs) == 0 {
+				return inputs, nil
+			}
+			aiClient, clientErr := snips.NewClient(trCtx)
+			if clientErr != nil || aiClient == nil {
+				return inputs, nil
+			}
+			payload, _ := json.Marshal(inputs)
+			prompt := fmt.Sprintf(
+				"Translate each restaurant/retail menu string in this JSON array into locale %q. Return ONLY a JSON array of strings with the exact same length and order.\nInput: %s",
+				targetLocale, string(payload),
+			)
+			raw, compErr := aiClient.CompleteTextWithOptions(trCtx, prompt, snips.DeterministicJSONCompletionOptions())
+			if compErr != nil {
+				return nil, compErr
+			}
+			trimmed := strings.TrimSpace(raw)
+			if strings.HasPrefix(trimmed, "```") {
+				trimmed = strings.TrimPrefix(trimmed, "```json")
+				trimmed = strings.TrimPrefix(trimmed, "```")
+				trimmed = strings.TrimSuffix(trimmed, "```")
+				trimmed = strings.TrimSpace(trimmed)
+			}
+			var out []string
+			if err := json.Unmarshal([]byte(trimmed), &out); err != nil || len(out) != len(inputs) {
+				return nil, fmt.Errorf("translation output format mismatch")
+			}
+			return out, nil
+		})
 	posOrdersModule := orders.NewModule(ctx, dbclient.Pool()).
 		WithSalesProductReader(productsModule.SalesProduct).
 		WithOnlineOrderingReader(addonsModule.OnlineOrderingEnabled).
 		WithPaymentRedirectResolver(hubMenuModule.ResolvePaymentRedirectURL).
-		WithPublicOrderHook(func(hookCtx context.Context, businessID, locationID, tableID, orderID int64, orderNumber, fulfillmentMode, customerName, customerPhone string, total float64) {
-			if customerPhone != "" {
+		WithBranchItemPriceResolver(hubMenuModule.ResolveBranchItemOverride).
+		WithPublicOrderTenancyValidator(func(vCtx context.Context, businessID, locationID, tableID int64) error {
+			if err := validateMenuLocation(vCtx, businessID, locationID); err != nil {
+				return err
+			}
+			return validateMenuTable(vCtx, businessID, tableID)
+		}).
+		WithPublicOrderHook(func(hookCtx context.Context, businessID, locationID, tableID, orderID int64, orderNumber, fulfillmentMode, customerName, customerPhone string, crmOptIn bool, total float64) {
+			if crmOptIn && customerPhone != "" {
 				_ = hubMenuModule.AwardStampsForOrder(hookCtx, businessID, locationID, orderID, customerPhone, customerName, total)
 			}
 			_ = webhooksModule.DispatchEvent(hookCtx, eventbus.Event{
@@ -269,6 +358,7 @@ func initializeModules(ctx context.Context) *apiModules {
 					"fulfillment_mode": fulfillmentMode,
 					"customer_name":    customerName,
 					"customer_phone":   customerPhone,
+					"crm_opt_in":       crmOptIn,
 					"total":            total,
 				},
 			})

@@ -95,4 +95,27 @@ describe("MenuLayoutCore", () => {
     await waitFor(() => expect(onTableAction).toHaveBeenCalledWith("call_waiter"));
     expect(await screen.findByText(/Staff notified/)).toBeTruthy();
   });
+
+  it("surfaces table action errors and closes sheets on Escape", async () => {
+    const onTableAction = vi.fn().mockRejectedValue(new Error("network"));
+    render(
+      <MenuLayoutCore
+        business={{ name: "Bistro" }}
+        categories={categories}
+        tableLabel="Table 4"
+        onTableAction={onTableAction}
+        stampCards={[
+          { id: "s1", title: "Coffee Club", stampsRequired: 5, rewardLabel: "Free Espresso" },
+        ]}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Table service" }));
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /Call Staff/ }));
+    expect(await screen.findByText(/Could not send request/)).toBeTruthy();
+
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
 });

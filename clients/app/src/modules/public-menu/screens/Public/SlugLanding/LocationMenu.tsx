@@ -2,11 +2,18 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate, useRouter } from '@tanstack/react-router';
 import { FullScreenLoader, HelmetContainer } from '@voxire/components';
-import { GridLayout, MenuCategoryData, BusinessInfo, type FulfillmentMode } from '@voxire/menu';
+import {
+  GridLayout,
+  MenuCategoryData,
+  BusinessInfo,
+  type CustomerStampProgressData,
+  type FulfillmentMode,
+} from '@voxire/menu';
 import { EmptyState } from '@voxire/ui';
 import { SearchX, MapPinOff, UtensilsCrossed } from 'lucide-react';
 import { usePublicBusinessBySlug, usePublicMenu } from '../../../shared/hooks/usePublicMenu';
 import {
+  lookupPublicCustomerStampsSafe,
   submitPublicTableActionSafe,
   trackPublicMenuEventSafe,
   translationKey,
@@ -50,6 +57,7 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
     setTable,
     setAvailableFulfillmentModes,
     setCurrency,
+    setCurrencyOption,
     addItem,
     updateQuantity,
     businessId: cartBusinessId,
@@ -57,11 +65,20 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
 
   const [activeLocale, setActiveLocale] = useState<string>('');
   const [activeCurrency, setActiveCurrency] = useState<string>('');
+  const [customerStamps, setCustomerStamps] = useState<CustomerStampProgressData[]>([]);
   const brandBundle = usePublicBrandBundleSafe(
     businessId,
     location?.id ?? null,
     activeLocale || undefined
   );
+  const activeCurrencyOption = useMemo(() => {
+    const code = activeCurrency || brandBundle?.defaultCurrency;
+    return (
+      brandBundle?.currencies.find((c) => c.code === code) ??
+      brandBundle?.currencies.find((c) => c.isDefault) ??
+      brandBundle?.currencies[0]
+    );
+  }, [activeCurrency, brandBundle?.currencies, brandBundle?.defaultCurrency]);
 
   const tableContext = useMemo(() => {
     if (typeof window === 'undefined') return { tableId: undefined, tableLabel: undefined };
@@ -114,11 +131,13 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
     const resolvedCurrency =
       activeCurrency || brandBundle?.defaultCurrency || menu?.business.currency;
     if (resolvedCurrency) setCurrency(resolvedCurrency);
+    if (typeof setCurrencyOption === 'function') setCurrencyOption(activeCurrencyOption);
   }, [
     businessId,
     cartBusinessId,
     location?.id,
     activeCurrency,
+    activeCurrencyOption,
     brandBundle?.defaultCurrency,
     brandBundle?.config.features?.fulfillmentModes,
     menu?.business.currency,
@@ -130,6 +149,7 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
     setTable,
     setAvailableFulfillmentModes,
     setCurrency,
+    setCurrencyOption,
   ]);
 
   const categories = useMemo<MenuCategoryData[]>(() => {
@@ -302,6 +322,15 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
         activeLocale={effectiveLocale}
         onLocaleChange={(loc) => setActiveLocale(loc)}
         stampCards={brandBundle?.stampCards}
+        customerStamps={customerStamps}
+        onLookupStamps={
+          businessId
+            ? async (phone) => {
+                const progress = await lookupPublicCustomerStampsSafe(businessId, phone);
+                setCustomerStamps(progress);
+              }
+            : undefined
+        }
         tableLabel={tableContext.tableLabel}
         onTableAction={
           tableContext.tableId && businessId
@@ -337,6 +366,9 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
                 if (location?.id) setLocationId(location.id);
                 if (typeof setTable === 'function' && tableContext.tableId) {
                   setTable(tableContext.tableId, tableContext.tableLabel);
+                }
+                if (typeof setCurrencyOption === 'function' && activeCurrencyOption) {
+                  setCurrencyOption(activeCurrencyOption);
                 }
                 cartItems.forEach((item) => {
                   const menuItemId = Number(item.id);

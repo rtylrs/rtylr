@@ -350,7 +350,7 @@ INSERT INTO hub_menu_customer_stamps (
 ) ON DUPLICATE KEY UPDATE
     customer_name = COALESCE(NULLIF(VALUES(customer_name), ''), customer_name),
     stamps_count = stamps_count + 1,
-    rewards_unlocked = FLOOR((stamps_count + 1) / ?),
+    rewards_unlocked = FLOOR(stamps_count / ?),
     last_order_id = VALUES(last_order_id),
     updated_at = CURRENT_TIMESTAMP;
 

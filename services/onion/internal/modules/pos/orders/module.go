@@ -56,6 +56,16 @@ func (m *Module) WithPaymentRedirectResolver(fn application.PaymentRedirectResol
 	return m
 }
 
+func (m *Module) WithBranchItemPriceResolver(fn application.BranchItemPriceResolver) *Module {
+	m.service.WithBranchItemPriceResolver(fn)
+	return m
+}
+
+func (m *Module) WithPublicOrderTenancyValidator(fn application.PublicOrderTenancyValidator) *Module {
+	m.service.WithPublicOrderTenancyValidator(fn)
+	return m
+}
+
 func (m *Module) CountOrdersCreatedBetween(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
 	return m.repository.CountOrdersCreatedBetween(ctx, businessID, from, to)
 }
