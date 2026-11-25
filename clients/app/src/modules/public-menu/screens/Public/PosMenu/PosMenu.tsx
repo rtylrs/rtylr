@@ -1,9 +1,13 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { FullScreenLoader, HelmetContainer } from '@voxire/components';
 import { GridLayout, MenuCategoryData, BusinessInfo, CartItem } from '@voxire/menu';
 import { usePublicMenu } from '../../../shared/hooks/usePublicMenu';
+import {
+  translationKey,
+  usePublicBrandBundleSafe,
+} from '../../../shared/hooks/usePublicBrandBundle';
 import { useCartStore } from '../../../shared/stores/cartStore';
 import { menuCheckoutPath } from '../../../menuPaths';
 
@@ -36,22 +40,40 @@ const PosMenu: React.FC = (): React.JSX.Element => {
   const businessId = Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 
   const { data, isLoading, isError } = usePublicMenu(businessId);
+  const [activeLocale, setActiveLocale] = useState<string>('');
+  const [activeCurrency, setActiveCurrency] = useState<string>('');
+  const brandBundle = usePublicBrandBundleSafe(businessId, null, activeLocale || undefined);
+  const effectiveLocale = activeLocale || brandBundle?.defaultLocale || 'en';
   const { clearCart, setBusinessId, setCurrency, addItem } = useCartStore();
 
-  // GridLayout expects a category-grouped list. POS menu items are
-  // ERP products today, so we bucket everything into one "Menu" group.
   const categories = useMemo<MenuCategoryData[]>(() => {
     if (!data) return [];
-    const items = data.items.map((i) => ({
-      id: String(i.id),
-      name: i.name,
-      price: i.salePrice,
-      currency: data.business.currency,
-      description: undefined,
-      image: i.imageUrl,
-      badges: [],
-      available: i.isActive,
-    }));
+    const overrides = brandBundle?.branchItems;
+    const tr = brandBundle?.translations;
+    const items = data.items
+      .filter((i) => {
+        const ov = overrides?.get(i.id);
+        return ov ? ov.isVisible : true;
+      })
+      .map((i) => {
+        const ov = overrides?.get(i.id);
+        return {
+          id: String(i.id),
+          name: tr?.get(translationKey('item', i.id, effectiveLocale, 'name')) || i.name,
+          price: ov?.hasPriceOverride ? ov.priceOverride : i.salePrice,
+          currency: activeCurrency || brandBundle?.defaultCurrency || data.business.currency,
+          description:
+            tr?.get(translationKey('item', i.id, effectiveLocale, 'description')) ||
+            i.description ||
+            undefined,
+          image: i.imageUrl,
+          badges: ov?.featuredBadge ? [ov.featuredBadge] : [],
+          dietaryTags: ov?.dietaryTags,
+          allergens: ov?.allergens,
+          calories: ov?.calories,
+          available: i.isActive,
+        };
+      });
     if (items.length === 0) return [];
     return [
       {
@@ -60,7 +82,7 @@ const PosMenu: React.FC = (): React.JSX.Element => {
         items,
       },
     ];
-  }, [data, t]);
+  }, [data, brandBundle, effectiveLocale, activeCurrency, t]);
 
   const business = useMemo<BusinessInfo | null>(() => {
     if (!data) return null;
@@ -123,14 +145,26 @@ const PosMenu: React.FC = (): React.JSX.Element => {
     );
   }
 
+  const orderingEnabled =
+    isOnlineOrderingEnabled() && (brandBundle?.config.features?.enableOrdering ?? true);
+
   return (
     <>
       <HelmetContainer title={t('posmenu.pageTitle')} />
       <GridLayout
         categories={categories}
         business={business}
-        enableCart={isOnlineOrderingEnabled()}
-        onCheckout={isOnlineOrderingEnabled() ? handleCheckout : undefined}
+        config={brandBundle?.config}
+        banners={brandBundle?.banners}
+        currencies={brandBundle?.currencies}
+        activeCurrencyCode={activeCurrency || brandBundle?.defaultCurrency}
+        onCurrencyChange={(code) => setActiveCurrency(code)}
+        availableLocales={brandBundle?.enabledLocales}
+        activeLocale={effectiveLocale}
+        onLocaleChange={(loc) => setActiveLocale(loc)}
+        stampCards={brandBundle?.stampCards}
+        enableCart={orderingEnabled}
+        onCheckout={orderingEnabled ? handleCheckout : undefined}
       />
     </>
   );

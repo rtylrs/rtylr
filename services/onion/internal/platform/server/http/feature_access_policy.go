@@ -537,7 +537,7 @@ func flowFeaturePermission(method, path string) (string, bool) {
 }
 
 func menuFeaturePermission(method, path string) (string, bool) {
-	if path == "/pos/menu-item/v1/menu-items/public" {
+	if path == "/pos/menu-item/v1/menu-items/public" || strings.HasPrefix(path, "/hub/menu/v1/public/") {
 		return "", false
 	}
 	if path == "/pos/menu-item/v1/menu-items" || strings.HasPrefix(path, "/pos/menu-item/v1/menu-items/") {

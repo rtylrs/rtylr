@@ -4,11 +4,19 @@ export type {
   BusinessInfo,
   BusinessReview,
   BusinessOffer,
+  MenuBannerData,
+  MenuCurrencyOption,
+  MenuStampCardSummary,
   PageConfig,
   HeaderConfig,
   NavConfig,
   ItemDisplayConfig,
   ColorsConfig,
+  TypographyConfig,
+  FulfillmentModesConfig,
+  TableActionsConfig,
+  MenuFeaturesConfig,
+  MenuPaymentConfig,
   MenuLayoutConfig,
   CoverHeight,
   NavStyle,
@@ -17,8 +25,28 @@ export type {
   ImagePosition,
   ImageSize,
   CardRadius,
+  ThemeMode,
+  MenuFontSize,
+  FulfillmentMode,
+  TableActionType,
 } from './types';
-export { DEFAULT_LAYOUT_CONFIG, GRID_PRESET, LIST_PRESET, MINIMAL_PRESET } from './types';
+export {
+  DEFAULT_FEATURES_CONFIG,
+  DEFAULT_LAYOUT_CONFIG,
+  GRID_PRESET,
+  LIST_PRESET,
+  MINIMAL_PRESET,
+} from './types';
+export {
+  MENU_FONT_STACKS,
+  MENU_ACCENT_SWATCHES,
+  MENU_STARTER_THEMES,
+  applyMenuStylePrompt,
+  buildMenuThemeStyle,
+  formatConvertedPrice,
+  isRtlLocale,
+} from './theme';
+export type { MenuStarterTheme, MenuStylePromptResult } from './theme';
 
 // Components
 export { default as MenuItem } from './components/MenuItem';
