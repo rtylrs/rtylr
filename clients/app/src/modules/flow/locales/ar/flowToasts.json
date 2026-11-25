@@ -215,5 +215,10 @@
     "deleted_other": "تم حذف الحقل. فقدت {{count}} مهمة قيمها.",
     "deleteFailed": "تعذّر حذف الحقل",
     "valueSaveFailed": "تعذّر حفظ القيمة"
+  },
+  "template": {
+    "saved": "تم حفظ القالب",
+    "removed": "تمت إزالة القالب",
+    "saveFailed": "فشل حفظ القالب"
   }
 }

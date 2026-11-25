@@ -12,6 +12,7 @@ import {
   CircleDot,
   Milestone as MilestoneIcon,
   SlidersHorizontal,
+  Shapes,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { DatePicker } from '@voxire/ui';
@@ -41,6 +42,10 @@ import { useCreateTask } from '../../features/tasks/useTasks';
 import { useLabels } from '../../features/tasks/useLabels';
 import { useProjectStatuses } from '../../features/projects/useStatuses';
 import { useMilestones } from '../../features/milestones/useMilestones';
+import { useTaskTemplates } from '../../features/tasks/useTaskTemplates';
+import { templateFor } from '../lib/taskTemplates';
+import { TASK_TYPES } from '../lib/taskHierarchy';
+import type { TaskType } from '../stores/flowStore';
 import {
   defaultStatus,
   displayStatusName,
@@ -51,9 +56,10 @@ import CustomFieldInput from './CustomFieldInput';
 import { withAlpha } from '../lib/colorUtils';
 import { useProjectFields } from '../../features/projects/useFields';
 import { useProjectMembers } from '../../features/projects/useProjectMembers';
-import type { ApiField, ApiTaskFieldValue } from '../services/flowApi';
+import type { ApiField, ApiTaskFieldValue, ApiTaskTemplate } from '../services/flowApi';
 import { initialFieldValues, missingRequiredFields, toFieldValueInputs } from '../lib/customFields';
 
+const NO_TEMPLATES: ApiTaskTemplate[] = [];
 const NO_FIELDS: ApiField[] = [];
 
 function FieldRow({
@@ -106,6 +112,10 @@ export const QuickCreate: React.FC = () => {
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [taskType, setTaskType] = useState<TaskType>('task');
+  // True while the description is a template the user has not edited, so a
+  // type or project change may swap it for another template.
+  const [templated, setTemplated] = useState(false);
   const [projectId, setProjectId] = useState<string>('');
   const [priority, setPriority] = useState<Task['priority']>('medium');
   const [dueDate, setDueDate] = useState('');
@@ -115,6 +125,9 @@ export const QuickCreate: React.FC = () => {
   const [statusId, setStatusId] = useState('');
   const [milestoneId, setMilestoneId] = useState('');
   const { data: projectMilestones = [] } = useMilestones(quickCreateOpen ? projectId : '');
+  const { data: templates = NO_TEMPLATES } = useTaskTemplates(
+    quickCreateOpen && projectId ? projectId : undefined
+  );
   const { data: rawStatuses } = useProjectStatuses(quickCreateOpen ? projectId : '');
   const statuses = rawStatuses ? sortStatuses(rawStatuses) : [];
   // A stable empty list: a fresh `[]` each render would re-run the reset below forever.
@@ -132,6 +145,8 @@ export const QuickCreate: React.FC = () => {
     if (quickCreateOpen) {
       setTitle('');
       setDescription('');
+      setTaskType('task');
+      setTemplated(false);
       setProjectId(currentProjectId ?? '');
       setPriority('medium');
       setDueDate('');
@@ -141,6 +156,18 @@ export const QuickCreate: React.FC = () => {
       setMilestoneId('');
     }
   }, [quickCreateOpen, currentProjectId]);
+
+  // Picking a type fills the description from the project's template (or the
+  // built-in bug one) unless the user has already written something.
+  useEffect(() => {
+    if (!quickCreateOpen) return;
+    if (description.trim() !== '' && !templated) return;
+    const next = templateFor(taskType, templates, t);
+    setDescription(next);
+    setTemplated(next !== '');
+    // Only a type or template change should refill; typing must not.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [taskType, templates, quickCreateOpen]);
 
   // Custom fields belong to the project, so a new project starts from its
   // own defaults rather than carrying values the next one cannot hold.
@@ -194,6 +221,7 @@ export const QuickCreate: React.FC = () => {
         labels: labelId ? [labelId] : undefined,
         milestoneId: projectMilestones.some((m) => m.id === milestoneId) ? milestoneId : undefined,
         fieldValues: toFieldValueInputs(projectFields, fieldValues),
+        taskType: taskType === 'task' ? undefined : taskType,
         // Opened from a Backlog section: the task joins that cycle, unless the
         // project was changed in the dialog.
         cycleId:
@@ -362,6 +390,20 @@ export const QuickCreate: React.FC = () => {
               />
             </FieldRow>
 
+            <FieldRow label={t('flow.taskType.label')} icon={Shapes}>
+              <div className="max-w-[240px]">
+                <FlowSelect
+                  label={t('flow.taskType.label')}
+                  value={taskType}
+                  options={TASK_TYPES.map((type) => ({
+                    value: type,
+                    label: t(`flow.taskType.${type}`),
+                  }))}
+                  onChange={(value) => setTaskType(value as TaskType)}
+                />
+              </div>
+            </FieldRow>
+
             <FieldRow label={t('flow.time.project')} icon={FolderInput}>
               <div className="-ml-1">
                 <ProjectSelect
@@ -508,7 +550,10 @@ export const QuickCreate: React.FC = () => {
             </p>
             <textarea
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => {
+                setDescription(e.target.value);
+                setTemplated(false);
+              }}
               placeholder={t('flow.quickCreate.descriptionPlaceholder')}
               rows={6}
               className="w-full rounded-lg px-3 py-2.5 text-flow-body leading-relaxed resize-y min-h-[120px] placeholder:opacity-45"

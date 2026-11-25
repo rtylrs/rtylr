@@ -207,7 +207,7 @@ model FlowTask {
   field_values: Record<TaskFieldValue>;
 
   /**
-   * What kind of work this is: task, bug, feature or epic. Every task that
+   * What kind of work this is: task, bug, feature, chore, spike or epic. Every task that
    * predates types reads as task.
    */
   task_type: string;
@@ -542,7 +542,7 @@ model CreateTaskRequest {
   @encode(string)
   parent_task_id?: int64;
 
-  /** task_type is task, bug, feature or epic; empty means task. */
+  /** task_type is task, bug, feature, chore, spike or epic; empty means task. */
   task_type: string;
 
   /** epic_color is the colour of a new epic. Rejected for any other type. */
@@ -734,7 +734,7 @@ model UpdateTaskBody {
   milestone_id?: int64;
 
   /**
-   * New type: task, bug, feature or epic. Empty leaves it untouched. A task
+   * New type: task, bug, feature, chore, spike or epic. Empty leaves it untouched. A task
    * that has a parent, an epic or subtasks cannot become an epic, and an epic
    * that still has tasks cannot stop being one.
    */
@@ -1479,4 +1479,54 @@ model SetTaskFieldValuesResponse {
    * field id.
    */
   field_values: Record<TaskFieldValue>;
+}
+
+/** TaskTemplate is the description a project fills in for new tasks of one type (T-380). */
+model TaskTemplate {
+  @encode(string)
+  id: int64;
+
+  @encode(string)
+  project_id: int64;
+
+  /** task_type is task, bug, feature, chore, spike or epic. */
+  task_type: string;
+
+  /** body is the Markdown description a new task of this type starts with. */
+  body: string;
+
+  /** updated_at is when the template last changed, RFC 3339. */
+  updated_at: string;
+}
+
+model ListTaskTemplatesRequest {
+  /** project_id is the project whose templates to list. */
+  @Onkt.required
+  @minValueExclusive(0)
+  @query("project_id")
+  @encode(string)
+  project_id?: int64;
+}
+
+model ListTaskTemplatesResponse {
+  templates: TaskTemplate[];
+}
+
+model SetTaskTemplateRequest {
+  @Onkt.required
+  @minValueExclusive(0)
+  @encode(string)
+  project_id: int64;
+
+  @Onkt.required
+  task_type: string;
+
+  /** body is the template; empty removes the project's template for the type. */
+  @maxLength(20000)
+  body: string;
+}
+
+model SetTaskTemplateResponse {
+  /** template is the saved template; absent when the body was empty and it was removed. */
+  template?: TaskTemplate;
 }

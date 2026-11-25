@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Code2 } from 'lucide-react';
+import { Code2, Copy } from 'lucide-react';
+import { toast } from 'sonner';
 import { useTaskLinks } from '../useTaskLinks';
 
 // Link kinds that describe code, builds or runtime errors for this task.
@@ -19,14 +20,24 @@ const CODE_LINK_KINDS = new Set([
  * Lists the task's code links; the dev fields are filled in by the
  * dev-planning work that follows.
  */
-const DevelopmentSection = ({ taskId }: { taskId: string }): React.JSX.Element => {
+const DevelopmentSection = ({
+  taskId,
+  typeLabel,
+  branchName,
+}: {
+  taskId: string;
+  /** The task's type, translated. */
+  typeLabel?: string;
+  /** A suggested git branch for the task, prefixed by its type (T-380). */
+  branchName?: string;
+}): React.JSX.Element => {
   const { t } = useTranslation();
   const { data: links = [] } = useTaskLinks(taskId);
   const codeLinks = links.filter((link) => CODE_LINK_KINDS.has(link.kind ?? ''));
   const fields = [
-    { key: 'type', label: t('flow.taskDetail.devType') },
-    { key: 'points', label: t('flow.taskDetail.devPoints') },
-    { key: 'branch', label: t('flow.taskDetail.devBranch') },
+    { key: 'type', label: t('flow.taskDetail.devType'), value: typeLabel },
+    { key: 'points', label: t('flow.taskDetail.devPoints'), value: undefined },
+    { key: 'branch', label: t('flow.taskDetail.devBranch'), value: branchName },
   ];
   return (
     <section className="mb-8" aria-labelledby="flow-task-development-heading">
@@ -59,8 +70,32 @@ const DevelopmentSection = ({ taskId }: { taskId: string }): React.JSX.Element =
             <dt className="text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>
               {field.label}
             </dt>
-            <dd className="text-flow-meta" style={{ color: 'var(--flow-text-dim)' }}>
-              {t('flow.taskDetail.devNotSet')}
+            <dd
+              className="flex min-w-0 items-center gap-1 text-flow-meta"
+              style={{ color: field.value ? 'var(--flow-text)' : 'var(--flow-text-dim)' }}
+            >
+              <span className={field.key === 'branch' ? 'truncate font-mono' : undefined} dir="ltr">
+                {field.value ?? t('flow.taskDetail.devNotSet')}
+              </span>
+              {field.key === 'branch' && field.value && (
+                <button
+                  type="button"
+                  aria-label={t('flow.taskDetail.copyBranch')}
+                  title={t('flow.taskDetail.copyBranch')}
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(field.value ?? '');
+                      toast.success(t('flow.taskDetail.branchCopied'));
+                    } catch {
+                      toast.error(t('flowErrors.generic'));
+                    }
+                  }}
+                  className="flow-focus shrink-0 rounded-sm p-0.5 hover:bg-[var(--flow-hover)]"
+                  style={{ color: 'var(--flow-text-muted)' }}
+                >
+                  <Copy size={11} aria-hidden="true" />
+                </button>
+              )}
             </dd>
           </div>
         ))}
