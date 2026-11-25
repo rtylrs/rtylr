@@ -5,6 +5,7 @@ import { APP_URLS } from '@voxire/config';
 import { motion } from 'motion/react';
 import { ArrowRight, ArrowUpRight, Check } from 'lucide-react';
 import { PAGER_RTYLR_PATH, PAGER_TRY_PATH } from '../../pagerPaths';
+import { RtylrBrandText } from '../../shared/components/RenniliLogo';
 import { ClosingCta } from './landing/ClosingCta';
 import { PublicPageShell } from './landing/PublicPageShell';
 import { RTYLR_SERVICES } from './landing/RtylrUpsellBand';
@@ -27,9 +28,15 @@ const RtylrServicesPage = (): React.JSX.Element => {
     >
       <section className="rl-subhero">
         <div className="rl-wrap rl-subhero-inner">
-          <p className="rl-kicker">{t('pager.landing.rtylr.eyebrow')}</p>
-          <h1 className="rl-subhero-title">{t('pager.landing.rtylr.heading')}</h1>
-          <p className="rl-subhero-lead">{t('pager.landing.rtylr.intro')}</p>
+          <p className="rl-kicker">
+            <RtylrBrandText text={t('pager.landing.rtylr.eyebrow')} />
+          </p>
+          <h1 className="rl-subhero-title">
+            <RtylrBrandText text={t('pager.landing.rtylr.heading')} />
+          </h1>
+          <p className="rl-subhero-lead">
+            <RtylrBrandText text={t('pager.landing.rtylr.intro')} />
+          </p>
           <div className="rl-subhero-actions">
             <a
               href={`${APP_URLS.landing}/workspace/`}
@@ -37,7 +44,7 @@ const RtylrServicesPage = (): React.JSX.Element => {
               rel="noreferrer"
               className="rl-btn rl-btn--primary rl-btn--lg"
             >
-              {t('pager.landing.rtylr.visitWorkspace')}
+              <RtylrBrandText text={t('pager.landing.rtylr.visitWorkspace')} />
               <ArrowUpRight size={18} strokeWidth={2.3} aria-hidden="true" />
             </a>
             <a
@@ -46,7 +53,7 @@ const RtylrServicesPage = (): React.JSX.Element => {
               rel="noreferrer"
               className="rl-btn rl-btn--secondary rl-btn--lg"
             >
-              {t('pager.landing.rtylr.bookDemo')}
+              <RtylrBrandText text={t('pager.landing.rtylr.bookDemo')} />
             </a>
           </div>
         </div>
@@ -55,7 +62,9 @@ const RtylrServicesPage = (): React.JSX.Element => {
       <section className="rl-section rl-section--mist" aria-labelledby="rl-services-grid-heading">
         <div className="rl-wrap">
           <div className="rl-section-head">
-            <p className="rl-kicker">{t('pager.landing.rtylr.suiteKicker')}</p>
+            <p className="rl-kicker">
+              <RtylrBrandText text={t('pager.landing.rtylr.suiteKicker')} />
+            </p>
             <h2 id="rl-services-grid-heading" className="rl-section-title">
               {t('pager.landing.rtylr.suiteTitle')}
             </h2>
@@ -118,7 +127,9 @@ const RtylrServicesPage = (): React.JSX.Element => {
                 <h2 id="rl-rtylr-bridge-heading" className="rl-free-heading">
                   {t('pager.landing.rtylr.bridgeTitle')}
                 </h2>
-                <p className="rl-free-why-body">{t('pager.landing.rtylr.bridgeBody')}</p>
+                <p className="rl-free-why-body">
+                  <RtylrBrandText text={t('pager.landing.rtylr.bridgeBody')} />
+                </p>
                 <div className="rl-free-actions">
                   <Link to={PAGER_TRY_PATH} className="rl-btn rl-btn--primary rl-btn--lg">
                     {t('pager.landing.hero.primaryCta')}
@@ -145,7 +156,9 @@ const RtylrServicesPage = (): React.JSX.Element => {
               {benefits.map((item) => (
                 <li key={item} className="rl-free-spec">
                   <Check size={15} strokeWidth={2.8} aria-hidden="true" />
-                  <span>{item}</span>
+                  <span>
+                    <RtylrBrandText text={item} />
+                  </span>
                 </li>
               ))}
             </ul>

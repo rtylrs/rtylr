@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { PAGER_RTYLR_PATH } from '../../../pagerPaths';
+import { RtylrBrandText } from '../../../shared/components/RenniliLogo';
 
 export interface RtylrServiceMeta {
   id: 'pos' | 'menu' | 'erp' | 'finance' | 'hr' | 'crm' | 'flow' | 'insights';
@@ -43,14 +44,18 @@ export const RtylrUpsellBand = (): React.JSX.Element => {
       <div className="rl-wrap">
         <div className="rl-upsell-card">
           <div className="rl-upsell-copy">
-            <p className="rl-kicker">{t('pager.landing.rtylr.eyebrow')}</p>
+            <p className="rl-kicker">
+              <RtylrBrandText text={t('pager.landing.rtylr.eyebrow')} />
+            </p>
             <h2 id="rl-upsell-heading" className="rl-upsell-title">
-              {t('pager.landing.rtylr.teaserTitle')}
+              <RtylrBrandText text={t('pager.landing.rtylr.teaserTitle')} />
             </h2>
-            <p className="rl-upsell-body">{t('pager.landing.rtylr.teaserBody')}</p>
+            <p className="rl-upsell-body">
+              <RtylrBrandText text={t('pager.landing.rtylr.teaserBody')} />
+            </p>
             <div className="rl-upsell-actions">
               <Link to={PAGER_RTYLR_PATH} className="rl-btn rl-btn--primary">
-                {t('pager.landing.rtylr.teaserCta')}
+                <RtylrBrandText text={t('pager.landing.rtylr.teaserCta')} />
                 <ArrowRight
                   size={16}
                   strokeWidth={2.4}
@@ -64,7 +69,7 @@ export const RtylrUpsellBand = (): React.JSX.Element => {
                 rel="noreferrer"
                 className="rl-btn rl-btn--secondary"
               >
-                {t('pager.landing.rtylr.visitWorkspace')}
+                <RtylrBrandText text={t('pager.landing.rtylr.visitWorkspace')} />
               </a>
             </div>
           </div>
