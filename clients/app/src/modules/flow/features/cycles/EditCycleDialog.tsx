@@ -68,7 +68,7 @@ const EditCycleDialog: React.FC<EditCycleDialogProps> = ({
           <DialogTitle>{t('flow.cycles.edit.title')}</DialogTitle>
           <DialogDescription>{t('flow.cycles.edit.description')}</DialogDescription>
         </DialogHeader>
-        <div className="space-y-3">
+        <div className="space-y-3 px-6">
           <div className="space-y-1">
             <label
               htmlFor={nameId}
