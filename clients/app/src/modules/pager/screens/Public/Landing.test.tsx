@@ -45,7 +45,8 @@ describe('Rennili landing page', () => {
     }
 
     const setupLinks = screen.getAllByRole('link', { name: 'Set up my venue' });
-    expect(setupLinks.length).toBeGreaterThanOrEqual(1);
+    expect(setupLinks.length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText('100% Free forever · No hardware')).toBeInTheDocument();
     for (const link of setupLinks) {
       const url = new URL(link.getAttribute('href') ?? '');
       expect(url.pathname).toBe('/register');

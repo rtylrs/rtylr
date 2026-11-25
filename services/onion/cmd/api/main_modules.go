@@ -12,6 +12,9 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/voxire/onion/internal/platform/eventbus"
 
 	"github.com/voxire/onion/internal/modules/activity"
 	"github.com/voxire/onion/internal/modules/aiquery"
@@ -229,9 +232,47 @@ func initializeModules(ctx context.Context) *apiModules {
 	teamModule.SetMemberProvisioner(teamadapters.NewHRMemberProvisioner(hrCoreModule, hrStaffModule))
 	teamModule.SetTerminatedEmployeeSource(teamadapters.NewTerminatedEmployeeSource(hrCoreModule))
 	expensesModule := expenses.NewModule(ctx, dbclient.Pool())
+	webhooksModule := webhooks.NewModule(ctx, dbclient.Pool())
+	hubMenuModule := hubmenu.NewModule(ctx, dbclient.Pool()).
+		WithHostResolver(func(resolveCtx context.Context, host string) (int64, string, bool, error) {
+			bizID, found, err := configModule.ResolveVerifiedDomainBusinessID(resolveCtx, host)
+			if err != nil || !found {
+				return 0, "", false, err
+			}
+			cfg, cfgErr := configModule.ConfigService.GetConfig(resolveCtx, strconv.FormatInt(bizID, 10))
+			if cfgErr != nil {
+				return bizID, "", true, nil
+			}
+			return bizID, strings.TrimSpace(cfg.BusinessSlug), true, nil
+		}).
+		WithEventDispatcher(webhooksModule.DispatchEvent)
 	posOrdersModule := orders.NewModule(ctx, dbclient.Pool()).
 		WithSalesProductReader(productsModule.SalesProduct).
-		WithOnlineOrderingReader(addonsModule.OnlineOrderingEnabled)
+		WithOnlineOrderingReader(addonsModule.OnlineOrderingEnabled).
+		WithPaymentRedirectResolver(hubMenuModule.ResolvePaymentRedirectURL).
+		WithPublicOrderHook(func(hookCtx context.Context, businessID, locationID, tableID, orderID int64, orderNumber, fulfillmentMode, customerName, customerPhone string, total float64) {
+			if customerPhone != "" {
+				_ = hubMenuModule.AwardStampsForOrder(hookCtx, businessID, locationID, orderID, customerPhone, customerName, total)
+			}
+			_ = webhooksModule.DispatchEvent(hookCtx, eventbus.Event{
+				Type:        "menu.order.created",
+				BusinessID:  businessID,
+				SubjectType: "pos_order",
+				SubjectID:   orderID,
+				OccurredAt:  time.Now().UTC(),
+				Payload: map[string]any{
+					"order_id":         orderID,
+					"order_number":     orderNumber,
+					"business_id":      businessID,
+					"location_id":      locationID,
+					"table_id":         tableID,
+					"fulfillment_mode": fulfillmentMode,
+					"customer_name":    customerName,
+					"customer_phone":   customerPhone,
+					"total":            total,
+				},
+			})
+		})
 	posLocationsModule := locations.NewModule(ctx, dbclient.Pool()).WithLocationLimitReader(scopes.NewReader(dbclient.Pool()).LocationLimit)
 	inventoryModule.WithPOSBranchReader(posLocationsModule.StockBranchExists)
 	posTerminalsModule := terminals.NewModule(ctx, dbclient.Pool())
@@ -358,7 +399,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
 		AIQuota:               aiQuotaModule,
-		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, memoryModule, insightsModule, financeReportsModule, flowInsightsModule, bookingDashboardModule, posDaySummaryModule, kpisModule, workspacesModule, customersModule, campaignsModule, segmentsModule, loyaltyModule, reviewsModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posLocationsModule, posTerminalsModule, posUsersModule, posFloorsModule, posTablesModule, posModifiersModule, posSessionsModule, posCashMovementsModule, hrCoreModule, hrAttendanceModule, hrLeaveModule, hrOvertimeModule, hrPayrollModule, hrTimeModule, billsModule, quotesModule, bookingAppointmentsModule, bookingCalendarModule, bookingRemindersModule, bookingResourcesModule, bookingServicesModule, bookingWaitlistModule, bankAccountsModule, financeBankFeedsModule, financeReconciliationModule, journalModule, taxModule, invoicesModule, storeOrdersModule, storeProductsModule, storeCategoriesModule, supportTicketsModule, supportInboxModule, supportCustomersModule, supportCannedModule, supportKnowledgeModule, s1FormsExecutor, portalModule),
+		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, memoryModule, insightsModule, financeReportsModule, flowInsightsModule, bookingDashboardModule, posDaySummaryModule, kpisModule, workspacesModule, customersModule, campaignsModule, segmentsModule, loyaltyModule, reviewsModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posLocationsModule, posTerminalsModule, posUsersModule, posFloorsModule, posTablesModule, posModifiersModule, posSessionsModule, posCashMovementsModule, hubMenuModule, hrCoreModule, hrAttendanceModule, hrLeaveModule, hrOvertimeModule, hrPayrollModule, hrTimeModule, billsModule, quotesModule, bookingAppointmentsModule, bookingCalendarModule, bookingRemindersModule, bookingResourcesModule, bookingServicesModule, bookingWaitlistModule, bankAccountsModule, financeBankFeedsModule, financeReconciliationModule, journalModule, taxModule, invoicesModule, storeOrdersModule, storeProductsModule, storeCategoriesModule, supportTicketsModule, supportInboxModule, supportCustomersModule, supportCannedModule, supportKnowledgeModule, s1FormsExecutor, portalModule),
 		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expensesModule,
 		ERPSettings:           erpsettings.NewModule(ctx, dbclient.Pool()),
@@ -372,7 +413,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		HRCore:                hrCoreModule,
 		HRDashboard:           hr_dashboard.NewModule(ctx, dbclient.Pool()),
 		HRDocuments:           hr_documents.NewModule(ctx, dbclient.Pool()),
-		HubMenu:               hubmenu.NewModule(ctx, dbclient.Pool()),
+		HubMenu:               hubMenuModule,
 		HREquipment:           hr_equipment.NewModule(ctx, dbclient.Pool(), hrCoreModule),
 		HRLeave:               hrLeaveModule,
 		HROnboarding:          hr_onboarding.NewModule(ctx, dbclient.Pool()),
@@ -452,7 +493,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Variants:              variants.NewModule(ctx, dbclient.Pool()),
 		Voxhire:               voxhire.NewModule(ctx, dbclient.Pool()),
 		Warehouses:            warehousesModule,
-		Webhooks:              webhooks.NewModule(ctx, dbclient.Pool()),
+		Webhooks:              webhooksModule,
 		WebsiteLead: websitelead.NewModule(ctx, dbclient.Pool(), websitelead.Notify{
 			LeadEmails:       platformConfig.GlobalConfig.LeadNotifyEmails,
 			NewsletterEmails: platformConfig.GlobalConfig.NewsletterNotifyEmails,

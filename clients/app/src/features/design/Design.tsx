@@ -1,35 +1,85 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
-import { motion, AnimatePresence } from 'motion/react';
-import { Plus, ChevronDown, X } from 'lucide-react';
-
+import { Switch } from '@voxire/ui';
+import { uploadAsset } from '@voxire/api';
+import { cdnImageUrl } from '@voxire/config';
+import { CaretIcon, useCaretStore } from '@voxire/caret';
+import { toast } from 'sonner';
 import {
+  Check,
+  Code2,
+  Copy,
+  LayoutGrid,
+  Monitor,
+  Palette,
+  Plus,
+  RotateCcw,
+  SlidersHorizontal,
+  Smartphone,
+  Sparkles,
+  Store,
+  Tablet,
+  Trash2,
+  Upload,
+} from 'lucide-react';
+import {
+  DEFAULT_FEATURES_CONFIG,
+  DEFAULT_LAYOUT_CONFIG,
+  MENU_ACCENT_SWATCHES,
+  MENU_STARTER_THEMES,
   MenuLayout,
-  MenuLayoutConfig,
-  BusinessInfo,
-  MenuCategoryData,
-  CoverHeight,
-  NavStyle,
-  NavSize,
-  ItemLayout,
-  ImagePosition,
-  ImageSize,
-  CardRadius,
+  applyMenuStylePrompt,
+  type BusinessInfo,
+  type CardRadius,
+  type CoverHeight,
+  type ImagePosition,
+  type ImageSize,
+  type ItemLayout,
+  type MenuCategoryData,
+  type MenuFontSize,
+  type MenuLayoutConfig,
+  type NavSize,
+  type NavStyle,
+  type ThemeMode,
 } from '@voxire/menu';
+import {
+  Badge,
+  Button,
+  Input,
+  Label,
+  Select,
+  Separator,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from '../../shared/components/ui';
 import { useLayoutPresetsStore } from '../../shared/stores/layoutPresetsStore';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useMenuStore } from '../../shared/stores/menuStore';
-import { useUpdateBusinessConfig } from '../../shared/hooks/queries/useBusiness';
+import {
+  useCloneMenuProfile,
+  useCreateMenuPreset,
+  useDeleteMenuCurrency,
+  useDeleteMenuPreset,
+  useMenuBranches,
+  useMenuCurrencies,
+  useMenuPresets,
+  useMenuProfile,
+  usePublishMenuProfile,
+  useSaveMenuProfileDraft,
+  useStampCards,
+  useTranslateMenu,
+  useUpsertMenuCurrency,
+  useUpsertStampCard,
+} from '../../shared/hooks/queries/useMenuBuilder';
 
-// -- Placeholder image helper ------------------------------------------------
+type RailTab = 'themes' | 'brand' | 'layout' | 'features' | 'ai' | 'css';
+type DeviceViewport = 'mobile' | 'tablet' | 'desktop';
 
 const PH = (w: number, h: number, bg: string, text: string) =>
   `https://placehold.co/${w}x${h}/${bg}/ffffff?text=${encodeURIComponent(text)}`;
 
-// name and description are supplied by the component, because a module-level
-// constant is evaluated before i18next has a language. Everything else here is
-// a placeholder image or an empty field and has nothing to translate.
 const DEFAULT_BUSINESS: Omit<BusinessInfo, 'name' | 'description'> = {
   coverImage: PH(800, 300, '1a1a1a', 'Cover'),
   logo: PH(120, 120, 'c8a96e', 'Logo'),
@@ -40,463 +90,101 @@ const DEFAULT_BUSINESS: Omit<BusinessInfo, 'name' | 'description'> = {
   reviewCount: 0,
 };
 
-const DEFAULT_CATEGORIES: MenuCategoryData[] = [];
+const FONT_OPTIONS = [
+  { id: 'system', label: 'System UI' },
+  { id: 'inter', label: 'Inter' },
+  { id: 'jakarta', label: 'Plus Jakarta' },
+  { id: 'poppins', label: 'Poppins' },
+  { id: 'playfair', label: 'Playfair' },
+  { id: 'merriweather', label: 'Merriweather' },
+  { id: 'cairo', label: 'Cairo (عربي)' },
+  { id: 'tajawal', label: 'Tajawal (عربي)' },
+] as const;
 
-// ─── Segment Button Group ──────────────────────────────────────────────────────
+const AI_QUICK_PROMPTS = [
+  'Luxury dark gold bistro',
+  'Warm beige artisan cafe',
+  'Arabic RTL Cairo editorial',
+  'Self-service retail list',
+] as const;
 
-function SegmentGroup<T extends string>({
+interface SwitchRowProps {
+  id: string;
+  label: string;
+  hint?: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}
+
+const SwitchRow: React.FC<SwitchRowProps> = ({ id, label, hint, checked, onChange }) => (
+  <div className="flex items-center justify-between gap-3 py-1.5">
+    <div className="min-w-0">
+      <label
+        htmlFor={id}
+        className="block text-[13px] font-medium cursor-pointer select-none"
+        style={{ color: 'var(--dash-text)' }}
+      >
+        {label}
+      </label>
+      {hint && (
+        <span className="block text-[11px]" style={{ color: 'var(--dash-text-muted)' }}>
+          {hint}
+        </span>
+      )}
+    </div>
+    <Switch id={id} checked={checked} onCheckedChange={onChange} />
+  </div>
+);
+
+interface SegmentedControlProps<T extends string> {
+  label?: string;
+  value: T;
+  options: { label: string; value: T }[];
+  onChange: (value: T) => void;
+}
+
+function SegmentedControl<T extends string>({
+  label,
   value,
   options,
   onChange,
-}: {
-  value: T;
-  options: { label: string; value: T }[];
-  onChange: (v: T) => void;
-}) {
+}: SegmentedControlProps<T>) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        gap: '3px',
-        background: 'var(--dash-input-bg)',
-        border: '1px solid var(--dash-border)',
-        borderRadius: '7px',
-        padding: '3px',
-      }}
-    >
-      {options.map((o) => (
-        <button
-          type="button"
-          key={o.value}
-          onClick={() => onChange(o.value)}
-          style={{
-            padding: '4px 10px',
-            borderRadius: '4px',
-            fontSize: '12px',
-            fontWeight: 500,
-            border: 'none',
-            cursor: 'pointer',
-            transition: 'all 0.15s ease',
-            background: value === o.value ? '#4583C4' : 'transparent',
-            color: value === o.value ? '#fff' : 'var(--dash-text-muted)',
-            whiteSpace: 'nowrap',
-          }}
+    <div className="space-y-1.5">
+      {label && <Label className="text-[11px] uppercase tracking-wider">{label}</Label>}
+      <Tabs value={value} onValueChange={(v) => onChange(v as T)}>
+        <TabsList
+          className="w-full grid"
+          style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
         >
-          {o.label}
-        </button>
-      ))}
+          {options.map((opt) => (
+            <TabsTrigger key={opt.value} value={opt.value} className="px-2 py-1.5 text-xs">
+              {opt.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
     </div>
   );
 }
 
-// ─── Toggle Switch ─────────────────────────────────────────────────────────────
-
-function ToggleRow({
-  label,
-  checked,
-  onChange,
-}: {
-  label: string;
-  checked: boolean;
-  onChange: (v: boolean) => void;
-}) {
-  return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '6px 0',
-      }}
-    >
-      <span style={{ fontSize: '13px', color: 'var(--dash-text)' }}>{label}</span>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        onClick={() => onChange(!checked)}
-        style={{
-          width: 36,
-          height: 20,
-          borderRadius: 999,
-          border: 'none',
-          cursor: 'pointer',
-          padding: 2,
-          background: checked ? '#4583C4' : 'var(--dash-active)',
-          transition: 'background 0.2s ease',
-          position: 'relative',
-          flexShrink: 0,
-        }}
-      >
-        <span
-          style={{
-            display: 'block',
-            width: 16,
-            height: 16,
-            borderRadius: '50%',
-            background: '#fff',
-            transform: checked ? 'translateX(16px)' : 'translateX(0)',
-            transition: 'transform 0.2s ease',
-          }}
-        />
-      </button>
-    </div>
-  );
+interface RawMenuItem {
+  _id?: string;
+  name?: string;
+  description?: string;
+  price?: number;
+  currency?: string;
+  available?: boolean;
+  image?: string;
+  badges?: string[];
 }
 
-// ─── Collapsible Section Card ──────────────────────────────────────────────────
-
-function SectionCard({
-  title,
-  children,
-  defaultOpen = true,
-  index = 0,
-}: {
-  title: string;
-  children: React.ReactNode;
-  defaultOpen?: boolean;
-  index?: number;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2, delay: index * 0.04 }}
-      style={{
-        background: 'var(--dash-card)',
-        border: '1px solid var(--dash-border)',
-        borderRadius: '8px',
-        overflow: 'hidden',
-      }}
-    >
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '12px 16px',
-          background: 'transparent',
-          border: 'none',
-          cursor: 'pointer',
-          borderBottom: open ? '1px solid var(--dash-border)' : 'none',
-          transition: 'border-color 0.15s',
-        }}
-      >
-        <span
-          style={{
-            fontSize: '11px',
-            fontWeight: 600,
-            textTransform: 'uppercase',
-            letterSpacing: 0,
-            color: 'var(--dash-text-dim)',
-          }}
-        >
-          {title}
-        </span>
-        <ChevronDown
-          size={14}
-          style={{
-            color: 'var(--dash-text-dim)',
-            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.2s ease',
-          }}
-        />
-      </button>
-
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            key="content"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: 'easeInOut' }}
-            style={{ overflow: 'hidden' }}
-          >
-            <div
-              style={{
-                padding: '12px 16px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '10px',
-              }}
-            >
-              {children}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  );
+interface RawCategory {
+  _id?: string;
+  name?: string;
+  type?: string;
+  menuItems?: RawMenuItem[];
 }
-
-// ─── Row with label + control ──────────────────────────────────────────────────
-
-function ControlRow({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div
-      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}
-    >
-      <span style={{ fontSize: '13px', color: 'var(--dash-text-muted)', flexShrink: 0 }}>
-        {label}
-      </span>
-      {children}
-    </div>
-  );
-}
-
-// ─── Color picker row ─────────────────────────────────────────────────────────
-
-function ColorRow({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div
-      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}
-    >
-      <span style={{ fontSize: '13px', color: 'var(--dash-text-muted)' }}>{label}</span>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: '12px', color: 'var(--dash-text-dim)', fontFamily: 'monospace' }}>
-          {value}
-        </span>
-        <label
-          style={{
-            width: 28,
-            height: 28,
-            borderRadius: 6,
-            overflow: 'hidden',
-            border: '2px solid var(--dash-border)',
-            cursor: 'pointer',
-            background: value,
-            display: 'block',
-            flexShrink: 0,
-          }}
-        >
-          <input
-            type="color"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            style={{ opacity: 0, width: 1, height: 1, position: 'absolute' }}
-          />
-        </label>
-      </div>
-    </div>
-  );
-}
-
-// ─── Phone Frame ──────────────────────────────────────────────────────────────
-
-function PhoneFrame({
-  config,
-  businessInfo,
-  menuCategories,
-}: {
-  config: MenuLayoutConfig;
-  businessInfo: BusinessInfo;
-  menuCategories: MenuCategoryData[];
-}) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0.5);
-
-  // Phone intrinsic dimensions
-  const PHONE_W = 390;
-  const PHONE_H = 844;
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const update = () => {
-      const { height } = el.getBoundingClientRect();
-      const availH = height - 64; // vertical padding
-      const availW = el.getBoundingClientRect().width - 48;
-      const byH = availH / PHONE_H;
-      const byW = availW / PHONE_W;
-      setScale(Math.min(byH, byW, 0.72));
-    };
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={containerRef}
-      style={{
-        flex: 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '100%',
-        height: '100%',
-      }}
-    >
-      {/* Outer phone shell */}
-      <div
-        style={{
-          width: PHONE_W * scale,
-          height: PHONE_H * scale,
-          borderRadius: 44 * scale,
-          background: '#18181b',
-          boxShadow:
-            '0 0 0 1px rgba(255,255,255,0.08), 0 32px 80px rgba(0,0,0,0.7), 0 8px 24px rgba(0,0,0,0.5)',
-          position: 'relative',
-          overflow: 'hidden',
-          flexShrink: 0,
-        }}
-      >
-        {/* Side button indicators (decorative) */}
-        <div
-          style={{
-            position: 'absolute',
-            left: -3 * scale,
-            top: 120 * scale,
-            width: 3 * scale,
-            height: 32 * scale,
-            background: '#2a2a2e',
-            borderRadius: '2px 0 0 2px',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            left: -3 * scale,
-            top: 162 * scale,
-            width: 3 * scale,
-            height: 64 * scale,
-            background: '#2a2a2e',
-            borderRadius: '2px 0 0 2px',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            left: -3 * scale,
-            top: 236 * scale,
-            width: 3 * scale,
-            height: 64 * scale,
-            background: '#2a2a2e',
-            borderRadius: '2px 0 0 2px',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            right: -3 * scale,
-            top: 160 * scale,
-            width: 3 * scale,
-            height: 80 * scale,
-            background: '#2a2a2e',
-            borderRadius: '0 2px 2px 0',
-          }}
-        />
-
-        {/* Screen bezel */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 6 * scale,
-            borderRadius: (44 - 6) * scale,
-            background: '#fff',
-            overflow: 'hidden',
-          }}
-        >
-          {/* Dynamic island */}
-          <div
-            style={{
-              position: 'absolute',
-              top: 10 * scale,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 120 * scale,
-              height: 34 * scale,
-              borderRadius: 20 * scale,
-              background: '#18181b',
-              zIndex: 20,
-            }}
-          />
-
-          {/* Status bar */}
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 54 * scale,
-              background: 'rgba(0,0,0,0.02)',
-              zIndex: 15,
-              display: 'flex',
-              alignItems: 'flex-end',
-              justifyContent: 'space-between',
-              padding: `0 ${16 * scale}px ${4 * scale}px`,
-              fontSize: 10 * scale,
-              fontWeight: 600,
-              color: '#000',
-            }}
-          >
-            <span>9:41</span>
-            <span style={{ display: 'flex', gap: 4 * scale, alignItems: 'center' }}>
-              <span>●●●</span>
-              <span>WiFi</span>
-              <span>⬛</span>
-            </span>
-          </div>
-
-          {/* Scrollable menu content */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              top: 54 * scale,
-              overflowY: 'auto',
-              overflowX: 'hidden',
-              WebkitOverflowScrolling: 'touch',
-            }}
-          >
-            <div
-              style={{
-                transform: `scale(${scale})`,
-                transformOrigin: 'top left',
-                width: `${100 / scale}%`,
-              }}
-            >
-              <MenuLayout business={businessInfo} categories={menuCategories} config={config} />
-            </div>
-          </div>
-
-          {/* Home indicator */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 8 * scale,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 130 * scale,
-              height: 5 * scale,
-              borderRadius: 999,
-              background: 'rgba(0,0,0,0.2)',
-              zIndex: 20,
-            }}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Main Component ────────────────────────────────────────────────────────────
 
 const Design: React.FC = () => {
   const {
@@ -506,6 +194,7 @@ const Design: React.FC = () => {
     activatePreset,
     createPreset,
     deletePreset,
+    setDraftConfig,
     patchDraftConfig,
     saveActivePreset,
   } = useLayoutPresetsStore();
@@ -513,55 +202,107 @@ const Design: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useUserStore();
   const { items: menuItems } = useMenuStore();
+  const openCaret = useCaretStore((s) => s.open);
 
-  const defaultBusiness: BusinessInfo = {
-    ...DEFAULT_BUSINESS,
-    name: t('design.businessPlaceholder.name'),
-    description: t('design.businessPlaceholder.description'),
+  const [activeTab, setActiveTab] = useState<RailTab>('themes');
+  const [viewport, setViewport] = useState<DeviceViewport>('mobile');
+  const [selectedLocationId, setSelectedLocationId] = useState<number>(0);
+  const [cloneSourceId, setCloneSourceId] = useState<number>(0);
+  const [previewLocale, setPreviewLocale] = useState<string>('en');
+  const [customCss, setCustomCss] = useState<string>('');
+  const [enabledLocales, setEnabledLocales] = useState<string[]>(['en', 'fr', 'ar']);
+  const [newPresetName, setNewPresetName] = useState('');
+  const [newCurrencyCode, setNewCurrencyCode] = useState('');
+  const [newCurrencySymbol, setNewCurrencySymbol] = useState('');
+  const [newCurrencyRate, setNewCurrencyRate] = useState('1');
+  const [newStampTitle, setNewStampTitle] = useState('');
+  const [newStampTarget, setNewStampTarget] = useState('10');
+  const [newStampReward, setNewStampReward] = useState('');
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [saved, setSaved] = useState(false);
+  const [uploadingField, setUploadingField] = useState<'cover' | 'logo' | null>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  const { data: branches = [] } = useMenuBranches();
+  const { data: remoteProfile } = useMenuProfile(selectedLocationId);
+  const { data: remotePresets = [] } = useMenuPresets();
+  const { data: currencies = [] } = useMenuCurrencies(selectedLocationId);
+  const { data: stampCards = [] } = useStampCards(selectedLocationId);
+
+  const saveDraftMutation = useSaveMenuProfileDraft();
+  const publishMutation = usePublishMenuProfile();
+  const cloneMutation = useCloneMenuProfile();
+  const createPresetMutation = useCreateMenuPreset();
+  const deletePresetMutation = useDeleteMenuPreset();
+  const upsertCurrencyMutation = useUpsertMenuCurrency();
+  const deleteCurrencyMutation = useDeleteMenuCurrency();
+  const upsertStampCardMutation = useUpsertStampCard();
+  const translateMenuMutation = useTranslateMenu();
+
+  useEffect(() => {
+    if (!remoteProfile) return;
+    try {
+      if (remoteProfile.draftConfigJson) {
+        const parsed = JSON.parse(remoteProfile.draftConfigJson) as Partial<MenuLayoutConfig>;
+        setDraftConfig({
+          ...DEFAULT_LAYOUT_CONFIG,
+          ...parsed,
+          header: { ...DEFAULT_LAYOUT_CONFIG.header, ...parsed.header },
+          nav: { ...DEFAULT_LAYOUT_CONFIG.nav, ...parsed.nav },
+          items: { ...DEFAULT_LAYOUT_CONFIG.items, ...parsed.items },
+          pages: { menu: true, ...parsed.pages },
+          typography: { ...DEFAULT_LAYOUT_CONFIG.typography!, ...parsed.typography },
+          features: {
+            ...DEFAULT_FEATURES_CONFIG,
+            ...parsed.features,
+            fulfillmentModes: {
+              ...DEFAULT_FEATURES_CONFIG.fulfillmentModes,
+              ...parsed.features?.fulfillmentModes,
+            },
+            tableActions: {
+              ...DEFAULT_FEATURES_CONFIG.tableActions,
+              ...parsed.features?.tableActions,
+            },
+          },
+          payment: { ...DEFAULT_LAYOUT_CONFIG.payment!, ...parsed.payment },
+        });
+      }
+    } catch {
+      // Keep current local draft if stored JSON cannot be parsed.
+    }
+    setCustomCss(remoteProfile.customCss ?? '');
+    if (remoteProfile.enabledLocales && remoteProfile.enabledLocales.length > 0) {
+      setEnabledLocales(remoteProfile.enabledLocales);
+    }
+    if (remoteProfile.defaultLocale) {
+      setPreviewLocale(remoteProfile.defaultLocale);
+    }
+  }, [remoteProfile, setDraftConfig]);
+
+  const u = user as Record<string, unknown> | null;
+  const businessInfo: BusinessInfo = {
+    name: (u?.businessName as string) || t('design.businessPlaceholder.name'),
+    description: (u?.businessDescription as string) || t('design.businessPlaceholder.description'),
+    coverImage: (u?.coverImage as string) || DEFAULT_BUSINESS.coverImage,
+    logo: (u?.logo as string) || DEFAULT_BUSINESS.logo,
+    address: (u?.address as string) || '',
+    phone: (u?.phone as string) || '',
+    hours: (u?.hours as string) || '',
+    averageRating: (u?.averageRating as number) ?? 0,
+    reviewCount: (u?.reviewCount as number) ?? 0,
   };
 
-  // Build business info and menu categories from real data
-  const u = user as Record<string, unknown> | null;
-  const businessInfo: BusinessInfo = u
-    ? {
-        name: (u.businessName as string) || defaultBusiness.name,
-        description: (u.businessDescription as string) || defaultBusiness.description,
-        coverImage: (u.coverImage as string) || DEFAULT_BUSINESS.coverImage,
-        logo: (u.logo as string) || DEFAULT_BUSINESS.logo,
-        address: (u.address as string) || DEFAULT_BUSINESS.address,
-        phone: (u.phone as string) || DEFAULT_BUSINESS.phone,
-        hours: (u.hours as string) || DEFAULT_BUSINESS.hours,
-        averageRating: (u.averageRating as number) ?? DEFAULT_BUSINESS.averageRating,
-        reviewCount: (u.reviewCount as number) ?? DEFAULT_BUSINESS.reviewCount,
-      }
-    : defaultBusiness;
-
-  interface RawMenuItem {
-    _id?: string;
-    name?: string;
-    description?: string;
-    price?: number;
-    currency?: string;
-    available?: boolean;
-    image?: string;
-    badges?: string[];
-  }
-  interface RawCategory {
-    _id?: string;
-    name?: string;
-    type?: string;
-    menuItems?: RawMenuItem[];
-  }
   const menuCategories: MenuCategoryData[] =
     menuItems && menuItems.length > 0
       ? ((menuItems as RawCategory[])
           .filter((item) => item.type === 'category')
           .map((cat) => ({
-            id: cat._id,
-            name: cat.name,
+            id: cat._id ?? '',
+            name: cat.name ?? '',
             items: (cat.menuItems || []).map((mi) => ({
-              id: mi._id,
-              name: mi.name,
+              id: mi._id ?? '',
+              name: mi.name ?? '',
               description: mi.description || '',
               price: mi.price ?? 0,
               currency: mi.currency || 'USD',
@@ -570,21 +311,49 @@ const Design: React.FC = () => {
               badges: mi.badges || [],
             })),
           })) as MenuCategoryData[])
-      : DEFAULT_CATEGORIES;
+      : [];
 
-  const [newPresetName, setNewPresetName] = useState('');
-  const [saved, setSaved] = useState(false);
-
-  const [fontFamily, setFontFamily] = useState('system');
-  const [fontSize, setFontSize] = useState('md');
-  const colorPrimary = draftConfig.colors?.primary ?? '#4583C4';
-  const colorAccent = draftConfig.colors?.accent ?? '#f59e0b';
-  const colorBg = draftConfig.colors?.bg ?? '#ffffff';
-
-  const activePreset = presets.find((p) => p.id === activePresetId);
+  const themeMode: ThemeMode = draftConfig.mode ?? 'light';
+  const fontFamily = draftConfig.typography?.bodyFont ?? 'system';
+  const fontSize: MenuFontSize = draftConfig.typography?.fontSize ?? 'md';
+  const colorPrimary = draftConfig.colors?.primary ?? '#111827';
+  const colorAccent = draftConfig.colors?.accent ?? '#4583C4';
+  const colorBg = draftConfig.colors?.bg ?? '#f9f9f7';
+  const colorSurface = draftConfig.colors?.surface ?? '#ffffff';
+  const features = {
+    ...DEFAULT_FEATURES_CONFIG,
+    ...draftConfig.features,
+    fulfillmentModes: {
+      ...DEFAULT_FEATURES_CONFIG.fulfillmentModes,
+      ...draftConfig.features?.fulfillmentModes,
+    },
+    tableActions: {
+      ...DEFAULT_FEATURES_CONFIG.tableActions,
+      ...draftConfig.features?.tableActions,
+    },
+  };
+  const paymentMode = draftConfig.payment?.mode ?? 'pos';
+  const paymentRedirectUrl = draftConfig.payment?.redirectUrl ?? '';
 
   const patchHeader = (patch: Partial<MenuLayoutConfig['header']>) =>
     patchDraftConfig({ header: { ...draftConfig.header, ...patch } });
+
+  const handleMediaUpload = async (field: 'cover' | 'logo', file: File | undefined) => {
+    if (!file) return;
+    setUploadingField(field);
+    try {
+      const res = await uploadAsset(file, { visibility: 'public' });
+      const uploadedUrl = res.url || '';
+      if (!uploadedUrl) throw new Error('Missing uploaded URL');
+      patchHeader(field === 'cover' ? { coverImageUrl: uploadedUrl } : { logoUrl: uploadedUrl });
+      toast.success(t('design.studio.uploadSuccess'));
+    } catch (err: unknown) {
+      const msg = (err as { message?: string })?.message || t('design.studio.uploadFailed');
+      toast.error(msg);
+    } finally {
+      setUploadingField(null);
+    }
+  };
 
   const patchNav = (patch: Partial<MenuLayoutConfig['nav']>) =>
     patchDraftConfig({ nav: { ...draftConfig.nav, ...patch } });
@@ -595,383 +364,804 @@ const Design: React.FC = () => {
   const patchPages = (patch: Partial<MenuLayoutConfig['pages']>) =>
     patchDraftConfig({ pages: { ...draftConfig.pages, ...patch } });
 
+  const patchColors = (patch: Partial<NonNullable<MenuLayoutConfig['colors']>>) =>
+    patchDraftConfig({
+      colors: {
+        primary: colorPrimary,
+        accent: colorAccent,
+        bg: colorBg,
+        surface: colorSurface,
+        ...draftConfig.colors,
+        ...patch,
+      },
+    });
+
+  const patchFeatures = (patch: Partial<typeof features>) =>
+    patchDraftConfig({ features: { ...features, ...patch } });
+
   const handleAddPreset = () => {
     const name = newPresetName.trim();
     if (!name) return;
     const id = createPreset(name);
     activatePreset(id);
+    createPresetMutation.mutate({ name, configJson: JSON.stringify(draftConfig) });
     setNewPresetName('');
   };
 
-  const updateConfig = useUpdateBusinessConfig();
-
   const handleSave = () => {
     saveActivePreset();
-    const { presets, activePresetId, draftConfig } = useLayoutPresetsStore.getState();
-    updateConfig.mutate({
-      layout_presets: presets,
-      active_preset_id: activePresetId,
-      draft_config: draftConfig,
+    const { draftConfig: latestDraft } = useLayoutPresetsStore.getState();
+    const mergedDraft: MenuLayoutConfig = {
+      ...latestDraft,
+      customCss,
+    };
+    const defaultCurrency = currencies.find((c) => c.isDefault)?.code ?? 'USD';
+    saveDraftMutation.mutate({
+      locationId: selectedLocationId,
+      draftConfigJson: JSON.stringify(mergedDraft),
+      customCss,
+      defaultLocale: enabledLocales[0] ?? 'en',
+      enabledLocales,
+      defaultCurrency,
     });
     setSaved(true);
     setTimeout(() => setSaved(false), 1800);
   };
 
+  const handlePublish = () => {
+    handleSave();
+    publishMutation.mutate(selectedLocationId);
+  };
+
+  const handleApplyPrompt = (rawText?: string) => {
+    const text = (rawText ?? aiPrompt).trim();
+    if (!text) return;
+    const { patch, locale } = applyMenuStylePrompt(text, { ...draftConfig, features });
+    if (Object.keys(patch).length > 0) {
+      patchDraftConfig(patch);
+    }
+    if (locale) setPreviewLocale(locale);
+    setAiPrompt('');
+  };
+
+  const handleTranslateAll = () => {
+    const entries = menuCategories.flatMap((cat) => [
+      { entityType: 'category', entityId: cat.id, field: 'name', text: cat.name },
+      ...cat.items.flatMap((item) => [
+        { entityType: 'item', entityId: item.id, field: 'name', text: item.name },
+        ...(item.description
+          ? [
+              {
+                entityType: 'item',
+                entityId: item.id,
+                field: 'description',
+                text: item.description,
+              },
+            ]
+          : []),
+      ]),
+    ]);
+    translateMenuMutation.mutate({
+      locationId: selectedLocationId,
+      targetLocales: enabledLocales,
+      entries,
+    });
+  };
+
+  const previewConfig: MenuLayoutConfig = {
+    ...draftConfig,
+    customCss,
+    features,
+  };
+
+  const previewCurrencies = currencies.map((c) => ({
+    code: c.code ?? 'USD',
+    symbol: c.symbol ?? '$',
+    exchangeRate: c.exchangeRate ?? 1,
+    decimalPlaces: c.decimalPlaces ?? 2,
+    isDefault: Boolean(c.isDefault),
+  }));
+
+  const previewStampCards = stampCards
+    .filter((s) => s.isActive !== false)
+    .map((s) => ({
+      id: s.id ?? '',
+      title: s.title ?? '',
+      description: s.description ?? '',
+      stampsRequired: s.stampsRequired ?? 10,
+      rewardLabel: s.rewardLabel ?? '',
+    }));
+
+  const railItems: { id: RailTab; label: string; icon: React.ReactNode }[] = [
+    {
+      id: 'themes',
+      label: t('design.studio.rail.themes'),
+      icon: <LayoutGrid className="w-[18px] h-[18px]" />,
+    },
+    {
+      id: 'brand',
+      label: t('design.studio.rail.brand'),
+      icon: <Palette className="w-[18px] h-[18px]" />,
+    },
+    {
+      id: 'layout',
+      label: t('design.studio.rail.layout'),
+      icon: <SlidersHorizontal className="w-[18px] h-[18px]" />,
+    },
+    {
+      id: 'features',
+      label: t('design.studio.rail.features'),
+      icon: <Store className="w-[18px] h-[18px]" />,
+    },
+    {
+      id: 'ai',
+      label: t('design.studio.rail.ai'),
+      icon: <Sparkles className="w-[18px] h-[18px]" />,
+    },
+    {
+      id: 'css',
+      label: t('design.studio.rail.css'),
+      icon: <Code2 className="w-[18px] h-[18px]" />,
+    },
+  ];
+
+  const deviceWidth = viewport === 'mobile' ? 392 : viewport === 'tablet' ? 680 : '100%';
+
   return (
     <>
-      <HelmetContainer title={`${t('design.pageTitle')} · rtylr`} />
+      <HelmetContainer title={t('design.pageTitle')} />
       <div
-        style={{
-          display: 'grid',
-          gridTemplateRows: 'auto 1fr',
-          // Escape DefaultLayout's p-6 padding to fill edge-to-edge
-          margin: '-24px',
-          height: 'calc(100% + 48px)',
-          overflow: 'hidden',
-          background: 'var(--dash-bg)',
-        }}
+        className="flex flex-col h-[calc(100vh-56px)] min-h-[620px] overflow-hidden"
+        style={{ background: 'var(--dash-bg)', color: 'var(--dash-text)' }}
       >
-        {/* ── Header bar ─────────────────────────────────────────────────────── */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            padding: '0 16px',
-            height: 52,
-            borderBottom: '1px solid var(--dash-border)',
-            background: 'var(--dash-surface)',
-            flexShrink: 0,
-            gap: 12,
-          }}
+        {/* Top Studio Toolbar */}
+        <header
+          className="h-14 shrink-0 px-4 flex items-center justify-between gap-3 border-b"
+          style={{ background: 'var(--dash-surface)', borderColor: 'var(--dash-border)' }}
         >
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <h1 style={{ margin: 0, fontSize: 15, fontWeight: 650, color: 'var(--dash-text)' }}>
-              {t('design.pageTitle')}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <h1 className="text-sm font-semibold tracking-tight whitespace-nowrap">
+              {t('design.studio.title')}
             </h1>
-            <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--dash-text-dim)' }}>
-              {t('design.subtitle')}
-            </p>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {activePreset && (
-              <span style={{ fontSize: 12, color: 'var(--dash-text-dim)' }}>
-                {activePreset.name}
-              </span>
+            {branches.length > 0 && (
+              <>
+                <span style={{ color: 'var(--dash-text-dim)' }}>/</span>
+                <div className="w-44">
+                  <Select
+                    aria-label={t('design.studio.branchLabel')}
+                    value={String(selectedLocationId)}
+                    onChange={(e) => setSelectedLocationId(Number(e.target.value))}
+                    className="h-8 text-xs"
+                  >
+                    <option value="0">{t('design.studio.defaultBranch')}</option>
+                    {branches.map((b) => (
+                      <option key={b.id} value={String(b.id)}>
+                        {b.name}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+                {branches.length > 1 && (
+                  <div className="hidden lg:flex items-center gap-1.5">
+                    <div className="w-36">
+                      <Select
+                        aria-label={t('design.studio.copyFromBranch')}
+                        value={String(cloneSourceId)}
+                        onChange={(e) => setCloneSourceId(Number(e.target.value))}
+                        className="h-8 text-xs"
+                      >
+                        <option value="0">{t('design.studio.copyFromBranch')}</option>
+                        {branches
+                          .filter((b) => b.id !== selectedLocationId)
+                          .map((b) => (
+                            <option key={b.id} value={String(b.id)}>
+                              {b.name}
+                            </option>
+                          ))}
+                      </Select>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={cloneMutation.isPending || cloneSourceId === selectedLocationId}
+                      onClick={() =>
+                        cloneMutation.mutate({
+                          sourceLocationId: cloneSourceId,
+                          targetLocationId: selectedLocationId,
+                        })
+                      }
+                    >
+                      <Copy className="w-3.5 h-3.5 me-1.5" />
+                      {t('design.studio.copyAction')}
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
-            <motion.button
-              whileTap={{ scale: 0.96 }}
-              onClick={handleSave}
-              style={{
-                padding: '6px 14px',
-                borderRadius: 7,
-                background: saved ? 'var(--accent-muted)' : 'var(--accent)',
-                color: saved ? 'var(--accent-on-muted)' : 'var(--dash-on-accent)',
-                fontSize: 13,
-                fontWeight: 600,
-                border: saved ? '1px solid rgba(69,131,196,0.3)' : 'none',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-              }}
-            >
-              {saved ? 'Saved' : 'Save'}
-            </motion.button>
           </div>
-        </div>
 
-        {/* ── Body ───────────────────────────────────────────────────────────── */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '220px minmax(300px, 340px) minmax(0, 1fr)',
-            overflow: 'hidden',
-            height: '100%',
-          }}
-        >
-          {/* ── Presets sidebar ──────────────────────────────────────────────── */}
-          <aside
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              height: '100%',
-              overflow: 'hidden',
-              borderRight: '1px solid var(--dash-border)',
-              background: 'var(--dash-surface)',
-            }}
-          >
-            <div
-              style={{
-                padding: '12px 14px 8px',
-                borderBottom: '1px solid var(--dash-border)',
-                flexShrink: 0,
-              }}
+          {/* Center Viewport + Locale Controls */}
+          <div className="hidden md:flex items-center gap-2">
+            <Tabs value={viewport} onValueChange={(v) => setViewport(v as DeviceViewport)}>
+              <TabsList>
+                <TabsTrigger value="mobile" className="px-2.5 py-1 text-xs gap-1.5">
+                  <Smartphone className="w-3.5 h-3.5" />
+                  {t('design.studio.viewports.mobile')}
+                </TabsTrigger>
+                <TabsTrigger value="tablet" className="px-2.5 py-1 text-xs gap-1.5">
+                  <Tablet className="w-3.5 h-3.5" />
+                  {t('design.studio.viewports.tablet')}
+                </TabsTrigger>
+                <TabsTrigger value="desktop" className="px-2.5 py-1 text-xs gap-1.5">
+                  <Monitor className="w-3.5 h-3.5" />
+                  {t('design.studio.viewports.desktop')}
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            <Tabs value={previewLocale} onValueChange={setPreviewLocale}>
+              <TabsList>
+                {(enabledLocales.length > 0 ? enabledLocales : ['en', 'fr', 'ar']).map((loc) => (
+                  <TabsTrigger key={loc} value={loc} className="px-2 py-1 text-xs uppercase">
+                    {loc}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          </div>
+
+          {/* Right Save & Publish */}
+          <div className="flex items-center gap-2 shrink-0">
+            {remoteProfile?.publishedAt && (
+              <Badge variant="success" className="hidden xl:inline-flex">
+                {t('design.studio.liveBadge')}
+              </Badge>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSave}
+              disabled={saveDraftMutation.isPending}
             >
-              <span
-                style={{
-                  fontSize: 10,
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  letterSpacing: 0,
-                  color: 'var(--dash-text-dim)',
-                }}
-              >
-                {t('design.layouts')}
-              </span>
-            </div>
+              {saved ? (
+                <>
+                  <Check className="w-3.5 h-3.5 me-1.5" />
+                  {t('design.studio.saved')}
+                </>
+              ) : (
+                t('design.studio.save')
+              )}
+            </Button>
+            <Button
+              variant="accent"
+              size="sm"
+              onClick={handlePublish}
+              disabled={publishMutation.isPending}
+            >
+              {t('design.studio.publish')}
+            </Button>
+          </div>
+        </header>
 
-            <div style={{ flex: 1, overflowY: 'auto', padding: '6px' }}>
-              {presets.map((preset) => (
-                <div
-                  key={preset.id}
-                  onClick={() => activatePreset(preset.id)}
+        {/* Main Studio Body: Icon Rail + Contextual Inspector + Dot-Grid Stage */}
+        <div className="flex flex-1 min-h-0 overflow-hidden">
+          {/* 64px Left Icon Rail */}
+          <nav
+            aria-label={t('design.studio.railLabel')}
+            className="w-16 shrink-0 flex flex-col items-center gap-1 py-3 px-1.5 border-e"
+            style={{ background: 'var(--dash-surface)', borderColor: 'var(--dash-border)' }}
+          >
+            {railItems.map((item) => {
+              const active = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setActiveTab(item.id)}
+                  className="w-full py-2 px-1 rounded-xl flex flex-col items-center gap-1 text-[10px] font-semibold transition-colors"
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    padding: '8px 10px',
-                    borderRadius: 8,
-                    cursor: 'pointer',
-                    background: preset.id === activePresetId ? 'var(--dash-active)' : 'transparent',
-                    marginBottom: 2,
-                    transition: 'background 0.15s',
+                    background: active ? 'var(--dash-active)' : 'transparent',
+                    color: active ? 'var(--dash-text)' : 'var(--dash-text-muted)',
                   }}
                 >
-                  {preset.id === activePresetId && (
-                    <span
-                      style={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: '50%',
-                        background: '#4583C4',
-                        flexShrink: 0,
-                      }}
-                    />
-                  )}
-                  <span
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 500,
-                      color:
-                        preset.id === activePresetId
-                          ? 'var(--dash-text)'
-                          : 'var(--dash-text-muted)',
-                      flex: 1,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {preset.name}
-                  </span>
-                  {presets.length > 1 && (
+                  {item.icon}
+                  <span className="truncate max-w-full">{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* 320px Contextual Inspector Panel */}
+          <aside
+            className="w-80 shrink-0 overflow-y-auto p-4 space-y-5 border-e"
+            style={{ background: 'var(--dash-surface)', borderColor: 'var(--dash-border)' }}
+          >
+            {/* 1. THEMES TAB */}
+            {activeTab === 'themes' && (
+              <div className="space-y-5">
+                <div>
+                  <h2 className="text-sm font-semibold">{t('design.studio.themesTitle')}</h2>
+                  <p className="text-xs mt-1" style={{ color: 'var(--dash-text-muted)' }}>
+                    {t('design.studio.themesSubtitle')}
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  {MENU_STARTER_THEMES.map((theme) => (
                     <button
+                      key={theme.id}
                       type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deletePreset(preset.id);
+                      onClick={() => {
+                        patchDraftConfig(theme.patch);
+                        if (theme.locale) setPreviewLocale(theme.locale);
                       }}
+                      className="w-full p-3 rounded-xl text-start flex items-center justify-between gap-3 border transition-colors hover:border-[var(--dash-border-focus)]"
                       style={{
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        padding: 2,
-                        borderRadius: 4,
-                        color: 'var(--dash-text-dim)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        opacity: 0.6,
-                        transition: 'opacity 0.15s',
+                        background: 'var(--dash-card)',
+                        borderColor: 'var(--dash-border)',
                       }}
                     >
-                      <X size={12} />
+                      <div className="min-w-0">
+                        <div className="text-[13px] font-semibold truncate">{theme.name}</div>
+                        <div
+                          className="text-[11px] truncate"
+                          style={{ color: 'var(--dash-text-muted)' }}
+                        >
+                          {theme.subtitle}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {theme.swatches.map((hex, i) => (
+                          <span
+                            key={i}
+                            className="w-4 h-4 rounded-full border border-black/15"
+                            style={{ background: hex }}
+                          />
+                        ))}
+                      </div>
                     </button>
-                  )}
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            <div
-              style={{
-                padding: '8px',
-                borderTop: '1px solid var(--dash-border)',
-                display: 'flex',
-                gap: 6,
-                flexShrink: 0,
-              }}
-            >
-              <input
-                placeholder={t('design.newLayoutPlaceholder')}
-                value={newPresetName}
-                onChange={(e) => setNewPresetName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddPreset()}
-                style={{
-                  flex: 1,
-                  background: 'var(--dash-input-bg)',
-                  border: '1px solid var(--dash-border)',
-                  borderRadius: 7,
-                  padding: '6px 10px',
-                  fontSize: 12,
-                  color: 'var(--dash-text)',
-                  outline: 'none',
-                }}
-              />
-              <button
-                type="button"
-                onClick={handleAddPreset}
-                disabled={!newPresetName.trim()}
-                style={{
-                  padding: '6px 8px',
-                  background: newPresetName.trim() ? '#4583C4' : 'var(--dash-input-bg)',
-                  border: '1px solid var(--dash-border)',
-                  borderRadius: 7,
-                  color: newPresetName.trim() ? '#fff' : 'var(--dash-text-dim)',
-                  cursor: newPresetName.trim() ? 'pointer' : 'default',
-                  display: 'flex',
-                  alignItems: 'center',
-                  transition: 'all 0.15s',
-                }}
-              >
-                <Plus size={14} />
-              </button>
-            </div>
-          </aside>
+                <Separator />
 
-          {/* ── Controls panel ───────────────────────────────────────────────── */}
-          <div
-            style={{
-              overflowY: 'auto',
-              padding: '16px 14px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 10,
-              borderRight: '1px solid var(--dash-border)',
-            }}
-          >
-            {/* Pages */}
-            <SectionCard title={t('design.sections.pages')} index={0}>
-              {(
-                ['about', 'gallery', 'reviews', 'offers'] as (keyof MenuLayoutConfig['pages'])[]
-              ).map((key) => (
-                <ToggleRow
-                  key={key}
-                  label={t(`design.pages.${key}`)}
-                  checked={draftConfig.pages[key] === true}
-                  onChange={(v) => patchPages({ [key]: v })}
-                />
-              ))}
-            </SectionCard>
+                {/* Saved Tenant Presets */}
+                <div className="space-y-2.5">
+                  <Label className="text-[11px] uppercase tracking-wider">
+                    {t('design.layouts')}
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={newPresetName}
+                      onChange={(e) => setNewPresetName(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAddPreset()}
+                      placeholder={t('design.newLayoutPlaceholder')}
+                      className="h-9 text-xs"
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleAddPreset}
+                      aria-label={t('design.studio.addPreset')}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
 
-            {/* Header */}
-            <SectionCard title={t('design.sections.header')} index={1}>
-              <ControlRow label={t('design.header.coverHeight')}>
-                <SegmentGroup<CoverHeight>
-                  value={draftConfig.header.coverHeight}
+                  <div className="space-y-1.5">
+                    {presets.map((preset) => {
+                      const active = preset.id === activePresetId;
+                      return (
+                        <div
+                          key={preset.id}
+                          className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg border"
+                          style={{
+                            background: active ? 'var(--dash-active)' : 'var(--dash-card)',
+                            borderColor: active ? 'var(--dash-border-focus)' : 'var(--dash-border)',
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => activatePreset(preset.id)}
+                            className="flex-1 text-start text-xs font-medium truncate"
+                          >
+                            {preset.name}
+                          </button>
+                          {presets.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => deletePreset(preset.id)}
+                              className="p-1 rounded hover:opacity-80"
+                              style={{ color: 'var(--dash-text-muted)' }}
+                              aria-label={`Delete ${preset.name}`}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {remotePresets.map((rp) => (
+                      <div
+                        key={rp.id}
+                        className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg border"
+                        style={{
+                          background: 'var(--dash-card)',
+                          borderColor: 'var(--dash-border)',
+                        }}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            try {
+                              if (rp.configJson) {
+                                patchDraftConfig(
+                                  JSON.parse(rp.configJson) as Partial<MenuLayoutConfig>
+                                );
+                              }
+                            } catch {
+                              // Ignore malformed saved preset JSON.
+                            }
+                          }}
+                          className="flex-1 text-start text-xs font-medium truncate"
+                        >
+                          {rp.name}
+                        </button>
+                        {rp.id && (
+                          <button
+                            type="button"
+                            onClick={() => deletePresetMutation.mutate(rp.id!)}
+                            className="p-1 rounded hover:opacity-80"
+                            style={{ color: 'var(--dash-text-muted)' }}
+                            aria-label={`Delete ${rp.name ?? ''}`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 2. BRAND & TYPOGRAPHY TAB */}
+            {activeTab === 'brand' && (
+              <div className="space-y-5">
+                <div>
+                  <h2 className="text-sm font-semibold">{t('design.studio.brandTitle')}</h2>
+                  <p className="text-xs mt-1" style={{ color: 'var(--dash-text-muted)' }}>
+                    {t('design.studio.brandSubtitle')}
+                  </p>
+                </div>
+
+                {/* Brand Media: Cover Image & Logo */}
+                <div className="space-y-3">
+                  <Label className="text-[11px] uppercase tracking-wider">
+                    {t('design.studio.brandMedia')}
+                  </Label>
+
+                  {/* Cover Image */}
+                  <div
+                    className="rounded-xl border p-2.5 space-y-2"
+                    style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-medium">{t('design.studio.coverImage')}</span>
+                      <div className="flex items-center gap-1">
+                        {draftConfig.header.coverImageUrl && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => patchHeader({ coverImageUrl: undefined })}
+                            aria-label={t('design.studio.resetImage')}
+                          >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={uploadingField === 'cover'}
+                          onClick={() => coverInputRef.current?.click()}
+                        >
+                          <Upload className="w-3.5 h-3.5 me-1" />
+                          {uploadingField === 'cover'
+                            ? t('design.studio.uploading')
+                            : t('design.studio.upload')}
+                        </Button>
+                      </div>
+                    </div>
+                    <input
+                      ref={coverInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        void handleMediaUpload('cover', e.target.files?.[0]);
+                        e.target.value = '';
+                      }}
+                    />
+                    <div
+                      className="h-20 w-full rounded-lg overflow-hidden border"
+                      style={{ borderColor: 'var(--dash-border)', background: 'var(--dash-hover)' }}
+                    >
+                      <img
+                        src={cdnImageUrl(
+                          draftConfig.header.coverImageUrl || businessInfo.coverImage
+                        )}
+                        alt={t('design.studio.coverImage')}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <Input
+                      value={draftConfig.header.coverImageUrl ?? ''}
+                      onChange={(e) => patchHeader({ coverImageUrl: e.target.value })}
+                      placeholder={t('design.studio.imageUrlPlaceholder')}
+                      className="h-8 text-xs"
+                    />
+                  </div>
+
+                  {/* Brand Logo */}
+                  <div
+                    className="rounded-xl border p-2.5 space-y-2"
+                    style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className="w-10 h-10 rounded-lg overflow-hidden border shrink-0"
+                          style={{
+                            borderColor: 'var(--dash-border)',
+                            background: 'var(--dash-hover)',
+                          }}
+                        >
+                          <img
+                            src={cdnImageUrl(draftConfig.header.logoUrl || businessInfo.logo)}
+                            alt={t('design.studio.logoImage')}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <span className="text-xs font-medium truncate">
+                          {t('design.studio.logoImage')}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {draftConfig.header.logoUrl && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => patchHeader({ logoUrl: undefined })}
+                            aria-label={t('design.studio.resetImage')}
+                          >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={uploadingField === 'logo'}
+                          onClick={() => logoInputRef.current?.click()}
+                        >
+                          <Upload className="w-3.5 h-3.5 me-1" />
+                          {uploadingField === 'logo'
+                            ? t('design.studio.uploading')
+                            : t('design.studio.upload')}
+                        </Button>
+                      </div>
+                    </div>
+                    <input
+                      ref={logoInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        void handleMediaUpload('logo', e.target.files?.[0]);
+                        e.target.value = '';
+                      }}
+                    />
+                    <Input
+                      value={draftConfig.header.logoUrl ?? ''}
+                      onChange={(e) => patchHeader({ logoUrl: e.target.value })}
+                      placeholder={t('design.studio.imageUrlPlaceholder')}
+                      className="h-8 text-xs"
+                    />
+                  </div>
+
+                  <p className="text-[11px]" style={{ color: 'var(--dash-text-muted)' }}>
+                    {t('design.studio.itemImagesHint')}
+                  </p>
+                </div>
+
+                <Separator />
+
+                <SegmentedControl<ThemeMode>
+                  label={t('design.studio.appearance')}
+                  value={themeMode}
                   options={[
-                    { label: t('design.none'), value: 'none' },
-                    { label: 'S', value: 'sm' },
-                    { label: 'M', value: 'md' },
-                    { label: 'L', value: 'lg' },
+                    { label: t('design.studio.modeLight'), value: 'light' },
+                    { label: t('design.studio.modeDark'), value: 'dark' },
                   ]}
-                  onChange={(v) => patchHeader({ coverHeight: v })}
+                  onChange={(mode) =>
+                    patchDraftConfig({
+                      mode,
+                      colors:
+                        mode === 'dark'
+                          ? {
+                              primary: '#ffffff',
+                              accent: colorAccent,
+                              bg: '#141414',
+                              surface: '#1c1c1c',
+                              text: '#f5f5f5',
+                            }
+                          : {
+                              primary: '#111111',
+                              accent: colorAccent,
+                              bg: '#ffffff',
+                              surface: '#ffffff',
+                              text: '#111111',
+                            },
+                    })
+                  }
                 />
-              </ControlRow>
-              <ToggleRow
-                label={t('design.header.sticky')}
-                checked={draftConfig.header.sticky}
-                onChange={(v) => patchHeader({ sticky: v })}
-              />
-              <ToggleRow
-                label={t('design.header.showLogo')}
-                checked={draftConfig.header.showLogo}
-                onChange={(v) => patchHeader({ showLogo: v })}
-              />
-              <ToggleRow
-                label={t('design.header.showDescription')}
-                checked={draftConfig.header.showDescription}
-                onChange={(v) => patchHeader({ showDescription: v })}
-              />
-              <ToggleRow
-                label={t('design.header.showMeta')}
-                checked={draftConfig.header.showMeta}
-                onChange={(v) => patchHeader({ showMeta: v })}
-              />
-            </SectionCard>
 
-            {/* Nav Tabs */}
-            <SectionCard title={t('design.sections.nav')} index={2}>
-              <ControlRow label={t('design.nav.style')}>
-                <SegmentGroup<NavStyle>
-                  value={draftConfig.nav.style}
-                  options={[
-                    { label: t('design.nav.styleUnderline'), value: 'underline' },
-                    { label: t('design.nav.stylePill'), value: 'pill' },
-                    { label: t('design.nav.styleFlat'), value: 'flat' },
-                  ]}
-                  onChange={(v) => patchNav({ style: v })}
-                />
-              </ControlRow>
-              <ControlRow label={t('design.nav.size')}>
-                <SegmentGroup<NavSize>
-                  value={draftConfig.nav.size}
-                  options={[
-                    { label: 'S', value: 'sm' },
-                    { label: 'M', value: 'md' },
-                    { label: 'L', value: 'lg' },
-                  ]}
-                  onChange={(v) => patchNav({ size: v })}
-                />
-              </ControlRow>
-            </SectionCard>
+                <div className="space-y-2">
+                  <Label className="text-[11px] uppercase tracking-wider">
+                    {t('design.colors.accent')}
+                  </Label>
+                  <div className="flex flex-wrap gap-2">
+                    {MENU_ACCENT_SWATCHES.map((swatch) => (
+                      <button
+                        key={swatch}
+                        type="button"
+                        aria-label={`Accent ${swatch}`}
+                        onClick={() => patchColors({ accent: swatch })}
+                        className="w-7 h-7 rounded-full border-2 transition-transform hover:scale-105"
+                        style={{
+                          background: swatch,
+                          borderColor:
+                            colorAccent.toLowerCase() === swatch.toLowerCase()
+                              ? 'var(--dash-text)'
+                              : 'transparent',
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
 
-            {/* Item Cards */}
-            <SectionCard title={t('design.sections.items')} index={3}>
-              <ControlRow label={t('design.items.layout')}>
-                <SegmentGroup<ItemLayout>
+                <div className="grid grid-cols-2 gap-3">
+                  {(
+                    [
+                      { key: 'primary', label: t('design.colors.primary'), val: colorPrimary },
+                      { key: 'accent', label: t('design.colors.accent'), val: colorAccent },
+                      { key: 'bg', label: t('design.colors.background'), val: colorBg },
+                      { key: 'surface', label: t('design.studio.surfaceColor'), val: colorSurface },
+                    ] as const
+                  ).map((c) => (
+                    <label
+                      key={c.key}
+                      className="flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg border text-xs cursor-pointer"
+                      style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
+                    >
+                      <span className="truncate">{c.label}</span>
+                      <input
+                        type="color"
+                        value={c.val}
+                        onChange={(e) => patchColors({ [c.key]: e.target.value })}
+                        className="w-6 h-6 rounded border-0 bg-transparent cursor-pointer"
+                      />
+                    </label>
+                  ))}
+                </div>
+
+                <Separator />
+
+                <div className="space-y-2.5">
+                  <Label className="text-[11px] uppercase tracking-wider">
+                    {t('design.typography.fontFamily')}
+                  </Label>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {FONT_OPTIONS.map((f) => {
+                      const active = fontFamily === f.id;
+                      return (
+                        <button
+                          key={f.id}
+                          type="button"
+                          onClick={() =>
+                            patchDraftConfig({
+                              typography: { headingFont: f.id, bodyFont: f.id, fontSize },
+                            })
+                          }
+                          className="px-2.5 py-2 rounded-lg text-xs font-medium text-start border transition-colors"
+                          style={{
+                            background: active ? 'var(--dash-active)' : 'var(--dash-card)',
+                            borderColor: active ? 'var(--dash-border-focus)' : 'var(--dash-border)',
+                          }}
+                        >
+                          {f.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <SegmentedControl<MenuFontSize>
+                    label={t('design.typography.fontSize')}
+                    value={fontSize}
+                    options={[
+                      { label: 'S', value: 'sm' },
+                      { label: 'M', value: 'md' },
+                      { label: 'L', value: 'lg' },
+                    ]}
+                    onChange={(size) =>
+                      patchDraftConfig({
+                        typography: {
+                          headingFont: fontFamily,
+                          bodyFont: fontFamily,
+                          fontSize: size,
+                        },
+                      })
+                    }
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* 3. LAYOUT TAB */}
+            {activeTab === 'layout' && (
+              <div className="space-y-5">
+                <div>
+                  <h2 className="text-sm font-semibold">{t('design.studio.layoutTitle')}</h2>
+                  <p className="text-xs mt-1" style={{ color: 'var(--dash-text-muted)' }}>
+                    {t('design.studio.layoutSubtitle')}
+                  </p>
+                </div>
+
+                <SegmentedControl<ItemLayout>
+                  label={t('design.items.layout')}
                   value={draftConfig.items.layout}
                   options={[
                     { label: t('design.items.layoutGrid'), value: 'grid' },
                     { label: t('design.items.layoutList'), value: 'list' },
                     { label: t('design.items.layoutMinimal'), value: 'minimal' },
                   ]}
-                  onChange={(v) => patchItems({ layout: v })}
+                  onChange={(layout) =>
+                    patchItems({
+                      layout,
+                      imagePosition:
+                        layout === 'list' ? 'right' : layout === 'minimal' ? 'none' : 'top',
+                    })
+                  }
                 />
-              </ControlRow>
-              <ControlRow label={t('design.items.columns')}>
-                <SegmentGroup<string>
-                  value={String(draftConfig.items.columns)}
-                  options={[
-                    { label: '2', value: '2' },
-                    { label: '3', value: '3' },
-                    { label: '4', value: '4' },
-                  ]}
-                  onChange={(v) => patchItems({ columns: Number(v) as 2 | 3 | 4 })}
-                />
-              </ControlRow>
-              <ControlRow label={t('design.items.imagePosition')}>
-                <SegmentGroup<ImagePosition>
-                  value={draftConfig.items.imagePosition}
-                  options={[
-                    { label: t('design.items.imageTop'), value: 'top' },
-                    { label: t('design.items.imageRight'), value: 'right' },
-                    { label: t('design.items.imageLeft'), value: 'left' },
-                    { label: t('design.none'), value: 'none' },
-                  ]}
-                  onChange={(v) => patchItems({ imagePosition: v })}
-                />
-              </ControlRow>
-              <ControlRow label={t('design.items.imageSize')}>
-                <SegmentGroup<ImageSize>
-                  value={draftConfig.items.imageSize}
-                  options={[
-                    { label: 'S', value: 'sm' },
-                    { label: 'M', value: 'md' },
-                    { label: 'L', value: 'lg' },
-                  ]}
-                  onChange={(v) => patchItems({ imageSize: v })}
-                />
-              </ControlRow>
-              <ControlRow label={t('design.items.cardRadius')}>
-                <SegmentGroup<CardRadius>
+
+                {draftConfig.items.layout !== 'minimal' && (
+                  <>
+                    <SegmentedControl<ImagePosition>
+                      label={t('design.items.imagePosition')}
+                      value={draftConfig.items.imagePosition}
+                      options={[
+                        { label: t('design.items.imageTop'), value: 'top' },
+                        { label: t('design.items.imageRight'), value: 'right' },
+                        { label: t('design.items.imageLeft'), value: 'left' },
+                        { label: t('design.none'), value: 'none' },
+                      ]}
+                      onChange={(imagePosition) => patchItems({ imagePosition })}
+                    />
+                    <SegmentedControl<ImageSize>
+                      label={t('design.items.imageSize')}
+                      value={draftConfig.items.imageSize}
+                      options={[
+                        { label: 'S', value: 'sm' },
+                        { label: 'M', value: 'md' },
+                        { label: 'L', value: 'lg' },
+                      ]}
+                      onChange={(imageSize) => patchItems({ imageSize })}
+                    />
+                  </>
+                )}
+
+                <SegmentedControl<CardRadius>
+                  label={t('design.items.cardRadius')}
                   value={draftConfig.items.cardRadius}
                   options={[
                     { label: t('design.none'), value: 'none' },
@@ -979,142 +1169,578 @@ const Design: React.FC = () => {
                     { label: 'M', value: 'md' },
                     { label: 'L', value: 'lg' },
                   ]}
-                  onChange={(v) => patchItems({ cardRadius: v })}
+                  onChange={(cardRadius) => patchItems({ cardRadius })}
                 />
-              </ControlRow>
-              <ToggleRow
-                label={t('design.items.showDescription')}
-                checked={draftConfig.items.showDescription}
-                onChange={(v) => patchItems({ showDescription: v })}
-              />
-              <ToggleRow
-                label={t('design.items.showBadges')}
-                checked={draftConfig.items.showBadges}
-                onChange={(v) => patchItems({ showBadges: v })}
-              />
-            </SectionCard>
 
-            {/* Colors */}
-            <SectionCard title={t('design.sections.colors')} index={4}>
-              <ColorRow
-                label={t('design.colors.primary')}
-                value={colorPrimary}
-                onChange={(v) => {
-                  patchDraftConfig({
-                    colors: { ...draftConfig.colors, primary: v, accent: colorAccent, bg: colorBg },
-                  });
-                }}
-              />
-              <ColorRow
-                label={t('design.colors.accent')}
-                value={colorAccent}
-                onChange={(v) => {
-                  patchDraftConfig({
-                    colors: {
-                      primary: colorPrimary,
-                      ...draftConfig.colors,
-                      accent: v,
-                      bg: colorBg,
-                    },
-                  });
-                }}
-              />
-              <ColorRow
-                label={t('design.colors.background')}
-                value={colorBg}
-                onChange={(v) => {
-                  patchDraftConfig({
-                    colors: {
-                      primary: colorPrimary,
-                      accent: colorAccent,
-                      ...draftConfig.colors,
-                      bg: v,
-                    },
-                  });
-                }}
-              />
-            </SectionCard>
+                <div className="space-y-1">
+                  <SwitchRow
+                    id="item-desc"
+                    label={t('design.items.showDescription')}
+                    checked={draftConfig.items.showDescription}
+                    onChange={(showDescription) => patchItems({ showDescription })}
+                  />
+                  <SwitchRow
+                    id="item-badges"
+                    label={t('design.items.showBadges')}
+                    checked={draftConfig.items.showBadges}
+                    onChange={(showBadges) => patchItems({ showBadges })}
+                  />
+                </div>
 
-            {/* Typography */}
-            <SectionCard title={t('design.sections.typography')} index={5}>
-              <ControlRow label={t('design.typography.fontFamily')}>
-                <select
-                  value={fontFamily}
-                  onChange={(e) => setFontFamily(e.target.value)}
+                <Separator />
+
+                <div className="space-y-3">
+                  <Label className="text-[11px] uppercase tracking-wider">
+                    {t('design.sections.header')}
+                  </Label>
+                  <SegmentedControl<CoverHeight>
+                    label={t('design.header.coverHeight')}
+                    value={draftConfig.header.coverHeight}
+                    options={[
+                      { label: t('design.none'), value: 'none' },
+                      { label: 'S', value: 'sm' },
+                      { label: 'M', value: 'md' },
+                      { label: 'L', value: 'lg' },
+                    ]}
+                    onChange={(coverHeight) => patchHeader({ coverHeight })}
+                  />
+                  <SwitchRow
+                    id="hdr-logo"
+                    label={t('design.header.showLogo')}
+                    checked={draftConfig.header.showLogo}
+                    onChange={(showLogo) => patchHeader({ showLogo })}
+                  />
+                  <SwitchRow
+                    id="hdr-desc"
+                    label={t('design.header.showDescription')}
+                    checked={draftConfig.header.showDescription}
+                    onChange={(showDescription) => patchHeader({ showDescription })}
+                  />
+                  <SwitchRow
+                    id="hdr-meta"
+                    label={t('design.header.showMeta')}
+                    checked={draftConfig.header.showMeta}
+                    onChange={(showMeta) => patchHeader({ showMeta })}
+                  />
+                </div>
+
+                <Separator />
+
+                <div className="space-y-3">
+                  <Label className="text-[11px] uppercase tracking-wider">
+                    {t('design.sections.nav')}
+                  </Label>
+                  <SegmentedControl<NavStyle>
+                    label={t('design.nav.style')}
+                    value={draftConfig.nav.style}
+                    options={[
+                      { label: t('design.nav.styleUnderline'), value: 'underline' },
+                      { label: t('design.nav.stylePill'), value: 'pill' },
+                      { label: t('design.nav.styleFlat'), value: 'flat' },
+                    ]}
+                    onChange={(style) => patchNav({ style })}
+                  />
+                  <SegmentedControl<NavSize>
+                    label={t('design.nav.size')}
+                    value={draftConfig.nav.size}
+                    options={[
+                      { label: 'S', value: 'sm' },
+                      { label: 'M', value: 'md' },
+                      { label: 'L', value: 'lg' },
+                    ]}
+                    onChange={(size) => patchNav({ size })}
+                  />
+                </div>
+
+                <Separator />
+
+                <div className="space-y-1">
+                  <Label className="text-[11px] uppercase tracking-wider">
+                    {t('design.sections.pages')}
+                  </Label>
+                  <SwitchRow
+                    id="page-about"
+                    label={t('design.pages.about')}
+                    checked={Boolean(draftConfig.pages.about)}
+                    onChange={(about) => patchPages({ about })}
+                  />
+                  <SwitchRow
+                    id="page-gallery"
+                    label={t('design.pages.gallery')}
+                    checked={Boolean(draftConfig.pages.gallery)}
+                    onChange={(gallery) => patchPages({ gallery })}
+                  />
+                  <SwitchRow
+                    id="page-reviews"
+                    label={t('design.pages.reviews')}
+                    checked={Boolean(draftConfig.pages.reviews)}
+                    onChange={(reviews) => patchPages({ reviews })}
+                  />
+                  <SwitchRow
+                    id="page-offers"
+                    label={t('design.pages.offers')}
+                    checked={Boolean(draftConfig.pages.offers)}
+                    onChange={(offers) => patchPages({ offers })}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* 4. FEATURES, CURRENCIES, LANGUAGES, LOYALTY & PAYMENTS TAB */}
+            {activeTab === 'features' && (
+              <div className="space-y-5">
+                <div>
+                  <h2 className="text-sm font-semibold">{t('design.sections.features')}</h2>
+                  <p className="text-xs mt-1" style={{ color: 'var(--dash-text-muted)' }}>
+                    {t('design.studio.featuresSubtitle')}
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  <SwitchRow
+                    id="feat-ordering"
+                    label={t('design.studio.orderingEnabled')}
+                    checked={features.enableOrdering}
+                    onChange={(enableOrdering) => patchFeatures({ enableOrdering })}
+                  />
+                  <SwitchRow
+                    id="feat-dinein"
+                    label={t('design.studio.modeDineIn')}
+                    checked={features.fulfillmentModes.dineIn}
+                    onChange={(dineIn) =>
+                      patchFeatures({ fulfillmentModes: { ...features.fulfillmentModes, dineIn } })
+                    }
+                  />
+                  <SwitchRow
+                    id="feat-selfservice"
+                    label={t('design.studio.modeSelfService')}
+                    checked={features.fulfillmentModes.selfService}
+                    onChange={(selfService) =>
+                      patchFeatures({
+                        fulfillmentModes: { ...features.fulfillmentModes, selfService },
+                      })
+                    }
+                  />
+                  <SwitchRow
+                    id="feat-pickup"
+                    label={t('design.studio.modePickup')}
+                    checked={features.fulfillmentModes.pickup}
+                    onChange={(pickup) =>
+                      patchFeatures({ fulfillmentModes: { ...features.fulfillmentModes, pickup } })
+                    }
+                  />
+                  <SwitchRow
+                    id="feat-delivery"
+                    label={t('design.studio.modeDelivery')}
+                    checked={features.fulfillmentModes.delivery}
+                    onChange={(delivery) =>
+                      patchFeatures({
+                        fulfillmentModes: { ...features.fulfillmentModes, delivery },
+                      })
+                    }
+                  />
+                </div>
+
+                <Separator />
+
+                <div className="space-y-1">
+                  <Label className="text-[11px] uppercase tracking-wider">
+                    {t('design.studio.tableService')}
+                  </Label>
+                  <SwitchRow
+                    id="act-waiter"
+                    label={t('design.studio.callStaff')}
+                    checked={features.tableActions.callWaiter}
+                    onChange={(callWaiter) =>
+                      patchFeatures({ tableActions: { ...features.tableActions, callWaiter } })
+                    }
+                  />
+                  <SwitchRow
+                    id="act-bill"
+                    label={t('design.studio.requestBill')}
+                    checked={features.tableActions.requestBill}
+                    onChange={(requestBill) =>
+                      patchFeatures({ tableActions: { ...features.tableActions, requestBill } })
+                    }
+                  />
+                  <SwitchRow
+                    id="act-split"
+                    label={t('design.studio.splitBill')}
+                    checked={features.tableActions.splitBill}
+                    onChange={(splitBill) =>
+                      patchFeatures({ tableActions: { ...features.tableActions, splitBill } })
+                    }
+                  />
+                  <SwitchRow
+                    id="feat-loyalty"
+                    label={t('design.sections.loyalty')}
+                    checked={features.enableLoyaltyStamps}
+                    onChange={(enableLoyaltyStamps) => patchFeatures({ enableLoyaltyStamps })}
+                  />
+                  <SwitchRow
+                    id="feat-banners"
+                    label={t('design.studio.promoBanners')}
+                    checked={features.enableBanners}
+                    onChange={(enableBanners) => patchFeatures({ enableBanners })}
+                  />
+                  <SwitchRow
+                    id="feat-search"
+                    label={t('design.studio.searchAndFilters')}
+                    checked={features.enableSearch}
+                    onChange={(enableSearch) =>
+                      patchFeatures({ enableSearch, enableDietaryFilters: enableSearch })
+                    }
+                  />
+                </div>
+
+                <Separator />
+
+                {/* Payment Redirect */}
+                <div className="space-y-2.5">
+                  <Label className="text-[11px] uppercase tracking-wider">
+                    {t('design.sections.payment')}
+                  </Label>
+                  <SegmentedControl<'pos' | 'redirect'>
+                    value={paymentMode === 'redirect' ? 'redirect' : 'pos'}
+                    options={[
+                      { label: t('design.studio.payAtPos'), value: 'pos' },
+                      { label: t('design.studio.payExternal'), value: 'redirect' },
+                    ]}
+                    onChange={(mode) =>
+                      patchDraftConfig({ payment: { ...draftConfig.payment, mode } })
+                    }
+                  />
+                  {paymentMode === 'redirect' && (
+                    <Input
+                      value={paymentRedirectUrl}
+                      onChange={(e) =>
+                        patchDraftConfig({
+                          payment: {
+                            ...draftConfig.payment,
+                            mode: 'redirect',
+                            redirectUrl: e.target.value,
+                          },
+                        })
+                      }
+                      placeholder="https://pay.yourstore.com/checkout"
+                      className="h-9 text-xs"
+                    />
+                  )}
+                </div>
+
+                <Separator />
+
+                {/* Dynamic Currencies */}
+                <div className="space-y-2.5">
+                  <Label className="text-[11px] uppercase tracking-wider">
+                    {t('design.sections.currencies')}
+                  </Label>
+                  <div className="space-y-1.5">
+                    {currencies.map((cur) => (
+                      <div
+                        key={cur.code}
+                        className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg border text-xs"
+                        style={{
+                          background: 'var(--dash-card)',
+                          borderColor: 'var(--dash-border)',
+                        }}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="font-semibold">{cur.code}</span>
+                          <span style={{ color: 'var(--dash-text-muted)' }}>
+                            {cur.symbol} · ×{cur.exchangeRate}
+                          </span>
+                          {cur.isDefault && (
+                            <Badge variant="secondary">{t('design.studio.defaultTag')}</Badge>
+                          )}
+                        </div>
+                        {!cur.isDefault && cur.code && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              deleteCurrencyMutation.mutate({
+                                locationId: selectedLocationId,
+                                code: cur.code!,
+                              })
+                            }
+                            style={{ color: 'var(--dash-text-muted)' }}
+                            aria-label={`Remove ${cur.code}`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    <Input
+                      value={newCurrencyCode}
+                      onChange={(e) => setNewCurrencyCode(e.target.value.toUpperCase())}
+                      placeholder="EUR"
+                      className="h-8 text-xs"
+                    />
+                    <Input
+                      value={newCurrencySymbol}
+                      onChange={(e) => setNewCurrencySymbol(e.target.value)}
+                      placeholder="€"
+                      className="h-8 text-xs"
+                    />
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={newCurrencyRate}
+                      onChange={(e) => setNewCurrencyRate(e.target.value)}
+                      placeholder="0.92"
+                      className="h-8 text-xs"
+                    />
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    disabled={
+                      !newCurrencyCode.trim() ||
+                      !newCurrencySymbol.trim() ||
+                      upsertCurrencyMutation.isPending
+                    }
+                    onClick={() => {
+                      upsertCurrencyMutation.mutate({
+                        locationId: selectedLocationId,
+                        code: newCurrencyCode.trim().toUpperCase(),
+                        symbol: newCurrencySymbol.trim(),
+                        exchangeRate: Number(newCurrencyRate) || 1,
+                      });
+                      setNewCurrencyCode('');
+                      setNewCurrencySymbol('');
+                      setNewCurrencyRate('1');
+                    }}
+                  >
+                    <Plus className="w-3.5 h-3.5 me-1.5" />
+                    {t('design.studio.addCurrency')}
+                  </Button>
+                </div>
+
+                <Separator />
+
+                {/* Languages & AI Translation */}
+                <div className="space-y-2.5">
+                  <Label className="text-[11px] uppercase tracking-wider">
+                    {t('design.sections.languages')}
+                  </Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(['en', 'fr', 'ar'] as const).map((loc) => {
+                      const active = enabledLocales.includes(loc);
+                      return (
+                        <Button
+                          key={loc}
+                          size="sm"
+                          variant={active ? 'default' : 'outline'}
+                          onClick={() =>
+                            setEnabledLocales((prev) =>
+                              prev.includes(loc)
+                                ? prev.length > 1
+                                  ? prev.filter((l) => l !== loc)
+                                  : prev
+                                : [...prev, loc]
+                            )
+                          }
+                        >
+                          {loc.toUpperCase()}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    disabled={translateMenuMutation.isPending || menuCategories.length === 0}
+                    onClick={handleTranslateAll}
+                  >
+                    <Sparkles className="w-3.5 h-3.5 me-1.5" />
+                    {t('design.studio.aiTranslate')}
+                  </Button>
+                </div>
+
+                <Separator />
+
+                {/* Loyalty Stamp Cards */}
+                <div className="space-y-2.5">
+                  <Label className="text-[11px] uppercase tracking-wider">
+                    {t('design.sections.loyalty')}
+                  </Label>
+                  {stampCards.map((card) => (
+                    <div
+                      key={card.id}
+                      className="px-2.5 py-2 rounded-lg border text-xs"
+                      style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
+                    >
+                      <div className="font-semibold">{card.title}</div>
+                      <div style={{ color: 'var(--dash-text-muted)' }}>
+                        {card.stampsRequired} → {card.rewardLabel}
+                      </div>
+                    </div>
+                  ))}
+                  <Input
+                    value={newStampTitle}
+                    onChange={(e) => setNewStampTitle(e.target.value)}
+                    placeholder={t('design.studio.stampTitlePlaceholder')}
+                    className="h-8 text-xs"
+                  />
+                  <div className="grid grid-cols-3 gap-1.5">
+                    <Input
+                      type="number"
+                      min={1}
+                      value={newStampTarget}
+                      onChange={(e) => setNewStampTarget(e.target.value)}
+                      placeholder="10"
+                      className="h-8 text-xs"
+                    />
+                    <Input
+                      value={newStampReward}
+                      onChange={(e) => setNewStampReward(e.target.value)}
+                      placeholder={t('design.studio.stampRewardPlaceholder')}
+                      className="h-8 text-xs col-span-2"
+                    />
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    disabled={
+                      !newStampTitle.trim() ||
+                      !newStampReward.trim() ||
+                      upsertStampCardMutation.isPending
+                    }
+                    onClick={() => {
+                      upsertStampCardMutation.mutate({
+                        locationId: selectedLocationId,
+                        title: newStampTitle.trim(),
+                        stampsRequired: Math.max(1, Number(newStampTarget) || 10),
+                        rewardLabel: newStampReward.trim(),
+                      });
+                      setNewStampTitle('');
+                      setNewStampReward('');
+                    }}
+                  >
+                    <Plus className="w-3.5 h-3.5 me-1.5" />
+                    {t('design.studio.addStampCard')}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* 5. CARET AI TAB */}
+            {activeTab === 'ai' && (
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-sm font-semibold">{t('design.sections.aiDesigner')}</h2>
+                  <p className="text-xs mt-1" style={{ color: 'var(--dash-text-muted)' }}>
+                    {t('design.studio.aiSubtitle')}
+                  </p>
+                </div>
+
+                <Button variant="accent" className="w-full gap-2" onClick={openCaret}>
+                  <CaretIcon size={16} />
+                  {t('design.studio.openCaretAi')}
+                </Button>
+
+                <Separator />
+
+                <div className="space-y-2">
+                  <Label className="text-[11px] uppercase tracking-wider">
+                    {t('design.studio.quickStylePrompt')}
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={aiPrompt}
+                      onChange={(e) => setAiPrompt(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleApplyPrompt()}
+                      placeholder={t('design.studio.aiPromptPlaceholder')}
+                      className="h-9 text-xs"
+                    />
+                    <Button size="sm" variant="default" onClick={() => handleApplyPrompt()}>
+                      {t('design.studio.apply')}
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {AI_QUICK_PROMPTS.map((chip) => (
+                      <button
+                        key={chip}
+                        type="button"
+                        onClick={() => handleApplyPrompt(chip)}
+                        className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors hover:border-[var(--dash-border-focus)]"
+                        style={{
+                          background: 'var(--dash-card)',
+                          borderColor: 'var(--dash-border)',
+                        }}
+                      >
+                        {chip}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 6. SCOPED CSS TAB */}
+            {activeTab === 'css' && (
+              <div className="space-y-3">
+                <div>
+                  <h2 className="text-sm font-semibold">{t('design.sections.advanced')}</h2>
+                  <p className="text-xs mt-1" style={{ color: 'var(--dash-text-muted)' }}>
+                    {t('design.studio.cssSubtitle')}
+                  </p>
+                </div>
+                <textarea
+                  value={customCss}
+                  onChange={(e) => setCustomCss(e.target.value)}
+                  rows={12}
+                  spellCheck={false}
+                  placeholder=".rtylr-menu-root { letter-spacing: 0.01em; }"
+                  className="w-full rounded-xl p-3 font-mono text-xs border focus:outline-none focus:ring-2 focus:ring-[var(--dash-border-focus)]"
                   style={{
                     background: 'var(--dash-input-bg)',
-                    border: '1px solid var(--dash-border)',
-                    borderRadius: 7,
-                    padding: '5px 8px',
-                    fontSize: 12,
                     color: 'var(--dash-text)',
-                    outline: 'none',
-                    cursor: 'pointer',
+                    borderColor: 'var(--dash-border)',
                   }}
-                >
-                  <option value="system">System UI</option>
-                  <option value="inter">Inter</option>
-                  <option value="jakarta">Plus Jakarta Sans</option>
-                  <option value="merriweather">Merriweather</option>
-                  <option value="poppins">Poppins</option>
-                </select>
-              </ControlRow>
-              <ControlRow label={t('design.typography.fontSize')}>
-                <SegmentGroup<string>
-                  value={fontSize}
-                  options={[
-                    { label: 'S', value: 'sm' },
-                    { label: 'M', value: 'md' },
-                    { label: 'L', value: 'lg' },
-                  ]}
-                  onChange={setFontSize}
                 />
-              </ControlRow>
-            </SectionCard>
-          </div>
+              </div>
+            )}
+          </aside>
 
-          {/* ── Phone Preview ─────────────────────────────────────────────────── */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              padding: '20px 0 12px',
-              background: 'var(--dash-bg)',
-              overflow: 'hidden',
-              height: '100%',
-            }}
-          >
-            <span
-              style={{
-                fontSize: 10,
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: 0,
-                color: 'var(--dash-text-dim)',
-                marginBottom: 16,
-                flexShrink: 0,
-              }}
-            >
-              {t('design.preview')}
-            </span>
+          {/* Calm Neutral Preview Stage */}
+          <main className="flex-1 min-w-0 overflow-auto p-6 flex items-start justify-center">
             <div
+              className="transition-all duration-200 overflow-hidden"
               style={{
-                flex: 1,
-                width: '100%',
-                overflow: 'hidden',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                width: deviceWidth,
+                maxWidth: viewport === 'desktop' ? 880 : undefined,
+                height: viewport === 'mobile' ? 780 : 'calc(100vh - 116px)',
+                borderRadius: viewport === 'mobile' ? 28 : 14,
+                border: '1px solid var(--dash-border)',
+                boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08)',
+                transform: 'translateZ(0)',
+                background: colorBg,
               }}
             >
-              <PhoneFrame
-                config={draftConfig}
-                businessInfo={businessInfo}
-                menuCategories={menuCategories}
-              />
+              <div className="w-full h-full overflow-y-auto overflow-x-hidden">
+                <MenuLayout
+                  business={businessInfo}
+                  categories={menuCategories}
+                  config={previewConfig}
+                  activeLocale={previewLocale}
+                  availableLocales={enabledLocales}
+                  onLocaleChange={setPreviewLocale}
+                  currencies={previewCurrencies}
+                  stampCards={previewStampCards}
+                  tableLabel="Table 4"
+                  enableCart={features.enableOrdering}
+                  onTableAction={() => undefined}
+                />
+              </div>
             </div>
-          </div>
+          </main>
         </div>
       </div>
     </>

@@ -10,9 +10,20 @@ interface DueDatePickerProps {
   value?: string;
   onChange: (date: string) => void;
   disabled?: boolean;
+  /** The calendar's accessible name; the due date by default. */
+  label?: string;
+  /** Tint a past date as overdue, and offer only today onwards. Off for a
+   * start date, which is often already past. */
+  showOverdue?: boolean;
 }
 
-export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, disabled }) => {
+export const DueDatePicker: React.FC<DueDatePickerProps> = ({
+  value,
+  onChange,
+  disabled,
+  label,
+  showOverdue = true,
+}) => {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const popupId = useId();
@@ -93,7 +104,7 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, d
       document.removeEventListener('focusin', focusOutside);
     };
   }, [open, disabled, direction]);
-  const overdue = isOverdue(value);
+  const overdue = showOverdue && isOverdue(value);
 
   const quickOptions = [
     { id: 'today', label: t('flowCommon.datePicker.today'), days: 0 },
@@ -144,7 +155,7 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, d
           id={popupId}
           popover="manual"
           role="dialog"
-          aria-label={t('flow.taskDetail.dueDate')}
+          aria-label={label ?? t('flow.taskDetail.dueDate')}
           dir={direction}
           className="flow-due-date-popover"
         >
@@ -177,7 +188,7 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, d
               onChange(date);
               close();
             }}
-            minDate={todayISODate()}
+            minDate={showOverdue ? todayISODate() : undefined}
             locale={i18n.language}
             weekStartsOn={1}
             labels={{

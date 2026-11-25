@@ -91,7 +91,6 @@ const VIEWS: ViewDef[] = [
     icon: GanttChart,
     to: '/flow/p/$projectId/timeline',
     match: (p) => p.endsWith('/timeline'),
-    previewOnly: true,
   },
   {
     key: 'calendar',

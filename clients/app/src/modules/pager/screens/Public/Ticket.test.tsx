@@ -303,7 +303,7 @@ describe('pager ticket page', () => {
           'aria-pressed',
           'true'
         );
-        expect(lastSound(sync)).toContain('marimba');
+        await waitFor(() => expect(lastSound(sync)).toContain('marimba'));
 
         fireEvent.click(within(tones).getByRole('button', { name: 'Classic ring' }));
         await waitFor(() => expect(lastSound(sync)).toContain('ring'));
@@ -583,7 +583,7 @@ describe('pager ticket page', () => {
 
     const link = await screen.findByRole('link', { name: 'Start a new order' });
     expect(link).toHaveAttribute('href', '/acme?new=1');
-    expect(window.localStorage.getItem('pager:scan:acme')).toBeNull();
+    await waitFor(() => expect(window.localStorage.getItem('pager:scan:acme')).toBeNull());
   });
 
   it('triggers a local Service Worker notification when ready and closes it on acknowledge', async () => {

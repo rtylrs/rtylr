@@ -206,3 +206,23 @@ func (s *Service) GetCycleCapacity(ctx context.Context, businessID, cycleID int6
 	})
 	return out, nil
 }
+
+// AttachTaskDependencies fills Dependencies (the ids of the tasks blocking
+// each task) on a page of tasks, so a list can draw dependency arrows (T-342).
+func (s *Service) AttachTaskDependencies(ctx context.Context, businessID int64, tasks []domain.Task) error {
+	if len(tasks) == 0 {
+		return nil
+	}
+	ids := make([]int64, len(tasks))
+	for i := range tasks {
+		ids[i] = tasks[i].ID
+	}
+	byTask, err := s.repo.ListTaskDependencies(ctx, ids, businessID)
+	if err != nil {
+		return err
+	}
+	for i := range tasks {
+		tasks[i].Dependencies = byTask[tasks[i].ID]
+	}
+	return nil
+}

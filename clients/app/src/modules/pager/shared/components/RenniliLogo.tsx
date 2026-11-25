@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { APP_URLS } from '@voxire/config';
+import RtylrLogo from '../../../../shared/components/RtylrLogo';
 
 /**
  * Rennili's mark: a phone mid-shake with motion lines either side. The same
@@ -61,12 +62,41 @@ export function RenniliLogo({
   );
 }
 
+/**
+ * Replaces literal "RTYLR" mentions with the inline RTYLR logo SVG (ribbon +
+ * blue fold + wordmark), keeping surrounding copy and RTL order intact.
+ */
+export function RtylrBrandText({ text }: { text: string }): React.JSX.Element {
+  if (!text.includes('RTYLR')) return <>{text}</>;
+  const parts = text.split(/(RTYLR)/g);
+  return (
+    <>
+      {parts.map((part, index) =>
+        part === 'RTYLR' ? (
+          <span key={index} className="rennili-rtylr-word" dir="ltr">
+            <RtylrLogo className="rennili-rtylr-inline" />
+          </span>
+        ) : (
+          <React.Fragment key={index}>{part}</React.Fragment>
+        )
+      )}
+    </>
+  );
+}
+
 /** The small "by RTYLR" badge on the customer pages and the landing. */
 export function ByRtylr(): React.JSX.Element {
   const { t } = useTranslation('pager');
+  const label = t('pager.brand.by');
   return (
-    <a className="rennili-by" href={APP_URLS.landing} target="_blank" rel="noreferrer">
-      {t('pager.brand.by')}
+    <a
+      className="rennili-by"
+      href={APP_URLS.landing}
+      target="_blank"
+      rel="noreferrer"
+      aria-label={label}
+    >
+      <RtylrBrandText text={label} />
     </a>
   );
 }

@@ -15,11 +15,12 @@ import (
 )
 
 type Repository struct {
+	db      *sql.DB
 	queries *sqlc.Queries
 }
 
 func NewRepository(db *sql.DB) *Repository {
-	return &Repository{queries: sqlc.New(db)}
+	return &Repository{db: db, queries: sqlc.New(db)}
 }
 
 func (r *Repository) List(ctx context.Context, businessID int64) ([]*posmenuitemv1.MenuItem, error) {

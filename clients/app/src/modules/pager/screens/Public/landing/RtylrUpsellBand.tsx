@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { PAGER_RTYLR_PATH } from '../../../pagerPaths';
+import { RtylrBrandText } from '../../../shared/components/RenniliLogo';
 
 export interface RtylrServiceMeta {
   id: 'pos' | 'menu' | 'erp' | 'finance' | 'hr' | 'crm' | 'flow' | 'insights';
@@ -43,7 +44,9 @@ export const RtylrUpsellBand = (): React.JSX.Element => {
       <div className="rl-wrap">
         <div className="rl-upsell-card">
           <div className="rl-upsell-copy">
-            <p className="rl-kicker">{t('pager.landing.rtylr.eyebrow')}</p>
+            <p className="rl-kicker">
+              <RtylrBrandText text={t('pager.landing.rtylr.eyebrow')} />
+            </p>
             <h2 id="rl-upsell-heading" className="rl-upsell-title">
               {t('pager.landing.rtylr.teaserTitle')}
             </h2>

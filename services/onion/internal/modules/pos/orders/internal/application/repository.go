@@ -18,7 +18,7 @@ type repository interface {
 	GetOrderIDByPaddleTx(ctx context.Context, txID string) (int64, int64, error)
 	IsOnlineOrderingEnabled(ctx context.Context, businessID int64) (bool, error)
 	GetPublicMenuItem(ctx context.Context, businessID, menuItemID int64) (domain.OrderItemInput, error)
-	CreatePublicOrder(ctx context.Context, businessID int64, orderNumber, customerName, customerPhone, notes string, items []domain.OrderItemInput) (int64, string, error)
+	CreatePublicOrder(ctx context.Context, businessID, locationID, tableID int64, orderType, orderNumber, customerName, customerPhone, notes string, items []domain.OrderItemInput) (int64, string, error)
 	GetPublicOrderStatus(ctx context.Context, businessID, orderID int64) (orderNumber, status string, err error)
 	ListLocations(ctx context.Context, businessID int64) ([]domain.Location, error)
 	CreateLocation(ctx context.Context, ownerID int64, input domain.LocationInput) (int64, error)
