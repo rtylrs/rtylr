@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func day(s string) *time.Time {
+func dayPtr(s string) *time.Time {
 	t, _ := time.Parse("2006-01-02", s)
 	return &t
 }
@@ -13,16 +13,16 @@ func day(s string) *time.Time {
 func TestDistributePlanned(t *testing.T) {
 	tasks := []PlannedTask{
 		// Fri 27 Nov to Tue 1 Dec: 3 working days (Fri, Mon, Tue), 600 minutes.
-		{ID: 1, AssigneeID: 7, StartDate: day("2026-11-27"), DueDate: day("2026-12-01"), EstimateMinutes: 600},
+		{ID: 1, AssigneeID: 7, StartDate: dayPtr("2026-11-27"), DueDate: dayPtr("2026-12-01"), EstimateMinutes: 600},
 		// Due only, on Monday.
-		{ID: 2, AssigneeID: 7, DueDate: day("2026-11-30"), EstimateMinutes: 90},
+		{ID: 2, AssigneeID: 7, DueDate: dayPtr("2026-11-30"), EstimateMinutes: 90},
 		// A weekend-only span keeps its estimate.
-		{ID: 3, AssigneeID: 8, StartDate: day("2026-11-28"), DueDate: day("2026-11-29"), EstimateMinutes: 61},
+		{ID: 3, AssigneeID: 8, StartDate: dayPtr("2026-11-28"), DueDate: dayPtr("2026-11-29"), EstimateMinutes: 61},
 		// No estimate, no assignee: left out.
-		{ID: 4, AssigneeID: 7, DueDate: day("2026-11-30")},
-		{ID: 5, DueDate: day("2026-11-30"), EstimateMinutes: 60},
+		{ID: 4, AssigneeID: 7, DueDate: dayPtr("2026-11-30")},
+		{ID: 5, DueDate: dayPtr("2026-11-30"), EstimateMinutes: 60},
 	}
-	got := DistributePlanned(tasks, *day("2026-11-23"), *day("2026-12-06"), nil)
+	got := DistributePlanned(tasks, *dayPtr("2026-11-23"), *dayPtr("2026-12-06"), nil)
 	type row struct {
 		user    int64
 		date    string
@@ -52,8 +52,8 @@ func TestDistributePlanned(t *testing.T) {
 
 func TestDistributePlannedHonoursTheWorkWeekAndRange(t *testing.T) {
 	sunThu := []time.Weekday{time.Sunday, time.Monday, time.Tuesday, time.Wednesday, time.Thursday}
-	tasks := []PlannedTask{{ID: 1, AssigneeID: 7, StartDate: day("2026-11-26"), DueDate: day("2026-11-29"), EstimateMinutes: 120}}
-	got := DistributePlanned(tasks, *day("2026-11-29"), *day("2026-11-30"), sunThu)
+	tasks := []PlannedTask{{ID: 1, AssigneeID: 7, StartDate: dayPtr("2026-11-26"), DueDate: dayPtr("2026-11-29"), EstimateMinutes: 120}}
+	got := DistributePlanned(tasks, *dayPtr("2026-11-29"), *dayPtr("2026-11-30"), sunThu)
 	// Thu 26 and Sun 29 are working days on a Sunday week; only Sunday is in range.
 	if len(got) != 1 || got[0].Date.Format("2006-01-02") != "2026-11-29" || got[0].Minutes != 60 {
 		t.Fatalf("got %+v", got)
