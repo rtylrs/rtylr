@@ -166,6 +166,23 @@ interface TaskService {
   @route("/tasks/epic-rollups")
   listEpicRollups(...ListEpicRollupsRequest): ListEpicRollupsResponse;
 
+  /**
+   * duplicateTask copies a task with its description, fields, labels, milestone
+   * and subtasks into the same project, in the default status, and links the
+   * copy to the original.
+   */
+  @post
+  @route("/tasks/{id}/duplicate")
+  duplicateTask(...DuplicateTaskRequest): DuplicateTaskResponse;
+
+  /**
+   * importTasks creates many tasks in one project. Every row is checked first;
+   * if any row is invalid nothing is created and the response names the rows.
+   */
+  @post
+  @route("/tasks/import")
+  importTasks(...ImportTasksRequest): ImportTasksResponse;
+
   /** listTaskTemplates returns a project's description templates, one per task type at most. */
   @get
   @route("/tasks/templates")

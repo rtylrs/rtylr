@@ -28,7 +28,12 @@
     "parentChanged": "Task moved",
     "parentFailed": "Could not move the task",
     "epicDeleted_one": "Epic deleted. {{count}} task kept with no epic",
-    "epicDeleted_other": "Epic deleted. {{count}} tasks kept with no epic"
+    "epicDeleted_other": "Epic deleted. {{count}} tasks kept with no epic",
+    "duplicated": "Duplicated as {{id}}",
+    "duplicateFailed": "Failed to duplicate the task",
+    "imported_one": "Imported {{count}} task",
+    "imported_other": "Imported {{count}} tasks",
+    "importFailed": "Failed to import the tasks"
   },
   "comment": {
     "postFailed": "Failed to post comment",

@@ -1,5 +1,5 @@
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
-import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useRef, useState, useEffect, Suspense } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, ChevronDown } from 'lucide-react';
@@ -28,7 +28,7 @@ import { useProjectTaskFilters } from './useProjectTaskFilters';
 import { projectFiltersForView, useSaveFiltersAsView } from '../views/useSaveFiltersAsView';
 import { TaskRow } from './list/ListRow';
 import { ListHeader } from './list/ListHeader';
-import { ExportCsvButton, ListColumnPicker } from './list/ListToolbar';
+import { ExportCsvButton, ImportCsvButton, ListColumnPicker } from './list/ListToolbar';
 import { ListGridContext, useListGrid, type ListGridState } from './list/listGridContext';
 import { handleGridKeyDown, GRID_CELL, GRID_ROW } from './list/gridKeyboard';
 import { useListPrefs } from './list/useListPrefs';
@@ -244,10 +244,15 @@ export const TaskGroup: React.FC<{
   );
 };
 
+// Loaded on first use: the dialog brings the CSV reader and the team list.
+const ImportTasksDialog = React.lazy(() => import('./import/ImportTasksDialog'));
+
 const ProjectList: React.FC = () => {
   const { t } = useTranslation();
   const { projectId = '' } = useParams({ strict: false });
   const [groupBy, setGroupByState] = useState<ListGroupKey>('status');
+  const [importing, setImporting] = useState(false);
+  const canImport = useCanCreateTask(projectId);
 
   useEffect(() => {
     if (projectId) setGroupByState(loadListGroupBy(projectId));
@@ -390,6 +395,7 @@ const ProjectList: React.FC = () => {
           rightSlot={
             <>
               <ListColumnPicker prefs={prefs} onChange={setPrefs} />
+              {canImport && <ImportCsvButton onImport={() => setImporting(true)} />}
               <ExportCsvButton disabled={exportRows.length === 0} onExport={exportCsv} />
               <div className="w-[180px]">
                 <FlowSelect
@@ -455,6 +461,11 @@ const ProjectList: React.FC = () => {
           )}
         </div>
       </div>
+      {canImport && importing && (
+        <Suspense fallback={null}>
+          <ImportTasksDialog projectId={projectId} open onOpenChange={setImporting} />
+        </Suspense>
+      )}
     </EpicFilterContext.Provider>
   );
 };

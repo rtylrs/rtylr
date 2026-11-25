@@ -256,7 +256,10 @@
     "noCyclesInProject": "Aucun cycle ouvert",
     "startDate": "Date de début",
     "copyBranch": "Copier le nom de branche",
-    "branchCopied": "Nom de branche copié"
+    "branchCopied": "Nom de branche copié",
+    "duplicate": "Dupliquer",
+    "duplicateHint": "Copier cette tâche avec sa description, ses champs et ses sous-tâches",
+    "duplicateTitle": "{{title}} (copie)"
   },
   "time": {
     "add": {
@@ -1611,5 +1614,51 @@
     "remove": "Supprimer le modèle",
     "startFromDefault": "Partir du modèle intégré",
     "defaultBug": "**Où**\nApplication > écran > URL\n\n**Étapes pour reproduire**\n1. \n2. \n3. \n\n**Attendu**\n\n\n**Constaté**\n\n\n**Environnement**\nNavigateur ou appareil, langue (EN ou AR)\n\n**Capture d'écran**\nJoignez-en une ci-dessous.\n"
+  },
+  "taskImport": {
+    "open": "Importer un CSV",
+    "title": "Importer des tâches depuis un CSV",
+    "description": "Jusqu’à {{max}} tâches à la fois. Vérifiez l’aperçu, puis importez.",
+    "choose": "Choisir un fichier CSV",
+    "chooseAnother": "Choisir un autre fichier",
+    "sampleFile": "Télécharger un fichier exemple",
+    "columns": "Colonnes : Titre (obligatoire), Description, E-mail de l’assigné, Échéance (AAAA-MM-JJ), Priorité (none, low, medium, high, urgent), Effort (ex. 90, 1h, 1h 30m), Section (un statut de ce projet), Sous-tâches (séparées par ;).",
+    "noTitleColumn": "Le fichier n’a pas de colonne Titre : aucune tâche ne peut en être créée.",
+    "summary_one": "{{count}} tâche prête à importer.",
+    "summary_many": "{{count}} tâches prêtes à importer.",
+    "summary_other": "{{count}} tâches prêtes à importer.",
+    "summaryIssues_one": "{{count}} ligne, {{issues}} avec des problèmes. Corrigez le fichier et choisissez-le à nouveau.",
+    "summaryIssues_many": "{{count}} lignes, {{issues}} avec des problèmes. Corrigez le fichier et choisissez-le à nouveau.",
+    "summaryIssues_other": "{{count}} lignes, {{issues}} avec des problèmes. Corrigez le fichier et choisissez-le à nouveau.",
+    "truncated": "Seules les {{max}} premières lignes sont lues.",
+    "more_one": "Et {{count}} ligne de plus.",
+    "more_many": "Et {{count}} lignes de plus.",
+    "more_other": "Et {{count}} lignes de plus.",
+    "refused": "Rien n’a été importé. Ces lignes ont été refusées :",
+    "rowError": "Ligne {{row}} : {{message}}",
+    "importing": "Import en cours...",
+    "import_one": "Importer {{count}} tâche",
+    "import_many": "Importer {{count}} tâches",
+    "import_other": "Importer {{count}} tâches",
+    "col": {
+      "title": "Titre",
+      "assignee": "Assigné",
+      "due": "Échéance",
+      "section": "Colonne",
+      "subtasks": "Sous-tâches"
+    },
+    "issue": {
+      "noTitle": "Sans titre",
+      "unknownAssignee": "Aucun membre de l’équipe n’a l’e-mail {{value}}",
+      "badDate": "L’échéance « {{value}} » n’est pas au format AAAA-MM-JJ",
+      "badPriority": "La priorité « {{value}} » n’est pas none, low, medium, high ou urgent",
+      "badEffort": "L’effort « {{value}} » n’est pas une durée",
+      "unknownSection": "Aucun statut « {{value}} » dans ce projet"
+    },
+    "sample": {
+      "title": "Créer la page de connexion",
+      "description": "Quoi et pourquoi, où regarder, étapes, QA",
+      "subtasks": "Maquette; Développement; Test"
+    }
   }
 }

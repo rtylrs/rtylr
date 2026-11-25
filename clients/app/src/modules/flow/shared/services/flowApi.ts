@@ -317,6 +317,22 @@ export interface ApiTaskTemplate {
   updatedAt?: string;
 }
 
+export interface ApiImportTaskRow {
+  title: string;
+  description?: string;
+  assigneeId?: string;
+  dueDate?: string;
+  priority?: string;
+  effortMinutes?: number;
+  sectionId?: string;
+  subtasks?: string[];
+}
+
+export interface ApiImportRowError {
+  row?: number;
+  message?: string;
+}
+
 export interface ApiCycleTotals {
   backlog?: number;
   active?: number;
@@ -1049,6 +1065,17 @@ export const flowApi = {
   setTaskTemplate: (projectId: string, taskType: string, body: string) =>
     flowResult<{ template?: ApiTaskTemplate }>(() =>
       taskV2.setTaskTemplate({ projectId, taskType, body })
+    ),
+
+  // Copies the task (fields, labels, milestone, subtasks) into its project and
+  // links the copy to it. An empty title keeps the original's.
+  duplicateTask: (id: string, title?: string) =>
+    flowResult<{ task: ApiTask }>(() => taskV2.duplicateTask({ id, title: title || undefined })),
+
+  // All rows are checked first; when `errors` is not empty nothing was created.
+  importTasks: (projectId: string, rows: ApiImportTaskRow[]) =>
+    flowResult<{ created?: number; taskIds?: string[]; errors?: ApiImportRowError[] }>(() =>
+      taskV2.importTasks({ projectId, rows })
     ),
 
   // Typed relations replace the dependency endpoints: a dependency is a

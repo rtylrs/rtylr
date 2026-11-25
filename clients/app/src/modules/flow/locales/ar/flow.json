@@ -267,7 +267,10 @@
     "noCyclesInProject": "لا توجد دورات مفتوحة",
     "startDate": "تاريخ البدء",
     "copyBranch": "نسخ اسم الفرع",
-    "branchCopied": "تم نسخ اسم الفرع"
+    "branchCopied": "تم نسخ اسم الفرع",
+    "duplicate": "تكرار",
+    "duplicateHint": "نسخ هذه المهمة مع وصفها وحقولها ومهامها الفرعية",
+    "duplicateTitle": "{{title}} (نسخة)"
   },
   "time": {
     "add": {
@@ -1719,5 +1722,63 @@
     "remove": "إزالة القالب",
     "startFromDefault": "البدء من القالب المدمج",
     "defaultBug": "**المكان**\nالتطبيق > الشاشة > الرابط\n\n**خطوات إعادة المشكلة**\n1. \n2. \n3. \n\n**المتوقع**\n\n\n**ما حدث فعلًا**\n\n\n**البيئة**\nالمتصفح أو الجهاز، اللغة (EN أو AR)\n\n**لقطة شاشة**\nأرفق واحدة أدناه.\n"
+  },
+  "taskImport": {
+    "open": "استيراد CSV",
+    "title": "استيراد المهام من ملف CSV",
+    "description": "حتى {{max}} مهمة في المرة الواحدة. راجع المعاينة ثم استورد.",
+    "choose": "اختر ملف CSV",
+    "chooseAnother": "اختر ملفًا آخر",
+    "sampleFile": "تنزيل ملف نموذجي",
+    "columns": "الأعمدة: العنوان (مطلوب)، الوصف، البريد الإلكتروني للمسؤول، تاريخ الاستحقاق (YYYY-MM-DD)، الأولوية (none، low، medium، high، urgent)، الجهد (مثل 90 أو 1h أو 1h 30m)، القسم (حالة في هذا المشروع)، المهام الفرعية (مفصولة بـ ;).",
+    "noTitleColumn": "لا يحتوي الملف على عمود العنوان، لذا لا يمكن إنشاء أي مهمة منه.",
+    "summary_zero": "لا مهام جاهزة للاستيراد.",
+    "summary_one": "مهمة واحدة جاهزة للاستيراد.",
+    "summary_two": "مهمتان جاهزتان للاستيراد.",
+    "summary_few": "{{count}} مهام جاهزة للاستيراد.",
+    "summary_many": "{{count}} مهمة جاهزة للاستيراد.",
+    "summary_other": "{{count}} مهمة جاهزة للاستيراد.",
+    "summaryIssues_zero": "لا صفوف.",
+    "summaryIssues_one": "صف واحد، {{issues}} به مشكلات. صحّح الملف واختره مجددًا.",
+    "summaryIssues_two": "صفان، {{issues}} بها مشكلات. صحّح الملف واختره مجددًا.",
+    "summaryIssues_few": "{{count}} صفوف، {{issues}} بها مشكلات. صحّح الملف واختره مجددًا.",
+    "summaryIssues_many": "{{count}} صفًا، {{issues}} بها مشكلات. صحّح الملف واختره مجددًا.",
+    "summaryIssues_other": "{{count}} صف، {{issues}} بها مشكلات. صحّح الملف واختره مجددًا.",
+    "truncated": "تتم قراءة أول {{max}} صف فقط.",
+    "more_zero": "لا صفوف أخرى.",
+    "more_one": "وصف واحد آخر.",
+    "more_two": "وصفان آخران.",
+    "more_few": "و{{count}} صفوف أخرى.",
+    "more_many": "و{{count}} صفًا آخر.",
+    "more_other": "و{{count}} صف آخر.",
+    "refused": "لم يتم استيراد أي شيء. رُفضت هذه الصفوف:",
+    "rowError": "الصف {{row}}: {{message}}",
+    "importing": "جارٍ الاستيراد...",
+    "import_zero": "استيراد",
+    "import_one": "استيراد مهمة واحدة",
+    "import_two": "استيراد مهمتين",
+    "import_few": "استيراد {{count}} مهام",
+    "import_many": "استيراد {{count}} مهمة",
+    "import_other": "استيراد {{count}} مهمة",
+    "col": {
+      "title": "العنوان",
+      "assignee": "المسؤول",
+      "due": "الاستحقاق",
+      "section": "القسم",
+      "subtasks": "المهام الفرعية"
+    },
+    "issue": {
+      "noTitle": "بلا عنوان",
+      "unknownAssignee": "لا يوجد عضو في الفريق بالبريد {{value}}",
+      "badDate": "تاريخ الاستحقاق \"{{value}}\" ليس بصيغة YYYY-MM-DD",
+      "badPriority": "الأولوية \"{{value}}\" ليست none أو low أو medium أو high أو urgent",
+      "badEffort": "الجهد \"{{value}}\" ليس مدة",
+      "unknownSection": "لا توجد حالة باسم \"{{value}}\" في هذا المشروع"
+    },
+    "sample": {
+      "title": "إنشاء صفحة تسجيل الدخول",
+      "description": "ماذا ولماذا، أين نبحث، الخطوات، الاختبار",
+      "subtasks": "تصميم; تطوير; اختبار"
+    }
   }
 }
