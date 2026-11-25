@@ -6,7 +6,6 @@ import { I18nextProvider } from 'react-i18next';
 import { CookiesProvider } from 'react-cookie';
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'sonner';
-import { getCookie } from '@voxire/auth';
 import { injectTheme } from '@voxire/config';
 import { bootObservability } from '@voxire/observability';
 import '@voxire/ui/toast.css';
@@ -15,13 +14,16 @@ import { queryClient } from '../../shared/lib/react-query';
 import { FullScreenLoader } from '../../shared/components/FullScreenLoader';
 import { initTheme } from '../../shared/stores/themeStore';
 import { renniliRouter } from './router';
+import { applyRenniliLanguage } from './shared/lib/renniliLanguage';
 import '../../globals.css';
 
-// Rennili defaults to Arabic when the visitor has not picked a language cookie,
-// without forcing Arabic onto the rest of the Portal.
-const initialLanguageReady = getCookie('language')
-  ? Promise.resolve()
-  : i18next.changeLanguage('ar').then(() => undefined);
+// Public Rennili pages default to Arabic via a host-only cookie; staff pages
+// follow the Portal's language cookie and default to English.
+const initialLanguageReady = applyRenniliLanguage(window.location.pathname);
+
+renniliRouter.subscribe('onBeforeLoad', ({ toLocation }) => {
+  void applyRenniliLanguage(toLocation.pathname);
+});
 
 // The staff pages reuse the Portal's components and theme tokens.
 initTheme();

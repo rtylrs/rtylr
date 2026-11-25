@@ -905,7 +905,7 @@
   },
   "cycles": {
     "loading": "Loading cycles...",
-    "subtitle": "Two-week delivery sprints",
+    "subtitle": "Time-boxed delivery sprints for a project",
     "newCycle": "New cycle",
     "namePlaceholder": "Cycle name",
     "startDate": "Start date",
@@ -919,11 +919,43 @@
     "sectionCompleted": "Completed",
     "dateRange": "{{start}} to {{end}}",
     "emptyTitle": "No cycles yet",
-    "emptyDescription": "Start your first two-week sprint to track scope and progress.",
+    "emptyDescription": "Start your first sprint to track scope and progress.",
     "createFirst": "Create first cycle",
     "project": "Project",
     "noProjects": "No projects yet",
-    "newCycleGate": "A cycle belongs to a project, and this business has none yet. Create a project first."
+    "newCycleGate": "A cycle belongs to a project, and this business has none yet. Create a project first.",
+    "length": "Length",
+    "customLength": "Custom dates",
+    "edit": {
+      "title": "Edit cycle",
+      "description": "Change the name, dates or goal.",
+      "name": "Name",
+      "save": "Save",
+      "saving": "Saving..."
+    },
+    "detail": {
+      "back": "All cycles",
+      "openBacklog": "Plan in Backlog",
+      "edit": "Edit",
+      "delete": "Delete",
+      "progress": "Progress",
+      "burndown": "Burndown",
+      "burndownEmpty": "The burndown appears once the cycle has dates.",
+      "burndownSummary": "{{remaining}} {{unit}} left",
+      "remaining": "Remaining",
+      "ideal": "Ideal",
+      "unitTasks": "tasks",
+      "carriedOver": "Carried over",
+      "carriedFrom_one": "{{count}} task from {{name}}",
+      "carriedFrom_other": "{{count}} tasks from {{name}}",
+      "openTasks": "Open ({{count}})",
+      "doneTasks": "Done ({{count}})",
+      "carryHint": "When this cycle is completed, unfinished tasks can move to {{name}}.",
+      "carryHintBacklog": "When this cycle is completed, unfinished tasks can move to the next cycle or back to the backlog.",
+      "deleteTitle": "Delete this cycle?",
+      "deleteDescription_one": "{{name}} will be deleted. Its {{count}} task stays in the project and goes back to the backlog.",
+      "deleteDescription_other": "{{name}} will be deleted. Its {{count}} tasks stay in the project and go back to the backlog."
+    }
   },
   "myIssues": {
     "buckets": {
@@ -1174,7 +1206,8 @@
     "markDone": "Mark done",
     "setUrgent": "Set urgent",
     "archive": "Archive",
-    "selectedCount": "{{count}} selected"
+    "selectedCount": "{{count}} selected",
+    "moveToCycle": "Move to cycle"
   },
   "allProjects": {
     "title": "All projects",

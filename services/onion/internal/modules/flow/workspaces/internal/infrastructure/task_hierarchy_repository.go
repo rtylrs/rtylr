@@ -173,9 +173,10 @@ func (r *Repository) SetTaskParent(
 	return tx.Commit()
 }
 
-// DeleteTaskDetachingEpicTasks deletes a task and, when it is an epic, keeps
-// its tasks by clearing their epic in the same transaction. It returns how
-// many were detached. Subtasks of a deleted task are left as they always were.
+// DeleteTaskDetachingEpicTasks deletes a task with its field values and cycle
+// membership and, when it is an epic, keeps its tasks by clearing their epic in
+// the same transaction. It returns how many were detached. Subtasks of a
+// deleted task are left as they always were.
 func (r *Repository) DeleteTaskDetachingEpicTasks(ctx context.Context, taskID, businessID int64) (int64, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
@@ -196,10 +197,15 @@ func (r *Repository) DeleteTaskDetachingEpicTasks(ctx context.Context, taskID, b
 		// Nothing in this business was deleted, so nothing may be detached.
 		return 0, nil
 	}
-	if _, err := tx.ExecContext(ctx,
-		"DELETE FROM flow_task_field_values WHERE task_id = ? AND business_id = ?", taskID, businessID); err != nil {
-		logger.Ctx(ctx).Error("DeleteTask field values cleanup failed", logger.Error(err))
-		return 0, err
+	for _, cleanup := range []string{
+		"DELETE FROM flow_task_field_values WHERE task_id = ? AND business_id = ?",
+		"DELETE ct FROM flow_cycle_tasks ct JOIN flow_cycles cy ON cy.id = ct.cycle_id WHERE ct.task_id = ? AND cy.business_id = ?",
+		"DELETE FROM flow_cycle_carryovers WHERE task_id = ? AND business_id = ?",
+	} {
+		if _, err := tx.ExecContext(ctx, cleanup, taskID, businessID); err != nil {
+			logger.Ctx(ctx).Error("DeleteTask cleanup failed", logger.Error(err))
+			return 0, err
+		}
 	}
 	res, err = tx.ExecContext(ctx, "UPDATE flow_tasks SET epic_id = NULL WHERE epic_id = ? AND business_id = ?", taskID, businessID)
 	if err != nil {

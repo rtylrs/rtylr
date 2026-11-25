@@ -474,11 +474,14 @@ type repository interface {
 	ListTaskTemplates(ctx context.Context, businessID, projectID int64) ([]domain.TaskTemplate, error)
 	UpsertTaskTemplate(ctx context.Context, businessID, projectID int64, taskType, body string, actorID int64) error
 	DeleteTaskTemplate(ctx context.Context, businessID, projectID int64, taskType string) error
+	DeleteCycle(ctx context.Context, businessID, cycleID int64) error
 	StartCycle(ctx context.Context, in domain.StartCycleInput) error
 	CompleteCycle(ctx context.Context, in domain.CompleteCycleInput) ([]domain.CompletedCycleTask, error)
 	MoveCycleTask(ctx context.Context, in domain.MoveCycleTaskInput) (domain.MovedCycleTask, error)
 	AttachTaskCycles(ctx context.Context, tasks []domain.Task) error
 	CycleMemberLoads(ctx context.Context, businessID, cycleID int64) ([]domain.CycleMemberLoad, error)
+	GetInsightsV2(ctx context.Context, businessID int64, projectIDs []int64, now time.Time) (domain.Insights, error)
+	ListTaskIDsInProjects(ctx context.Context, businessID int64, projectIDs []int64, afterID int64, limit int32) ([]int64, error)
 	AssigneeNames(ctx context.Context, businessID int64, userIDs []int64) (map[int64]string, error)
 	UpdateProject(ctx context.Context, input domain.UpdateProjectInput) error
 	UpdateProjectMemberRole(ctx context.Context, input domain.UpdateProjectMemberRoleInput) error

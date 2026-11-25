@@ -11,6 +11,7 @@ import {
   Tag,
   CircleDot,
   Milestone as MilestoneIcon,
+  Timer,
   SlidersHorizontal,
   Shapes,
 } from 'lucide-react';
@@ -46,6 +47,7 @@ import { useTaskTemplates } from '../../features/tasks/useTaskTemplates';
 import { templateFor } from '../lib/taskTemplates';
 import { TASK_TYPES } from '../lib/taskHierarchy';
 import type { TaskType } from '../stores/flowStore';
+import { useCycles } from '../../features/cycles/useCycles';
 import {
   defaultStatus,
   displayStatusName,
@@ -128,6 +130,9 @@ export const QuickCreate: React.FC = () => {
   const { data: templates = NO_TEMPLATES } = useTaskTemplates(
     quickCreateOpen && projectId ? projectId : undefined
   );
+  const [cycleId, setCycleId] = useState('');
+  const { data: projectCycles = [] } = useCycles(quickCreateOpen ? projectId : undefined);
+  const openCycles = projectCycles.filter((c) => c.status !== 'completed');
   const { data: rawStatuses } = useProjectStatuses(quickCreateOpen ? projectId : '');
   const statuses = rawStatuses ? sortStatuses(rawStatuses) : [];
   // A stable empty list: a fresh `[]` each render would re-run the reset below forever.
@@ -154,8 +159,10 @@ export const QuickCreate: React.FC = () => {
       setEffortMinutes(30);
       setLabelId('');
       setMilestoneId('');
+      // Opened from a Backlog section: preselect that cycle.
+      setCycleId(quickCreateCycleId ?? '');
     }
-  }, [quickCreateOpen, currentProjectId]);
+  }, [quickCreateOpen, currentProjectId, quickCreateCycleId]);
 
   // Picking a type fills the description from the project's template (or the
   // built-in bug one) unless the user has already written something.
@@ -222,10 +229,7 @@ export const QuickCreate: React.FC = () => {
         milestoneId: projectMilestones.some((m) => m.id === milestoneId) ? milestoneId : undefined,
         fieldValues: toFieldValueInputs(projectFields, fieldValues),
         taskType: taskType === 'task' ? undefined : taskType,
-        // Opened from a Backlog section: the task joins that cycle, unless the
-        // project was changed in the dialog.
-        cycleId:
-          quickCreateCycleId && projectId === currentProjectId ? quickCreateCycleId : undefined,
+        cycleId: openCycles.some((c) => c.id === cycleId) ? cycleId : undefined,
       });
       const task = res.task;
       const taskId = String(task.id);
@@ -410,8 +414,9 @@ export const QuickCreate: React.FC = () => {
                   value={projectId}
                   onChange={(next) => {
                     setProjectId(next);
-                    // A milestone belongs to one project.
+                    // Milestones and cycles belong to one project.
                     setMilestoneId('');
+                    setCycleId('');
                   }}
                   allowPersonal
                 />
@@ -453,6 +458,23 @@ export const QuickCreate: React.FC = () => {
                     ]}
                     onChange={setMilestoneId}
                     muted={!milestoneId}
+                  />
+                </div>
+              </FieldRow>
+            )}
+
+            {openCycles.length > 0 && (
+              <FieldRow label={t('flow.taskDetail.cycle')} icon={Timer}>
+                <div className="max-w-[240px]">
+                  <FlowSelect
+                    label={t('flow.taskDetail.cycle')}
+                    value={cycleId}
+                    options={[
+                      { value: '', label: t('flow.taskDetail.noCycle') },
+                      ...openCycles.map((c) => ({ value: c.id, label: c.name })),
+                    ]}
+                    onChange={setCycleId}
+                    muted={!cycleId}
                   />
                 </div>
               </FieldRow>

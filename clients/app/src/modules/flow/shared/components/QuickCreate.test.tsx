@@ -18,6 +18,7 @@ const mocks = vi.hoisted(() => ({
   labels: [] as Array<{ id: number; name: string }>,
   statuses: [] as ApiStatus[],
   milestones: [] as Array<{ id: string; name: string }>,
+  cycles: [] as Array<{ id: string; name: string; status: string }>,
   fields: [] as ApiField[],
   templates: [] as Array<{ id: string; projectId: string; taskType: string; body: string }>,
 }));
@@ -43,6 +44,9 @@ vi.mock('../../features/milestones/useMilestones', () => ({
 }));
 vi.mock('../../features/tasks/useTaskTemplates', () => ({
   useTaskTemplates: (projectId?: string) => ({ data: projectId ? mocks.templates : undefined }),
+}));
+vi.mock('../../features/cycles/useCycles', () => ({
+  useCycles: (projectId?: string) => ({ data: projectId ? mocks.cycles : undefined }),
 }));
 vi.mock('../../features/projects/useFields', () => ({
   useProjectFields: (projectId: string) => ({ data: projectId ? mocks.fields : undefined }),
@@ -72,6 +76,7 @@ beforeEach(async () => {
   mocks.currentProjectId = undefined;
   mocks.labels = [];
   mocks.milestones = [];
+  mocks.cycles = [];
   mocks.fields = [];
   mocks.templates = [];
   mocks.statuses = [status('3', 'To Do', 10, true), status('4', 'Doing', 20)];
@@ -241,8 +246,26 @@ describe('Quick task creation in Portal', () => {
   });
   it('files a task created from a Backlog section into that cycle', async () => {
     mocks.currentProjectId = '12';
+    mocks.cycles = [{ id: '55', name: 'Sprint 4', status: 'upcoming' }];
     useFlowStore.setState({ quickCreateCycleId: '55' });
     render(<QuickCreate />);
+    fillTitle();
+    create();
+    await waitFor(() =>
+      expect(mocks.create).toHaveBeenCalledWith(
+        expect.objectContaining({ projectId: '12', cycleId: '55' })
+      )
+    );
+  });
+  it('files the new task under the cycle picked for its project', async () => {
+    mocks.currentProjectId = '12';
+    mocks.cycles = [
+      { id: '55', name: 'Sprint 4', status: 'active' },
+      { id: '54', name: 'Sprint 3', status: 'completed' },
+    ];
+    render(<QuickCreate />);
+    expect(screen.queryByText('Sprint 3')).not.toBeInTheDocument();
+    await chooseFlowOption('Cycle', 'Sprint 4');
     fillTitle();
     create();
     await waitFor(() =>

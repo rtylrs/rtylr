@@ -86,6 +86,13 @@ describe('flow locale parity', () => {
       'settings.appearance.groups.mode',
       'settings.appearance.groups.palette',
       'settings.appearance.density.compact',
+      // "Cycle" is the French term too; Flow's French copy says "cycle"
+      // throughout rather than mixing in "itération".
+      'shell.cycles',
+      'taskDetail.cycle',
+      'board.cardField.cycle',
+      'board.groupBy.cycle',
+      'filters.fields.cycle',
       // A URL placeholder is intentionally identical in every locale.
       'sidebar.externalUrlPlaceholder',
       'fields.placeholder.url',

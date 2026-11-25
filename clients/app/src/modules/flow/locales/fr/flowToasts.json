@@ -48,15 +48,18 @@
     "deleted": "Entrée de temps supprimée"
   },
   "cycle": {
-    "created": "Itération créée",
-    "createFailed": "Échec de la création de l'itération",
-    "updateFailed": "Échec de la mise à jour de l'itération",
+    "created": "Cycle créé",
+    "createFailed": "Échec de la création du cycle",
+    "updateFailed": "Échec de la mise à jour du cycle",
     "started": "Cycle démarré",
     "alreadyActive": "Ce projet a déjà un cycle actif",
     "startFailed": "Échec du démarrage du cycle",
     "completed": "Cycle terminé",
     "completeFailed": "Échec de la clôture du cycle",
-    "moveFailed": "Échec du déplacement de la tâche"
+    "moveFailed": "Échec du déplacement de la tâche",
+    "updated": "Cycle mis à jour",
+    "deleted": "Cycle supprimé",
+    "deleteFailed": "Échec de la suppression du cycle"
   },
   "label": {
     "created": "Étiquette créée",

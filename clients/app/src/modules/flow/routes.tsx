@@ -37,6 +37,7 @@ const Timeline = React.lazy(() => import('./features/timeline/Timeline'));
 const CalendarView = React.lazy(() => import('./features/calendar/Calendar'));
 const Milestones = React.lazy(() => import('./features/milestones/Milestones'));
 const Cycles = React.lazy(() => import('./features/cycles/Cycles'));
+const CycleDetail = React.lazy(() => import('./features/cycles/CycleDetail'));
 const Views = React.lazy(() => import('./features/views/Views'));
 const Roadmap = React.lazy(() => import('./features/roadmap/Roadmap'));
 const Insights = React.lazy(() => import('./features/insights/Insights'));
@@ -227,6 +228,12 @@ export function createFlowRoutes<TParent extends AnyRoute>(parent: TParent) {
     component: () => withLayout(<Cycles />),
   });
 
+  const cycleDetailRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/cycles/$cycleId',
+    component: () => withLayout(<CycleDetail />),
+  });
+
   const viewsRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/views',
@@ -348,6 +355,7 @@ export function createFlowRoutes<TParent extends AnyRoute>(parent: TParent) {
     calendarRoute,
     milestonesRoute,
     cyclesRoute,
+    cycleDetailRoute,
     viewsRoute,
     roadmapRoute,
     insightsRoute,
