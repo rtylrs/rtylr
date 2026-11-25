@@ -380,7 +380,36 @@
     "unknownAuthor": "Inconnu",
     "weekStrip": "Choisir un jour de la semaine",
     "whatYouWorkedOn": "Ce sur quoi vous avez travaillé",
-    "workType": "Type de travail"
+    "workType": "Type de travail",
+    "planned": {
+      "title": "Heures prévues",
+      "viewLabel": "Vue des heures de l’équipe",
+      "view": {
+        "logged": "Saisies",
+        "planned": "Prévues"
+      },
+      "previousWeek": "Semaine précédente",
+      "nextWeek": "Semaine suivante",
+      "range": "Du {{start}} au {{end}}",
+      "workWeek": "Semaine de travail",
+      "workWeeks": {
+        "mon_fri": "Lundi à vendredi",
+        "sun_thu": "Dimanche à jeudi"
+      },
+      "target": "Objectif d’heures par jour",
+      "explain": "L’estimation de chaque tâche ouverte est répartie sur les jours ouvrés entre sa date de début et son échéance. Les jours sont comparés à un objectif de {{target}} h.",
+      "empty": "Aucun plan ne vous est visible. Les administrateurs de projet voient les personnes de leurs projets ; chacun voit son propre travail.",
+      "person": "Personne",
+      "total": "Total",
+      "cellLabel": "{{name}}, {{date}} : {{hours}} heures prévues. {{status}}",
+      "legend": {
+        "under": "Moins de {{target}} h",
+        "ok": "Dans l’objectif",
+        "over": "Plus d’une heure au-dessus"
+      },
+      "cellTasks": "{{name}} le {{date}} : {{hours}} h",
+      "taskSpan": "{{hours}} h du {{start}} au {{end}}"
+    }
   },
   "settings": {
     "time": {

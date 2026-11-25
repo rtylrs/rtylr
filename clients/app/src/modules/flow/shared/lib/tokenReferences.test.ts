@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 const SRC = path.resolve(__dirname, '../..');
 const GLOBALS = path.join(SRC, 'globals.css');
-const SHARED_THEME = path.resolve(SRC, '../../../../../packages/tailwind-config/theme.css');
+const SHARED_THEME = path.resolve(SRC, '../../../../packages/tailwind-config/theme.css');
 
 // Set at runtime by a script rather than declared in a stylesheet. Radix publishes
 // the trigger's width on the open dropdown so a menu can match it.

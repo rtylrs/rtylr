@@ -127,6 +127,7 @@ export function useUpdateTask() {
     },
     onSuccess: () => {
       invalidateTaskProgress(qc);
+      qc.invalidateQueries({ queryKey: ['planned-workload'] });
     },
     onError: () => toast.error(t('flowToasts.task.updateFailed')),
   });

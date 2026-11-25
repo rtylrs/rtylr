@@ -462,3 +462,72 @@ model DeleteWorkTypeResponse {
   /** message is a human-readable result message. */
   message: string;
 }
+
+model ListPlannedWorkloadRequest {
+  /** from_date is the inclusive start of the range, as YYYY-MM-DD. */
+  @Onkt.required
+  @query("from")
+  from_date: string;
+
+  /** to_date is the inclusive end of the range, as YYYY-MM-DD, at most 62 days after from_date. */
+  @Onkt.required
+  @query("to")
+  to_date: string;
+
+  /**
+   * working_days are ISO weekdays (1 Monday to 7 Sunday), comma separated,
+   * that estimates spread over. Empty means Monday to Friday.
+   */
+  @query("working_days")
+  working_days?: string;
+}
+
+/** PlannedWorkloadDay is one person's planned minutes on one day. */
+model PlannedWorkloadDay {
+  @encode(string)
+  user_id: int64;
+
+  /** date is YYYY-MM-DD. */
+  date: string;
+
+  planned_minutes: int32;
+
+  @Onkt.encode("string")
+  task_ids: int64[];
+}
+
+/** PlannedWorkloadTask is a task that contributes to the plan. */
+model PlannedWorkloadTask {
+  @encode(string)
+  id: int64;
+
+  identifier: string;
+  title: string;
+
+  @encode(string)
+  project_id: int64;
+
+  @encode(string)
+  assignee_id: int64;
+
+  /** assignee_name is the assignee's display name. */
+  assignee_name: string;
+
+  /** start_date and due_date are YYYY-MM-DD, or empty. */
+  start_date: string;
+
+  due_date: string;
+  estimate_minutes: int32;
+}
+
+model ListPlannedWorkloadResponse {
+  days: PlannedWorkloadDay[];
+  tasks: PlannedWorkloadTask[];
+
+  /** everyone is true when the caller sees the whole business's plan. */
+  everyone: boolean;
+
+  /** people are the users whose plan the caller sees, when everyone is false. */
+  @Onkt.encode("string")
+  people: int64[];
+}

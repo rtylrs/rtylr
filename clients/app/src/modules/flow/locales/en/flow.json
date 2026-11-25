@@ -377,7 +377,36 @@
     "unknownAuthor": "Unknown",
     "weekStrip": "Choose a day this week",
     "whatYouWorkedOn": "What you worked on",
-    "workType": "Type of work"
+    "workType": "Type of work",
+    "planned": {
+      "title": "Planned hours",
+      "viewLabel": "Team hours view",
+      "view": {
+        "logged": "Logged",
+        "planned": "Planned"
+      },
+      "previousWeek": "Previous week",
+      "nextWeek": "Next week",
+      "range": "{{start}} to {{end}}",
+      "workWeek": "Work week",
+      "workWeeks": {
+        "mon_fri": "Monday to Friday",
+        "sun_thu": "Sunday to Thursday"
+      },
+      "target": "Target hours per day",
+      "explain": "Each open task’s estimate is spread over the working days from its start date to its due date. Days are compared with a target of {{target}}h.",
+      "empty": "Nobody’s plan is visible to you. Project admins see the people on their projects; everyone sees their own work.",
+      "person": "Person",
+      "total": "Total",
+      "cellLabel": "{{name}}, {{date}}: {{hours}} hours planned. {{status}}",
+      "legend": {
+        "under": "Under {{target}}h",
+        "ok": "On target",
+        "over": "More than an hour over"
+      },
+      "cellTasks": "{{name}} on {{date}}: {{hours}}h",
+      "taskSpan": "{{hours}}h from {{start}} to {{end}}"
+    }
   },
   "settings": {
     "time": {
