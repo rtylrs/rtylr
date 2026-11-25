@@ -841,6 +841,16 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           </div>
         )}
 
+        <DetailField icon={CalendarIcon} label={t('flow.taskDetail.startDate')}>
+          <DueDatePicker
+            value={task.startDate}
+            onChange={(d) => updateTask(task.id, { startDate: d })}
+            disabled={!canEdit}
+            label={t('flow.taskDetail.startDate')}
+            showOverdue={false}
+          />
+        </DetailField>
+
         <DetailField icon={CalendarIcon} label={t('flow.taskDetail.dueDate')}>
           <DueDatePicker
             value={task.dueDate}
