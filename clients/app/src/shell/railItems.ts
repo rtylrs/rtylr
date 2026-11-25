@@ -1,7 +1,7 @@
 import type { ComponentType } from 'react';
 import type { TFunction } from 'i18next';
 import { CircleUserRound, Settings } from 'lucide-react';
-import { resolveAppUrl } from '@voxire/config';
+import { RENNILI_URL, resolveAppUrl } from '@voxire/config';
 import {
   AutomationsIcon,
   CrmIcon,
@@ -17,6 +17,9 @@ import { CaretIcon } from '@voxire/caret';
 import type { StoredUser } from '../shared/stores/userStore';
 import { canAccessPortalPath } from '../shared/utils/canAccessPortalPath';
 import { insightsNavItems } from '../modules/insights/navigation';
+import { RenniliMark } from '../modules/pager/shared/components/RenniliLogo';
+
+const RENNILI_BOARD_URL = new URL('/board', RENNILI_URL).href;
 
 /** One icon of the app bar. Ids match the server's navigation map. */
 export interface RailItem {
@@ -27,6 +30,8 @@ export interface RailItem {
    *  it opens the profile menu. */
   to?: string;
   href?: string;
+  /** Opens `href` in a new browser tab. */
+  external?: boolean;
 }
 
 // Caret, Settings and the profile menu sit below the apps until the person
@@ -42,6 +47,7 @@ export const RAIL_ICONS: Record<string, ComponentType<{ size?: number }>> = {
   finance: FinanceIcon,
   hr: HrIcon,
   pos: PosIcon,
+  rennili: RenniliMark,
   automations: AutomationsIcon,
   caret: CaretIcon,
   settings: Settings,
@@ -90,6 +96,17 @@ export function railItems(user: StoredUser | null, t: TFunction): RailItem[] {
             label: t('appNames.short.pos'),
             icon: RAIL_ICONS.pos,
             href: resolveAppUrl('pos'),
+          },
+        ]
+      : []),
+    ...(canAccessPortalPath(user, '/pager')
+      ? [
+          {
+            id: 'rennili',
+            label: t('appNames.short.rennili'),
+            icon: RAIL_ICONS.rennili,
+            href: RENNILI_BOARD_URL,
+            external: true,
           },
         ]
       : []),

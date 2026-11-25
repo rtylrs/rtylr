@@ -23,7 +23,18 @@ const api = vi.hoisted(() => ({
   reset: vi.fn(),
   layout: {
     rail: {
-      top: ['home', 'insights', 'flow', 'crm', 'erp', 'finance', 'hr', 'pos', 'automations'],
+      top: [
+        'home',
+        'insights',
+        'flow',
+        'crm',
+        'erp',
+        'finance',
+        'hr',
+        'pos',
+        'rennili',
+        'automations',
+      ],
       bottom: ['caret'],
       hidden: [] as string[],
       customized: false,
@@ -69,6 +80,7 @@ describe('NavigationSettings', () => {
             'finance',
             'hr',
             'pos',
+            'rennili',
             'automations',
             'caret',
           ],
