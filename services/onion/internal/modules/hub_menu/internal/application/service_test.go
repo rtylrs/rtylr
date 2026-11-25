@@ -12,6 +12,7 @@ import (
 )
 
 type mockBannerRepo struct {
+	repository
 	banners     []domain.Banner
 	createdID   int64
 	createInput domain.BannerInput

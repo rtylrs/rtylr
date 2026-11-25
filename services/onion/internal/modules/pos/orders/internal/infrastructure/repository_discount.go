@@ -432,13 +432,13 @@ func (r *Repository) GetPublicMenuItem(ctx context.Context, businessID, menuItem
 }
 
 // CreatePublicOrder shares the register's order-number allocator.
-func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, orderNumber, customerName, customerPhone, notes string, items []domain.OrderItemInput) (int64, string, error) {
+func (r *Repository) CreatePublicOrder(ctx context.Context, businessID, locationID, tableID int64, orderType, orderNumber, customerName, customerPhone, notes string, items []domain.OrderItemInput) (int64, string, error) {
 	// Only a generated number is worth retrying; see CreateOrder.
 	if orderNumber != "" {
-		return r.createPublicOrderOnce(ctx, businessID, orderNumber, customerName, customerPhone, notes, items)
+		return r.createPublicOrderOnce(ctx, businessID, locationID, tableID, orderType, orderNumber, customerName, customerPhone, notes, items)
 	}
 	for attempt := 1; ; attempt++ {
-		orderID, generated, err := r.createPublicOrderOnce(ctx, businessID, "", customerName, customerPhone, notes, items)
+		orderID, generated, err := r.createPublicOrderOnce(ctx, businessID, locationID, tableID, orderType, "", customerName, customerPhone, notes, items)
 		if err == nil {
 			return orderID, generated, nil
 		}
@@ -450,7 +450,7 @@ func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, or
 	}
 }
 
-func (r *Repository) createPublicOrderOnce(ctx context.Context, businessID int64, orderNumber, customerName, customerPhone, notes string, items []domain.OrderItemInput) (int64, string, error) {
+func (r *Repository) createPublicOrderOnce(ctx context.Context, businessID, locationID, tableID int64, orderType, orderNumber, customerName, customerPhone, notes string, items []domain.OrderItemInput) (int64, string, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin public order transaction", logger.Error(err))
@@ -474,10 +474,31 @@ func (r *Repository) createPublicOrderOnce(ctx context.Context, businessID int64
 		}
 	}
 
+	locVal := sql.NullInt64{}
+	if locationID > 0 {
+		locVal = sql.NullInt64{Int64: locationID, Valid: true}
+	}
+	tableVal := sql.NullInt64{}
+	if tableID > 0 {
+		tableVal = sql.NullInt64{Int64: tableID, Valid: true}
+	}
+	posOrderType := sqlc.NullPosOrdersType{PosOrdersType: sqlc.PosOrdersTypeOnline, Valid: true}
+	switch orderType {
+	case "dine_in":
+		posOrderType.PosOrdersType = sqlc.PosOrdersTypeDineIn
+	case "takeaway", "pickup", "self_service":
+		posOrderType.PosOrdersType = sqlc.PosOrdersTypeTakeaway
+	case "delivery":
+		posOrderType.PosOrdersType = sqlc.PosOrdersTypeDelivery
+	}
+
 	res, err := qtx.CreatePublicOrder(ctx, sqlc.CreatePublicOrderParams{
 		OwnerID:       businessID,
 		BusinessID:    businessID,
+		LocationID:    locVal,
+		TableID:       tableVal,
 		OrderNumber:   orderNumber,
+		Type:          posOrderType,
 		CustomerID:    sql.NullInt64{},
 		CustomerName:  sqlutil.NullString(customerName),
 		CustomerPhone: sqlutil.NullString(customerPhone),

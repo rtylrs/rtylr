@@ -222,11 +222,18 @@ type PublicOrderItemInput struct {
 }
 
 type PublicOrderInput struct {
-	CustomerName  string
-	CustomerPhone string
-	CustomerEmail string
-	Notes         string
-	Items         []PublicOrderItemInput
+	LocationID      int64
+	TableID         int64
+	FulfillmentMode string
+	DeliveryAddress string
+	CurrencyCode    string
+	LoyaltyPhone    string
+	CRMOptIn        bool
+	CustomerName    string
+	CustomerPhone   string
+	CustomerEmail   string
+	Notes           string
+	Items           []PublicOrderItemInput
 }
 
 func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input PublicOrderInput) (int64, string, string, error) {
@@ -267,10 +274,35 @@ func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input Pu
 		items = append(items, item)
 	}
 
+	notes := input.Notes
+	if input.DeliveryAddress != "" {
+		if notes != "" {
+			notes += "\n"
+		}
+		notes += "Delivery address: " + input.DeliveryAddress
+	}
+	if input.CurrencyCode != "" {
+		if notes != "" {
+			notes += "\n"
+		}
+		notes += "Display currency: " + input.CurrencyCode
+	}
+
 	// The order number is generated inside the insert transaction, not here:
 	// counting on a separate connection let two simultaneous checkouts pick
 	// the same number and the loser of uq_pos_orders_number lost the order.
-	orderID, orderNumber, err := s.repo.CreatePublicOrder(ctx, ownerID, "", input.CustomerName, input.CustomerPhone, input.Notes, items)
+	orderID, orderNumber, err := s.repo.CreatePublicOrder(
+		ctx,
+		ownerID,
+		input.LocationID,
+		input.TableID,
+		input.FulfillmentMode,
+		"",
+		input.CustomerName,
+		input.CustomerPhone,
+		notes,
+		items,
+	)
 	if err != nil {
 		return 0, "", "", fmt.Errorf("create public order: %w", err)
 	}
@@ -279,6 +311,15 @@ func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input Pu
 	cacher.Of[string]().Put(ctx, publicOrderTokenCacheKey(ownerID, orderID), publicToken,
 		cacher.WithExpiry(ctx, publicOrderTokenTTL),
 	)
+
+	if s.publicOrderHook != nil {
+		totals := domain.ComputeTotals(items)
+		phone := input.LoyaltyPhone
+		if phone == "" {
+			phone = input.CustomerPhone
+		}
+		s.publicOrderHook(ctx, ownerID, input.LocationID, input.TableID, orderID, orderNumber, input.FulfillmentMode, input.CustomerName, phone, totals.Total)
+	}
 
 	return orderID, orderNumber, publicToken, nil
 }

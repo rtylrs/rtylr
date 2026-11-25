@@ -62,11 +62,29 @@
   }
 }
 
+.rennili-rtylr-word {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  line-height: 0;
+}
+
+.rennili-rtylr-inline {
+  display: inline-block;
+  height: 1.55em;
+  width: auto;
+  color: currentColor;
+  flex-shrink: 0;
+  transform: translateY(-0.04em);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
 .rennili-by {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   padding: 4px 10px;
   border: 1px solid var(--pager-line, #dce1dc);
   border-radius: 999px;
@@ -77,6 +95,11 @@
   white-space: nowrap;
 }
 
+.rennili-by .rennili-rtylr-inline {
+  height: 18px;
+  color: var(--rl-rtylr-ink, #0a0a0a);
+}
+
 /* The pill stays small; its tap area is the 44px a finger needs. */
 .rennili-by::after {
   content: '';
@@ -84,21 +107,14 @@
   inset: -8px 0;
 }
 
-.rennili-by::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: var(--pager-accent, #0e4d3b);
-}
-
 .pager-screen--ready .rennili-by {
   border-color: rgba(255, 255, 255, 0.6);
   color: #ffffff;
 }
 
-.pager-screen--ready .rennili-by::before {
-  background: #ffffff;
+.pager-screen--ready .rennili-by .rennili-rtylr-inline {
+  color: #ffffff;
+  --app-logo-fold: rgba(255, 255, 255, 0.72);
 }
 
 .pager-footer {
@@ -357,20 +373,20 @@
 .rl-strip .rennili-by {
   padding: 0;
   border: none;
-  color: var(--rl-rtylr-blue);
+  color: rgba(255, 255, 255, 0.86);
   font-size: 12.5px;
   font-weight: 700;
-  text-decoration: underline;
-  text-decoration-color: rgba(69, 131, 196, 0.45);
-  text-underline-offset: 3px;
+  text-decoration: none;
 }
 
-.rl-strip .rennili-by::before {
-  display: none;
+.rl-strip .rennili-by .rennili-rtylr-inline {
+  height: 19px;
+  color: #ffffff;
+  --app-logo-fold: var(--rl-rtylr-blue);
 }
 
 .rl-strip .rennili-by:hover {
-  text-decoration-color: var(--rl-rtylr-blue);
+  color: #ffffff;
 }
 
 .rl-strip .pager-languages {
@@ -718,6 +734,28 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 20px;
+}
+
+.rl-hero-free-pill {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--rl-sage-soft, #e6f2ec);
+  border: 1px solid rgba(14, 77, 59, 0.16);
+  color: var(--rl-forest);
+  font-size: 13.5px;
+  font-weight: 800;
+}
+
+.rl-hero-free-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--rl-forest);
+  flex: none;
 }
 
 .rl-hero-title {
@@ -2275,10 +2313,12 @@
 .rl-free-figure {
   margin: 0;
   font-family: var(--rl-font-display);
-  font-size: clamp(44px, 5vw, 62px);
-  line-height: 1.05;
+  font-size: clamp(32px, 3.4vw, 44px);
+  line-height: 1.28;
   font-weight: 900;
   color: var(--rl-forest);
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .rl-free-figure-sub {
@@ -3608,17 +3648,18 @@
   }
 }
 
-.rl-free-card {
+.rl-free-band .rl-free-card {
   padding: 36px 24px;
   border-radius: 28px;
   background: var(--rl-forest);
+  border: 0;
   color: #ffffff;
   display: grid;
   gap: 28px;
 }
 
 @media (min-width: 900px) {
-  .rl-free-card {
+  .rl-free-band .rl-free-card {
     padding: 56px;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: end;
@@ -3680,14 +3721,14 @@
   color: #9fc4b5;
 }
 
-.rl-free-actions {
+.rl-free-band .rl-free-actions {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
 @media (min-width: 900px) {
-  .rl-free-actions {
+  .rl-free-band .rl-free-actions {
     min-width: 270px;
   }
 }
@@ -3732,6 +3773,14 @@
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rl-rtylr-bar .rennili-rtylr-inline {
+  color: #ffffff;
+  --app-logo-fold: var(--rl-rtylr-blue);
 }
 
 [dir='rtl'] .rl-rtylr-kicker {

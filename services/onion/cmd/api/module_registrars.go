@@ -211,6 +211,7 @@ func (modules *apiModules) anonymousRouteProviders() []http.AnonymousRouteProvid
 		modules.HRSetup,
 		modules.HRShifts,
 		modules.HRTime,
+		modules.HubMenu,
 		modules.Insights,
 		modules.Integrations,
 		modules.Inventory,

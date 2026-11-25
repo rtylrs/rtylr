@@ -30,6 +30,21 @@ func (s *Service) Get(ctx context.Context, businessID int64) (domain.CustomDomai
 	return s.repo.Get(ctx, businessID)
 }
 
+func (s *Service) ResolveVerifiedBusinessID(ctx context.Context, domainName string) (int64, bool, error) {
+	normalized := strings.TrimSuffix(strings.ToLower(strings.TrimSpace(domainName)), ".")
+	if normalized == "" {
+		return 0, false, nil
+	}
+	item, err := s.repo.GetVerifiedByDomain(ctx, normalized)
+	if errors.Is(err, domain.ErrNotFound) {
+		return 0, false, nil
+	}
+	if err != nil {
+		return 0, false, err
+	}
+	return item.BusinessID, true, nil
+}
+
 // Register records a pending claim. Only a verified claim by another business
 // blocks it: an unverified claim proves nothing, so it must not let someone
 // squat a domain they do not control.
