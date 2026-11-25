@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { useParams } from '@tanstack/react-router';
+import { Link, useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
@@ -16,6 +16,8 @@ import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import TaskRow from '../../shared/components/TaskRow';
 import WorkloadBar from '../../shared/components/WorkloadBar';
 import CycleBadge from '../../shared/components/CycleBadge';
+import { addDays, todayIso } from '../../shared/lib/dateUtils';
+import { endDateForLength } from '../cycles/cycleModel';
 import FilterBar from '../../shared/filters/FilterBar';
 import type { ApiCycle, ApiStatus } from '../../shared/services/flowApi';
 import {
@@ -269,18 +271,13 @@ const ProjectBacklog: React.FC = () => {
       .map((c) => c.endDate)
       .sort()
       .pop();
-    const start = lastEnd ? new Date(`${lastEnd}T00:00:00`) : new Date();
-    if (lastEnd) start.setDate(start.getDate() + 1);
-    const end = new Date(start);
-    end.setDate(end.getDate() + 13);
-    const iso = (d: Date) =>
-      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const startDate = lastEnd ? addDays(lastEnd, 1) : todayIso();
     createCycle.mutate(
       {
         projectId,
         name: t('flow.backlog.newCycleName', { number: cycles.length + 1 }),
-        startDate: iso(start),
-        endDate: iso(end),
+        startDate,
+        endDate: endDateForLength(startDate, 2),
       },
       { onSuccess: () => toast.success(t('flowToasts.cycle.created')) }
     );
@@ -480,14 +477,19 @@ const BacklogSectionView: React.FC<SectionViewProps> = ({
               className="text-flow-body font-semibold"
               style={{ color: 'var(--flow-text)' }}
             >
-              {cycle ? cycle.name : t('flow.backlog.unplanned')}
+              {cycle ? (
+                <Link
+                  to="/flow/cycles/$cycleId"
+                  params={{ cycleId: cycle.id }}
+                  className="flow-focus hover:underline"
+                >
+                  {cycle.name}
+                </Link>
+              ) : (
+                t('flow.backlog.unplanned')
+              )}
             </h2>
-            {cycle && (
-              <CycleBadge
-                cycle={{ ...cycle, name: t(`flow.backlog.status.${cycle.status}`) }}
-                compact
-              />
-            )}
+            {cycle && <CycleBadge cycle={cycle} compact showState />}
             <span className="text-flow-meta" style={{ color: 'var(--flow-text-dim)' }}>
               {t('flow.backlog.taskCount', { count: tasks.length })}
             </span>

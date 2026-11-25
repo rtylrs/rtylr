@@ -6,6 +6,7 @@ import (
 	"errors"
 	"math"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/application"
@@ -75,9 +76,44 @@ type InsightsAPIV2 struct{ Service *application.Service }
 
 func NewInsightsAPIV2(s *application.Service) *InsightsAPIV2 { return &InsightsAPIV2{Service: s} }
 
-func (a *InsightsAPIV2) GetInsights(_ context.Context, _ *flowinsightsv2.GetInsightsRequest) (*flowinsightsv2.GetInsightsResponse, error) {
-	// Served by the flow_insights module; stub for contract completeness.
-	return &flowinsightsv2.GetInsightsResponse{}, nil
+// GetInsights is the Flow overview over the projects the caller sees in their
+// project list. Cycle time is in days.
+func (a *InsightsAPIV2) GetInsights(ctx context.Context, _ *flowinsightsv2.GetInsightsRequest) (*flowinsightsv2.GetInsightsResponse, error) {
+	caller, businessID, err := resolveV2(ctx)
+	if err != nil {
+		return nil, err
+	}
+	ins, err := a.Service.GetInsightsV2(ctx, caller.UserID, businessID, time.Now())
+	if err != nil {
+		return nil, workspaceInternalError(ctx, "GetInsightsV2 failed", err)
+	}
+	resp := &flowinsightsv2.GetInsightsResponse{
+		CycleTime:    ins.CycleTime,
+		TotalTasks:   clampInt32(int64(ins.TotalTasks)),
+		DoneTasks:    clampInt32(int64(ins.DoneTasks)),
+		Velocity:     make([]*flowinsightsv2.VelocityPoint, 0, len(ins.Velocity)),
+		Burndown:     make([]*flowinsightsv2.BurndownPoint, 0, len(ins.Burndown)),
+		TimeByMember: make([]*flowinsightsv2.MemberTime, 0, len(ins.TimeByMember)),
+		Throughput:   make([]*flowinsightsv2.ThroughputPoint, 0, len(ins.Throughput)),
+	}
+	for _, v := range ins.Velocity {
+		resp.Velocity = append(resp.Velocity, &flowinsightsv2.VelocityPoint{
+			Cycle: v.Cycle, Completed: clampInt32(int64(v.Completed)), Total: clampInt32(int64(v.Total)),
+			CompletionRate: v.CompletionRate,
+		})
+	}
+	for _, b := range ins.Burndown {
+		resp.Burndown = append(resp.Burndown, &flowinsightsv2.BurndownPoint{
+			Day: clampInt32(int64(b.Day)), Ideal: b.Ideal, Actual: b.Actual,
+		})
+	}
+	for _, m := range ins.TimeByMember {
+		resp.TimeByMember = append(resp.TimeByMember, &flowinsightsv2.MemberTime{Id: m.ID, Name: m.Name, Hours: m.Hours})
+	}
+	for _, t := range ins.Throughput {
+		resp.Throughput = append(resp.Throughput, &flowinsightsv2.ThroughputPoint{Week: t.Week, Completed: clampInt32(int64(t.Completed))})
+	}
+	return resp, nil
 }
 
 func (a *InsightsAPIV2) GetTeamWorkload(_ context.Context, req *flowinsightsv2.GetTeamWorkloadRequest) (*flowinsightsv2.GetTeamWorkloadResponse, error) {
@@ -85,9 +121,36 @@ func (a *InsightsAPIV2) GetTeamWorkload(_ context.Context, req *flowinsightsv2.G
 	return &flowinsightsv2.GetTeamWorkloadResponse{Pagination: buildPagination(page, limit, 0, 0)}, nil
 }
 
-func (a *InsightsAPIV2) GetRoadmap(_ context.Context, req *flowinsightsv2.GetRoadmapRequest) (*flowinsightsv2.GetRoadmapResponse, error) {
-	page, limit, _ := resolvePagination(req.GetPage(), req.GetLimit())
-	return &flowinsightsv2.GetRoadmapResponse{Pagination: buildPagination(page, limit, 0, 0)}, nil
+// GetRoadmap is the caller's project list (same projects, order and progress)
+// as timeline rows.
+func (a *InsightsAPIV2) GetRoadmap(ctx context.Context, req *flowinsightsv2.GetRoadmapRequest) (*flowinsightsv2.GetRoadmapResponse, error) {
+	caller, businessID, err := resolveV2(ctx)
+	if err != nil {
+		return nil, err
+	}
+	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
+	projects, total, err := a.Service.ListProjectsV2(ctx, caller.UserID, businessID, "", "", "", int64(limit), offset)
+	if err != nil {
+		return nil, workspaceInternalError(ctx, "GetRoadmapV2 failed", err)
+	}
+	rows := make([]*flowinsightsv2.RoadmapProject, 0, len(projects))
+	for _, p := range projects {
+		row := &flowinsightsv2.RoadmapProject{
+			Id: strconv.FormatInt(p.ID, 10), Name: p.Name, Color: p.Color, Description: p.Description,
+			TaskCount: p.TaskCount, DoneCount: p.CompletedCount,
+		}
+		if p.TaskCount > 0 {
+			row.Progress = p.CompletedCount * 100 / p.TaskCount
+		}
+		if p.StartDate != nil {
+			row.StartDate = p.StartDate.Format("2006-01-02")
+		}
+		if p.DueDate != nil {
+			row.TargetDate = p.DueDate.Format("2006-01-02")
+		}
+		rows = append(rows, row)
+	}
+	return &flowinsightsv2.GetRoadmapResponse{Projects: rows, Pagination: buildPagination(page, limit, total, len(rows))}, nil
 }
 
 // ─── label/v2 ───────────────────────────────────────────────────────────────

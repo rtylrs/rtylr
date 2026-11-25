@@ -7,6 +7,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 
 import { useInsights } from './useInsights';
+import BurndownChart from '../../shared/components/BurndownChart';
 import { Skeleton, CardSkeleton } from '../../shared/components/Skeleton';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
@@ -108,47 +109,10 @@ const Insights: React.FC = () => {
           {data.burndown.length === 0 ? (
             <EmptyChart onGoToCycles={() => navigate({ to: '/flow/cycles' })} />
           ) : (
-            <div className="relative h-[160px]">
-              <svg width="100%" height="100%" viewBox="0 0 400 160" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="bgrad" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0" stopColor="var(--accent)" stopOpacity="0.3" />
-                    <stop offset="1" stopColor="var(--accent)" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                {(() => {
-                  const max = Math.max(...data.burndown.map((b) => b.ideal));
-                  const pts = data.burndown.map((b, i) => {
-                    const x = (i / (data.burndown.length - 1)) * 400;
-                    const y = 160 - (b.actual / max) * 150;
-                    return `${x},${y}`;
-                  });
-                  const idealPts = data.burndown.map((b, i) => {
-                    const x = (i / (data.burndown.length - 1)) * 400;
-                    const y = 160 - (b.ideal / max) * 150;
-                    return `${x},${y}`;
-                  });
-                  return (
-                    <>
-                      <polyline
-                        points={idealPts.join(' ')}
-                        fill="none"
-                        stroke="rgba(255,255,255,0.15)"
-                        strokeWidth="1.5"
-                        strokeDasharray="4 4"
-                      />
-                      <polygon points={`0,160 ${pts.join(' ')} 400,160`} fill="url(#bgrad)" />
-                      <polyline
-                        points={pts.join(' ')}
-                        fill="none"
-                        stroke="var(--accent)"
-                        strokeWidth="2"
-                      />
-                    </>
-                  );
-                })()}
-              </svg>
-            </div>
+            <BurndownChart
+              points={data.burndown.map((b) => ({ ideal: b.ideal, remaining: b.actual }))}
+              unitLabel={t('flow.cycles.detail.unitTasks')}
+            />
           )}
         </ChartCard>
 

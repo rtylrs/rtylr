@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"sort"
 	"testing"
@@ -13,14 +14,31 @@ import (
 type planningFixture struct {
 	svc     *Service
 	ctx     context.Context
+	db      *sql.DB
 	project domain.Project
 }
 
 func newPlanningFixture(t *testing.T) planningFixture {
 	t.Helper()
-	svc, ctx, _ := v2Svc(t)
+	svc, ctx, db := v2Svc(t)
 	p := createV2Project(ctx, t, svc, "cycle-planning", domain.VisibilityPrivate, v2UserA)
-	return planningFixture{svc: svc, ctx: ctx, project: p}
+	return planningFixture{svc: svc, ctx: ctx, db: db, project: p}
+}
+
+func (f planningFixture) setStatus(t *testing.T, taskID int64, status string) {
+	t.Helper()
+	if err := f.svc.UpdateTaskStatus(f.ctx, domain.UpdateTaskStatusInput{
+		ID: taskID, OwnerID: v2UserA, BusinessID: v2Business, Status: status,
+	}, v2UserA); err != nil {
+		t.Fatalf("UpdateTaskStatus(%d, %s): %v", taskID, status, err)
+	}
+}
+
+func (f planningFixture) archive(t *testing.T, taskID int64) {
+	t.Helper()
+	if _, err := f.db.Exec("UPDATE flow_tasks SET archived = TRUE WHERE id = ?", taskID); err != nil {
+		t.Fatalf("archive task %d: %v", taskID, err)
+	}
 }
 
 func (f planningFixture) cycle(t *testing.T, name, start, end string) int64 {
@@ -406,5 +424,108 @@ func TestDeleteCycleReturnsItsTasksToTheBacklog(t *testing.T) {
 	}
 	if err := f.svc.DeleteCycle(f.ctx, v2Business, sprint); err != nil {
 		t.Fatalf("DeleteCycle on a completed cycle: %v", err)
+	}
+}
+
+func TestCycleTotalsLeaveArchivedOutAndCancelledOutOfScope(t *testing.T) {
+	f := newPlanningFixture(t)
+	sprint := f.cycle(t, "Sprint 1", "2026-12-07", "2026-12-18")
+	assignee := v2UserA
+	done := f.task(t, "done", &assignee, 60)
+	open := f.task(t, "open", &assignee, 30)
+	cancelled := f.task(t, "cancelled", &assignee, 45)
+	archived := f.task(t, "archived", &assignee, 90)
+	for _, id := range []int64{done, open, cancelled, archived} {
+		f.move(t, id, sprint, 0, 0)
+	}
+	f.setStatus(t, done, domain.TaskStatusDone)
+	f.setStatus(t, cancelled, domain.TaskStatusCancelled)
+	f.setStatus(t, archived, domain.TaskStatusDone)
+	f.archive(t, archived)
+
+	c, err := f.svc.GetCycleV2(f.ctx, v2Business, sprint)
+	if err != nil {
+		t.Fatalf("GetCycleV2: %v", err)
+	}
+	want := domain.CycleTotals{Backlog: 1, Done: 1, Cancelled: 1}
+	if c.Scope != 2 || c.Completed != 1 || c.Totals != want || c.EstimateMinutes != 90 {
+		t.Fatalf("scope %d completed %d totals %+v estimate %d; want scope 2, completed 1, %+v, estimate 90",
+			c.Scope, c.Completed, c.Totals, c.EstimateMinutes, want)
+	}
+
+	capacity, err := f.svc.GetCycleCapacity(f.ctx, v2Business, sprint)
+	if err != nil {
+		t.Fatalf("GetCycleCapacity: %v", err)
+	}
+	found := false
+	for _, m := range capacity.Members {
+		if m.UserID != v2UserA {
+			continue
+		}
+		found = true
+		if m.CommittedMinutes != 90 || m.TaskCount != 2 {
+			t.Fatalf("committed %d minutes over %d tasks, want 90 over 2", m.CommittedMinutes, m.TaskCount)
+		}
+	}
+	if !found {
+		t.Fatalf("the assignee is missing from %+v", capacity.Members)
+	}
+}
+
+func TestDeleteTaskRemovesItsCycleMembership(t *testing.T) {
+	f := newPlanningFixture(t)
+	sprint := f.cycle(t, "Sprint 1", "2026-12-07", "2026-12-18")
+	next := f.cycle(t, "Sprint 2", "2026-12-21", "2027-01-01")
+	carry := f.task(t, "carry", nil, 30)
+	stay := f.task(t, "stay", nil, 30)
+	f.move(t, carry, sprint, 0, 0)
+	if _, err := f.svc.StartCycle(f.ctx, domain.StartCycleInput{ID: sprint, BusinessID: v2Business}); err != nil {
+		t.Fatalf("StartCycle: %v", err)
+	}
+	if _, err := f.svc.CompleteCycle(f.ctx, domain.CompleteCycleInput{
+		ID: sprint, BusinessID: v2Business, ActorID: v2UserA,
+		Decisions: []domain.CycleTaskDecision{{TaskID: carry, Decision: domain.CycleDecisionMove, ToCycleID: next}},
+	}); err != nil {
+		t.Fatalf("CompleteCycle: %v", err)
+	}
+
+	rows := func(taskID int64) (memberships, carryovers int) {
+		t.Helper()
+		if err := f.db.QueryRow("SELECT COUNT(*) FROM flow_cycle_tasks WHERE task_id = ?", taskID).Scan(&memberships); err != nil {
+			t.Fatalf("count memberships: %v", err)
+		}
+		if err := f.db.QueryRow("SELECT COUNT(*) FROM flow_cycle_carryovers WHERE task_id = ?", taskID).Scan(&carryovers); err != nil {
+			t.Fatalf("count carryovers: %v", err)
+		}
+		return memberships, carryovers
+	}
+	f.move(t, stay, next, 0, 0)
+	if m, c := rows(carry); m == 0 || c == 0 {
+		t.Fatalf("setup: carried task has %d memberships and %d carry-overs", m, c)
+	}
+
+	// Another business cannot delete it, so nothing of it may go.
+	if err := f.svc.DeleteTask(f.ctx, carry, v2Business+1); err != nil {
+		t.Fatalf("DeleteTask from another business: %v", err)
+	}
+	if m, c := rows(carry); m == 0 || c == 0 {
+		t.Fatalf("a foreign delete removed %d/%d cycle rows", m, c)
+	}
+
+	if err := f.svc.DeleteTask(f.ctx, carry, v2Business); err != nil {
+		t.Fatalf("DeleteTask: %v", err)
+	}
+	if m, c := rows(carry); m != 0 || c != 0 {
+		t.Fatalf("deleted task left %d memberships and %d carry-overs", m, c)
+	}
+	if m, _ := rows(stay); m != 1 {
+		t.Fatalf("the other task has %d memberships, want 1", m)
+	}
+	receiving, err := f.svc.GetCycleV2(f.ctx, v2Business, next)
+	if err != nil {
+		t.Fatalf("GetCycleV2: %v", err)
+	}
+	if receiving.Scope != 1 || len(receiving.CarriedOver) != 0 {
+		t.Fatalf("receiving cycle scope %d carried %+v after the delete", receiving.Scope, receiving.CarriedOver)
 	}
 }

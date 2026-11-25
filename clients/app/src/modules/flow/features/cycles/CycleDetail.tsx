@@ -18,10 +18,11 @@ import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import TaskRow from '../../shared/components/TaskRow';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import type { ApiStatus } from '../../shared/services/flowApi';
-import BurndownChart from './BurndownChart';
-import CycleStateBadge from './CycleStateBadge';
-import EditCycleDialog from './EditCycleDialog';
-import { buildBurndown, cyclePercent } from './cycleModel';
+import BurndownChart from '../../shared/components/BurndownChart';
+import CycleBadge from '../../shared/components/CycleBadge';
+import { EditCycleDialog } from '../projects/backlog/CycleDialogs';
+import { buildBurndown } from './cycleModel';
+import { CycleProgress } from './CycleProgress';
 
 /**
  * One cycle: its tasks, progress, a burndown and what was carried over into it
@@ -50,38 +51,41 @@ const CycleDetail: React.FC = () => {
     () => new Map<string, ApiStatus>((rawStatuses ?? []).map((s) => [s.id, s])),
     [rawStatuses]
   );
-  const tasks = useMemo(
+  // Every task in the cycle: deleting it sends them all back to the backlog.
+  const members = useMemo(
     () =>
       orderByPlanRank(
         (tasksQuery.data ?? []).filter((x) => x.cycleId === cycleId).map(apiTaskToTask)
       ),
     [tasksQuery.data, cycleId]
   );
-  const open = tasks.filter((x) => {
-    const bucket = taskBucket(x, statusesById);
-    return bucket !== 'done' && bucket !== 'cancelled';
-  });
-  const finished = tasks.filter((x) => taskBucket(x, statusesById) === 'done');
+  // The cycle's scope, counted as the server counts it: not archived, not
+  // cancelled.
+  const scoped = useMemo(
+    () => members.filter((x) => !x.archived && taskBucket(x, statusesById) !== 'cancelled'),
+    [members, statusesById]
+  );
+  const open = scoped.filter((x) => taskBucket(x, statusesById) !== 'done');
+  const finished = scoped.filter((x) => taskBucket(x, statusesById) === 'done');
   const burndown = useMemo(
     () =>
       cycle
         ? buildBurndown(
             cycle.startDate,
             cycle.endDate,
-            tasks
-              .filter((x) => taskBucket(x, statusesById) !== 'cancelled')
-              .map((x) => ({
-                weight: 1,
-                completedAt: taskBucket(x, statusesById) === 'done' ? x.completedAt : undefined,
-              })),
+            scoped.map((x) => ({
+              weight: 1,
+              completedAt: taskBucket(x, statusesById) === 'done' ? x.completedAt : undefined,
+            })),
             todayIso()
           )
         : [],
-    [cycle, tasks, statusesById]
+    [cycle, scoped, statusesById]
   );
-  const nextCycle = projectCycles.find(
-    (c) => c.status === 'upcoming' && cycle !== undefined && c.startDate >= cycle.endDate
-  );
+  // The soonest upcoming cycle after this one; the list is not in date order.
+  const nextCycle = projectCycles
+    .filter((c) => c.status === 'upcoming' && cycle !== undefined && c.startDate >= cycle.endDate)
+    .sort((a, b) => a.startDate.localeCompare(b.startDate))[0];
 
   if (cycleQuery.isPending) {
     return (
@@ -94,7 +98,6 @@ const CycleDetail: React.FC = () => {
     return <ListLoadFailed onRetry={() => void cycleQuery.refetch()} />;
   }
 
-  const percent = cyclePercent(cycle);
   const carriedOver = cycle.carriedOver ?? [];
 
   return (
@@ -120,7 +123,7 @@ const CycleDetail: React.FC = () => {
             >
               {cycle.name}
             </h1>
-            <CycleStateBadge status={cycle.status} />
+            <CycleBadge cycle={cycle} compact showState />
           </div>
           <div className="flex items-center gap-2">
             {projectId && (
@@ -184,28 +187,7 @@ const CycleDetail: React.FC = () => {
           <h2 id="cycle-progress" className="sr-only">
             {t('flow.cycles.detail.progress')}
           </h2>
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>
-              {t('flow.cycles.taskCount', { done: cycle.completed, total: cycle.scope })}
-            </span>
-            <span className="text-flow-meta font-semibold" style={{ color: 'var(--flow-text)' }}>
-              {percent}%
-            </span>
-          </div>
-          <div
-            className="h-2 rounded-full overflow-hidden"
-            style={{ background: 'var(--flow-hover)' }}
-            role="progressbar"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={percent}
-            aria-label={t('flow.cycles.detail.progress')}
-          >
-            <div
-              className="h-full rounded-full"
-              style={{ width: `${percent}%`, background: 'var(--flow-action-bg)' }}
-            />
-          </div>
+          <CycleProgress cycle={cycle} />
         </section>
 
         <section>
@@ -280,7 +262,7 @@ const CycleDetail: React.FC = () => {
         title={t('flow.cycles.detail.deleteTitle')}
         description={t('flow.cycles.detail.deleteDescription', {
           name: cycle.name,
-          count: tasks.length,
+          count: members.length,
         })}
         confirmLabel={t('flowCommon.delete')}
         cancelLabel={t('flowCommon.cancel')}

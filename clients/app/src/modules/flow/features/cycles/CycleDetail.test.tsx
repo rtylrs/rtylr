@@ -84,17 +84,21 @@ beforeEach(() => {
       completedAt: '2026-11-17T10:00:00Z',
     }),
     task({ id: '3', title: 'Other cycle', cycleId: '8' }),
+    task({ id: '4', title: 'Shelved', cycleId: '7', archived: true }),
+    task({ id: '5', title: 'Dropped', cycleId: '7', status: 'cancelled' }),
   ];
 });
 
 describe('CycleDetail', () => {
-  it("lists the cycle's open and done tasks and nothing from other cycles", () => {
+  it("lists the cycle's open and done tasks, leaving out other cycles, archived and cancelled", () => {
     render(<CycleDetail />);
     expect(screen.getByText('C1')).toBeInTheDocument();
-    expect(screen.getByText('flow.cycles.state.active')).toBeInTheDocument();
+    expect(screen.getByText('flow.backlog.status.active')).toBeInTheDocument();
     expect(screen.getByText('Open one')).toBeInTheDocument();
     expect(screen.getByText('Shipped')).toBeInTheDocument();
     expect(screen.queryByText('Other cycle')).not.toBeInTheDocument();
+    expect(screen.queryByText('Shelved')).not.toBeInTheDocument();
+    expect(screen.queryByText('Dropped')).not.toBeInTheDocument();
     expect(screen.getByText('flow.cycles.detail.openTasks:1')).toBeInTheDocument();
     expect(screen.getByText('50%')).toBeInTheDocument();
   });
@@ -110,6 +114,8 @@ describe('CycleDetail', () => {
     );
     render(<CycleDetail />);
     fireEvent.click(screen.getByText('flow.cycles.detail.delete'));
+    // Every member goes back to the backlog, archived and cancelled ones too.
+    expect(screen.getByText('flow.cycles.detail.deleteDescription:4')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'flowCommon.delete' }));
     expect(mocks.deleteMutate).toHaveBeenCalledWith('7', expect.anything());
     expect(mocks.navigate).toHaveBeenCalledWith({ to: '/flow/cycles' });

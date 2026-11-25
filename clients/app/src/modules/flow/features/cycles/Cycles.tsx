@@ -11,9 +11,10 @@ import { useCycles, useCreateCycle } from './useCycles';
 import { type ApiCycle } from '../../shared/services/flowApi';
 import { formatShortDate } from '../../shared/lib/utils';
 import { Link } from '@tanstack/react-router';
-import CycleStateBadge from './CycleStateBadge';
-import { cyclePercent, endDateForLength } from './cycleModel';
-import { CYCLE_LENGTH_WEEKS } from '../projects/backlog/backlogModel';
+import CycleBadge from '../../shared/components/CycleBadge';
+import { endDateForLength } from './cycleModel';
+import { CycleProgress } from './CycleProgress';
+import { CycleLengthPresets, fieldStyle, presetWeeks } from '../projects/backlog/CycleDialogs';
 import { useProjects } from '../projects/useProjects';
 import GateNotice from '../../shared/components/GateNotice';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
@@ -43,7 +44,7 @@ const Cycles: React.FC = () => {
   const [newName, setNewName] = useState('');
   const [newStart, setNewStart] = useState('');
   const [newEnd, setNewEnd] = useState('');
-  // Weeks chosen from the presets; null once the end date is picked by hand.
+  // The preset the dates match; null for a custom length.
   const [newWeeks, setNewWeeks] = useState<number | null>(2);
 
   if (projectsLoadFailed) {
@@ -64,7 +65,10 @@ const Cycles: React.FC = () => {
   }
 
   const activeCycles = cycles.filter((c) => c.status === 'active');
-  const upcoming = cycles.filter((c) => c.status === 'upcoming');
+  // Soonest first, so the next cycle reads first.
+  const upcoming = cycles
+    .filter((c) => c.status === 'upcoming')
+    .sort((a, b) => a.startDate.localeCompare(b.startDate));
   const completed = cycles.filter((c) => c.status === 'completed');
 
   return (
@@ -99,11 +103,7 @@ const Cycles: React.FC = () => {
               onChange={(e) => setProjectId(e.target.value)}
               aria-label={t('flow.cycles.project')}
               className="min-h-[44px] rounded-md px-2 text-flow-title sm:min-h-0 sm:py-1.5 sm:text-flow-meta"
-              style={{
-                background: 'var(--flow-input-bg)',
-                border: '1px solid var(--flow-border-control)',
-                color: 'var(--flow-text)',
-              }}
+              style={fieldStyle}
             >
               {projects.length === 0 ? (
                 <option value="">{t('flow.cycles.noProjects')}</option>
@@ -151,11 +151,7 @@ const Cycles: React.FC = () => {
             onChange={(e) => setNewName(e.target.value)}
             placeholder={t('flow.cycles.namePlaceholder')}
             className="w-full rounded-md px-3 py-2 text-flow-meta"
-            style={{
-              background: 'var(--flow-input-bg)',
-              border: '1px solid var(--flow-border-control)',
-              color: 'var(--flow-text)',
-            }}
+            style={fieldStyle}
             autoFocus
           />
           <div className="flex gap-2">
@@ -178,7 +174,7 @@ const Cycles: React.FC = () => {
               value={newEnd}
               onChange={(value) => {
                 setNewEnd(value);
-                setNewWeeks(null);
+                setNewWeeks(presetWeeks(newStart, value));
               }}
               minDate={newStart || undefined}
               locale={i18n.language}
@@ -191,39 +187,14 @@ const Cycles: React.FC = () => {
               className="text-flow-meta"
             />
           </div>
-          <div
-            className="flex flex-wrap items-center gap-1.5"
-            role="group"
-            aria-label={t('flow.cycles.length')}
-          >
-            <span className="text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>
-              {t('flow.cycles.length')}
-            </span>
-            {CYCLE_LENGTH_WEEKS.map((weeks) => (
-              <button
-                key={weeks}
-                type="button"
-                aria-pressed={newWeeks === weeks}
-                onClick={() => {
-                  setNewWeeks(weeks);
-                  if (newStart) setNewEnd(endDateForLength(newStart, weeks));
-                }}
-                className="px-2 py-1 rounded-sm text-flow-meta"
-                style={{
-                  border: '1px solid var(--flow-border-control)',
-                  background: newWeeks === weeks ? 'var(--accent-muted)' : 'transparent',
-                  color: 'var(--flow-text)',
-                }}
-              >
-                {t('flow.backlog.start.weeks', { count: weeks })}
-              </button>
-            ))}
-            {newWeeks === null && newStart && newEnd && (
-              <span className="text-flow-meta" style={{ color: 'var(--flow-text-dim)' }}>
-                {t('flow.cycles.customLength')}
-              </span>
-            )}
-          </div>
+          <CycleLengthPresets
+            weeks={newWeeks}
+            showCustom={Boolean(newStart && newEnd)}
+            onPick={(weeks) => {
+              setNewWeeks(weeks);
+              if (newStart) setNewEnd(endDateForLength(newStart, weeks));
+            }}
+          />
           <div className="flex gap-2">
             <button
               type="button"
@@ -337,29 +308,7 @@ const Cycles: React.FC = () => {
                 <span>{formatShortDate(active.endDate, i18n.language)}</span>
               </div>
               <div className="mt-4">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>
-                    {t('flow.cycles.taskCount', { done: active.completed, total: active.scope })}
-                  </span>
-                  <span
-                    className="text-flow-meta font-semibold"
-                    style={{ color: 'var(--flow-text)' }}
-                  >
-                    {cyclePercent(active)}%
-                  </span>
-                </div>
-                <div
-                  className="h-2 rounded-full overflow-hidden"
-                  style={{ background: 'var(--flow-hover)' }}
-                >
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width: `${active.scope > 0 ? (active.completed / active.scope) * 100 : 0}%`,
-                      background: 'var(--flow-action-bg)',
-                    }}
-                  />
-                </div>
+                <CycleProgress cycle={active} />
               </div>
             </motion.section>
           ))}
@@ -421,7 +370,7 @@ const CycleSection: React.FC<{ title: string; cycles: ApiCycle[] }> = ({ title, 
                 )}
               </p>
             </div>
-            <CycleStateBadge status={c.status} />
+            <CycleBadge cycle={c} compact showState />
           </Link>
         ))}
       </div>

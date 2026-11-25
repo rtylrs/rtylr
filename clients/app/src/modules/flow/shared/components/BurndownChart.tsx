@@ -1,21 +1,28 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { BurndownPoint } from './cycleModel';
-import { formatShortDate } from '../../shared/lib/utils';
+import { formatShortDate } from '../lib/utils';
 
 const WIDTH = 640;
 const HEIGHT = 200;
 const PAD = { top: 12, right: 12, bottom: 24, left: 32 };
 
+export interface BurndownChartPoint {
+  /** yyyy-mm-dd; the first and last label the x axis when present. */
+  date?: string;
+  /** Work left at the end of the day, or null for days still to come. */
+  remaining: number | null;
+  ideal: number;
+}
+
 interface BurndownChartProps {
-  points: BurndownPoint[];
+  points: BurndownChartPoint[];
   /** Label for the y axis unit, e.g. "tasks" or "points". */
   unitLabel: string;
 }
 
 /**
- * Remaining work per day against the ideal straight line. Plain SVG, like the
- * Insights burndown, so Flow does not load a chart library for one line.
+ * Remaining work per day against the ideal straight line, for a cycle page and
+ * Insights. Plain SVG, so Flow does not load a chart library for one line.
  */
 const BurndownChart: React.FC<BurndownChartProps> = ({ points, unitLabel }) => {
   const { t, i18n } = useTranslation();
@@ -78,12 +85,22 @@ const BurndownChart: React.FC<BurndownChartProps> = ({ points, unitLabel }) => {
         >
           0
         </text>
-        <text x={x(0)} y={HEIGHT - 6} fontSize="10" fill="var(--flow-text-dim)">
-          {formatShortDate(points[0].date, i18n.language)}
-        </text>
-        <text x={x(last)} y={HEIGHT - 6} textAnchor="end" fontSize="10" fill="var(--flow-text-dim)">
-          {formatShortDate(points[last].date, i18n.language)}
-        </text>
+        {points[0].date && (
+          <text x={x(0)} y={HEIGHT - 6} fontSize="10" fill="var(--flow-text-dim)">
+            {formatShortDate(points[0].date, i18n.language)}
+          </text>
+        )}
+        {points[last].date && (
+          <text
+            x={x(last)}
+            y={HEIGHT - 6}
+            textAnchor="end"
+            fontSize="10"
+            fill="var(--flow-text-dim)"
+          >
+            {formatShortDate(points[last].date, i18n.language)}
+          </text>
+        )}
         <polyline
           points={ideal}
           fill="none"

@@ -142,11 +142,30 @@ func (s *Service) GetInsights(ctx context.Context, businessID, workspaceID int64
 	if err != nil {
 		return domain.Insights{}, err
 	}
-	minutesByUser := make(map[int64]int64, len(ins.TimeByMember))
-	for _, member := range ins.TimeByMember {
+	ins.TimeByMember, err = s.insightsTimeByMember(ctx, businessID, ins.TimeByMember,
+		func(afterID int64, limit int32) ([]int64, error) {
+			return s.repo.ListInsightsTaskIDs(ctx, workspaceID, afterID, limit)
+		})
+	if err != nil {
+		return domain.Insights{}, err
+	}
+	return ins, nil
+}
+
+// insightsTimeByMember adds the work-day minutes logged on the tasks listTaskIDs
+// pages through to Flow's own logged minutes, and returns the ten members with
+// the most time, named, in hours.
+func (s *Service) insightsTimeByMember(
+	ctx context.Context,
+	businessID int64,
+	logged []domain.InsightsMemberTime,
+	listTaskIDs func(afterID int64, limit int32) ([]int64, error),
+) ([]domain.InsightsMemberTime, error) {
+	minutesByUser := make(map[int64]int64, len(logged))
+	for _, member := range logged {
 		userID, parseErr := strconv.ParseInt(member.ID, 10, 64)
 		if parseErr != nil || userID <= 0 {
-			return domain.Insights{}, fmt.Errorf("invalid Flow insights member id %q", member.ID)
+			return nil, fmt.Errorf("invalid Flow insights member id %q", member.ID)
 		}
 		minutesByUser[userID] += member.Minutes
 	}
@@ -154,16 +173,16 @@ func (s *Service) GetInsights(ctx context.Context, businessID, workspaceID int64
 		const batchSize int32 = 500
 		var afterTaskID int64
 		for {
-			taskIDs, listErr := s.repo.ListInsightsTaskIDs(ctx, workspaceID, afterTaskID, batchSize)
+			taskIDs, listErr := listTaskIDs(afterTaskID, batchSize)
 			if listErr != nil {
-				return domain.Insights{}, listErr
+				return nil, listErr
 			}
 			if len(taskIDs) == 0 {
 				break
 			}
 			rows, sumErr := s.workdayLines.SumWorkDayLineMinutesByMemberAndTaskIDs(ctx, businessID, taskIDs)
 			if sumErr != nil {
-				return domain.Insights{}, sumErr
+				return nil, sumErr
 			}
 			for _, row := range rows {
 				if row.UserID > 0 {
@@ -193,26 +212,26 @@ func (s *Service) GetInsights(ctx context.Context, businessID, workspaceID int64
 	}
 	profiles := map[int64]InsightsMemberProfile{}
 	if s.memberProfiles != nil && len(userIDs) > 0 {
+		var err error
 		profiles, err = s.memberProfiles.GetInsightsMemberProfiles(ctx, userIDs)
 		if err != nil {
-			return domain.Insights{}, err
+			return nil, err
 		}
 	}
 
-	ins.TimeByMember = make([]domain.InsightsMemberTime, 0, len(userIDs))
+	members := make([]domain.InsightsMemberTime, 0, len(userIDs))
 	for _, userID := range userIDs {
 		minutes := minutesByUser[userID]
-		profile := profiles[userID]
-		name := profile.Name
+		name := profiles[userID].Name
 		if name == "" {
 			name = fmt.Sprintf("User %d", userID)
 		}
-		ins.TimeByMember = append(ins.TimeByMember, domain.InsightsMemberTime{
+		members = append(members, domain.InsightsMemberTime{
 			ID: strconv.FormatInt(userID, 10), Name: name,
 			Hours: math.Round((float64(minutes)/60)*10) / 10,
 		})
 	}
-	return ins, nil
+	return members, nil
 }
 
 // ─────────────────────────────────────────────

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { flowApi, ApiStatus, type ApiStatusTemplateItem } from '../../shared/services/flowApi';
 import { applyStatusOrder, type InsertionPlan } from './statusUtils';
+import { invalidateTaskProgress } from '../../shared/lib/invalidateTaskProgress';
 
 function key(projectId: string) {
   return ['statuses', projectId];
@@ -133,11 +134,7 @@ export function useSetTaskStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { taskId: string; statusId: string }) => unwrap(flowApi.setTaskStatus(data)),
-    onSuccess: (_data, variables) => {
-      qc.invalidateQueries({ queryKey: ['task', variables.taskId] });
-      qc.invalidateQueries({ queryKey: ['tasks'] });
-      qc.invalidateQueries({ queryKey: ['my-tasks'] });
-    },
+    onSuccess: () => invalidateTaskProgress(qc),
     onError: () => toast.error(t('flowToasts.status.setFailed')),
   });
 }

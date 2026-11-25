@@ -924,11 +924,6 @@
     "newCycleGate": "A cycle belongs to a project, and this business has none yet. Create a project first.",
     "length": "Length",
     "customLength": "Custom dates",
-    "state": {
-      "upcoming": "Upcoming",
-      "active": "Active",
-      "completed": "Done"
-    },
     "edit": {
       "title": "Edit cycle",
       "description": "Change the name, dates or goal.",

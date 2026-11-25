@@ -16,6 +16,7 @@ import {
 import { useMostRestrictiveProjectRole } from '../lib/currentUser';
 import { useCycles } from '../../features/cycles/useCycles';
 import { canEditTask, canDelete } from '../lib/roleUtils';
+import FlowSelect from './FlowSelect';
 
 const t = (key: string, options?: Record<string, unknown>): string =>
   i18next.t(key, options) as string;
@@ -77,7 +78,9 @@ export const BulkEditBar: React.FC = () => {
   // inside a single project.
   const singleProjectId = allResolved && projectIds.length === 1 ? projectIds[0] : undefined;
   const { data: projectCycles = [] } = useCycles(singleProjectId);
-  const openCycles = projectCycles.filter((c) => c.status !== 'completed');
+  const openCycles = projectCycles
+    .filter((c) => c.status !== 'completed')
+    .sort((a, b) => a.startDate.localeCompare(b.startDate));
 
   const restrictingRole = useMostRestrictiveProjectRole(projectIds);
   const effectiveRole = allResolved ? restrictingRole : undefined;
@@ -154,39 +157,33 @@ export const BulkEditBar: React.FC = () => {
           <Flag size={11} /> {t('flow.bulkEdit.setUrgent')}
         </button>
         {singleProjectId && openCycles.length > 0 && (
-          <label
-            className="h-7 px-2 rounded-sm text-flow-meta flex items-center gap-1 hover:bg-[var(--flow-hover)]"
-            style={{ color: 'var(--flow-text-muted)' }}
+          <span
+            className="inline-flex shrink-0"
             title={!canEdit ? t(editBlockedReason) : undefined}
           >
-            <Timer size={11} aria-hidden />
-            <select
+            <FlowSelect
               value=""
+              placeholder={t('flow.bulkEdit.moveToCycle')}
+              label={t('flow.bulkEdit.moveToCycle')}
+              leading={<Timer size={11} aria-hidden />}
+              muted
               disabled={isPending || !canEdit}
-              aria-label={t('flow.bulkEdit.moveToCycle')}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value === '') return;
+              options={[
+                { value: BACKLOG_OPTION, label: t('flow.taskDetail.noCycle') },
+                ...openCycles.map((c) => ({ value: c.id, label: c.name })),
+              ]}
+              onChange={(value) =>
                 bulkCycle
                   .mutateAsync({
                     ids: selectedTaskIds,
                     cycleId: value === BACKLOG_OPTION ? '' : value,
                   })
                   .then(() => clearSelection())
-                  .catch(() => toast.error(t('flowErrors.generic')));
-              }}
-              className="bg-transparent text-flow-meta disabled:opacity-40"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
-              <option value="">{t('flow.bulkEdit.moveToCycle')}</option>
-              <option value={BACKLOG_OPTION}>{t('flow.taskDetail.noCycle')}</option>
-              {openCycles.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </label>
+                  .catch(() => toast.error(t('flowErrors.generic')))
+              }
+              className="h-7 text-flow-meta"
+            />
+          </span>
         )}
         <button
           type="button"

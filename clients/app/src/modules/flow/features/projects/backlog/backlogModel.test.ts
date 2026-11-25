@@ -80,7 +80,7 @@ describe('buildBacklogSections', () => {
 });
 
 describe('sectionTotals', () => {
-  it('counts to do, in progress and done, and sums estimates', () => {
+  it('counts to do, in progress and done, and sums estimates, leaving cancelled out', () => {
     const totals = sectionTotals(
       [
         task('1', { effortMinutes: 60 }),
@@ -90,7 +90,7 @@ describe('sectionTotals', () => {
       ],
       noStatuses
     );
-    expect(totals).toEqual({ todo: 1, active: 1, done: 2, estimateMinutes: 105 });
+    expect(totals).toEqual({ todo: 1, active: 1, done: 1, estimateMinutes: 90 });
   });
 });
 
