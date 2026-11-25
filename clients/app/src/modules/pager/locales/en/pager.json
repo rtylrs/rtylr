@@ -307,11 +307,12 @@
       "backHome": "$t(pager.brand.name) home"
     },
     "hero": {
+      "freeBadge": "100% Free forever · No hardware",
       "title": "Ditch the plastic buzzers.\nRing their phone when it's ready.",
       "subtitle": "Replace plastic restaurant pagers, coasters, and beepers with one QR on your counter. Guests scan, sit anywhere, and their own phone rings the second their order is up.",
       "primaryCta": "Try the live demo",
       "secondaryCta": "See how it works",
-      "note": "No app · No account · Zero hardware to buy or charge",
+      "note": "Free forever · No app · Zero hardware to buy or charge",
       "demoVenue": "Cedar Coffee",
       "simLabel": "Counter board",
       "simOrder": "Order #42",

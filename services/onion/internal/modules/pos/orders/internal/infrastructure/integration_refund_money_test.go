@@ -243,7 +243,7 @@ func TestCreateOrder_ConcurrentCreatesAllGetDistinctOrderNumbers(t *testing.T) {
 			defer wg.Done()
 			<-start
 			if i%2 == 0 {
-				ids[i], _, errs[i] = repo.CreatePublicOrder(ctx, testutil.BusinessID, "", "Test Customer", "", "", []domain.OrderItemInput{
+				ids[i], _, errs[i] = repo.CreatePublicOrder(ctx, testutil.BusinessID, 0, 0, "online", "", "Test Customer", "", "", []domain.OrderItemInput{
 					{MenuItemID: productID, Name: "Test product", Quantity: 1, UnitPrice: 10.00},
 				})
 				return

@@ -10,6 +10,7 @@ import {
 } from '../../../pagerPaths';
 import { PhoneFrame, ScreenCode, ScreenReady, ScreenScan, ScreenWaiting } from './PhoneMockups';
 import { PhonePagerSvg, PlasticPagerSvg } from './PagerIllustration';
+import { RtylrBrandText } from '../../../shared/components/RenniliLogo';
 
 // The landing page tells each part of the story once: the highlights, the steps,
 // the comparison, then one band that says it is free and who makes it.
@@ -157,7 +158,7 @@ export const FreeBand = (): React.JSX.Element => {
   const included = list(t('pager.landing.free.included', { returnObjects: true }));
 
   return (
-    <section className="rl-section" aria-labelledby="rl-free-heading">
+    <section className="rl-section rl-free-band" aria-labelledby="rl-free-heading">
       <div className="rl-wrap">
         <div className="rl-free-card">
           <div className="rl-free-main">
@@ -198,7 +199,9 @@ export const FreeBand = (): React.JSX.Element => {
         {/* RTYLR speaks in its own colours, as in the strip above the header. */}
         <div className="rl-rtylr-bar">
           <div>
-            <p className="rl-rtylr-kicker">{t('pager.landing.rtylr.eyebrow')}</p>
+            <p className="rl-rtylr-kicker">
+              <RtylrBrandText text={t('pager.landing.rtylr.eyebrow')} />
+            </p>
             <p className="rl-rtylr-title">{t('pager.landing.rtylr.teaserTitle')}</p>
           </div>
           <Link to={PAGER_RTYLR_PATH} className="rl-rtylr-link">

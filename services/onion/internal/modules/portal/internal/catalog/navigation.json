@@ -11,6 +11,7 @@
       { "id": "finance", "label": "Finance" },
       { "id": "hr", "label": "HR" },
       { "id": "pos", "label": "POS" },
+      { "id": "rennili", "label": "Rennili" },
       { "id": "automations", "label": "Automations" },
       { "id": "caret", "label": "Caret", "bottom": true },
       { "id": "settings", "label": "Settings", "required": true, "bottom": true },

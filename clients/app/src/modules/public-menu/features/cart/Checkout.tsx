@@ -12,11 +12,26 @@ import { menuOrderStatusPath } from '../../menuPaths';
 const Checkout = (): React.JSX.Element => {
   const navigate = useNavigate();
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
-  const { items, businessId, currency = 'USD', total, setItemNote, clearCart } = useCartStore();
+  const {
+    items,
+    businessId,
+    locationId,
+    tableId,
+    tableLabel,
+    fulfillmentMode = 'dine_in',
+    availableFulfillmentModes = ['dine_in', 'self_service', 'pickup'],
+    setFulfillmentMode,
+    currency = 'USD',
+    total,
+    setItemNote,
+    clearCart,
+  } = useCartStore();
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [crmOptIn, setCrmOptIn] = useState(true);
   const [orderNotes, setOrderNotes] = useState('');
   const [expandedItemId, setExpandedItemId] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -77,6 +92,15 @@ const Checkout = (): React.JSX.Element => {
 
     const request: CreatePublicOrderRequest = {
       ownerId: String(businessId),
+      ...(locationId ? { locationId: String(locationId) } : {}),
+      ...(tableId ? { tableId: String(tableId) } : {}),
+      fulfillmentMode,
+      ...(fulfillmentMode === 'delivery' && deliveryAddress.trim()
+        ? { deliveryAddress: deliveryAddress.trim() }
+        : {}),
+      currencyCode: currency || 'USD',
+      loyaltyPhone: phone.trim(),
+      crmOptIn,
       customerName: name.trim(),
       customerEmail: email.trim(),
       customerPhone: phone.trim(),
@@ -92,10 +116,14 @@ const Checkout = (): React.JSX.Element => {
 
     try {
       const response = await orderClient.createPublicOrder(request);
-      const { orderId, orderNumber, publicToken } = response;
+      const { orderId, orderNumber, publicToken, paymentRedirectUrl } = response;
       if (!orderId || !orderNumber) throw new Error('Incomplete order response');
 
       clearCart();
+      if (paymentRedirectUrl && /^https?:\/\//i.test(paymentRedirectUrl)) {
+        window.location.assign(paymentRedirectUrl);
+        return;
+      }
       const businessQuery = businessId
         ? `&business_id=${encodeURIComponent(String(businessId))}`
         : '';
@@ -178,6 +206,89 @@ const Checkout = (): React.JSX.Element => {
         </h1>
 
         <form onSubmit={(e) => void handleSubmit(e)} noValidate>
+          {/* Fulfillment Mode & Table Badge */}
+          {(availableFulfillmentModes.length > 1 || tableLabel) && (
+            <section
+              style={{
+                border: '1px solid rgba(0,0,0,0.1)',
+                borderRadius: 16,
+                padding: '14px 16px',
+                marginBottom: 18,
+              }}
+            >
+              {tableLabel && (
+                <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: 8 }}>
+                  {tableLabel}
+                </div>
+              )}
+              {availableFulfillmentModes.length > 1 && typeof setFulfillmentMode === 'function' && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {availableFulfillmentModes.map((mode) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => setFulfillmentMode(mode)}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: 999,
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        border: '1px solid rgba(0,0,0,0.15)',
+                        background:
+                          fulfillmentMode === mode ? 'var(--menu-accent, #111827)' : '#ffffff',
+                        color: fulfillmentMode === mode ? '#ffffff' : '#111827',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {mode === 'dine_in'
+                        ? 'Dine-in'
+                        : mode === 'self_service'
+                          ? 'Self-service'
+                          : mode === 'pickup'
+                            ? 'Pickup'
+                            : 'Delivery'}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {fulfillmentMode === 'delivery' && (
+                <input
+                  type="text"
+                  value={deliveryAddress}
+                  onChange={(e) => setDeliveryAddress(e.target.value)}
+                  placeholder="Delivery address"
+                  aria-label="Delivery address"
+                  style={{
+                    width: '100%',
+                    marginTop: 10,
+                    padding: '9px 12px',
+                    fontSize: '14px',
+                    border: '1px solid rgba(0,0,0,0.15)',
+                    borderRadius: 8,
+                    boxSizing: 'border-box',
+                  }}
+                />
+              )}
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginTop: 10,
+                  fontSize: '13px',
+                  color: 'rgba(0,0,0,0.7)',
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={crmOptIn}
+                  onChange={(e) => setCrmOptIn(e.target.checked)}
+                />
+                Earn loyalty stamps &amp; save order history
+              </label>
+            </section>
+          )}
+
           {/* Cart summary */}
           <section
             style={{

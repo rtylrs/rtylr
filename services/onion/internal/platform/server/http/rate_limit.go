@@ -342,6 +342,11 @@ var authRouteLimiters = map[string]func(http.Handler) http.Handler{
 	"/pos/orders/v1/orders/public":                   PerRouteRateLimit(10, time.Minute),
 	"/pos/orders/v1/orders/{order_id}/public-status": PerRouteRateLimit(60, time.Minute),
 	"/pos/menu-item/v1/menu-items/public":            PerRouteRateLimit(60, time.Minute),
+	"/hub/menu/v1/public/resolve-host":               PerRouteRateLimit(60, time.Minute),
+	"/hub/menu/v1/public/bundle":                     PerRouteRateLimit(60, time.Minute),
+	"/hub/menu/v1/public/table-actions":              PerRouteRateLimit(15, time.Minute),
+	"/hub/menu/v1/public/events":                     PerRouteRateLimit(120, time.Minute),
+	"/hub/menu/v1/public/stamps":                     PerRouteRateLimit(30, time.Minute),
 }
 
 // AuthRouteRateLimit applies the per-route auth budgets by exact request

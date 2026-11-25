@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/hub_menu/internal/domain"
 	posmenuitemv1 "github.com/voxire/voxie/gen/go/pos/menu_item/v1"
@@ -20,16 +21,56 @@ const (
 
 type repository interface {
 	ListBanners(ctx context.Context, businessID int64) ([]domain.Banner, error)
+	ListActivePublicBanners(ctx context.Context, businessID int64) ([]domain.Banner, error)
 	CreateBanner(ctx context.Context, businessID int64, input domain.BannerInput) (int64, error)
 	UpdateBanner(ctx context.Context, businessID, id int64, input domain.BannerInput) error
 	DeleteBanner(ctx context.Context, businessID, id int64) error
 	GetBanner(ctx context.Context, businessID, id int64) (domain.Banner, error)
 	List(ctx context.Context, businessID int64) ([]*posmenuitemv1.MenuItem, error)
 	Update(ctx context.Context, businessID int64, items []*posmenuitemv1.MenuItem) error
+
+	GetMenuProfile(ctx context.Context, businessID, locationID int64) (domain.MenuProfile, bool, error)
+	UpsertMenuProfileDraft(ctx context.Context, profile domain.MenuProfile) error
+	PublishMenuProfile(ctx context.Context, businessID, locationID int64) error
+	CloneMenuProfile(ctx context.Context, businessID, sourceLocationID, targetLocationID int64, sourceProfile domain.MenuProfile) error
+
+	ListMenuPresets(ctx context.Context, businessID int64) ([]domain.MenuPreset, error)
+	GetMenuPreset(ctx context.Context, businessID, id int64) (domain.MenuPreset, error)
+	CreateMenuPreset(ctx context.Context, businessID int64, name, configJSON string) (int64, error)
+	UpdateMenuPreset(ctx context.Context, businessID, id int64, name, configJSON string) error
+	DeleteMenuPreset(ctx context.Context, businessID, id int64) error
+
+	ListBranchMenuItems(ctx context.Context, businessID, locationID int64) ([]domain.BranchMenuItem, error)
+	UpsertBranchMenuItem(ctx context.Context, item domain.BranchMenuItem) error
+
+	ListMenuTranslations(ctx context.Context, businessID, locationID int64, locale string) ([]domain.MenuTranslation, error)
+	UpsertMenuTranslation(ctx context.Context, tr domain.MenuTranslation) error
+
+	ListMenuCurrencies(ctx context.Context, businessID, locationID int64) ([]domain.MenuCurrency, error)
+	UpsertMenuCurrency(ctx context.Context, cur domain.MenuCurrency) error
+	DeleteMenuCurrency(ctx context.Context, businessID, locationID int64, code string) error
+
+	ListStampCards(ctx context.Context, businessID, locationID int64) ([]domain.StampCard, error)
+	GetStampCard(ctx context.Context, businessID, id int64) (domain.StampCard, error)
+	CreateStampCard(ctx context.Context, card domain.StampCard) (int64, error)
+	UpdateStampCard(ctx context.Context, card domain.StampCard) error
+	DeleteStampCard(ctx context.Context, businessID, id int64) error
+	GetCustomerStampProgress(ctx context.Context, businessID int64, phone string) ([]domain.CustomerStampProgress, error)
+	AddCustomerStamp(ctx context.Context, businessID, stampCardID int64, phone, name string, stampsRequired int32, orderID int64) error
+
+	CreateTableAction(ctx context.Context, action domain.TableAction) (int64, error)
+	ListTableActions(ctx context.Context, businessID, locationID int64, status string) ([]domain.TableAction, error)
+	UpdateTableActionStatus(ctx context.Context, businessID, id int64, status string) error
+
+	InsertMenuEvents(ctx context.Context, businessID int64, events []domain.MenuEventInput) error
+	SummarizeMenuEvents(ctx context.Context, businessID, locationID int64, since time.Time) (domain.AnalyticsSummary, error)
 }
 
 type Service struct {
-	repo repository
+	repo            repository
+	hostResolver    HostResolver
+	eventDispatcher EventDispatcher
+	translator      AITranslator
 }
 
 func NewService(_ context.Context, repo repository) *Service {

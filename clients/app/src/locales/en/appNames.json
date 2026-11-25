@@ -30,7 +30,8 @@
     "flow": "Projects and tasks",
     "insights": "Analytics and reports",
     "menu": "Menus and ordering",
-    "recruit": "Jobs and candidates"
+    "recruit": "Jobs and candidates",
+    "rennili": "Order pager"
   },
   "blurb": {
     "pos": "Orders & tables",

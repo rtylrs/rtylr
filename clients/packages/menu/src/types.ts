@@ -16,8 +16,12 @@ export type ItemLayout = 'grid' | 'list' | 'minimal';
 export type ImagePosition = 'top' | 'right' | 'left' | 'none';
 export type ImageSize = 'sm' | 'md' | 'lg';
 export type CardRadius = 'none' | 'sm' | 'md' | 'lg';
+export type ThemeMode = 'light' | 'dark';
+export type MenuFontSize = 'sm' | 'md' | 'lg';
+export type FulfillmentMode = 'dine_in' | 'self_service' | 'pickup' | 'delivery';
+export type TableActionType = 'call_waiter' | 'request_bill' | 'split_bill';
 
-// ─── Business data ─────────────────────────────────────────────────────────────
+// ─── Business & Merchandising Data ────────────────────────────────────────────
 
 export interface BusinessReview {
   id: string;
@@ -37,10 +41,35 @@ export interface BusinessOffer {
   validUntil?: string;
 }
 
+export interface MenuBannerData {
+  id: string;
+  title: string;
+  body?: string;
+  imageUrl?: string;
+  linkUrl?: string;
+}
+
+export interface MenuCurrencyOption {
+  code: string;
+  symbol: string;
+  exchangeRate: number;
+  decimalPlaces?: number;
+  isDefault?: boolean;
+}
+
+export interface MenuStampCardSummary {
+  id: string;
+  title: string;
+  description?: string;
+  stampsRequired: number;
+  rewardLabel: string;
+}
+
 export interface BusinessInfo {
   name: string;
   logo?: string;
   coverImage?: string;
+  faviconUrl?: string;
   description?: string;
   address?: string;
   phone?: string;
@@ -60,7 +89,7 @@ export interface BusinessInfo {
   offers?: BusinessOffer[];
 }
 
-// ─── Layout config ─────────────────────────────────────────────────────────────
+// ─── Layout & Brand Config ────────────────────────────────────────────────────
 
 export interface PageConfig {
   menu?: boolean;
@@ -72,6 +101,8 @@ export interface PageConfig {
 
 export interface HeaderConfig {
   coverHeight: CoverHeight;
+  coverImageUrl?: string;
+  logoUrl?: string;
   showLogo: boolean;
   showDescription: boolean;
   showMeta: boolean; // address / phone / hours
@@ -97,6 +128,50 @@ export interface ColorsConfig {
   primary: string;
   accent: string;
   bg: string;
+  secondary?: string;
+  surface?: string;
+  text?: string;
+  subtext?: string;
+  border?: string;
+}
+
+export interface TypographyConfig {
+  headingFont: string;
+  bodyFont: string;
+  fontSize: MenuFontSize;
+  customFontCssUrl?: string;
+}
+
+export interface FulfillmentModesConfig {
+  dineIn: boolean;
+  selfService: boolean;
+  pickup: boolean;
+  delivery: boolean;
+}
+
+export interface TableActionsConfig {
+  callWaiter: boolean;
+  requestBill: boolean;
+  splitBill: boolean;
+}
+
+export interface MenuFeaturesConfig {
+  enableOrdering: boolean;
+  fulfillmentModes: FulfillmentModesConfig;
+  tableActions: TableActionsConfig;
+  enableLoyaltyStamps: boolean;
+  enableAiAssistant: boolean;
+  enableBanners: boolean;
+  enableUpsells: boolean;
+  enableDietaryFilters: boolean;
+  enableCurrencySwitcher: boolean;
+  enableLanguageSwitcher: boolean;
+  enableSearch: boolean;
+}
+
+export interface MenuPaymentConfig {
+  mode: 'pos' | 'redirect';
+  redirectUrl?: string;
 }
 
 export interface MenuLayoutConfig {
@@ -105,7 +180,35 @@ export interface MenuLayoutConfig {
   nav: NavConfig;
   items: ItemDisplayConfig;
   colors?: ColorsConfig;
+  typography?: TypographyConfig;
+  mode?: ThemeMode;
+  features?: Partial<MenuFeaturesConfig>;
+  payment?: MenuPaymentConfig;
+  customCss?: string;
 }
+
+export const DEFAULT_FEATURES_CONFIG: MenuFeaturesConfig = {
+  enableOrdering: true,
+  fulfillmentModes: {
+    dineIn: true,
+    selfService: true,
+    pickup: true,
+    delivery: false,
+  },
+  tableActions: {
+    callWaiter: true,
+    requestBill: true,
+    splitBill: false,
+  },
+  enableLoyaltyStamps: true,
+  enableAiAssistant: true,
+  enableBanners: true,
+  enableUpsells: true,
+  enableDietaryFilters: true,
+  enableCurrencySwitcher: true,
+  enableLanguageSwitcher: true,
+  enableSearch: true,
+};
 
 export const DEFAULT_LAYOUT_CONFIG: MenuLayoutConfig = {
   pages: {
@@ -135,9 +238,19 @@ export const DEFAULT_LAYOUT_CONFIG: MenuLayoutConfig = {
     showBadges: true,
     cardRadius: 'md',
   },
+  typography: {
+    headingFont: 'system',
+    bodyFont: 'system',
+    fontSize: 'md',
+  },
+  mode: 'light',
+  features: DEFAULT_FEATURES_CONFIG,
+  payment: {
+    mode: 'pos',
+    redirectUrl: '',
+  },
 };
 
-// Preset configs for convenience
 export const GRID_PRESET: Partial<MenuLayoutConfig> = {
   items: {
     layout: 'grid',
