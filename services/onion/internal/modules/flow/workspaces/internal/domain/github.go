@@ -133,4 +133,9 @@ type GitHubWebhookEffect struct {
 	SuspendedAt         *time.Time
 	RemoveRepositoryIDs []int64
 	RevokeGitHubUserID  int64
+
+	// PullRequests and Checks come from pull_request, check_run and status
+	// deliveries (T-376).
+	PullRequests []GitHubPullRequestUpdate
+	Checks       []GitHubCheckUpdate
 }

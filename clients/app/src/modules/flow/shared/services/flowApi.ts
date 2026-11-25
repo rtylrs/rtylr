@@ -151,6 +151,9 @@ export interface ApiTask {
   // on the wire when false or zero.
   blocked?: ContractTask['blocked'];
   blockerCount?: ContractTask['blockerCount'];
+  // Worst CI state of the task's open pull requests (T-376); absent when none
+  // has checks.
+  prChecksState?: ContractTask['prChecksState'];
   sectionId?: string;
   cycleId?: string;
   cycleName?: ContractTask['cycleName'];

@@ -29,6 +29,37 @@ type githubWebhookPayload struct {
 	RepositoriesRemoved []struct {
 		ID int64 `json:"id"`
 	} `json:"repositories_removed"`
+
+	Repository *struct {
+		ID       int64  `json:"id"`
+		FullName string `json:"full_name"`
+	} `json:"repository"`
+	PullRequest *struct {
+		Number  int64  `json:"number"`
+		Title   string `json:"title"`
+		State   string `json:"state"`
+		Draft   bool   `json:"draft"`
+		Merged  bool   `json:"merged"`
+		HTMLURL string `json:"html_url"`
+		Head    struct {
+			SHA string `json:"sha"`
+			Ref string `json:"ref"`
+		} `json:"head"`
+	} `json:"pull_request"`
+	CheckRun *struct {
+		ID         int64  `json:"id"`
+		Name       string `json:"name"`
+		Status     string `json:"status"`
+		Conclusion string `json:"conclusion"`
+		HeadSHA    string `json:"head_sha"`
+		DetailsURL string `json:"details_url"`
+		HTMLURL    string `json:"html_url"`
+	} `json:"check_run"`
+	// Commit status fields (the "status" event) sit at the top level.
+	SHA       string `json:"sha"`
+	Context   string `json:"context"`
+	State     string `json:"state"`
+	TargetURL string `json:"target_url"`
 }
 
 // githubWebhookHandler fills in what one event changes for a stored
@@ -38,6 +69,9 @@ type githubWebhookHandler func(ctx context.Context, s *Service, p githubWebhookP
 var githubWebhookHandlers = map[string]githubWebhookHandler{
 	"installation":              handleGitHubInstallationEvent,
 	"installation_repositories": handleGitHubInstallationRepositoriesEvent,
+	"pull_request":              handleGitHubPullRequestEvent,
+	"check_run":                 handleGitHubCheckRunEvent,
+	"status":                    handleGitHubStatusEvent,
 }
 
 // HandleGitHubWebhook applies one delivery whose signature the caller has
@@ -89,7 +123,113 @@ func (s *Service) applyGitHubWebhook(ctx context.Context, effect domain.GitHubWe
 	if duplicate {
 		return domain.GitHubWebhookDuplicate, nil
 	}
+	s.publishLinkedTaskUpdates(ctx, effect)
 	return domain.GitHubWebhookProcessed, nil
+}
+
+// publishLinkedTaskUpdates tells open screens of the tasks linked to the
+// changed pull requests to refetch. Actor 0 is GitHub, so nobody's own
+// screen skips the event. A failed lookup only delays the refresh.
+func (s *Service) publishLinkedTaskUpdates(ctx context.Context, effect domain.GitHubWebhookEffect) {
+	if len(effect.PullRequests) == 0 && len(effect.Checks) == 0 {
+		return
+	}
+	tasks, err := s.repo.TasksLinkedToGitHubChange(ctx, effect)
+	if err != nil {
+		return
+	}
+	for _, t := range tasks {
+		publishTaskUpdated(t.ID, t.ProjectID, 0)
+	}
+}
+
+// githubPRState folds GitHub's state, draft and merged flags into one value.
+func githubPRState(state string, draft, merged bool) string {
+	switch {
+	case merged:
+		return "merged"
+	case state == "closed":
+		return "closed"
+	case draft:
+		return "draft"
+	}
+	return "open"
+}
+
+func handleGitHubPullRequestEvent(_ context.Context, _ *Service, p githubWebhookPayload, _ domain.GitHubInstallation, effect *domain.GitHubWebhookEffect) error {
+	if p.PullRequest == nil || p.Repository == nil || p.Repository.ID <= 0 || p.PullRequest.Number <= 0 {
+		return nil
+	}
+	pr := p.PullRequest
+	effect.PullRequests = append(effect.PullRequests, domain.GitHubPullRequestUpdate{
+		RepositoryID: p.Repository.ID,
+		RepoFullName: p.Repository.FullName,
+		Number:       pr.Number,
+		Title:        truncateRunes(pr.Title, 500),
+		State:        githubPRState(pr.State, pr.Draft, pr.Merged),
+		HeadSHA:      pr.Head.SHA,
+		HeadRef:      truncateRunes(pr.Head.Ref, 255),
+		HTMLURL:      pr.HTMLURL,
+	})
+	return nil
+}
+
+func handleGitHubCheckRunEvent(_ context.Context, _ *Service, p githubWebhookPayload, _ domain.GitHubInstallation, effect *domain.GitHubWebhookEffect) error {
+	run := p.CheckRun
+	if run == nil || p.Repository == nil || p.Repository.ID <= 0 || run.ID <= 0 || run.HeadSHA == "" {
+		return nil
+	}
+	details := run.DetailsURL
+	if details == "" {
+		details = run.HTMLURL
+	}
+	effect.Checks = append(effect.Checks, domain.GitHubCheckUpdate{
+		RepositoryID: p.Repository.ID,
+		HeadSHA:      run.HeadSHA,
+		ExternalID:   fmt.Sprintf("run:%d", run.ID),
+		Name:         truncateRunes(run.Name, 255),
+		Status:       run.Status,
+		Conclusion:   run.Conclusion,
+		DetailsURL:   details,
+	})
+	return nil
+}
+
+// handleGitHubStatusEvent stores a commit status (posted by CI systems that do
+// not use check runs) as a check keyed by its context.
+func handleGitHubStatusEvent(_ context.Context, _ *Service, p githubWebhookPayload, _ domain.GitHubInstallation, effect *domain.GitHubWebhookEffect) error {
+	if p.Repository == nil || p.Repository.ID <= 0 || p.SHA == "" || p.Context == "" {
+		return nil
+	}
+	status, conclusion := "completed", ""
+	switch p.State {
+	case "pending":
+		status = "in_progress"
+	case "success":
+		conclusion = "success"
+	case "failure", "error":
+		conclusion = "failure"
+	default:
+		return nil
+	}
+	effect.Checks = append(effect.Checks, domain.GitHubCheckUpdate{
+		RepositoryID: p.Repository.ID,
+		HeadSHA:      p.SHA,
+		ExternalID:   truncateRunes("status:"+p.Context, 191),
+		Name:         truncateRunes(p.Context, 255),
+		Status:       status,
+		Conclusion:   conclusion,
+		DetailsURL:   p.TargetURL,
+	})
+	return nil
+}
+
+func truncateRunes(value string, max int) string {
+	runes := []rune(value)
+	if len(runes) <= max {
+		return value
+	}
+	return string(runes[:max])
 }
 
 func (s *Service) githubNow() time.Time {

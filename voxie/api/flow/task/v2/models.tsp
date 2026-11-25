@@ -200,6 +200,12 @@ model FlowTask {
   blocker_count: int32;
 
   /**
+   * pr_checks_state is the worst CI state of the task's open pull requests:
+   * failing, running or passing. Absent when none has checks (T-376).
+   */
+  pr_checks_state?: string;
+
+  /**
    * Custom field values keyed by field id (flow.field.v2). Only fields with a
    * value appear, so a task without any carries an empty map. Read-only
    * projection on list and detail reads; write through setTaskFieldValues.

@@ -227,3 +227,51 @@ model CompleteGitHubLinkResponse {
 model UnlinkGitHubRequest {}
 
 model UnlinkGitHubResponse {}
+
+model ListTaskPullRequestsRequest {
+  @minValueExclusive(0)
+  @encode(string)
+  task_id: int64;
+}
+
+/** GitHubCheck is one CI check on a pull request's head commit. */
+model GitHubCheck {
+  name: string;
+
+  /** status is queued, in_progress or completed. */
+  status: string;
+
+  /** conclusion is set once completed: success, failure, neutral, skipped, cancelled, timed_out... */
+  conclusion: string;
+
+  /** details_url links to the check's log. */
+  details_url: string;
+
+  /** updated_at is RFC 3339. */
+  updated_at: string;
+}
+
+/** TaskPullRequest is a pull request linked to a task. */
+model TaskPullRequest {
+  url: string;
+
+  /** ref is owner/repo#number. */
+  ref: string;
+
+  title: string;
+
+  /** state is open, draft, closed or merged. */
+  state: string;
+
+  /** known is false while no webhook has described the pull request yet. */
+  known: boolean;
+
+  /** checks_state is failing, running, passing or none. */
+  checks_state: string;
+
+  checks: GitHubCheck[];
+}
+
+model ListTaskPullRequestsResponse {
+  pull_requests: TaskPullRequest[];
+}

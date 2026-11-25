@@ -111,6 +111,18 @@ export function epicField(epics: readonly EpicSummary[], t: TFunction): FilterFi
   };
 }
 
+/** The CI state of a task's open pull requests (T-376). */
+export function checksField(t: TFunction): FilterFieldConfig {
+  return {
+    field: 'checks',
+    label: t('flow.filters.fields.checks'),
+    options: (['failing', 'running', 'passing'] as const).map((value) => ({
+      value,
+      label: t(`flow.checks.state.${value}`),
+    })),
+  };
+}
+
 /** The task types, in picker order. */
 export function typeField(types: readonly string[], t: TFunction): FilterFieldConfig {
   return {

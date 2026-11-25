@@ -96,6 +96,9 @@ func (s *Service) AttachTaskMemberships(ctx context.Context, tasks []domain.Task
 	if err := s.AttachMilestoneIDs(ctx, tasks); err != nil {
 		return err
 	}
+	if err := s.attachTaskChecksStates(ctx, tasks); err != nil {
+		return err
+	}
 	return s.AttachTaskCycles(ctx, tasks)
 }
 

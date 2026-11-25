@@ -1421,7 +1421,8 @@
       "milestone": "Milestone",
       "project": "Project",
       "epic": "Epic",
-      "type": "Type"
+      "type": "Type",
+      "checks": "PR checks"
     },
     "due": {
       "overdue": "Overdue",
@@ -1661,5 +1662,30 @@
       "description": "What and why, where to look, steps, QA",
       "subtasks": "Design; Build; Test"
     }
+  },
+  "checks": {
+    "state": {
+      "failing": "Checks failing",
+      "running": "Checks running",
+      "passing": "Checks passing"
+    },
+    "waiting": "Waiting for GitHub: checks show after the next push or check on this pull request.",
+    "summary": {
+      "failing_one": "{{count}} check, failing",
+      "failing_other": "{{count}} checks, failing",
+      "running_one": "{{count}} check, running",
+      "running_other": "{{count}} checks, running",
+      "passing_one": "{{count}} check, all passed",
+      "passing_other": "{{count}} checks, all passed",
+      "none_one": "No checks yet",
+      "none_other": "No checks yet"
+    },
+    "check": {
+      "running": "Running",
+      "passed": "Passed",
+      "skipped": "Skipped",
+      "failed": "Failed"
+    },
+    "openLog": "Open the log"
   }
 }

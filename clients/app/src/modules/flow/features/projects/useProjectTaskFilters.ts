@@ -9,6 +9,7 @@ import {
   epicField,
   labelField,
   namedField,
+  checksField,
   typeField,
   peopleFrom,
   priorityField,
@@ -100,6 +101,10 @@ export function useProjectTaskFilters(projectId: string, tasks: Task[]): Project
     // The epics are tasks on this board, so they come from the same list.
     const epics = epicsIn(tasks);
     if (epics.length > 0) out.push(epicField(epics, t));
+    // Only projects whose tasks have pull request checks offer the field.
+    if (tasks.some((task) => task.prChecksState) || filters.checks.length > 0) {
+      out.push(checksField(t));
+    }
     out.push(typeField(TASK_TYPES, t));
     out.push(...customFieldFilters(fieldsQuery.data ?? [], people, t));
     return out;
@@ -111,6 +116,7 @@ export function useProjectTaskFilters(projectId: string, tasks: Task[]): Project
     statusesQuery.data,
     cyclesQuery.data,
     milestonesQuery.data,
+    filters.checks.length,
     fieldsQuery.data,
     t,
   ]);

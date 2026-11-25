@@ -1513,7 +1513,8 @@
       "milestone": "المرحلة",
       "project": "المشروع",
       "epic": "الملحمة",
-      "type": "النوع"
+      "type": "النوع",
+      "checks": "فحوصات طلب الدمج"
     },
     "due": {
       "overdue": "متأخرة",
@@ -1809,5 +1810,46 @@
       "description": "ماذا ولماذا، أين نبحث، الخطوات، الاختبار",
       "subtasks": "تصميم; تطوير; اختبار"
     }
+  },
+  "checks": {
+    "state": {
+      "failing": "الفحوصات فاشلة",
+      "running": "الفحوصات قيد التشغيل",
+      "passing": "الفحوصات ناجحة"
+    },
+    "waiting": "بانتظار GitHub: تظهر الفحوصات بعد الدفع أو الفحص التالي على طلب الدمج هذا.",
+    "summary": {
+      "failing_zero": "لا فحوصات",
+      "failing_one": "فحص واحد، فاشل",
+      "failing_two": "فحصان، فاشلة",
+      "failing_few": "{{count}} فحوصات، فاشلة",
+      "failing_many": "{{count}} فحصًا، فاشلة",
+      "failing_other": "{{count}} فحص، فاشلة",
+      "running_zero": "لا فحوصات",
+      "running_one": "فحص واحد، قيد التشغيل",
+      "running_two": "فحصان، قيد التشغيل",
+      "running_few": "{{count}} فحوصات، قيد التشغيل",
+      "running_many": "{{count}} فحصًا، قيد التشغيل",
+      "running_other": "{{count}} فحص، قيد التشغيل",
+      "passing_zero": "لا فحوصات",
+      "passing_one": "فحص واحد، ناجح",
+      "passing_two": "فحصان، ناجحان",
+      "passing_few": "{{count}} فحوصات، كلها ناجحة",
+      "passing_many": "{{count}} فحصًا، كلها ناجحة",
+      "passing_other": "{{count}} فحص، كلها ناجحة",
+      "none_zero": "لا فحوصات بعد",
+      "none_one": "لا فحوصات بعد",
+      "none_two": "لا فحوصات بعد",
+      "none_few": "لا فحوصات بعد",
+      "none_many": "لا فحوصات بعد",
+      "none_other": "لا فحوصات بعد"
+    },
+    "check": {
+      "running": "قيد التشغيل",
+      "passed": "ناجح",
+      "skipped": "متخطى",
+      "failed": "فاشل"
+    },
+    "openLog": "فتح السجل"
   }
 }

@@ -36,6 +36,9 @@ export function useTaskRealtime(taskId: string | undefined): void {
         // it as theirs until the cache expires.
         qc.invalidateQueries({ queryKey: ['my-tasks'] });
         qc.invalidateQueries({ queryKey: ['task-activity', taskId] });
+        // GitHub webhooks announce PR and check changes as task updates.
+        qc.invalidateQueries({ queryKey: ['task-pull-requests', taskId] });
+        qc.invalidateQueries({ queryKey: ['task-links', taskId] });
       }
       if (e.type.startsWith('comment.')) {
         qc.invalidateQueries({ queryKey: ['task', taskId] });

@@ -1,8 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Code2, Copy } from 'lucide-react';
+import { Code2, CheckCircle2, Circle, Copy, Loader2, MinusCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTaskLinks } from '../useTaskLinks';
+import { useTaskPullRequests, type TaskPullRequest } from '../useTaskPullRequests';
+import ChecksDot from '../../../shared/components/ChecksDot';
 
 // Link kinds that describe code, builds or runtime errors for this task.
 const CODE_LINK_KINDS = new Set([
@@ -34,6 +36,9 @@ const DevelopmentSection = ({
   const { t } = useTranslation();
   const { data: links = [] } = useTaskLinks(taskId);
   const codeLinks = links.filter((link) => CODE_LINK_KINDS.has(link.kind ?? ''));
+  const hasPullRequests = codeLinks.some((link) => link.kind === 'github_pr');
+  const { data: pullRequests = [] } = useTaskPullRequests(taskId, hasPullRequests);
+  const pullRequestByRef = new Map(pullRequests.map((pr) => [pr.ref ?? '', pr]));
   const fields = [
     { key: 'type', label: t('flow.taskDetail.devType'), value: typeLabel },
     { key: 'points', label: t('flow.taskDetail.devPoints'), value: undefined },
@@ -103,7 +108,7 @@ const DevelopmentSection = ({
       {codeLinks.length > 0 ? (
         <ul className="space-y-1">
           {codeLinks.map((link) => (
-            <li key={link.id} className="flex items-baseline gap-2 text-flow-meta">
+            <li key={link.id} className="flex flex-wrap items-baseline gap-x-2 text-flow-meta">
               <a
                 href={link.url}
                 target="_blank"
@@ -111,7 +116,7 @@ const DevelopmentSection = ({
                 className="min-w-0 truncate font-medium hover:underline"
                 style={{ color: 'var(--flow-text)' }}
               >
-                {link.title || link.ref || link.url}
+                {link.title || pullRequestByRef.get(link.ref ?? '')?.title || link.ref || link.url}
               </a>
               {link.title && link.ref && (
                 <span className="shrink-0" style={{ color: 'var(--flow-text-dim)' }}>
@@ -123,6 +128,9 @@ const DevelopmentSection = ({
                   {t(`flow.taskDetail.linkState.${link.state}`, { defaultValue: link.state })}
                 </span>
               )}
+              {link.kind === 'github_pr' && (
+                <PullRequestChecks pr={pullRequestByRef.get(link.ref ?? '')} />
+              )}
             </li>
           ))}
         </ul>
@@ -132,6 +140,82 @@ const DevelopmentSection = ({
         </p>
       )}
     </section>
+  );
+};
+
+type CheckLook = { icon: typeof Circle; color: string; key: string };
+
+function checkLook(status?: string, conclusion?: string): CheckLook {
+  if (status !== 'completed') {
+    return { icon: Loader2, color: 'var(--flow-warn-fg)', key: 'running' };
+  }
+  switch (conclusion) {
+    case 'success':
+      return { icon: CheckCircle2, color: 'var(--color-success)', key: 'passed' };
+    case 'neutral':
+    case 'skipped':
+    case 'stale':
+      return { icon: MinusCircle, color: 'var(--flow-text-dim)', key: 'skipped' };
+    default:
+      return { icon: XCircle, color: 'var(--flow-danger-fg)', key: 'failed' };
+  }
+}
+
+/**
+ * The CI checks on a linked pull request's head commit (T-376): overall state,
+ * then each check with a link to its log.
+ */
+const PullRequestChecks = ({ pr }: { pr?: TaskPullRequest }): React.JSX.Element | null => {
+  const { t } = useTranslation();
+  if (!pr) return null;
+  if (!pr.known) {
+    return (
+      <p className="w-full ps-4 text-flow-meta" style={{ color: 'var(--flow-text-dim)' }}>
+        {t('flow.checks.waiting')}
+      </p>
+    );
+  }
+  const checks = pr.checks ?? [];
+  return (
+    <div className="w-full ps-4">
+      <p
+        className="flex items-center gap-1.5 text-flow-meta"
+        style={{ color: 'var(--flow-text-muted)' }}
+      >
+        <ChecksDot state={pr.checksState} />
+        {t(`flow.checks.summary.${pr.checksState || 'none'}`, { count: checks.length })}
+      </p>
+      {checks.length > 0 && (
+        <ul className="mt-0.5 space-y-0.5">
+          {checks.map((check) => {
+            const look = checkLook(check.status, check.conclusion);
+            const Icon = look.icon;
+            return (
+              <li key={check.name} className="flex items-center gap-1.5 text-flow-meta">
+                <Icon size={11} aria-hidden="true" style={{ color: look.color }} />
+                <span className="sr-only">{t(`flow.checks.check.${look.key}`)}</span>
+                {check.detailsUrl ? (
+                  <a
+                    href={check.detailsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="truncate hover:underline"
+                    style={{ color: 'var(--flow-text)' }}
+                    title={t('flow.checks.openLog')}
+                  >
+                    {check.name}
+                  </a>
+                ) : (
+                  <span className="truncate" style={{ color: 'var(--flow-text)' }}>
+                    {check.name}
+                  </span>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
   );
 };
 

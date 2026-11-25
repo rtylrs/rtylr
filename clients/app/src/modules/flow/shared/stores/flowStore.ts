@@ -185,6 +185,8 @@ export interface Task {
   /** On an epic its own colour, otherwise the colour of the epic it sits under. */
   epicColor?: string;
   dependencies?: string[];
+  /** failing, running or passing: the CI state of the task's open PRs. */
+  prChecksState?: string;
   /** How many open tasks block this one; 0 when it is free to start. */
   blockerCount?: number;
   archived?: boolean;
