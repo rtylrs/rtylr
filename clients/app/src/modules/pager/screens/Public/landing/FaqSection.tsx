@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence, motion } from 'motion/react';
-import { RtylrBrandText } from '../../../shared/components/RenniliLogo';
 
 interface FaqItem {
   q: string;
@@ -39,9 +38,7 @@ export const FaqSection = (): React.JSX.Element => {
                     aria-controls={panelId}
                     onClick={() => setOpenIndex(isOpen ? null : index)}
                   >
-                    <span>
-                      <RtylrBrandText text={item.q} />
-                    </span>
+                    <span>{item.q}</span>
                     <span className="rl-faq-toggle" aria-hidden="true" />
                   </button>
                 </h3>
@@ -55,9 +52,7 @@ export const FaqSection = (): React.JSX.Element => {
                       transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
                       style={{ overflow: 'hidden' }}
                     >
-                      <p className="rl-faq-a">
-                        <RtylrBrandText text={item.a} />
-                      </p>
+                      <p className="rl-faq-a">{item.a}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>

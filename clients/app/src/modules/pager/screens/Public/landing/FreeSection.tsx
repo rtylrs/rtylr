@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
 import { ArrowRight, Check } from 'lucide-react';
 import { PAGER_TRY_PATH, pagerClaimUrl } from '../../../pagerPaths';
-import { RtylrBrandText } from '../../../shared/components/RenniliLogo';
 
 export const FreeSection = (): React.JSX.Element => {
   const { t } = useTranslation('pager');
@@ -26,12 +25,8 @@ export const FreeSection = (): React.JSX.Element => {
                 {t('pager.landing.free.title')}
               </h2>
               <div className="rl-free-why">
-                <h3 className="rl-free-why-title">
-                  <RtylrBrandText text={t('pager.landing.free.whyTitle')} />
-                </h3>
-                <p className="rl-free-why-body">
-                  <RtylrBrandText text={t('pager.landing.free.whyBody')} />
-                </p>
+                <h3 className="rl-free-why-title">{t('pager.landing.free.whyTitle')}</h3>
+                <p className="rl-free-why-body">{t('pager.landing.free.whyBody')}</p>
               </div>
 
               <div className="rl-free-actions">
