@@ -69,6 +69,8 @@ export interface TaskFilters {
   fields?: Record<string, string[]>;
   /** Epic ids, or NO_EPIC. An epic matches its own id (see epicKeyOf). */
   epics: string[];
+  /** CI states of the task's open pull requests: failing, running, passing. */
+  checks: string[];
   /** Free text matched against title, identifier, description and label names. */
   query: string;
 }
@@ -87,6 +89,7 @@ export type FilterField =
   | 'milestones'
   | 'projects'
   | 'epics'
+  | 'checks'
   | CustomFilterField;
 
 export type ListField = Exclude<FilterField, 'due' | CustomFilterField>;
@@ -105,6 +108,7 @@ export const EMPTY_TASK_FILTERS: TaskFilters = {
   projects: [],
   fields: {},
   epics: [],
+  checks: [],
   query: '',
 };
 
@@ -117,6 +121,7 @@ const LIST_FIELDS: ListField[] = [
   'milestones',
   'projects',
   'epics',
+  'checks',
 ];
 
 export interface FilterContext {
@@ -288,6 +293,7 @@ export function matchesTaskFilters(task: Task, filters: TaskFilters, ctx: Filter
     if (!hit) return false;
   }
   if (filters.epics.length > 0 && !filters.epics.includes(epicKeyOf(task))) return false;
+  if (filters.checks.length > 0 && !filters.checks.includes(task.prChecksState ?? '')) return false;
   if (!matchesDue(task, filters, ctx.today)) return false;
   if (!matchesChanged(task, filters, ctx.today)) return false;
   return matchesQuery(task, filters.query, ctx);
@@ -381,6 +387,7 @@ export function parseTaskFilters(value: unknown): TaskFilters {
     projects: stringList(raw.projects),
     fields: fieldLists(raw.fields),
     epics: stringList(raw.epics),
+    checks: stringList(raw.checks),
     query: typeof raw.query === 'string' ? raw.query : '',
   };
 }

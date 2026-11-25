@@ -90,4 +90,13 @@ interface GitHubService {
   @delete
   @route("/link")
   unlinkGitHub(...UnlinkGitHubRequest): UnlinkGitHubResponse;
+
+  /**
+   * listTaskPullRequests returns the pull requests linked to a task, each with
+   * its state and the CI checks on its head commit (T-376). Anyone who can read
+   * the task may call it.
+   */
+  @get
+  @route("/tasks/{task_id}/pull-requests")
+  listTaskPullRequests(...ListTaskPullRequestsRequest): ListTaskPullRequestsResponse;
 }

@@ -77,7 +77,10 @@ type Task struct {
 	Dependencies      []int64
 	// Blocked is true while at least one task blocking this one is open;
 	// BlockerCount is how many are.
-	Blocked      bool
+	Blocked bool
+	// ChecksState is the worst CI state of the task's open pull requests
+	// (T-376), empty when none has checks.
+	ChecksState  string
 	BlockerCount int32
 	// FieldValues holds the task's custom field values keyed by field id.
 	FieldValues map[int64]FieldValue

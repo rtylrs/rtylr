@@ -1346,7 +1346,8 @@
       "cycle": "Itération",
       "milestone": "Jalon",
       "project": "Projet",
-      "epic": "Épopée"
+      "epic": "Épopée",
+      "checks": "Vérifications PR"
     },
     "due": {
       "overdue": "En retard",
@@ -1538,5 +1539,34 @@
       "confirm": "Terminer le cycle",
       "completing": "Clôture..."
     }
+  },
+  "checks": {
+    "state": {
+      "failing": "Vérifications en échec",
+      "running": "Vérifications en cours",
+      "passing": "Vérifications réussies"
+    },
+    "waiting": "En attente de GitHub : les vérifications s’affichent après le prochain push ou la prochaine vérification de cette pull request.",
+    "summary": {
+      "failing_one": "{{count}} vérification, en échec",
+      "failing_many": "{{count}} vérifications, en échec",
+      "failing_other": "{{count}} vérifications, en échec",
+      "running_one": "{{count}} vérification, en cours",
+      "running_many": "{{count}} vérifications, en cours",
+      "running_other": "{{count}} vérifications, en cours",
+      "passing_one": "{{count}} vérification, réussie",
+      "passing_many": "{{count}} vérifications, toutes réussies",
+      "passing_other": "{{count}} vérifications, toutes réussies",
+      "none_one": "Aucune vérification",
+      "none_many": "Aucune vérification",
+      "none_other": "Aucune vérification"
+    },
+    "check": {
+      "running": "En cours",
+      "passed": "Réussie",
+      "skipped": "Ignorée",
+      "failed": "En échec"
+    },
+    "openLog": "Ouvrir le journal"
   }
 }

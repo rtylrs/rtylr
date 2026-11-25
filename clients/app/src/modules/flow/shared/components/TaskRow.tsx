@@ -10,6 +10,7 @@ import PriorityIcon from './PriorityIcon';
 import StatusIcon from './StatusIcon';
 import AssigneeAvatar from './AssigneeAvatar';
 import BlockedBadge from './BlockedBadge';
+import ChecksDot from './ChecksDot';
 import { Check } from 'lucide-react';
 import { TaskContextMenu, ContextMenuState } from './TaskContextMenu';
 import EpicChip from './EpicChip';
@@ -153,6 +154,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({
         {(task.blockerCount ?? 0) > 0 && (
           <BlockedBadge taskId={String(task.id)} count={task.blockerCount ?? 0} />
         )}
+        <ChecksDot state={task.prChecksState} />
         <EpicChip task={task} />
         {showProject && project && (
           <span

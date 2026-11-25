@@ -84,6 +84,7 @@ export function apiTaskToTask(t: ApiTask): Task {
       (t.estimatedHours != null && Number.isFinite(t.estimatedHours) && t.estimatedHours > 0
         ? Math.round(t.estimatedHours * 60)
         : undefined),
+    prChecksState: t.prChecksState || undefined,
     waitingOn: t.waitingOn,
     decisionNote: t.decisionNote,
     focusPin: t.focusPin,

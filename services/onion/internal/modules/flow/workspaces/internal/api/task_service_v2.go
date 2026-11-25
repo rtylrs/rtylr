@@ -175,6 +175,10 @@ func toTaskV2(t domain.Task) *flowtaskv2.FlowTask {
 		out.CycleId = &v
 		out.CycleName = t.CycleName
 	}
+	if t.ChecksState != "" {
+		v := t.ChecksState
+		out.PrChecksState = &v
+	}
 	if t.PlanRank != nil {
 		v := *t.PlanRank
 		out.PlanRank = &v

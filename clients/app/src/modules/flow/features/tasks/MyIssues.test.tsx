@@ -53,6 +53,7 @@ vi.mock('./useMyTaskFilters', () => ({
         milestones: [],
         projects: [],
         epics: [],
+        checks: [],
         query: '',
       },
       setFilters: vi.fn(),

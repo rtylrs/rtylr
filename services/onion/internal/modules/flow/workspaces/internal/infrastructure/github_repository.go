@@ -204,6 +204,10 @@ func (r *Repository) ApplyGitHubWebhook(ctx context.Context, e domain.GitHubWebh
 		logger.Ctx(ctx).Error("applying github webhook failed", logger.String("event", e.Event), logger.Error(err))
 		return false, err
 	}
+	if err := applyGitHubCodeEffect(ctx, tx, e); err != nil {
+		logger.Ctx(ctx).Error("storing github pull requests and checks failed", logger.String("event", e.Event), logger.Error(err))
+		return false, err
+	}
 	if err := q.PruneGitHubWebhookDeliveries(ctx, e.ReceivedAt.Add(-githubDeliveryRetention)); err != nil {
 		logger.Ctx(ctx).Error("PruneGitHubWebhookDeliveries failed", logger.Error(err))
 		return false, err
