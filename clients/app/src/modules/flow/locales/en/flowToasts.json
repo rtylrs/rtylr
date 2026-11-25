@@ -190,5 +190,10 @@
     "deleted_other": "Field deleted. {{count}} tasks lost their value.",
     "deleteFailed": "Could not delete the field",
     "valueSaveFailed": "Could not save the value"
+  },
+  "template": {
+    "saved": "Template saved",
+    "removed": "Template removed",
+    "saveFailed": "Failed to save the template"
   }
 }

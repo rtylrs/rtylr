@@ -10,7 +10,7 @@ import type { ApiEpicRollup } from '../services/flowApi';
  * bug and feature.
  */
 
-export const TASK_TYPES: readonly TaskType[] = ['task', 'bug', 'feature', 'epic'];
+export const TASK_TYPES: readonly TaskType[] = ['task', 'feature', 'bug', 'chore', 'spike', 'epic'];
 
 /** Stands in for "no epic" in the epic filter and the epic swimlane. */
 export const NO_EPIC = 'none';

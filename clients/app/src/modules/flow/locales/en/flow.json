@@ -253,7 +253,9 @@
     "closeDuplicateKeepOpen": "Keep open",
     "noCycle": "Backlog (no cycle)",
     "noCyclesInProject": "No open cycles",
-    "startDate": "Start date"
+    "startDate": "Start date",
+    "copyBranch": "Copy branch name",
+    "branchCopied": "Branch name copied"
   },
   "time": {
     "add": {
@@ -1144,7 +1146,8 @@
       "members": "Members",
       "fields": "Fields",
       "integrations": "Integrations",
-      "danger": "Danger zone"
+      "danger": "Danger zone",
+      "templates": "Templates"
     },
     "transferConfirmHint": "Ownership will transfer immediately. Click Confirm to proceed.",
     "transferCta": "Transfer",
@@ -1385,7 +1388,8 @@
       "cycle": "Cycle",
       "milestone": "Milestone",
       "project": "Project",
-      "epic": "Epic"
+      "epic": "Epic",
+      "type": "Type"
     },
     "due": {
       "overdue": "Overdue",
@@ -1480,7 +1484,9 @@
     "task": "Task",
     "bug": "Bug",
     "feature": "Feature",
-    "epic": "Epic"
+    "epic": "Epic",
+    "chore": "Chore",
+    "spike": "Spike"
   },
   "epics": {
     "noEpic": "No epic",
@@ -1570,5 +1576,16 @@
       "confirm": "Complete cycle",
       "completing": "Completing..."
     }
+  },
+  "taskTemplates": {
+    "intro": "Each task type can start with its own description in the New task form. Bugs use the built-in template until you save one.",
+    "gateReason": "Only project admins can change templates.",
+    "usingDefault": "Using the built-in template",
+    "none": "No template",
+    "placeholder": "Markdown the description starts with",
+    "save": "Save template",
+    "remove": "Remove template",
+    "startFromDefault": "Start from the built-in template",
+    "defaultBug": "**Where**\nApp > screen > URL\n\n**Steps to reproduce**\n1. \n2. \n3. \n\n**Expected**\n\n\n**Actual**\n\n\n**Environment**\nBrowser or device, language (EN or AR)\n\n**Screenshot**\nAttach one below.\n"
   }
 }

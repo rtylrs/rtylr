@@ -196,5 +196,10 @@
     "deleted_other": "Champ supprimé. {{count}} tâches ont perdu leur valeur.",
     "deleteFailed": "Impossible de supprimer le champ",
     "valueSaveFailed": "Impossible d'enregistrer la valeur"
+  },
+  "template": {
+    "saved": "Modèle enregistré",
+    "removed": "Modèle supprimé",
+    "saveFailed": "Échec de l’enregistrement du modèle"
   }
 }

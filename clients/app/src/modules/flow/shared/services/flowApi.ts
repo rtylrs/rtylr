@@ -309,6 +309,14 @@ export interface ApiMilestone {
   project?: { name: string; color: string };
 }
 
+export interface ApiTaskTemplate {
+  id: string;
+  projectId: string;
+  taskType: string;
+  body: string;
+  updatedAt?: string;
+}
+
 export interface ApiCycleTotals {
   backlog?: number;
   active?: number;
@@ -1032,6 +1040,16 @@ export const flowApi = {
 
   listEpicRollups: (projectId: string) =>
     flowResult<{ epics: ApiEpicRollup[] }>(() => taskV2.listEpicRollups({ projectId })),
+
+  // A project's description templates, one per task type at most (T-380).
+  listTaskTemplates: (projectId: string) =>
+    flowResult<{ templates?: ApiTaskTemplate[] }>(() => taskV2.listTaskTemplates({ projectId })),
+
+  // Project admins only. An empty body removes the type's template.
+  setTaskTemplate: (projectId: string, taskType: string, body: string) =>
+    flowResult<{ template?: ApiTaskTemplate }>(() =>
+      taskV2.setTaskTemplate({ projectId, taskType, body })
+    ),
 
   // Typed relations replace the dependency endpoints: a dependency is a
   // "blocks" relation and is listed here as blocked_by.

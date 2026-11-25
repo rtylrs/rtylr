@@ -254,7 +254,9 @@
     "closeDuplicateKeepOpen": "Laisser ouverte",
     "noCycle": "Carnet (aucun cycle)",
     "noCyclesInProject": "Aucun cycle ouvert",
-    "startDate": "Date de début"
+    "startDate": "Date de début",
+    "copyBranch": "Copier le nom de branche",
+    "branchCopied": "Nom de branche copié"
   },
   "time": {
     "add": {
@@ -1158,7 +1160,8 @@
       "members": "Membres",
       "fields": "Champs",
       "integrations": "Intégrations",
-      "danger": "Zone sensible"
+      "danger": "Zone sensible",
+      "templates": "Modèles"
     },
     "transferConfirmHint": "La propriété sera transférée immédiatement. Cliquez sur Confirmer pour continuer.",
     "transferCta": "Transférer",
@@ -1402,7 +1405,8 @@
       "cycle": "Cycle",
       "milestone": "Jalon",
       "project": "Projet",
-      "epic": "Épopée"
+      "epic": "Épopée",
+      "type": "Type de tâche"
     },
     "due": {
       "overdue": "En retard",
@@ -1497,7 +1501,9 @@
     "task": "Tâche",
     "bug": "Bogue",
     "feature": "Fonctionnalité",
-    "epic": "Épopée"
+    "epic": "Épopée",
+    "chore": "Maintenance",
+    "spike": "Exploration"
   },
   "epics": {
     "noEpic": "Sans épopée",
@@ -1594,5 +1600,16 @@
       "confirm": "Terminer le cycle",
       "completing": "Clôture..."
     }
+  },
+  "taskTemplates": {
+    "intro": "Chaque type de tâche peut commencer avec sa propre description dans le formulaire Nouvelle tâche. Les bugs utilisent le modèle intégré tant que vous n’en enregistrez pas un.",
+    "gateReason": "Seuls les administrateurs du projet peuvent modifier les modèles.",
+    "usingDefault": "Modèle intégré utilisé",
+    "none": "Aucun modèle",
+    "placeholder": "Markdown de départ de la description",
+    "save": "Enregistrer le modèle",
+    "remove": "Supprimer le modèle",
+    "startFromDefault": "Partir du modèle intégré",
+    "defaultBug": "**Où**\nApplication > écran > URL\n\n**Étapes pour reproduire**\n1. \n2. \n3. \n\n**Attendu**\n\n\n**Constaté**\n\n\n**Environnement**\nNavigateur ou appareil, langue (EN ou AR)\n\n**Capture d'écran**\nJoignez-en une ci-dessous.\n"
   }
 }

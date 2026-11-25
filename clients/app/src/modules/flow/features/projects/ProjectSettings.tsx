@@ -45,6 +45,7 @@ import ProjectDeveloperModeField from './components/ProjectDeveloperModeField';
 import { useIsDeveloperProject } from '../projects-v2/useDeveloperMode';
 import ProjectRepositoriesPanel from './components/ProjectRepositoriesPanel';
 import ProjectFieldsSettings from './components/ProjectFieldsSettings';
+import ProjectTemplatesSettings from './components/ProjectTemplatesSettings';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 
@@ -64,9 +65,9 @@ const ProjectSettings: React.FC = () => {
 
   const [name, setName] = useState(project?.name || '');
   const [description, setDescription] = useState(displayDescription(project?.description));
-  const [tab, setTab] = useState<'general' | 'members' | 'fields' | 'integrations' | 'danger'>(
-    'general'
-  );
+  const [tab, setTab] = useState<
+    'general' | 'members' | 'fields' | 'templates' | 'integrations' | 'danger'
+  >('general');
 
   // Projects load async into the store and the same component instance is
   // reused when switching projects, so sync the form when the project changes.
@@ -139,6 +140,7 @@ const ProjectSettings: React.FC = () => {
     { id: 'general', label: t('flow.projectSettings.tabs.general') },
     { id: 'members', label: t('flow.projectSettings.tabs.members') },
     { id: 'fields', label: t('flow.projectSettings.tabs.fields') },
+    { id: 'templates', label: t('flow.projectSettings.tabs.templates') },
     { id: 'integrations', label: t('flow.projectSettings.tabs.integrations') },
     { id: 'danger', label: t('flow.projectSettings.tabs.danger') },
   ] as const;
@@ -270,6 +272,11 @@ const ProjectSettings: React.FC = () => {
         {/* ── Fields ── */}
         {tab === 'fields' && (
           <ProjectFieldsSettings projectId={projectId} canManage={canManageProject} />
+        )}
+
+        {/* ── Templates ── */}
+        {tab === 'templates' && (
+          <ProjectTemplatesSettings projectId={projectId} canManage={canManageProject} />
         )}
 
         {/* ── Members ── */}
