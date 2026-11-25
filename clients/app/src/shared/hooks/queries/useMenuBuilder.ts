@@ -1,13 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createOneKitClient } from '@voxire/api';
+import i18next from 'i18next';
 import { toast } from 'sonner';
 import type {
+  BranchMenuItemConfig,
   MenuCurrency,
   MenuPreset,
   MenuProfile,
   MenuStampCard,
+  MenuTableAction,
   MenuTranslationSourceEntry,
 } from '@voxire/voxie/hub/menu/v1/types';
-import { menuClient, posLocationClient } from '../../lib/clients';
+import { MenuItemServiceClient } from '@voxire/voxie/pos/menu_item/v1/client';
+import type { MenuItem as ApiMenuItem } from '@voxire/voxie/pos/menu_item/v1/types';
+import { businessClient, menuClient, posLocationClient, tableClient } from '../../lib/clients';
+
+const menuItemClient = createOneKitClient(MenuItemServiceClient, 'dash');
 
 export interface MenuBranchOption {
   id: number;
@@ -15,11 +23,38 @@ export interface MenuBranchOption {
   slug: string;
 }
 
-export const useMenuBranches = () =>
+export interface MenuTableOption {
+  id: string;
+  locationId: number;
+  label: string;
+}
+
+/**
+ * Resolves the business's public branches using the same HR location source
+ * (`businessClient.lookupBusinessBySlug`) that `LocationMenu` renders, so
+ * branch IDs and URL slugs always match across Studio, QR codes, and storefront.
+ */
+export const useMenuBranches = (businessSlug?: string) =>
   useQuery<MenuBranchOption[]>({
-    queryKey: ['menu-builder', 'branches'],
+    queryKey: ['menu-builder', 'branches', businessSlug ?? ''],
     staleTime: 60_000,
     queryFn: async () => {
+      const slug = (businessSlug ?? '').trim().toLowerCase();
+      if (slug) {
+        try {
+          const res = await businessClient.lookupBusinessBySlug({ slug });
+          const hrLocations = (res.locations ?? [])
+            .map((loc) => ({
+              id: Number(loc.id ?? 0),
+              name: loc.name ?? '',
+              slug: loc.slug ?? '',
+            }))
+            .filter((loc) => loc.id > 0 && loc.slug);
+          if (hrLocations.length > 0) return hrLocations;
+        } catch {
+          // Fall back to POS locations when public slug lookup is unavailable.
+        }
+      }
       const res = await posLocationClient.listLocations({});
       return (res.locations ?? []).map((loc) => ({
         id: Number(loc.id ?? 0),
@@ -29,6 +64,30 @@ export const useMenuBranches = () =>
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/^-|-$/g, ''),
       }));
+    },
+  });
+
+export const useMenuTables = () =>
+  useQuery<MenuTableOption[]>({
+    queryKey: ['menu-builder', 'tables'],
+    staleTime: 60_000,
+    queryFn: async () => {
+      const res = await tableClient.listTables({});
+      return (res.tables ?? []).map((tb) => ({
+        id: String(tb.id ?? ''),
+        locationId: Number(tb.locationId ?? 0),
+        label: tb.label ?? `Table ${tb.id ?? ''}`,
+      }));
+    },
+  });
+
+export const useMenuCatalogItems = () =>
+  useQuery<ApiMenuItem[]>({
+    queryKey: ['menu-builder', 'catalog-items'],
+    staleTime: 60_000,
+    queryFn: async () => {
+      const res = await menuItemClient.listMenuItems({});
+      return res.items ?? [];
     },
   });
 
@@ -50,7 +109,6 @@ export const useSaveMenuProfileDraft = () => {
       locationId: number;
       draftConfigJson: string;
       customCss?: string;
-      whiteLabelHideBadge?: boolean;
       defaultLocale?: string;
       enabledLocales?: string[];
       defaultCurrency?: string;
@@ -59,7 +117,6 @@ export const useSaveMenuProfileDraft = () => {
         ...(params.locationId > 0 ? { locationId: String(params.locationId) } : {}),
         draftConfigJson: params.draftConfigJson,
         customCss: params.customCss,
-        whiteLabelHideBadge: params.whiteLabelHideBadge,
         defaultLocale: params.defaultLocale,
         enabledLocales: params.enabledLocales,
         defaultCurrency: params.defaultCurrency,
@@ -70,10 +127,12 @@ export const useSaveMenuProfileDraft = () => {
       void queryClient.invalidateQueries({
         queryKey: ['menu-builder', 'profile', vars.locationId],
       });
-      toast.success('Draft saved');
+      toast.success(i18next.t('design.toasts.draftSaved', 'Draft saved'));
     },
     onError: (err: unknown) => {
-      const msg = (err as { message?: string })?.message || 'Failed to save draft';
+      const msg =
+        (err as { message?: string })?.message ||
+        i18next.t('design.toasts.draftSaveFailed', 'Failed to save draft');
       toast.error(msg);
     },
   });
@@ -90,10 +149,13 @@ export const usePublishMenuProfile = () => {
     },
     onSuccess: (_data, locationId) => {
       void queryClient.invalidateQueries({ queryKey: ['menu-builder', 'profile', locationId] });
-      toast.success('Branded menu published live');
+      void queryClient.invalidateQueries({ queryKey: ['public-menu-brand-bundle'] });
+      toast.success(i18next.t('design.toasts.published', 'Branded menu published live'));
     },
     onError: (err: unknown) => {
-      const msg = (err as { message?: string })?.message || 'Failed to publish menu';
+      const msg =
+        (err as { message?: string })?.message ||
+        i18next.t('design.toasts.publishFailed', 'Failed to publish menu');
       toast.error(msg);
     },
   });
@@ -116,10 +178,12 @@ export const useCloneMenuProfile = () => {
       void queryClient.invalidateQueries({
         queryKey: ['menu-builder', 'currencies', vars.targetLocationId],
       });
-      toast.success('Copied branch menu configuration');
+      toast.success(i18next.t('design.toasts.cloned', 'Copied branch menu configuration'));
     },
     onError: (err: unknown) => {
-      const msg = (err as { message?: string })?.message || 'Failed to copy branch menu';
+      const msg =
+        (err as { message?: string })?.message ||
+        i18next.t('design.toasts.cloneFailed', 'Failed to copy branch menu');
       toast.error(msg);
     },
   });
@@ -155,6 +219,56 @@ export const useDeleteMenuPreset = () => {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['menu-builder', 'presets'] });
+    },
+  });
+};
+
+export const useBranchMenuItems = (locationId: number) =>
+  useQuery<BranchMenuItemConfig[]>({
+    queryKey: ['menu-builder', 'branch-items', locationId],
+    queryFn: async () => {
+      const res = await menuClient.listBranchMenuItems({
+        ...(locationId > 0 ? { locationId: String(locationId) } : {}),
+      });
+      return res.items ?? [];
+    },
+  });
+
+export const useUpsertBranchMenuItem = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: {
+      locationId: number;
+      menuItemId: string;
+      isVisible: boolean;
+      hasPriceOverride?: boolean;
+      priceOverride?: number;
+      displayOrder?: number;
+      featuredBadge?: string;
+    }) => {
+      const res = await menuClient.upsertBranchMenuItem({
+        ...(params.locationId > 0 ? { locationId: String(params.locationId) } : {}),
+        menuItemId: params.menuItemId,
+        isVisible: params.isVisible,
+        hasPriceOverride: params.hasPriceOverride ?? false,
+        priceOverride: params.priceOverride ?? 0,
+        displayOrder: params.displayOrder ?? 0,
+        featuredBadge: params.featuredBadge ?? '',
+      });
+      return res.item;
+    },
+    onSuccess: (_data, vars) => {
+      void queryClient.invalidateQueries({
+        queryKey: ['menu-builder', 'branch-items', vars.locationId],
+      });
+      void queryClient.invalidateQueries({ queryKey: ['public-menu-brand-bundle'] });
+      toast.success(i18next.t('design.toasts.branchItemSaved', 'Branch item updated'));
+    },
+    onError: (err: unknown) => {
+      const msg =
+        (err as { message?: string })?.message ||
+        i18next.t('design.toasts.branchItemFailed', 'Failed to update branch item');
+      toast.error(msg);
     },
   });
 };
@@ -197,7 +311,7 @@ export const useUpsertMenuCurrency = () => {
       void queryClient.invalidateQueries({
         queryKey: ['menu-builder', 'currencies', vars.locationId],
       });
-      toast.success('Currency saved');
+      toast.success(i18next.t('design.toasts.currencySaved', 'Currency saved'));
     },
   });
 };
@@ -260,7 +374,7 @@ export const useUpsertStampCard = () => {
       void queryClient.invalidateQueries({
         queryKey: ['menu-builder', 'stamp-cards', vars.locationId],
       });
-      toast.success('Stamp card saved');
+      toast.success(i18next.t('design.toasts.stampCardSaved', 'Stamp card saved'));
     },
   });
 };
@@ -282,14 +396,52 @@ export const useTranslateMenu = () =>
     },
     onSuccess: (res) => {
       toast.success(
-        `Translated ${res.translatedCount ?? 0} entries (${res.skippedManualCount ?? 0} manual kept)`
+        i18next.t('design.toasts.translated', {
+          count: res.translatedCount ?? 0,
+          skipped: res.skippedManualCount ?? 0,
+          defaultValue: 'Translated {{count}} entries ({{skipped}} manual kept)',
+        })
       );
     },
     onError: (err: unknown) => {
-      const msg = (err as { message?: string })?.message || 'Translation failed';
+      const msg =
+        (err as { message?: string })?.message ||
+        i18next.t('design.toasts.translationFailed', 'Translation failed');
       toast.error(msg);
     },
   });
+
+export const useTableActions = (locationId: number, status?: string) =>
+  useQuery<MenuTableAction[]>({
+    queryKey: ['menu-builder', 'table-actions', locationId, status ?? ''],
+    refetchInterval: 30_000,
+    queryFn: async () => {
+      const res = await menuClient.listTableActions({
+        ...(locationId > 0 ? { locationId: String(locationId) } : {}),
+        ...(status ? { status } : {}),
+      });
+      return res.actions ?? [];
+    },
+  });
+
+export const useUpdateTableActionStatus = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: { id: string; status: 'open' | 'acknowledged' | 'resolved' }) => {
+      await menuClient.updateTableActionStatus(params);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['menu-builder', 'table-actions'] });
+      toast.success(i18next.t('design.toasts.tableActionUpdated', 'Table request updated'));
+    },
+    onError: (err: unknown) => {
+      const msg =
+        (err as { message?: string })?.message ||
+        i18next.t('design.toasts.tableActionFailed', 'Failed to update table request');
+      toast.error(msg);
+    },
+  });
+};
 
 export const useMenuAnalyticsSummary = (locationId: number, days = 30) =>
   useQuery({

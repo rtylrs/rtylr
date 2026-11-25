@@ -27,5 +27,11 @@
   "nameRequired": "يرجى إدخال الاسم.",
   "phoneRequired": "يرجى إدخال رقم الهاتف.",
   "emailInvalid": "يرجى إدخال بريد إلكتروني صحيح.",
-  "orderFailed": "فشل في تأكيد الطلب. يرجى المحاولة مرة أخرى."
+  "orderFailed": "فشل في تأكيد الطلب. يرجى المحاولة مرة أخرى.",
+  "fulfillmentDineIn": "في المطعم",
+  "fulfillmentSelfService": "خدمة ذاتية",
+  "fulfillmentPickup": "استلام من الفرع",
+  "fulfillmentDelivery": "توصيل",
+  "deliveryAddressPlaceholder": "عنوان التوصيل",
+  "crmOptInLabel": "اكسب أختام الولاء واحفظ سجل الطلبات"
 }

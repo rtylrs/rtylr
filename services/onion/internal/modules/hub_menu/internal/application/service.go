@@ -71,6 +71,7 @@ type Service struct {
 	hostResolver    HostResolver
 	eventDispatcher EventDispatcher
 	translator      AITranslator
+	tenantValidator TenantValidator
 }
 
 func NewService(_ context.Context, repo repository) *Service {

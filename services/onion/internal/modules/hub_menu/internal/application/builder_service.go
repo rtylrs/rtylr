@@ -20,6 +20,13 @@ type EventDispatcher func(ctx context.Context, event eventbus.Event) error
 // AITranslator translates a batch of source strings into a target locale.
 type AITranslator func(ctx context.Context, targetLocale string, inputs []string) ([]string, error)
 
+// TenantValidator verifies that referenced branch/table/item IDs belong to businessID.
+type TenantValidator struct {
+	ValidateLocation func(ctx context.Context, businessID, locationID int64) error
+	ValidateTable    func(ctx context.Context, businessID, tableID int64) error
+	ValidateMenuItem func(ctx context.Context, businessID, menuItemID int64) error
+}
+
 func (s *Service) WithHostResolver(fn HostResolver) *Service {
 	s.hostResolver = fn
 	return s
@@ -33,6 +40,41 @@ func (s *Service) WithEventDispatcher(fn EventDispatcher) *Service {
 func (s *Service) WithTranslator(fn AITranslator) *Service {
 	s.translator = fn
 	return s
+}
+
+func (s *Service) WithTenantValidator(v TenantValidator) *Service {
+	s.tenantValidator = v
+	return s
+}
+
+func (s *Service) validateLocation(ctx context.Context, businessID, locationID int64) error {
+	if locationID <= 0 || s.tenantValidator.ValidateLocation == nil {
+		return nil
+	}
+	if err := s.tenantValidator.ValidateLocation(ctx, businessID, locationID); err != nil {
+		return fmt.Errorf("%w: %v", domain.ErrMenuProfileInvalidInput, err)
+	}
+	return nil
+}
+
+func (s *Service) validateTable(ctx context.Context, businessID, tableID int64) error {
+	if tableID <= 0 || s.tenantValidator.ValidateTable == nil {
+		return nil
+	}
+	if err := s.tenantValidator.ValidateTable(ctx, businessID, tableID); err != nil {
+		return fmt.Errorf("%w: %v", domain.ErrTableActionInvalidInput, err)
+	}
+	return nil
+}
+
+func (s *Service) validateMenuItem(ctx context.Context, businessID, menuItemID int64) error {
+	if menuItemID <= 0 || s.tenantValidator.ValidateMenuItem == nil {
+		return nil
+	}
+	if err := s.tenantValidator.ValidateMenuItem(ctx, businessID, menuItemID); err != nil {
+		return fmt.Errorf("%w: %v", domain.ErrBranchItemInvalidInput, err)
+	}
+	return nil
 }
 
 func (s *Service) GetMenuProfile(ctx context.Context, businessID, locationID int64) (domain.MenuProfile, error) {
@@ -52,6 +94,9 @@ func (s *Service) GetMenuProfile(ctx context.Context, businessID, locationID int
 func (s *Service) SaveMenuProfileDraft(ctx context.Context, businessID int64, input domain.SaveMenuProfileDraftInput) (domain.MenuProfile, error) {
 	if input.LocationID < 0 {
 		return domain.MenuProfile{}, fmt.Errorf("%w: location_id must be non-negative", domain.ErrMenuProfileInvalidInput)
+	}
+	if err := s.validateLocation(ctx, businessID, input.LocationID); err != nil {
+		return domain.MenuProfile{}, err
 	}
 	trimmedJSON := strings.TrimSpace(input.DraftConfigJSON)
 	if trimmedJSON == "" || !json.Valid([]byte(trimmedJSON)) {
@@ -103,6 +148,9 @@ func (s *Service) PublishMenuProfile(ctx context.Context, businessID, locationID
 	if locationID < 0 {
 		locationID = 0
 	}
+	if err := s.validateLocation(ctx, businessID, locationID); err != nil {
+		return domain.MenuProfile{}, err
+	}
 	profile, found, err := s.repo.GetMenuProfile(ctx, businessID, locationID)
 	if err != nil {
 		return domain.MenuProfile{}, err
@@ -134,6 +182,12 @@ func (s *Service) CloneMenuProfile(ctx context.Context, businessID, sourceLocati
 	}
 	if sourceLocationID == targetLocationID {
 		return domain.MenuProfile{}, fmt.Errorf("%w: source and target locations must differ", domain.ErrMenuProfileInvalidInput)
+	}
+	if err := s.validateLocation(ctx, businessID, sourceLocationID); err != nil {
+		return domain.MenuProfile{}, err
+	}
+	if err := s.validateLocation(ctx, businessID, targetLocationID); err != nil {
+		return domain.MenuProfile{}, err
 	}
 	sourceProfile, err := s.GetMenuProfile(ctx, businessID, sourceLocationID)
 	if err != nil {
@@ -204,6 +258,12 @@ func (s *Service) UpsertBranchMenuItem(ctx context.Context, businessID int64, it
 	if item.LocationID < 0 {
 		item.LocationID = 0
 	}
+	if err := s.validateLocation(ctx, businessID, item.LocationID); err != nil {
+		return domain.BranchMenuItem{}, err
+	}
+	if err := s.validateMenuItem(ctx, businessID, item.MenuItemID); err != nil {
+		return domain.BranchMenuItem{}, err
+	}
 	if item.HasPriceOverride && item.PriceOverride < 0 {
 		return domain.BranchMenuItem{}, fmt.Errorf("%w: price_override must be non-negative", domain.ErrBranchItemInvalidInput)
 	}
@@ -243,6 +303,9 @@ func (s *Service) UpsertMenuTranslation(ctx context.Context, businessID int64, t
 	if tr.LocationID < 0 {
 		tr.LocationID = 0
 	}
+	if err := s.validateLocation(ctx, businessID, tr.LocationID); err != nil {
+		return domain.MenuTranslation{}, err
+	}
 	if tr.EntityType == "" || tr.EntityID == "" || tr.Locale == "" || tr.Field == "" || tr.Value == "" {
 		return domain.MenuTranslation{}, fmt.Errorf("%w: entity_type, entity_id, locale, field, and value are required", domain.ErrTranslationInvalidInput)
 	}
@@ -266,6 +329,9 @@ func (s *Service) TranslateMenu(
 ) (translatedCount int32, skippedManual int32, results []domain.MenuTranslation, err error) {
 	if locationID < 0 {
 		locationID = 0
+	}
+	if err := s.validateLocation(ctx, businessID, locationID); err != nil {
+		return 0, 0, nil, err
 	}
 	if len(targetLocales) == 0 {
 		return 0, 0, nil, fmt.Errorf("%w: at least one target locale is required", domain.ErrTranslationInvalidInput)
@@ -373,6 +439,9 @@ func (s *Service) UpsertMenuCurrency(ctx context.Context, businessID int64, cur 
 	if cur.LocationID < 0 {
 		cur.LocationID = 0
 	}
+	if err := s.validateLocation(ctx, businessID, cur.LocationID); err != nil {
+		return nil, err
+	}
 	if len(cur.Code) < 2 || len(cur.Code) > 12 {
 		return nil, fmt.Errorf("%w: code must be 2-12 uppercase letters", domain.ErrCurrencyInvalidInput)
 	}
@@ -400,6 +469,9 @@ func (s *Service) DeleteMenuCurrency(ctx context.Context, businessID, locationID
 	if locationID < 0 {
 		locationID = 0
 	}
+	if err := s.validateLocation(ctx, businessID, locationID); err != nil {
+		return err
+	}
 	return s.repo.DeleteMenuCurrency(ctx, businessID, locationID, code)
 }
 
@@ -416,6 +488,9 @@ func (s *Service) UpsertStampCard(ctx context.Context, businessID int64, card do
 	card.RewardLabel = strings.TrimSpace(card.RewardLabel)
 	if card.LocationID < 0 {
 		card.LocationID = 0
+	}
+	if err := s.validateLocation(ctx, businessID, card.LocationID); err != nil {
+		return domain.StampCard{}, err
 	}
 	if card.Title == "" || len(card.Title) > 160 {
 		return domain.StampCard{}, fmt.Errorf("%w: title is required", domain.ErrStampCardInvalidInput)
@@ -446,7 +521,20 @@ func (s *Service) DeleteStampCard(ctx context.Context, businessID, id int64) err
 
 func (s *Service) GetPublicCustomerStamps(ctx context.Context, businessID int64, phone string) ([]domain.CustomerStampProgress, error) {
 	phone = strings.TrimSpace(phone)
-	if businessID <= 0 || phone == "" {
+	digits := 0
+	for _, r := range phone {
+		if r >= '0' && r <= '9' {
+			digits++
+		}
+	}
+	if businessID <= 0 || digits < 7 {
+		return []domain.CustomerStampProgress{}, nil
+	}
+	profile, found, err := s.repo.GetMenuProfile(ctx, businessID, 0)
+	if err != nil {
+		return nil, err
+	}
+	if found && profile.IsPublished && !domain.IsLoyaltyStampsEnabled(profile.PublishedConfigJSON) {
 		return []domain.CustomerStampProgress{}, nil
 	}
 	return s.repo.GetCustomerStampProgress(ctx, businessID, phone)
@@ -483,6 +571,12 @@ func (s *Service) CreatePublicTableAction(ctx context.Context, businessID int64,
 	if businessID <= 0 {
 		return domain.TableAction{}, fmt.Errorf("%w: business_id is required", domain.ErrTableActionInvalidInput)
 	}
+	if err := s.validateLocation(ctx, businessID, action.LocationID); err != nil {
+		return domain.TableAction{}, err
+	}
+	if err := s.validateTable(ctx, businessID, action.TableID); err != nil {
+		return domain.TableAction{}, err
+	}
 	action.ActionType = strings.ToLower(strings.TrimSpace(action.ActionType))
 	switch action.ActionType {
 	case "call_waiter", "request_bill", "split_bill":
@@ -517,6 +611,12 @@ func (s *Service) CreatePublicTableAction(ctx context.Context, businessID int64,
 }
 
 func (s *Service) ListTableActions(ctx context.Context, businessID, locationID int64, status string) ([]domain.TableAction, error) {
+	if locationID < 0 {
+		locationID = 0
+	}
+	if err := s.validateLocation(ctx, businessID, locationID); err != nil {
+		return nil, err
+	}
 	status = strings.ToLower(strings.TrimSpace(status))
 	if status != "" && status != "open" && status != "acknowledged" && status != "resolved" {
 		return nil, fmt.Errorf("%w: invalid status", domain.ErrTableActionInvalidInput)
@@ -541,6 +641,9 @@ func (s *Service) TrackPublicMenuEvents(ctx context.Context, businessID int64, e
 	}
 	valid := make([]domain.MenuEventInput, 0, len(events))
 	for _, ev := range events {
+		if err := s.validateLocation(ctx, businessID, ev.LocationID); err != nil {
+			return 0, fmt.Errorf("%w: invalid location_id", domain.ErrEventInvalidInput)
+		}
 		ev.EventType = strings.ToLower(strings.TrimSpace(ev.EventType))
 		switch ev.EventType {
 		case "qr_scan", "menu_view", "item_view", "add_to_cart", "checkout_start", "order_placed":
@@ -611,8 +714,16 @@ func (s *Service) GetPublicMenuBundle(ctx context.Context, businessID, locationI
 			effectiveLocationID = 0
 		}
 	}
-	if !found {
+	if !found || !profile.IsPublished {
+		// Never expose unpublished draft config or draft CSS to public customers.
 		profile = defaultMenuProfile(businessID, locationID)
+		profile.DraftConfigJSON = ""
+		profile.CustomCSS = ""
+		profile.PublishedConfigJSON = ""
+		profile.PublishedCustomCSS = ""
+	} else {
+		profile.DraftConfigJSON = ""
+		profile.CustomCSS = ""
 	}
 
 	banners, err := s.repo.ListActivePublicBanners(ctx, businessID)
@@ -653,24 +764,51 @@ func (s *Service) GetPublicMenuBundle(ctx context.Context, businessID, locationI
 }
 
 // ResolvePaymentRedirectURL returns the configured third-party payment redirect URL
-// for a business/branch when the tenant chose redirect mode instead of pay-at-POS.
+// strictly from a published profile when payment.mode == "redirect".
 func (s *Service) ResolvePaymentRedirectURL(ctx context.Context, businessID, locationID int64) string {
 	profile, found, err := s.repo.GetMenuProfile(ctx, businessID, locationID)
-	if err != nil || !found {
+	if err != nil || !found || !profile.IsPublished {
 		if locationID > 0 {
 			profile, found, err = s.repo.GetMenuProfile(ctx, businessID, 0)
-			if err != nil || !found {
+			if err != nil || !found || !profile.IsPublished {
 				return ""
 			}
 		} else {
 			return ""
 		}
 	}
-	cfg := profile.PublishedConfigJSON
-	if cfg == "" {
-		cfg = profile.DraftConfigJSON
+	return domain.ExtractPaymentRedirectURL(profile.PublishedConfigJSON)
+}
+
+// ResolveBranchItemOverride returns visibility and optional branch price override for POS checkout.
+func (s *Service) ResolveBranchItemOverride(ctx context.Context, businessID, locationID, menuItemID int64) (visible bool, hasPriceOverride bool, priceOverride float64, err error) {
+	if businessID <= 0 || menuItemID <= 0 {
+		return true, false, 0, nil
 	}
-	return domain.ExtractPaymentRedirectURL(cfg)
+	if locationID < 0 {
+		locationID = 0
+	}
+	items, err := s.repo.ListBranchMenuItems(ctx, businessID, locationID)
+	if err != nil {
+		return true, false, 0, err
+	}
+	for _, item := range items {
+		if item.MenuItemID == menuItemID {
+			return item.IsVisible, item.HasPriceOverride, item.PriceOverride, nil
+		}
+	}
+	if locationID > 0 {
+		defaultItems, err := s.repo.ListBranchMenuItems(ctx, businessID, 0)
+		if err != nil {
+			return true, false, 0, err
+		}
+		for _, item := range defaultItems {
+			if item.MenuItemID == menuItemID {
+				return item.IsVisible, item.HasPriceOverride, item.PriceOverride, nil
+			}
+		}
+	}
+	return true, false, 0, nil
 }
 
 func (s *Service) emitEvent(ctx context.Context, businessID int64, eventType string, payload map[string]any) {

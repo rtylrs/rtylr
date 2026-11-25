@@ -37,6 +37,7 @@
       "brand": "Marque",
       "layout": "Mise en page",
       "features": "Options",
+      "ops": "Direct",
       "ai": "Caret IA",
       "css": "CSS"
     },
@@ -90,7 +91,44 @@
     "quickStylePrompt": "Style rapide par prompt",
     "aiPromptPlaceholder": "ex. bistro sombre doré",
     "apply": "Appliquer",
-    "cssSubtitle": "CSS personnalisé appliqué dans .rtylr-menu-root et nettoyé à l’enregistrement."
+    "cssSubtitle": "CSS personnalisé appliqué dans .rtylr-menu-root et nettoyé à l’enregistrement.",
+    "opsTitle": "Opérations et analyses en direct",
+    "opsSubtitle": "Suivez les scans, gérez les demandes à table et ajustez les articles par point de vente.",
+    "analyticsTitle": "30 derniers jours",
+    "metricScans": "Scans QR",
+    "metricViews": "Vues menu",
+    "metricCarts": "Ajouts panier",
+    "metricOrders": "Commandes",
+    "tableQueueTitle": "Demandes à table",
+    "tableQueueEmpty": "Aucune demande en attente.",
+    "acknowledge": "Prendre en charge",
+    "resolve": "Terminer",
+    "branchItemsTitle": "Personnalisation par site",
+    "branchItemsEmpty": "Ajoutez des articles POS pour gérer la visibilité et les prix par point de vente.",
+    "priceOverridePlaceholder": "Prix personnalisé"
+  },
+  "toasts": {
+    "draftSaved": "Brouillon enregistré",
+    "draftSaveFailed": "Échec de l’enregistrement du brouillon",
+    "published": "Menu publié en ligne",
+    "publishFailed": "Échec de la publication",
+    "cloned": "Configuration copiée",
+    "cloneFailed": "Échec de la copie",
+    "branchItemSaved": "Article mis à jour pour ce site",
+    "branchItemFailed": "Échec de la mise à jour de l’article",
+    "currencySaved": "Devise enregistrée",
+    "stampCardSaved": "Carte à tampons enregistrée",
+    "translated": "{{count}} entrées traduites ({{skipped}} modifs manuelles conservées)",
+    "translationFailed": "Échec de la traduction",
+    "tableActionUpdated": "Demande mise à jour",
+    "tableActionFailed": "Échec de la mise à jour"
+  },
+  "qr": {
+    "branch": "Point de vente",
+    "allBranches": "Tous les sites",
+    "tableCounter": "Table / Comptoir",
+    "generalMenuQr": "QR menu général",
+    "useCustomDomain": "Utiliser le domaine personnalisé ({{domain}})"
   },
   "pages": {
     "about": "À propos",

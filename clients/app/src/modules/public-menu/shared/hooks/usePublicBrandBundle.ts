@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { QueryClientContext } from '@tanstack/react-query';
 import {
   DEFAULT_LAYOUT_CONFIG,
+  type CustomerStampProgressData,
   type MenuBannerData,
   type MenuCurrencyOption,
   type MenuLayoutConfig,
@@ -45,13 +46,9 @@ export async function fetchPublicBrandBundle(
     ...(locale ? { locale } : {}),
   });
   const profile = res.profile;
-  const rawCfg = profile?.isPublished
-    ? profile.publishedConfigJson || profile.draftConfigJson
-    : profile?.draftConfigJson;
+  const rawCfg = profile?.isPublished ? profile.publishedConfigJson : undefined;
   const parsed = parseProfileConfig(rawCfg);
-  const customCss = profile?.isPublished
-    ? profile.publishedCustomCss || profile.customCss || ''
-    : profile?.customCss || '';
+  const customCss = profile?.isPublished ? profile.publishedCustomCss || '' : '';
 
   const config: MenuLayoutConfig = {
     ...DEFAULT_LAYOUT_CONFIG,
@@ -61,7 +58,7 @@ export async function fetchPublicBrandBundle(
     items: { ...DEFAULT_LAYOUT_CONFIG.items, ...parsed.items },
     pages: { menu: true, ...parsed.pages },
     typography: { ...DEFAULT_LAYOUT_CONFIG.typography!, ...parsed.typography },
-    customCss: customCss || parsed.customCss,
+    customCss: customCss || undefined,
   };
 
   const branchItems = new Map<number, BranchItemOverride>();
@@ -217,6 +214,23 @@ export function trackPublicMenuEventSafe(params: {
       ],
     })
     .catch(() => undefined);
+}
+
+export async function lookupPublicCustomerStampsSafe(
+  businessId: number,
+  phone: string
+): Promise<CustomerStampProgressData[]> {
+  const res = await menuBuilderClient.getPublicCustomerStamps({
+    businessId: String(businessId),
+    phone: phone.trim(),
+  });
+  return (res.progress ?? []).map((p) => ({
+    stampCardId: String(p.stampCardId ?? ''),
+    stampsCount: p.stampsCount ?? 0,
+    stampsRequired: p.stampsRequired ?? 10,
+    rewardsUnlocked: p.rewardsUnlocked ?? 0,
+    rewardLabel: p.rewardLabel ?? '',
+  }));
 }
 
 export async function resolvePublicCustomDomain(host: string): Promise<{

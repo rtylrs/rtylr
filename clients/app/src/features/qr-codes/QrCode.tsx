@@ -8,10 +8,129 @@ import { toast } from 'sonner';
 import { QRCode } from 'react-qrcode-logo';
 import { saveAs } from 'file-saver';
 import { useUserStore } from '../../shared/stores/userStore';
-import { configClient, posLocationClient, tableClient } from '../../shared/lib/clients';
+import { useCustomDomain } from '../../shared/hooks/queries/useBusiness';
+import { useMenuBranches, useMenuTables } from '../../shared/hooks/queries/useMenuBuilder';
 import { QrCodeTemplate, QrCodeTemplates, QrOptions } from './templates';
 
 import { PORTAL_URL, buildPublicMenuUrl, buildPublicMenuUrlById } from '@voxire/config';
+
+interface QrTargetControlsProps {
+  businessSlug: string;
+  selectedBranchSlug: string;
+  selectedTableId: string;
+  useCustomDomain: boolean;
+  onBranchChange: (slug: string) => void;
+  onTableChange: (id: string, label: string) => void;
+  onUseCustomDomainChange: (checked: boolean) => void;
+  onVerifiedDomainChange: (domain: string) => void;
+}
+
+const QrTargetControls: React.FC<QrTargetControlsProps> = ({
+  businessSlug,
+  selectedBranchSlug,
+  selectedTableId,
+  useCustomDomain: useCustomDomainChecked,
+  onBranchChange,
+  onTableChange,
+  onUseCustomDomainChange,
+  onVerifiedDomainChange,
+}) => {
+  const { t } = useTranslation();
+  const { data: branches = [] } = useMenuBranches(businessSlug);
+  const { data: allTables = [] } = useMenuTables();
+  const { data: domainData } = useCustomDomain();
+
+  const verifiedDomain =
+    domainData?.status === 'verified' && domainData.domain ? domainData.domain : '';
+
+  useEffect(() => {
+    onVerifiedDomainChange(verifiedDomain);
+  }, [verifiedDomain, onVerifiedDomainChange]);
+
+  const selectedBranch = branches.find((b) => b.slug === selectedBranchSlug);
+  const filteredTables = selectedBranch
+    ? allTables.filter((tb) => tb.locationId === 0 || tb.locationId === selectedBranch.id)
+    : allTables;
+
+  if (branches.length === 0 && filteredTables.length === 0 && !verifiedDomain) {
+    return null;
+  }
+
+  return (
+    <div
+      className="flex flex-wrap items-center gap-3 rounded-xl border p-4"
+      style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
+    >
+      {branches.length > 0 && (
+        <label className="flex items-center gap-2 text-xs text-muted">
+          <span>{t('design.qr.branch', 'Branch')}</span>
+          <select
+            aria-label={t('design.qr.branch', 'Branch')}
+            value={selectedBranchSlug}
+            onChange={(e) => {
+              onBranchChange(e.target.value);
+              onTableChange('', '');
+            }}
+            className="rounded-lg border px-2.5 py-1.5 text-sm"
+            style={{
+              background: 'var(--dash-input-bg)',
+              borderColor: 'var(--dash-border)',
+              color: 'var(--dash-text)',
+            }}
+          >
+            <option value="">{t('design.qr.allBranches', 'All branches')}</option>
+            {branches.map((b) => (
+              <option key={b.id} value={b.slug}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+      {filteredTables.length > 0 && (
+        <label className="flex items-center gap-2 text-xs text-muted">
+          <span>{t('design.qr.tableCounter', 'Table / Counter')}</span>
+          <select
+            aria-label={t('design.qr.tableCounter', 'Table / Counter')}
+            value={selectedTableId}
+            onChange={(e) => {
+              const found = filteredTables.find((tb) => tb.id === e.target.value);
+              onTableChange(e.target.value, found?.label ?? '');
+            }}
+            className="rounded-lg border px-2.5 py-1.5 text-sm"
+            style={{
+              background: 'var(--dash-input-bg)',
+              borderColor: 'var(--dash-border)',
+              color: 'var(--dash-text)',
+            }}
+          >
+            <option value="">{t('design.qr.generalMenuQr', 'General menu QR')}</option>
+            {filteredTables.map((tb) => (
+              <option key={tb.id} value={tb.id}>
+                {tb.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+      {verifiedDomain && (
+        <label className="flex items-center gap-2 text-xs text-muted">
+          <input
+            type="checkbox"
+            checked={useCustomDomainChecked}
+            onChange={(e) => onUseCustomDomainChange(e.target.checked)}
+          />
+          <span>
+            {t('design.qr.useCustomDomain', {
+              domain: verifiedDomain,
+              defaultValue: 'Use custom domain ({{domain}})',
+            })}
+          </span>
+        </label>
+      )}
+    </div>
+  );
+};
 
 function QrCode() {
   const { t } = useTranslation();
@@ -20,46 +139,11 @@ function QrCode() {
   const businessSlug = user?.businessSlug || user?.business_slug || '';
   const businessId = user?.businessId ?? user?.id;
 
-  const [branches, setBranches] = useState<Array<{ id: string; name: string; slug: string }>>([]);
-  const [tables, setTables] = useState<Array<{ id: string; label: string }>>([]);
   const [selectedBranchSlug, setSelectedBranchSlug] = useState('');
   const [selectedTableId, setSelectedTableId] = useState('');
+  const [selectedTableLabel, setSelectedTableLabel] = useState('');
   const [customDomain, setCustomDomain] = useState('');
   const [useCustomDomain, setUseCustomDomain] = useState(false);
-
-  useEffect(() => {
-    if (!queryClient) return;
-    let cancelled = false;
-    void Promise.all([
-      posLocationClient.listLocations({}).catch(() => ({ locations: [] })),
-      tableClient.listTables({}).catch(() => ({ tables: [] })),
-      configClient.getCustomDomain({}).catch(() => ({ domain: undefined })),
-    ]).then(([locRes, tableRes, domainRes]) => {
-      if (cancelled) return;
-      setBranches(
-        (locRes.locations ?? []).map((loc) => ({
-          id: String(loc.id ?? ''),
-          name: loc.name ?? '',
-          slug: (loc.name ?? '')
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-|-$/g, ''),
-        }))
-      );
-      setTables(
-        (tableRes.tables ?? []).map((tb) => ({
-          id: String(tb.id ?? ''),
-          label: tb.label ?? `Table ${tb.id ?? ''}`,
-        }))
-      );
-      if (domainRes.domain?.status === 'verified' && domainRes.domain.domain) {
-        setCustomDomain(domainRes.domain.domain);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [queryClient]);
 
   // A slug gives the canonical /<slug>/menu URL; without one the business is
   // addressed by id in the POS-style /b/<id>/menu form.
@@ -72,9 +156,8 @@ function QrCode() {
           ? buildPublicMenuUrlById(businessId)
           : PORTAL_URL;
 
-  const selectedTable = tables.find((tb) => tb.id === selectedTableId);
-  const menuUrl = selectedTable
-    ? `${baseMenuUrl}?table=${encodeURIComponent(selectedTable.id)}&tableLabel=${encodeURIComponent(selectedTable.label)}`
+  const menuUrl = selectedTableId
+    ? `${baseMenuUrl}?table=${encodeURIComponent(selectedTableId)}&tableLabel=${encodeURIComponent(selectedTableLabel || `Table ${selectedTableId}`)}`
     : baseMenuUrl;
   const initialUrl = menuUrl;
 
@@ -171,68 +254,20 @@ function QrCode() {
       <HelmetContainer title="QR code generator · rtylr" />
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-primary">QR Code Generator</h1>
-        {(branches.length > 0 || tables.length > 0 || customDomain) && (
-          <div
-            className="flex flex-wrap items-center gap-3 rounded-xl border p-4"
-            style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
-          >
-            {branches.length > 0 && (
-              <label className="flex items-center gap-2 text-xs text-muted">
-                <span>Branch</span>
-                <select
-                  aria-label="Branch"
-                  value={selectedBranchSlug}
-                  onChange={(e) => setSelectedBranchSlug(e.target.value)}
-                  className="rounded-lg border px-2.5 py-1.5 text-sm"
-                  style={{
-                    background: 'var(--dash-input-bg)',
-                    borderColor: 'var(--dash-border)',
-                    color: 'var(--dash-text)',
-                  }}
-                >
-                  <option value="">All branches</option>
-                  {branches.map((b) => (
-                    <option key={b.id} value={b.slug}>
-                      {b.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
-            {tables.length > 0 && (
-              <label className="flex items-center gap-2 text-xs text-muted">
-                <span>Table / Counter</span>
-                <select
-                  aria-label="Table"
-                  value={selectedTableId}
-                  onChange={(e) => setSelectedTableId(e.target.value)}
-                  className="rounded-lg border px-2.5 py-1.5 text-sm"
-                  style={{
-                    background: 'var(--dash-input-bg)',
-                    borderColor: 'var(--dash-border)',
-                    color: 'var(--dash-text)',
-                  }}
-                >
-                  <option value="">General menu QR</option>
-                  {tables.map((tb) => (
-                    <option key={tb.id} value={tb.id}>
-                      {tb.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
-            {customDomain && (
-              <label className="flex items-center gap-2 text-xs text-muted">
-                <input
-                  type="checkbox"
-                  checked={useCustomDomain}
-                  onChange={(e) => setUseCustomDomain(e.target.checked)}
-                />
-                <span>Use custom domain ({customDomain})</span>
-              </label>
-            )}
-          </div>
+        {queryClient && (
+          <QrTargetControls
+            businessSlug={businessSlug}
+            selectedBranchSlug={selectedBranchSlug}
+            selectedTableId={selectedTableId}
+            useCustomDomain={useCustomDomain}
+            onBranchChange={setSelectedBranchSlug}
+            onTableChange={(id, label) => {
+              setSelectedTableId(id);
+              setSelectedTableLabel(label);
+            }}
+            onUseCustomDomainChange={setUseCustomDomain}
+            onVerifiedDomainChange={setCustomDomain}
+          />
         )}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div

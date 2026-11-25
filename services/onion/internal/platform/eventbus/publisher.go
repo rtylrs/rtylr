@@ -10,7 +10,13 @@ import (
 	"github.com/voxire/onion/internal/platform/eventbus/internal/infrastructure/persistence/sqlc"
 )
 
-const TypeOrderCreated = "order_created"
+const (
+	TypeOrderCreated             = "order_created"
+	TypeMenuProfilePublished     = "menu.profile.published"
+	TypeMenuOrderCreated         = "menu.order.created"
+	TypeMenuTableActionRequested = "menu.table.action_requested"
+	TypeMenuStampEarned          = "menu.loyalty.stamp_earned"
+)
 const SubjectOrder = "order"
 
 // Event is a tenant-scoped fact. Payload contains immutable reference data.

@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 
@@ -191,5 +192,88 @@ func TestPaginateOrders_NormalPaging(t *testing.T) {
 	limit, offset := paginateOrders(3, 50)
 	if limit != 50 || offset != 100 {
 		t.Errorf("got limit=%d offset=%d, want 50,100", limit, offset)
+	}
+}
+
+type fakePublicOrderRepo struct {
+	repository
+	items        []domain.OrderItemInput
+	basePrice    float64
+	orderCreated bool
+}
+
+func (f *fakePublicOrderRepo) IsOnlineOrderingEnabled(_ context.Context, _ int64) (bool, error) {
+	return true, nil
+}
+
+func (f *fakePublicOrderRepo) GetPublicMenuItem(_ context.Context, _, menuItemID int64) (domain.OrderItemInput, error) {
+	return domain.OrderItemInput{MenuItemID: menuItemID, Name: "Latte", UnitPrice: f.basePrice}, nil
+}
+
+func (f *fakePublicOrderRepo) CreatePublicOrder(_ context.Context, _, _, _ int64, _, _, _, _, _ string, items []domain.OrderItemInput) (int64, string, error) {
+	f.items = items
+	f.orderCreated = true
+	return 101, "ORD-101", nil
+}
+
+func TestCreatePublicOrder_BranchOverridesTenancyAndCRMOptIn(t *testing.T) {
+	repo := &fakePublicOrderRepo{basePrice: 5.00}
+	var hookCRMOptIn bool
+	var hookTotal float64
+
+	svc := NewService(repo, nil).
+		WithPublicOrderTenancyValidator(func(_ context.Context, _, locationID, tableID int64) error {
+			if locationID == 999 || tableID == 888 {
+				return errors.New("foreign branch or table")
+			}
+			return nil
+		}).
+		WithBranchItemPriceResolver(func(_ context.Context, _, _, menuItemID int64) (bool, bool, float64, error) {
+			if menuItemID == 20 {
+				return false, false, 0, nil
+			}
+			if menuItemID == 10 {
+				return true, true, 7.50, nil
+			}
+			return true, false, 0, nil
+		}).
+		WithPublicOrderHook(func(_ context.Context, _, _, _, _ int64, _, _, _, _ string, crmOptIn bool, total float64) {
+			hookCRMOptIn = crmOptIn
+			hookTotal = total
+		})
+
+	// Rejects foreign location.
+	if _, _, _, err := svc.CreatePublicOrder(context.Background(), 42, PublicOrderInput{
+		LocationID: 999,
+		Items:      []PublicOrderItemInput{{MenuItemID: 10, Quantity: 1}},
+	}); err == nil {
+		t.Fatalf("expected error for foreign location")
+	}
+
+	// Rejects branch-hidden item.
+	if _, _, _, err := svc.CreatePublicOrder(context.Background(), 42, PublicOrderInput{
+		LocationID: 1,
+		Items:      []PublicOrderItemInput{{MenuItemID: 20, Quantity: 1}},
+	}); err == nil || !strings.Contains(err.Error(), "not available at this branch") {
+		t.Fatalf("expected hidden branch item error, got %v", err)
+	}
+
+	// Applies branch price override and propagates crmOptIn=false.
+	if _, _, _, err := svc.CreatePublicOrder(context.Background(), 42, PublicOrderInput{
+		LocationID:    1,
+		CustomerPhone: "+15550001111",
+		CRMOptIn:      false,
+		Items:         []PublicOrderItemInput{{MenuItemID: 10, Quantity: 2}},
+	}); err != nil {
+		t.Fatalf("CreatePublicOrder failed: %v", err)
+	}
+	if !repo.orderCreated || len(repo.items) != 1 || repo.items[0].UnitPrice != 7.50 {
+		t.Fatalf("expected overridden unit price 7.50, got %+v", repo.items)
+	}
+	if hookCRMOptIn {
+		t.Fatalf("expected crmOptIn=false propagated to hook")
+	}
+	if hookTotal != 15.00 {
+		t.Fatalf("expected hook total 15.00, got %.2f", hookTotal)
 	}
 }

@@ -36,16 +36,24 @@ type PaddlePaymentResult struct {
 }
 
 // PublicOrderHook is invoked after a public menu order lands in POS (stamps, webhooks, CRM).
-type PublicOrderHook func(ctx context.Context, businessID, locationID, tableID, orderID int64, orderNumber, fulfillmentMode, customerName, customerPhone string, total float64)
+type PublicOrderHook func(ctx context.Context, businessID, locationID, tableID, orderID int64, orderNumber, fulfillmentMode, customerName, customerPhone string, crmOptIn bool, total float64)
 
 // PaymentRedirectResolver resolves an optional third-party payment redirect URL for a branch.
 type PaymentRedirectResolver func(ctx context.Context, businessID, locationID int64) string
 
+// BranchItemPriceResolver resolves branch visibility and optional price override for a menu item.
+type BranchItemPriceResolver func(ctx context.Context, businessID, locationID, menuItemID int64) (visible bool, hasPriceOverride bool, priceOverride float64, err error)
+
+// PublicOrderTenancyValidator verifies that locationID and tableID belong to businessID.
+type PublicOrderTenancyValidator func(ctx context.Context, businessID, locationID, tableID int64) error
+
 type Service struct {
-	repo                    repository
-	settings                settingsReader
-	publicOrderHook         PublicOrderHook
-	paymentRedirectResolver PaymentRedirectResolver
+	repo                        repository
+	settings                    settingsReader
+	publicOrderHook             PublicOrderHook
+	paymentRedirectResolver     PaymentRedirectResolver
+	branchItemPriceResolver     BranchItemPriceResolver
+	publicOrderTenancyValidator PublicOrderTenancyValidator
 }
 
 func NewService(repo repository, settings settingsReader) *Service {
@@ -59,6 +67,16 @@ func (s *Service) WithPublicOrderHook(fn PublicOrderHook) *Service {
 
 func (s *Service) WithPaymentRedirectResolver(fn PaymentRedirectResolver) *Service {
 	s.paymentRedirectResolver = fn
+	return s
+}
+
+func (s *Service) WithBranchItemPriceResolver(fn BranchItemPriceResolver) *Service {
+	s.branchItemPriceResolver = fn
+	return s
+}
+
+func (s *Service) WithPublicOrderTenancyValidator(fn PublicOrderTenancyValidator) *Service {
+	s.publicOrderTenancyValidator = fn
 	return s
 }
 

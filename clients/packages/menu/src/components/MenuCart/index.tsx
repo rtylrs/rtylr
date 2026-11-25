@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import classNames from "classnames";
 import { motion, AnimatePresence } from "motion/react";
 import { formatMenuPrice, MenuItemData } from "../MenuItem";
+import { formatConvertedPrice } from "../../theme";
+import type { MenuCurrencyOption, MenuLayoutLabels } from "../../types";
 import styles from "./MenuCart.module.scss";
 
 export interface CartItem extends MenuItemData {
@@ -15,6 +17,13 @@ interface MenuCartProps {
   onQuantityChange: (itemId: string, quantity: number) => void;
   onCheckout: (items: CartItem[]) => void;
   currency?: string;
+  activeCurrency?: MenuCurrencyOption;
+  labels?: Partial<
+    Pick<
+      MenuLayoutLabels,
+      "yourOrder" | "closeCart" | "emptyCart" | "subtotal" | "placeOrder"
+    >
+  >;
   className?: string;
 }
 
@@ -25,17 +34,35 @@ const MenuCart: React.FC<MenuCartProps> = ({
   onQuantityChange,
   onCheckout,
   currency = "USD",
+  activeCurrency,
+  labels,
   className,
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, onClose]);
+
   const cartCurrency =
     items.find((item) => item.currency)?.currency ?? currency;
   const formatPrice = (price: number, itemCurrency = cartCurrency) =>
-    formatMenuPrice(price, itemCurrency);
+    activeCurrency
+      ? formatConvertedPrice(price, activeCurrency, itemCurrency)
+      : formatMenuPrice(price, itemCurrency);
 
   const subtotal = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
+  const titleText = labels?.yourOrder ?? "Your Order";
+  const closeCartLabel = labels?.closeCart ?? "Close cart";
+  const emptyText = labels?.emptyCart ?? "Your cart is empty";
+  const subtotalText = labels?.subtotal ?? "Subtotal";
+  const placeOrderText = labels?.placeOrder ?? "Place Order";
 
   return (
     <AnimatePresence>
@@ -51,7 +78,7 @@ const MenuCart: React.FC<MenuCartProps> = ({
           <motion.aside
             role="dialog"
             aria-modal="true"
-            aria-label="Your Order"
+            aria-label={titleText}
             className={classNames(styles.cart, className)}
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
@@ -59,11 +86,11 @@ const MenuCart: React.FC<MenuCartProps> = ({
             transition={{ type: "spring", damping: 28, stiffness: 300 }}
           >
             <div className={styles.cart__header}>
-              <h2 className={styles.cart__title}>Your Order</h2>
+              <h2 className={styles.cart__title}>{titleText}</h2>
               <button
                 className={styles.cart__close}
                 onClick={onClose}
-                aria-label="Close cart"
+                aria-label={closeCartLabel}
               >
                 ✕
               </button>
@@ -73,7 +100,7 @@ const MenuCart: React.FC<MenuCartProps> = ({
               {items.length === 0 ? (
                 <div className={styles.cart__empty}>
                   <span className={styles.cart__emptyIcon}>🛒</span>
-                  <p>Your cart is empty</p>
+                  <p>{emptyText}</p>
                 </div>
               ) : (
                 <ul className={styles.cart__list}>
@@ -122,14 +149,14 @@ const MenuCart: React.FC<MenuCartProps> = ({
             {items.length > 0 && (
               <div className={styles.cart__footer}>
                 <div className={styles.cart__subtotal}>
-                  <span>Subtotal</span>
+                  <span>{subtotalText}</span>
                   <span>{formatPrice(subtotal, cartCurrency)}</span>
                 </div>
                 <button
                   className={styles.cart__checkoutBtn}
                   onClick={() => onCheckout(items)}
                 >
-                  Place Order · {formatPrice(subtotal, cartCurrency)}
+                  {placeOrderText} · {formatPrice(subtotal, cartCurrency)}
                 </button>
               </div>
             )}

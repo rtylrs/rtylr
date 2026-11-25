@@ -2,9 +2,16 @@ import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { FullScreenLoader, HelmetContainer } from '@voxire/components';
-import { GridLayout, MenuCategoryData, BusinessInfo, CartItem } from '@voxire/menu';
+import {
+  GridLayout,
+  MenuCategoryData,
+  BusinessInfo,
+  CartItem,
+  type CustomerStampProgressData,
+} from '@voxire/menu';
 import { usePublicMenu } from '../../../shared/hooks/usePublicMenu';
 import {
+  lookupPublicCustomerStampsSafe,
   translationKey,
   usePublicBrandBundleSafe,
 } from '../../../shared/hooks/usePublicBrandBundle';
@@ -42,9 +49,18 @@ const PosMenu: React.FC = (): React.JSX.Element => {
   const { data, isLoading, isError } = usePublicMenu(businessId);
   const [activeLocale, setActiveLocale] = useState<string>('');
   const [activeCurrency, setActiveCurrency] = useState<string>('');
+  const [customerStamps, setCustomerStamps] = useState<CustomerStampProgressData[]>([]);
   const brandBundle = usePublicBrandBundleSafe(businessId, null, activeLocale || undefined);
   const effectiveLocale = activeLocale || brandBundle?.defaultLocale || 'en';
-  const { clearCart, setBusinessId, setCurrency, addItem } = useCartStore();
+  const activeCurrencyOption = useMemo(() => {
+    const code = activeCurrency || brandBundle?.defaultCurrency;
+    return (
+      brandBundle?.currencies.find((c) => c.code === code) ??
+      brandBundle?.currencies.find((c) => c.isDefault) ??
+      brandBundle?.currencies[0]
+    );
+  }, [activeCurrency, brandBundle?.currencies, brandBundle?.defaultCurrency]);
+  const { clearCart, setBusinessId, setCurrency, setCurrencyOption, addItem } = useCartStore();
 
   const categories = useMemo<MenuCategoryData[]>(() => {
     if (!data) return [];
@@ -96,7 +112,9 @@ const PosMenu: React.FC = (): React.JSX.Element => {
     if (businessId == null) return;
     clearCart();
     setBusinessId(businessId);
-    if (data?.business.currency) {
+    if (typeof setCurrencyOption === 'function' && activeCurrencyOption) {
+      setCurrencyOption(activeCurrencyOption);
+    } else if (data?.business.currency) {
       setCurrency(data.business.currency);
     }
     cartItems.forEach((item) => {
@@ -163,6 +181,15 @@ const PosMenu: React.FC = (): React.JSX.Element => {
         activeLocale={effectiveLocale}
         onLocaleChange={(loc) => setActiveLocale(loc)}
         stampCards={brandBundle?.stampCards}
+        customerStamps={customerStamps}
+        onLookupStamps={
+          businessId
+            ? async (phone) => {
+                const progress = await lookupPublicCustomerStampsSafe(businessId, phone);
+                setCustomerStamps(progress);
+              }
+            : undefined
+        }
         enableCart={orderingEnabled}
         onCheckout={orderingEnabled ? handleCheckout : undefined}
       />

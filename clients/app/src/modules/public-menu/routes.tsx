@@ -8,6 +8,9 @@ import './public-menu.css';
 const PosMenu = React.lazy(() => import('./screens/Public/PosMenu/PosMenu'));
 const SlugLanding = React.lazy(() => import('./screens/Public/SlugLanding/SlugLanding'));
 const LocationMenu = React.lazy(() => import('./screens/Public/SlugLanding/LocationMenu'));
+const CustomDomainMenu = React.lazy(
+  () => import('./screens/Public/CustomDomainMenu/CustomDomainMenu')
+);
 const Checkout = React.lazy(() => import('./features/cart/Checkout'));
 const OrderStatus = React.lazy(() => import('./features/cart/OrderStatus'));
 
@@ -58,6 +61,16 @@ export function createPublicMenuRoutes<TParent extends AnyRoute>(rootRoute: TPar
         getParentRoute: () => layoutRoute,
         path: '/menu/order-status/$id',
         component: OrderStatus,
+      }),
+      createRoute({
+        getParentRoute: () => layoutRoute,
+        path: '/menu',
+        component: CustomDomainMenu,
+      }),
+      createRoute({
+        getParentRoute: () => layoutRoute,
+        path: '/menu/$location',
+        component: CustomDomainMenu,
       }),
       createRoute({
         getParentRoute: () => layoutRoute,

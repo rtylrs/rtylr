@@ -65,6 +65,55 @@ export interface MenuStampCardSummary {
   rewardLabel: string;
 }
 
+export interface CustomerStampProgressData {
+  stampCardId: string;
+  stampsCount: number;
+  stampsRequired: number;
+  rewardsUnlocked: number;
+  rewardLabel?: string;
+}
+
+export interface MenuLayoutLabels {
+  searchMenu: string;
+  searchPlaceholder: string;
+  showResults: string;
+  dietaryFilters: string;
+  dietaryPreferences: string;
+  allItems: string;
+  applyFilter: string;
+  languageAndCurrency: string;
+  language: string;
+  currency: string;
+  done: string;
+  tableService: string;
+  service: string;
+  callStaff: string;
+  callStaffSubtitle: string;
+  requestBill: string;
+  requestBillSubtitle: string;
+  splitBill: string;
+  splitBillSubtitle: string;
+  callWaiterSuccess: string;
+  requestBillSuccess: string;
+  splitBillSuccess: string;
+  tableActionError: string;
+  rewards: string;
+  digitalStampCards: string;
+  stampsPhonePlaceholder: string;
+  checkStamps: string;
+  checkingStamps: string;
+  gotIt: string;
+  viewOrder: string;
+  addToOrder: string;
+  yourOrder: string;
+  closeCart: string;
+  emptyCart: string;
+  subtotal: string;
+  placeOrder: string;
+  askAi: string;
+  aiPlaceholder: string;
+}
+
 export interface BusinessInfo {
   name: string;
   logo?: string;

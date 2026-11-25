@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import type { MenuCurrencyOption } from '@voxire/menu';
 
 export interface CartItem {
   menuItemId: number;
@@ -18,6 +19,7 @@ interface CartState {
   fulfillmentMode: 'dine_in' | 'self_service' | 'pickup' | 'delivery';
   availableFulfillmentModes: Array<'dine_in' | 'self_service' | 'pickup' | 'delivery'>;
   currency: string;
+  currencyOption?: MenuCurrencyOption;
   addItem: (item: Omit<CartItem, 'quantity' | 'notes'> & { quantity?: number }) => void;
   removeItem: (menuItemId: number) => void;
   updateQuantity: (menuItemId: number, qty: number) => void;
@@ -30,6 +32,7 @@ interface CartState {
     modes: Array<'dine_in' | 'self_service' | 'pickup' | 'delivery'>
   ) => void;
   setCurrency: (currency: string) => void;
+  setCurrencyOption: (option?: MenuCurrencyOption) => void;
   clearCart: () => void;
   total: () => number;
   itemCount: () => number;
@@ -46,6 +49,7 @@ export const useCartStore = create<CartState>()(
       fulfillmentMode: 'dine_in',
       availableFulfillmentModes: ['dine_in', 'self_service', 'pickup'],
       currency: 'USD',
+      currencyOption: undefined,
 
       addItem: (item) => {
         const addQty = item.quantity && item.quantity > 0 ? item.quantity : 1;
@@ -127,6 +131,13 @@ export const useCartStore = create<CartState>()(
         set({ currency: currency || 'USD' });
       },
 
+      setCurrencyOption: (currencyOption) => {
+        set({
+          currencyOption,
+          ...(currencyOption?.code ? { currency: currencyOption.code } : {}),
+        });
+      },
+
       clearCart: () => {
         set({
           items: [],
@@ -136,6 +147,7 @@ export const useCartStore = create<CartState>()(
           tableLabel: undefined,
           fulfillmentMode: 'dine_in',
           currency: 'USD',
+          currencyOption: undefined,
         });
       },
 

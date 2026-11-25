@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
+import { formatConvertedPrice } from '@voxire/menu';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import type { CreatePublicOrderRequest } from '@voxire/voxie/pos/orders/v1/types';
 import { EmptyState } from '@voxire/ui';
@@ -22,6 +23,7 @@ const Checkout = (): React.JSX.Element => {
     availableFulfillmentModes = ['dine_in', 'self_service', 'pickup'],
     setFulfillmentMode,
     currency = 'USD',
+    currencyOption,
     total,
     setItemNote,
     clearCart,
@@ -38,9 +40,7 @@ const Checkout = (): React.JSX.Element => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const formatPrice = (price: number): string =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format(
-      price
-    );
+    formatConvertedPrice(price, currencyOption, currency || 'USD');
 
   const onlineOrderingEnabled = import.meta.env.VITE_ONLINE_ORDERING_ENABLED !== 'false';
 
@@ -241,12 +241,12 @@ const Checkout = (): React.JSX.Element => {
                       }}
                     >
                       {mode === 'dine_in'
-                        ? 'Dine-in'
+                        ? t('checkout.fulfillmentDineIn')
                         : mode === 'self_service'
-                          ? 'Self-service'
+                          ? t('checkout.fulfillmentSelfService')
                           : mode === 'pickup'
-                            ? 'Pickup'
-                            : 'Delivery'}
+                            ? t('checkout.fulfillmentPickup')
+                            : t('checkout.fulfillmentDelivery')}
                     </button>
                   ))}
                 </div>
@@ -256,8 +256,8 @@ const Checkout = (): React.JSX.Element => {
                   type="text"
                   value={deliveryAddress}
                   onChange={(e) => setDeliveryAddress(e.target.value)}
-                  placeholder="Delivery address"
-                  aria-label="Delivery address"
+                  placeholder={t('checkout.deliveryAddressPlaceholder')}
+                  aria-label={t('checkout.deliveryAddressPlaceholder')}
                   style={{
                     width: '100%',
                     marginTop: 10,
@@ -284,7 +284,7 @@ const Checkout = (): React.JSX.Element => {
                   checked={crmOptIn}
                   onChange={(e) => setCrmOptIn(e.target.checked)}
                 />
-                Earn loyalty stamps &amp; save order history
+                {t('checkout.crmOptInLabel')}
               </label>
             </section>
           )}

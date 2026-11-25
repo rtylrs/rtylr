@@ -17,6 +17,7 @@ type (
 	HostResolver           = application.HostResolver
 	EventDispatcher        = application.EventDispatcher
 	AITranslator           = application.AITranslator
+	TenantValidator        = application.TenantValidator
 	MenuProfile            = domain.MenuProfile
 	SaveMenuProfileDraftIn = domain.SaveMenuProfileDraftInput
 	TranslationSourceEntry = domain.TranslationSourceEntry
@@ -46,6 +47,11 @@ func (m *Module) WithTranslator(fn AITranslator) *Module {
 	return m
 }
 
+func (m *Module) WithTenantValidator(v TenantValidator) *Module {
+	m.service.WithTenantValidator(v)
+	return m
+}
+
 // GetAnonymousRoutes exposes the anonymous customer-facing branded menu endpoints
 // so the HTTP auth middleware allows unauthenticated guest access.
 func (m *Module) GetAnonymousRoutes() []string {
@@ -71,6 +77,10 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 
 func (m *Module) ResolvePaymentRedirectURL(ctx context.Context, businessID, locationID int64) string {
 	return m.service.ResolvePaymentRedirectURL(ctx, businessID, locationID)
+}
+
+func (m *Module) ResolveBranchItemOverride(ctx context.Context, businessID, locationID, menuItemID int64) (visible bool, hasPriceOverride bool, priceOverride float64, err error) {
+	return m.service.ResolveBranchItemOverride(ctx, businessID, locationID, menuItemID)
 }
 
 func (m *Module) AwardStampsForOrder(ctx context.Context, businessID, locationID, orderID int64, phone, name string, orderTotal float64) error {

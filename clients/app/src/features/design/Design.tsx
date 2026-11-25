@@ -1,12 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import { HelmetContainer } from '@voxire/components';
 import { Switch } from '@voxire/ui';
 import { uploadAsset } from '@voxire/api';
 import { cdnImageUrl } from '@voxire/config';
-import { CaretIcon, useCaretStore } from '@voxire/caret';
+import { CaretIcon, onCaretToolSuccess, useCaretStore } from '@voxire/caret';
 import { toast } from 'sonner';
 import {
+  Activity,
   Check,
   Code2,
   Copy,
@@ -58,23 +60,29 @@ import { useLayoutPresetsStore } from '../../shared/stores/layoutPresetsStore';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useMenuStore } from '../../shared/stores/menuStore';
 import {
+  useBranchMenuItems,
   useCloneMenuProfile,
   useCreateMenuPreset,
   useDeleteMenuCurrency,
   useDeleteMenuPreset,
+  useMenuAnalyticsSummary,
   useMenuBranches,
+  useMenuCatalogItems,
   useMenuCurrencies,
   useMenuPresets,
   useMenuProfile,
   usePublishMenuProfile,
   useSaveMenuProfileDraft,
   useStampCards,
+  useTableActions,
   useTranslateMenu,
+  useUpdateTableActionStatus,
+  useUpsertBranchMenuItem,
   useUpsertMenuCurrency,
   useUpsertStampCard,
 } from '../../shared/hooks/queries/useMenuBuilder';
 
-type RailTab = 'themes' | 'brand' | 'layout' | 'features' | 'ai' | 'css';
+type RailTab = 'themes' | 'brand' | 'layout' | 'features' | 'ops' | 'ai' | 'css';
 type DeviceViewport = 'mobile' | 'tablet' | 'desktop';
 
 const PH = (w: number, h: number, bg: string, text: string) =>
@@ -192,7 +200,6 @@ const Design: React.FC = () => {
     activePresetId,
     draftConfig,
     activatePreset,
-    createPreset,
     deletePreset,
     setDraftConfig,
     patchDraftConfig,
@@ -200,9 +207,11 @@ const Design: React.FC = () => {
   } = useLayoutPresetsStore();
 
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const { user } = useUserStore();
   const { items: menuItems } = useMenuStore();
   const openCaret = useCaretStore((s) => s.open);
+  const businessSlug = user?.businessSlug || user?.business_slug || '';
 
   const [activeTab, setActiveTab] = useState<RailTab>('themes');
   const [viewport, setViewport] = useState<DeviceViewport>('mobile');
@@ -221,14 +230,19 @@ const Design: React.FC = () => {
   const [aiPrompt, setAiPrompt] = useState('');
   const [saved, setSaved] = useState(false);
   const [uploadingField, setUploadingField] = useState<'cover' | 'logo' | null>(null);
+  const [priceOverrideDrafts, setPriceOverrideDrafts] = useState<Record<string, string>>({});
   const coverInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: branches = [] } = useMenuBranches();
+  const { data: branches = [] } = useMenuBranches(businessSlug);
+  const { data: catalogItems = [] } = useMenuCatalogItems();
   const { data: remoteProfile } = useMenuProfile(selectedLocationId);
   const { data: remotePresets = [] } = useMenuPresets();
   const { data: currencies = [] } = useMenuCurrencies(selectedLocationId);
   const { data: stampCards = [] } = useStampCards(selectedLocationId);
+  const { data: branchMenuItems = [] } = useBranchMenuItems(selectedLocationId);
+  const { data: tableActions = [] } = useTableActions(selectedLocationId);
+  const { data: analyticsSummary } = useMenuAnalyticsSummary(selectedLocationId, 30);
 
   const saveDraftMutation = useSaveMenuProfileDraft();
   const publishMutation = usePublishMenuProfile();
@@ -238,7 +252,21 @@ const Design: React.FC = () => {
   const upsertCurrencyMutation = useUpsertMenuCurrency();
   const deleteCurrencyMutation = useDeleteMenuCurrency();
   const upsertStampCardMutation = useUpsertStampCard();
+  const upsertBranchItemMutation = useUpsertBranchMenuItem();
+  const updateTableActionMutation = useUpdateTableActionStatus();
   const translateMenuMutation = useTranslateMenu();
+
+  useEffect(() => {
+    return onCaretToolSuccess((event) => {
+      if (
+        event.name === 'pos.update_menu_design' ||
+        event.name === 'pos.publish_menu_design' ||
+        event.name === 'pos.clone_menu_design'
+      ) {
+        void queryClient.invalidateQueries({ queryKey: ['menu-builder'] });
+      }
+    });
+  }, [queryClient]);
 
   useEffect(() => {
     if (!remoteProfile) return;
@@ -293,25 +321,61 @@ const Design: React.FC = () => {
     reviewCount: (u?.reviewCount as number) ?? 0,
   };
 
-  const menuCategories: MenuCategoryData[] =
-    menuItems && menuItems.length > 0
-      ? ((menuItems as RawCategory[])
-          .filter((item) => item.type === 'category')
-          .map((cat) => ({
-            id: cat._id ?? '',
-            name: cat.name ?? '',
-            items: (cat.menuItems || []).map((mi) => ({
-              id: mi._id ?? '',
-              name: mi.name ?? '',
-              description: mi.description || '',
-              price: mi.price ?? 0,
-              currency: mi.currency || 'USD',
-              available: mi.available !== false,
-              image: mi.image || '',
-              badges: mi.badges || [],
-            })),
-          })) as MenuCategoryData[])
-      : [];
+  const branchOverrideByItemId = useMemo(() => {
+    const map = new Map<string, (typeof branchMenuItems)[number]>();
+    for (const bi of branchMenuItems) {
+      if (bi.menuItemId) map.set(String(bi.menuItemId), bi);
+    }
+    return map;
+  }, [branchMenuItems]);
+
+  const menuCategories: MenuCategoryData[] = useMemo(() => {
+    if (catalogItems.length > 0) {
+      const grouped = new Map<string, MenuCategoryData['items']>();
+      for (const item of catalogItems) {
+        const id = String(item.id ?? '');
+        const ov = branchOverrideByItemId.get(id);
+        if (ov && ov.isVisible === false) continue;
+        const catName = item.category?.trim() || t('design.studio.title');
+        const list = grouped.get(catName) ?? [];
+        list.push({
+          id,
+          name: item.name ?? '',
+          description: item.description ?? '',
+          price: ov?.hasPriceOverride ? (ov.priceOverride ?? 0) : (item.salePrice ?? 0),
+          currency: currencies.find((c) => c.isDefault)?.code ?? 'USD',
+          available: item.isActive !== false,
+          image: item.imageUrl ?? '',
+          badges: ov?.featuredBadge ? [ov.featuredBadge] : [],
+        });
+        grouped.set(catName, list);
+      }
+      return Array.from(grouped.entries()).map(([name, items], idx) => ({
+        id: `cat-${idx}`,
+        name,
+        items,
+      }));
+    }
+    if (menuItems && menuItems.length > 0) {
+      return (menuItems as RawCategory[])
+        .filter((item) => item.type === 'category')
+        .map((cat) => ({
+          id: cat._id ?? '',
+          name: cat.name ?? '',
+          items: (cat.menuItems || []).map((mi) => ({
+            id: mi._id ?? '',
+            name: mi.name ?? '',
+            description: mi.description || '',
+            price: mi.price ?? 0,
+            currency: mi.currency || 'USD',
+            available: mi.available !== false,
+            image: mi.image || '',
+            badges: mi.badges || [],
+          })),
+        })) as MenuCategoryData[];
+    }
+    return [];
+  }, [catalogItems, branchOverrideByItemId, currencies, menuItems, t]);
 
   const themeMode: ThemeMode = draftConfig.mode ?? 'light';
   const fontFamily = draftConfig.typography?.bodyFont ?? 'system';
@@ -382,13 +446,11 @@ const Design: React.FC = () => {
   const handleAddPreset = () => {
     const name = newPresetName.trim();
     if (!name) return;
-    const id = createPreset(name);
-    activatePreset(id);
     createPresetMutation.mutate({ name, configJson: JSON.stringify(draftConfig) });
     setNewPresetName('');
   };
 
-  const handleSave = () => {
+  const handleSave = async (): Promise<void> => {
     saveActivePreset();
     const { draftConfig: latestDraft } = useLayoutPresetsStore.getState();
     const mergedDraft: MenuLayoutConfig = {
@@ -396,7 +458,7 @@ const Design: React.FC = () => {
       customCss,
     };
     const defaultCurrency = currencies.find((c) => c.isDefault)?.code ?? 'USD';
-    saveDraftMutation.mutate({
+    await saveDraftMutation.mutateAsync({
       locationId: selectedLocationId,
       draftConfigJson: JSON.stringify(mergedDraft),
       customCss,
@@ -408,9 +470,13 @@ const Design: React.FC = () => {
     setTimeout(() => setSaved(false), 1800);
   };
 
-  const handlePublish = () => {
-    handleSave();
-    publishMutation.mutate(selectedLocationId);
+  const handlePublish = async (): Promise<void> => {
+    try {
+      await handleSave();
+      await publishMutation.mutateAsync(selectedLocationId);
+    } catch {
+      // Mutation hooks surface errors via toast.
+    }
   };
 
   const handleApplyPrompt = (rawText?: string) => {
@@ -426,16 +492,16 @@ const Design: React.FC = () => {
 
   const handleTranslateAll = () => {
     const entries = menuCategories.flatMap((cat) => [
-      { entityType: 'category', entityId: cat.id, field: 'name', text: cat.name },
+      { entityType: 'category', entityId: cat.id, field: 'name', sourceText: cat.name },
       ...cat.items.flatMap((item) => [
-        { entityType: 'item', entityId: item.id, field: 'name', text: item.name },
+        { entityType: 'item', entityId: item.id, field: 'name', sourceText: item.name },
         ...(item.description
           ? [
               {
                 entityType: 'item',
                 entityId: item.id,
                 field: 'description',
-                text: item.description,
+                sourceText: item.description,
               },
             ]
           : []),
@@ -492,6 +558,11 @@ const Design: React.FC = () => {
       id: 'features',
       label: t('design.studio.rail.features'),
       icon: <Store className="w-[18px] h-[18px]" />,
+    },
+    {
+      id: 'ops',
+      label: t('design.studio.rail.ops'),
+      icon: <Activity className="w-[18px] h-[18px]" />,
     },
     {
       id: 'ai',
@@ -620,7 +691,7 @@ const Design: React.FC = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={handleSave}
+              onClick={() => void handleSave()}
               disabled={saveDraftMutation.isPending}
             >
               {saved ? (
@@ -635,8 +706,8 @@ const Design: React.FC = () => {
             <Button
               variant="accent"
               size="sm"
-              onClick={handlePublish}
-              disabled={publishMutation.isPending}
+              onClick={() => void handlePublish()}
+              disabled={saveDraftMutation.isPending || publishMutation.isPending}
             >
               {t('design.studio.publish')}
             </Button>
@@ -1630,7 +1701,216 @@ const Design: React.FC = () => {
               </div>
             )}
 
-            {/* 5. CARET AI TAB */}
+            {/* 5. LIVE OPS: ANALYTICS, TABLE SERVICE QUEUE & BRANCH ITEM OVERRIDES */}
+            {activeTab === 'ops' && (
+              <div className="space-y-5">
+                <div>
+                  <h2 className="text-sm font-semibold">{t('design.studio.opsTitle')}</h2>
+                  <p className="text-xs mt-1" style={{ color: 'var(--dash-text-muted)' }}>
+                    {t('design.studio.opsSubtitle')}
+                  </p>
+                </div>
+
+                {/* Analytics Summary */}
+                <div className="space-y-2">
+                  <Label className="text-[11px] uppercase tracking-wider">
+                    {t('design.studio.analyticsTitle')}
+                  </Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      {
+                        label: t('design.studio.metricScans'),
+                        val: analyticsSummary?.qrScans ?? 0,
+                      },
+                      {
+                        label: t('design.studio.metricViews'),
+                        val: analyticsSummary?.menuViews ?? 0,
+                      },
+                      {
+                        label: t('design.studio.metricCarts'),
+                        val: analyticsSummary?.addToCarts ?? 0,
+                      },
+                      {
+                        label: t('design.studio.metricOrders'),
+                        val: analyticsSummary?.ordersPlaced ?? 0,
+                      },
+                    ].map((m) => (
+                      <div
+                        key={m.label}
+                        className="rounded-lg border px-2.5 py-2"
+                        style={{
+                          background: 'var(--dash-card)',
+                          borderColor: 'var(--dash-border)',
+                        }}
+                      >
+                        <div className="text-base font-semibold">{m.val}</div>
+                        <div className="text-[11px]" style={{ color: 'var(--dash-text-muted)' }}>
+                          {m.label}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Table Service Queue */}
+                <div className="space-y-2">
+                  <Label className="text-[11px] uppercase tracking-wider">
+                    {t('design.studio.tableQueueTitle')}
+                  </Label>
+                  {tableActions.filter((a) => a.status !== 'resolved').length === 0 ? (
+                    <p className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
+                      {t('design.studio.tableQueueEmpty')}
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {tableActions
+                        .filter((a) => a.status !== 'resolved')
+                        .map((act) => (
+                          <div
+                            key={act.id}
+                            className="rounded-lg border p-2.5 space-y-2 text-xs"
+                            style={{
+                              background: 'var(--dash-card)',
+                              borderColor: 'var(--dash-border)',
+                            }}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-semibold truncate">
+                                {act.tableLabel || `Table ${act.tableId ?? ''}`} · {act.actionType}
+                              </span>
+                              <Badge variant="secondary">{act.status}</Badge>
+                            </div>
+                            <div className="flex gap-1.5">
+                              {act.status === 'open' && act.id && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={updateTableActionMutation.isPending}
+                                  onClick={() =>
+                                    updateTableActionMutation.mutate({
+                                      id: act.id!,
+                                      status: 'acknowledged',
+                                    })
+                                  }
+                                >
+                                  {t('design.studio.acknowledge')}
+                                </Button>
+                              )}
+                              {act.id && (
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  disabled={updateTableActionMutation.isPending}
+                                  onClick={() =>
+                                    updateTableActionMutation.mutate({
+                                      id: act.id!,
+                                      status: 'resolved',
+                                    })
+                                  }
+                                >
+                                  {t('design.studio.resolve')}
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+
+                <Separator />
+
+                {/* Branch Item Overrides */}
+                <div className="space-y-2">
+                  <Label className="text-[11px] uppercase tracking-wider">
+                    {t('design.studio.branchItemsTitle')}
+                  </Label>
+                  {catalogItems.length === 0 ? (
+                    <p className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
+                      {t('design.studio.branchItemsEmpty')}
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {catalogItems.slice(0, 25).map((item) => {
+                        const itemId = String(item.id ?? '');
+                        const ov = branchOverrideByItemId.get(itemId);
+                        const visible = ov ? ov.isVisible !== false : true;
+                        const draftPrice =
+                          priceOverrideDrafts[itemId] ??
+                          (ov?.hasPriceOverride ? String(ov.priceOverride ?? '') : '');
+                        return (
+                          <div
+                            key={itemId}
+                            className="rounded-lg border p-2.5 space-y-2 text-xs"
+                            style={{
+                              background: 'var(--dash-card)',
+                              borderColor: 'var(--dash-border)',
+                            }}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-medium truncate">{item.name}</span>
+                              <Switch
+                                id={`branch-vis-${itemId}`}
+                                checked={visible}
+                                onCheckedChange={(nextVisible) =>
+                                  upsertBranchItemMutation.mutate({
+                                    locationId: selectedLocationId,
+                                    menuItemId: itemId,
+                                    isVisible: nextVisible,
+                                    hasPriceOverride: Boolean(ov?.hasPriceOverride),
+                                    priceOverride: ov?.priceOverride ?? 0,
+                                  })
+                                }
+                              />
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <Input
+                                type="number"
+                                step="0.01"
+                                min={0}
+                                value={draftPrice}
+                                onChange={(e) =>
+                                  setPriceOverrideDrafts((prev) => ({
+                                    ...prev,
+                                    [itemId]: e.target.value,
+                                  }))
+                                }
+                                placeholder={`${t('design.studio.priceOverridePlaceholder')} (${item.salePrice ?? 0})`}
+                                className="h-7 text-xs flex-1"
+                              />
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={upsertBranchItemMutation.isPending}
+                                onClick={() => {
+                                  const raw = (priceOverrideDrafts[itemId] ?? '').trim();
+                                  const parsed = Number(raw);
+                                  const hasOverride =
+                                    raw !== '' && Number.isFinite(parsed) && parsed >= 0;
+                                  upsertBranchItemMutation.mutate({
+                                    locationId: selectedLocationId,
+                                    menuItemId: itemId,
+                                    isVisible: visible,
+                                    hasPriceOverride: hasOverride,
+                                    priceOverride: hasOverride ? parsed : 0,
+                                  });
+                                }}
+                              >
+                                {t('design.studio.save')}
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* 6. CARET AI TAB */}
             {activeTab === 'ai' && (
               <div className="space-y-4">
                 <div>

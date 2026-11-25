@@ -25,9 +25,13 @@ var (
 
 const MaxCustomCSSBytes = 32 * 1024
 
+var cssCommentPattern = regexp.MustCompile(`(?s)/\*.*?\*/`)
+
 var disallowedCSSPatterns = []*regexp.Regexp{
 	regexp.MustCompile(`(?i)@import\b`),
 	regexp.MustCompile(`(?i)@charset\b`),
+	regexp.MustCompile(`(?i)@font-face\b`),
+	regexp.MustCompile(`(?i)@namespace\b`),
 	regexp.MustCompile(`(?i)javascript\s*:`),
 	regexp.MustCompile(`(?i)vbscript\s*:`),
 	regexp.MustCompile(`(?i)expression\s*\(`),
@@ -35,12 +39,14 @@ var disallowedCSSPatterns = []*regexp.Regexp{
 	regexp.MustCompile(`(?i)-moz-binding\s*:`),
 	regexp.MustCompile(`(?i)</\s*style`),
 	regexp.MustCompile(`(?i)<\s*script`),
-	regexp.MustCompile(`(?i)url\s*\(\s*['"]?\s*(?:https?:|//|data:text/html|javascript:)`),
+	regexp.MustCompile(`(?i)\burl\s*\(`),
 }
 
-// SanitizeCustomCSS enforces size and safety limits on tenant-authored CSS.
-// External url(...) references and active-content constructs are rejected to
-// prevent XSS and CSS-based data exfiltration on customer devices.
+var protectedSelectorPattern = regexp.MustCompile(`(?i)(poweredby|powered-by|data-rtylr-powered|\bfooter\b)`)
+
+// SanitizeCustomCSS strips comments, blocks escape/URL/active-content bypasses,
+// protects the RTYLR attribution footer, and scopes every selector strictly
+// inside .rtylr-menu-root so tenant CSS cannot affect the surrounding page.
 func SanitizeCustomCSS(raw string) (string, error) {
 	trimmed := strings.TrimSpace(raw)
 	if trimmed == "" {
@@ -49,12 +55,146 @@ func SanitizeCustomCSS(raw string) (string, error) {
 	if len(trimmed) > MaxCustomCSSBytes {
 		return "", fmt.Errorf("%w: custom_css exceeds %d bytes", ErrUnsafeCustomCSS, MaxCustomCSSBytes)
 	}
+	// Reject CSS backslash escapes (e.g. \75rl(...)) and unclosed comments before pattern checks.
+	if strings.Contains(trimmed, `\`) {
+		return "", fmt.Errorf("%w: CSS escape sequences are not allowed", ErrUnsafeCustomCSS)
+	}
+	noComments := strings.TrimSpace(cssCommentPattern.ReplaceAllString(trimmed, ""))
+	if strings.Contains(noComments, "/*") || strings.Contains(noComments, "*/") {
+		return "", fmt.Errorf("%w: unclosed CSS comment", ErrUnsafeCustomCSS)
+	}
+	if noComments == "" {
+		return "", nil
+	}
 	for _, pattern := range disallowedCSSPatterns {
-		if pattern.MatchString(trimmed) {
+		if pattern.MatchString(noComments) {
 			return "", fmt.Errorf("%w: matched forbidden CSS construct", ErrUnsafeCustomCSS)
 		}
 	}
-	return trimmed, nil
+	scoped, err := scopeCSSToMenuRoot(noComments)
+	if err != nil {
+		return "", err
+	}
+	return scoped, nil
+}
+
+func scopeCSSToMenuRoot(css string) (string, error) {
+	var out strings.Builder
+	i := 0
+	n := len(css)
+	for i < n {
+		for i < n && (css[i] == ' ' || css[i] == '\t' || css[i] == '\n' || css[i] == '\r') {
+			i++
+		}
+		if i >= n {
+			break
+		}
+		if css[i] == '@' {
+			// Only allow safe @media rules, recursively scoping their inner rules.
+			openIdx := strings.IndexByte(css[i:], '{')
+			if openIdx < 0 {
+				return "", fmt.Errorf("%w: invalid at-rule", ErrUnsafeCustomCSS)
+			}
+			header := strings.TrimSpace(css[i : i+openIdx])
+			if !strings.HasPrefix(strings.ToLower(header), "@media") {
+				return "", fmt.Errorf("%w: unsupported at-rule %q", ErrUnsafeCustomCSS, header)
+			}
+			bodyStart := i + openIdx + 1
+			depth := 1
+			j := bodyStart
+			for j < n && depth > 0 {
+				if css[j] == '{' {
+					depth++
+				} else if css[j] == '}' {
+					depth--
+				}
+				j++
+			}
+			if depth != 0 {
+				return "", fmt.Errorf("%w: unbalanced braces in @media rule", ErrUnsafeCustomCSS)
+			}
+			innerScoped, err := scopeCSSToMenuRoot(css[bodyStart : j-1])
+			if err != nil {
+				return "", err
+			}
+			if out.Len() > 0 {
+				out.WriteByte('\n')
+			}
+			out.WriteString(header)
+			out.WriteString(" {\n")
+			out.WriteString(innerScoped)
+			out.WriteString("\n}")
+			i = j
+			continue
+		}
+
+		openIdx := strings.IndexByte(css[i:], '{')
+		if openIdx < 0 {
+			return "", fmt.Errorf("%w: malformed CSS rule", ErrUnsafeCustomCSS)
+		}
+		selectorList := strings.TrimSpace(css[i : i+openIdx])
+		closeIdx := strings.IndexByte(css[i+openIdx+1:], '}')
+		if closeIdx < 0 {
+			return "", fmt.Errorf("%w: unclosed CSS rule", ErrUnsafeCustomCSS)
+		}
+		declarations := strings.TrimSpace(css[i+openIdx+1 : i+openIdx+1+closeIdx])
+		if strings.Contains(declarations, "{") {
+			return "", fmt.Errorf("%w: nested rule blocks are not supported", ErrUnsafeCustomCSS)
+		}
+
+		rawSelectors := strings.Split(selectorList, ",")
+		scopedSelectors := make([]string, 0, len(rawSelectors))
+		for _, sel := range rawSelectors {
+			s := strings.TrimSpace(sel)
+			if s == "" {
+				continue
+			}
+			if protectedSelectorPattern.MatchString(s) {
+				return "", fmt.Errorf("%w: selector targets protected attribution footer", ErrUnsafeCustomCSS)
+			}
+			lower := strings.ToLower(s)
+			switch {
+			case lower == ":root" || lower == "html" || lower == "body":
+				s = ".rtylr-menu-root"
+			case strings.HasPrefix(s, ".rtylr-menu-root"):
+				// Already scoped.
+			default:
+				s = ".rtylr-menu-root " + s
+			}
+			scopedSelectors = append(scopedSelectors, s)
+		}
+		if len(scopedSelectors) == 0 {
+			return "", fmt.Errorf("%w: empty CSS selector", ErrUnsafeCustomCSS)
+		}
+		if out.Len() > 0 {
+			out.WriteByte('\n')
+		}
+		out.WriteString(strings.Join(scopedSelectors, ", "))
+		out.WriteString(" { ")
+		out.WriteString(declarations)
+		out.WriteString(" }")
+		i = i + openIdx + 1 + closeIdx + 1
+	}
+	return out.String(), nil
+}
+
+// IsLoyaltyStampsEnabled reports whether a published profile config enables digital stamp cards.
+func IsLoyaltyStampsEnabled(configJSON string) bool {
+	if strings.TrimSpace(configJSON) == "" {
+		return true
+	}
+	var parsed struct {
+		Features struct {
+			EnableLoyaltyStamps *bool `json:"enableLoyaltyStamps"`
+		} `json:"features"`
+	}
+	if err := json.Unmarshal([]byte(configJSON), &parsed); err != nil {
+		return true
+	}
+	if parsed.Features.EnableLoyaltyStamps == nil {
+		return true
+	}
+	return *parsed.Features.EnableLoyaltyStamps
 }
 
 // DefaultDraftConfigJSON returns a baseline MenuLayoutConfig JSON payload for
