@@ -5,7 +5,7 @@ import { RTYLR_CONTACT_CHANNELS } from '@voxire/config';
 import { motion } from 'motion/react';
 import { ArrowRight, Menu, MessageCircle, X } from 'lucide-react';
 import LanguageSwitch from '../../../shared/components/LanguageSwitch';
-import { ByRtylr, RenniliLogo, RtylrBrandText } from '../../../shared/components/RenniliLogo';
+import { ByRtylr, RenniliLogo } from '../../../shared/components/RenniliLogo';
 import {
   PAGER_FAQ_PATH,
   PAGER_FEATURES_PATH,
@@ -124,9 +124,7 @@ export const LandingNav = ({
                         aria-hidden="true"
                       />
                     )}
-                    <span className="rl-nav-link-text">
-                      <RtylrBrandText text={item.label} />
-                    </span>
+                    <span className="rl-nav-link-text">{item.label}</span>
                   </Link>
                 );
               })}
@@ -184,7 +182,7 @@ export const LandingNav = ({
                   className={`rl-sheet-link ${currentPath === item.to ? 'rl-sheet-link--active' : ''}`}
                   onClick={() => closeSheet(false)}
                 >
-                  <RtylrBrandText text={item.label} />
+                  {item.label}
                 </Link>
               ))}
             </nav>

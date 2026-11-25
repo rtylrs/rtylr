@@ -48,14 +48,12 @@ export const RtylrUpsellBand = (): React.JSX.Element => {
               <RtylrBrandText text={t('pager.landing.rtylr.eyebrow')} />
             </p>
             <h2 id="rl-upsell-heading" className="rl-upsell-title">
-              <RtylrBrandText text={t('pager.landing.rtylr.teaserTitle')} />
+              {t('pager.landing.rtylr.teaserTitle')}
             </h2>
-            <p className="rl-upsell-body">
-              <RtylrBrandText text={t('pager.landing.rtylr.teaserBody')} />
-            </p>
+            <p className="rl-upsell-body">{t('pager.landing.rtylr.teaserBody')}</p>
             <div className="rl-upsell-actions">
               <Link to={PAGER_RTYLR_PATH} className="rl-btn rl-btn--primary">
-                <RtylrBrandText text={t('pager.landing.rtylr.teaserCta')} />
+                {t('pager.landing.rtylr.teaserCta')}
                 <ArrowRight
                   size={16}
                   strokeWidth={2.4}
@@ -69,7 +67,7 @@ export const RtylrUpsellBand = (): React.JSX.Element => {
                 rel="noreferrer"
                 className="rl-btn rl-btn--secondary"
               >
-                <RtylrBrandText text={t('pager.landing.rtylr.visitWorkspace')} />
+                {t('pager.landing.rtylr.visitWorkspace')}
               </a>
             </div>
           </div>

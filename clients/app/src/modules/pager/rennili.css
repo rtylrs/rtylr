@@ -3778,24 +3778,9 @@
   gap: 6px;
 }
 
-.rl-rtylr-bar .rennili-rtylr-inline,
-.rl-free-band .rennili-rtylr-inline,
-.rl-btn--primary .rennili-rtylr-inline {
+.rl-rtylr-bar .rennili-rtylr-inline {
   color: #ffffff;
   --app-logo-fold: var(--rl-rtylr-blue);
-}
-
-.rl-free-band .rennili-rtylr-inline {
-  --app-logo-fold: rgba(255, 255, 255, 0.72);
-}
-
-.rennili-staff-portal {
-  gap: 5px;
-}
-
-.rennili-staff-portal .rennili-rtylr-inline {
-  height: 18px;
-  color: var(--dash-text, #0a0a0a);
 }
 
 [dir='rtl'] .rl-rtylr-kicker {

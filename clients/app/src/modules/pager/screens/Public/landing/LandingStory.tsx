@@ -166,9 +166,7 @@ export const FreeBand = (): React.JSX.Element => {
             <h2 id="rl-free-heading" className="rl-free-title">
               {t('pager.landing.free.title')}
             </h2>
-            <p className="rl-free-body">
-              <RtylrBrandText text={t('pager.landing.free.whyBody')} />
-            </p>
+            <p className="rl-free-body">{t('pager.landing.free.whyBody')}</p>
             <ul className="rl-free-included">
               {included.map((item) => (
                 <li key={item}>
@@ -204,12 +202,10 @@ export const FreeBand = (): React.JSX.Element => {
             <p className="rl-rtylr-kicker">
               <RtylrBrandText text={t('pager.landing.rtylr.eyebrow')} />
             </p>
-            <p className="rl-rtylr-title">
-              <RtylrBrandText text={t('pager.landing.rtylr.teaserTitle')} />
-            </p>
+            <p className="rl-rtylr-title">{t('pager.landing.rtylr.teaserTitle')}</p>
           </div>
           <Link to={PAGER_RTYLR_PATH} className="rl-rtylr-link">
-            <RtylrBrandText text={t('pager.landing.rtylr.teaserCta')} />
+            {t('pager.landing.rtylr.teaserCta')}
             <ArrowRight size={16} strokeWidth={2.4} aria-hidden="true" className="rtl:rotate-180" />
           </Link>
         </div>
