@@ -134,6 +134,7 @@ export function useUpdateTask() {
       qc.invalidateQueries({ queryKey: ['milestones'] });
       qc.invalidateQueries({ queryKey: ['cycles'] });
       qc.invalidateQueries({ queryKey: ['task'] });
+      qc.invalidateQueries({ queryKey: ['planned-workload'] });
     },
     onError: () => toast.error(t('flowToasts.task.updateFailed')),
   });

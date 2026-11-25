@@ -134,6 +134,19 @@ export async function fetchTeamWorkDays(
 }
 
 /** Business and project visibility is enforced by the team endpoint. */
+/**
+ * Planned minutes per person per day from task estimates (T-341). The server
+ * decides whose plan the caller sees.
+ */
+export function usePlannedWorkload(from: string, to: string, workingDays: string) {
+  return useQuery({
+    queryKey: ['planned-workload', from, to, workingDays],
+    queryFn: () => timeV2.listPlannedWorkload({ fromDate: from, toDate: to, workingDays }),
+    enabled: !!from && !!to,
+    staleTime: 60 * 1000,
+  });
+}
+
 export function useTeamWorkDays(from: string, to: string) {
   return useQuery({
     queryKey: ['work-days-team', from, to],
