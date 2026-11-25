@@ -169,6 +169,12 @@ model FlowTask {
    */
   effort_minutes?: int32;
 
+  /**
+   * story_points is the task's points estimate on its project's points scale,
+   * separate from effort_minutes. Absent when not estimated.
+   */
+  story_points?: int32;
+
   /** Free-text blocker label. Empty if nothing is blocking. */
   waiting_on: string;
 
@@ -576,6 +582,10 @@ model CreateTaskRequest {
   @minValue(0)
   effort_minutes?: int32;
 
+  /** story_points must be a value on the project's points scale; omitted means none. */
+  @minValue(0)
+  story_points?: int32;
+
   /**
    * priority is the priority value for this contract. Optional in v2; empty
    * means the backend default rather than a client-mandated value.
@@ -709,6 +719,13 @@ model UpdateTaskBody {
    * of ambiguity between an omitted value and an explicit clear.
    */
   effort_minutes?: int32;
+
+  /**
+   * story_points sets the points estimate on the project's scale. Absent leaves
+   * it untouched; 0 clears it.
+   */
+  @minValue(0)
+  story_points?: int32;
 
   /**
    * Estimated hours. Absent leaves untouched; 0 clears. Same sentinel rule as

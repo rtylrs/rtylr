@@ -12,7 +12,8 @@ import { type ApiCycle } from '../../shared/services/flowApi';
 import { formatShortDate } from '../../shared/lib/utils';
 import { Link } from '@tanstack/react-router';
 import CycleBadge from '../../shared/components/CycleBadge';
-import { endDateForLength } from './cycleModel';
+import { buildVelocity, endDateForLength } from './cycleModel';
+import VelocityChart from './VelocityChart';
 import { CycleProgress } from './CycleProgress';
 import { CycleLengthPresets, fieldStyle, presetWeeks } from '../projects/backlog/CycleDialogs';
 import { useProjects } from '../projects/useProjects';
@@ -65,6 +66,8 @@ const Cycles: React.FC = () => {
   }
 
   const activeCycles = cycles.filter((c) => c.status === 'active');
+  const velocity = buildVelocity(cycles);
+  const showVelocity = velocity.entries.some((e) => e.committed > 0 || e.completed > 0);
   // Soonest first, so the next cycle reads first.
   const upcoming = cycles
     .filter((c) => c.status === 'upcoming')
@@ -312,6 +315,18 @@ const Cycles: React.FC = () => {
               </div>
             </motion.section>
           ))}
+
+          {showVelocity && (
+            <section>
+              <h3
+                className="text-flow-meta font-semibold uppercase tracking-wider mb-3"
+                style={{ color: 'var(--flow-text-muted)' }}
+              >
+                {t('flow.cycles.velocity.title')}
+              </h3>
+              <VelocityChart entries={velocity.entries} average={velocity.average} />
+            </section>
+          )}
 
           {upcoming.length > 0 && (
             <CycleSection title={t('flow.cycles.sectionUpcoming')} cycles={upcoming} />

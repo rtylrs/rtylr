@@ -12,6 +12,7 @@ import {
   CircleDot,
   Milestone as MilestoneIcon,
   Timer,
+  Hash,
   SlidersHorizontal,
   Shapes,
 } from 'lucide-react';
@@ -48,6 +49,11 @@ import { templateFor } from '../lib/taskTemplates';
 import { TASK_TYPES } from '../lib/taskHierarchy';
 import type { TaskType } from '../stores/flowStore';
 import { useCycles } from '../../features/cycles/useCycles';
+import {
+  useIsDeveloperProject,
+  useProjectPointsScale,
+} from '../../features/projects-v2/useDeveloperMode';
+import { formatPoints, pointsOptions } from '../lib/storyPoints';
 import {
   defaultStatus,
   displayStatusName,
@@ -133,6 +139,11 @@ export const QuickCreate: React.FC = () => {
   const [cycleId, setCycleId] = useState('');
   const { data: projectCycles = [] } = useCycles(quickCreateOpen ? projectId : undefined);
   const openCycles = projectCycles.filter((c) => c.status !== 'completed');
+  const [storyPoints, setStoryPoints] = useState('');
+  const isDeveloperProject = useIsDeveloperProject(
+    quickCreateOpen && projectId ? projectId : undefined
+  );
+  const pointsScale = useProjectPointsScale(quickCreateOpen && projectId ? projectId : undefined);
   const { data: rawStatuses } = useProjectStatuses(quickCreateOpen ? projectId : '');
   const statuses = rawStatuses ? sortStatuses(rawStatuses) : [];
   // A stable empty list: a fresh `[]` each render would re-run the reset below forever.
@@ -161,6 +172,7 @@ export const QuickCreate: React.FC = () => {
       setMilestoneId('');
       // Opened from a Backlog section: preselect that cycle.
       setCycleId(quickCreateCycleId ?? '');
+      setStoryPoints('');
     }
   }, [quickCreateOpen, currentProjectId, quickCreateCycleId]);
 
@@ -230,6 +242,7 @@ export const QuickCreate: React.FC = () => {
         fieldValues: toFieldValueInputs(projectFields, fieldValues),
         taskType: taskType === 'task' ? undefined : taskType,
         cycleId: openCycles.some((c) => c.id === cycleId) ? cycleId : undefined,
+        storyPoints: isDeveloperProject && storyPoints ? Number(storyPoints) : undefined,
       });
       const task = res.task;
       const taskId = String(task.id);
@@ -417,6 +430,7 @@ export const QuickCreate: React.FC = () => {
                     // Milestones and cycles belong to one project.
                     setMilestoneId('');
                     setCycleId('');
+                    setStoryPoints('');
                   }}
                   allowPersonal
                 />
@@ -458,6 +472,26 @@ export const QuickCreate: React.FC = () => {
                     ]}
                     onChange={setMilestoneId}
                     muted={!milestoneId}
+                  />
+                </div>
+              </FieldRow>
+            )}
+
+            {isDeveloperProject && (
+              <FieldRow label={t('flow.taskDetail.points')} icon={Hash}>
+                <div className="max-w-[240px]">
+                  <FlowSelect
+                    label={t('flow.taskDetail.points')}
+                    value={storyPoints}
+                    options={[
+                      { value: '', label: t('flow.taskDetail.noPoints') },
+                      ...pointsOptions(pointsScale).map((p) => ({
+                        value: String(p),
+                        label: formatPoints(p, pointsScale),
+                      })),
+                    ]}
+                    onChange={setStoryPoints}
+                    muted={!storyPoints}
                   />
                 </div>
               </FieldRow>

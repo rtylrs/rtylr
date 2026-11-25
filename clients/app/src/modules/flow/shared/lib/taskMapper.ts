@@ -85,6 +85,7 @@ export function apiTaskToTask(t: ApiTask): Task {
         ? Math.round(t.estimatedHours * 60)
         : undefined),
     prChecksState: t.prChecksState || undefined,
+    storyPoints: t.storyPoints ?? undefined,
     waitingOn: t.waitingOn,
     decisionNote: t.decisionNote,
     focusPin: t.focusPin,

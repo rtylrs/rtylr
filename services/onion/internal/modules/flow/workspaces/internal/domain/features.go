@@ -28,6 +28,13 @@ type Cycle struct {
 	Totals          CycleTotals
 	EstimateMinutes int64
 	CarriedOver     []CycleCarryOver
+
+	// Story points (T-381). Committed is what was in the cycle when it started
+	// (everything while upcoming); scope added is what joined after the start.
+	CommittedPoints  int
+	CompletedPoints  int
+	ScopeAddedPoints int
+	ScopeAddedCount  int
 }
 
 type CycleInput struct {

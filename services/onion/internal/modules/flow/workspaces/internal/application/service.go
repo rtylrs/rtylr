@@ -479,6 +479,9 @@ type repository interface {
 	UpsertTaskTemplate(ctx context.Context, businessID, projectID int64, taskType, body string, actorID int64) error
 	DeleteTaskTemplate(ctx context.Context, businessID, projectID int64, taskType string) error
 	DeleteCycle(ctx context.Context, businessID, cycleID int64) error
+	AttachTaskStoryPoints(ctx context.Context, tasks []domain.Task) error
+	SetTaskStoryPoints(ctx context.Context, businessID, taskID int64, points *int32) error
+	UpdateProjectPointsScale(ctx context.Context, id, businessID int64, scale string) error
 	StartCycle(ctx context.Context, in domain.StartCycleInput) error
 	CompleteCycle(ctx context.Context, in domain.CompleteCycleInput) ([]domain.CompletedCycleTask, error)
 	MoveCycleTask(ctx context.Context, in domain.MoveCycleTaskInput) (domain.MovedCycleTask, error)

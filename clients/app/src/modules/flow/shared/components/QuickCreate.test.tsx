@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => ({
   statuses: [] as ApiStatus[],
   milestones: [] as Array<{ id: string; name: string }>,
   cycles: [] as Array<{ id: string; name: string; status: string }>,
+  developer: false,
   fields: [] as ApiField[],
   templates: [] as Array<{ id: string; projectId: string; taskType: string; body: string }>,
 }));
@@ -44,6 +45,10 @@ vi.mock('../../features/milestones/useMilestones', () => ({
 }));
 vi.mock('../../features/tasks/useTaskTemplates', () => ({
   useTaskTemplates: (projectId?: string) => ({ data: projectId ? mocks.templates : undefined }),
+}));
+vi.mock('../../features/projects-v2/useDeveloperMode', () => ({
+  useIsDeveloperProject: (projectId?: string) => Boolean(projectId) && mocks.developer,
+  useProjectPointsScale: () => 'fibonacci',
 }));
 vi.mock('../../features/cycles/useCycles', () => ({
   useCycles: (projectId?: string) => ({ data: projectId ? mocks.cycles : undefined }),
@@ -77,6 +82,7 @@ beforeEach(async () => {
   mocks.labels = [];
   mocks.milestones = [];
   mocks.cycles = [];
+  mocks.developer = false;
   mocks.fields = [];
   mocks.templates = [];
   mocks.statuses = [status('3', 'To Do', 10, true), status('4', 'Doing', 20)];
@@ -273,6 +279,24 @@ describe('Quick task creation in Portal', () => {
         expect.objectContaining({ projectId: '12', cycleId: '55' })
       )
     );
+  });
+  it('sends story points picked for a developer project (T-381)', async () => {
+    mocks.currentProjectId = '12';
+    mocks.developer = true;
+    render(<QuickCreate />);
+    await chooseFlowOption('Points', '8');
+    fillTitle();
+    create();
+    await waitFor(() =>
+      expect(mocks.create).toHaveBeenCalledWith(
+        expect.objectContaining({ projectId: '12', storyPoints: 8 })
+      )
+    );
+  });
+  it('offers no points field outside developer projects', () => {
+    mocks.currentProjectId = '12';
+    render(<QuickCreate />);
+    expect(screen.queryByRole('button', { name: /^Points(:|$)/ })).toBeNull();
   });
   it('offers no milestone field when the project has none', () => {
     mocks.currentProjectId = '12';

@@ -72,6 +72,7 @@ func toProjectV2(p domain.Project) *flowprojectv2.Project {
 		Visibility:     p.Visibility,
 		IsPersonal:     p.IsPersonal,
 		DeveloperMode:  p.DeveloperMode,
+		PointsScale:    p.PointsScale,
 		CreatedBy:      p.CreatedBy,
 		TaskCount:      p.TaskCount,
 		CompletedCount: p.CompletedCount,
@@ -115,6 +116,8 @@ func mapProjectV2Error(err error) error {
 		return onekiterrors.PermissionDenied()
 	case errors.Is(err, application.ErrPersonalProjectDeveloperMode):
 		return onekiterrors.New(http.StatusBadRequest, application.ErrPersonalProjectDeveloperMode.Error())
+	case errors.Is(err, domain.ErrInvalidPointsScale):
+		return onekiterrors.New(http.StatusBadRequest, domain.ErrInvalidPointsScale.Error())
 	case errors.Is(err, application.ErrProjectNotArchived):
 		// 409: the project exists and the caller may act on it, but not in the
 		// state it is in. Archiving it first makes the same request valid.
@@ -320,6 +323,25 @@ func (a *ProjectAPIV2) SetProjectDeveloperMode(ctx context.Context, req *flowpro
 
 	publishBusinessEvent("project.updated", businessID, req.GetId(), authUser.UserID)
 	return &flowprojectv2.SetProjectDeveloperModeResponse{Project: toProjectV2(project)}, nil
+}
+
+func (a *ProjectAPIV2) SetProjectPointsScale(ctx context.Context, req *flowprojectv2.SetProjectPointsScaleRequest) (*flowprojectv2.SetProjectPointsScaleResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:edit"); err != nil {
+		return nil, err
+	}
+	businessID, authUser, err := a.resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	project, err := a.Service.SetProjectPointsScale(ctx, req.GetId(), authUser.UserID, businessID, req.GetScale())
+	if err != nil {
+		if err := mapProjectV2Error(err); err != nil {
+			return nil, err
+		}
+		return nil, onekiterrors.New(http.StatusBadRequest, "Failed to set points scale")
+	}
+	publishBusinessEvent("project.updated", businessID, req.GetId(), authUser.UserID)
+	return &flowprojectv2.SetProjectPointsScaleResponse{Project: toProjectV2(project)}, nil
 }
 
 func (a *ProjectAPIV2) SetProjectVisibility(ctx context.Context, req *flowprojectv2.SetProjectVisibilityRequest) (*flowprojectv2.SetProjectVisibilityResponse, error) {

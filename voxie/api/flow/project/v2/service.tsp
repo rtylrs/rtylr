@@ -52,6 +52,14 @@ interface ProjectService {
     ...SetProjectDeveloperModeRequest,
   ): SetProjectDeveloperModeResponse;
 
+  /**
+   * setProjectPointsScale picks the scale the project's story points use.
+   * Requires project admin. Points already set are kept.
+   */
+  @put
+  @route("/projects/points-scale")
+  setProjectPointsScale(...SetProjectPointsScaleRequest): SetProjectPointsScaleResponse;
+
   @get
   @route("/projects/archived")
   listArchivedProjects(

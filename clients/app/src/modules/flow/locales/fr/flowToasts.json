@@ -107,7 +107,8 @@
     "archived": "Projet archivé.",
     "archivedUntil": "Projet archivé. Il sera définitivement supprimé le {{date}}.",
     "archiveFailed": "Échec de l'archivage du projet",
-    "developerModeFailed": "Impossible de modifier les fonctions de développement"
+    "developerModeFailed": "Impossible de modifier les fonctions de développement",
+    "pointsScaleFailed": "Échec du changement de l'échelle des points"
   },
   "milestone": {
     "createFailed": "Échec de la création du jalon",

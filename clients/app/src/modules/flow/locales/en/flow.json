@@ -253,6 +253,8 @@
     "closeDuplicateKeepOpen": "Keep open",
     "noCycle": "Backlog (no cycle)",
     "noCyclesInProject": "No open cycles",
+    "points": "Points",
+    "noPoints": "None",
     "startDate": "Start date",
     "copyBranch": "Copy branch name",
     "branchCopied": "Branch name copied",
@@ -986,7 +988,27 @@
       "carryHintBacklog": "When this cycle is completed, unfinished tasks can move to the next cycle or back to the backlog.",
       "deleteTitle": "Delete this cycle?",
       "deleteDescription_one": "{{name}} will be deleted. Its {{count}} task stays in the project and goes back to the backlog.",
-      "deleteDescription_other": "{{name}} will be deleted. Its {{count}} tasks stay in the project and go back to the backlog."
+      "deleteDescription_other": "{{name}} will be deleted. Its {{count}} tasks stay in the project and go back to the backlog.",
+      "unit": "Burndown unit",
+      "unitTasksLabel": "Tasks",
+      "unitPointsLabel": "Points",
+      "unitPoints": "points",
+      "addedValue_one": "{{points}} pts, {{count}} task",
+      "addedValue_other": "{{points}} pts, {{count}} tasks",
+      "points": {
+        "committed": "Committed points",
+        "completed": "Completed points",
+        "added": "Added mid-cycle"
+      }
+    },
+    "velocity": {
+      "title": "Velocity",
+      "summary": "Average of {{average}} points completed over the last {{count}} cycles",
+      "committed": "Committed",
+      "completed": "Completed",
+      "committedValue": "{{value}} points committed",
+      "completedValue": "{{value}} points completed",
+      "average": "Average {{average}} points per cycle"
     }
   },
   "myIssues": {
@@ -1230,7 +1252,15 @@
     },
     "memberCount_one": "{{count}} member",
     "memberCount_other": "{{count}} members",
-    "addMemberShort": "Add"
+    "addMemberShort": "Add",
+    "pointsScale": "Story points scale",
+    "pointsScaleHint": "The values tasks pick their points from. Points already set are kept.",
+    "pointsScaleSaved": "Points scale saved",
+    "pointsScales": {
+      "fibonacci": "Fibonacci (1, 2, 3, 5, 8, 13)",
+      "linear": "Linear (1 to 10)",
+      "tshirt": "T-shirt (XS to XL)"
+    }
   },
   "bulkEdit": {
     "clearSelectionLabel": "Clear selection",

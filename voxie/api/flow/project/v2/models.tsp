@@ -61,6 +61,13 @@ model Project {
    */
   developer_mode: boolean;
 
+  /**
+   * points_scale is the scale tasks pick story points from: "fibonacci"
+   * (1, 2, 3, 5, 8, 13), "linear" (1 to 10) or "tshirt" (XS to XL, stored as
+   * 1, 2, 3, 5, 8).
+   */
+  points_scale: string;
+
   /** start_date is the start date value for this contract. */
   start_date: string;
 
@@ -203,6 +210,22 @@ model SetProjectDeveloperModeRequest {
 
   /** enabled turns developer features on (true) or off (false). */
   enabled: boolean;
+}
+
+model SetProjectPointsScaleRequest {
+  /** id is the unique identifier for the resource. */
+  @minValueExclusive(0)
+  @encode(string)
+  id: int64;
+
+  /** scale is "fibonacci", "linear" or "tshirt". */
+  @Onkt.required
+  scale: string;
+}
+
+model SetProjectPointsScaleResponse {
+  /** project is the updated project. */
+  project: Project;
 }
 
 model SetProjectDeveloperModeResponse {

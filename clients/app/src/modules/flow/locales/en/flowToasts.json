@@ -103,7 +103,8 @@
     "archived": "Project archived.",
     "archivedUntil": "Project archived. It will be permanently deleted on {{date}}.",
     "archiveFailed": "Failed to archive project",
-    "developerModeFailed": "Failed to change developer features"
+    "developerModeFailed": "Failed to change developer features",
+    "pointsScaleFailed": "Failed to change the points scale"
   },
   "milestone": {
     "createFailed": "Failed to create milestone",

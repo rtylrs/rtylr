@@ -60,6 +60,21 @@ model Cycle {
   estimate_minutes: int32;
 
   /**
+   * committed_points is the story points of the tasks in the cycle when it
+   * started, or of all its tasks while it is upcoming.
+   */
+  committed_points: int32;
+
+  /** completed_points is the story points of the cycle's done tasks. */
+  completed_points: int32;
+
+  /** scope_added_points is the story points of tasks added after the cycle started. */
+  scope_added_points: int32;
+
+  /** scope_added_count is how many tasks were added after the cycle started. */
+  scope_added_count: int32;
+
+  /**
    * carried_over lists the tasks this cycle received from cycles that were
    * completed with a move decision, grouped by the cycle they came from.
    */

@@ -89,6 +89,11 @@ func (a *TaskAPIV2) CreateTask(ctx context.Context, req *flowtaskv2.CreateTaskRe
 	if req.SectionId != nil && (projectID == 0 || a.Service.GetColumnProject(ctx, *req.SectionId) != projectID) {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Column must belong to the selected project")
 	}
+	if req.StoryPoints != nil {
+		if pointsErr := a.Service.ValidateStoryPoints(ctx, businessID, projectID, *req.StoryPoints); pointsErr != nil {
+			return nil, storyPointsError(ctx, pointsErr)
+		}
+	}
 	if req.MilestoneId != nil {
 		milestoneProject, lookupErr := a.Service.MilestoneProjectID(ctx, *req.MilestoneId, businessID)
 		if lookupErr != nil {
@@ -166,6 +171,16 @@ func (a *TaskAPIV2) CreateTask(ctx context.Context, req *flowtaskv2.CreateTaskRe
 		created := []domain.Task{task}
 		if attachErr := a.Service.AttachTaskCycles(ctx, created); attachErr == nil {
 			task = created[0]
+		}
+	}
+
+	if req.StoryPoints != nil && *req.StoryPoints != 0 {
+		// Validated above; a failed write is logged like the cycle placement.
+		if pointsErr := a.Service.SetTaskStoryPoints(ctx, businessID, task.ID, task.ProjectID, *req.StoryPoints); pointsErr != nil {
+			logger.Ctx(ctx).Error("CreateTask story points failed", logger.Error(pointsErr))
+		} else {
+			points := *req.StoryPoints
+			task.StoryPoints = &points
 		}
 	}
 
@@ -252,6 +267,17 @@ func (a *TaskAPIV2) UpdateTask(ctx context.Context, req *flowtaskv2.UpdateTaskRe
 	if body.EffortMinutes != nil && *body.EffortMinutes < 0 {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid effort_minutes")
 	}
+	var pointsProjectID int64
+	if body.StoryPoints != nil {
+		detail, detailErr := a.Service.GetTaskDetail(ctx, req.GetId())
+		if detailErr != nil {
+			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update task")
+		}
+		pointsProjectID = detail.Task.ProjectID
+		if pointsErr := a.Service.ValidateStoryPoints(ctx, businessID, pointsProjectID, *body.StoryPoints); pointsErr != nil {
+			return nil, storyPointsError(ctx, pointsErr)
+		}
+	}
 	if body.SectionId != nil && *body.SectionId != 0 {
 		detail, err := a.Service.GetTaskDetail(ctx, req.GetId())
 		if err != nil || a.Service.GetColumnProject(ctx, *body.SectionId) != detail.Task.ProjectID {
@@ -334,6 +360,11 @@ func (a *TaskAPIV2) UpdateTask(ctx context.Context, req *flowtaskv2.UpdateTaskRe
 			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update task")
 		}
 	}
+	if body.StoryPoints != nil {
+		if err := a.Service.SetTaskStoryPoints(ctx, businessID, input.ID, pointsProjectID, *body.StoryPoints); err != nil {
+			return nil, storyPointsError(ctx, err)
+		}
+	}
 	if body.CycleId != nil {
 		if err := a.Service.SetTaskCycle(ctx, businessID, input.ID, *body.CycleId); err != nil {
 			return nil, cyclePlanningError(ctx, "UpdateTask cycle", err)
@@ -365,4 +396,12 @@ func (a *TaskAPIV2) requireOpenProjectCycle(ctx context.Context, businessID, cyc
 		return onekiterrors.New(http.StatusBadRequest, "The cycle is completed")
 	}
 	return nil
+}
+
+// storyPointsError maps a points value off the project's scale to 400.
+func storyPointsError(ctx context.Context, err error) error {
+	if errors.Is(err, domain.ErrInvalidStoryPoints) {
+		return onekiterrors.New(http.StatusBadRequest, domain.ErrInvalidStoryPoints.Error())
+	}
+	return workspaceInternalError(ctx, "story points failed", err)
 }

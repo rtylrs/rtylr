@@ -65,3 +65,35 @@ export function cyclePercent(cycle: Pick<ApiCycle, 'scope' | 'completed'>): numb
 export function endDateForLength(startDate: string, weeks: number): string {
   return ISO_DAY.test(startDate) ? addDays(startDate, weeks * 7 - 1) : '';
 }
+
+export interface VelocityEntry {
+  id: string;
+  name: string;
+  committed: number;
+  completed: number;
+}
+
+/**
+ * Committed and completed points of the project's last `limit` completed
+ * cycles, oldest first, and the average completed.
+ */
+export function buildVelocity(
+  cycles: readonly ApiCycle[],
+  limit = 6
+): { entries: VelocityEntry[]; average: number } {
+  const entries = cycles
+    .filter((c) => c.status === 'completed')
+    .sort((a, b) => (a.endDate < b.endDate ? -1 : a.endDate > b.endDate ? 1 : 0))
+    .slice(-limit)
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      committed: c.committedPoints ?? 0,
+      completed: c.completedPoints ?? 0,
+    }));
+  const average =
+    entries.length > 0
+      ? Math.round((entries.reduce((sum, e) => sum + e.completed, 0) / entries.length) * 10) / 10
+      : 0;
+  return { entries, average };
+}

@@ -119,7 +119,8 @@
     "archived": "تمت أرشفة المشروع.",
     "archivedUntil": "تمت أرشفة المشروع. سيتم حذفه نهائيًا في {{date}}.",
     "archiveFailed": "فشل أرشفة المشروع",
-    "developerModeFailed": "تعذر تغيير ميزات التطوير"
+    "developerModeFailed": "تعذر تغيير ميزات التطوير",
+    "pointsScaleFailed": "فشل تغيير مقياس النقاط"
   },
   "milestone": {
     "createFailed": "فشل إنشاء المرحلة",

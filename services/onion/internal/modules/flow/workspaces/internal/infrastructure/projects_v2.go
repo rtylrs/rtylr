@@ -28,6 +28,7 @@ type projectV2Row struct {
 	Visibility  string
 	IsPersonal  bool
 	DevMode     bool
+	PointsScale string
 	StartDate   sql.NullTime
 	DueDate     sql.NullTime
 	CreatedBy   int64
@@ -54,6 +55,7 @@ func mapProjectV2(r projectV2Row) domain.Project {
 		Visibility:     r.Visibility,
 		IsPersonal:     r.IsPersonal,
 		DeveloperMode:  r.DevMode,
+		PointsScale:    r.PointsScale,
 		CreatedBy:      r.CreatedBy,
 		TaskCount:      int32(countIfaceToInt64(r.TaskCount)),   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		CompletedCount: int32(countIfaceToInt64(r.DoneCount)),   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
@@ -93,7 +95,7 @@ func (r *Repository) GetProjectV2ByID(ctx context.Context, id, businessID int64)
 		ID: row.ID, WorkspaceID: row.WorkspaceID, OwnerID: row.OwnerID,
 		BusinessID: row.BusinessID, Name: row.Name, Description: row.Description,
 		Icon: row.Icon, Color: row.Color, Status: string(row.Status), Visibility: string(row.Visibility),
-		IsPersonal: row.IsPersonal, DevMode: row.DeveloperMode, StartDate: row.StartDate, DueDate: row.DueDate,
+		IsPersonal: row.IsPersonal, DevMode: row.DeveloperMode, PointsScale: row.PointsScale, StartDate: row.StartDate, DueDate: row.DueDate,
 		CreatedBy: row.CreatedBy, CreatedAt: row.CreatedAt, UpdatedAt: row.UpdatedAt,
 		ArchivedAt: row.ArchivedAt, PurgeAt: row.PurgeAt,
 		TaskCount: row.TaskCount, DoneCount: row.CompletedCount, MemberCount: row.MemberCount,
@@ -170,7 +172,7 @@ func (r *Repository) ListProjectsV2(ctx context.Context, businessID, callerID in
 			ID: row.ID, WorkspaceID: row.WorkspaceID, OwnerID: row.OwnerID,
 			BusinessID: row.BusinessID, Name: row.Name, Description: row.Description,
 			Icon: row.Icon, Color: row.Color, Status: string(row.Status), Visibility: string(row.Visibility),
-			IsPersonal: row.IsPersonal, DevMode: row.DeveloperMode, StartDate: row.StartDate, DueDate: row.DueDate,
+			IsPersonal: row.IsPersonal, DevMode: row.DeveloperMode, PointsScale: row.PointsScale, StartDate: row.StartDate, DueDate: row.DueDate,
 			CreatedBy: row.CreatedBy, CreatedAt: row.CreatedAt, UpdatedAt: row.UpdatedAt,
 			ArchivedAt: row.ArchivedAt, PurgeAt: row.PurgeAt,
 			TaskCount: row.TaskCount, DoneCount: row.CompletedCount, MemberCount: row.MemberCount,
@@ -216,7 +218,7 @@ func (r *Repository) ListArchivedProjectsV2(ctx context.Context, businessID, cal
 			ID: row.ID, WorkspaceID: row.WorkspaceID, OwnerID: row.OwnerID,
 			BusinessID: row.BusinessID, Name: row.Name, Description: row.Description,
 			Icon: row.Icon, Color: row.Color, Status: string(row.Status), Visibility: string(row.Visibility),
-			IsPersonal: row.IsPersonal, DevMode: row.DeveloperMode, StartDate: row.StartDate, DueDate: row.DueDate,
+			IsPersonal: row.IsPersonal, DevMode: row.DeveloperMode, PointsScale: row.PointsScale, StartDate: row.StartDate, DueDate: row.DueDate,
 			CreatedBy: row.CreatedBy, CreatedAt: row.CreatedAt, UpdatedAt: row.UpdatedAt,
 			ArchivedAt: row.ArchivedAt, PurgeAt: row.PurgeAt,
 			TaskCount: row.TaskCount, DoneCount: row.CompletedCount, MemberCount: row.MemberCount,
@@ -232,6 +234,16 @@ func (r *Repository) UpdateProjectDeveloperMode(ctx context.Context, id, busines
 		DeveloperMode: enabled,
 		ID:            id,
 		BusinessID:    businessID,
+	})
+	return err
+}
+
+// UpdateProjectPointsScale sets the story points scale of one business project.
+func (r *Repository) UpdateProjectPointsScale(ctx context.Context, id, businessID int64, scale string) error {
+	_, err := r.queries.UpdateProjectPointsScale(ctx, sqlc.UpdateProjectPointsScaleParams{
+		PointsScale: scale,
+		ID:          id,
+		BusinessID:  businessID,
 	})
 	return err
 }

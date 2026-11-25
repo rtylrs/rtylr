@@ -179,6 +179,10 @@ func toTaskV2(t domain.Task) *flowtaskv2.FlowTask {
 		v := t.ChecksState
 		out.PrChecksState = &v
 	}
+	if t.StoryPoints != nil {
+		v := *t.StoryPoints
+		out.StoryPoints = &v
+	}
 	if t.PlanRank != nil {
 		v := *t.PlanRank
 		out.PlanRank = &v

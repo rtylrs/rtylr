@@ -112,6 +112,7 @@ flow/v18_cycle_planning.sql	internal/modules/flow/sql/schema/flow/v18_cycle_plan
 flow/v19_task_types_epics.sql	internal/modules/flow/sql/schema/flow/v19_task_types_epics.sql
 flow/v20_custom_fields.sql	internal/modules/flow/sql/schema/flow/v20_custom_fields.sql
 flow/v21_task_relations.sql	internal/modules/flow/sql/schema/flow/v21_task_relations.sql
+flow/v22_story_points.sql	internal/modules/flow/sql/schema/flow/v22_story_points.sql
 flow/v23_task_templates.sql	internal/modules/flow/sql/schema/flow/v23_task_templates.sql
 flow/v24_github_pull_requests.sql	internal/modules/flow/sql/schema/flow/v24_github_pull_requests.sql
 flow/v8_time_tracking.sql	internal/modules/flow/sql/schema/flow/v8_time_tracking.sql
