@@ -2291,10 +2291,12 @@
 .rl-free-figure {
   margin: 0;
   font-family: var(--rl-font-display);
-  font-size: clamp(44px, 5vw, 62px);
-  line-height: 1.05;
+  font-size: clamp(32px, 3.4vw, 44px);
+  line-height: 1.28;
   font-weight: 900;
   color: var(--rl-forest);
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .rl-free-figure-sub {
@@ -3624,17 +3626,18 @@
   }
 }
 
-.rl-free-card {
+.rl-free-band .rl-free-card {
   padding: 36px 24px;
   border-radius: 28px;
   background: var(--rl-forest);
+  border: 0;
   color: #ffffff;
   display: grid;
   gap: 28px;
 }
 
 @media (min-width: 900px) {
-  .rl-free-card {
+  .rl-free-band .rl-free-card {
     padding: 56px;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: end;
@@ -3696,14 +3699,14 @@
   color: #9fc4b5;
 }
 
-.rl-free-actions {
+.rl-free-band .rl-free-actions {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
 @media (min-width: 900px) {
-  .rl-free-actions {
+  .rl-free-band .rl-free-actions {
     min-width: 270px;
   }
 }
@@ -3755,14 +3758,12 @@
 
 .rl-rtylr-bar .rennili-rtylr-inline,
 .rl-free-band .rennili-rtylr-inline,
-.rl-free-card .rennili-rtylr-inline,
 .rl-btn--primary .rennili-rtylr-inline {
   color: #ffffff;
   --app-logo-fold: var(--rl-rtylr-blue);
 }
 
-.rl-free-band .rennili-rtylr-inline,
-.rl-free-card .rennili-rtylr-inline {
+.rl-free-band .rennili-rtylr-inline {
   --app-logo-fold: rgba(255, 255, 255, 0.72);
 }
 
