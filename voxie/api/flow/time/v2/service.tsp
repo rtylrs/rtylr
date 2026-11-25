@@ -35,6 +35,16 @@ interface TimeService {
   @route("/work-days/team")
   listTeamWorkDays(...ListTeamWorkDaysRequest): ListTeamWorkDaysResponse;
 
+  /**
+   * listPlannedWorkload spreads each open task's estimate over the working days
+   * from its start date to its due date and returns planned minutes per person
+   * per day (T-341). Business admins see everyone; project admins see the
+   * tasks of the projects they administer; everyone sees their own.
+   */
+  @get
+  @route("/work-days/planned")
+  listPlannedWorkload(...ListPlannedWorkloadRequest): ListPlannedWorkloadResponse;
+
   @post
   @route("/work-days/{work_day_id}/lines")
   createWorkDayLine(...CreateWorkDayLineRequest): CreateWorkDayLineResponse;

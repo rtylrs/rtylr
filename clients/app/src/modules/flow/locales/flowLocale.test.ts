@@ -86,6 +86,13 @@ describe('flow locale parity', () => {
       'settings.appearance.groups.mode',
       'settings.appearance.groups.palette',
       'settings.appearance.density.compact',
+      // "Cycle" is the French term too; Flow's French copy says "cycle"
+      // throughout rather than mixing in "itération".
+      'shell.cycles',
+      'taskDetail.cycle',
+      'board.cardField.cycle',
+      'board.groupBy.cycle',
+      'filters.fields.cycle',
       // A URL placeholder is intentionally identical in every locale.
       'sidebar.externalUrlPlaceholder',
       'fields.placeholder.url',
@@ -106,6 +113,8 @@ describe('flow locale parity', () => {
       // projectOverview.health.onTrack and .recentComments, both differ, which
       // is the check that this is a cognate rather than a missed translation.
       'projectOverview.total',
+      // Same word in French again; its siblings under time.planned differ.
+      'time.planned.total',
       // "Relations" is the same word in French. Every relation kind under it
       // (taskDetail.relationKinds) differs, which is the check that this is a
       // cognate rather than a missed translation.

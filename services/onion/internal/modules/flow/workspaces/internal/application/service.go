@@ -430,6 +430,7 @@ type repository interface {
 	TasksLinkedToGitHubChange(ctx context.Context, e domain.GitHubWebhookEffect) ([]domain.Task, error)
 	ListTaskPullRequests(ctx context.Context, businessID, taskID int64) ([]domain.TaskPullRequest, error)
 	TaskChecksStates(ctx context.Context, businessID int64, taskIDs []int64) (map[int64]string, error)
+	ListPlannedTasks(ctx context.Context, businessID int64, projectIDs []int64, ownerID int64, from, to time.Time) ([]domain.PlannedTask, error)
 	ListTeamWorkDays(ctx context.Context, businessID int64, employeeIDs, hiddenIDs, userIDs []int64, from, to string, limit int32, offset int64) ([]domain.WorkDay, int64, error)
 	ListViews(ctx context.Context, businessID, workspaceID, callerID, limit, offset int64) ([]domain.View, int64, error)
 	ListViewsV2(ctx context.Context, businessID, callerID, limit, offset int64) ([]domain.View, int64, error)
@@ -474,11 +475,17 @@ type repository interface {
 	TaskMilestoneIDs(ctx context.Context, taskIDs []int64) (map[int64]int64, error)
 	GetCycleV2(ctx context.Context, businessID, cycleID int64) (domain.Cycle, error)
 	UpdateCycleV2(ctx context.Context, in domain.UpdateCycleV2Input) error
+	ListTaskTemplates(ctx context.Context, businessID, projectID int64) ([]domain.TaskTemplate, error)
+	UpsertTaskTemplate(ctx context.Context, businessID, projectID int64, taskType, body string, actorID int64) error
+	DeleteTaskTemplate(ctx context.Context, businessID, projectID int64, taskType string) error
+	DeleteCycle(ctx context.Context, businessID, cycleID int64) error
 	StartCycle(ctx context.Context, in domain.StartCycleInput) error
 	CompleteCycle(ctx context.Context, in domain.CompleteCycleInput) ([]domain.CompletedCycleTask, error)
 	MoveCycleTask(ctx context.Context, in domain.MoveCycleTaskInput) (domain.MovedCycleTask, error)
 	AttachTaskCycles(ctx context.Context, tasks []domain.Task) error
 	CycleMemberLoads(ctx context.Context, businessID, cycleID int64) ([]domain.CycleMemberLoad, error)
+	GetInsightsV2(ctx context.Context, businessID int64, projectIDs []int64, now time.Time) (domain.Insights, error)
+	ListTaskIDsInProjects(ctx context.Context, businessID int64, projectIDs []int64, afterID int64, limit int32) ([]int64, error)
 	AssigneeNames(ctx context.Context, businessID int64, userIDs []int64) (map[int64]string, error)
 	UpdateProject(ctx context.Context, input domain.UpdateProjectInput) error
 	UpdateProjectMemberRole(ctx context.Context, input domain.UpdateProjectMemberRoleInput) error

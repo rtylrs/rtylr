@@ -14,6 +14,23 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({
+    children,
+    to,
+    params,
+    ...rest
+  }: {
+    children: React.ReactNode;
+    to: string;
+    params?: Record<string, string>;
+  }) => (
+    <a href={to.replace('$cycleId', params?.cycleId ?? '')} {...rest}>
+      {children}
+    </a>
+  ),
+}));
+
 vi.mock('../../shared/stores/flowStore', () => ({
   useFlowStore: (selector?: (state: object) => unknown) => {
     const state = { activeWorkspaceId: 'ws-1' };
@@ -197,11 +214,12 @@ describe('Cycles create form', () => {
       target: { value: 'Sprint 1' },
     });
 
-    fireEvent.click(screen.getByLabelText('flow.cycles.startDate'));
-    fireEvent.click(screen.getByRole('gridcell', { name: 'Thursday, August 20, 2026' }));
-
+    // An end date picked by hand is kept when the start is picked after it.
     fireEvent.click(screen.getByLabelText('flow.cycles.endDate'));
     fireEvent.click(screen.getByRole('gridcell', { name: 'Friday, August 21, 2026' }));
+
+    fireEvent.click(screen.getByLabelText('flow.cycles.startDate'));
+    fireEvent.click(screen.getByRole('gridcell', { name: 'Thursday, August 20, 2026' }));
 
     fireEvent.click(screen.getByText('flow.cycles.create'));
 
@@ -210,6 +228,25 @@ describe('Cycles create form', () => {
       name: 'Sprint 1',
       startDate: '2026-08-20',
       endDate: '2026-08-21',
+    });
+  });
+
+  it('fills the end date from the chosen length', () => {
+    render(<Cycles />);
+
+    fireEvent.click(screen.getByText('flow.cycles.newCycle'));
+    fireEvent.change(screen.getByPlaceholderText('flow.cycles.namePlaceholder'), {
+      target: { value: 'Sprint 1' },
+    });
+    fireEvent.click(screen.getByLabelText('flow.cycles.startDate'));
+    fireEvent.click(screen.getByRole('gridcell', { name: 'Thursday, August 20, 2026' }));
+    fireEvent.click(screen.getAllByText('flow.backlog.start.weeks')[0]);
+
+    fireEvent.click(screen.getByText('flow.cycles.create'));
+
+    expect(mutateSpy.mock.calls[0][0]).toMatchObject({
+      startDate: '2026-08-20',
+      endDate: '2026-08-26',
     });
   });
 });

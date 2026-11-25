@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildCsv, csvField } from './csv';
+import { buildCsv, csvField, parseCsv } from './csv';
 
 const BOM = '﻿';
 
@@ -27,5 +27,25 @@ describe('csvField', () => {
 describe('buildCsv', () => {
   it('starts with a byte order mark and ends rows with CRLF', () => {
     expect(buildCsv([['a'], ['b']])).toBe(`${BOM}"a"\r\n"b"\r\n`);
+  });
+});
+
+describe('parseCsv', () => {
+  it('reads quoted cells, doubled quotes and line breaks inside quotes', () => {
+    expect(parseCsv('﻿title,description\r\n"Login, page","Say ""hi""\nthen go"\nPlain,\n')).toEqual(
+      [
+        ['title', 'description'],
+        ['Login, page', 'Say "hi"\nthen go'],
+        ['Plain', ''],
+      ]
+    );
+  });
+
+  it('drops blank lines and reads what buildCsv writes', () => {
+    expect(parseCsv('a,b\n\n,\n1,2')).toEqual([
+      ['a', 'b'],
+      ['1', '2'],
+    ]);
+    expect(parseCsv(buildCsv([['Title'], ['مهمة']]))).toEqual([['Title'], ['مهمة']]);
   });
 });

@@ -8,7 +8,7 @@ import { HelmetContainer } from '@voxire/components';
 import { STATUS_COLORS, useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
 import { STATUS_LABEL_KEYS } from '../../shared/lib/constantsFlow';
-import { isOverdue, todayIso } from '../../shared/lib/dateUtils';
+import { todayIso } from '../../shared/lib/dateUtils';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import ProjectViewTabs from './ProjectViewTabs';
@@ -26,6 +26,8 @@ import EpicProgressBar, {
 import { useProjectStatuses } from './useStatuses';
 import { useCycles } from '../cycles/useCycles';
 import { computeProjectSummary } from './projectSummary';
+import { projectTaskStats } from './useProjectOverview';
+import { ActiveCycleCard } from '../cycles/CycleProgress';
 import {
   BreakdownBar,
   FilteredListLink,
@@ -85,16 +87,11 @@ const ProjectDashboard: React.FC = () => {
     return computeProjectSummary({ tasks, loggedHours, statuses, cycles, today: todayIso() });
   }, [apiTasks, statuses, cycles]);
 
+  // The tiles count progress as the server's project dashboard does.
+  const progressStats = useMemo(() => projectTaskStats(apiTasks, statuses), [apiTasks, statuses]);
+
   const stats = useMemo(() => {
     const total = apiTasks.length;
-    const done = apiTasks.filter((t) => t.status === 'done').length;
-    const inProgress = apiTasks.filter((t) => t.status === 'in_progress').length;
-    // A due date is a calendar day, not an instant. `new Date(dueDate) < now`
-    // parses a bare "YYYY-MM-DD" as UTC midnight, so every task due today
-    // counted as overdue from 00:00 UTC onward (rtylr#1077) and contradicted
-    // the task row, My tasks and the project calendar. `isOverdue` is the one
-    // shared definition of "finished means done or cancelled".
-    const overdue = apiTasks.filter((t) => isOverdue(t.dueDate, t.status)).length;
 
     const statusCounts: Record<string, number> = {
       todo: 0,
@@ -108,7 +105,7 @@ const ProjectDashboard: React.FC = () => {
       statusCounts[t.status] = (statusCounts[t.status] ?? 0) + 1;
     });
 
-    return { total, done, inProgress, overdue, statusCounts };
+    return { total, statusCounts };
   }, [apiTasks]);
 
   if (projectLoading && !project) {
@@ -149,8 +146,6 @@ const ProjectDashboard: React.FC = () => {
     );
   }
 
-  const progress = stats.total ? Math.round((stats.done / stats.total) * 100) : 0;
-
   return (
     <div className="flex flex-col h-full">
       <HelmetContainer title={t('flow.projectDashboard.pageTitle')} />
@@ -168,28 +163,32 @@ const ProjectDashboard: React.FC = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <StatTile
                 label={t('flow.projectDashboard.totalTasks')}
-                value={stats.total}
+                value={progressStats.total}
                 tint={project.color}
               />
               <StatTile
                 label={t('flow.projectDashboard.done')}
-                value={stats.done}
+                value={progressStats.done}
                 tint="var(--flow-status-approved)"
-                hint={t('flow.projectDashboard.percentComplete', { percent: progress })}
+                hint={t('flow.projectDashboard.percentComplete', {
+                  percent: progressStats.progress,
+                })}
               />
               <StatTile
                 label={t('flow.projectDashboard.inProgress')}
-                value={stats.inProgress}
+                value={progressStats.inProgress}
                 tint={STATUS_COLORS.in_progress}
               />
               <StatTile
                 label={t('flow.projectDashboard.overdue')}
-                value={stats.overdue}
+                value={progressStats.overdue}
                 tint="var(--flow-danger-fg)"
               />
             </div>
           }
         />
+
+        <ActiveCycleCard projectId={projectId} />
 
         {labourCost && Number(labourCost.costMinorUnits ?? 0) > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

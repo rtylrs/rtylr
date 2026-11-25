@@ -12,6 +12,11 @@ vi.mock('react-i18next', async (importOriginal) => ({
   }),
 }));
 vi.mock('@tanstack/react-router', () => ({
+  Link: ({ children, to: _to, params: _params, ...rest }: Record<string, unknown>) => (
+    <a {...(rest as React.AnchorHTMLAttributes<HTMLAnchorElement>)}>
+      {children as React.ReactNode}
+    </a>
+  ),
   useParams: () => ({ projectId: 'p1' }),
   useNavigate: () => vi.fn(),
 }));

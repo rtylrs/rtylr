@@ -12,8 +12,9 @@ const RENNILI_URL = process.env.RENNILI_URL ?? 'http://localhost:5198';
  * the ticket and unlocks the bell; that tap and the later ring happen in the
  * same document; and a reload or a second scan keeps the same ticket.
  *
- * Rennili opens in Arabic unless a language was chosen, so the specs that read
- * English copy choose English first, as the language switch would.
+ * Public Rennili pages open in Arabic unless a language was chosen on Rennili,
+ * so the public specs that read English copy choose English first via the
+ * host-only cookie the language switch sets. Staff pages default to English.
  */
 
 type TicketState = 'scanned' | 'waiting' | 'ready' | 'acknowledged';
@@ -53,9 +54,9 @@ async function recordBellPlays(page: Page): Promise<void> {
   });
 }
 
-/** The language cookie the switch sets; without it Rennili opens in Arabic. */
+/** The host-only cookie Rennili's switch sets; without it public pages open in Arabic. */
 async function chooseEnglish(context: BrowserContext): Promise<void> {
-  await context.addCookies([{ name: 'language', value: 'en', url: RENNILI_URL }]);
+  await context.addCookies([{ name: 'rennili_language', value: 'en', url: RENNILI_URL }]);
 }
 
 const bellPlays = (page: Page): Promise<BellPlay[]> => page.evaluate(() => window.__bellPlays);
@@ -307,8 +308,8 @@ test.describe('Pager (staff board)', () => {
       route.fulfill({ json: { enabled: true, label_mode: 'number' } })
     );
 
-    await chooseEnglish(context);
     await page.goto(`${RENNILI_URL}/board`);
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
 
     // Rennili's own header, not the Portal shell.
     await expect(page.getByRole('link', { name: 'Rennili' }).first()).toBeVisible();

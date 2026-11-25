@@ -31,7 +31,13 @@
     "parentFailed": "Impossible de déplacer la tâche",
     "epicDeleted_one": "Épopée supprimée. {{count}} tâche conservée sans épopée",
     "epicDeleted_many": "Épopée supprimée. {{count}} tâches conservées sans épopée",
-    "epicDeleted_other": "Épopée supprimée. {{count}} tâches conservées sans épopée"
+    "epicDeleted_other": "Épopée supprimée. {{count}} tâches conservées sans épopée",
+    "duplicated": "Dupliquée en {{id}}",
+    "duplicateFailed": "Échec de la duplication de la tâche",
+    "imported_one": "{{count}} tâche importée",
+    "imported_many": "{{count}} tâches importées",
+    "imported_other": "{{count}} tâches importées",
+    "importFailed": "Échec de l’import des tâches"
   },
   "comment": {
     "postFailed": "Impossible de publier le commentaire",
@@ -48,15 +54,18 @@
     "deleted": "Entrée de temps supprimée"
   },
   "cycle": {
-    "created": "Itération créée",
-    "createFailed": "Échec de la création de l'itération",
-    "updateFailed": "Échec de la mise à jour de l'itération",
+    "created": "Cycle créé",
+    "createFailed": "Échec de la création du cycle",
+    "updateFailed": "Échec de la mise à jour du cycle",
     "started": "Cycle démarré",
     "alreadyActive": "Ce projet a déjà un cycle actif",
     "startFailed": "Échec du démarrage du cycle",
     "completed": "Cycle terminé",
     "completeFailed": "Échec de la clôture du cycle",
-    "moveFailed": "Échec du déplacement de la tâche"
+    "moveFailed": "Échec du déplacement de la tâche",
+    "updated": "Cycle mis à jour",
+    "deleted": "Cycle supprimé",
+    "deleteFailed": "Échec de la suppression du cycle"
   },
   "label": {
     "created": "Étiquette créée",
@@ -193,5 +202,10 @@
     "deleted_other": "Champ supprimé. {{count}} tâches ont perdu leur valeur.",
     "deleteFailed": "Impossible de supprimer le champ",
     "valueSaveFailed": "Impossible d'enregistrer la valeur"
+  },
+  "template": {
+    "saved": "Modèle enregistré",
+    "removed": "Modèle supprimé",
+    "saveFailed": "Échec de l’enregistrement du modèle"
   }
 }

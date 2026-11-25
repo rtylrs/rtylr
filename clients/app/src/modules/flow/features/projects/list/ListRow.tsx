@@ -12,6 +12,7 @@ import { TaskContextMenu, type ContextMenuState } from '../../../shared/componen
 import BlockedBadge from '../../../shared/components/BlockedBadge';
 import ChecksDot from '../../../shared/components/ChecksDot';
 import EpicChip from '../../../shared/components/EpicChip';
+import TaskTypeIcon from '../../../shared/components/TaskTypeIcon';
 import type { RowProps } from '../../../../../shared/hooks/useVirtualRows';
 import { useToggleDone } from '../../tasks/useToggleDone';
 import { useTaskDetail } from '../../tasks/useTasks';
@@ -142,6 +143,7 @@ function TitleCell({
         <BlockedBadge taskId={String(task.id)} count={task.blockerCount ?? 0} />
       )}
       <ChecksDot state={task.prChecksState} />
+      <TaskTypeIcon type={task.taskType} />
       <EpicChip task={task} />
     </div>
   );

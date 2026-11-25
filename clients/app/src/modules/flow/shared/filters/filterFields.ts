@@ -123,6 +123,15 @@ export function checksField(t: TFunction): FilterFieldConfig {
   };
 }
 
+/** The task types, in picker order. */
+export function typeField(types: readonly string[], t: TFunction): FilterFieldConfig {
+  return {
+    field: 'types',
+    label: t('flow.filters.fields.type'),
+    options: types.map((type) => ({ value: type, label: t(`flow.taskType.${type}`) })),
+  };
+}
+
 export function namedField(
   field: Extract<ListField, 'statuses' | 'cycles' | 'milestones' | 'projects'>,
   label: string,

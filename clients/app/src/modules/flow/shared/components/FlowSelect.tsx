@@ -108,7 +108,7 @@ export const FlowSelect: React.FC<FlowSelectProps> = ({
     <DropdownMenu>
       <DropdownMenuTrigger
         disabled={disabled}
-        aria-label={text ? `${label}: ${text}` : label}
+        aria-label={text && text !== label ? `${label}: ${text}` : label}
         className={`flow-select-trigger group flex w-full min-w-0 items-center gap-2 rounded-md px-2.5 py-1.5 text-start text-flow-meta transition-colors hover:bg-[var(--flow-hover)] disabled:cursor-default disabled:opacity-70 disabled:hover:bg-[var(--flow-input-bg)] ${className ?? ''}`}
         style={{
           color: muted || !selected ? 'var(--flow-text-muted)' : 'var(--flow-text)',
@@ -201,7 +201,7 @@ export const FlowMultiSelect: React.FC<FlowMultiSelectProps> = ({
     <DropdownMenu>
       <DropdownMenuTrigger
         disabled={disabled}
-        aria-label={text ? `${label}: ${text}` : label}
+        aria-label={text && text !== label ? `${label}: ${text}` : label}
         className={`flow-select-trigger group flex w-full min-w-0 items-center gap-2 rounded-md px-2.5 py-1.5 text-start text-flow-meta transition-colors hover:bg-[var(--flow-hover)] disabled:cursor-default disabled:opacity-70 disabled:hover:bg-[var(--flow-input-bg)] ${className ?? ''}`}
         style={{
           color: picked.length > 0 ? 'var(--flow-text)' : 'var(--flow-text-muted)',

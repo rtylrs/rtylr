@@ -18,7 +18,9 @@ const mocks = vi.hoisted(() => ({
   labels: [] as Array<{ id: number; name: string }>,
   statuses: [] as ApiStatus[],
   milestones: [] as Array<{ id: string; name: string }>,
+  cycles: [] as Array<{ id: string; name: string; status: string }>,
   fields: [] as ApiField[],
+  templates: [] as Array<{ id: string; projectId: string; taskType: string; body: string }>,
 }));
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => mocks.navigate,
@@ -39,6 +41,12 @@ vi.mock('../../features/tasks/useTasks', () => ({
 vi.mock('../../features/tasks/useLabels', () => ({ useLabels: () => ({ data: mocks.labels }) }));
 vi.mock('../../features/milestones/useMilestones', () => ({
   useMilestones: (projectId: string) => ({ data: projectId ? mocks.milestones : undefined }),
+}));
+vi.mock('../../features/tasks/useTaskTemplates', () => ({
+  useTaskTemplates: (projectId?: string) => ({ data: projectId ? mocks.templates : undefined }),
+}));
+vi.mock('../../features/cycles/useCycles', () => ({
+  useCycles: (projectId?: string) => ({ data: projectId ? mocks.cycles : undefined }),
 }));
 vi.mock('../../features/projects/useFields', () => ({
   useProjectFields: (projectId: string) => ({ data: projectId ? mocks.fields : undefined }),
@@ -68,7 +76,9 @@ beforeEach(async () => {
   mocks.currentProjectId = undefined;
   mocks.labels = [];
   mocks.milestones = [];
+  mocks.cycles = [];
   mocks.fields = [];
+  mocks.templates = [];
   mocks.statuses = [status('3', 'To Do', 10, true), status('4', 'Doing', 20)];
   mocks.create.mockResolvedValue({
     task: { id: '101', identifier: 'FLOW-101', title: 'Ship the thing' },
@@ -236,8 +246,26 @@ describe('Quick task creation in Portal', () => {
   });
   it('files a task created from a Backlog section into that cycle', async () => {
     mocks.currentProjectId = '12';
+    mocks.cycles = [{ id: '55', name: 'Sprint 4', status: 'upcoming' }];
     useFlowStore.setState({ quickCreateCycleId: '55' });
     render(<QuickCreate />);
+    fillTitle();
+    create();
+    await waitFor(() =>
+      expect(mocks.create).toHaveBeenCalledWith(
+        expect.objectContaining({ projectId: '12', cycleId: '55' })
+      )
+    );
+  });
+  it('files the new task under the cycle picked for its project', async () => {
+    mocks.currentProjectId = '12';
+    mocks.cycles = [
+      { id: '55', name: 'Sprint 4', status: 'active' },
+      { id: '54', name: 'Sprint 3', status: 'completed' },
+    ];
+    render(<QuickCreate />);
+    expect(screen.queryByText('Sprint 3')).not.toBeInTheDocument();
+    await chooseFlowOption('Cycle', 'Sprint 4');
     fillTitle();
     create();
     await waitFor(() =>
@@ -302,7 +330,51 @@ describe('Quick task creation in Portal', () => {
       )
     );
   });
+  it('creates a chore with the picked type (T-380)', async () => {
+    mocks.currentProjectId = '12';
+    render(<QuickCreate />);
+    await chooseFlowOption('Type', 'Chore');
+    fillTitle();
+    create();
+    await waitFor(() =>
+      expect(mocks.create).toHaveBeenCalledWith(
+        expect.objectContaining({ projectId: '12', taskType: 'chore' })
+      )
+    );
+  });
+  it('fills a bug with the built-in template', async () => {
+    mocks.currentProjectId = '12';
+    render(<QuickCreate />);
+    await chooseFlowOption('Type', 'Bug');
+    expect(description().value).toContain('Steps to reproduce');
+  });
+  it("prefers the project's own template", async () => {
+    mocks.currentProjectId = '12';
+    mocks.templates = [{ id: '1', projectId: '12', taskType: 'bug', body: '## IH bug format' }];
+    render(<QuickCreate />);
+    await chooseFlowOption('Type', 'Bug');
+    expect(description().value).toBe('## IH bug format');
+  });
+  it('swaps an untouched template for the next type, which may have none', async () => {
+    mocks.currentProjectId = '12';
+    mocks.templates = [{ id: '2', projectId: '12', taskType: 'task', body: '## Task notes' }];
+    render(<QuickCreate />);
+    expect(description().value).toBe('## Task notes');
+    await chooseFlowOption('Type', 'Feature');
+    expect(description().value).toBe('');
+  });
+  it('keeps a description the user wrote when the type changes', async () => {
+    mocks.currentProjectId = '12';
+    render(<QuickCreate />);
+    fireEvent.change(description(), { target: { value: 'My own notes' } });
+    await chooseFlowOption('Type', 'Bug');
+    expect(description().value).toBe('My own notes');
+  });
 });
+
+function description(): HTMLTextAreaElement {
+  return screen.getByPlaceholderText('What needs to be done?') as HTMLTextAreaElement;
+}
 
 function field(overrides: Partial<ApiField>): ApiField {
   return {

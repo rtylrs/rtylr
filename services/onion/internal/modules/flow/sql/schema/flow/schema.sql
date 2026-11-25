@@ -409,3 +409,18 @@ CREATE TABLE IF NOT EXISTS `flow_github_checks` (
   UNIQUE KEY `uq_flow_github_checks_sha_check` (`business_id`, `repository_id`, `head_sha`, `external_id`),
   KEY `idx_flow_github_checks_sha` (`business_id`, `repository_id`, `head_sha`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- T-380 task description templates, also created by v23_task_templates.sql.
+CREATE TABLE IF NOT EXISTS `flow_task_templates` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `business_id` bigint NOT NULL,
+  `project_id` bigint NOT NULL,
+  `task_type` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `body` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `updated_by` bigint NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_flow_task_templates_project_type` (`project_id`, `task_type`),
+  KEY `idx_flow_task_templates_business` (`business_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

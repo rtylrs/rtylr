@@ -10,6 +10,7 @@ import {
   labelField,
   namedField,
   checksField,
+  typeField,
   peopleFrom,
   priorityField,
   type FilterFieldConfig,
@@ -24,7 +25,7 @@ import { useLabels } from '../tasks/useLabels';
 import { useCycles } from '../cycles/useCycles';
 import { useMilestones } from '../milestones/useMilestones';
 import { useProjectFields } from './useFields';
-import { epicsIn } from '../../shared/lib/taskHierarchy';
+import { TASK_TYPES, epicsIn } from '../../shared/lib/taskHierarchy';
 import type { ApiCycle, ApiMilestone } from '../../shared/services/flowApi';
 
 const NO_CYCLES: ApiCycle[] = [];
@@ -104,6 +105,7 @@ export function useProjectTaskFilters(projectId: string, tasks: Task[]): Project
     if (tasks.some((task) => task.prChecksState) || filters.checks.length > 0) {
       out.push(checksField(t));
     }
+    out.push(typeField(TASK_TYPES, t));
     out.push(...customFieldFilters(fieldsQuery.data ?? [], people, t));
     return out;
   }, [

@@ -32,6 +32,7 @@ func newProjectDashboardFixture(t *testing.T) projectDashboardFixture {
 		for _, q := range []string{
 			`DELETE tl FROM flow_time_logs tl JOIN flow_tasks t ON t.id = tl.task_id WHERE t.business_id IN (?, ?)`,
 			`DELETE FROM flow_tasks WHERE business_id IN (?, ?)`,
+			`DELETE FROM flow_statuses WHERE business_id IN (?, ?)`,
 			`DELETE pm FROM flow_project_members pm JOIN flow_projects p ON p.id = pm.project_id WHERE p.business_id IN (?, ?)`,
 			`DELETE FROM flow_projects WHERE business_id IN (?, ?)`,
 		} {
@@ -204,15 +205,27 @@ func TestProjectTaskProgress(t *testing.T) {
 		f.task(dashBiz, p, "Recent overdue", "in_review", day(-i), 0, 0, false)
 	}
 	f.task(dashBiz, other, "Other project overdue", "todo", day(-50), 0, 0, false)
+	// A custom status in the done bucket makes the task done, whatever its
+	// legacy status says.
+	shipped := f.task(dashBiz, p, "Shipped", "todo", "", 0, 0, false)
+	res, err := f.db.ExecContext(f.ctx, `INSERT INTO flow_statuses (business_id, project_id, name, bucket, legacy_status, created_by)
+VALUES (?, ?, 'Shipped', 'done', 'done', 1)`, dashBiz, p)
+	if err != nil {
+		t.Fatalf("insert status: %v", err)
+	}
+	statusID, _ := res.LastInsertId()
+	if _, err := f.db.ExecContext(f.ctx, `UPDATE flow_tasks SET status_id = ? WHERE id = ?`, statusID, shipped); err != nil {
+		t.Fatalf("set status: %v", err)
+	}
 
 	got, err := repo.GetProjectTaskProgress(f.ctx, dashBiz, p)
 	if err != nil {
 		t.Fatalf("GetProjectTaskProgress: %v", err)
 	}
-	// Top-level, not archived: done x2, cancelled, oldest, today, no date,
-	// parent and the four recent ones.
-	if got.TotalTasks != 11 || got.CompletedTasks != 2 {
-		t.Errorf("progress = %d/%d, want 2/11", got.CompletedTasks, got.TotalTasks)
+	// Top-level, not archived, not cancelled: done x2, shipped, oldest, today,
+	// no date, parent and the four recent ones.
+	if got.TotalTasks != 11 || got.CompletedTasks != 3 {
+		t.Errorf("progress = %d/%d, want 3/11", got.CompletedTasks, got.TotalTasks)
 	}
 	// Oldest, parent, subtask and the four recent ones.
 	if got.OverdueTasks != 7 {

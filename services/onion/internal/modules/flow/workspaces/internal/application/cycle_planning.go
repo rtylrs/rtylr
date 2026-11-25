@@ -50,6 +50,11 @@ func (s *Service) UpdateCycleV2(ctx context.Context, in domain.UpdateCycleV2Inpu
 	return s.repo.UpdateCycleV2(ctx, in)
 }
 
+// DeleteCycle removes a cycle. Its tasks return to the project's backlog.
+func (s *Service) DeleteCycle(ctx context.Context, businessID, cycleID int64) error {
+	return s.repo.DeleteCycle(ctx, businessID, cycleID)
+}
+
 // StartCycle starts an upcoming cycle and returns it as stored.
 func (s *Service) StartCycle(ctx context.Context, in domain.StartCycleInput) (domain.Cycle, error) {
 	if in.Today.IsZero() {

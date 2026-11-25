@@ -141,7 +141,7 @@ export interface ProjectSection {
   order: number;
 }
 
-export type TaskType = 'task' | 'bug' | 'feature' | 'epic';
+export type TaskType = 'task' | 'bug' | 'feature' | 'chore' | 'spike' | 'epic';
 
 export interface Task {
   id: string;

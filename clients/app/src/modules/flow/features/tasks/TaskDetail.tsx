@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
   Copy,
+  CopyPlus,
   Tag,
   User as UserIcon,
   Calendar as CalendarIcon,
@@ -35,6 +36,7 @@ import { useTask } from './useTask';
 import {
   useTasks,
   useUpdateTask,
+  useDuplicateTask,
   useDeleteTask,
   useAddComment,
   useUpdateComment,
@@ -61,7 +63,11 @@ import TimePanel from './components/TimePanel';
 import { useFlowStore, Attachment, Task } from '../../shared/stores/flowStore';
 import type { ApiTask, ApiTaskDetail } from '../../shared/services/flowApi';
 import { useUserStore } from '../../shared/stores/userStore';
-import { useCanEditTask, useCanDeleteResource } from '../../shared/lib/currentUser';
+import {
+  useCanCreateTask,
+  useCanEditTask,
+  useCanDeleteResource,
+} from '../../shared/lib/currentUser';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
 import CommentList from '../../shared/components/CommentList';
 import CommentInput, { type MentionCandidate } from '../../shared/components/CommentInput';
@@ -87,6 +93,7 @@ import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import DevelopmentSection from './components/DevelopmentSection';
 import { useIsDeveloperProject } from '../projects-v2/useDeveloperMode';
+import { branchNameFor } from '../../shared/lib/taskTemplates';
 import LinksSection from './components/LinksSection';
 import RelationsSection from './components/RelationsSection';
 import TaskCustomFields from './components/TaskCustomFields';
@@ -172,6 +179,8 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const removeAttachmentMut = useRemoveAttachment();
 
   const taskProjectId = detail?.task?.projectId;
+  const canDuplicate = useCanCreateTask(taskProjectId);
+  const duplicateTask = useDuplicateTask();
   const isDeveloperProject = useIsDeveloperProject(taskProjectId);
   const { project: taskProject } = useCurrentProject(taskProjectId);
   const { data: projectMembers = [] } = useProjectMembers(taskProjectId);
@@ -491,6 +500,34 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
               <Copy size={11} />
               <span className="hidden sm:inline">{t('flow.taskDetail.copyId')}</span>
             </button>
+            {canDuplicate && (
+              <button
+                type="button"
+                disabled={duplicateTask.isPending}
+                onClick={() =>
+                  duplicateTask.mutate(
+                    {
+                      id: task.id,
+                      title: t('flow.taskDetail.duplicateTitle', { title: task.title }),
+                    },
+                    {
+                      onSuccess: ({ task: copy }) => {
+                        toast.success(
+                          t('flowToasts.task.duplicated', { id: copy.identifier ?? copy.id })
+                        );
+                        openTask(String(copy.id));
+                      },
+                    }
+                  )
+                }
+                className="flex h-8 items-center gap-1 rounded-sm px-2 text-flow-meta hover:bg-[var(--flow-hover)] disabled:opacity-40 sm:h-7"
+                style={{ color: 'var(--flow-text-muted)' }}
+                title={t('flow.taskDetail.duplicateHint')}
+              >
+                <CopyPlus size={11} aria-hidden="true" />
+                <span className="hidden sm:inline">{t('flow.taskDetail.duplicate')}</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setPrinting(true)}
@@ -605,7 +642,13 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
               />
             </section>
 
-            {isDeveloperProject && <DevelopmentSection taskId={task.id} />}
+            {isDeveloperProject && (
+              <DevelopmentSection
+                taskId={task.id}
+                typeLabel={t(`flow.taskType.${task.taskType ?? 'task'}`)}
+                branchName={branchNameFor(task)}
+              />
+            )}
 
             <section className="mb-8">
               <h3

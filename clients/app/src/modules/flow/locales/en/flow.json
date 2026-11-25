@@ -253,7 +253,12 @@
     "closeDuplicateKeepOpen": "Keep open",
     "noCycle": "Backlog (no cycle)",
     "noCyclesInProject": "No open cycles",
-    "startDate": "Start date"
+    "startDate": "Start date",
+    "copyBranch": "Copy branch name",
+    "branchCopied": "Branch name copied",
+    "duplicate": "Duplicate",
+    "duplicateHint": "Copy this task with its description, fields and subtasks",
+    "duplicateTitle": "{{title}} (copy)"
   },
   "time": {
     "add": {
@@ -372,7 +377,36 @@
     "unknownAuthor": "Unknown",
     "weekStrip": "Choose a day this week",
     "whatYouWorkedOn": "What you worked on",
-    "workType": "Type of work"
+    "workType": "Type of work",
+    "planned": {
+      "title": "Planned hours",
+      "viewLabel": "Team hours view",
+      "view": {
+        "logged": "Logged",
+        "planned": "Planned"
+      },
+      "previousWeek": "Previous week",
+      "nextWeek": "Next week",
+      "range": "{{start}} to {{end}}",
+      "workWeek": "Work week",
+      "workWeeks": {
+        "mon_fri": "Monday to Friday",
+        "sun_thu": "Sunday to Thursday"
+      },
+      "target": "Target hours per day",
+      "explain": "Each open task’s estimate is spread over the working days from its start date to its due date. Days are compared with a target of {{target}}h.",
+      "empty": "Nobody’s plan is visible to you. Project admins see the people on their projects; everyone sees their own work.",
+      "person": "Person",
+      "total": "Total",
+      "cellLabel": "{{name}}, {{date}}: {{hours}} hours planned. {{status}}",
+      "legend": {
+        "under": "Under {{target}}h",
+        "ok": "On target",
+        "over": "More than an hour over"
+      },
+      "cellTasks": "{{name}} on {{date}}: {{hours}}h",
+      "taskSpan": "{{hours}}h from {{start}} to {{end}}"
+    }
   },
   "settings": {
     "time": {
@@ -903,7 +937,7 @@
   },
   "cycles": {
     "loading": "Loading cycles...",
-    "subtitle": "Two-week delivery sprints",
+    "subtitle": "Time-boxed delivery sprints for a project",
     "newCycle": "New cycle",
     "namePlaceholder": "Cycle name",
     "startDate": "Start date",
@@ -917,11 +951,43 @@
     "sectionCompleted": "Completed",
     "dateRange": "{{start}} to {{end}}",
     "emptyTitle": "No cycles yet",
-    "emptyDescription": "Start your first two-week sprint to track scope and progress.",
+    "emptyDescription": "Start your first sprint to track scope and progress.",
     "createFirst": "Create first cycle",
     "project": "Project",
     "noProjects": "No projects yet",
-    "newCycleGate": "A cycle belongs to a project, and this business has none yet. Create a project first."
+    "newCycleGate": "A cycle belongs to a project, and this business has none yet. Create a project first.",
+    "length": "Length",
+    "customLength": "Custom dates",
+    "edit": {
+      "title": "Edit cycle",
+      "description": "Change the name, dates or goal.",
+      "name": "Name",
+      "save": "Save",
+      "saving": "Saving..."
+    },
+    "detail": {
+      "back": "All cycles",
+      "openBacklog": "Plan in Backlog",
+      "edit": "Edit",
+      "delete": "Delete",
+      "progress": "Progress",
+      "burndown": "Burndown",
+      "burndownEmpty": "The burndown appears once the cycle has dates.",
+      "burndownSummary": "{{remaining}} {{unit}} left",
+      "remaining": "Remaining",
+      "ideal": "Ideal",
+      "unitTasks": "tasks",
+      "carriedOver": "Carried over",
+      "carriedFrom_one": "{{count}} task from {{name}}",
+      "carriedFrom_other": "{{count}} tasks from {{name}}",
+      "openTasks": "Open ({{count}})",
+      "doneTasks": "Done ({{count}})",
+      "carryHint": "When this cycle is completed, unfinished tasks can move to {{name}}.",
+      "carryHintBacklog": "When this cycle is completed, unfinished tasks can move to the next cycle or back to the backlog.",
+      "deleteTitle": "Delete this cycle?",
+      "deleteDescription_one": "{{name}} will be deleted. Its {{count}} task stays in the project and goes back to the backlog.",
+      "deleteDescription_other": "{{name}} will be deleted. Its {{count}} tasks stay in the project and go back to the backlog."
+    }
   },
   "myIssues": {
     "buckets": {
@@ -1112,7 +1178,8 @@
       "members": "Members",
       "fields": "Fields",
       "integrations": "Integrations",
-      "danger": "Danger zone"
+      "danger": "Danger zone",
+      "templates": "Templates"
     },
     "transferConfirmHint": "Ownership will transfer immediately. Click Confirm to proceed.",
     "transferCta": "Transfer",
@@ -1171,7 +1238,8 @@
     "markDone": "Mark done",
     "setUrgent": "Set urgent",
     "archive": "Archive",
-    "selectedCount": "{{count}} selected"
+    "selectedCount": "{{count}} selected",
+    "moveToCycle": "Move to cycle"
   },
   "allProjects": {
     "title": "All projects",
@@ -1353,6 +1421,7 @@
       "milestone": "Milestone",
       "project": "Project",
       "epic": "Epic",
+      "type": "Type",
       "checks": "PR checks"
     },
     "due": {
@@ -1448,7 +1517,9 @@
     "task": "Task",
     "bug": "Bug",
     "feature": "Feature",
-    "epic": "Epic"
+    "epic": "Epic",
+    "chore": "Chore",
+    "spike": "Spike"
   },
   "epics": {
     "noEpic": "No epic",
@@ -1537,6 +1608,59 @@
       "rowLabel": "Where {{title}} goes",
       "confirm": "Complete cycle",
       "completing": "Completing..."
+    }
+  },
+  "taskTemplates": {
+    "intro": "Each task type can start with its own description in the New task form. Bugs use the built-in template until you save one.",
+    "gateReason": "Only project admins can change templates.",
+    "usingDefault": "Using the built-in template",
+    "none": "No template",
+    "placeholder": "Markdown the description starts with",
+    "save": "Save template",
+    "remove": "Remove template",
+    "startFromDefault": "Start from the built-in template",
+    "defaultBug": "**Where**\nApp > screen > URL\n\n**Steps to reproduce**\n1. \n2. \n3. \n\n**Expected**\n\n\n**Actual**\n\n\n**Environment**\nBrowser or device, language (EN or AR)\n\n**Screenshot**\nAttach one below.\n"
+  },
+  "taskImport": {
+    "open": "Import CSV",
+    "title": "Import tasks from CSV",
+    "description": "Up to {{max}} tasks at once. Check the preview, then import.",
+    "choose": "Choose a CSV file",
+    "chooseAnother": "Choose another file",
+    "sampleFile": "Download a sample file",
+    "columns": "Columns: Title (required), Description, Assignee email, Due date (YYYY-MM-DD), Priority (none, low, medium, high, urgent), Effort (e.g. 90, 1h, 1h 30m), Section (a status of this project), Subtasks (separated by ;).",
+    "noTitleColumn": "The file has no Title column, so no task can be created from it.",
+    "summary_one": "{{count}} task ready to import.",
+    "summary_other": "{{count}} tasks ready to import.",
+    "summaryIssues_one": "{{count}} row, {{issues}} with problems. Fix the file and choose it again.",
+    "summaryIssues_other": "{{count}} rows, {{issues}} with problems. Fix the file and choose it again.",
+    "truncated": "Only the first {{max}} rows are read.",
+    "more_one": "And {{count}} more row.",
+    "more_other": "And {{count}} more rows.",
+    "refused": "Nothing was imported. These rows were refused:",
+    "rowError": "Row {{row}}: {{message}}",
+    "importing": "Importing...",
+    "import_one": "Import {{count}} task",
+    "import_other": "Import {{count}} tasks",
+    "col": {
+      "title": "Title",
+      "assignee": "Assignee",
+      "due": "Due",
+      "section": "Section",
+      "subtasks": "Subtasks"
+    },
+    "issue": {
+      "noTitle": "No title",
+      "unknownAssignee": "No team member has the email {{value}}",
+      "badDate": "Due date \"{{value}}\" is not YYYY-MM-DD",
+      "badPriority": "Priority \"{{value}}\" is not none, low, medium, high or urgent",
+      "badEffort": "Effort \"{{value}}\" is not a duration",
+      "unknownSection": "No status called \"{{value}}\" in this project"
+    },
+    "sample": {
+      "title": "Build the login page",
+      "description": "What and why, where to look, steps, QA",
+      "subtasks": "Design; Build; Test"
     }
   },
   "checks": {

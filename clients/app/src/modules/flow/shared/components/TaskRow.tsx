@@ -14,6 +14,7 @@ import ChecksDot from './ChecksDot';
 import { Check } from 'lucide-react';
 import { TaskContextMenu, ContextMenuState } from './TaskContextMenu';
 import EpicChip from './EpicChip';
+import TaskTypeIcon from './TaskTypeIcon';
 import { withAlpha, onTint } from '../lib/colorUtils';
 import type { RowProps } from '../../../../shared/hooks/useVirtualRows';
 
@@ -155,6 +156,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({
           <BlockedBadge taskId={String(task.id)} count={task.blockerCount ?? 0} />
         )}
         <ChecksDot state={task.prChecksState} />
+        <TaskTypeIcon type={task.taskType} />
         <EpicChip task={task} />
         {showProject && project && (
           <span

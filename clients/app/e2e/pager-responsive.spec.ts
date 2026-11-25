@@ -7,12 +7,13 @@ const RENNILI_URL = process.env.RENNILI_URL ?? 'http://localhost:5198';
  * Rennili at the sizes it is used at: a customer's phone, and a tablet at the
  * counter. Layout is only real in a browser, so these measure the rendered page.
  *
- * Rennili opens in Arabic unless a language was chosen; English is chosen with
- * the cookie the language switch sets.
+ * Public Rennili pages open in Arabic unless a language was chosen; English is
+ * chosen with the host-only cookie the language switch sets. Staff pages
+ * default to English.
  */
 
 async function chooseEnglish(context: BrowserContext): Promise<void> {
-  await context.addCookies([{ name: 'language', value: 'en', url: RENNILI_URL }]);
+  await context.addCookies([{ name: 'rennili_language', value: 'en', url: RENNILI_URL }]);
 }
 
 const LANDSCAPE_TABLET = { width: 1024, height: 768 };
@@ -213,9 +214,8 @@ test.describe('Rennili on phones and tablets', () => {
     await page.setViewportSize(LANDSCAPE_TABLET);
     await stubPortalSession(page, context);
     await stubBoard(page);
-    await chooseEnglish(context);
-
     await page.goto(`${RENNILI_URL}/board`);
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
 
     // No queue tabs: the scan dock runs across the top, with Waiting and Ready
     // side by side beneath it.

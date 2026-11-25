@@ -20,6 +20,7 @@ import { AvatarStack } from '../../shared/components/AssigneeAvatar';
 import { formatDueDate } from '../../shared/lib/utils';
 import { displayDescription } from '../../shared/lib/stringUtils';
 import ProjectViewTabs from './ProjectViewTabs';
+import { ActiveCycleCard } from '../cycles/CycleProgress';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
@@ -168,6 +169,8 @@ const ProjectOverview: React.FC = () => {
             />
           </div>
         </motion.section>
+
+        <ActiveCycleCard projectId={projectId} />
 
         {/* Milestones */}
         <section

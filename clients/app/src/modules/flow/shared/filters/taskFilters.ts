@@ -71,6 +71,8 @@ export interface TaskFilters {
   epics: string[];
   /** CI states of the task's open pull requests: failing, running, passing. */
   checks: string[];
+  /** Task types (task, bug, feature, chore, spike, epic). */
+  types: string[];
   /** Free text matched against title, identifier, description and label names. */
   query: string;
 }
@@ -90,6 +92,7 @@ export type FilterField =
   | 'projects'
   | 'epics'
   | 'checks'
+  | 'types'
   | CustomFilterField;
 
 export type ListField = Exclude<FilterField, 'due' | CustomFilterField>;
@@ -109,6 +112,7 @@ export const EMPTY_TASK_FILTERS: TaskFilters = {
   fields: {},
   epics: [],
   checks: [],
+  types: [],
   query: '',
 };
 
@@ -122,6 +126,7 @@ const LIST_FIELDS: ListField[] = [
   'projects',
   'epics',
   'checks',
+  'types',
 ];
 
 export interface FilterContext {
@@ -294,6 +299,7 @@ export function matchesTaskFilters(task: Task, filters: TaskFilters, ctx: Filter
   }
   if (filters.epics.length > 0 && !filters.epics.includes(epicKeyOf(task))) return false;
   if (filters.checks.length > 0 && !filters.checks.includes(task.prChecksState ?? '')) return false;
+  if (filters.types.length > 0 && !filters.types.includes(task.taskType ?? 'task')) return false;
   if (!matchesDue(task, filters, ctx.today)) return false;
   if (!matchesChanged(task, filters, ctx.today)) return false;
   return matchesQuery(task, filters.query, ctx);
@@ -388,6 +394,7 @@ export function parseTaskFilters(value: unknown): TaskFilters {
     fields: fieldLists(raw.fields),
     epics: stringList(raw.epics),
     checks: stringList(raw.checks),
+    types: stringList(raw.types),
     query: typeof raw.query === 'string' ? raw.query : '',
   };
 }
