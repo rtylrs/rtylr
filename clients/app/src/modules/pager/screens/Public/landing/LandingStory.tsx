@@ -158,7 +158,7 @@ export const FreeBand = (): React.JSX.Element => {
   const included = list(t('pager.landing.free.included', { returnObjects: true }));
 
   return (
-    <section className="rl-section" aria-labelledby="rl-free-heading">
+    <section className="rl-section rl-free-band" aria-labelledby="rl-free-heading">
       <div className="rl-wrap">
         <div className="rl-free-card">
           <div className="rl-free-main">
