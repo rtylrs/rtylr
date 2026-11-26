@@ -338,12 +338,14 @@ var authRouteLimiters = map[string]func(http.Handler) http.Handler{
 	// during one application, so 10/min leaves generous headroom.
 	"/recruit/public/resume-upload-url": PerRouteRateLimit(10, time.Minute),
 
-	// --- public read surfaces (unchanged) ---
+	// --- public read & menu storefront surfaces ---
 	"/pos/orders/v1/orders/public":                   PerRouteRateLimit(10, time.Minute),
 	"/pos/orders/v1/orders/{order_id}/public-status": PerRouteRateLimit(60, time.Minute),
 	"/pos/menu-item/v1/menu-items/public":            PerRouteRateLimit(60, time.Minute),
+	"/hub/business/v1/public/by-slug/{slug}":         PerRouteRateLimit(60, time.Minute),
 	"/hub/menu/v1/public/resolve-host":               PerRouteRateLimit(60, time.Minute),
 	"/hub/menu/v1/public/bundle":                     PerRouteRateLimit(60, time.Minute),
+	"/hub/menu/v1/public/guest":                      PerRouteRateLimit(10, time.Minute),
 	"/hub/menu/v1/public/table-actions":              PerRouteRateLimit(15, time.Minute),
 	"/hub/menu/v1/public/events":                     PerRouteRateLimit(120, time.Minute),
 	"/hub/menu/v1/public/stamps":                     PerRouteRateLimit(30, time.Minute),

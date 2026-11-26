@@ -30,3 +30,23 @@ func TestToPublicProtoMenuItemOmitsInventoryAndInternalIdentifiers(t *testing.T)
 		t.Fatalf("public menu exposed internal or inventory fields: %+v", item)
 	}
 }
+
+func TestSanitizeMenuImageURLRejectsUnsafeSchemes(t *testing.T) {
+	valid := []string{"", "https://cdn.voxire.com/a.jpg", "/storage/uploads/1/a.png"}
+	for _, raw := range valid {
+		if _, err := sanitizeMenuImageURL(raw); err != nil {
+			t.Fatalf("expected %q to be allowed, got %v", raw, err)
+		}
+	}
+	invalid := []string{
+		"javascript:alert(1)",
+		"data:text/html,<script>alert(1)</script>",
+		"//evil.example/a.png",
+		"https://cdn.example.com/a\n.png",
+	}
+	for _, raw := range invalid {
+		if _, err := sanitizeMenuImageURL(raw); err == nil {
+			t.Fatalf("expected %q to be rejected", raw)
+		}
+	}
+}

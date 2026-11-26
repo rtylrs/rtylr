@@ -72,6 +72,12 @@ model CreateMenuItemRequest {
 
   @minValue(0)
   sale_price: float64;
+
+  /** Optional customer-facing description for the menu item. */
+  description?: string;
+
+  /** Optional public storefront image URL for the menu item. */
+  image_url?: string;
 }
 
 model CreateMenuItemResponse {
@@ -117,6 +123,12 @@ model UpdateMenuItemBody {
   /** Current tracked stock quantity for the menu item. */
   @minValue(0)
   stock: float64;
+
+  /** Optional customer-facing description; omitted preserves existing description. */
+  description?: string;
+
+  /** Optional primary image URL; empty string clears the primary image, omitted preserves existing image. */
+  image_url?: string;
 }
 
 model UpdateMenuItemRequest {

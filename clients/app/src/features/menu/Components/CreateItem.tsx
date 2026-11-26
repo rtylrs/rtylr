@@ -1,11 +1,19 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { uploadAsset } from '@voxire/api';
 import { HelmetContainer } from '@voxire/components';
+import { cdnImageUrl } from '@voxire/config';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
+import { ImagePlus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button, Input } from '../../../shared/components/ui';
 import { useMenuStore } from '../../../shared/stores/menuStore';
-import { useCreateMenuItem, useUpdateMenuItem } from '../../../shared/hooks/queries/useMenu';
+import {
+  useCreateMenuItem,
+  useGetMenu,
+  useUpdateMenuItem,
+} from '../../../shared/hooks/queries/useMenu';
+import { useUserStore } from '../../../shared/stores/userStore';
 
 interface StoreItemDetailsLike {
   name?: string;
@@ -13,6 +21,7 @@ interface StoreItemDetailsLike {
   price?: string | number;
   sku?: string;
   stock?: number;
+  image?: string;
   isActive?: boolean;
   isAvailable?: boolean;
   menuItems?: StoreItemLike[];
@@ -40,17 +49,26 @@ const CreateItem: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
+  const { user } = useUserStore();
   const { items } = useMenuStore();
   const searchParams = new URLSearchParams(searchStr);
   const itemId = searchParams.get('itemId');
 
+  // Ensure items are loaded even when `/create-item?itemId=...` is opened directly.
+  useGetMenu(user?.id ? String(user.id) : null, !itemId);
+
   const createMenuItem = useCreateMenuItem();
   const updateMenuItem = useUpdateMenuItem();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const [sku, setSku] = useState('');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('0');
+  const [imageUrl, setImageUrl] = useState('');
+  const [imageDirty, setImageDirty] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [isAvailable, setIsAvailable] = useState(true);
 
   React.useEffect(() => {
@@ -70,15 +88,39 @@ const CreateItem: React.FC = () => {
     if (found) {
       const details = found.details;
       setName(details?.name || found.name || '');
+      if (details?.description && !details.description.startsWith('SKU ')) {
+        setDescription(details.description);
+      }
       if (details?.sku) setSku(details.sku);
       if (details?.price !== undefined) setPrice(String(Number(details.price)));
       if (details?.stock !== undefined) setStock(String(Number(details.stock)));
+      if (details?.image && !imageDirty) setImageUrl(details.image);
       if (details?.isActive !== undefined) setIsAvailable(Boolean(details.isActive));
       else if (details?.isAvailable !== undefined) setIsAvailable(Boolean(details.isAvailable));
     }
-  }, [itemId, items]);
+  }, [itemId, items, imageDirty]);
 
-  const isSaving = createMenuItem.isPending || updateMenuItem.isPending;
+  const handlePhotoUpload = async (file: File | undefined) => {
+    if (!file) return;
+    setUploadingPhoto(true);
+    try {
+      const res = await uploadAsset(file, { visibility: 'public' });
+      const uploaded = res.url || '';
+      if (!uploaded) throw new Error('Missing uploaded URL');
+      setImageUrl(uploaded);
+      setImageDirty(true);
+      toast.success(t('menu.photoUploaded', 'Item photo uploaded'));
+    } catch (err: unknown) {
+      const msg =
+        (err as { message?: string })?.message ||
+        t('menu.photoUploadFailed', 'Failed to upload photo');
+      toast.error(msg);
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const isSaving = createMenuItem.isPending || updateMenuItem.isPending || uploadingPhoto;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,6 +148,8 @@ const CreateItem: React.FC = () => {
           salePrice: numericPrice,
           isActive: isAvailable,
           stock: safeStock,
+          description: description.trim(),
+          ...(imageDirty ? { imageUrl } : {}),
         });
         toast.success(t('menu.itemUpdated', 'Menu item updated and synced across your apps'));
       } else {
@@ -113,6 +157,8 @@ const CreateItem: React.FC = () => {
           name: trimmedName,
           sku: sku.trim() || generateSku(trimmedName),
           salePrice: numericPrice,
+          ...(description.trim() ? { description: description.trim() } : {}),
+          ...(imageUrl ? { imageUrl } : {}),
         });
         toast.success(t('menu.itemCreated', 'Menu item created and synced across your apps'));
       }
@@ -124,6 +170,8 @@ const CreateItem: React.FC = () => {
       toast.error(msg);
     }
   };
+
+  const resolvedPreviewUrl = imageUrl ? cdnImageUrl(imageUrl) || imageUrl : '';
 
   return (
     <>
@@ -164,6 +212,98 @@ const CreateItem: React.FC = () => {
               onChange={(e) => setName(e.target.value)}
               required
             />
+          </div>
+
+          <div className="space-y-1">
+            <label
+              htmlFor="item-description"
+              className="text-xs font-semibold"
+              style={{ color: 'var(--dash-text-muted)' }}
+            >
+              {t('menu.descriptionLabel', 'Description (optional)')}
+            </label>
+            <textarea
+              id="item-description"
+              rows={2}
+              placeholder={t(
+                'menu.descriptionPlaceholder',
+                'Short description shown on your digital menu'
+              )}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2"
+              style={{
+                background: 'var(--dash-bg)',
+                borderColor: 'var(--dash-border)',
+                color: 'var(--dash-text)',
+              }}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <span
+              className="text-xs font-semibold block"
+              style={{ color: 'var(--dash-text-muted)' }}
+            >
+              {t('menu.itemPhoto', 'Item photo')}
+            </span>
+            <div className="flex flex-wrap items-center gap-3">
+              {resolvedPreviewUrl ? (
+                <img
+                  src={resolvedPreviewUrl}
+                  alt={name || t('menu.itemPhoto', 'Item photo')}
+                  className="w-16 h-16 rounded-lg object-cover border"
+                  style={{ borderColor: 'var(--dash-border)' }}
+                />
+              ) : (
+                <div
+                  className="w-16 h-16 rounded-lg border border-dashed flex items-center justify-center"
+                  style={{ borderColor: 'var(--dash-border)', color: 'var(--dash-text-muted)' }}
+                >
+                  <ImagePlus className="w-5 h-5" />
+                </div>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                aria-label={t('menu.uploadPhoto', 'Upload photo')}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = '';
+                  void handlePhotoUpload(file);
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={uploadingPhoto}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {uploadingPhoto
+                  ? t('menu.uploadingPhoto', 'Uploading...')
+                  : resolvedPreviewUrl
+                    ? t('menu.replacePhoto', 'Replace photo')
+                    : t('menu.uploadPhoto', 'Upload photo')}
+              </Button>
+              {resolvedPreviewUrl && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  disabled={uploadingPhoto}
+                  onClick={() => {
+                    setImageUrl('');
+                    setImageDirty(true);
+                  }}
+                >
+                  <Trash2 className="w-3.5 h-3.5 me-1" />
+                  {t('menu.removePhoto', 'Remove')}
+                </Button>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -5,5 +5,14 @@
   "createItem": "Article",
   "savingUnavailable": "L'enregistrement n'est pas encore disponible. Les modifications restent dans ce navigateur et n'atteignent ni votre point de vente ni votre menu public.",
   "savingUnavailableToast": "L'enregistrement n'est pas encore disponible.",
-  "saveItem": "Enregistrer"
+  "saveItem": "Enregistrer",
+  "itemPhoto": "Photo de l'article",
+  "uploadPhoto": "Téléverser une photo",
+  "replacePhoto": "Remplacer la photo",
+  "removePhoto": "Supprimer",
+  "uploadingPhoto": "Téléversement...",
+  "photoUploaded": "Photo de l'article téléversée",
+  "photoUploadFailed": "Échec du téléversement de la photo",
+  "descriptionLabel": "Description (facultatif)",
+  "descriptionPlaceholder": "Courte description affichée sur votre menu numérique"
 }

@@ -23,14 +23,18 @@ type MenuItem struct {
 }
 
 type MenuItemInput struct {
-	Name      string
-	SKU       string
-	SalePrice float64
+	Name        string
+	SKU         string
+	SalePrice   float64
+	Description string
+	ImageURL    string
 }
 
 type MenuItemUpdateInput struct {
-	Name      string
-	SalePrice float64
-	Stock     float64
-	IsActive  bool
+	Name        string
+	SalePrice   float64
+	Stock       float64
+	IsActive    bool
+	Description *string
+	ImageURL    *string
 }

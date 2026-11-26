@@ -296,14 +296,29 @@ func initializeModules(ctx context.Context) *apiModules {
 		}).
 		WithHostResolver(func(resolveCtx context.Context, host string) (int64, string, bool, error) {
 			bizID, found, err := configModule.ResolveVerifiedDomainBusinessID(resolveCtx, host)
-			if err != nil || !found {
+			if err != nil {
 				return 0, "", false, err
 			}
-			cfg, cfgErr := configModule.ConfigService.GetConfig(resolveCtx, strconv.FormatInt(bizID, 10))
-			if cfgErr != nil {
-				return bizID, "", true, nil
+			if found {
+				cfg, cfgErr := configModule.ConfigService.GetConfig(resolveCtx, strconv.FormatInt(bizID, 10))
+				if cfgErr != nil {
+					return bizID, "", true, nil
+				}
+				return bizID, strings.TrimSpace(cfg.BusinessSlug), true, nil
 			}
-			return bizID, strings.TrimSpace(cfg.BusinessSlug), true, nil
+			// Fallback: resolve `<business-slug>.rtylr.com` subdomains for branded
+			// menu links while ignoring reserved platform hosts.
+			const suffix = ".rtylr.com"
+			if strings.HasSuffix(host, suffix) {
+				sub := strings.TrimSuffix(host, suffix)
+				if sub != "" && !strings.Contains(sub, ".") && !isReservedPlatformSubdomain(sub) {
+					slugBizID, _, _, slugErr := businessModule.PublicBusinessBySlug(resolveCtx, sub)
+					if slugErr == nil && slugBizID > 0 {
+						return slugBizID, sub, true, nil
+					}
+				}
+			}
+			return 0, "", false, nil
 		}).
 		WithEventDispatcher(webhooksModule.DispatchEvent).
 		WithTenantValidator(hubmenu.TenantValidator{
@@ -809,6 +824,27 @@ func resolveVoxireCRMBusinessID(ctx context.Context, businesses *business.Module
 		return 0
 	}
 	return id
+}
+
+func isReservedPlatformSubdomain(sub string) bool {
+	switch strings.ToLower(strings.TrimSpace(sub)) {
+	case "", "www", "portal", "pos", "sso", "auth", "api", "app", "admin",
+		"docs", "status", "rennili", "recruit", "cdn", "mail", "static", "assets":
+		return true
+	default:
+		// Allow only RFC-1123 lowercase DNS labels to prevent header injection.
+		for i, r := range sub {
+			isAlphaNum := (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9')
+			if isAlphaNum {
+				continue
+			}
+			if r == '-' && i > 0 && i < len(sub)-1 {
+				continue
+			}
+			return true
+		}
+		return len(sub) > 63
+	}
 }
 
 func splitLeadName(full string) (first, last string) {

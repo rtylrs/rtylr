@@ -49,14 +49,24 @@ ORDER BY c.name, p.name, p.id;
 
 -- name: QuickCreateMenuItem :execresult
 -- cross-schema write to erp_products (products module) — create a product from the POS menu workflow.
-INSERT INTO erp_products (owner_id, business_id, name, sku, sale_price, is_active)
-VALUES (?, ?, ?, ?, ?, TRUE);
+INSERT INTO erp_products (owner_id, business_id, name, sku, sale_price, description, is_active)
+VALUES (?, ?, ?, ?, ?, NULLIF(sqlc.arg(description), ''), TRUE);
 
 -- name: UpdateMenuItem :execresult
 -- cross-schema write to erp_products (products module) — update product details from the POS menu workflow.
 UPDATE erp_products
 SET name = COALESCE(NULLIF(sqlc.arg(name), ''), name),
     sale_price = ?,
+    description = CASE WHEN sqlc.arg(set_description) = 1 THEN NULLIF(sqlc.arg(description), '') ELSE description END,
     is_active = ?,
     updated_at = CURRENT_TIMESTAMP
 WHERE business_id = ? AND id = ?;
+
+-- name: ClearPrimaryMenuItemImage :exec
+-- cross-schema write to erp_product_images (products module) — replace the primary storefront photo for a menu item.
+DELETE FROM erp_product_images WHERE business_id = ? AND product_id = ? AND is_primary = TRUE;
+
+-- name: InsertPrimaryMenuItemImage :exec
+-- cross-schema write to erp_product_images (products module) — store the primary storefront photo for a menu item.
+INSERT INTO erp_product_images (owner_id, business_id, product_id, url, alt, position, is_primary)
+VALUES (?, ?, ?, ?, ?, 0, TRUE);

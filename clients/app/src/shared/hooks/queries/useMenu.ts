@@ -124,11 +124,19 @@ export const useGetMenu = (userId: string | null, disabled?: boolean) => {
 export const useCreateMenuItem = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (params: { name: string; sku: string; salePrice: number }) => {
+    mutationFn: async (params: {
+      name: string;
+      sku: string;
+      salePrice: number;
+      description?: string;
+      imageUrl?: string;
+    }) => {
       return menuItemClient.createMenuItem({
         name: params.name,
         sku: params.sku,
         salePrice: params.salePrice,
+        ...(params.description !== undefined ? { description: params.description } : {}),
+        ...(params.imageUrl !== undefined ? { imageUrl: params.imageUrl } : {}),
       });
     },
     onSuccess: () => {
@@ -148,6 +156,8 @@ export const useUpdateMenuItem = () => {
       salePrice: number;
       isActive: boolean;
       stock: number;
+      description?: string;
+      imageUrl?: string;
     }) => {
       return menuItemClient.updateMenuItem({
         id: params.id,
@@ -156,6 +166,8 @@ export const useUpdateMenuItem = () => {
           salePrice: params.salePrice,
           isActive: params.isActive,
           stock: params.stock,
+          ...(params.description !== undefined ? { description: params.description } : {}),
+          ...(params.imageUrl !== undefined ? { imageUrl: params.imageUrl } : {}),
         },
       });
     },

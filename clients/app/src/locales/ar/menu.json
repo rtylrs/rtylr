@@ -5,5 +5,14 @@
   "createItem": "عنصر",
   "savingUnavailable": "الحفظ غير متوفر بعد. التغييرات هنا تبقى في هذا المتصفّح ولا تصل إلى نقطة البيع أو قائمتك العامة.",
   "savingUnavailableToast": "الحفظ غير متوفر بعد.",
-  "saveItem": "حفظ العنصر"
+  "saveItem": "حفظ العنصر",
+  "itemPhoto": "صورة العنصر",
+  "uploadPhoto": "رفع صورة",
+  "replacePhoto": "استبدال الصورة",
+  "removePhoto": "إزالة",
+  "uploadingPhoto": "جارٍ الرفع...",
+  "photoUploaded": "تم رفع صورة العنصر",
+  "photoUploadFailed": "فشل رفع الصورة",
+  "descriptionLabel": "الوصف (اختياري)",
+  "descriptionPlaceholder": "وصف قصير يظهر على قائمتك الرقمية"
 }
