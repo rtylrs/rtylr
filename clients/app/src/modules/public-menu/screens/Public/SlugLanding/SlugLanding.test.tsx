@@ -159,9 +159,23 @@ describe('SlugLanding location picker', () => {
     expect(helmetSpy).toHaveBeenCalledWith('Locations · rtylr');
   });
 
-  it('says so when a business has no active location', () => {
+  it('redirects directly to the business menu when there are no active locations', () => {
     businessQuery.data = {
       business: { id: 1, name: 'Acme Diner', logoUrl: '', currency: 'USD', timezone: 'UTC' },
+      locations: [],
+    };
+
+    render(<SlugLanding />);
+
+    expect(navigateSpy).toHaveBeenCalledWith({
+      to: '/b/1/menu',
+      replace: true,
+    });
+  });
+
+  it('says so when a business has no active location and no numeric id', () => {
+    businessQuery.data = {
+      business: { id: 0, name: 'Acme Diner', logoUrl: '', currency: 'USD', timezone: 'UTC' },
       locations: [],
     };
 

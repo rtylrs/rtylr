@@ -46,3 +46,20 @@ func TestQuickCreate_PropagatesError(t *testing.T) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
+
+func TestListPublic_RespectsPublicMenuResolver(t *testing.T) {
+	s := &Service{
+		repo:           &mockRepo{list: []domain.MenuItem{{ID: 1, Name: "Espresso"}}},
+		onlineOrdering: func(_ context.Context, _ int64) (bool, error) { return true, nil },
+	}
+	got, err := s.ListPublic(context.Background(), 1)
+	if err != nil || len(got) != 1 {
+		t.Fatalf("expected 1 public menu item when enabled, got %d (%v)", len(got), err)
+	}
+
+	s.SetOnlineOrdering(func(_ context.Context, _ int64) (bool, error) { return false, nil })
+	got, err = s.ListPublic(context.Background(), 1)
+	if err != nil || len(got) != 0 {
+		t.Fatalf("expected empty public menu when disabled, got %d (%v)", len(got), err)
+	}
+}

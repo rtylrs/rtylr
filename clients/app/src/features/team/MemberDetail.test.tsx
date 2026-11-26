@@ -415,4 +415,37 @@ describe('MemberDetail: member-locations query with no data', () => {
       expect(assignLocationMock).toHaveBeenCalledWith(expect.objectContaining({ locationId: 9002 }))
     );
   });
+
+  it('allows workspace owners to assign and remove their own POS locations directly', async () => {
+    posState.locations = [
+      { id: 4, name: 'Voxire Cafe' },
+      { id: 5, name: 'Downtown' },
+    ];
+    posState.memberLocations = [
+      {
+        id: 77,
+        locationId: 5,
+        canManagePosUsers: true,
+        canManageTerminals: true,
+        canViewReports: true,
+      },
+    ];
+    memberState.data = makeMember({ isOwner: true, memberType: 'owner', licensedAppIds: [] });
+
+    render(<MemberDetail />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Voxire Cafe/ }));
+    await waitFor(() =>
+      expect(assignLocationMock).toHaveBeenCalledWith({
+        userId: 1,
+        locationId: 4,
+        canManagePosUsers: true,
+        canManageTerminals: true,
+        canViewReports: true,
+      })
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /Downtown/ }));
+    await waitFor(() => expect(removeLocationMock).toHaveBeenCalledWith(77));
+  });
 });

@@ -2,6 +2,11 @@
 
 Run `make generate` before baseline build, vet, lint, and test commands.
 
+## Reuse and edge-case testing
+
+- Reuse existing modules, adapters, queries, and canonical tables rather than duplicating logic or creating parallel sources of truth for shared business entities.
+- Cover all realistic edge cases (including nullable SQL/JSON scans, empty states, tenant/permission boundaries, and cross-module hooks) with tests before merging any PR to production.
+
 ## HR time-entry ownership
 
 `hr_time_entries.owner_id` is the business ID, matching `business_id`. This is

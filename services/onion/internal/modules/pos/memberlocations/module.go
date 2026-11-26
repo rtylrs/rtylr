@@ -37,3 +37,7 @@ func (m *Module) WithIdentityReaders(name func(context.Context, int64, int64) (s
 	m.repository.WithIdentityReaders(name, member)
 	return m
 }
+
+func (m *Module) Assign(ctx context.Context, businessID, userID, locationID int64, canManagePOSUsers, canManageTerminals, canViewReports bool) (int64, error) {
+	return m.service.Assign(ctx, businessID, userID, locationID, canManagePOSUsers, canManageTerminals, canViewReports)
+}

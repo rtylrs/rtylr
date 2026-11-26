@@ -455,6 +455,30 @@ func (s *Service) UpsertMenuCurrency(ctx context.Context, businessID int64, cur 
 		cur.DecimalPlaces = 2
 	}
 	cur.BusinessID = businessID
+	existing, listErr := s.repo.ListMenuCurrencies(ctx, businessID, cur.LocationID)
+	if listErr != nil {
+		return nil, listErr
+	}
+	if len(existing) == 0 && !cur.IsDefault && cur.Code != "USD" {
+		// Seed the base USD currency so adding a first secondary currency appends
+		// alongside USD instead of replacing the synthetic default.
+		if seedErr := s.repo.UpsertMenuCurrency(ctx, domain.MenuCurrency{
+			BusinessID:    businessID,
+			LocationID:    cur.LocationID,
+			Code:          "USD",
+			Symbol:        "$",
+			ExchangeRate:  1,
+			DecimalPlaces: 2,
+			IsDefault:     true,
+			IsActive:      true,
+			Position:      0,
+		}); seedErr != nil {
+			return nil, seedErr
+		}
+		if cur.Position == 0 {
+			cur.Position = 1
+		}
+	}
 	if err := s.repo.UpsertMenuCurrency(ctx, cur); err != nil {
 		return nil, err
 	}
