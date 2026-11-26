@@ -110,3 +110,27 @@ func TestPOSOrderPermissionHelperRejectsWrongAppAndMembersWithoutAccess(t *testi
 		t.Fatalf("an unlicensed app returned %v, want 403", err)
 	}
 }
+
+func TestPOSOrMenuPermissionAllowsStandaloneMenuWorkspace(t *testing.T) {
+	menuOnlyUser := &auth.AuthUser{
+		BusinessID: 9,
+		UserID:     7,
+		EffectiveAccess: &authorization.EffectiveAccess{
+			Apps: []authorization.EffectiveAppAccess{{
+				AppID:       authorization.AppMenu,
+				Licensed:    true,
+				HasAccess:   true,
+				Permissions: []string{"menu:orders:view", "menu:menus:edit"},
+			}},
+		},
+	}
+	if _, err := requirePOSOrMenuPermission(auth.WithAuthUser(context.Background(), menuOnlyUser), "pos:orders:view", "menu:orders:view"); err != nil {
+		t.Fatalf("standalone menu user with menu:orders:view should be allowed, got %v", err)
+	}
+	if _, err := requirePOSOrMenuPermission(auth.WithAuthUser(context.Background(), menuOnlyUser), "pos:orders:create", "menu:menus:edit"); err != nil {
+		t.Fatalf("standalone menu user with menu:menus:edit should be allowed, got %v", err)
+	}
+	if _, err := requirePOSOrMenuPermission(auth.WithAuthUser(context.Background(), menuOnlyUser), "pos:orders:void", ""); posOrdersStatus(err) != http.StatusForbidden {
+		t.Fatalf("standalone menu user without menu permission mapping should be rejected, got %v", err)
+	}
+}

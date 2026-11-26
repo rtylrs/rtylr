@@ -32,9 +32,9 @@ import { menuCheckoutPath, menuHomePath } from '../../../menuPaths';
  * thread `location_id` through.)
  */
 
-// Opt-in: the cart is off unless VITE_ONLINE_ORDERING_ENABLED is exactly 'true'.
+// Env kill-switch: online ordering stays enabled unless explicitly set to 'false'.
 const isOnlineOrderingEnabled = (): boolean =>
-  import.meta.env.VITE_ONLINE_ORDERING_ENABLED === 'true';
+  import.meta.env.VITE_ONLINE_ORDERING_ENABLED !== 'false';
 
 const LocationMenu: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation('locationmenu');
