@@ -1,7 +1,7 @@
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import resourcesToBackend from 'i18next-resources-to-backend';
-import { getCookie, setCookie, getDefaultCookieDomain } from '@voxire/auth';
+import { getCookie, setCookie, removeCookie, getDefaultCookieDomain } from '@voxire/auth';
 import { isRTL } from './languages';
 
 export interface I18nConfig {
@@ -103,9 +103,14 @@ export function initI18n(config: I18nConfig): typeof i18next {
  */
 export function selectLanguage(language: string = 'en'): void {
   void i18next.changeLanguage(language);
+  const domain = getDefaultCookieDomain();
+  if (domain) {
+    // Clear any stale host-only `language` cookie that would shadow the shared domain cookie.
+    removeCookie('language');
+  }
   setCookie('language', language, {
     days: 365,
     sameSite: 'lax',
-    domain: getDefaultCookieDomain(),
+    domain,
   });
 }

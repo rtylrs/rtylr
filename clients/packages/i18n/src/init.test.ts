@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { initI18n } from './init';
+import * as auth from '@voxire/auth';
+import { initI18n, selectLanguage } from './init';
 import { isRTL, getLanguage } from './languages';
 
 describe('i18n package', () => {
@@ -34,5 +35,38 @@ describe('i18n package', () => {
       loadResource: () => Promise.resolve({ test: 'value' }),
     });
     expect(instance).not.toBeNull();
+  });
+
+  it('clears any stale host-only language cookie before writing the shared domain cookie', () => {
+    vi.spyOn(auth, 'getDefaultCookieDomain').mockReturnValue('.rtylr.com');
+    const removeSpy = vi.spyOn(auth, 'removeCookie').mockImplementation(() => {});
+    const setSpy = vi.spyOn(auth, 'setCookie').mockImplementation(() => {});
+
+    selectLanguage('en');
+
+    expect(removeSpy).toHaveBeenCalledWith('language');
+    expect(setSpy).toHaveBeenCalledWith('language', 'en', {
+      days: 365,
+      sameSite: 'lax',
+      domain: '.rtylr.com',
+    });
+    expect(removeSpy.mock.invocationCallOrder[0]).toBeLessThan(
+      setSpy.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('does not remove host-only cookie on localhost when no shared domain applies', () => {
+    vi.spyOn(auth, 'getDefaultCookieDomain').mockReturnValue(undefined);
+    const removeSpy = vi.spyOn(auth, 'removeCookie').mockImplementation(() => {});
+    const setSpy = vi.spyOn(auth, 'setCookie').mockImplementation(() => {});
+
+    selectLanguage('en');
+
+    expect(removeSpy).not.toHaveBeenCalled();
+    expect(setSpy).toHaveBeenCalledWith('language', 'en', {
+      days: 365,
+      sameSite: 'lax',
+      domain: undefined,
+    });
   });
 });

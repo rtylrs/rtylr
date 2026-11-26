@@ -19,6 +19,7 @@ function buildLocale(lang: string): Record<string, unknown> {
 
 const i18n = initI18n({
   loadResource: (lang: string) => Promise.resolve(buildLocale(lang)),
+  ns: ['recruitCommon'],
 });
 
 export { selectLanguage } from '@voxire/i18n';

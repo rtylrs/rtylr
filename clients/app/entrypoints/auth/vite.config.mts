@@ -22,7 +22,14 @@ export default defineConfig(() => ({
     alias: {
       '@app': path.resolve(__dirname, './src'),
     },
-    dedupe: ['react', 'react-dom', 'react/jsx-runtime', 'react-dom/client'],
+    dedupe: [
+      'react',
+      'react-dom',
+      'react/jsx-runtime',
+      'react-dom/client',
+      'i18next',
+      'react-i18next',
+    ],
   },
   server: {
     port: 5176,
