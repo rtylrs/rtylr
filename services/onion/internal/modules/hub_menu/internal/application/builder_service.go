@@ -20,6 +20,12 @@ type EventDispatcher func(ctx context.Context, event eventbus.Event) error
 // AITranslator translates a batch of source strings into a target locale.
 type AITranslator func(ctx context.Context, targetLocale string, inputs []string) ([]string, error)
 
+// FeatureFlagChecker checks a global platform super-admin feature flag.
+type FeatureFlagChecker func(ctx context.Context, key string, defaultVal bool) bool
+
+// GuestCapturer saves a consenting guest from the published menu into CRM.
+type GuestCapturer func(ctx context.Context, businessID, locationID int64, name, phone, email, notes string) error
+
 // TenantValidator verifies that referenced branch/table/item IDs belong to businessID.
 type TenantValidator struct {
 	ValidateLocation func(ctx context.Context, businessID, locationID int64) error
@@ -45,6 +51,23 @@ func (s *Service) WithTranslator(fn AITranslator) *Service {
 func (s *Service) WithTenantValidator(v TenantValidator) *Service {
 	s.tenantValidator = v
 	return s
+}
+
+func (s *Service) WithFeatureFlagChecker(fn FeatureFlagChecker) *Service {
+	s.featureFlagChecker = fn
+	return s
+}
+
+func (s *Service) WithGuestCapturer(fn GuestCapturer) *Service {
+	s.guestCapturer = fn
+	return s
+}
+
+func (s *Service) isPlatformFeatureEnabled(ctx context.Context, key string) bool {
+	if s.featureFlagChecker == nil {
+		return true
+	}
+	return s.featureFlagChecker(ctx, key, true)
 }
 
 func (s *Service) validateLocation(ctx context.Context, businessID, locationID int64) error {
@@ -327,6 +350,9 @@ func (s *Service) TranslateMenu(
 	overwriteManual bool,
 	entries []domain.TranslationSourceEntry,
 ) (translatedCount int32, skippedManual int32, results []domain.MenuTranslation, err error) {
+	if !s.isPlatformFeatureEnabled(ctx, "app.menu.aiTranslate") {
+		return 0, 0, nil, fmt.Errorf("%w: AI menu translation is disabled", domain.ErrFeatureDisabled)
+	}
 	if locationID < 0 {
 		locationID = 0
 	}
@@ -416,6 +442,17 @@ func (s *Service) ListMenuCurrencies(ctx context.Context, businessID, locationID
 	list, err := s.repo.ListMenuCurrencies(ctx, businessID, locationID)
 	if err != nil {
 		return nil, err
+	}
+	if len(list) == 0 && locationID > 0 {
+		// Inherit default brand currencies (location_id = 0) when a branch has
+		// not configured branch-specific currency overrides.
+		inherited, inheritErr := s.repo.ListMenuCurrencies(ctx, businessID, 0)
+		if inheritErr != nil {
+			return nil, inheritErr
+		}
+		if len(inherited) > 0 {
+			return inherited, nil
+		}
 	}
 	if len(list) == 0 {
 		return []domain.MenuCurrency{{
@@ -544,6 +581,9 @@ func (s *Service) DeleteStampCard(ctx context.Context, businessID, id int64) err
 }
 
 func (s *Service) GetPublicCustomerStamps(ctx context.Context, businessID int64, phone string) ([]domain.CustomerStampProgress, error) {
+	if !s.isPlatformFeatureEnabled(ctx, "app.menu.loyalty") {
+		return []domain.CustomerStampProgress{}, nil
+	}
 	phone = strings.TrimSpace(phone)
 	digits := 0
 	for _, r := range phone {
@@ -592,6 +632,9 @@ func (s *Service) AwardStampsForOrder(ctx context.Context, businessID, locationI
 }
 
 func (s *Service) CreatePublicTableAction(ctx context.Context, businessID int64, action domain.TableAction) (domain.TableAction, error) {
+	if !s.isPlatformFeatureEnabled(ctx, "app.menu.tableActions") {
+		return domain.TableAction{}, fmt.Errorf("%w: table actions are disabled", domain.ErrFeatureDisabled)
+	}
 	if businessID <= 0 {
 		return domain.TableAction{}, fmt.Errorf("%w: business_id is required", domain.ErrTableActionInvalidInput)
 	}
@@ -754,6 +797,12 @@ func (s *Service) GetPublicMenuBundle(ctx context.Context, businessID, locationI
 	if err != nil {
 		return domain.PublicMenuBundle{}, err
 	}
+	if !s.isPlatformFeatureEnabled(ctx, "app.menu.banners") {
+		banners = nil
+	}
+	if !s.isPlatformFeatureEnabled(ctx, "app.menu.customCss") {
+		profile.PublishedCustomCSS = ""
+	}
 	branchItems, err := s.repo.ListBranchMenuItems(ctx, businessID, effectiveLocationID)
 	if err != nil {
 		return domain.PublicMenuBundle{}, err
@@ -762,18 +811,34 @@ func (s *Service) GetPublicMenuBundle(ctx context.Context, businessID, locationI
 	if err != nil {
 		return domain.PublicMenuBundle{}, err
 	}
+	if !s.isPlatformFeatureEnabled(ctx, "app.menu.currencies") && len(currencies) > 1 {
+		// Keep only the default currency when multi-currency switching is globally disabled.
+		defaultOnly := make([]domain.MenuCurrency, 0, 1)
+		for _, cur := range currencies {
+			if cur.IsDefault {
+				defaultOnly = append(defaultOnly, cur)
+				break
+			}
+		}
+		if len(defaultOnly) == 0 {
+			defaultOnly = currencies[:1]
+		}
+		currencies = defaultOnly
+	}
 	translations, err := s.repo.ListMenuTranslations(ctx, businessID, effectiveLocationID, normalizeLocale(locale))
 	if err != nil {
 		return domain.PublicMenuBundle{}, err
 	}
-	stampCards, err := s.repo.ListStampCards(ctx, businessID, locationID)
-	if err != nil {
-		return domain.PublicMenuBundle{}, err
-	}
-	activeCards := make([]domain.StampCard, 0, len(stampCards))
-	for _, card := range stampCards {
-		if card.IsActive {
-			activeCards = append(activeCards, card)
+	activeCards := []domain.StampCard{}
+	if s.isPlatformFeatureEnabled(ctx, "app.menu.loyalty") {
+		stampCards, err := s.repo.ListStampCards(ctx, businessID, locationID)
+		if err != nil {
+			return domain.PublicMenuBundle{}, err
+		}
+		for _, card := range stampCards {
+			if card.IsActive {
+				activeCards = append(activeCards, card)
+			}
 		}
 	}
 
@@ -785,6 +850,88 @@ func (s *Service) GetPublicMenuBundle(ctx context.Context, businessID, locationI
 		Translations: translations,
 		StampCards:   activeCards,
 	}, nil
+}
+
+// CapturePublicMenuGuest validates and stores an optional consenting guest from
+// the published digital menu into the business's CRM.
+func (s *Service) CapturePublicMenuGuest(ctx context.Context, businessID, locationID int64, name, phone, email, notes string, consent bool) error {
+	if businessID <= 0 {
+		return fmt.Errorf("%w: business_id is required", domain.ErrGuestCaptureInvalidInput)
+	}
+	if locationID < 0 {
+		locationID = 0
+	}
+	if err := s.validateLocation(ctx, businessID, locationID); err != nil {
+		return fmt.Errorf("%w: %v", domain.ErrGuestCaptureInvalidInput, err)
+	}
+	if !consent {
+		return fmt.Errorf("%w: consent is required", domain.ErrGuestCaptureInvalidInput)
+	}
+	if !s.isPlatformFeatureEnabled(ctx, "app.menu.crmCapture") {
+		return fmt.Errorf("%w: guest CRM capture is disabled", domain.ErrFeatureDisabled)
+	}
+
+	name = strings.TrimSpace(name)
+	phone = strings.TrimSpace(phone)
+	email = strings.ToLower(strings.TrimSpace(email))
+	notes = strings.TrimSpace(notes)
+	if phone == "" && email == "" {
+		return fmt.Errorf("%w: phone or email is required", domain.ErrGuestCaptureInvalidInput)
+	}
+	if email != "" && (!strings.Contains(email, "@") || !strings.Contains(email, ".") || len(email) > 254) {
+		return fmt.Errorf("%w: invalid email address", domain.ErrGuestCaptureInvalidInput)
+	}
+	if len(name) > 160 {
+		name = name[:160]
+	}
+	if len(phone) > 40 {
+		phone = phone[:40]
+	}
+	if len(notes) > 500 {
+		notes = notes[:500]
+	}
+
+	profile, found, err := s.repo.GetMenuProfile(ctx, businessID, locationID)
+	if err != nil {
+		return err
+	}
+	if !found && locationID > 0 {
+		profile, found, err = s.repo.GetMenuProfile(ctx, businessID, 0)
+		if err != nil {
+			return err
+		}
+	}
+	if found && profile.IsPublished && !domain.IsCRMCaptureEnabled(profile.PublishedConfigJSON) {
+		return fmt.Errorf("%w: guest CRM capture is turned off for this menu", domain.ErrFeatureDisabled)
+	}
+
+	if s.guestCapturer != nil {
+		if err := s.guestCapturer(ctx, businessID, locationID, name, phone, email, notes); err != nil {
+			return err
+		}
+	}
+
+	s.emitEvent(ctx, businessID, "menu.guest.captured", map[string]any{
+		"business_id": businessID,
+		"location_id": locationID,
+		"has_phone":   phone != "",
+		"has_email":   email != "",
+	})
+	return nil
+}
+
+// IsPublishedOrderingEnabled reports whether the business's published menu profile
+// allows customer ordering (used to enable standalone Menu-only ordering without POS).
+func (s *Service) IsPublishedOrderingEnabled(ctx context.Context, businessID int64) bool {
+	if businessID <= 0 || !s.isPlatformFeatureEnabled(ctx, "app.menu.ordering") {
+		return false
+	}
+	profile, found, err := s.repo.GetMenuProfile(ctx, businessID, 0)
+	if err != nil || !found || !profile.IsPublished {
+		// Default menu profile allows ordering when the business enables Digital Menu.
+		return true
+	}
+	return domain.IsOrderingEnabled(profile.PublishedConfigJSON)
 }
 
 // ResolvePaymentRedirectURL returns the configured third-party payment redirect URL

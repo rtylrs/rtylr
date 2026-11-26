@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { QueryClientContext } from '@tanstack/react-query';
+import { Check, Copy, ExternalLink } from 'lucide-react';
 import { cn } from '@voxire/ui';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
@@ -173,8 +174,22 @@ function QrCode() {
     qrStyle: 'squares',
   });
   const [isLogoLoaded, setIsLogoLoaded] = useState(false);
+  const [copiedUrl, setCopiedUrl] = useState(false);
 
   const qrRef = useRef(null);
+
+  const handleCopyUrl = async () => {
+    const urlToCopy = qrOptions.url || menuUrl;
+    if (!urlToCopy) return;
+    try {
+      await navigator.clipboard.writeText(urlToCopy);
+      setCopiedUrl(true);
+      toast.success(t('qrCodes.linkCopied', 'Menu link copied'));
+      setTimeout(() => setCopiedUrl(false), 1800);
+    } catch {
+      toast.error(t('qrCodes.copyFailed', 'Could not copy link'));
+    }
+  };
 
   useEffect(() => {
     setQrOptions((current) => ({
@@ -300,7 +315,7 @@ function QrCode() {
             </div>
 
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-primary w-40">Background Color:</label>
+              <label className="text-sm font-medium text-primary w-40">Background Color</label>
               <input
                 type="color"
                 name="backgroundColor"
@@ -310,7 +325,7 @@ function QrCode() {
             </div>
 
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-primary w-40">QR Background Color:</label>
+              <label className="text-sm font-medium text-primary w-40">QR Background Color</label>
               <input
                 type="color"
                 name="bgColor"
@@ -320,7 +335,7 @@ function QrCode() {
             </div>
 
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-primary w-40">Color:</label>
+              <label className="text-sm font-medium text-primary w-40">Color</label>
               <input
                 type="color"
                 name="fgColor"
@@ -330,7 +345,7 @@ function QrCode() {
             </div>
 
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-primary w-40">Text Color:</label>
+              <label className="text-sm font-medium text-primary w-40">Text Color</label>
               <input
                 type="color"
                 name="textColor"
@@ -340,7 +355,7 @@ function QrCode() {
             </div>
 
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-primary w-40">Logo Width:</label>
+              <label className="text-sm font-medium text-primary w-40">Logo Width</label>
               <input
                 className="border border-black/10 rounded px-2 py-1 text-sm w-20"
                 type="number"
@@ -351,7 +366,7 @@ function QrCode() {
             </div>
 
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-primary w-40">Logo Height:</label>
+              <label className="text-sm font-medium text-primary w-40">Logo Height</label>
               <input
                 className="border border-black/10 rounded px-2 py-1 text-sm w-20"
                 type="number"
@@ -362,7 +377,7 @@ function QrCode() {
             </div>
 
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-primary w-40">Eye Radius:</label>
+              <label className="text-sm font-medium text-primary w-40">Eye Radius</label>
               <input
                 className="border border-black/10 rounded px-2 py-1 text-sm w-20"
                 type="number"
@@ -373,7 +388,7 @@ function QrCode() {
             </div>
 
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-primary w-40">Eye Color:</label>
+              <label className="text-sm font-medium text-primary w-40">Eye Color</label>
               <input
                 type="color"
                 name="eyeColor"
@@ -383,7 +398,7 @@ function QrCode() {
             </div>
 
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-primary w-40">QR Style:</label>
+              <label className="text-sm font-medium text-primary w-40">QR Style</label>
               <select
                 className="border border-black/10 rounded px-2 py-1 text-sm"
                 name="qrStyle"
@@ -397,7 +412,7 @@ function QrCode() {
             </div>
 
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-primary w-40">Title:</label>
+              <label className="text-sm font-medium text-primary w-40">Title</label>
               <input
                 className="border border-black/10 rounded px-2 py-1 text-sm flex-1"
                 type="text"
@@ -408,7 +423,7 @@ function QrCode() {
             </div>
 
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-primary w-40">Description:</label>
+              <label className="text-sm font-medium text-primary w-40">Description</label>
               <input
                 className="border border-black/10 rounded px-2 py-1 text-sm flex-1"
                 type="text"
@@ -419,7 +434,7 @@ function QrCode() {
             </div>
 
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-primary w-40">Display Logo:</label>
+              <label className="text-sm font-medium text-primary w-40">Display Logo</label>
               <input
                 type="checkbox"
                 name="logoImage"
@@ -433,6 +448,40 @@ function QrCode() {
             className="rounded-xl p-5 border shadow-card flex flex-col items-center gap-4"
             style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
           >
+            {/* Live Generated Menu URL + Copy Link */}
+            <div
+              className="w-full rounded-lg border px-3 py-2 flex items-center justify-between gap-2"
+              style={{ background: 'var(--dash-surface)', borderColor: 'var(--dash-border)' }}
+            >
+              <code
+                dir="ltr"
+                className="text-xs truncate flex-1 select-all"
+                style={{ color: 'var(--dash-text)' }}
+              >
+                {qrOptions.url}
+              </code>
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => void handleCopyUrl()}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium border hover:bg-[var(--dash-hover)] transition-colors"
+                  style={{ borderColor: 'var(--dash-border)', color: 'var(--dash-text)' }}
+                >
+                  {copiedUrl ? <Check size={13} /> : <Copy size={13} />}
+                  {copiedUrl ? t('common.copied', 'Copied') : t('qrCodes.copyLink', 'Copy link')}
+                </button>
+                <a
+                  href={qrOptions.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={t('qrCodes.openMenu', 'Open menu')}
+                  className="inline-flex items-center p-1.5 rounded-md border hover:bg-[var(--dash-hover)] transition-colors"
+                  style={{ borderColor: 'var(--dash-border)', color: 'var(--dash-text-muted)' }}
+                >
+                  <ExternalLink size={13} />
+                </a>
+              </div>
+            </div>
             <div
               ref={qrRef}
               className="flex flex-col items-center justify-center rounded-lg overflow-hidden max-w-full"

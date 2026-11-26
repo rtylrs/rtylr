@@ -173,7 +173,7 @@ const General: React.FC = () => {
               </div>
               <div className="space-y-1.5">
                 <Label>{t('settings.general.publicSlug')}</Label>
-                <div className="flex gap-2 items-center">
+                <div dir="ltr" className="flex gap-2 items-center">
                   <span
                     className="text-xs whitespace-nowrap"
                     style={{ color: 'var(--dash-text-muted)' }}

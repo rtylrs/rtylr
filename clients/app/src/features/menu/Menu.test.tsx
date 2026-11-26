@@ -20,6 +20,7 @@ const queryState = vi.hoisted(() => ({ isLoading: false }));
 
 vi.mock('../../shared/hooks/queries/useMenu', () => ({
   useGetMenu: () => queryState,
+  useUpdateMenuItem: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 vi.mock('../../shared/stores/userStore', () => ({

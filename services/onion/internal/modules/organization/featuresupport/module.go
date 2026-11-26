@@ -30,6 +30,11 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	}
 }
 
+// IsFlagEnabled reports whether a global super-admin feature flag is active.
+func (m *Module) IsFlagEnabled(ctx context.Context, key string, defaultVal bool) bool {
+	return m.service.IsFlagEnabled(ctx, key, defaultVal)
+}
+
 // GetAnonymousRoutes exposes anonymous feature resolution without auth. The
 // per-user and admin surfaces remain protected.
 func (m *Module) GetAnonymousRoutes() []string {

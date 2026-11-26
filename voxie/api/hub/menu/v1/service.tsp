@@ -186,4 +186,9 @@ interface MenuService {
   @get
   @route("/public/stamps")
   getPublicCustomerStamps(...GetPublicCustomerStampsRequest): GetPublicCustomerStampsResponse;
+
+  /** Captures a consenting guest's contact info from the published menu into CRM. */
+  @post
+  @route("/public/guest")
+  capturePublicMenuGuest(...CapturePublicMenuGuestRequest): CapturePublicMenuGuestResponse;
 }

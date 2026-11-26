@@ -336,7 +336,7 @@ func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input Pu
 		if phone == "" {
 			phone = input.CustomerPhone
 		}
-		s.publicOrderHook(ctx, ownerID, input.LocationID, input.TableID, orderID, orderNumber, input.FulfillmentMode, input.CustomerName, phone, input.CRMOptIn, totals.Total)
+		s.publicOrderHook(ctx, ownerID, input.LocationID, input.TableID, orderID, orderNumber, input.FulfillmentMode, input.CustomerName, phone, input.CustomerEmail, input.CRMOptIn, totals.Total)
 	}
 
 	return orderID, orderNumber, publicToken, nil

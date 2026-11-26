@@ -168,3 +168,7 @@ func (m *Module) WithReportingTimezone(read func(context.Context, int64) (string
 func (m *Module) CountCustomersCreatedBetween(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
 	return m.repository.CountCustomersCreatedBetween(ctx, businessID, from, to)
 }
+
+func (m *Module) CapturePublicContact(ctx context.Context, businessID int64, contact crmcontract.CustomerContactCaptured) (int64, error) {
+	return m.service.CapturePublicContact(ctx, businessID, contact)
+}

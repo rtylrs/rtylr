@@ -73,6 +73,14 @@ export interface CustomerStampProgressData {
   rewardLabel?: string;
 }
 
+export interface CrmGuestInput {
+  name?: string;
+  phone?: string;
+  email?: string;
+  notes?: string;
+  consent: boolean;
+}
+
 export interface MenuLayoutLabels {
   searchMenu: string;
   searchPlaceholder: string;
@@ -110,8 +118,21 @@ export interface MenuLayoutLabels {
   emptyCart: string;
   subtotal: string;
   placeOrder: string;
+  previewCheckoutNotice: string;
   askAi: string;
   aiPlaceholder: string;
+  joinClub: string;
+  crmGuestTitle: string;
+  crmGuestSubtitle: string;
+  crmGuestName: string;
+  crmGuestPhone: string;
+  crmGuestEmail: string;
+  crmGuestConsent: string;
+  crmGuestSubmit: string;
+  crmGuestSubmitting: string;
+  crmGuestSuccess: string;
+  crmGuestError: string;
+  crmGuestContactRequired: string;
 }
 
 export interface BusinessInfo {
@@ -209,6 +230,7 @@ export interface MenuFeaturesConfig {
   fulfillmentModes: FulfillmentModesConfig;
   tableActions: TableActionsConfig;
   enableLoyaltyStamps: boolean;
+  enableCrmCapture: boolean;
   enableAiAssistant: boolean;
   enableBanners: boolean;
   enableUpsells: boolean;
@@ -250,6 +272,7 @@ export const DEFAULT_FEATURES_CONFIG: MenuFeaturesConfig = {
     splitBill: false,
   },
   enableLoyaltyStamps: true,
+  enableCrmCapture: true,
   enableAiAssistant: true,
   enableBanners: true,
   enableUpsells: true,

@@ -82,18 +82,26 @@ func (f *fakeBuilderRepo) UpsertMenuTranslation(_ context.Context, tr domain.Men
 	return nil
 }
 
-func (f *fakeBuilderRepo) ListMenuCurrencies(_ context.Context, _ int64, _ int64) ([]domain.MenuCurrency, error) {
-	return append([]domain.MenuCurrency{}, f.currencies...), nil
+func (f *fakeBuilderRepo) ListMenuCurrencies(_ context.Context, _ int64, locationID int64) ([]domain.MenuCurrency, error) {
+	var out []domain.MenuCurrency
+	for _, cur := range f.currencies {
+		if cur.LocationID == locationID {
+			out = append(out, cur)
+		}
+	}
+	return out, nil
 }
 
 func (f *fakeBuilderRepo) UpsertMenuCurrency(_ context.Context, cur domain.MenuCurrency) error {
 	if cur.IsDefault {
 		for i := range f.currencies {
-			f.currencies[i].IsDefault = false
+			if f.currencies[i].LocationID == cur.LocationID {
+				f.currencies[i].IsDefault = false
+			}
 		}
 	}
 	for i, existing := range f.currencies {
-		if existing.Code == cur.Code {
+		if existing.LocationID == cur.LocationID && existing.Code == cur.Code {
 			f.currencies[i] = cur
 			return nil
 		}
@@ -380,5 +388,114 @@ func TestTenantValidatorRejectsForeignIDs(t *testing.T) {
 		LocationID: 1, MenuItemID: 777, IsVisible: true,
 	}); !errors.Is(err, domain.ErrBranchItemInvalidInput) {
 		t.Fatalf("expected ErrBranchItemInvalidInput for foreign item, got %v", err)
+	}
+}
+
+func TestBranchInheritsDefaultBrandCurrencies(t *testing.T) {
+	repo := newFakeBuilderRepo()
+	svc := NewService(context.Background(), repo)
+
+	// Add EUR on default brand (location_id = 0): must seed USD alongside EUR.
+	defaultList, err := svc.UpsertMenuCurrency(context.Background(), 42, domain.MenuCurrency{
+		LocationID: 0, Code: "EUR", Symbol: "€", ExchangeRate: 0.92, DecimalPlaces: 2, IsActive: true,
+	})
+	if err != nil || len(defaultList) != 2 {
+		t.Fatalf("expected USD + EUR on default brand, got %+v (%v)", defaultList, err)
+	}
+
+	// Branch 4 has no currency rows of its own -> must inherit default brand USD + EUR.
+	inherited, err := svc.ListMenuCurrencies(context.Background(), 42, 4)
+	if err != nil || len(inherited) != 2 || inherited[0].Code != "USD" || inherited[1].Code != "EUR" {
+		t.Fatalf("expected branch 4 to inherit USD + EUR, got %+v (%v)", inherited, err)
+	}
+
+	// Public bundle for branch 4 must also surface inherited currencies.
+	_, _ = svc.SaveMenuProfileDraft(context.Background(), 42, domain.SaveMenuProfileDraftInput{
+		LocationID:      4,
+		DraftConfigJSON: `{}`,
+	})
+	_, _ = svc.PublishMenuProfile(context.Background(), 42, 4)
+	bundle, err := svc.GetPublicMenuBundle(context.Background(), 42, 4, "en")
+	if err != nil || len(bundle.Currencies) != 2 {
+		t.Fatalf("expected public bundle for branch 4 to inherit 2 currencies, got %+v (%v)", bundle.Currencies, err)
+	}
+}
+
+func TestCapturePublicMenuGuestAndFeatureKillSwitches(t *testing.T) {
+	repo := newFakeBuilderRepo()
+	repo.stampCards = []domain.StampCard{{ID: 7, BusinessID: 42, Title: "Club", StampsRequired: 5, IsActive: true}}
+	flags := map[string]bool{}
+	var captured []string
+	svc := NewService(context.Background(), repo).
+		WithFeatureFlagChecker(func(_ context.Context, key string, def bool) bool {
+			if v, ok := flags[key]; ok {
+				return v
+			}
+			return def
+		}).
+		WithGuestCapturer(func(_ context.Context, _, _ int64, name, phone, email, _ string) error {
+			captured = append(captured, name+"|"+phone+"|"+email)
+			return nil
+		})
+
+	// Rejects without consent.
+	if err := svc.CapturePublicMenuGuest(context.Background(), 42, 0, "Sara", "+15550001111", "", "", false); !errors.Is(err, domain.ErrGuestCaptureInvalidInput) {
+		t.Fatalf("expected ErrGuestCaptureInvalidInput without consent, got %v", err)
+	}
+	// Rejects without phone or email.
+	if err := svc.CapturePublicMenuGuest(context.Background(), 42, 0, "Sara", "", "", "", true); !errors.Is(err, domain.ErrGuestCaptureInvalidInput) {
+		t.Fatalf("expected ErrGuestCaptureInvalidInput without contact, got %v", err)
+	}
+	// Rejects malformed email.
+	if err := svc.CapturePublicMenuGuest(context.Background(), 42, 0, "Sara", "", "not-an-email", "", true); !errors.Is(err, domain.ErrGuestCaptureInvalidInput) {
+		t.Fatalf("expected ErrGuestCaptureInvalidInput for invalid email, got %v", err)
+	}
+	// Captures consenting guest cleanly.
+	if err := svc.CapturePublicMenuGuest(context.Background(), 42, 0, "Sara", "+15550001111", "sara@example.com", "VIP", true); err != nil {
+		t.Fatalf("expected guest capture success, got %v", err)
+	}
+	if len(captured) != 1 || captured[0] != "Sara|+15550001111|sara@example.com" {
+		t.Fatalf("unexpected captured payload: %+v", captured)
+	}
+
+	// Super-admin kill-switches disable CRM capture, table actions, AI translate, ordering, loyalty, CSS, currencies.
+	flags["app.menu.crmCapture"] = false
+	flags["app.menu.tableActions"] = false
+	flags["app.menu.aiTranslate"] = false
+	flags["app.menu.ordering"] = false
+	flags["app.menu.loyalty"] = false
+	flags["app.menu.customCss"] = false
+	flags["app.menu.currencies"] = false
+
+	if err := svc.CapturePublicMenuGuest(context.Background(), 42, 0, "Sara", "+15550001111", "", "", true); !errors.Is(err, domain.ErrFeatureDisabled) {
+		t.Fatalf("expected ErrFeatureDisabled for crmCapture kill-switch, got %v", err)
+	}
+	if _, err := svc.CreatePublicTableAction(context.Background(), 42, domain.TableAction{ActionType: "call_waiter"}); !errors.Is(err, domain.ErrFeatureDisabled) {
+		t.Fatalf("expected ErrFeatureDisabled for tableActions kill-switch, got %v", err)
+	}
+	if _, _, _, err := svc.TranslateMenu(context.Background(), 42, 0, []string{"ar"}, false, nil); !errors.Is(err, domain.ErrFeatureDisabled) {
+		t.Fatalf("expected ErrFeatureDisabled for aiTranslate kill-switch, got %v", err)
+	}
+	if svc.IsPublishedOrderingEnabled(context.Background(), 42) {
+		t.Fatal("expected IsPublishedOrderingEnabled to be false when app.menu.ordering kill-switch is off")
+	}
+
+	css := ".rtylr-menu-root { color: green; }"
+	_, _ = svc.SaveMenuProfileDraft(context.Background(), 42, domain.SaveMenuProfileDraftInput{LocationID: 0, DraftConfigJSON: `{}`, CustomCSS: &css})
+	_, _ = svc.PublishMenuProfile(context.Background(), 42, 0)
+	_, _ = svc.UpsertMenuCurrency(context.Background(), 42, domain.MenuCurrency{LocationID: 0, Code: "EUR", Symbol: "€", ExchangeRate: 0.92, IsActive: true})
+
+	bundle, err := svc.GetPublicMenuBundle(context.Background(), 42, 0, "en")
+	if err != nil {
+		t.Fatalf("GetPublicMenuBundle failed: %v", err)
+	}
+	if bundle.Profile.PublishedCustomCSS != "" {
+		t.Fatalf("expected custom CSS stripped when kill-switch is off, got %q", bundle.Profile.PublishedCustomCSS)
+	}
+	if len(bundle.StampCards) != 0 {
+		t.Fatalf("expected 0 stamp cards when loyalty kill-switch is off, got %d", len(bundle.StampCards))
+	}
+	if len(bundle.Currencies) != 1 || bundle.Currencies[0].Code != "USD" {
+		t.Fatalf("expected only default currency when currencies kill-switch is off, got %+v", bundle.Currencies)
 	}
 }

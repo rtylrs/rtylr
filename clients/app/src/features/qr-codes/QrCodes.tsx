@@ -2,8 +2,10 @@ import React, { useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
-import { Plus, QrCode as QrCodeIcon, RefreshCw, Search } from 'lucide-react';
+import { Copy, ExternalLink, Plus, QrCode as QrCodeIcon, RefreshCw, Search } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { buildPublicMenuUrl, buildPublicMenuUrlById } from '@voxire/config';
+import { toast } from 'sonner';
 import { EmptyState } from '../../shared/components/dash/EmptyState';
 import { Badge, Button } from '../../shared/components/ui';
 import { configClient, tableClient } from '../../shared/lib/clients';
@@ -60,6 +62,24 @@ const QrCodes: React.FC = () => {
   const configSlug = typeof configSlugData === 'string' ? configSlugData.trim() : '';
   const businessSlug = user?.businessSlug?.trim() || user?.business_slug?.trim() || configSlug;
   const canOpenGenerator = !user || Boolean(businessSlug);
+  const baseMenuUrl = businessSlug
+    ? buildPublicMenuUrl(businessSlug)
+    : businessId > 0
+      ? buildPublicMenuUrlById(businessId)
+      : '';
+  const buildTableMenuUrl = (table: QrTable): string =>
+    baseMenuUrl
+      ? `${baseMenuUrl}?table=${encodeURIComponent(String(table.id))}&tableLabel=${encodeURIComponent(table.name || `Table ${table.id}`)}`
+      : '';
+  const handleCopyLink = async (url: string) => {
+    if (!url) return;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success(t('qrCodes.linkCopied', 'Menu link copied'));
+    } catch {
+      toast.error(t('qrCodes.copyFailed', 'Could not copy link'));
+    }
+  };
   const normalizedSearch = searchTerm.trim().toLowerCase();
 
   const filteredTables = useMemo(
@@ -136,6 +156,45 @@ const QrCodes: React.FC = () => {
           </div>
         </div>
 
+        {baseMenuUrl && (
+          <div
+            className="flex flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-3"
+            style={{ borderColor: 'var(--dash-border)', background: 'var(--dash-surface)' }}
+          >
+            <div className="min-w-0">
+              <p
+                className="text-[11px] font-medium uppercase"
+                style={{ color: 'var(--dash-text-dim)' }}
+              >
+                {t('qrCodes.liveMenuLink', 'Live digital menu link')}
+              </p>
+              <code
+                dir="ltr"
+                className="block truncate text-xs mt-0.5"
+                style={{ color: 'var(--dash-text)' }}
+              >
+                {baseMenuUrl}
+              </code>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Button size="sm" variant="outline" onClick={() => void handleCopyLink(baseMenuUrl)}>
+                <Copy size={13} />
+                {t('qrCodes.copyLink', 'Copy link')}
+              </Button>
+              <a
+                href={baseMenuUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-[var(--dash-hover)] transition-colors"
+                style={{ borderColor: 'var(--dash-border)', color: 'var(--dash-text)' }}
+              >
+                <ExternalLink size={13} />
+                {t('qrCodes.openMenu', 'Open')}
+              </a>
+            </div>
+          </div>
+        )}
+
         {!isLoading && !isError && (
           <div
             className="grid overflow-hidden rounded-lg border sm:grid-cols-2"
@@ -172,7 +231,7 @@ const QrCodes: React.FC = () => {
           style={{ borderColor: 'var(--dash-border)', background: 'var(--dash-surface)' }}
         >
           <div
-            className="hidden px-4 py-2.5 text-[11px] font-semibold uppercase md:grid md:grid-cols-[minmax(0,1fr)_100px_140px] md:items-center"
+            className="hidden px-4 py-2.5 text-[11px] font-semibold uppercase md:grid md:grid-cols-[minmax(0,1fr)_100px_140px_160px] md:items-center"
             style={{
               color: 'var(--dash-text-dim)',
               borderBottom: '1px solid var(--dash-border)',
@@ -182,6 +241,7 @@ const QrCodes: React.FC = () => {
             <span>Table</span>
             <span>Seats</span>
             <span>Status</span>
+            <span className="text-end">{t('qrCodes.tableLink', 'Menu Link')}</span>
           </div>
 
           {isLoading ? (
@@ -235,10 +295,11 @@ const QrCodes: React.FC = () => {
           ) : (
             <div>
               {filteredTables.map((table, index) => {
+                const tableUrl = buildTableMenuUrl(table);
                 return (
                   <div
                     key={table.id}
-                    className="grid gap-3 px-4 py-4 transition-colors hover:bg-[var(--dash-hover)] md:grid-cols-[minmax(0,1fr)_100px_140px] md:items-center"
+                    className="grid gap-3 px-4 py-4 transition-colors hover:bg-[var(--dash-hover)] md:grid-cols-[minmax(0,1fr)_100px_140px_160px] md:items-center"
                     style={{
                       borderBottom:
                         index === filteredTables.length - 1
@@ -262,16 +323,24 @@ const QrCodes: React.FC = () => {
                         {formatStatus(table.status || 'unknown')}
                       </Badge>
                     </div>
+                    <div className="flex items-center justify-start md:justify-end gap-1.5">
+                      {tableUrl && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => void handleCopyLink(tableUrl)}
+                        >
+                          <Copy size={13} />
+                          {t('qrCodes.copyLink', 'Copy link')}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 );
               })}
             </div>
           )}
         </section>
-
-        <p className="px-1 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-          {t('qrCodes.tableQrComingSoon')}
-        </p>
       </div>
     </>
   );

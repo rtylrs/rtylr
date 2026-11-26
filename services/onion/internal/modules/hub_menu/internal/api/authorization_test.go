@@ -93,3 +93,43 @@ func TestInternalMenuPermissionRequiresGrantedBrandingPermission(t *testing.T) {
 		t.Fatalf("expected branding permission denial, got %v", err)
 	}
 }
+
+func TestMenuOrPOSPermissionAllowsScopedPOSStaffForOperations(t *testing.T) {
+	posStaff := &authPkg.AuthUser{
+		BusinessID: 9,
+		UserID:     7,
+		EffectiveAccess: &authorization.EffectiveAccess{
+			Apps: []authorization.EffectiveAppAccess{{
+				AppID:       authorization.AppPOS,
+				Licensed:    true,
+				HasAccess:   true,
+				Permissions: []string{"pos:orders:view", "pos:orders:create"},
+				PermissionScopes: map[string][]authorization.Scope{
+					"pos:orders:view": {{Type: "location", ID: "4"}},
+				},
+			}},
+		},
+	}
+	if !hasMenuOrPOSPermission(posStaff, "menu:orders:view", "pos:orders:view") {
+		t.Fatal("expected scoped POS staff to pass operations permission check")
+	}
+
+	unscopedPOS := &authPkg.AuthUser{
+		BusinessID: 9,
+		UserID:     7,
+		EffectiveAccess: &authorization.EffectiveAccess{
+			Apps: []authorization.EffectiveAppAccess{{
+				AppID:       authorization.AppPOS,
+				Licensed:    true,
+				HasAccess:   true,
+				Permissions: []string{"pos:orders:view"},
+			}},
+		},
+	}
+	if hasMenuOrPOSPermission(unscopedPOS, "menu:orders:view", "pos:orders:view") {
+		t.Fatal("expected unscoped POS user to be denied")
+	}
+	if _, err := requireMenuOrPOSPermission(authPkg.WithAuthUser(context.Background(), unscopedPOS), "menu:orders:view", "pos:orders:view"); menuPermissionStatus(err) != http.StatusForbidden {
+		t.Fatalf("expected unscoped POS user to receive 403, got %v", err)
+	}
+}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	crmcontract "github.com/voxire/onion/internal/contracts/crm"
 	flowreferences "github.com/voxire/onion/internal/modules/flow/references"
 	identityadapter "github.com/voxire/onion/internal/modules/flow/workspaces/adapters/identity"
 	posreferences "github.com/voxire/onion/internal/modules/pos/references"
@@ -281,7 +282,17 @@ func initializeModules(ctx context.Context) *apiModules {
 		}
 		return nil
 	}
+	featureSupportModule := featuresupport.NewModule(ctx, dbclient.Pool())
 	hubMenuModule := hubmenu.NewModule(ctx, dbclient.Pool()).
+		WithFeatureFlagChecker(featureSupportModule.IsFlagEnabled).
+		WithGuestCapturer(func(capCtx context.Context, businessID, _ int64, name, phone, email, _ string) error {
+			_, err := customersModule.CapturePublicContact(capCtx, businessID, crmcontract.CustomerContactCaptured{
+				Name:  name,
+				Phone: phone,
+				Email: email,
+			})
+			return err
+		}).
 		WithHostResolver(func(resolveCtx context.Context, host string) (int64, string, bool, error) {
 			bizID, found, err := configModule.ResolveVerifiedDomainBusinessID(resolveCtx, host)
 			if err != nil || !found {
@@ -331,7 +342,25 @@ func initializeModules(ctx context.Context) *apiModules {
 		})
 	posOrdersModule := orders.NewModule(ctx, dbclient.Pool()).
 		WithSalesProductReader(productsModule.SalesProduct).
-		WithOnlineOrderingReader(addonsModule.OnlineOrderingEnabled).
+		WithOnlineOrderingReader(func(ordCtx context.Context, businessID int64) (bool, error) {
+			if !featureSupportModule.IsFlagEnabled(ordCtx, "app.menu.ordering", true) {
+				return false, nil
+			}
+			enabled, err := addonsModule.OnlineOrderingEnabled(ordCtx, businessID)
+			if err != nil {
+				return false, err
+			}
+			if enabled {
+				return true, nil
+			}
+			// Allow standalone Digital Menu ordering (routing into Portal Orders)
+			// when the Menu app is active and ordering is enabled on the published menu.
+			menuEnabled, menuErr := addonsModule.PublicMenuEnabled(ordCtx, businessID)
+			if menuErr != nil || !menuEnabled {
+				return false, menuErr
+			}
+			return hubMenuModule.IsPublishedOrderingEnabled(ordCtx, businessID), nil
+		}).
 		WithPaymentRedirectResolver(hubMenuModule.ResolvePaymentRedirectURL).
 		WithBranchItemPriceResolver(hubMenuModule.ResolveBranchItemOverride).
 		WithPublicOrderTenancyValidator(func(vCtx context.Context, businessID, locationID, tableID int64) error {
@@ -340,9 +369,18 @@ func initializeModules(ctx context.Context) *apiModules {
 			}
 			return validateMenuTable(vCtx, businessID, tableID)
 		}).
-		WithPublicOrderHook(func(hookCtx context.Context, businessID, locationID, tableID, orderID int64, orderNumber, fulfillmentMode, customerName, customerPhone string, crmOptIn bool, total float64) {
-			if crmOptIn && customerPhone != "" {
-				_ = hubMenuModule.AwardStampsForOrder(hookCtx, businessID, locationID, orderID, customerPhone, customerName, total)
+		WithPublicOrderHook(func(hookCtx context.Context, businessID, locationID, tableID, orderID int64, orderNumber, fulfillmentMode, customerName, customerPhone, customerEmail string, crmOptIn bool, total float64) {
+			if crmOptIn && (customerPhone != "" || customerEmail != "") {
+				if customerPhone != "" {
+					_ = hubMenuModule.AwardStampsForOrder(hookCtx, businessID, locationID, orderID, customerPhone, customerName, total)
+				}
+				_, _ = customersModule.CapturePublicContact(hookCtx, businessID, crmcontract.CustomerContactCaptured{
+					Name:       customerName,
+					Phone:      customerPhone,
+					Email:      customerEmail,
+					TotalSpent: total,
+					CountVisit: true,
+				})
 			}
 			_ = webhooksModule.DispatchEvent(hookCtx, eventbus.Event{
 				Type:        "menu.order.created",
@@ -359,6 +397,7 @@ func initializeModules(ctx context.Context) *apiModules {
 					"fulfillment_mode": fulfillmentMode,
 					"customer_name":    customerName,
 					"customer_phone":   customerPhone,
+					"customer_email":   customerEmail,
 					"crm_opt_in":       crmOptIn,
 					"total":            total,
 				},
@@ -534,7 +573,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		CRMSettings:           crmsettings.NewModule(ctx, dbclient.Pool()),
 		CRMSales:              crmSalesModule,
 		Customers:             customersModule,
-		FeatureSupport:        featuresupport.NewModule(ctx, dbclient.Pool()),
+		FeatureSupport:        featureSupportModule,
 		Departments:           departments.NewModule(ctx, dbclient.Pool(), hrCoreModule),
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
