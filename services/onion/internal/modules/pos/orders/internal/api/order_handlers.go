@@ -152,7 +152,7 @@ func (h *ListOrdersHandler) Validate(_ context.Context, req *ListOrdersRequest) 
 }
 
 func (h *ListOrdersHandler) Serve(ctx context.Context, req *ListOrdersRequest) (ListOrdersResponse, error) {
-	user, authErr := requirePOSPermission(ctx, "pos:orders:view")
+	user, authErr := requirePOSOrMenuPermission(ctx, "pos:orders:view", "menu:orders:view")
 	if authErr != nil {
 		return ListOrdersResponse{}, authErr
 	}

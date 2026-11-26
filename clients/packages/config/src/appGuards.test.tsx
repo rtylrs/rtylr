@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, act } from '@testing-library/react';
 import React from 'react';
-import { AppFlagGuard } from './appGuards';
+import { AppFlagGuard, hydrateServerFlags, resetServerFlagsForTest } from './appGuards';
 import { FLAG_KEYS, FLAG_PROD_DEFAULTS } from './flags';
 
 /**
@@ -22,7 +22,10 @@ vi.mock('@voxire/observability', () => ({
   },
 }));
 
-afterEach(() => cleanup());
+afterEach(() => {
+  cleanup();
+  resetServerFlagsForTest();
+});
 
 describe('AppFlagGuard', () => {
   test('renders children when prod default for the flag is true', () => {
@@ -62,5 +65,45 @@ describe('AppFlagGuard', () => {
   test('FLAG_KEYS surface stable string values', () => {
     expect(FLAG_KEYS.APP_RECRUIT).toBe('app.recruit');
     expect(FLAG_KEYS.APP_ERP).toBe('app.erp');
+  });
+
+  test('Super-Admin server flag hydration overrides prod default live', async () => {
+    render(
+      <AppFlagGuard flag={FLAG_KEYS.APP_MENU_ORDERING} fallback={<span>disabled-by-admin</span>}>
+        <span>ordering-active</span>
+      </AppFlagGuard>
+    );
+    expect(screen.queryByText('ordering-active')).not.toBeNull();
+
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        features: {
+          [FLAG_KEYS.APP_MENU_ORDERING]: { key: FLAG_KEYS.APP_MENU_ORDERING, enabled: false },
+        },
+      }),
+    }) as unknown as typeof fetch;
+
+    await act(async () => {
+      await hydrateServerFlags(mockFetch);
+    });
+
+    expect(screen.queryByText('disabled-by-admin')).not.toBeNull();
+    expect(screen.queryByText('ordering-active')).toBeNull();
+  });
+
+  test('server flag hydration fails open on network errors', async () => {
+    const failingFetch = vi.fn().mockRejectedValue(new Error('offline')) as unknown as typeof fetch;
+
+    await act(async () => {
+      await hydrateServerFlags(failingFetch);
+    });
+
+    render(
+      <AppFlagGuard flag={FLAG_KEYS.APP_MENU_ORDERING} fallback={<span>disabled-by-admin</span>}>
+        <span>ordering-active</span>
+      </AppFlagGuard>
+    );
+    expect(screen.queryByText('ordering-active')).not.toBeNull();
   });
 });

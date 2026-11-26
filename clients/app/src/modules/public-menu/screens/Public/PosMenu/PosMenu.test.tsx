@@ -213,12 +213,19 @@ describe('PosMenu cart handoff', () => {
     expect(navigateSpy).toHaveBeenCalledWith({ to: '/menu/checkout' });
   });
 
-  // Online ordering is opt-in: the cart stays off until the flag is exactly 'true'.
-  it('keeps the cart off when the flag is unset', () => {
-    vi.stubEnv('VITE_ONLINE_ORDERING_ENABLED', '');
+  // Env kill-switch: the cart is disabled only when VITE_ONLINE_ORDERING_ENABLED is 'false'.
+  it('keeps the cart off when the env kill-switch is false', () => {
+    vi.stubEnv('VITE_ONLINE_ORDERING_ENABLED', 'false');
     render(<PosMenu />);
 
     expect(screen.getByTestId('enable-cart')).toHaveTextContent('false');
+  });
+
+  it('keeps the cart on by default when the env var is unset', () => {
+    vi.stubEnv('VITE_ONLINE_ORDERING_ENABLED', '');
+    render(<PosMenu />);
+
+    expect(screen.getByTestId('enable-cart')).toHaveTextContent('true');
   });
 
   it('rejects a non-numeric business id', () => {

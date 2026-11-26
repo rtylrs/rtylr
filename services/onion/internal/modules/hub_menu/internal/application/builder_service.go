@@ -766,19 +766,21 @@ func (s *Service) GetPublicMenuBundle(ctx context.Context, businessID, locationI
 		locationID = 0
 	}
 
-	// Prefer branch profile; fall back to business default (location_id = 0) if the branch hasn't configured one.
+	// Prefer a published branch profile; fall back to the published business
+	// default (location_id = 0) when the branch has no profile or only an
+	// unpublished draft so a draft never wipes the live brand storefront.
 	profile, found, err := s.repo.GetMenuProfile(ctx, businessID, locationID)
 	if err != nil {
 		return domain.PublicMenuBundle{}, err
 	}
-	effectiveLocationID := locationID
-	if !found && locationID > 0 {
-		profile, found, err = s.repo.GetMenuProfile(ctx, businessID, 0)
-		if err != nil {
-			return domain.PublicMenuBundle{}, err
+	if (!found || !profile.IsPublished) && locationID > 0 {
+		fallback, fallbackFound, fallbackErr := s.repo.GetMenuProfile(ctx, businessID, 0)
+		if fallbackErr != nil {
+			return domain.PublicMenuBundle{}, fallbackErr
 		}
-		if found {
-			effectiveLocationID = 0
+		if fallbackFound && fallback.IsPublished {
+			profile = fallback
+			found = true
 		}
 	}
 	if !found || !profile.IsPublished {
@@ -803,11 +805,19 @@ func (s *Service) GetPublicMenuBundle(ctx context.Context, businessID, locationI
 	if !s.isPlatformFeatureEnabled(ctx, "app.menu.customCss") {
 		profile.PublishedCustomCSS = ""
 	}
-	branchItems, err := s.repo.ListBranchMenuItems(ctx, businessID, effectiveLocationID)
+	// Always honor branch-specific item overrides (POS 86'ing and branch pricing)
+	// even when the branch inherits the default brand profile.
+	branchItems, err := s.repo.ListBranchMenuItems(ctx, businessID, locationID)
 	if err != nil {
 		return domain.PublicMenuBundle{}, err
 	}
-	currencies, err := s.ListMenuCurrencies(ctx, businessID, effectiveLocationID)
+	if len(branchItems) == 0 && locationID > 0 {
+		branchItems, err = s.repo.ListBranchMenuItems(ctx, businessID, 0)
+		if err != nil {
+			return domain.PublicMenuBundle{}, err
+		}
+	}
+	currencies, err := s.ListMenuCurrencies(ctx, businessID, locationID)
 	if err != nil {
 		return domain.PublicMenuBundle{}, err
 	}
@@ -825,9 +835,16 @@ func (s *Service) GetPublicMenuBundle(ctx context.Context, businessID, locationI
 		}
 		currencies = defaultOnly
 	}
-	translations, err := s.repo.ListMenuTranslations(ctx, businessID, effectiveLocationID, normalizeLocale(locale))
+	normLocale := normalizeLocale(locale)
+	translations, err := s.repo.ListMenuTranslations(ctx, businessID, locationID, normLocale)
 	if err != nil {
 		return domain.PublicMenuBundle{}, err
+	}
+	if len(translations) == 0 && locationID > 0 {
+		translations, err = s.repo.ListMenuTranslations(ctx, businessID, 0, normLocale)
+		if err != nil {
+			return domain.PublicMenuBundle{}, err
+		}
 	}
 	activeCards := []domain.StampCard{}
 	if s.isPlatformFeatureEnabled(ctx, "app.menu.loyalty") {

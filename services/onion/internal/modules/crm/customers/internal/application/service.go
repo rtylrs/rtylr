@@ -95,6 +95,18 @@ func (s *Service) CapturePublicContact(ctx context.Context, businessID int64, co
 	}
 	if customerID > 0 {
 		invalidateCustomerScope(ctx, businessID)
+		// Award unified CRM loyalty points when the capture represents a real
+		// storefront purchase (online menu checkout), never on browse-only signups.
+		if contact.CountVisit && contact.TotalSpent > 0 {
+			s.awardVisitPoints(
+				ctx,
+				businessID,
+				ownerID,
+				customerID,
+				contact.TotalSpent,
+				fmt.Sprintf("Points earned from online menu order (spend: %.2f)", contact.TotalSpent),
+			)
+		}
 	}
 	return customerID, nil
 }
@@ -188,30 +200,44 @@ func (s *Service) RecordVisit(ctx context.Context, input domain.RecordVisitInput
 		map[string]any{"amount": input.Amount})
 
 	if input.AwardPoints && input.Amount > 0 {
-		cfg, err := s.GetLoyaltyConfig(ctx, input.BusinessID)
-		if err != nil {
-			logger.Ctx(ctx).Error("Failed to get loyalty config for visit award", logger.Error(err))
-
-			return nil
-		}
-
-		if cfg.IsEnabled && cfg.PointsPerCurrencyUnit > 0 {
-			points := loyaltyPointsFromCents(input.Amount, cfg.PointsPerCurrencyUnit)
-			if points > 0 {
-				if awardErr := s.AwardPoints(ctx, domain.AwardPointsInput{
-					OwnerID:     input.OwnerID,
-					BusinessID:  input.BusinessID,
-					CustomerID:  input.CustomerID,
-					Points:      points,
-					Description: fmt.Sprintf("Points earned for visit (spend: %.2f)", input.Amount),
-				}); awardErr != nil {
-					logger.Ctx(ctx).Error("Failed to auto-award points on visit", logger.Error(awardErr))
-				}
-			}
-		}
+		s.awardVisitPoints(
+			ctx,
+			input.BusinessID,
+			input.OwnerID,
+			input.CustomerID,
+			input.Amount,
+			fmt.Sprintf("Points earned for visit (spend: %.2f)", input.Amount),
+		)
 	}
 
 	return nil
+}
+
+// awardVisitPoints calculates and credits CRM loyalty points for a recorded
+// visit or storefront order. Non-fatal: loyalty config errors are logged so
+// customer capture or visit recording never fails.
+func (s *Service) awardVisitPoints(ctx context.Context, businessID, ownerID, customerID int64, amount float64, description string) {
+	cfg, err := s.GetLoyaltyConfig(ctx, businessID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to get loyalty config for visit award", logger.Error(err))
+		return
+	}
+	if !cfg.IsEnabled || cfg.PointsPerCurrencyUnit <= 0 {
+		return
+	}
+	points := loyaltyPointsFromCents(amount, cfg.PointsPerCurrencyUnit)
+	if points <= 0 {
+		return
+	}
+	if awardErr := s.AwardPoints(ctx, domain.AwardPointsInput{
+		OwnerID:     ownerID,
+		BusinessID:  businessID,
+		CustomerID:  customerID,
+		Points:      points,
+		Description: description,
+	}); awardErr != nil {
+		logger.Ctx(ctx).Error("Failed to auto-award points on visit", logger.Error(awardErr))
+	}
 }
 
 // loyaltyPointsFromCents rounds the purchase to integer minor units before

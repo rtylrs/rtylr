@@ -1,23 +1,94 @@
 import React, { useEffect, useState } from 'react';
 import { posthog } from '@voxire/observability';
 import { FLAG_KEYS, FLAG_PROD_DEFAULTS, FLAG_ENV_OVERRIDES, type FlagKey } from './flags';
+import { resolveApiBase } from './serviceUrls';
 
 /**
  * Client-side feature-flag resolver.
  *
- * Order (documented in `flags.ts`):
- *   1. PostHog flag value (live, overridable per cohort)
- *   2. VITE_APP_*_ENABLED env var from the build
- *   3. Hard-coded prod default.
+ * Order:
+ *   1. Server-side Super-Admin flag from `POST /hub/feature/v1/features`
+ *      (authoritative platform kill-switch matching the Go backend)
+ *   2. PostHog flag value (live, overridable per cohort)
+ *   3. VITE_APP_*_ENABLED env var from the build
+ *   4. Hard-coded prod default.
  *
- * PostHog may not have loaded yet when the first render runs - in
- * that case we fall through to env/default and re-check once PostHog
- * fires its `onFeatureFlags` callback.
+ * Both server flags and PostHog load asynchronously on browser mount;
+ * `useFeatureFlag` falls through to env/default immediately and
+ * re-evaluates as soon as either source updates.
  */
 
 // Local env accessor - keeps consumers' tsconfigs free of a
 // `vite/client` dependency for what is just an optional lookup.
 const viteEnv = (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {};
+
+let serverFlags: Record<string, boolean> | null = null;
+let serverFlagsPromise: Promise<void> | null = null;
+const serverFlagListeners = new Set<() => void>();
+
+function notifyServerFlagListeners(): void {
+  serverFlagListeners.forEach((cb) => {
+    try {
+      cb();
+    } catch {
+      // Ignore individual subscriber errors.
+    }
+  });
+}
+
+function isTestRuntime(): boolean {
+  return viteEnv.MODE === 'test' || Boolean(viteEnv.VITEST);
+}
+
+/**
+ * Fetches public Super-Admin feature flags from `/hub/feature/v1/features`
+ * once per session and notifies all mounted `useFeatureFlag` subscribers.
+ * Fails open silently if offline or unreachable.
+ */
+export function hydrateServerFlags(customFetch?: typeof fetch): Promise<void> {
+  if (serverFlagsPromise) return serverFlagsPromise;
+  const fetchImpl = customFetch ?? (typeof globalThis.fetch === 'function' ? globalThis.fetch : undefined);
+  if (!fetchImpl) return Promise.resolve();
+
+  const endpoint = `${resolveApiBase()}/hub/feature/v1/features`;
+  serverFlagsPromise = fetchImpl(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ subject: 'web', attributes: {} }),
+  })
+    .then(async (res) => {
+      if (!res.ok) return;
+      const payload = (await res.json()) as {
+        features?: Record<string, { enabled?: unknown } | undefined>;
+      };
+      const raw = payload?.features;
+      if (!raw || typeof raw !== 'object') return;
+      const resolved: Record<string, boolean> = {};
+      for (const [key, entry] of Object.entries(raw)) {
+        if (entry && typeof entry.enabled === 'boolean') {
+          resolved[key] = entry.enabled;
+        }
+      }
+      serverFlags = resolved;
+      notifyServerFlagListeners();
+    })
+    .catch(() => {
+      // Fail open on network/parse errors so offline/degraded API never breaks UI.
+    });
+  return serverFlagsPromise;
+}
+
+export function resetServerFlagsForTest(): void {
+  serverFlags = null;
+  serverFlagsPromise = null;
+}
+
+function readServerFlag(flag: FlagKey): boolean | null {
+  if (serverFlags !== null && typeof serverFlags[flag] === 'boolean') {
+    return serverFlags[flag];
+  }
+  return null;
+}
 
 function readEnvOverride(flag: FlagKey): boolean | null {
   const envName = FLAG_ENV_OVERRIDES[flag];
@@ -42,6 +113,8 @@ function readPostHog(flag: FlagKey): boolean | null {
 }
 
 export function resolveFlag(flag: FlagKey): boolean {
+  const server = readServerFlag(flag);
+  if (server !== null) return server;
   const ph = readPostHog(flag);
   if (ph !== null) return ph;
   const env = readEnvOverride(flag);
@@ -50,26 +123,29 @@ export function resolveFlag(flag: FlagKey): boolean {
 }
 
 /**
- * React hook - re-renders when PostHog reports new flag values. Use
- * this inside components. For route-level gating prefer
- * `<AppFlagGuard>` below, which handles the fallback UI.
+ * React hook - re-renders when Super-Admin server flags or PostHog
+ * report new flag values. Use this inside components. For route-level
+ * gating prefer `<AppFlagGuard>` below, which handles the fallback UI.
  */
 export function useFeatureFlag(flag: FlagKey): boolean {
   const [enabled, setEnabled] = useState<boolean>(() => resolveFlag(flag));
 
   useEffect(() => {
-    // Re-resolve once PostHog publishes flags. The callback fires
-    // every time the feature-flag map changes, so one subscription
-    // handles both the "flags just loaded" case and the "admin
-    // flipped a flag in PostHog" case.
+    setEnabled(resolveFlag(flag));
+    const onUpdate = () => setEnabled(resolveFlag(flag));
+    serverFlagListeners.add(onUpdate);
+    if (typeof window !== 'undefined' && !isTestRuntime()) {
+      void hydrateServerFlags();
+    }
+
     let unsub: (() => void) | undefined;
     try {
-      unsub = posthog.onFeatureFlags?.(() => setEnabled(resolveFlag(flag)));
+      unsub = posthog.onFeatureFlags?.(onUpdate);
     } catch {
-      // PostHog not initialised - fall through, env/default already
-      // applied.
+      // PostHog not initialised - fall through, server/env/default already applied.
     }
     return () => {
+      serverFlagListeners.delete(onUpdate);
       if (unsub) unsub();
     };
   }, [flag]);

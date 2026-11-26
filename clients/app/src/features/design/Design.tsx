@@ -612,12 +612,12 @@ const Design: React.FC = () => {
                 <span className="hidden sm:inline" style={{ color: 'var(--dash-text-dim)' }}>
                   /
                 </span>
-                <div className="w-36 sm:w-44">
+                <div className="w-48 sm:w-56">
                   <Select
                     aria-label={t('design.studio.branchLabel')}
                     value={String(selectedLocationId)}
                     onChange={(e) => setSelectedLocationId(Number(e.target.value))}
-                    className="h-9 py-1 text-xs leading-normal"
+                    className="h-9 py-1 text-xs leading-normal whitespace-nowrap"
                   >
                     <option value="0">{t('design.studio.defaultBranch')}</option>
                     {branches.map((b) => (

@@ -13,6 +13,7 @@ import (
 type fakeBuilderRepo struct {
 	repository
 	profiles     map[int64]domain.MenuProfile
+	branchItems  map[int64][]domain.BranchMenuItem
 	translations []domain.MenuTranslation
 	currencies   []domain.MenuCurrency
 	stampCards   []domain.StampCard
@@ -24,7 +25,10 @@ type fakeBuilderRepo struct {
 }
 
 func newFakeBuilderRepo() *fakeBuilderRepo {
-	return &fakeBuilderRepo{profiles: make(map[int64]domain.MenuProfile)}
+	return &fakeBuilderRepo{
+		profiles:    make(map[int64]domain.MenuProfile),
+		branchItems: make(map[int64][]domain.BranchMenuItem),
+	}
 }
 
 func (f *fakeBuilderRepo) GetMenuProfile(_ context.Context, _ int64, locationID int64) (domain.MenuProfile, bool, error) {
@@ -134,8 +138,8 @@ func (f *fakeBuilderRepo) ListActivePublicBanners(_ context.Context, _ int64) ([
 	return nil, nil
 }
 
-func (f *fakeBuilderRepo) ListBranchMenuItems(_ context.Context, _ int64, _ int64) ([]domain.BranchMenuItem, error) {
-	return nil, nil
+func (f *fakeBuilderRepo) ListBranchMenuItems(_ context.Context, _ int64, locationID int64) ([]domain.BranchMenuItem, error) {
+	return append([]domain.BranchMenuItem{}, f.branchItems[locationID]...), nil
 }
 
 func (f *fakeBuilderRepo) GetCustomerStampProgress(_ context.Context, _ int64, _ string) ([]domain.CustomerStampProgress, error) {
@@ -497,5 +501,45 @@ func TestCapturePublicMenuGuestAndFeatureKillSwitches(t *testing.T) {
 	}
 	if len(bundle.Currencies) != 1 || bundle.Currencies[0].Code != "USD" {
 		t.Fatalf("expected only default currency when currencies kill-switch is off, got %+v", bundle.Currencies)
+	}
+}
+
+func TestGetPublicMenuBundleFallsBackWhenBranchHasUnpublishedDraft(t *testing.T) {
+	repo := newFakeBuilderRepo()
+	svc := NewService(context.Background(), repo)
+
+	// Publish brand default profile (location_id = 0).
+	_, err := svc.SaveMenuProfileDraft(context.Background(), 42, domain.SaveMenuProfileDraftInput{
+		LocationID:      0,
+		DraftConfigJSON: `{"theme":"espresso","features":{"enableOrdering":true}}`,
+	})
+	if err != nil {
+		t.Fatalf("save brand draft failed: %v", err)
+	}
+	if _, err := svc.PublishMenuProfile(context.Background(), 42, 0); err != nil {
+		t.Fatalf("publish brand profile failed: %v", err)
+	}
+
+	// Save an UNPUBLISHED draft on branch 4 + a branch-specific 86 override from POS.
+	_, err = svc.SaveMenuProfileDraft(context.Background(), 42, domain.SaveMenuProfileDraftInput{
+		LocationID:      4,
+		DraftConfigJSON: `{"theme":"draft-only"}`,
+	})
+	if err != nil {
+		t.Fatalf("save branch draft failed: %v", err)
+	}
+	repo.branchItems[4] = []domain.BranchMenuItem{
+		{BusinessID: 42, LocationID: 4, MenuItemID: 99, IsVisible: false},
+	}
+
+	bundle, err := svc.GetPublicMenuBundle(context.Background(), 42, 4, "en")
+	if err != nil {
+		t.Fatalf("GetPublicMenuBundle failed: %v", err)
+	}
+	if !bundle.Profile.IsPublished || bundle.Profile.PublishedConfigJSON != `{"theme":"espresso","features":{"enableOrdering":true}}` {
+		t.Fatalf("expected published brand default fallback, got %+v", bundle.Profile)
+	}
+	if len(bundle.BranchItems) != 1 || bundle.BranchItems[0].MenuItemID != 99 || bundle.BranchItems[0].IsVisible {
+		t.Fatalf("expected branch 4 item overrides preserved, got %+v", bundle.BranchItems)
 	}
 }
