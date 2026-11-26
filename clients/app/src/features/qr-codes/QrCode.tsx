@@ -1,13 +1,14 @@
 import React, { useContext } from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { QueryClientContext } from '@tanstack/react-query';
+import { QueryClientContext, useQuery } from '@tanstack/react-query';
 import { Check, Copy, ExternalLink } from 'lucide-react';
 import { cn } from '@voxire/ui';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { QRCode } from 'react-qrcode-logo';
 import { saveAs } from 'file-saver';
+import { configClient } from '../../shared/lib/clients';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useCustomDomain } from '../../shared/hooks/queries/useBusiness';
 import { useMenuBranches, useMenuTables } from '../../shared/hooks/queries/useMenuBuilder';
@@ -17,6 +18,7 @@ import { PORTAL_URL, buildPublicMenuUrl, buildPublicMenuUrlById } from '@voxire/
 
 interface QrTargetControlsProps {
   businessSlug: string;
+  businessId?: string | number;
   selectedBranchSlug: string;
   selectedTableId: string;
   useCustomDomain: boolean;
@@ -24,10 +26,12 @@ interface QrTargetControlsProps {
   onTableChange: (id: string, label: string) => void;
   onUseCustomDomainChange: (checked: boolean) => void;
   onVerifiedDomainChange: (domain: string) => void;
+  onResolvedSlugChange: (slug: string) => void;
 }
 
 const QrTargetControls: React.FC<QrTargetControlsProps> = ({
   businessSlug,
+  businessId,
   selectedBranchSlug,
   selectedTableId,
   useCustomDomain: useCustomDomainChecked,
@@ -35,9 +39,25 @@ const QrTargetControls: React.FC<QrTargetControlsProps> = ({
   onTableChange,
   onUseCustomDomainChange,
   onVerifiedDomainChange,
+  onResolvedSlugChange,
 }) => {
   const { t } = useTranslation();
-  const { data: branches = [] } = useMenuBranches(businessSlug);
+  const numericBusinessId = Number(businessId ?? 0);
+  const { data: configSlugData = '' } = useQuery<string>({
+    queryKey: ['qr-business-slug', numericBusinessId],
+    enabled: !businessSlug && numericBusinessId > 0,
+    queryFn: async () => {
+      const response = await configClient.getConfig({});
+      return response.business?.slug?.trim() ?? '';
+    },
+  });
+  const effectiveSlug = businessSlug || configSlugData;
+
+  useEffect(() => {
+    if (configSlugData) onResolvedSlugChange(configSlugData);
+  }, [configSlugData, onResolvedSlugChange]);
+
+  const { data: branches = [] } = useMenuBranches(effectiveSlug);
   const { data: allTables = [] } = useMenuTables();
   const { data: domainData } = useCustomDomain();
 
@@ -137,7 +157,8 @@ function QrCode() {
   const { t } = useTranslation();
   const { user } = useUserStore();
   const queryClient = useContext(QueryClientContext);
-  const businessSlug = user?.businessSlug || user?.business_slug || '';
+  const [resolvedSlug, setResolvedSlug] = useState('');
+  const businessSlug = user?.businessSlug || user?.business_slug || resolvedSlug;
   const businessId = user?.businessId ?? user?.id;
 
   const [selectedBranchSlug, setSelectedBranchSlug] = useState('');
@@ -272,6 +293,7 @@ function QrCode() {
         {queryClient && (
           <QrTargetControls
             businessSlug={businessSlug}
+            businessId={businessId}
             selectedBranchSlug={selectedBranchSlug}
             selectedTableId={selectedTableId}
             useCustomDomain={useCustomDomain}
@@ -282,6 +304,7 @@ function QrCode() {
             }}
             onUseCustomDomainChange={setUseCustomDomain}
             onVerifiedDomainChange={setCustomDomain}
+            onResolvedSlugChange={setResolvedSlug}
           />
         )}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

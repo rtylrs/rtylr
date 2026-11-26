@@ -194,6 +194,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	configModule := config.NewModule(ctx, dbclient.Pool())
 	customersModule := customers.NewModule(ctx, dbclient.Pool()).
 		WithReportingTimezone(businessModule.ReportingTimezone).
+		WithBusinessOwnerResolver(businessModule.GetBusinessOwnerID).
 		WithCampaignDelivery(crmCampaignSender(configModule, businessModule), crmUnsubscribeKey(platformConfig.GlobalConfig.JWTSecret), platformConfig.GlobalConfig.PublicAPIURL)
 	automationContacts := func(ctx context.Context, customerID, businessID int64) (automations.CustomerContact, bool, error) {
 		recipient, found, err := customersModule.ResolveEmailRecipient(ctx, businessID, customerID)

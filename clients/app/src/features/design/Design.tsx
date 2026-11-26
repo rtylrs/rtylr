@@ -617,7 +617,7 @@ const Design: React.FC = () => {
                     aria-label={t('design.studio.branchLabel')}
                     value={String(selectedLocationId)}
                     onChange={(e) => setSelectedLocationId(Number(e.target.value))}
-                    className="h-8 text-xs"
+                    className="h-9 py-1 text-xs leading-normal"
                   >
                     <option value="0">{t('design.studio.defaultBranch')}</option>
                     {branches.map((b) => (
