@@ -1,6 +1,6 @@
 import { createOneKitClient } from '@voxire/api';
-import React, { useEffect, useState } from 'react';
-import { AlertTriangle, ChevronLeft, ChevronRight, ReceiptText } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { AlertTriangle, ChevronLeft, ChevronRight, Globe, ReceiptText } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useDebounce } from '@voxire/utils';
@@ -22,10 +22,29 @@ function isSettled(status: string | undefined): boolean {
   return isOrderFinalized((status ?? '') as OrderStatus) || status === 'completed';
 }
 
-const FILTERS = ['all', 'pending', 'preparing', 'ready', 'paid', 'voided', 'refunded'] as const;
+const SCOPES = [
+  { id: 'all', label: 'All Orders' },
+  { id: 'online', label: 'Online Menu' },
+  { id: 'shift', label: 'This Shift' },
+] as const;
+type OrderScope = (typeof SCOPES)[number]['id'];
+
+const FILTERS = ['all', 'pending', 'confirmed', 'preparing', 'ready', 'paid', 'voided', 'refunded'] as const;
 type OrderFilter = (typeof FILTERS)[number];
 const PAGE_SIZE = 25;
 const orderClient = createOneKitClient(OrderServiceClient, 'pos');
+
+const NEXT_KITCHEN_ACTION: Record<string, { status: string; label: string }> = {
+  pending: { status: 'confirmed', label: 'Confirm & Send to Kitchen' },
+  confirmed: { status: 'preparing', label: 'Start Preparing' },
+  preparing: { status: 'ready', label: 'Mark Ready' },
+  ready: { status: 'served', label: 'Mark Served' },
+};
+
+function isOnlineMenuOrder(order: Order): boolean {
+  const sid = String(order.sessionId ?? '').trim();
+  return sid === '' || sid === '0';
+}
 
 function orderItemsPreview(order: Order): string | null {
   const items = order.items ?? [];
@@ -46,11 +65,13 @@ const OrdersScreen: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 250);
+  const [scope, setScope] = useState<OrderScope>('all');
   const [filter, setFilter] = useState<OrderFilter>('all');
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [reopening, setReopening] = useState<string | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [voiding, setVoiding] = useState<string | null>(null);
   const [noSession, setNoSession] = useState(false);
   const navigate = useNavigate();
@@ -60,46 +81,76 @@ const OrdersScreen: React.FC = () => {
   const { canVoid } = useCapabilities();
   const reopenMode = params.get('reopen') === '1' && canVoid;
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      setError(null);
-      setNoSession(false);
-      try {
-        // ListOrdersRequest.session_id must be a real open register session;
-        // there is no "current" alias, so resolve it before listing.
-        const sessionId = String(await resolveOpenSessionId());
-        const res = await orderClient.listOrders({
-          sessionId,
-          status: filter !== 'all' ? filter : '',
-          dateFrom: '',
-          dateTo: '',
-          search: debouncedSearch.trim(),
-          page,
-          pageSize: PAGE_SIZE,
-        });
-        const nextOrders = res.orders ?? [];
-        setOrders(nextOrders);
-        setTotal(res.total ?? 0);
-        setHasMore(res.hasMore ?? false);
-      } catch (e) {
-        if (e instanceof Error && e.message.includes('No open register session')) {
-          setNoSession(true);
-          setOrders([]);
-          setTotal(0);
-          setHasMore(false);
-          return;
-        }
-        const err = e as {
-          response?: { data?: { message?: string } };
-          message?: string;
-        };
-        setError(err?.response?.data?.message ?? 'Failed to load orders');
-      } finally {
-        setLoading(false);
+  const loadOrders = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    setNoSession(false);
+    try {
+      // Only scope by open register session on "This Shift"; "All Orders" and
+      // "Online Menu" omit sessionId so public digital menu orders (session_id IS NULL)
+      // appear directly in POS alongside register orders.
+      const sessionId = scope === 'shift' ? String(await resolveOpenSessionId()) : '';
+      const res = await orderClient.listOrders({
+        sessionId,
+        status: filter !== 'all' ? filter : '',
+        dateFrom: '',
+        dateTo: '',
+        search: debouncedSearch.trim(),
+        page,
+        pageSize: PAGE_SIZE,
+      });
+      const rawOrders = res.orders ?? [];
+      const nextOrders = scope === 'online' ? rawOrders.filter(isOnlineMenuOrder) : rawOrders;
+      setOrders(nextOrders);
+      setTotal(scope === 'online' ? nextOrders.length : (res.total ?? 0));
+      setHasMore(scope === 'online' ? false : (res.hasMore ?? false));
+    } catch (e) {
+      if (scope === 'shift' && e instanceof Error && e.message.includes('No open register session')) {
+        setNoSession(true);
+        setOrders([]);
+        setTotal(0);
+        setHasMore(false);
+        return;
       }
-    })();
-  }, [debouncedSearch, filter, page]);
+      const err = e as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
+      setError(err?.response?.data?.message ?? 'Failed to load orders');
+    } finally {
+      setLoading(false);
+    }
+  }, [debouncedSearch, filter, page, scope]);
+
+  useEffect(() => {
+    void loadOrders();
+  }, [loadOrders]);
+
+  const handleAdvanceStatus = async (e: React.MouseEvent, order: Order, nextStatus: string) => {
+    e.stopPropagation();
+    const id = String(order.id);
+    setUpdatingStatus(id);
+    try {
+      await orderClient.updateOrderStatus({
+        orderId: id,
+        body: { status: nextStatus },
+      });
+      setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status: nextStatus } : o)));
+      toast.success(
+        nextStatus === 'confirmed'
+          ? `Order #${order.orderNumber || order.id} confirmed and sent to kitchen`
+          : `Order #${order.orderNumber || order.id} marked ${nextStatus}`
+      );
+    } catch (err) {
+      const ex = err as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
+      toast.error(ex?.response?.data?.message ?? 'Failed to update order status');
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
 
   const handleReopen = async (e: React.MouseEvent, order: Order) => {
     e.stopPropagation();
@@ -160,7 +211,35 @@ const OrdersScreen: React.FC = () => {
           }}
           placeholder="Search orders..."
         />
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex gap-2">
+            {SCOPES.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => {
+                  setPage(1);
+                  setScope(s.id);
+                }}
+                className={`h-9 px-3.5 rounded-lg text-xs font-semibold transition-colors ${
+                  scope === s.id
+                    ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-300'
+                    : 'bg-white/8 text-pos-muted hover:text-pos-text'
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => void loadOrders()}
+            className="h-9 px-3 rounded-lg bg-white/8 text-xs font-semibold text-pos-text hover:bg-white/15"
+          >
+            Refresh
+          </button>
+        </div>
+        <div className="flex flex-wrap gap-2">
           {FILTERS.map((f) => (
             <button
               key={f}
@@ -193,6 +272,8 @@ const OrdersScreen: React.FC = () => {
             <ul className="space-y-2">
               {orders.map((o) => {
                 const preview = orderItemsPreview(o);
+                const onlineOrder = isOnlineMenuOrder(o);
+                const nextAction = NEXT_KITCHEN_ACTION[String(o.status ?? '').toLowerCase()];
                 // Settled orders must not re-enter the payment flow; reopening
                 // a paid order is the explicit manager exception.
                 const settled = isSettled(o.status as string);
@@ -211,20 +292,41 @@ const OrdersScreen: React.FC = () => {
                       navigate(`/payment/${o.id}`);
                     }}
                   >
-                    <div className="flex justify-between items-center gap-4">
-                      <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex flex-wrap justify-between items-center gap-3">
+                      <div className="flex flex-wrap items-center gap-2.5 min-w-0">
                         <span className="font-bold text-pos-text truncate">
                           #{o.orderNumber || o.id}
                         </span>
                         <OrderStatusBadge status={o.status as OrderStatus} />
-                        {o.tableId && (
+                        {onlineOrder && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sky-500/15 border border-sky-500/30 text-sky-300">
+                            <Globe className="w-3 h-3" />
+                            Online Menu
+                          </span>
+                        )}
+                        {o.customerName && (
+                          <span className="text-xs text-pos-text/80 truncate">
+                            {o.customerName}
+                          </span>
+                        )}
+                        {o.tableId && o.tableId !== '0' && (
                           <span className="text-xs text-pos-muted">Table {o.tableId}</span>
                         )}
                       </div>
-                      <div className="flex items-center gap-3 shrink-0">
+                      <div className="flex items-center gap-2 shrink-0">
                         <span className="text-sm font-bold text-pos-text">
                           {formatCurrency(o.total ?? 0)}
                         </span>
+                        {!reopenMode && nextAction && (
+                          <button
+                            type="button"
+                            disabled={updatingStatus === String(o.id)}
+                            onClick={(e) => void handleAdvanceStatus(e, o, nextAction.status)}
+                            className="h-8 px-3 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold hover:bg-emerald-500/30 disabled:opacity-50 transition-colors"
+                          >
+                            {updatingStatus === String(o.id) ? '...' : nextAction.label}
+                          </button>
+                        )}
                         {reopenMode && o.status === 'paid' && (
                           <button
                             type="button"

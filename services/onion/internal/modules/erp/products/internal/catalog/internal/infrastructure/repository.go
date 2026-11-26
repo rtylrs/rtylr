@@ -76,20 +76,47 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.MenuI
 }
 
 // QuickCreate writes the business ID into owner_id, as every ERP product row
-// does.
+// does, and optionally stores the primary storefront image atomically.
 func (r *Repository) QuickCreate(ctx context.Context, businessID int64, input domain.MenuItemInput) (int64, error) {
-	result, err := r.queries.QuickCreateMenuItem(ctx, sqlc.QuickCreateMenuItemParams{
-		OwnerID:    businessID,
-		BusinessID: businessID,
-		Name:       input.Name,
-		Sku:        sql.NullString{String: input.SKU, Valid: input.SKU != ""},
-		SalePrice:  sqlutil.FloatToDecimal(input.SalePrice),
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+
+	qtx := r.queries.WithTx(tx)
+	result, err := qtx.QuickCreateMenuItem(ctx, sqlc.QuickCreateMenuItemParams{
+		OwnerID:     businessID,
+		BusinessID:  businessID,
+		Name:        input.Name,
+		Sku:         sql.NullString{String: input.SKU, Valid: input.SKU != ""},
+		SalePrice:   sqlutil.FloatToDecimal(input.SalePrice),
+		Description: input.Description,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to quick-create menu item", logger.Error(err))
 		return 0, err
 	}
-	return result.LastInsertId()
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	if input.ImageURL != "" {
+		if err := qtx.InsertPrimaryMenuItemImage(ctx, sqlc.InsertPrimaryMenuItemImageParams{
+			OwnerID:    businessID,
+			BusinessID: businessID,
+			ProductID:  id,
+			Url:        input.ImageURL,
+			Alt:        sql.NullString{String: input.Name, Valid: input.Name != ""},
+		}); err != nil {
+			logger.Ctx(ctx).Error("Failed to save menu item image", logger.Error(err))
+			return 0, err
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 
 func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.MenuItemUpdateInput) error {
@@ -115,13 +142,22 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		return err
 	}
 
+	var setDesc int32
+	descVal := ""
+	if input.Description != nil {
+		setDesc = 1
+		descVal = *input.Description
+	}
+
 	qtx := r.queries.WithTx(tx)
 	result, err := qtx.UpdateMenuItem(ctx, sqlc.UpdateMenuItemParams{
-		Name:       input.Name,
-		SalePrice:  sqlutil.FloatToDecimal(input.SalePrice),
-		IsActive:   sql.NullBool{Bool: input.IsActive, Valid: true},
-		BusinessID: businessID,
-		ID:         id,
+		Name:           input.Name,
+		SalePrice:      sqlutil.FloatToDecimal(input.SalePrice),
+		SetDescription: setDesc,
+		Description:    descVal,
+		IsActive:       sql.NullBool{Bool: input.IsActive, Valid: true},
+		BusinessID:     businessID,
+		ID:             id,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update menu item", logger.Error(err))
@@ -133,6 +169,27 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 	}
 	if affected == 0 {
 		return sql.ErrNoRows
+	}
+	if input.ImageURL != nil {
+		if err := qtx.ClearPrimaryMenuItemImage(ctx, sqlc.ClearPrimaryMenuItemImageParams{
+			BusinessID: businessID,
+			ProductID:  id,
+		}); err != nil {
+			logger.Ctx(ctx).Error("Failed to clear previous menu item image", logger.Error(err))
+			return err
+		}
+		if *input.ImageURL != "" {
+			if err := qtx.InsertPrimaryMenuItemImage(ctx, sqlc.InsertPrimaryMenuItemImageParams{
+				OwnerID:    businessID,
+				BusinessID: businessID,
+				ProductID:  id,
+				Url:        *input.ImageURL,
+				Alt:        sql.NullString{String: input.Name, Valid: input.Name != ""},
+			}); err != nil {
+				logger.Ctx(ctx).Error("Failed to insert updated menu item image", logger.Error(err))
+				return err
+			}
+		}
 	}
 	return tx.Commit()
 }

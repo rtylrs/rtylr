@@ -104,11 +104,18 @@ func (a *MenuItemAPI) CreateMenuItem(ctx context.Context, req *posmenuitemv1.Cre
 	if req.GetSalePrice() < 0 {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Sale price must be zero or greater")
 	}
+	imageURL, imgErr := sanitizeMenuImageURL(req.GetImageUrl())
+	if imgErr != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, imgErr.Error())
+	}
+	description := trimBounded(req.GetDescription(), 1000)
 
 	id, createErr := a.Service.QuickCreate(ctx, businessID, domain.MenuItemInput{
-		Name:      name,
-		SKU:       req.GetSku(),
-		SalePrice: req.GetSalePrice(),
+		Name:        name,
+		SKU:         req.GetSku(),
+		SalePrice:   req.GetSalePrice(),
+		Description: description,
+		ImageURL:    imageURL,
 	})
 	if createErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create menu item")
@@ -129,15 +136,61 @@ func (a *MenuItemAPI) UpdateMenuItem(ctx context.Context, req *posmenuitemv1.Upd
 		return nil, onekiterrors.New(http.StatusBadRequest, "Sale price must be zero or greater")
 	}
 
+	var descPtr *string
+	if body.Description != nil {
+		d := trimBounded(*body.Description, 1000)
+		descPtr = &d
+	}
+	var imagePtr *string
+	if body.ImageUrl != nil {
+		sanitized, imgErr := sanitizeMenuImageURL(*body.ImageUrl)
+		if imgErr != nil {
+			return nil, onekiterrors.New(http.StatusBadRequest, imgErr.Error())
+		}
+		imagePtr = &sanitized
+	}
+
 	if updateErr := a.Service.Update(ctx, businessID, req.GetId(), domain.MenuItemUpdateInput{
-		Name:      body.GetName(),
-		SalePrice: body.GetSalePrice(),
-		Stock:     body.GetStock(),
-		IsActive:  body.GetIsActive(),
+		Name:        body.GetName(),
+		SalePrice:   body.GetSalePrice(),
+		Stock:       body.GetStock(),
+		IsActive:    body.GetIsActive(),
+		Description: descPtr,
+		ImageURL:    imagePtr,
 	}); updateErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update menu item")
 	}
 	return &posmenuitemv1.UpdateMenuItemResponse{Message: "Menu item updated successfully"}, nil
+}
+
+func trimBounded(raw string, max int) string {
+	s := strings.TrimSpace(raw)
+	if len(s) > max {
+		return s[:max]
+	}
+	return s
+}
+
+// sanitizeMenuImageURL allows empty string, HTTPS/HTTP URLs, or app-relative
+// storage paths while rejecting script/data schemes and control characters.
+func sanitizeMenuImageURL(raw string) (string, error) {
+	s := strings.TrimSpace(raw)
+	if s == "" {
+		return "", nil
+	}
+	if len(s) > 1024 {
+		return "", onekiterrors.New(http.StatusBadRequest, "Image URL is too long")
+	}
+	for _, r := range s {
+		if r < 0x20 || r == 0x7f {
+			return "", onekiterrors.New(http.StatusBadRequest, "Image URL contains invalid characters")
+		}
+	}
+	lower := strings.ToLower(s)
+	if strings.HasPrefix(lower, "https://") || strings.HasPrefix(lower, "http://") || (strings.HasPrefix(s, "/") && !strings.HasPrefix(s, "//")) {
+		return s, nil
+	}
+	return "", onekiterrors.New(http.StatusBadRequest, "Image URL must use https, http, or a relative storage path")
 }
 
 func requireMenuPermission(ctx context.Context, permission string) (*authPkg.AuthUser, int64, error) {

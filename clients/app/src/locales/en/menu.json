@@ -5,5 +5,14 @@
   "createItem": "Item",
   "savingUnavailable": "Saving is not available yet. Changes here stay in this browser and do not reach your point of sale or your public menu.",
   "savingUnavailableToast": "Saving is not available yet.",
-  "saveItem": "Save item"
+  "saveItem": "Save item",
+  "itemPhoto": "Item photo",
+  "uploadPhoto": "Upload photo",
+  "replacePhoto": "Replace photo",
+  "removePhoto": "Remove",
+  "uploadingPhoto": "Uploading...",
+  "photoUploaded": "Item photo uploaded",
+  "photoUploadFailed": "Failed to upload photo",
+  "descriptionLabel": "Description (optional)",
+  "descriptionPlaceholder": "Short description shown on your digital menu"
 }
