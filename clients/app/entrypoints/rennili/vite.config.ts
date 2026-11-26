@@ -18,7 +18,14 @@ export default defineConfig(() => ({
     }),
   ],
   resolve: {
-    dedupe: ['react', 'react-dom', 'react/jsx-runtime', 'react-dom/client'],
+    dedupe: [
+      'react',
+      'react-dom',
+      'react/jsx-runtime',
+      'react-dom/client',
+      'i18next',
+      'react-i18next',
+    ],
   },
   server: {
     port: 5186,
