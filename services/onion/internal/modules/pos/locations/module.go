@@ -10,6 +10,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos/locations/internal/api"
 	"github.com/voxire/onion/internal/modules/pos/locations/internal/application"
+	"github.com/voxire/onion/internal/modules/pos/locations/internal/domain"
 	poslocationv1 "github.com/voxire/voxie/gen/go/pos/location/v1"
 )
 
@@ -45,4 +46,14 @@ func (m *Module) StockBranchExists(ctx context.Context, businessID, branchID int
 func (m *Module) WithLocationLimitReader(reader func(context.Context, int64) (int64, bool, error)) *Module {
 	m.repository.WithLocationLimitReader(reader)
 	return m
+}
+
+func (m *Module) WithOnLocationCreated(fn application.OnLocationCreated) *Module {
+	m.service.WithOnLocationCreated(fn)
+	return m
+}
+
+// ListLocations returns all POS locations for businessID.
+func (m *Module) ListLocations(ctx context.Context, businessID int64) ([]domain.Location, error) {
+	return m.service.List(ctx, businessID)
 }

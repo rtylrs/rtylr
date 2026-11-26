@@ -4,7 +4,7 @@ SELECT
     business_id,
     location_id,
     draft_config,
-    published_config,
+    COALESCE(published_config, JSON_OBJECT()) AS published_config,
     COALESCE(custom_css, '') AS custom_css,
     COALESCE(published_custom_css, '') AS published_custom_css,
     white_label_hide_badge,

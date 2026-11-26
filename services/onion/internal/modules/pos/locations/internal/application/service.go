@@ -20,12 +20,21 @@ type repository interface {
 	Update(ctx context.Context, input domain.LocationUpdateInput) error
 }
 
+// OnLocationCreated runs after a POS location is persisted (e.g. auto-assigning the creator).
+type OnLocationCreated func(ctx context.Context, businessID, creatorUserID, locationID int64)
+
 type Service struct {
-	repo repository
+	repo              repository
+	onLocationCreated OnLocationCreated
 }
 
 func NewService(_ context.Context, repo repository) *Service {
 	return &Service{repo: repo}
+}
+
+func (s *Service) WithOnLocationCreated(fn OnLocationCreated) *Service {
+	s.onLocationCreated = fn
+	return s
 }
 
 func invalidatePosLocationsScope(ctx context.Context, businessID int64) {
@@ -51,6 +60,9 @@ func (s *Service) Create(ctx context.Context, input domain.LocationInput) (int64
 		return 0, err
 	}
 	invalidatePosLocationsScope(ctx, input.BusinessID)
+	if s.onLocationCreated != nil {
+		s.onLocationCreated(ctx, input.BusinessID, input.OwnerID, id)
+	}
 	return id, nil
 }
 

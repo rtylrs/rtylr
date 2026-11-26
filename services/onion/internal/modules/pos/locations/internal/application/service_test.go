@@ -66,3 +66,34 @@ func TestUpdate_PropagatesError(t *testing.T) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
+
+func TestCreate_InvokesOnLocationCreatedHook(t *testing.T) {
+	var gotBiz, gotOwner, gotLoc int64
+	s := NewService(context.Background(), &mockRepo{createID: 42}).
+		WithOnLocationCreated(func(_ context.Context, businessID, creatorUserID, locationID int64) {
+			gotBiz, gotOwner, gotLoc = businessID, creatorUserID, locationID
+		})
+	id, err := s.Create(context.Background(), domain.LocationInput{
+		OwnerID:    16,
+		BusinessID: 1,
+		Name:       "Voxire Cafe",
+		IsActive:   true,
+	})
+	if err != nil || id != 42 {
+		t.Fatalf("Create failed: id=%d err=%v", id, err)
+	}
+	if gotBiz != 1 || gotOwner != 16 || gotLoc != 42 {
+		t.Fatalf("unexpected hook args: biz=%d owner=%d loc=%d", gotBiz, gotOwner, gotLoc)
+	}
+
+	// Hook must not fire when repo.Create returns an error.
+	firedOnErr := false
+	sErr := NewService(context.Background(), &mockRepo{createErr: errors.New("db fail")}).
+		WithOnLocationCreated(func(_ context.Context, _, _, _ int64) { firedOnErr = true })
+	if _, err := sErr.Create(context.Background(), domain.LocationInput{OwnerID: 16, BusinessID: 1, Name: "Fail"}); err == nil {
+		t.Fatalf("expected error")
+	}
+	if firedOnErr {
+		t.Fatalf("onLocationCreated must not fire on create failure")
+	}
+}

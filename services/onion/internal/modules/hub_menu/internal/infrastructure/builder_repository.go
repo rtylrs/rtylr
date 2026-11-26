@@ -669,7 +669,7 @@ func menuProfileFromRow(row sqlc.GetMenuProfileRow) domain.MenuProfile {
 		locales = []string{"en"}
 	}
 	var publishedConfig string
-	if len(row.PublishedConfig) > 0 {
+	if row.IsPublished && len(row.PublishedConfig) > 0 {
 		publishedConfig = string(row.PublishedConfig)
 	}
 	var publishedAt time.Time

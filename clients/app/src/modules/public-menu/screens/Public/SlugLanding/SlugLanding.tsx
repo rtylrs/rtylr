@@ -5,7 +5,7 @@ import { FullScreenLoader, HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
 import { SearchX } from 'lucide-react';
 import { usePublicBusinessBySlug } from '../../../shared/hooks/usePublicMenu';
-import { menuLocationPath } from '../../../menuPaths';
+import { menuByBusinessIdPath, menuLocationPath } from '../../../menuPaths';
 
 /**
  * Single screen mounted at `/$slug/menu`. Tries the new slug lookup
@@ -28,7 +28,8 @@ const SlugLanding: React.FC = (): React.JSX.Element => {
   const { data, isLoading, isError } = usePublicBusinessBySlug(slug);
 
   React.useEffect(() => {
-    if (data && data.locations.length === 1) {
+    if (!data) return;
+    if (data.locations.length === 1) {
       const loc = data.locations[0];
       if (loc.slug) {
         navigate({
@@ -36,6 +37,14 @@ const SlugLanding: React.FC = (): React.JSX.Element => {
           replace: true,
         });
       }
+      return;
+    }
+    if (data.locations.length === 0 && data.business.id > 0) {
+      const search = typeof window !== 'undefined' ? window.location.search : '';
+      navigate({
+        to: `${menuByBusinessIdPath(data.business.id)}${search}`,
+        replace: true,
+      });
     }
   }, [data, slug, navigate]);
 

@@ -182,7 +182,8 @@ func initializeModules(ctx context.Context) *apiModules {
 		WithAccountEmailReader(scopes.NewReader(dbclient.Pool()).AccountEmail).
 		WithBusinessOwnerResolver(businessModule).
 		WithBusinessIdentityResolver(businessModule)
-	businessModule.WithPublicLocationReader(businessadapters.NewHRPublicLocationReader(hrCoreModule))
+	hrPublicLocationReader := businessadapters.NewHRPublicLocationReader(hrCoreModule)
+	businessModule.WithPublicLocationReader(hrPublicLocationReader)
 	hrStaffModule := staff.NewModule(ctx, dbclient.Pool(), hrCoreModule)
 	hrAttendanceModule := hr_attendance.NewModule(ctx, dbclient.Pool(), hrCoreModule)
 	hrLeaveModule := hr_leave.NewModule(ctx, dbclient.Pool(), hrCoreModule)
@@ -200,7 +201,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	campaignsModule := campaigns.NewModule(ctx, dbclient.Pool())
 	inventoryModule := inventory.NewModule(ctx, dbclient.Pool())
 	productsModule := products.NewModule(ctx, dbclient.Pool())
-	productsModule.SetCatalogOnlineOrdering(addonsModule.OnlineOrderingEnabled)
+	productsModule.SetCatalogOnlineOrdering(addonsModule.PublicMenuEnabled)
 	categoriesModule := categories.NewModule(ctx, dbclient.Pool())
 	brandsModule := brands.NewModule(ctx, dbclient.Pool())
 	loyaltyModule := loyalty.NewModule(ctx, dbclient.Pool())
@@ -363,7 +364,56 @@ func initializeModules(ctx context.Context) *apiModules {
 				},
 			})
 		})
-	posLocationsModule := locations.NewModule(ctx, dbclient.Pool()).WithLocationLimitReader(scopes.NewReader(dbclient.Pool()).LocationLimit)
+	posMemberLocationsModule := memberlocations.NewModule(ctx, dbclient.Pool()).
+		WithIdentityReaders(scopes.NewReader(dbclient.Pool()).BusinessUserName, scopes.NewReader(dbclient.Pool()).IsBusinessUser)
+	posLocationsModule := locations.NewModule(ctx, dbclient.Pool()).
+		WithLocationLimitReader(scopes.NewReader(dbclient.Pool()).LocationLimit).
+		WithOnLocationCreated(func(hookCtx context.Context, businessID, creatorUserID, locationID int64) {
+			if businessID <= 0 || creatorUserID <= 0 || locationID <= 0 {
+				return
+			}
+			_, _ = posMemberLocationsModule.Assign(hookCtx, businessID, creatorUserID, locationID, true, true, true)
+		})
+	businessModule.WithPublicLocationReader(func(locCtx context.Context, businessID int64) ([]business.PublicLocation, error) {
+		hrLocs, hrErr := hrPublicLocationReader(locCtx, businessID)
+		if hrErr != nil {
+			hrLocs = nil
+		}
+		posLocs, posErr := posLocationsModule.ListLocations(locCtx, businessID)
+		if posErr != nil {
+			if hrErr != nil {
+				return nil, hrErr
+			}
+			return hrLocs, nil
+		}
+		seenSlugs := make(map[string]struct{}, len(hrLocs))
+		out := make([]business.PublicLocation, 0, len(hrLocs)+len(posLocs))
+		for _, loc := range hrLocs {
+			if loc.Slug != "" {
+				seenSlugs[strings.ToLower(loc.Slug)] = struct{}{}
+			}
+			out = append(out, loc)
+		}
+		for _, pl := range posLocs {
+			if !pl.IsActive {
+				continue
+			}
+			slug := publicLocationSlug(pl.Name, pl.ID)
+			if _, dup := seenSlugs[slug]; dup {
+				continue
+			}
+			seenSlugs[slug] = struct{}{}
+			out = append(out, business.PublicLocation{
+				ID:       pl.ID,
+				Name:     pl.Name,
+				Slug:     slug,
+				Address:  pl.Address,
+				Timezone: "UTC",
+				IsActive: true,
+			})
+		}
+		return out, nil
+	})
 	inventoryModule.WithPOSBranchReader(posLocationsModule.StockBranchExists)
 	posTerminalsModule := terminals.NewModule(ctx, dbclient.Pool())
 	posUsersModule := users.NewModule(ctx, dbclient.Pool()).WithAuthorizationVersionReader(scopes.NewReader(dbclient.Pool()).AuthorizationVersion)
@@ -537,7 +587,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		PosLocations:          posLocationsModule,
 		PosLoyalty:            posloyalty.NewModule(ctx, dbclient.Pool()),
 		PosManager:            manager.NewModule(ctx, dbclient.Pool()).WithPasswordVerifier(scopes.NewReader(dbclient.Pool()).VerifyAccountPassword),
-		PosMemberLocations:    memberlocations.NewModule(ctx, dbclient.Pool()).WithIdentityReaders(scopes.NewReader(dbclient.Pool()).BusinessUserName, scopes.NewReader(dbclient.Pool()).IsBusinessUser),
+		PosMemberLocations:    posMemberLocationsModule,
 		PosModifiers:          posModifiersModule,
 		PosOrders:             posOrdersModule,
 		PosReceipts:           receipts.NewModule(ctx, dbclient.Pool()),
@@ -633,6 +683,26 @@ func crmCampaignSender(settings *config.Module, businesses *business.Module) fun
 func crmUnsubscribeKey(jwtSecret string) []byte {
 	key := sha256.Sum256([]byte("crm-unsubscribe:" + jwtSecret))
 	return key[:]
+}
+
+// publicLocationSlug builds a URL-safe slug for POS locations surfaced on /<slug>/menu.
+func publicLocationSlug(name string, id int64) string {
+	var b strings.Builder
+	prevDash := false
+	for _, r := range strings.ToLower(strings.TrimSpace(name)) {
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
+			b.WriteRune(r)
+			prevDash = false
+		} else if !prevDash && b.Len() > 0 {
+			b.WriteByte('-')
+			prevDash = true
+		}
+	}
+	slug := strings.Trim(b.String(), "-")
+	if slug == "" {
+		return fmt.Sprintf("branch-%d", id)
+	}
+	return slug
 }
 
 // renniliLeadRecorder captures venues that activate the free Rennili pager as

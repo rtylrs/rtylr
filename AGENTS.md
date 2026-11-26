@@ -26,7 +26,7 @@ Deployment repositories (`rtylrs/infra`, `rtylrs/pipelines`) are separate. A fro
 
 - Preserve unrelated work. Use an isolated branch or worktree when the checkout holds someone else's changes; never reset or clean their files.
 - Make the smallest coherent change. Avoid unrelated refactors, dependency upgrades, formatting sweeps and speculative abstractions.
-- Follow nearby structure and reuse existing components, hooks, API helpers and styling. Put shared behavior in the right package instead of copying it between apps.
+- Follow nearby structure and reuse existing components, hooks, API helpers and styling. **Always search for and reuse existing modules, hooks, components, utilities, and canonical data sources before writing new code — never duplicate functionality that already exists or split shared business entities across parallel tables/endpoints.** Put shared behavior in the right package instead of copying it between apps.
 - Keep TypeScript types meaningful. Do not use `any`, unsafe assertions or suppressed errors in place of understanding a contract.
 - Use the generated client, transport helpers and existing result/error conventions. Do not invent request fields or hand-edit generated code.
 - Contract changes belong in `voxie/api/`. Run `make -C voxie generate` so the contract, its generated consumers and the Go handlers land in one change. `voxie/gen/` is generated and gitignored: never commit or edit it (`pnpm -C clients --filter @rtylr/portal typecheck` also generates it when missing).
@@ -82,6 +82,7 @@ pnpm filters resolve relative to `clients/`, and some aggregate scripts under `c
 ## Testing that earns its cost
 
 - Test behavior and realistic risks, not implementation trivia. Prefer a regression test that fails for the original bug and passes with the fix.
+- **Verify every edge case before merging to production:** cover nullable DB columns/scans, empty/zero states, owner/admin vs. member permissions, cross-app flows, and UI/RTL/mobile breakpoints with automated tests and end-to-end checks before shipping or merging a PR. Do not merge while known edge cases remain untested.
 - Start with affected tests and relevant typechecks/builds. Widen to shared consumers or the full suite when a change crosses app boundaries, touches contracts/auth/payments/consent, or leaves real uncertainty. Complete required hooks and CI checks.
 - Do not write tests that assert constants, file contents, class names, trivial getters or a copy of the implementation. Avoid broad snapshots and heavy mocking that let broken behavior pass.
 - Documentation-only changes need a content, link and formatting review, not an app build. Copy or styling changes need the relevant locale, rendering or accessibility checks, not unrelated unit tests.

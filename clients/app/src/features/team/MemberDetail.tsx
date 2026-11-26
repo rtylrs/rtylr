@@ -112,10 +112,15 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
   const [locationsDraft, setLocationsDraft] = useState<number[]>([]);
 
   const posSelected = licensedAppsDraft.includes('pos');
+  const canManageTeam =
+    currentUser?.effectiveAccess?.dashPermissions.includes('hub:team:edit') === true;
+  const isOwnerOrAdmin = Boolean(member?.isOwner || member?.memberType === 'admin');
+  const canManageOwnerOrAdminPosLocations = canManageTeam && isOwnerOrAdmin;
+  const shouldLoadPosLocations = (isEditing && posSelected) || canManageOwnerOrAdminPosLocations;
   const assignLocation = useAssignPOSLocation();
   const removeLocation = useRemovePOSLocation();
-  const { data: allLocations = [] } = usePOSLocations(isEditing && posSelected);
-  const memberLocationsQuery = useMemberLocations(id, isEditing && posSelected);
+  const { data: allLocations = [] } = usePOSLocations(shouldLoadPosLocations);
+  const memberLocationsQuery = useMemberLocations(id, shouldLoadPosLocations);
   const memberLocations = memberLocationsQuery.data ?? EMPTY_MEMBER_LOCATIONS;
   const seededLocationsRef = useRef(false);
 
@@ -196,12 +201,30 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
     );
   }
 
-  const canEditMember =
-    currentUser?.effectiveAccess?.dashPermissions.includes('hub:team:edit') === true &&
-    !member.isOwner;
+  const canEditMember = canManageTeam && !member.isOwner;
   const visibleLicensedApps =
     member.effectiveAccess?.apps.filter((app) => app.licensed).map((app) => app.appId) ??
     member.licensedAppIds;
+
+  const handleToggleDirectPosLocation = async (locationId: number): Promise<void> => {
+    const existing = memberLocations.find((l) => l.locationId === locationId);
+    try {
+      if (existing) {
+        await removeLocation.mutateAsync(existing.id);
+      } else {
+        await assignLocation.mutateAsync({
+          userId: Number(member.id),
+          locationId,
+          canManagePosUsers: isOwnerOrAdmin,
+          canManageTerminals: isOwnerOrAdmin,
+          canViewReports: isOwnerOrAdmin,
+        });
+      }
+      qc.invalidateQueries({ queryKey: ['pos-member-locations', member.id] });
+    } catch {
+      // Mutation hooks surface errors via toast.
+    }
+  };
 
   const toggleApp = (appKey: string): void => {
     setLicensedAppsDraft((prev) =>
@@ -565,6 +588,62 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
             )}
           </div>
         </SettingSection>
+
+        {canManageOwnerOrAdminPosLocations && !isEditing && (
+          <SettingSection
+            title={t('team.memberDetail.posLocationsLabel')}
+            description={t('team.memberDetail.posLocationsMemberHint')}
+          >
+            {allLocations.length === 0 ? (
+              <EmptyState
+                icon={MapPin}
+                title={t('team.memberDetail.noPosLocationsTitle')}
+                description={t('team.memberDetail.noPosLocationsDescription')}
+                size="compact"
+              />
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                {allLocations.map((loc) => {
+                  const assigned = memberLocations.some((ml) => ml.locationId === loc.id);
+                  return (
+                    <button
+                      key={loc.id}
+                      type="button"
+                      disabled={assignLocation.isPending || removeLocation.isPending}
+                      onClick={() => void handleToggleDirectPosLocation(loc.id)}
+                      className="flex items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-start transition-colors"
+                      style={{
+                        background: assigned ? 'var(--dash-active)' : 'var(--dash-bg)',
+                        border: `1px solid ${assigned ? 'var(--dash-text-dim)' : 'var(--dash-border)'}`,
+                      }}
+                    >
+                      <span className="flex items-center gap-2 min-w-0">
+                        <MapPin
+                          size={14}
+                          style={{
+                            color: assigned ? 'var(--dash-text)' : 'var(--dash-text-dim)',
+                          }}
+                        />
+                        <span
+                          className="text-xs font-medium truncate"
+                          style={{ color: 'var(--dash-text)' }}
+                        >
+                          {loc.name}
+                        </span>
+                      </span>
+                      <span
+                        className="text-[10px] font-semibold shrink-0"
+                        style={{ color: assigned ? 'var(--dash-text)' : 'var(--dash-text-dim)' }}
+                      >
+                        {assigned ? '✓' : '+'}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </SettingSection>
+        )}
 
         <SettingSection
           title={t('team.memberDetail.effectiveAccessTitle')}

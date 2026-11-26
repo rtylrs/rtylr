@@ -85,12 +85,9 @@ import {
 type RailTab = 'themes' | 'brand' | 'layout' | 'features' | 'ops' | 'ai' | 'css';
 type DeviceViewport = 'mobile' | 'tablet' | 'desktop';
 
-const PH = (w: number, h: number, bg: string, text: string) =>
-  `https://placehold.co/${w}x${h}/${bg}/ffffff?text=${encodeURIComponent(text)}`;
-
 const DEFAULT_BUSINESS: Omit<BusinessInfo, 'name' | 'description'> = {
-  coverImage: PH(800, 300, '1a1a1a', 'Cover'),
-  logo: PH(120, 120, 'c8a96e', 'Logo'),
+  coverImage: undefined,
+  logo: undefined,
   address: '',
   phone: '',
   hours: '',
@@ -955,16 +952,26 @@ const Design: React.FC = () => {
                       }}
                     />
                     <div
-                      className="h-20 w-full rounded-lg overflow-hidden border"
+                      className="h-20 w-full rounded-lg overflow-hidden border flex items-center justify-center"
                       style={{ borderColor: 'var(--dash-border)', background: 'var(--dash-hover)' }}
                     >
-                      <img
-                        src={cdnImageUrl(
-                          draftConfig.header.coverImageUrl || businessInfo.coverImage
-                        )}
-                        alt={t('design.studio.coverImage')}
-                        className="w-full h-full object-cover"
-                      />
+                      {cdnImageUrl(draftConfig.header.coverImageUrl || businessInfo.coverImage) ? (
+                        <img
+                          src={cdnImageUrl(
+                            draftConfig.header.coverImageUrl || businessInfo.coverImage
+                          )}
+                          alt={t('design.studio.coverImage')}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span
+                          className="text-[11px] flex items-center gap-1.5"
+                          style={{ color: 'var(--dash-text-muted)' }}
+                        >
+                          <Upload className="w-3.5 h-3.5" />
+                          {t('design.studio.coverImage')}
+                        </span>
+                      )}
                     </div>
                     <Input
                       value={draftConfig.header.coverImageUrl ?? ''}
@@ -982,17 +989,24 @@ const Design: React.FC = () => {
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div
-                          className="w-10 h-10 rounded-lg overflow-hidden border shrink-0"
+                          className="w-10 h-10 rounded-lg overflow-hidden border shrink-0 flex items-center justify-center"
                           style={{
                             borderColor: 'var(--dash-border)',
                             background: 'var(--dash-hover)',
                           }}
                         >
-                          <img
-                            src={cdnImageUrl(draftConfig.header.logoUrl || businessInfo.logo)}
-                            alt={t('design.studio.logoImage')}
-                            className="w-full h-full object-cover"
-                          />
+                          {cdnImageUrl(draftConfig.header.logoUrl || businessInfo.logo) ? (
+                            <img
+                              src={cdnImageUrl(draftConfig.header.logoUrl || businessInfo.logo)}
+                              alt={t('design.studio.logoImage')}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <Store
+                              className="w-4 h-4"
+                              style={{ color: 'var(--dash-text-muted)' }}
+                            />
+                          )}
                         </div>
                         <span className="text-xs font-medium truncate">
                           {t('design.studio.logoImage')}

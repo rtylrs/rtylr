@@ -226,12 +226,12 @@ func TestMenuCurrenciesAndTableActionsAndStamps(t *testing.T) {
 		t.Fatalf("expected default USD currency, got %+v (%v)", list, err)
 	}
 
-	// Add dynamic secondary currency.
+	// Add dynamic secondary currency: must preserve default USD alongside LBP.
 	list, err = svc.UpsertMenuCurrency(context.Background(), 42, domain.MenuCurrency{
 		LocationID: 1, Code: "lbp", Symbol: "L.L.", ExchangeRate: 89500, DecimalPlaces: 0, IsActive: true,
 	})
-	if err != nil || len(list) != 1 || list[0].Code != "LBP" {
-		t.Fatalf("expected uppercase LBP currency, got %+v (%v)", list, err)
+	if err != nil || len(list) != 2 || list[0].Code != "USD" || !list[0].IsDefault || list[1].Code != "LBP" {
+		t.Fatalf("expected default USD preserved alongside LBP, got %+v (%v)", list, err)
 	}
 
 	// Invalid table action rejected.
