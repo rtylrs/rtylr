@@ -118,4 +118,61 @@ describe("MenuLayoutCore", () => {
     fireEvent.keyDown(window, { key: "Escape" });
     expect(screen.queryByRole("dialog")).toBeNull();
   });
+
+  it("hides table pill when dine-in is off, avoids nested main in previewMode, and shows preview checkout notice", async () => {
+    const { container } = render(
+      <MenuLayoutCore
+        business={{ name: "Bistro" }}
+        categories={categories}
+        tableLabel="Table 4"
+        previewMode
+        config={{
+          features: {
+            enableOrdering: true,
+            fulfillmentModes: { dineIn: false, selfService: true, pickup: true, delivery: false },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.queryByText("Table 4")).toBeNull();
+    expect(container.querySelector("main")).toBeNull();
+
+    // Add item and open cart -> Place Order shows preview-only notice instead of silently closing.
+    fireEvent.click(screen.getByRole("button", { name: /Add Espresso/i }));
+    fireEvent.click(screen.getByRole("button", { name: /View Order/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Place Order/i }));
+    expect(await screen.findByText(/Preview only/)).toBeTruthy();
+  });
+
+  it("validates and submits consenting guest details to CRM capture callback", async () => {
+    const onCaptureCrmGuest = vi.fn().mockResolvedValue(undefined);
+    render(
+      <MenuLayoutCore
+        business={{ name: "Bistro" }}
+        categories={categories}
+        onCaptureCrmGuest={onCaptureCrmGuest}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Stay in touch" }));
+    // Empty submission shows validation alert and does not submit.
+    fireEvent.click(screen.getByRole("button", { name: "Save my details" }));
+    expect(screen.getByRole("alert").textContent).toContain("phone number or email");
+    expect(onCaptureCrmGuest).not.toHaveBeenCalled();
+
+    fireEvent.change(screen.getByLabelText("Full name"), { target: { value: "Nadia" } });
+    fireEvent.change(screen.getByLabelText("Phone number"), { target: { value: "+15550002222" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save my details" }));
+
+    await waitFor(() =>
+      expect(onCaptureCrmGuest).toHaveBeenCalledWith({
+        name: "Nadia",
+        phone: "+15550002222",
+        email: undefined,
+        consent: true,
+      }),
+    );
+    expect(await screen.findByText(/Your details have been saved/)).toBeTruthy();
+  });
 });

@@ -4,14 +4,14 @@ import { useQueryClient } from '@tanstack/react-query';
 import { HelmetContainer } from '@voxire/components';
 import { Switch } from '@voxire/ui';
 import { uploadAsset } from '@voxire/api';
-import { cdnImageUrl } from '@voxire/config';
+import { FLAG_KEYS, cdnImageUrl, useFeatureFlag } from '@voxire/config';
 import { CaretIcon, onCaretToolSuccess, useCaretStore } from '@voxire/caret';
 import { toast } from 'sonner';
 import {
-  Activity,
   Check,
   Code2,
   Copy,
+  Eye,
   LayoutGrid,
   Monitor,
   Palette,
@@ -60,7 +60,6 @@ import { useLayoutPresetsStore } from '../../shared/stores/layoutPresetsStore';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useMenuStore } from '../../shared/stores/menuStore';
 import {
-  useBranchMenuItems,
   useCloneMenuProfile,
   useCreateMenuPreset,
   useDeleteMenuCurrency,
@@ -74,15 +73,17 @@ import {
   usePublishMenuProfile,
   useSaveMenuProfileDraft,
   useStampCards,
-  useTableActions,
   useTranslateMenu,
-  useUpdateTableActionStatus,
-  useUpsertBranchMenuItem,
   useUpsertMenuCurrency,
   useUpsertStampCard,
 } from '../../shared/hooks/queries/useMenuBuilder';
+import {
+  useCreateMenuBanner,
+  useDeleteMenuBanner,
+  useMenuBanners,
+} from '../../shared/hooks/queries/useMenu';
 
-type RailTab = 'themes' | 'brand' | 'layout' | 'features' | 'ops' | 'ai' | 'css';
+type RailTab = 'themes' | 'brand' | 'layout' | 'features' | 'ai' | 'css';
 type DeviceViewport = 'mobile' | 'tablet' | 'desktop';
 
 const DEFAULT_BUSINESS: Omit<BusinessInfo, 'name' | 'description'> = {
@@ -203,14 +204,24 @@ const Design: React.FC = () => {
     saveActivePreset,
   } = useLayoutPresetsStore();
 
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const { user } = useUserStore();
   const { items: menuItems } = useMenuStore();
   const openCaret = useCaretStore((s) => s.open);
   const businessSlug = user?.businessSlug || user?.business_slug || '';
 
+  const platformOrderingEnabled = useFeatureFlag(FLAG_KEYS.APP_MENU_ORDERING);
+  const platformLoyaltyEnabled = useFeatureFlag(FLAG_KEYS.APP_MENU_LOYALTY);
+  const platformTableActionsEnabled = useFeatureFlag(FLAG_KEYS.APP_MENU_TABLE_ACTIONS);
+  const platformCrmCaptureEnabled = useFeatureFlag(FLAG_KEYS.APP_MENU_CRM_CAPTURE);
+  const platformCurrenciesEnabled = useFeatureFlag(FLAG_KEYS.APP_MENU_CURRENCIES);
+  const platformAiTranslateEnabled = useFeatureFlag(FLAG_KEYS.APP_MENU_AI_TRANSLATE);
+  const platformCustomCssEnabled = useFeatureFlag(FLAG_KEYS.APP_MENU_CUSTOM_CSS);
+  const platformBannersEnabled = useFeatureFlag(FLAG_KEYS.APP_MENU_BANNERS);
+
   const [activeTab, setActiveTab] = useState<RailTab>('themes');
+  const [mobilePane, setMobilePane] = useState<'editor' | 'preview'>('editor');
   const [viewport, setViewport] = useState<DeviceViewport>('mobile');
   const [selectedLocationId, setSelectedLocationId] = useState<number>(0);
   const [cloneSourceId, setCloneSourceId] = useState<number>(0);
@@ -224,10 +235,11 @@ const Design: React.FC = () => {
   const [newStampTitle, setNewStampTitle] = useState('');
   const [newStampTarget, setNewStampTarget] = useState('10');
   const [newStampReward, setNewStampReward] = useState('');
+  const [newBannerTitle, setNewBannerTitle] = useState('');
+  const [newBannerBody, setNewBannerBody] = useState('');
   const [aiPrompt, setAiPrompt] = useState('');
   const [saved, setSaved] = useState(false);
   const [uploadingField, setUploadingField] = useState<'cover' | 'logo' | null>(null);
-  const [priceOverrideDrafts, setPriceOverrideDrafts] = useState<Record<string, string>>({});
   const coverInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
@@ -237,8 +249,7 @@ const Design: React.FC = () => {
   const { data: remotePresets = [] } = useMenuPresets();
   const { data: currencies = [] } = useMenuCurrencies(selectedLocationId);
   const { data: stampCards = [] } = useStampCards(selectedLocationId);
-  const { data: branchMenuItems = [] } = useBranchMenuItems(selectedLocationId);
-  const { data: tableActions = [] } = useTableActions(selectedLocationId);
+  const { data: menuBanners = [] } = useMenuBanners();
   const { data: analyticsSummary } = useMenuAnalyticsSummary(selectedLocationId, 30);
 
   const saveDraftMutation = useSaveMenuProfileDraft();
@@ -249,8 +260,8 @@ const Design: React.FC = () => {
   const upsertCurrencyMutation = useUpsertMenuCurrency();
   const deleteCurrencyMutation = useDeleteMenuCurrency();
   const upsertStampCardMutation = useUpsertStampCard();
-  const upsertBranchItemMutation = useUpsertBranchMenuItem();
-  const updateTableActionMutation = useUpdateTableActionStatus();
+  const createBannerMutation = useCreateMenuBanner();
+  const deleteBannerMutation = useDeleteMenuBanner();
   const translateMenuMutation = useTranslateMenu();
 
   useEffect(() => {
@@ -305,10 +316,12 @@ const Design: React.FC = () => {
     }
   }, [remoteProfile, setDraftConfig]);
 
+  const previewT = useMemo(() => i18n.getFixedT(previewLocale), [i18n, previewLocale]);
   const u = user as Record<string, unknown> | null;
   const businessInfo: BusinessInfo = {
-    name: (u?.businessName as string) || t('design.businessPlaceholder.name'),
-    description: (u?.businessDescription as string) || t('design.businessPlaceholder.description'),
+    name: (u?.businessName as string) || previewT('design.businessPlaceholder.name'),
+    description:
+      (u?.businessDescription as string) || previewT('design.businessPlaceholder.description'),
     coverImage: (u?.coverImage as string) || DEFAULT_BUSINESS.coverImage,
     logo: (u?.logo as string) || DEFAULT_BUSINESS.logo,
     address: (u?.address as string) || '',
@@ -318,32 +331,22 @@ const Design: React.FC = () => {
     reviewCount: (u?.reviewCount as number) ?? 0,
   };
 
-  const branchOverrideByItemId = useMemo(() => {
-    const map = new Map<string, (typeof branchMenuItems)[number]>();
-    for (const bi of branchMenuItems) {
-      if (bi.menuItemId) map.set(String(bi.menuItemId), bi);
-    }
-    return map;
-  }, [branchMenuItems]);
-
   const menuCategories: MenuCategoryData[] = useMemo(() => {
     if (catalogItems.length > 0) {
       const grouped = new Map<string, MenuCategoryData['items']>();
       for (const item of catalogItems) {
         const id = String(item.id ?? '');
-        const ov = branchOverrideByItemId.get(id);
-        if (ov && ov.isVisible === false) continue;
-        const catName = item.category?.trim() || t('design.studio.title');
+        const catName = item.category?.trim() || previewT('design.studio.title');
         const list = grouped.get(catName) ?? [];
         list.push({
           id,
           name: item.name ?? '',
           description: item.description ?? '',
-          price: ov?.hasPriceOverride ? (ov.priceOverride ?? 0) : (item.salePrice ?? 0),
+          price: item.salePrice ?? 0,
           currency: currencies.find((c) => c.isDefault)?.code ?? 'USD',
           available: item.isActive !== false,
           image: item.imageUrl ?? '',
-          badges: ov?.featuredBadge ? [ov.featuredBadge] : [],
+          badges: [],
         });
         grouped.set(catName, list);
       }
@@ -372,7 +375,7 @@ const Design: React.FC = () => {
         })) as MenuCategoryData[];
     }
     return [];
-  }, [catalogItems, branchOverrideByItemId, currencies, menuItems, t]);
+  }, [catalogItems, currencies, menuItems, previewT]);
 
   const themeMode: ThemeMode = draftConfig.mode ?? 'light';
   const fontFamily = draftConfig.typography?.bodyFont ?? 'system';
@@ -525,15 +528,29 @@ const Design: React.FC = () => {
     isDefault: Boolean(c.isDefault),
   }));
 
-  const previewStampCards = stampCards
-    .filter((s) => s.isActive !== false)
-    .map((s) => ({
-      id: s.id ?? '',
-      title: s.title ?? '',
-      description: s.description ?? '',
-      stampsRequired: s.stampsRequired ?? 10,
-      rewardLabel: s.rewardLabel ?? '',
-    }));
+  const previewStampCards = platformLoyaltyEnabled
+    ? stampCards
+        .filter((s) => s.isActive !== false)
+        .map((s) => ({
+          id: s.id ?? '',
+          title: s.title ?? '',
+          description: s.description ?? '',
+          stampsRequired: s.stampsRequired ?? 10,
+          rewardLabel: s.rewardLabel ?? '',
+        }))
+    : [];
+
+  const previewBanners = platformBannersEnabled
+    ? menuBanners
+        .filter((b) => b.isActive !== false)
+        .map((b) => ({
+          id: String(b.id ?? ''),
+          title: b.title ?? '',
+          body: b.body ?? '',
+          imageUrl: b.imageUrl || undefined,
+          linkUrl: b.linkUrl || undefined,
+        }))
+    : [];
 
   const railItems: { id: RailTab; label: string; icon: React.ReactNode }[] = [
     {
@@ -557,20 +574,19 @@ const Design: React.FC = () => {
       icon: <Store className="w-[18px] h-[18px]" />,
     },
     {
-      id: 'ops',
-      label: t('design.studio.rail.ops'),
-      icon: <Activity className="w-[18px] h-[18px]" />,
-    },
-    {
       id: 'ai',
       label: t('design.studio.rail.ai'),
       icon: <Sparkles className="w-[18px] h-[18px]" />,
     },
-    {
-      id: 'css',
-      label: t('design.studio.rail.css'),
-      icon: <Code2 className="w-[18px] h-[18px]" />,
-    },
+    ...(platformCustomCssEnabled
+      ? [
+          {
+            id: 'css' as const,
+            label: t('design.studio.rail.css'),
+            icon: <Code2 className="w-[18px] h-[18px]" />,
+          },
+        ]
+      : []),
   ];
 
   const deviceWidth = viewport === 'mobile' ? 392 : viewport === 'tablet' ? 680 : '100%';
@@ -579,22 +595,24 @@ const Design: React.FC = () => {
     <>
       <HelmetContainer title={t('design.pageTitle')} />
       <div
-        className="flex flex-col h-[calc(100vh-56px)] min-h-[620px] overflow-hidden"
+        className="relative flex flex-col h-[calc(100vh-56px)] min-h-[600px] overflow-hidden"
         style={{ background: 'var(--dash-bg)', color: 'var(--dash-text)' }}
       >
-        {/* Top Studio Toolbar */}
+        {/* Top Studio Toolbar (sticky, wraps cleanly on mobile & narrow desktop) */}
         <header
-          className="h-14 shrink-0 px-4 flex items-center justify-between gap-3 border-b"
+          className="sticky top-0 z-20 shrink-0 min-h-14 py-2 px-3 sm:px-4 flex flex-wrap items-center justify-between gap-2 border-b"
           style={{ background: 'var(--dash-surface)', borderColor: 'var(--dash-border)' }}
         >
-          <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 min-w-0">
             <h1 className="text-sm font-semibold tracking-tight whitespace-nowrap">
               {t('design.studio.title')}
             </h1>
             {branches.length > 0 && (
               <>
-                <span style={{ color: 'var(--dash-text-dim)' }}>/</span>
-                <div className="w-44">
+                <span className="hidden sm:inline" style={{ color: 'var(--dash-text-dim)' }}>
+                  /
+                </span>
+                <div className="w-36 sm:w-44">
                   <Select
                     aria-label={t('design.studio.branchLabel')}
                     value={String(selectedLocationId)}
@@ -610,7 +628,7 @@ const Design: React.FC = () => {
                   </Select>
                 </div>
                 {branches.length > 1 && (
-                  <div className="hidden lg:flex items-center gap-1.5">
+                  <div className="hidden 2xl:flex items-center gap-1.5">
                     <div className="w-36">
                       <Select
                         aria-label={t('design.studio.copyFromBranch')}
@@ -649,20 +667,32 @@ const Design: React.FC = () => {
           </div>
 
           {/* Center Viewport + Locale Controls */}
-          <div className="hidden md:flex items-center gap-2">
+          <div className="hidden lg:flex items-center gap-2 shrink-0">
             <Tabs value={viewport} onValueChange={(v) => setViewport(v as DeviceViewport)}>
               <TabsList>
-                <TabsTrigger value="mobile" className="px-2.5 py-1 text-xs gap-1.5">
+                <TabsTrigger
+                  value="mobile"
+                  className="px-2 py-1 text-xs gap-1.5"
+                  aria-label={t('design.studio.viewports.mobile')}
+                >
                   <Smartphone className="w-3.5 h-3.5" />
-                  {t('design.studio.viewports.mobile')}
+                  <span className="hidden xl:inline">{t('design.studio.viewports.mobile')}</span>
                 </TabsTrigger>
-                <TabsTrigger value="tablet" className="px-2.5 py-1 text-xs gap-1.5">
+                <TabsTrigger
+                  value="tablet"
+                  className="px-2 py-1 text-xs gap-1.5"
+                  aria-label={t('design.studio.viewports.tablet')}
+                >
                   <Tablet className="w-3.5 h-3.5" />
-                  {t('design.studio.viewports.tablet')}
+                  <span className="hidden xl:inline">{t('design.studio.viewports.tablet')}</span>
                 </TabsTrigger>
-                <TabsTrigger value="desktop" className="px-2.5 py-1 text-xs gap-1.5">
+                <TabsTrigger
+                  value="desktop"
+                  className="px-2 py-1 text-xs gap-1.5"
+                  aria-label={t('design.studio.viewports.desktop')}
+                >
                   <Monitor className="w-3.5 h-3.5" />
-                  {t('design.studio.viewports.desktop')}
+                  <span className="hidden xl:inline">{t('design.studio.viewports.desktop')}</span>
                 </TabsTrigger>
               </TabsList>
             </Tabs>
@@ -678,10 +708,21 @@ const Design: React.FC = () => {
             </Tabs>
           </div>
 
-          {/* Right Save & Publish */}
-          <div className="flex items-center gap-2 shrink-0">
+          {/* Right Save, Publish & Mobile Preview Toggle */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              className="lg:hidden"
+              onClick={() => setMobilePane((p) => (p === 'editor' ? 'preview' : 'editor'))}
+            >
+              <Eye className="w-3.5 h-3.5 me-1" />
+              {mobilePane === 'editor'
+                ? t('design.studio.mobilePreview', 'Preview')
+                : t('design.studio.mobileEditor', 'Editor')}
+            </Button>
             {remoteProfile?.publishedAt && (
-              <Badge variant="success" className="hidden xl:inline-flex">
+              <Badge variant="success" className="hidden 2xl:inline-flex">
                 {t('design.studio.liveBadge')}
               </Badge>
             )}
@@ -693,7 +734,7 @@ const Design: React.FC = () => {
             >
               {saved ? (
                 <>
-                  <Check className="w-3.5 h-3.5 me-1.5" />
+                  <Check className="w-3.5 h-3.5 me-1" />
                   {t('design.studio.saved')}
                 </>
               ) : (
@@ -711,12 +752,14 @@ const Design: React.FC = () => {
           </div>
         </header>
 
-        {/* Main Studio Body: Icon Rail + Contextual Inspector + Dot-Grid Stage */}
+        {/* Main Studio Body: Icon Rail + Contextual Inspector + Neutral Stage */}
         <div className="flex flex-1 min-h-0 overflow-hidden">
           {/* 64px Left Icon Rail */}
           <nav
             aria-label={t('design.studio.railLabel')}
-            className="w-16 shrink-0 flex flex-col items-center gap-1 py-3 px-1.5 border-e"
+            className={`${
+              mobilePane === 'preview' ? 'hidden lg:flex' : 'flex'
+            } w-14 sm:w-16 shrink-0 flex-col items-center gap-1 py-3 px-1 border-e overflow-y-auto`}
             style={{ background: 'var(--dash-surface)', borderColor: 'var(--dash-border)' }}
           >
             {railItems.map((item) => {
@@ -725,7 +768,10 @@ const Design: React.FC = () => {
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    setMobilePane('editor');
+                  }}
                   className="w-full py-2 px-1 rounded-xl flex flex-col items-center gap-1 text-[10px] font-semibold transition-colors"
                   style={{
                     background: active ? 'var(--dash-active)' : 'transparent',
@@ -739,9 +785,11 @@ const Design: React.FC = () => {
             })}
           </nav>
 
-          {/* 320px Contextual Inspector Panel */}
+          {/* Responsive Contextual Inspector Panel */}
           <aside
-            className="w-80 shrink-0 overflow-y-auto p-4 space-y-5 border-e"
+            className={`${
+              mobilePane === 'preview' ? 'hidden lg:block' : 'block'
+            } flex-1 lg:flex-none lg:w-72 xl:w-80 shrink-0 overflow-y-auto p-4 space-y-5 border-e`}
             style={{ background: 'var(--dash-surface)', borderColor: 'var(--dash-border)' }}
           >
             {/* 1. THEMES TAB */}
@@ -1381,93 +1429,202 @@ const Design: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="space-y-1">
-                  <SwitchRow
-                    id="feat-ordering"
-                    label={t('design.studio.orderingEnabled')}
-                    checked={features.enableOrdering}
-                    onChange={(enableOrdering) => patchFeatures({ enableOrdering })}
-                  />
-                  <SwitchRow
-                    id="feat-dinein"
-                    label={t('design.studio.modeDineIn')}
-                    checked={features.fulfillmentModes.dineIn}
-                    onChange={(dineIn) =>
-                      patchFeatures({ fulfillmentModes: { ...features.fulfillmentModes, dineIn } })
-                    }
-                  />
-                  <SwitchRow
-                    id="feat-selfservice"
-                    label={t('design.studio.modeSelfService')}
-                    checked={features.fulfillmentModes.selfService}
-                    onChange={(selfService) =>
-                      patchFeatures({
-                        fulfillmentModes: { ...features.fulfillmentModes, selfService },
-                      })
-                    }
-                  />
-                  <SwitchRow
-                    id="feat-pickup"
-                    label={t('design.studio.modePickup')}
-                    checked={features.fulfillmentModes.pickup}
-                    onChange={(pickup) =>
-                      patchFeatures({ fulfillmentModes: { ...features.fulfillmentModes, pickup } })
-                    }
-                  />
-                  <SwitchRow
-                    id="feat-delivery"
-                    label={t('design.studio.modeDelivery')}
-                    checked={features.fulfillmentModes.delivery}
-                    onChange={(delivery) =>
-                      patchFeatures({
-                        fulfillmentModes: { ...features.fulfillmentModes, delivery },
-                      })
-                    }
-                  />
-                </div>
+                {platformOrderingEnabled && (
+                  <div className="space-y-1">
+                    <SwitchRow
+                      id="feat-ordering"
+                      label={t('design.studio.orderingEnabled')}
+                      checked={features.enableOrdering}
+                      onChange={(enableOrdering) => patchFeatures({ enableOrdering })}
+                    />
+                    <SwitchRow
+                      id="feat-dinein"
+                      label={t('design.studio.modeDineIn')}
+                      checked={features.fulfillmentModes.dineIn}
+                      onChange={(dineIn) =>
+                        patchFeatures({
+                          fulfillmentModes: { ...features.fulfillmentModes, dineIn },
+                        })
+                      }
+                    />
+                    <SwitchRow
+                      id="feat-selfservice"
+                      label={t('design.studio.modeSelfService')}
+                      checked={features.fulfillmentModes.selfService}
+                      onChange={(selfService) =>
+                        patchFeatures({
+                          fulfillmentModes: { ...features.fulfillmentModes, selfService },
+                        })
+                      }
+                    />
+                    <SwitchRow
+                      id="feat-pickup"
+                      label={t('design.studio.modePickup')}
+                      checked={features.fulfillmentModes.pickup}
+                      onChange={(pickup) =>
+                        patchFeatures({
+                          fulfillmentModes: { ...features.fulfillmentModes, pickup },
+                        })
+                      }
+                    />
+                    <SwitchRow
+                      id="feat-delivery"
+                      label={t('design.studio.modeDelivery')}
+                      checked={features.fulfillmentModes.delivery}
+                      onChange={(delivery) =>
+                        patchFeatures({
+                          fulfillmentModes: { ...features.fulfillmentModes, delivery },
+                        })
+                      }
+                    />
+                  </div>
+                )}
 
                 <Separator />
 
                 <div className="space-y-1">
-                  <Label className="text-[11px] uppercase tracking-wider">
-                    {t('design.studio.tableService')}
-                  </Label>
-                  <SwitchRow
-                    id="act-waiter"
-                    label={t('design.studio.callStaff')}
-                    checked={features.tableActions.callWaiter}
-                    onChange={(callWaiter) =>
-                      patchFeatures({ tableActions: { ...features.tableActions, callWaiter } })
-                    }
-                  />
-                  <SwitchRow
-                    id="act-bill"
-                    label={t('design.studio.requestBill')}
-                    checked={features.tableActions.requestBill}
-                    onChange={(requestBill) =>
-                      patchFeatures({ tableActions: { ...features.tableActions, requestBill } })
-                    }
-                  />
-                  <SwitchRow
-                    id="act-split"
-                    label={t('design.studio.splitBill')}
-                    checked={features.tableActions.splitBill}
-                    onChange={(splitBill) =>
-                      patchFeatures({ tableActions: { ...features.tableActions, splitBill } })
-                    }
-                  />
-                  <SwitchRow
-                    id="feat-loyalty"
-                    label={t('design.sections.loyalty')}
-                    checked={features.enableLoyaltyStamps}
-                    onChange={(enableLoyaltyStamps) => patchFeatures({ enableLoyaltyStamps })}
-                  />
-                  <SwitchRow
-                    id="feat-banners"
-                    label={t('design.studio.promoBanners')}
-                    checked={features.enableBanners}
-                    onChange={(enableBanners) => patchFeatures({ enableBanners })}
-                  />
+                  {platformTableActionsEnabled && (
+                    <>
+                      <Label className="text-[11px] uppercase tracking-wider">
+                        {t('design.studio.tableService')}
+                      </Label>
+                      <SwitchRow
+                        id="act-waiter"
+                        label={t('design.studio.callStaff')}
+                        checked={features.tableActions.callWaiter}
+                        onChange={(callWaiter) =>
+                          patchFeatures({ tableActions: { ...features.tableActions, callWaiter } })
+                        }
+                      />
+                      <SwitchRow
+                        id="act-bill"
+                        label={t('design.studio.requestBill')}
+                        checked={features.tableActions.requestBill}
+                        onChange={(requestBill) =>
+                          patchFeatures({ tableActions: { ...features.tableActions, requestBill } })
+                        }
+                      />
+                      <SwitchRow
+                        id="act-split"
+                        label={t('design.studio.splitBill')}
+                        checked={features.tableActions.splitBill}
+                        onChange={(splitBill) =>
+                          patchFeatures({ tableActions: { ...features.tableActions, splitBill } })
+                        }
+                      />
+                    </>
+                  )}
+                  {platformLoyaltyEnabled && (
+                    <SwitchRow
+                      id="feat-loyalty"
+                      label={t('design.sections.loyalty')}
+                      checked={features.enableLoyaltyStamps}
+                      onChange={(enableLoyaltyStamps) => patchFeatures({ enableLoyaltyStamps })}
+                    />
+                  )}
+                  {platformCrmCaptureEnabled && (
+                    <SwitchRow
+                      id="feat-crm-capture"
+                      label={t('design.studio.crmCapture', 'Guest CRM capture')}
+                      hint={t(
+                        'design.studio.crmCaptureHint',
+                        'Let guests optionally leave their contact info directly into your CRM.'
+                      )}
+                      checked={features.enableCrmCapture}
+                      onChange={(enableCrmCapture) => patchFeatures({ enableCrmCapture })}
+                    />
+                  )}
+                  {platformBannersEnabled && (
+                    <>
+                      <SwitchRow
+                        id="feat-banners"
+                        label={t('design.studio.promoBanners')}
+                        checked={features.enableBanners}
+                        onChange={(enableBanners) => patchFeatures({ enableBanners })}
+                      />
+                      {features.enableBanners && (
+                        <div className="space-y-2 pt-1 pb-2">
+                          {menuBanners.map((banner) => (
+                            <div
+                              key={banner.id}
+                              className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg border text-xs"
+                              style={{
+                                background: 'var(--dash-card)',
+                                borderColor: 'var(--dash-border)',
+                              }}
+                            >
+                              <div className="min-w-0">
+                                <div className="font-semibold truncate">{banner.title}</div>
+                                {banner.body && (
+                                  <div
+                                    className="truncate text-[11px]"
+                                    style={{ color: 'var(--dash-text-muted)' }}
+                                  >
+                                    {banner.body}
+                                  </div>
+                                )}
+                              </div>
+                              {banner.id && (
+                                <button
+                                  type="button"
+                                  onClick={() => deleteBannerMutation.mutate(String(banner.id))}
+                                  style={{ color: 'var(--dash-text-muted)' }}
+                                  aria-label={`Remove ${banner.title ?? ''}`}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                          <Input
+                            value={newBannerTitle}
+                            onChange={(e) => setNewBannerTitle(e.target.value)}
+                            placeholder={t(
+                              'design.studio.promoBannerTitlePlaceholder',
+                              'Banner title (e.g. Happy Hour 20% off)'
+                            )}
+                            className="h-8 text-xs"
+                          />
+                          <Input
+                            value={newBannerBody}
+                            onChange={(e) => setNewBannerBody(e.target.value)}
+                            placeholder={t(
+                              'design.studio.promoBannerBodyPlaceholder',
+                              'Short details (optional)'
+                            )}
+                            className="h-8 text-xs"
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
+                            disabled={!newBannerTitle.trim() || createBannerMutation.isPending}
+                            onClick={() => {
+                              createBannerMutation.mutate(
+                                {
+                                  title: newBannerTitle.trim(),
+                                  body: newBannerBody.trim(),
+                                  isActive: true,
+                                },
+                                {
+                                  onSuccess: () => {
+                                    setNewBannerTitle('');
+                                    setNewBannerBody('');
+                                    toast.success(
+                                      t('menu.bannerCreated', 'Promo banner added to menu')
+                                    );
+                                  },
+                                }
+                              );
+                            }}
+                          >
+                            <Plus className="w-3.5 h-3.5 me-1.5" />
+                            {t('design.studio.addBanner', 'Add banner')}
+                          </Button>
+                        </div>
+                      )}
+                    </>
+                  )}
                   <SwitchRow
                     id="feat-search"
                     label={t('design.studio.searchAndFilters')}
@@ -1513,97 +1670,101 @@ const Design: React.FC = () => {
                   )}
                 </div>
 
-                <Separator />
+                {platformCurrenciesEnabled && (
+                  <>
+                    <Separator />
 
-                {/* Dynamic Currencies */}
-                <div className="space-y-2.5">
-                  <Label className="text-[11px] uppercase tracking-wider">
-                    {t('design.sections.currencies')}
-                  </Label>
-                  <div className="space-y-1.5">
-                    {currencies.map((cur) => (
-                      <div
-                        key={cur.code}
-                        className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg border text-xs"
-                        style={{
-                          background: 'var(--dash-card)',
-                          borderColor: 'var(--dash-border)',
+                    {/* Dynamic Currencies */}
+                    <div className="space-y-2.5">
+                      <Label className="text-[11px] uppercase tracking-wider">
+                        {t('design.sections.currencies')}
+                      </Label>
+                      <div className="space-y-1.5">
+                        {currencies.map((cur) => (
+                          <div
+                            key={cur.code}
+                            className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg border text-xs"
+                            style={{
+                              background: 'var(--dash-card)',
+                              borderColor: 'var(--dash-border)',
+                            }}
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="font-semibold">{cur.code}</span>
+                              <span style={{ color: 'var(--dash-text-muted)' }}>
+                                {cur.symbol} · ×{cur.exchangeRate}
+                              </span>
+                              {cur.isDefault && (
+                                <Badge variant="secondary">{t('design.studio.defaultTag')}</Badge>
+                              )}
+                            </div>
+                            {!cur.isDefault && cur.code && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  deleteCurrencyMutation.mutate({
+                                    locationId: selectedLocationId,
+                                    code: cur.code!,
+                                  })
+                                }
+                                style={{ color: 'var(--dash-text-muted)' }}
+                                aria-label={`Remove ${cur.code}`}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        <Input
+                          value={newCurrencyCode}
+                          onChange={(e) => setNewCurrencyCode(e.target.value.toUpperCase())}
+                          placeholder="EUR"
+                          className="h-8 text-xs"
+                        />
+                        <Input
+                          value={newCurrencySymbol}
+                          onChange={(e) => setNewCurrencySymbol(e.target.value)}
+                          placeholder="€"
+                          className="h-8 text-xs"
+                        />
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={newCurrencyRate}
+                          onChange={(e) => setNewCurrencyRate(e.target.value)}
+                          placeholder="0.92"
+                          className="h-8 text-xs"
+                        />
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        disabled={
+                          !newCurrencyCode.trim() ||
+                          !newCurrencySymbol.trim() ||
+                          upsertCurrencyMutation.isPending
+                        }
+                        onClick={() => {
+                          upsertCurrencyMutation.mutate({
+                            locationId: selectedLocationId,
+                            code: newCurrencyCode.trim().toUpperCase(),
+                            symbol: newCurrencySymbol.trim(),
+                            exchangeRate: Number(newCurrencyRate) || 1,
+                          });
+                          setNewCurrencyCode('');
+                          setNewCurrencySymbol('');
+                          setNewCurrencyRate('1');
                         }}
                       >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="font-semibold">{cur.code}</span>
-                          <span style={{ color: 'var(--dash-text-muted)' }}>
-                            {cur.symbol} · ×{cur.exchangeRate}
-                          </span>
-                          {cur.isDefault && (
-                            <Badge variant="secondary">{t('design.studio.defaultTag')}</Badge>
-                          )}
-                        </div>
-                        {!cur.isDefault && cur.code && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              deleteCurrencyMutation.mutate({
-                                locationId: selectedLocationId,
-                                code: cur.code!,
-                              })
-                            }
-                            style={{ color: 'var(--dash-text-muted)' }}
-                            aria-label={`Remove ${cur.code}`}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    <Input
-                      value={newCurrencyCode}
-                      onChange={(e) => setNewCurrencyCode(e.target.value.toUpperCase())}
-                      placeholder="EUR"
-                      className="h-8 text-xs"
-                    />
-                    <Input
-                      value={newCurrencySymbol}
-                      onChange={(e) => setNewCurrencySymbol(e.target.value)}
-                      placeholder="€"
-                      className="h-8 text-xs"
-                    />
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={newCurrencyRate}
-                      onChange={(e) => setNewCurrencyRate(e.target.value)}
-                      placeholder="0.92"
-                      className="h-8 text-xs"
-                    />
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    disabled={
-                      !newCurrencyCode.trim() ||
-                      !newCurrencySymbol.trim() ||
-                      upsertCurrencyMutation.isPending
-                    }
-                    onClick={() => {
-                      upsertCurrencyMutation.mutate({
-                        locationId: selectedLocationId,
-                        code: newCurrencyCode.trim().toUpperCase(),
-                        symbol: newCurrencySymbol.trim(),
-                        exchangeRate: Number(newCurrencyRate) || 1,
-                      });
-                      setNewCurrencyCode('');
-                      setNewCurrencySymbol('');
-                      setNewCurrencyRate('1');
-                    }}
-                  >
-                    <Plus className="w-3.5 h-3.5 me-1.5" />
-                    {t('design.studio.addCurrency')}
-                  </Button>
-                </div>
+                        <Plus className="w-3.5 h-3.5 me-1.5" />
+                        {t('design.studio.addCurrency')}
+                      </Button>
+                    </div>
+                  </>
+                )}
 
                 <Separator />
 
@@ -1635,97 +1796,96 @@ const Design: React.FC = () => {
                       );
                     })}
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    disabled={translateMenuMutation.isPending || menuCategories.length === 0}
-                    onClick={handleTranslateAll}
-                  >
-                    <Sparkles className="w-3.5 h-3.5 me-1.5" />
-                    {t('design.studio.aiTranslate')}
-                  </Button>
+                  {platformAiTranslateEnabled && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full whitespace-normal text-center h-auto py-2 leading-snug"
+                      disabled={translateMenuMutation.isPending || menuCategories.length === 0}
+                      onClick={handleTranslateAll}
+                    >
+                      <Sparkles className="w-3.5 h-3.5 me-1.5 shrink-0" />
+                      <span>{t('design.studio.aiTranslate')}</span>
+                    </Button>
+                  )}
                 </div>
+
+                {platformLoyaltyEnabled && (
+                  <>
+                    <Separator />
+
+                    {/* Loyalty Stamp Cards */}
+                    <div className="space-y-2.5">
+                      <Label className="text-[11px] uppercase tracking-wider">
+                        {t('design.sections.loyalty')}
+                      </Label>
+                      {stampCards.map((card) => (
+                        <div
+                          key={card.id}
+                          className="px-2.5 py-2 rounded-lg border text-xs"
+                          style={{
+                            background: 'var(--dash-card)',
+                            borderColor: 'var(--dash-border)',
+                          }}
+                        >
+                          <div className="font-semibold">{card.title}</div>
+                          <div style={{ color: 'var(--dash-text-muted)' }}>
+                            {card.stampsRequired} → {card.rewardLabel}
+                          </div>
+                        </div>
+                      ))}
+                      <Input
+                        value={newStampTitle}
+                        onChange={(e) => setNewStampTitle(e.target.value)}
+                        placeholder={t('design.studio.stampTitlePlaceholder')}
+                        className="h-8 text-xs"
+                      />
+                      <div className="grid grid-cols-3 gap-1.5">
+                        <Input
+                          type="number"
+                          min={1}
+                          value={newStampTarget}
+                          onChange={(e) => setNewStampTarget(e.target.value)}
+                          placeholder="10"
+                          className="h-8 text-xs"
+                        />
+                        <Input
+                          value={newStampReward}
+                          onChange={(e) => setNewStampReward(e.target.value)}
+                          placeholder={t('design.studio.stampRewardPlaceholder')}
+                          className="h-8 text-xs col-span-2"
+                        />
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        disabled={
+                          !newStampTitle.trim() ||
+                          !newStampReward.trim() ||
+                          upsertStampCardMutation.isPending
+                        }
+                        onClick={() => {
+                          upsertStampCardMutation.mutate({
+                            locationId: selectedLocationId,
+                            title: newStampTitle.trim(),
+                            stampsRequired: Math.max(1, Number(newStampTarget) || 10),
+                            rewardLabel: newStampReward.trim(),
+                          });
+                          setNewStampTitle('');
+                          setNewStampReward('');
+                        }}
+                      >
+                        <Plus className="w-3.5 h-3.5 me-1.5" />
+                        {t('design.studio.addStampCard')}
+                      </Button>
+                    </div>
+                  </>
+                )}
 
                 <Separator />
 
-                {/* Loyalty Stamp Cards */}
-                <div className="space-y-2.5">
-                  <Label className="text-[11px] uppercase tracking-wider">
-                    {t('design.sections.loyalty')}
-                  </Label>
-                  {stampCards.map((card) => (
-                    <div
-                      key={card.id}
-                      className="px-2.5 py-2 rounded-lg border text-xs"
-                      style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
-                    >
-                      <div className="font-semibold">{card.title}</div>
-                      <div style={{ color: 'var(--dash-text-muted)' }}>
-                        {card.stampsRequired} → {card.rewardLabel}
-                      </div>
-                    </div>
-                  ))}
-                  <Input
-                    value={newStampTitle}
-                    onChange={(e) => setNewStampTitle(e.target.value)}
-                    placeholder={t('design.studio.stampTitlePlaceholder')}
-                    className="h-8 text-xs"
-                  />
-                  <div className="grid grid-cols-3 gap-1.5">
-                    <Input
-                      type="number"
-                      min={1}
-                      value={newStampTarget}
-                      onChange={(e) => setNewStampTarget(e.target.value)}
-                      placeholder="10"
-                      className="h-8 text-xs"
-                    />
-                    <Input
-                      value={newStampReward}
-                      onChange={(e) => setNewStampReward(e.target.value)}
-                      placeholder={t('design.studio.stampRewardPlaceholder')}
-                      className="h-8 text-xs col-span-2"
-                    />
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    disabled={
-                      !newStampTitle.trim() ||
-                      !newStampReward.trim() ||
-                      upsertStampCardMutation.isPending
-                    }
-                    onClick={() => {
-                      upsertStampCardMutation.mutate({
-                        locationId: selectedLocationId,
-                        title: newStampTitle.trim(),
-                        stampsRequired: Math.max(1, Number(newStampTarget) || 10),
-                        rewardLabel: newStampReward.trim(),
-                      });
-                      setNewStampTitle('');
-                      setNewStampReward('');
-                    }}
-                  >
-                    <Plus className="w-3.5 h-3.5 me-1.5" />
-                    {t('design.studio.addStampCard')}
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* 5. LIVE OPS: ANALYTICS, TABLE SERVICE QUEUE & BRANCH ITEM OVERRIDES */}
-            {activeTab === 'ops' && (
-              <div className="space-y-5">
-                <div>
-                  <h2 className="text-sm font-semibold">{t('design.studio.opsTitle')}</h2>
-                  <p className="text-xs mt-1" style={{ color: 'var(--dash-text-muted)' }}>
-                    {t('design.studio.opsSubtitle')}
-                  </p>
-                </div>
-
-                {/* Analytics Summary */}
+                {/* Compact 30-day Menu Analytics + POS Operations Note */}
                 <div className="space-y-2">
                   <Label className="text-[11px] uppercase tracking-wider">
                     {t('design.studio.analyticsTitle')}
@@ -1764,162 +1924,12 @@ const Design: React.FC = () => {
                       </div>
                     ))}
                   </div>
-                </div>
-
-                <Separator />
-
-                {/* Table Service Queue */}
-                <div className="space-y-2">
-                  <Label className="text-[11px] uppercase tracking-wider">
-                    {t('design.studio.tableQueueTitle')}
-                  </Label>
-                  {tableActions.filter((a) => a.status !== 'resolved').length === 0 ? (
-                    <p className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
-                      {t('design.studio.tableQueueEmpty')}
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {tableActions
-                        .filter((a) => a.status !== 'resolved')
-                        .map((act) => (
-                          <div
-                            key={act.id}
-                            className="rounded-lg border p-2.5 space-y-2 text-xs"
-                            style={{
-                              background: 'var(--dash-card)',
-                              borderColor: 'var(--dash-border)',
-                            }}
-                          >
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="font-semibold truncate">
-                                {act.tableLabel || `Table ${act.tableId ?? ''}`} · {act.actionType}
-                              </span>
-                              <Badge variant="secondary">{act.status}</Badge>
-                            </div>
-                            <div className="flex gap-1.5">
-                              {act.status === 'open' && act.id && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  disabled={updateTableActionMutation.isPending}
-                                  onClick={() =>
-                                    updateTableActionMutation.mutate({
-                                      id: act.id!,
-                                      status: 'acknowledged',
-                                    })
-                                  }
-                                >
-                                  {t('design.studio.acknowledge')}
-                                </Button>
-                              )}
-                              {act.id && (
-                                <Button
-                                  size="sm"
-                                  variant="default"
-                                  disabled={updateTableActionMutation.isPending}
-                                  onClick={() =>
-                                    updateTableActionMutation.mutate({
-                                      id: act.id!,
-                                      status: 'resolved',
-                                    })
-                                  }
-                                >
-                                  {t('design.studio.resolve')}
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-                  )}
-                </div>
-
-                <Separator />
-
-                {/* Branch Item Overrides */}
-                <div className="space-y-2">
-                  <Label className="text-[11px] uppercase tracking-wider">
-                    {t('design.studio.branchItemsTitle')}
-                  </Label>
-                  {catalogItems.length === 0 ? (
-                    <p className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
-                      {t('design.studio.branchItemsEmpty')}
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {catalogItems.slice(0, 25).map((item) => {
-                        const itemId = String(item.id ?? '');
-                        const ov = branchOverrideByItemId.get(itemId);
-                        const visible = ov ? ov.isVisible !== false : true;
-                        const draftPrice =
-                          priceOverrideDrafts[itemId] ??
-                          (ov?.hasPriceOverride ? String(ov.priceOverride ?? '') : '');
-                        return (
-                          <div
-                            key={itemId}
-                            className="rounded-lg border p-2.5 space-y-2 text-xs"
-                            style={{
-                              background: 'var(--dash-card)',
-                              borderColor: 'var(--dash-border)',
-                            }}
-                          >
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="font-medium truncate">{item.name}</span>
-                              <Switch
-                                id={`branch-vis-${itemId}`}
-                                checked={visible}
-                                onCheckedChange={(nextVisible) =>
-                                  upsertBranchItemMutation.mutate({
-                                    locationId: selectedLocationId,
-                                    menuItemId: itemId,
-                                    isVisible: nextVisible,
-                                    hasPriceOverride: Boolean(ov?.hasPriceOverride),
-                                    priceOverride: ov?.priceOverride ?? 0,
-                                  })
-                                }
-                              />
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <Input
-                                type="number"
-                                step="0.01"
-                                min={0}
-                                value={draftPrice}
-                                onChange={(e) =>
-                                  setPriceOverrideDrafts((prev) => ({
-                                    ...prev,
-                                    [itemId]: e.target.value,
-                                  }))
-                                }
-                                placeholder={`${t('design.studio.priceOverridePlaceholder')} (${item.salePrice ?? 0})`}
-                                className="h-7 text-xs flex-1"
-                              />
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                disabled={upsertBranchItemMutation.isPending}
-                                onClick={() => {
-                                  const raw = (priceOverrideDrafts[itemId] ?? '').trim();
-                                  const parsed = Number(raw);
-                                  const hasOverride =
-                                    raw !== '' && Number.isFinite(parsed) && parsed >= 0;
-                                  upsertBranchItemMutation.mutate({
-                                    locationId: selectedLocationId,
-                                    menuItemId: itemId,
-                                    isVisible: visible,
-                                    hasPriceOverride: hasOverride,
-                                    priceOverride: hasOverride ? parsed : 0,
-                                  });
-                                }}
-                              >
-                                {t('design.studio.save')}
-                              </Button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                  <p className="text-[11px] pt-1" style={{ color: 'var(--dash-text-muted)' }}>
+                    {t(
+                      'design.studio.posOpsHint',
+                      'Live table service requests and branch 86 / price overrides are managed in POS.'
+                    )}
+                  </p>
                 </div>
               </div>
             )}
@@ -1977,8 +1987,8 @@ const Design: React.FC = () => {
               </div>
             )}
 
-            {/* 6. SCOPED CSS TAB */}
-            {activeTab === 'css' && (
+            {/* 5. SCOPED CSS TAB */}
+            {activeTab === 'css' && platformCustomCssEnabled && (
               <div className="space-y-3">
                 <div>
                   <h2 className="text-sm font-semibold">{t('design.sections.advanced')}</h2>
@@ -1987,12 +1997,13 @@ const Design: React.FC = () => {
                   </p>
                 </div>
                 <textarea
+                  dir="ltr"
                   value={customCss}
                   onChange={(e) => setCustomCss(e.target.value)}
                   rows={12}
                   spellCheck={false}
                   placeholder=".rtylr-menu-root { letter-spacing: 0.01em; }"
-                  className="w-full rounded-xl p-3 font-mono text-xs border focus:outline-none focus:ring-2 focus:ring-[var(--dash-border-focus)]"
+                  className="w-full rounded-xl p-3 font-mono text-xs border text-left focus:outline-none focus:ring-2 focus:ring-[var(--dash-border-focus)]"
                   style={{
                     background: 'var(--dash-input-bg)',
                     color: 'var(--dash-text)',
@@ -2004,12 +2015,17 @@ const Design: React.FC = () => {
           </aside>
 
           {/* Calm Neutral Preview Stage */}
-          <main className="flex-1 min-w-0 overflow-auto p-6 flex items-start justify-center">
+          <section
+            aria-label={t('design.preview')}
+            className={`${
+              mobilePane === 'preview' ? 'flex' : 'hidden lg:flex'
+            } flex-1 min-w-0 overflow-auto p-3 sm:p-6 items-start justify-center`}
+          >
             <div
-              className="transition-all duration-200 overflow-hidden"
+              className="transition-all duration-200 overflow-hidden max-w-full"
               style={{
                 width: deviceWidth,
-                maxWidth: viewport === 'desktop' ? 880 : undefined,
+                maxWidth: viewport === 'desktop' ? 880 : '100%',
                 height: viewport === 'mobile' ? 780 : 'calc(100vh - 116px)',
                 borderRadius: viewport === 'mobile' ? 28 : 14,
                 border: '1px solid var(--dash-border)',
@@ -2023,18 +2039,21 @@ const Design: React.FC = () => {
                   business={businessInfo}
                   categories={menuCategories}
                   config={previewConfig}
+                  banners={previewBanners}
                   activeLocale={previewLocale}
                   availableLocales={enabledLocales}
                   onLocaleChange={setPreviewLocale}
-                  currencies={previewCurrencies}
+                  currencies={platformCurrenciesEnabled ? previewCurrencies : []}
                   stampCards={previewStampCards}
                   tableLabel="Table 4"
-                  enableCart={features.enableOrdering}
-                  onTableAction={() => undefined}
+                  enableCart={platformOrderingEnabled && features.enableOrdering}
+                  previewMode
+                  onTableAction={platformTableActionsEnabled ? () => undefined : undefined}
+                  onCaptureCrmGuest={platformCrmCaptureEnabled ? () => undefined : undefined}
                 />
               </div>
             </div>
-          </main>
+          </section>
         </div>
       </div>
     </>

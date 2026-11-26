@@ -67,11 +67,13 @@ type repository interface {
 }
 
 type Service struct {
-	repo            repository
-	hostResolver    HostResolver
-	eventDispatcher EventDispatcher
-	translator      AITranslator
-	tenantValidator TenantValidator
+	repo               repository
+	hostResolver       HostResolver
+	eventDispatcher    EventDispatcher
+	translator         AITranslator
+	tenantValidator    TenantValidator
+	featureFlagChecker FeatureFlagChecker
+	guestCapturer      GuestCapturer
 }
 
 func NewService(_ context.Context, repo repository) *Service {

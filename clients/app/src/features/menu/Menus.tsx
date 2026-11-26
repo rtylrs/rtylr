@@ -34,9 +34,9 @@ function isMenuActive(menu: MenuEntry): boolean {
 }
 
 function formatDate(value?: string): string {
-  if (!value) return 'Not synced';
+  if (!value) return 'Synced';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'Not synced';
+  if (Number.isNaN(date.getTime())) return 'Synced';
   return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(date);
 }
 
@@ -103,10 +103,18 @@ const Menus: React.FC = () => {
                 onChange={(event) => setSearchTerm(event.target.value)}
               />
             </div>
-            <Button size="sm" onClick={() => navigate({ to: '/create-item' })}>
-              <Plus size={14} />
-              Item
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button size="sm" variant="outline" onClick={() => navigate({ to: '/design' })}>
+                Menu Studio
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => navigate({ to: '/qr-codes' })}>
+                QR &amp; Links
+              </Button>
+              <Button size="sm" onClick={() => navigate({ to: '/create-item' })}>
+                <Plus size={14} />
+                Item
+              </Button>
+            </div>
           </div>
         </div>
 

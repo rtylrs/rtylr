@@ -8,6 +8,7 @@ import AiChat, { ChatMessage } from "../../components/AiChat";
 import { MenuItemData } from "../../components/MenuItem";
 import {
   BusinessInfo,
+  CrmGuestInput,
   CustomerStampProgressData,
   DEFAULT_FEATURES_CONFIG,
   DEFAULT_LAYOUT_CONFIG,
@@ -68,8 +69,21 @@ const DEFAULT_LABELS: MenuLayoutLabels = {
   emptyCart: "Your cart is empty",
   subtotal: "Subtotal",
   placeOrder: "Place Order",
+  previewCheckoutNotice: "Preview only — live checkout runs on your published menu link",
   askAi: "Ask AI",
   aiPlaceholder: "Ask about items, allergens, specials…",
+  joinClub: "Stay in touch",
+  crmGuestTitle: "Join our guest list",
+  crmGuestSubtitle: "Leave your details for offers, events, and personalized rewards.",
+  crmGuestName: "Full name",
+  crmGuestPhone: "Phone number",
+  crmGuestEmail: "Email address",
+  crmGuestConsent: "Save my contact info so this business can send me updates & offers",
+  crmGuestSubmit: "Save my details",
+  crmGuestSubmitting: "Saving…",
+  crmGuestSuccess: "Thanks! Your details have been saved.",
+  crmGuestError: "Could not save your details — please try again.",
+  crmGuestContactRequired: "Enter a phone number or email address to continue.",
 };
 
 function safeExternalHref(url?: string): string | null {
@@ -96,6 +110,8 @@ export interface MenuLayoutCoreProps {
   onLookupStamps?: (phone: string) => Promise<void> | void;
   tableLabel?: string;
   onTableAction?: (action: TableActionType) => Promise<void> | void;
+  onCaptureCrmGuest?: (input: CrmGuestInput) => Promise<void> | void;
+  previewMode?: boolean;
   labels?: Partial<MenuLayoutLabels>;
   enableCart?: boolean;
   enableAiChat?: boolean;
@@ -112,7 +128,8 @@ type ActiveSheet =
   | "preferences"
   | "filters"
   | "service"
-  | "loyalty";
+  | "loyalty"
+  | "crm";
 
 const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
   business,
@@ -131,6 +148,8 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
   onLookupStamps,
   tableLabel,
   onTableAction,
+  onCaptureCrmGuest,
+  previewMode = false,
   labels: labelsOverride,
   enableCart = true,
   enableAiChat = true,
@@ -186,6 +205,12 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
   const [tableActionNotice, setTableActionNotice] = useState<string | null>(null);
   const [stampLookupPhone, setStampLookupPhone] = useState("");
   const [lookingUpStamps, setLookingUpStamps] = useState(false);
+  const [crmName, setCrmName] = useState("");
+  const [crmPhone, setCrmPhone] = useState("");
+  const [crmEmail, setCrmEmail] = useState("");
+  const [crmConsent, setCrmConsent] = useState(true);
+  const [crmSubmitting, setCrmSubmitting] = useState(false);
+  const [crmError, setCrmError] = useState<string | null>(null);
   const [activeCategoryId, setActiveCategoryId] = useState<string>(
     categories[0]?.id ?? "",
   );
@@ -314,6 +339,37 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
     }
   };
 
+  const handleSubmitCrmGuest = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setCrmError(null);
+    const trimmedPhone = crmPhone.trim();
+    const trimmedEmail = crmEmail.trim();
+    if (!trimmedPhone && !trimmedEmail) {
+      setCrmError(t.crmGuestContactRequired);
+      return;
+    }
+    if (!crmConsent || !onCaptureCrmGuest) return;
+    setCrmSubmitting(true);
+    try {
+      await onCaptureCrmGuest({
+        name: crmName.trim() || undefined,
+        phone: trimmedPhone || undefined,
+        email: trimmedEmail || undefined,
+        consent: true,
+      });
+      setCrmName("");
+      setCrmPhone("");
+      setCrmEmail("");
+      setActiveSheet(null);
+      setTableActionNotice(t.crmGuestSuccess);
+      setTimeout(() => setTableActionNotice(null), 3500);
+    } catch {
+      setCrmError(t.crmGuestError);
+    } finally {
+      setCrmSubmitting(false);
+    }
+  };
+
   const totalItems = cartItems.reduce((sum, c) => sum + c.quantity, 0);
   const totalBasePrice = cartItems.reduce((sum, c) => sum + c.price * c.quantity, 0);
   const cartEnabled = enableCart && features.enableOrdering && config.items.layout !== "minimal";
@@ -326,20 +382,24 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
     (features.enableCurrencySwitcher && currencies.length > 1);
   const showFilterTrigger = features.enableDietaryFilters && dietaryOptions.length > 0;
   const showTableActions =
+    features.fulfillmentModes.dineIn &&
     Boolean(onTableAction) &&
     (features.tableActions.callWaiter ||
       features.tableActions.requestBill ||
       features.tableActions.splitBill);
   const showLoyalty = features.enableLoyaltyStamps && stampCards.length > 0;
+  const showCrmCapture = features.enableCrmCapture && Boolean(onCaptureCrmGuest);
   const showBottomDock =
-    renderedPage === "menu" && (showTableActions || showLoyalty || (cartEnabled && totalItems > 0));
+    renderedPage === "menu" &&
+    (showTableActions || showLoyalty || showCrmCapture || (cartEnabled && totalItems > 0));
 
-  const topStartSlot = tableLabel ? (
-    <span className={styles.glassPill}>
-      <span className={styles.glassDot} />
-      {tableLabel}
-    </span>
-  ) : null;
+  const topStartSlot =
+    tableLabel && features.fulfillmentModes.dineIn ? (
+      <span className={styles.glassPill}>
+        <span className={styles.glassDot} />
+        {tableLabel}
+      </span>
+    ) : null;
 
   const topEndSlot = (
     <>
@@ -453,92 +513,96 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
       )}
 
       {/* Main menu content starts immediately above the fold */}
-      <main className={styles.layout__main}>
-        {renderedPage === "menu" && (
-          <>
-            {/* Compact 1-line loyalty / promo pill (tappable, never bulky) */}
-            {(showLoyalty || (features.enableBanners && banners.length > 0)) && (
-              <div className={styles.compactHighlights}>
-                {showLoyalty && (
-                  <button
-                    type="button"
-                    className={styles.highlightPill}
-                    onClick={() => setActiveSheet("loyalty")}
-                  >
-                    <span className={styles.highlightDot}>★</span>
-                    <span className={styles.highlightText}>
-                      <strong>{stampCards[0].title}</strong> · {stampCards[0].stampsRequired} stamps → {stampCards[0].rewardLabel}
-                    </span>
-                    <span className={styles.highlightChevron}>›</span>
-                  </button>
-                )}
-                {features.enableBanners && banners.length > 0 && (
-                  <div className={styles.bannerStrip}>
-                    {banners.map((banner) => {
-                      const img = cdnImageUrl(banner.imageUrl);
-                      const href = safeExternalHref(banner.linkUrl);
-                      const inner = (
-                        <>
-                          {img && (
-                            <img
-                              src={img}
-                              alt={banner.title}
-                              className={styles.bannerPillImg}
-                            />
-                          )}
-                          <div className={styles.bannerPillText}>
-                            <strong>{banner.title}</strong>
-                            {banner.body && <span>{banner.body}</span>}
+      {React.createElement(
+        previewMode ? "div" : "main",
+        { className: styles.layout__main },
+        <>
+          {renderedPage === "menu" && (
+            <>
+              {/* Compact 1-line loyalty / promo pill (tappable, never bulky) */}
+              {(showLoyalty || (features.enableBanners && banners.length > 0)) && (
+                <div className={styles.compactHighlights}>
+                  {showLoyalty && (
+                    <button
+                      type="button"
+                      className={styles.highlightPill}
+                      onClick={() => setActiveSheet("loyalty")}
+                    >
+                      <span className={styles.highlightDot}>★</span>
+                      <span className={styles.highlightText}>
+                        <strong>{stampCards[0].title}</strong> · {stampCards[0].stampsRequired} stamps → {stampCards[0].rewardLabel}
+                      </span>
+                      <span className={styles.highlightChevron}>›</span>
+                    </button>
+                  )}
+                  {features.enableBanners && banners.length > 0 && (
+                    <div className={styles.bannerStrip}>
+                      {banners.map((banner) => {
+                        const img = cdnImageUrl(banner.imageUrl);
+                        const href = safeExternalHref(banner.linkUrl);
+                        const inner = (
+                          <>
+                            {img && (
+                              <img
+                                src={img}
+                                alt={banner.title}
+                                className={styles.bannerPillImg}
+                              />
+                            )}
+                            <div className={styles.bannerPillText}>
+                              <strong>{banner.title}</strong>
+                              {banner.body && <span>{banner.body}</span>}
+                            </div>
+                          </>
+                        );
+                        return href ? (
+                          <a
+                            key={banner.id}
+                            href={href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.bannerPill}
+                            style={{ textDecoration: "none", color: "inherit" }}
+                          >
+                            {inner}
+                          </a>
+                        ) : (
+                          <div key={banner.id} className={styles.bannerPill}>
+                            {inner}
                           </div>
-                        </>
-                      );
-                      return href ? (
-                        <a
-                          key={banner.id}
-                          href={href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={styles.bannerPill}
-                          style={{ textDecoration: "none", color: "inherit" }}
-                        >
-                          {inner}
-                        </a>
-                      ) : (
-                        <div key={banner.id} className={styles.bannerPill}>
-                          {inner}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
 
-            {decoratedCategories.map((cat) => (
-              <MenuCategory
-                key={cat.id}
-                category={cat}
-                displayConfig={config.items}
-                onItemClick={handleOpenItem}
-                onAddToCart={cartEnabled ? (item) => handleAddToCart(item, 1) : undefined}
-              />
-            ))}
-          </>
-        )}
+              {decoratedCategories.map((cat) => (
+                <MenuCategory
+                  key={cat.id}
+                  category={cat}
+                  displayConfig={config.items}
+                  onItemClick={handleOpenItem}
+                  onAddToCart={cartEnabled ? (item) => handleAddToCart(item, 1) : undefined}
+                />
+              ))}
+            </>
+          )}
 
-        {renderedPage === "about" && <AboutPage business={business} />}
-        {renderedPage === "gallery" && (
-          <GalleryPage photos={business.photos ?? []} businessName={business.name} />
-        )}
-        {renderedPage === "reviews" && (
-          <ReviewsPage
-            reviews={business.reviews ?? []}
-            averageRating={business.averageRating}
-            reviewCount={business.reviewCount}
-          />
-        )}
-        {renderedPage === "offers" && <OffersPage offers={business.offers ?? []} />}
-      </main>
+          {renderedPage === "about" && <AboutPage business={business} />}
+          {renderedPage === "gallery" && (
+            <GalleryPage photos={business.photos ?? []} businessName={business.name} />
+          )}
+          {renderedPage === "reviews" && (
+            <ReviewsPage
+              reviews={business.reviews ?? []}
+              averageRating={business.averageRating}
+              reviewCount={business.reviewCount}
+            />
+          )}
+          {renderedPage === "offers" && <OffersPage offers={business.offers ?? []} />}
+        </>,
+      )}
 
       <footer className={styles.layout__poweredBy} data-rtylr-powered-by="true">
         Powered by RTYLR
@@ -578,6 +642,25 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
               <span>{t.rewards}</span>
             </button>
           )}
+          {showCrmCapture && (
+            <button
+              type="button"
+              className={styles.dockIconBtn}
+              aria-label={t.joinClub}
+              onClick={() => {
+                setCrmError(null);
+                setActiveSheet("crm");
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <line x1="19" x2="19" y1="8" y2="14" />
+                <line x1="22" x2="16" y1="11" y2="11" />
+              </svg>
+              <span>{t.joinClub}</span>
+            </button>
+          )}
           {cartEnabled && totalItems > 0 && (
             <button
               type="button"
@@ -614,7 +697,9 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
                     ? t.dietaryPreferences
                     : activeSheet === "service"
                       ? t.tableService
-                      : t.digitalStampCards
+                      : activeSheet === "crm"
+                        ? t.crmGuestTitle
+                        : t.digitalStampCards
             }
           >
             <div className={styles.sheetHandle} />
@@ -839,6 +924,74 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
                 </button>
               </div>
             )}
+
+            {activeSheet === "crm" && (
+              <form className={styles.sheetBody} onSubmit={(e) => void handleSubmitCrmGuest(e)}>
+                <h3 className={styles.sheetTitle}>{t.crmGuestTitle}</h3>
+                <p style={{ margin: "0 0 12px", fontSize: "0.875rem", opacity: 0.72 }}>
+                  {t.crmGuestSubtitle}
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <input
+                    type="text"
+                    className={styles.sheetInput}
+                    value={crmName}
+                    onChange={(e) => setCrmName(e.target.value)}
+                    placeholder={t.crmGuestName}
+                    aria-label={t.crmGuestName}
+                    style={{ margin: 0 }}
+                  />
+                  <input
+                    type="tel"
+                    className={styles.sheetInput}
+                    value={crmPhone}
+                    onChange={(e) => setCrmPhone(e.target.value)}
+                    placeholder={t.crmGuestPhone}
+                    aria-label={t.crmGuestPhone}
+                    style={{ margin: 0 }}
+                  />
+                  <input
+                    type="email"
+                    className={styles.sheetInput}
+                    value={crmEmail}
+                    onChange={(e) => setCrmEmail(e.target.value)}
+                    placeholder={t.crmGuestEmail}
+                    aria-label={t.crmGuestEmail}
+                    style={{ margin: 0 }}
+                  />
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 8,
+                      fontSize: "0.8rem",
+                      opacity: 0.85,
+                      cursor: "pointer",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={crmConsent}
+                      onChange={(e) => setCrmConsent(e.target.checked)}
+                      style={{ marginTop: 2 }}
+                    />
+                    <span>{t.crmGuestConsent}</span>
+                  </label>
+                  {crmError && (
+                    <p role="alert" style={{ margin: 0, fontSize: "0.8rem", color: "#dc2626" }}>
+                      {crmError}
+                    </p>
+                  )}
+                  <button
+                    type="submit"
+                    className={styles.sheetPrimaryBtn}
+                    disabled={crmSubmitting || !crmConsent}
+                  >
+                    {crmSubmitting ? t.crmGuestSubmitting : t.crmGuestSubmit}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
@@ -941,7 +1094,12 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
           labels={t}
           onCheckout={(items) => {
             setCartOpen(false);
-            onCheckout?.(items);
+            if (previewMode || !onCheckout) {
+              setTableActionNotice(t.previewCheckoutNotice);
+              setTimeout(() => setTableActionNotice(null), 3500);
+              return;
+            }
+            onCheckout(items);
           }}
         />
       )}

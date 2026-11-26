@@ -713,3 +713,24 @@ model GetPublicMenuBundleResponse {
   translations: MenuTranslation[];
   stamp_cards: MenuStampCard[];
 }
+
+// ── Public Guest CRM Capture ─────────────────────────────────────────────────
+
+model CapturePublicMenuGuestRequest {
+  @minValueExclusive(0)
+  @encode(string)
+  business_id: int64;
+
+  @encode(string)
+  location_id?: int64;
+
+  name?: string;
+  phone?: string;
+  email?: string;
+  notes?: string;
+  consent: boolean;
+}
+
+model CapturePublicMenuGuestResponse {
+  captured: boolean;
+}

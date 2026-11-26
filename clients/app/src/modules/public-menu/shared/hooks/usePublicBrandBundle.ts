@@ -245,3 +245,23 @@ export async function resolvePublicCustomDomain(host: string): Promise<{
     businessSlug: res.businessSlug ?? '',
   };
 }
+
+export async function capturePublicMenuGuestSafe(params: {
+  businessId: number;
+  locationId?: number;
+  name?: string;
+  phone?: string;
+  email?: string;
+  notes?: string;
+  consent: boolean;
+}): Promise<void> {
+  await menuBuilderClient.capturePublicMenuGuest({
+    businessId: String(params.businessId),
+    ...(params.locationId ? { locationId: String(params.locationId) } : {}),
+    ...(params.name ? { name: params.name } : {}),
+    ...(params.phone ? { phone: params.phone } : {}),
+    ...(params.email ? { email: params.email } : {}),
+    ...(params.notes ? { notes: params.notes } : {}),
+    consent: params.consent,
+  });
+}

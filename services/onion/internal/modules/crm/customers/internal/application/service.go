@@ -73,6 +73,32 @@ func (s *Service) CaptureContactFromEvent(ctx context.Context, event eventbus.Ev
 	return nil
 }
 
+// CapturePublicContact upserts a consenting customer from a public storefront
+// (e.g. published digital menu guest form or online checkout) into CRM.
+func (s *Service) CapturePublicContact(ctx context.Context, businessID int64, contact crmcontract.CustomerContactCaptured) (int64, error) {
+	if businessID <= 0 {
+		return 0, fmt.Errorf("customer contact capture requires a positive business id")
+	}
+	if s.ownerOf == nil {
+		return 0, fmt.Errorf("customer contact capture requires a business owner resolver")
+	}
+	ownerID, err := s.ownerOf.GetBusinessOwnerID(ctx, businessID)
+	if err != nil {
+		return 0, err
+	}
+	if ownerID <= 0 {
+		return 0, fmt.Errorf("customer contact capture resolved an invalid business owner")
+	}
+	customerID, err := s.repo.UpsertDirectContact(ctx, businessID, ownerID, contact)
+	if err != nil {
+		return 0, err
+	}
+	if customerID > 0 {
+		invalidateCustomerScope(ctx, businessID)
+	}
+	return customerID, nil
+}
+
 // ─── Customers ────────────────────────────────────────────────────────────────
 
 func (s *Service) ListCustomers(ctx context.Context, filter domain.CustomerListFilter) (domain.CustomerListResult, error) {
@@ -257,6 +283,7 @@ type repository interface {
 
 	SearchSalesContacts(context.Context, int64, string) ([]domain.SalesContact, error)
 	CaptureCustomerContact(ctx context.Context, event eventbus.Event, ownerID int64, contact crmcontract.CustomerContactCaptured) error
+	UpsertDirectContact(ctx context.Context, businessID, ownerID int64, contact crmcontract.CustomerContactCaptured) (int64, error)
 	ApplyLoyaltyDelta(ctx context.Context, input domain.LoyaltyTransaction, delta int, tierFor func(int) string, onCommitted func()) error
 	BulkCreateCustomers(ctx context.Context, businessID, ownerID int64, items []domain.CustomerImportItem, dedupe bool) (int, int, error)
 	CreateCampaign(ctx context.Context, input domain.CampaignInput) (int64, error)

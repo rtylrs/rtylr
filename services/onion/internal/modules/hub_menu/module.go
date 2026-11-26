@@ -17,6 +17,8 @@ type (
 	HostResolver           = application.HostResolver
 	EventDispatcher        = application.EventDispatcher
 	AITranslator           = application.AITranslator
+	FeatureFlagChecker     = application.FeatureFlagChecker
+	GuestCapturer          = application.GuestCapturer
 	TenantValidator        = application.TenantValidator
 	MenuProfile            = domain.MenuProfile
 	SaveMenuProfileDraftIn = domain.SaveMenuProfileDraftInput
@@ -52,6 +54,16 @@ func (m *Module) WithTenantValidator(v TenantValidator) *Module {
 	return m
 }
 
+func (m *Module) WithFeatureFlagChecker(fn FeatureFlagChecker) *Module {
+	m.service.WithFeatureFlagChecker(fn)
+	return m
+}
+
+func (m *Module) WithGuestCapturer(fn GuestCapturer) *Module {
+	m.service.WithGuestCapturer(fn)
+	return m
+}
+
 // GetAnonymousRoutes exposes the anonymous customer-facing branded menu endpoints
 // so the HTTP auth middleware allows unauthenticated guest access.
 func (m *Module) GetAnonymousRoutes() []string {
@@ -61,6 +73,7 @@ func (m *Module) GetAnonymousRoutes() []string {
 		"/hub/menu/v1/public/table-actions",
 		"/hub/menu/v1/public/events",
 		"/hub/menu/v1/public/stamps",
+		"/hub/menu/v1/public/guest",
 	}
 }
 
@@ -101,4 +114,8 @@ func (m *Module) PublishMenuProfile(ctx context.Context, businessID, locationID 
 
 func (m *Module) CloneMenuProfile(ctx context.Context, businessID, sourceLocationID, targetLocationID int64) (MenuProfile, error) {
 	return m.service.CloneMenuProfile(ctx, businessID, sourceLocationID, targetLocationID)
+}
+
+func (m *Module) IsPublishedOrderingEnabled(ctx context.Context, businessID int64) bool {
+	return m.service.IsPublishedOrderingEnabled(ctx, businessID)
 }

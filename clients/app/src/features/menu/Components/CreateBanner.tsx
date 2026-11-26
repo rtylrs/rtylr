@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { uploadAsset } from '@voxire/api';
-import UnavailableNotice from '../../../shared/components/dash/UnavailableNotice';
-import { useUserStore } from '../../../shared/stores/userStore';
+import { useNavigate } from '@tanstack/react-router';
 import Dropzone from '../../../shared/components/Dropzone';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-
-const UNAVAILABLE_ID = 'menu-banner-saving-unavailable';
+import { useCreateMenuBanner } from '../../../shared/hooks/queries/useMenu';
 
 const CreateBanner = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const { userId: restaurantId } = useUserStore();
+  const navigate = useNavigate();
+  const createBanner = useCreateMenuBanner();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
+    body: '',
+    linkUrl: '',
     image: null as File | null,
   });
 
@@ -28,43 +29,43 @@ const CreateBanner = (): React.JSX.Element => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const title = formData.title.trim();
+    if (!title) {
+      toast.error(t('menu.bannerTitleRequired', 'Please enter a banner title'));
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       let bannerImageUrl = '';
       if (formData.image) {
-        const res = await uploadAsset(formData.image);
+        const res = await uploadAsset(formData.image, { visibility: 'public' });
         bannerImageUrl = res.url || '';
       }
 
-      const bannerObj = {
-        _id: String(Date.now()),
-        title: formData.title,
-        bannerImage: bannerImageUrl,
-        menuId: restaurantId ?? '',
-        type: 'banner' as const,
-        details: {
-          banner: {
-            title: formData.title,
-            bannerImage: bannerImageUrl,
-          },
-        },
-      };
+      await createBanner.mutateAsync({
+        title,
+        body: formData.body.trim(),
+        imageUrl: bannerImageUrl,
+        linkUrl: formData.linkUrl.trim(),
+        isActive: true,
+      });
 
-      // Same as CreateItem: addBanner touches only the local store, so the
-      // success toast was untrue. Also drops an `as any` the store's own
-      // Banner type never needed. rtylr#1150.
-      void bannerObj;
-      toast.error(t('menu.savingUnavailableToast'));
-    } catch {
-      toast.error('Failed to upload image. Please try again.');
+      toast.success(t('menu.bannerCreated', 'Promo banner published to your digital menu'));
+      void navigate({ to: '/design' });
+    } catch (err: unknown) {
+      const msg =
+        (err as { message?: string })?.message ||
+        t('menu.bannerSaveFailed', 'Failed to create banner. Please try again.');
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -77,11 +78,8 @@ const CreateBanner = (): React.JSX.Element => {
         <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
           Create Banner
         </h1>
-        <UnavailableNotice>
-          <span id={UNAVAILABLE_ID}>{t('menu.savingUnavailable')}</span>
-        </UnavailableNotice>
         <form
-          onSubmit={handleSubmit}
+          onSubmit={(e) => void handleSubmit(e)}
           className="rounded-xl p-6 border space-y-4"
           style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
         >
@@ -110,6 +108,52 @@ const CreateBanner = (): React.JSX.Element => {
             />
           </div>
           <div className="space-y-1">
+            <label
+              htmlFor="banner-body"
+              className="text-xs font-semibold"
+              style={{ color: 'var(--dash-text-muted)' }}
+            >
+              Subtitle / Offer Details
+            </label>
+            <input
+              id="banner-body"
+              type="text"
+              name="body"
+              value={formData.body}
+              onChange={handleChange}
+              placeholder="20% off iced drinks from 2pm to 5pm"
+              className="w-full px-3 py-2 rounded-lg border text-sm transition-colors focus:outline-none"
+              style={{
+                background: 'var(--dash-hover)',
+                borderColor: 'var(--dash-border)',
+                color: 'var(--dash-text)',
+              }}
+            />
+          </div>
+          <div className="space-y-1">
+            <label
+              htmlFor="banner-link"
+              className="text-xs font-semibold"
+              style={{ color: 'var(--dash-text-muted)' }}
+            >
+              Link URL (optional)
+            </label>
+            <input
+              id="banner-link"
+              type="url"
+              name="linkUrl"
+              value={formData.linkUrl}
+              onChange={handleChange}
+              placeholder="https://example.com/offer"
+              className="w-full px-3 py-2 rounded-lg border text-sm transition-colors focus:outline-none"
+              style={{
+                background: 'var(--dash-hover)',
+                borderColor: 'var(--dash-border)',
+                color: 'var(--dash-text)',
+              }}
+            />
+          </div>
+          <div className="space-y-1">
             <label className="text-xs font-semibold" style={{ color: 'var(--dash-text-muted)' }}>
               Banner Image
             </label>
@@ -127,7 +171,7 @@ const CreateBanner = (): React.JSX.Element => {
             <button
               type="button"
               onClick={() => window.history.back()}
-              disabled={isSubmitting}
+              disabled={isSubmitting || createBanner.isPending}
               className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-50"
               style={{ color: 'var(--dash-text-muted)' }}
             >
@@ -135,12 +179,11 @@ const CreateBanner = (): React.JSX.Element => {
             </button>
             <button
               type="submit"
-              disabled
-              aria-describedby={UNAVAILABLE_ID}
+              disabled={isSubmitting || createBanner.isPending}
               className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-50"
               style={{ background: 'var(--accent)', color: 'var(--dash-on-accent)' }}
             >
-              {isSubmitting ? 'Uploading...' : 'Create Banner'}
+              {isSubmitting || createBanner.isPending ? 'Saving...' : 'Create Banner'}
             </button>
           </div>
         </form>

@@ -237,7 +237,7 @@ func TestCreatePublicOrder_BranchOverridesTenancyAndCRMOptIn(t *testing.T) {
 			}
 			return true, false, 0, nil
 		}).
-		WithPublicOrderHook(func(_ context.Context, _, _, _, _ int64, _, _, _, _ string, crmOptIn bool, total float64) {
+		WithPublicOrderHook(func(_ context.Context, _, _, _, _ int64, _, _, _, _, _ string, crmOptIn bool, total float64) {
 			hookCRMOptIn = crmOptIn
 			hookTotal = total
 		})

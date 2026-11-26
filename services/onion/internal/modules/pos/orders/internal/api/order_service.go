@@ -25,7 +25,7 @@ func (a *OrderAPI) ListOrders(ctx context.Context, req *posordersv1.ListOrdersRe
 		return nil, err
 	}
 
-	user, authErr := requirePOSPermission(ctx, "pos:orders:view")
+	user, authErr := requirePOSOrMenuPermission(ctx, "pos:orders:view", "menu:orders:view")
 	if authErr != nil {
 		return nil, orderAPIError(authErr)
 	}
@@ -217,7 +217,7 @@ func (a *OrderAPI) GetPublicOrderStatus(ctx context.Context, req *posordersv1.Ge
 }
 
 func (a *OrderAPI) GetOrderDetail(ctx context.Context, req *posordersv1.GetOrderDetailRequest) (*posordersv1.GetOrderDetailResponse, error) {
-	user, authErr := requirePOSPermission(ctx, "pos:orders:view")
+	user, authErr := requirePOSOrMenuPermission(ctx, "pos:orders:view", "menu:orders:view")
 	if authErr != nil {
 		return nil, orderAPIError(authErr)
 	}
@@ -239,7 +239,7 @@ func (a *OrderAPI) GetOrderDetail(ctx context.Context, req *posordersv1.GetOrder
 }
 
 func (a *OrderAPI) UpdateOrderStatus(ctx context.Context, req *posordersv1.UpdateOrderStatusRequest) (*posordersv1.UpdateOrderStatusResponse, error) {
-	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
+	user, authErr := requirePOSOrMenuPermission(ctx, "pos:orders:create", "menu:menus:edit")
 	if authErr != nil {
 		return nil, orderAPIError(authErr)
 	}

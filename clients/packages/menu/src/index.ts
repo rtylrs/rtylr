@@ -8,6 +8,7 @@ export type {
   MenuCurrencyOption,
   MenuStampCardSummary,
   CustomerStampProgressData,
+  CrmGuestInput,
   MenuLayoutLabels,
   PageConfig,
   HeaderConfig,

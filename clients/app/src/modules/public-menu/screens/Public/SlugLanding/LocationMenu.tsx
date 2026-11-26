@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate, useRouter } from '@tanstack/react-router';
 import { FullScreenLoader, HelmetContainer } from '@voxire/components';
+import { FLAG_KEYS, useFeatureFlag } from '@voxire/config';
 import {
   GridLayout,
   MenuCategoryData,
@@ -13,6 +14,7 @@ import { EmptyState } from '@voxire/ui';
 import { SearchX, MapPinOff, UtensilsCrossed } from 'lucide-react';
 import { usePublicBusinessBySlug, usePublicMenu } from '../../../shared/hooks/usePublicMenu';
 import {
+  capturePublicMenuGuestSafe,
   lookupPublicCustomerStampsSafe,
   submitPublicTableActionSafe,
   trackPublicMenuEventSafe,
@@ -62,6 +64,12 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
     updateQuantity,
     businessId: cartBusinessId,
   } = useCartStore();
+
+  const platformOrderingEnabled = useFeatureFlag(FLAG_KEYS.APP_MENU_ORDERING);
+  const platformCrmCaptureEnabled = useFeatureFlag(FLAG_KEYS.APP_MENU_CRM_CAPTURE);
+  const platformTableActionsEnabled = useFeatureFlag(FLAG_KEYS.APP_MENU_TABLE_ACTIONS);
+  const platformLoyaltyEnabled = useFeatureFlag(FLAG_KEYS.APP_MENU_LOYALTY);
+  const platformBannersEnabled = useFeatureFlag(FLAG_KEYS.APP_MENU_BANNERS);
 
   const [activeLocale, setActiveLocale] = useState<string>('');
   const [activeCurrency, setActiveCurrency] = useState<string>('');
@@ -305,7 +313,9 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
   }
 
   const orderingEnabled =
-    isOnlineOrderingEnabled() && (brandBundle?.config.features?.enableOrdering ?? true);
+    isOnlineOrderingEnabled() &&
+    platformOrderingEnabled &&
+    (brandBundle?.config.features?.enableOrdering ?? true);
 
   return (
     <>
@@ -314,26 +324,36 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
         business={businessInfo}
         categories={categories}
         config={brandBundle?.config}
-        banners={brandBundle?.banners}
+        banners={platformBannersEnabled ? brandBundle?.banners : []}
         currencies={brandBundle?.currencies}
         activeCurrencyCode={activeCurrency || brandBundle?.defaultCurrency}
         onCurrencyChange={(code) => setActiveCurrency(code)}
         availableLocales={brandBundle?.enabledLocales}
         activeLocale={effectiveLocale}
         onLocaleChange={(loc) => setActiveLocale(loc)}
-        stampCards={brandBundle?.stampCards}
+        stampCards={platformLoyaltyEnabled ? brandBundle?.stampCards : []}
         customerStamps={customerStamps}
         onLookupStamps={
-          businessId
+          businessId && platformLoyaltyEnabled
             ? async (phone) => {
                 const progress = await lookupPublicCustomerStampsSafe(businessId, phone);
                 setCustomerStamps(progress);
               }
             : undefined
         }
+        onCaptureCrmGuest={
+          businessId && platformCrmCaptureEnabled
+            ? (guest) =>
+                capturePublicMenuGuestSafe({
+                  businessId,
+                  locationId: location.id,
+                  ...guest,
+                })
+            : undefined
+        }
         tableLabel={tableContext.tableLabel}
         onTableAction={
-          tableContext.tableId && businessId
+          tableContext.tableId && businessId && platformTableActionsEnabled
             ? (actionType) =>
                 submitPublicTableActionSafe({
                   businessId,

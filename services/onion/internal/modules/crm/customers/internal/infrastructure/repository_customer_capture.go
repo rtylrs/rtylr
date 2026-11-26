@@ -120,6 +120,91 @@ func (r *Repository) CaptureCustomerContact(ctx context.Context, event eventbus.
 	return tx.Commit()
 }
 
+// UpsertDirectContact captures or updates a consenting customer directly (for
+// example from a published digital menu lead form or public checkout) using the
+// same deduplication rules as event-driven contact capture.
+func (r *Repository) UpsertDirectContact(ctx context.Context, businessID, ownerID int64, contact crmcontract.CustomerContactCaptured) (customerID int64, err error) {
+	name := strings.TrimSpace(contact.Name)
+	email := strings.ToLower(strings.TrimSpace(contact.Email))
+	phone := strings.TrimSpace(contact.Phone)
+	if email == "" && phone == "" {
+		return 0, nil
+	}
+
+	firstName, lastName := splitCapturedName(name, email, phone)
+	totalSpent := strconv.FormatFloat(contact.TotalSpent, 'f', 2, 64)
+	visitCount := int32(0)
+	var lastVisit sql.NullTime
+	if contact.CountVisit {
+		visitCount = 1
+		lastVisit = sql.NullTime{Time: time.Now().UTC(), Valid: true}
+	}
+
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	qtx := r.queries.WithTx(tx)
+	customerID, err = qtx.FindCustomerForCapture(ctx, sqlc.FindCustomerForCaptureParams{
+		BusinessID: businessID,
+		Email:      email,
+		PhoneInput: sqlutil.NullString(phone),
+	})
+	if errors.Is(err, sql.ErrNoRows) {
+		result, insertErr := qtx.InsertCustomerFromCapture(ctx, sqlc.InsertCustomerFromCaptureParams{
+			OwnerID:     ownerID,
+			BusinessID:  businessID,
+			FirstName:   firstName,
+			LastName:    sqlutil.NullString(lastName),
+			Email:       sqlutil.NullString(email),
+			Phone:       sqlutil.NullString(phone),
+			TotalSpent:  sql.NullString{String: totalSpent, Valid: true},
+			VisitCount:  sql.NullInt32{Int32: visitCount, Valid: true},
+			LastVisitAt: lastVisit,
+		})
+		if insertErr != nil {
+			err = insertErr
+			return 0, err
+		}
+		customerID, err = result.LastInsertId()
+		if err != nil {
+			return 0, err
+		}
+	} else if err != nil {
+		return 0, err
+	} else {
+		updateFirstName := firstName
+		updateLastName := sqlutil.NullString(lastName)
+		if name == "" {
+			updateFirstName = ""
+			updateLastName = sqlutil.NullString("")
+		}
+		if err = qtx.UpdateCustomerFromCapture(ctx, sqlc.UpdateCustomerFromCaptureParams{
+			FirstName:       updateFirstName,
+			LastName:        updateLastName,
+			Email:           sqlutil.NullString(email),
+			Phone:           sqlutil.NullString(phone),
+			TotalSpentDelta: sql.NullString{String: totalSpent, Valid: true},
+			VisitCountDelta: sql.NullInt32{Int32: visitCount, Valid: true},
+			LastVisitAt:     lastVisit,
+			BusinessID:      businessID,
+			CustomerID:      customerID,
+		}); err != nil {
+			return 0, err
+		}
+	}
+	if err = tx.Commit(); err != nil {
+		return 0, err
+	}
+	return customerID, nil
+}
+
 func splitCapturedName(name, email, phone string) (string, string) {
 	if name == "" {
 		if email != "" {

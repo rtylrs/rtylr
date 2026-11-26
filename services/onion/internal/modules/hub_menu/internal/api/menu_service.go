@@ -129,6 +129,31 @@ func requireMenuPermission(ctx context.Context, permission string) (int64, error
 	return authenticatedBusinessID(ctx)
 }
 
+func hasMenuOrPOSPermission(authUser *authPkg.AuthUser, menuPermission, posPermission string) bool {
+	if authUser == nil {
+		return false
+	}
+	hasMenu := authPkg.HasAppPermission(authUser, authorization.AppMenu, menuPermission)
+	hasPOS := authPkg.HasAppPermission(authUser, authorization.AppPOS, posPermission) &&
+		authPkg.HasAnyAppScope(authUser, authorization.AppPOS)
+	return hasMenu || hasPOS
+}
+
+func requireMenuOrPOSPermission(ctx context.Context, menuPermission, posPermission string) (int64, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil {
+		authUser = authPkg.DeviceCtx(ctx).User
+	}
+	if !hasMenuOrPOSPermission(authUser, menuPermission, posPermission) {
+		return 0, onekiterrors.PermissionDenied()
+	}
+	businessID, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return 0, onekiterrors.PermissionDenied()
+	}
+	return businessID, nil
+}
+
 func createBannerInput(req *hubmenuv1.CreateMenuBannerRequest) (domain.BannerInput, error) {
 	startsAt, err := parseOptionalTime(req.GetStartsAt(), "starts_at")
 	if err != nil {

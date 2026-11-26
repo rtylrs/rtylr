@@ -45,7 +45,13 @@ if (rootElement) {
                 <RouterProvider router={router} />
                 <AvatarNameTooltip />
               </AvatarDirectoryProvider>
-              <Toaster className="rtylr-toaster" expand={false} offset={20} mobileOffset={16} />
+              <Toaster
+                className="rtylr-toaster"
+                position="top-center"
+                expand={false}
+                offset={20}
+                mobileOffset={16}
+              />
             </I18nextProvider>
           </Suspense>
         </CookiesProvider>

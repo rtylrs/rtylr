@@ -123,7 +123,7 @@ func (a *MenuAPI) DeleteMenuPreset(ctx context.Context, req *hubmenuv1.DeleteMen
 // ── Per-Branch POS Catalog Overrides ──────────────────────────────────────────
 
 func (a *MenuAPI) ListBranchMenuItems(ctx context.Context, req *hubmenuv1.ListBranchMenuItemsRequest) (*hubmenuv1.ListBranchMenuItemsResponse, error) {
-	businessID, err := requireMenuPermission(ctx, "menu:menus:view")
+	businessID, err := requireMenuOrPOSPermission(ctx, "menu:menus:view", "pos:orders:view")
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +139,7 @@ func (a *MenuAPI) ListBranchMenuItems(ctx context.Context, req *hubmenuv1.ListBr
 }
 
 func (a *MenuAPI) UpsertBranchMenuItem(ctx context.Context, req *hubmenuv1.UpsertBranchMenuItemRequest) (*hubmenuv1.UpsertBranchMenuItemResponse, error) {
-	businessID, err := requireMenuPermission(ctx, "menu:menus:edit")
+	businessID, err := requireMenuOrPOSPermission(ctx, "menu:menus:edit", "pos:orders:create")
 	if err != nil {
 		return nil, err
 	}
@@ -351,7 +351,7 @@ func (a *MenuAPI) DeleteStampCard(ctx context.Context, req *hubmenuv1.DeleteStam
 // ── Table Actions & Analytics (Authenticated) ─────────────────────────────────
 
 func (a *MenuAPI) ListTableActions(ctx context.Context, req *hubmenuv1.ListTableActionsRequest) (*hubmenuv1.ListTableActionsResponse, error) {
-	businessID, err := requireMenuPermission(ctx, "menu:orders:view")
+	businessID, err := requireMenuOrPOSPermission(ctx, "menu:orders:view", "pos:orders:view")
 	if err != nil {
 		return nil, err
 	}
@@ -367,7 +367,7 @@ func (a *MenuAPI) ListTableActions(ctx context.Context, req *hubmenuv1.ListTable
 }
 
 func (a *MenuAPI) UpdateTableActionStatus(ctx context.Context, req *hubmenuv1.UpdateTableActionStatusRequest) (*hubmenuv1.UpdateTableActionStatusResponse, error) {
-	businessID, err := requireMenuPermission(ctx, "menu:menus:edit")
+	businessID, err := requireMenuOrPOSPermission(ctx, "menu:menus:edit", "pos:orders:create")
 	if err != nil {
 		return nil, err
 	}
@@ -505,10 +505,28 @@ func (a *MenuAPI) GetPublicCustomerStamps(ctx context.Context, req *hubmenuv1.Ge
 	return &hubmenuv1.GetPublicCustomerStampsResponse{Progress: out}, nil
 }
 
+func (a *MenuAPI) CapturePublicMenuGuest(ctx context.Context, req *hubmenuv1.CapturePublicMenuGuestRequest) (*hubmenuv1.CapturePublicMenuGuestResponse, error) {
+	if err := a.Service.CapturePublicMenuGuest(
+		ctx,
+		req.GetBusinessId(),
+		req.GetLocationId(),
+		req.GetName(),
+		req.GetPhone(),
+		req.GetEmail(),
+		req.GetNotes(),
+		req.GetConsent(),
+	); err != nil {
+		return nil, builderError(err, "Failed to save guest details")
+	}
+	return &hubmenuv1.CapturePublicMenuGuestResponse{Captured: true}, nil
+}
+
 // ── Converters & Error Mapping ────────────────────────────────────────────────
 
 func builderError(err error, fallback string) error {
 	switch {
+	case errors.Is(err, domain.ErrFeatureDisabled):
+		return onekiterrors.New(http.StatusForbidden, err.Error())
 	case errors.Is(err, domain.ErrMenuPresetNotFound), errors.Is(err, domain.ErrStampCardNotFound):
 		return onekiterrors.New(http.StatusNotFound, err.Error())
 	case errors.Is(err, domain.ErrMenuProfileInvalidInput),
@@ -519,6 +537,7 @@ func builderError(err error, fallback string) error {
 		errors.Is(err, domain.ErrStampCardInvalidInput),
 		errors.Is(err, domain.ErrTableActionInvalidInput),
 		errors.Is(err, domain.ErrEventInvalidInput),
+		errors.Is(err, domain.ErrGuestCaptureInvalidInput),
 		errors.Is(err, domain.ErrUnsafeCustomCSS):
 		return onekiterrors.New(http.StatusBadRequest, err.Error())
 	default:

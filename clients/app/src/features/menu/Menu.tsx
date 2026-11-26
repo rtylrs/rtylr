@@ -2,9 +2,11 @@ import { Spinner, HelmetContainer } from '@voxire/components';
 import { cdnImageUrl } from '@voxire/config';
 import { useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
+import { toast } from 'sonner';
 import { useMenuStore } from '../../shared/stores/menuStore';
 import { useUserStore } from '../../shared/stores/userStore';
-import { useGetMenu } from '../../shared/hooks/queries/useMenu';
+import { useGetMenu, useUpdateMenuItem } from '../../shared/hooks/queries/useMenu';
+import { Button } from '../../shared/components/ui';
 import { toFiniteNumber } from '@voxire/api';
 import { formatMoney } from '../../shared/lib/money';
 
@@ -36,16 +38,47 @@ interface GroupedCategory {
 
 const Menu: React.FC = () => {
   const navigate = useNavigate();
-  const { userId } = useUserStore();
+  const { user, userId } = useUserStore();
   const {
-    items,
+    items: storeItems,
     status,
     id: menuId,
     deleteCategory,
     deleteBanner,
     deleteMenuItem,
   } = useMenuStore();
-  const { isLoading: isMenuLoading } = useGetMenu(userId as string);
+  const menuQueryId =
+    user?.businessId != null
+      ? String(user.businessId)
+      : user?.id != null
+        ? String(user.id)
+        : userId;
+  const { data: fetchedMenu, isLoading: isMenuLoading } = useGetMenu(menuQueryId);
+  const updateMenuItemMutation = useUpdateMenuItem();
+  const items = fetchedMenu?.items?.length ? fetchedMenu.items : storeItems;
+
+  const handleToggleItemActive = (item: StoreItem) => {
+    const id = String(item.itemId || item._id || '');
+    if (!id) return;
+    const nextActive = item.details?.isActive === false;
+    updateMenuItemMutation.mutate(
+      {
+        id,
+        name: item.details?.name ?? '',
+        salePrice: toFiniteNumber(item.details?.price),
+        isActive: nextActive,
+        stock: toFiniteNumber((item.details as { stock?: number } | undefined)?.stock),
+      },
+      {
+        onSuccess: () => {
+          toast.success(nextActive ? 'Item activated on menu' : 'Item hidden from menu');
+        },
+        onError: () => {
+          toast.error('Failed to update menu item');
+        },
+      }
+    );
+  };
 
   useEffect(() => {
     if (menuId) {
@@ -149,10 +182,12 @@ const Menu: React.FC = () => {
         </button>
         <button
           type="button"
-          className="text-xs text-red-500 hover:underline px-2 py-1"
-          onClick={() => deleteMenuItem(item._id as string)}
+          className="text-xs hover:underline px-2 py-1"
+          style={{ color: item.details?.isActive === false ? '#047857' : '#b45309' }}
+          disabled={updateMenuItemMutation.isPending}
+          onClick={() => handleToggleItemActive(item)}
         >
-          Delete
+          {item.details?.isActive === false ? 'Activate' : 'Hide'}
         </button>
       </div>
     </div>
@@ -317,21 +352,35 @@ const Menu: React.FC = () => {
     <>
       <HelmetContainer title="Menu · rtylr" />
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-bold text-primary">Menu</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button size="sm" variant="outline" onClick={() => navigate({ to: '/design' })}>
+              Menu Studio
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => navigate({ to: '/qr-codes' })}>
+              QR &amp; Links
+            </Button>
+            <Button size="sm" onClick={() => navigate({ to: '/create-item' })}>
+              Add Item
+            </Button>
+          </div>
         </div>
         {items.length > 0 ? (
           <div className="space-y-2">{renderSections(items as StoreItem[])}</div>
         ) : (
           <div
-            className="rounded-xl border p-8 text-center text-sm"
+            className="rounded-xl border p-8 text-center text-sm space-y-3"
             style={{
               background: 'var(--dash-card)',
               borderColor: 'var(--dash-border)',
               color: 'var(--dash-text-muted)',
             }}
           >
-            No POS menu items yet.
+            <p>No POS menu items yet.</p>
+            <Button size="sm" onClick={() => navigate({ to: '/create-item' })}>
+              Add your first item
+            </Button>
           </div>
         )}
       </div>

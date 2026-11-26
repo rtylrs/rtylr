@@ -10,17 +10,19 @@ import (
 )
 
 var (
-	ErrMenuProfileInvalidInput = errors.New("invalid menu profile input")
-	ErrMenuPresetNotFound      = errors.New("menu preset not found")
-	ErrMenuPresetInvalidInput  = errors.New("invalid menu preset input")
-	ErrBranchItemInvalidInput  = errors.New("invalid branch menu item input")
-	ErrTranslationInvalidInput = errors.New("invalid menu translation input")
-	ErrCurrencyInvalidInput    = errors.New("invalid menu currency input")
-	ErrStampCardNotFound       = errors.New("stamp card not found")
-	ErrStampCardInvalidInput   = errors.New("invalid stamp card input")
-	ErrTableActionInvalidInput = errors.New("invalid table action input")
-	ErrEventInvalidInput       = errors.New("invalid menu event input")
-	ErrUnsafeCustomCSS         = errors.New("custom CSS contains disallowed directives")
+	ErrMenuProfileInvalidInput  = errors.New("invalid menu profile input")
+	ErrMenuPresetNotFound       = errors.New("menu preset not found")
+	ErrMenuPresetInvalidInput   = errors.New("invalid menu preset input")
+	ErrBranchItemInvalidInput   = errors.New("invalid branch menu item input")
+	ErrTranslationInvalidInput  = errors.New("invalid menu translation input")
+	ErrCurrencyInvalidInput     = errors.New("invalid menu currency input")
+	ErrStampCardNotFound        = errors.New("stamp card not found")
+	ErrStampCardInvalidInput    = errors.New("invalid stamp card input")
+	ErrTableActionInvalidInput  = errors.New("invalid table action input")
+	ErrEventInvalidInput        = errors.New("invalid menu event input")
+	ErrGuestCaptureInvalidInput = errors.New("invalid guest capture input")
+	ErrFeatureDisabled          = errors.New("feature is disabled")
+	ErrUnsafeCustomCSS          = errors.New("custom CSS contains disallowed directives")
 )
 
 const MaxCustomCSSBytes = 32 * 1024
@@ -197,10 +199,48 @@ func IsLoyaltyStampsEnabled(configJSON string) bool {
 	return *parsed.Features.EnableLoyaltyStamps
 }
 
+// IsCRMCaptureEnabled reports whether a published profile enables optional CRM guest capture.
+func IsCRMCaptureEnabled(configJSON string) bool {
+	if strings.TrimSpace(configJSON) == "" {
+		return true
+	}
+	var parsed struct {
+		Features struct {
+			EnableCrmCapture *bool `json:"enableCrmCapture"`
+		} `json:"features"`
+	}
+	if err := json.Unmarshal([]byte(configJSON), &parsed); err != nil {
+		return true
+	}
+	if parsed.Features.EnableCrmCapture == nil {
+		return true
+	}
+	return *parsed.Features.EnableCrmCapture
+}
+
+// IsOrderingEnabled reports whether a published profile enables customer ordering.
+func IsOrderingEnabled(configJSON string) bool {
+	if strings.TrimSpace(configJSON) == "" {
+		return true
+	}
+	var parsed struct {
+		Features struct {
+			EnableOrdering *bool `json:"enableOrdering"`
+		} `json:"features"`
+	}
+	if err := json.Unmarshal([]byte(configJSON), &parsed); err != nil {
+		return true
+	}
+	if parsed.Features.EnableOrdering == nil {
+		return true
+	}
+	return *parsed.Features.EnableOrdering
+}
+
 // DefaultDraftConfigJSON returns a baseline MenuLayoutConfig JSON payload for
 // branches that have not saved a custom profile yet.
 func DefaultDraftConfigJSON() string {
-	return `{"pages":{"menu":true,"about":false,"gallery":false,"reviews":false,"offers":false},"header":{"coverHeight":"md","showLogo":true,"showDescription":true,"showMeta":true,"sticky":true},"nav":{"style":"underline","size":"md"},"items":{"layout":"grid","columns":2,"imagePosition":"top","imageSize":"md","showDescription":true,"showBadges":true,"cardRadius":"md"},"colors":{"primary":"#111827","secondary":"#374151","accent":"#4583C4","bg":"#f9f9f7","surface":"#ffffff","text":"#1a1a1a"},"typography":{"headingFont":"system","bodyFont":"system","fontSize":"md"},"mode":"light","features":{"enableOrdering":true,"fulfillmentModes":{"dineIn":true,"selfService":true,"pickup":true,"delivery":false},"tableActions":{"callWaiter":true,"requestBill":true,"splitBill":false},"enableLoyaltyStamps":true,"enableAiAssistant":true,"enableBanners":true,"enableUpsells":true,"enableDietaryFilters":true,"enableCurrencySwitcher":true,"enableLanguageSwitcher":true,"enableSearch":true},"payment":{"mode":"pos","redirectUrl":""}}`
+	return `{"pages":{"menu":true,"about":false,"gallery":false,"reviews":false,"offers":false},"header":{"coverHeight":"md","showLogo":true,"showDescription":true,"showMeta":true,"sticky":true},"nav":{"style":"underline","size":"md"},"items":{"layout":"grid","columns":2,"imagePosition":"top","imageSize":"md","showDescription":true,"showBadges":true,"cardRadius":"md"},"colors":{"primary":"#111827","secondary":"#374151","accent":"#4583C4","bg":"#f9f9f7","surface":"#ffffff","text":"#1a1a1a"},"typography":{"headingFont":"system","bodyFont":"system","fontSize":"md"},"mode":"light","features":{"enableOrdering":true,"fulfillmentModes":{"dineIn":true,"selfService":true,"pickup":true,"delivery":false},"tableActions":{"callWaiter":true,"requestBill":true,"splitBill":false},"enableLoyaltyStamps":true,"enableCrmCapture":true,"enableAiAssistant":true,"enableBanners":true,"enableUpsells":true,"enableDietaryFilters":true,"enableCurrencySwitcher":true,"enableLanguageSwitcher":true,"enableSearch":true},"payment":{"mode":"pos","redirectUrl":""}}`
 }
 
 // ExtractPaymentRedirectURL parses the optional third-party payment redirect URL

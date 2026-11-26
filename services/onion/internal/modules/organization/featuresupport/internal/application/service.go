@@ -335,6 +335,26 @@ func clampPercent(p int32) int32 {
 	return p
 }
 
+// IsFlagEnabled reports whether a platform feature flag is globally enabled.
+// Missing flags or storage errors fall back to defaultVal so unconfigured
+// shipped features stay available until a super-admin toggles them off.
+func (s *Service) IsFlagEnabled(ctx context.Context, key string, defaultVal bool) bool {
+	key = strings.TrimSpace(key)
+	if key == "" {
+		return defaultVal
+	}
+	flags, err := s.ListFlags(ctx)
+	if err != nil {
+		return defaultVal
+	}
+	for _, f := range flags {
+		if f.Key == key {
+			return f.Enabled && f.RolloutPercentage > 0
+		}
+	}
+	return defaultVal
+}
+
 func (s *Service) ListFlags(ctx context.Context) ([]domain.Flag, error) {
 	return cacher.Of[[]domain.Flag]().GetOrComputeSingle(ctx,
 		cacheKeys.Scoped(featureSupportCacheScope, 0, "flags"),

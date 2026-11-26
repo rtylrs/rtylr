@@ -1,25 +1,20 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { useRouterState } from '@tanstack/react-router';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Button, Input } from '../../../shared/components/ui';
 import { useMenuStore } from '../../../shared/stores/menuStore';
-import UnavailableNotice from '../../../shared/components/dash/UnavailableNotice';
-
-const UNAVAILABLE_ID = 'menu-item-saving-unavailable';
+import { useCreateMenuItem, useUpdateMenuItem } from '../../../shared/hooks/queries/useMenu';
 
 interface StoreItemDetailsLike {
   name?: string;
   description?: string;
   price?: string | number;
-  salePrice?: string | number;
+  sku?: string;
+  stock?: number;
+  isActive?: boolean;
   isAvailable?: boolean;
-  ingredients?: string[];
-  allergens?: string[];
-  tags?: string[];
-  isVeg?: boolean;
-  isHalal?: boolean;
   menuItems?: StoreItemLike[];
 }
 
@@ -31,28 +26,32 @@ interface StoreItemLike {
   details?: StoreItemDetailsLike;
 }
 
+function generateSku(name: string): string {
+  const base = name
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 12);
+  const suffix = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `${base || 'ITEM'}-${suffix}`;
+}
+
 const CreateItem: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
-  // Only `items` is read now: the two write actions were the false-success
-  // path. They stay in the store for whoever wires the real mutations.
   const { items } = useMenuStore();
   const searchParams = new URLSearchParams(searchStr);
   const itemId = searchParams.get('itemId');
 
+  const createMenuItem = useCreateMenuItem();
+  const updateMenuItem = useUpdateMenuItem();
+
   const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [sku, setSku] = useState('');
   const [price, setPrice] = useState('');
-  const [salePrice, setSalePrice] = useState('');
-  const [coverImage, setCoverImage] = useState<File | null>(null);
-  const [images] = useState<string[]>([]);
-  const [ingredients, setIngredients] = useState<string[]>([]);
+  const [stock, setStock] = useState('0');
   const [isAvailable, setIsAvailable] = useState(true);
-  const [availability] = useState('');
-  const [allergens, setAllergens] = useState<string[]>([]);
-  const [tags, setTags] = useState<string[]>([]);
-  const [isVeg, setIsVeg] = useState(false);
-  const [isHalal, setIsHalal] = useState(false);
 
   React.useEffect(() => {
     if (!itemId) return;
@@ -71,85 +70,81 @@ const CreateItem: React.FC = () => {
     if (found) {
       const details = found.details;
       setName(details?.name || found.name || '');
-      setDescription(details?.description || '');
-      if (details?.price !== undefined) {
-        setPrice(String(Number(details.price)));
-      }
-      if (details?.salePrice) {
-        setSalePrice(String(Number(details.salePrice)));
-      }
-      if (details?.isAvailable !== undefined) setIsAvailable(Boolean(details.isAvailable));
-      if (details?.ingredients) setIngredients(details.ingredients);
-      if (details?.allergens) setAllergens(details.allergens);
-      if (details?.tags) setTags(details.tags);
-      if (details?.isVeg !== undefined) setIsVeg(Boolean(details.isVeg));
-      if (details?.isHalal !== undefined) setIsHalal(Boolean(details.isHalal));
+      if (details?.sku) setSku(details.sku);
+      if (details?.price !== undefined) setPrice(String(Number(details.price)));
+      if (details?.stock !== undefined) setStock(String(Number(details.stock)));
+      if (details?.isActive !== undefined) setIsAvailable(Boolean(details.isActive));
+      else if (details?.isAvailable !== undefined) setIsAvailable(Boolean(details.isAvailable));
     }
   }, [itemId, items]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    setState: React.Dispatch<React.SetStateAction<string[]>>
-  ) => {
-    setState(e.target.value.split(',').map((item) => item.trim()));
-  };
+  const isSaving = createMenuItem.isPending || updateMenuItem.isPending;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const trimmedName = name.trim();
     if (!trimmedName) {
-      toast.error('Please enter an item name');
+      toast.error(t('menu.nameRequired', 'Please enter an item name'));
       return;
     }
 
     const numericPrice = Number(price);
-    if (isNaN(numericPrice) || numericPrice < 0) {
-      toast.error('Please enter a valid non-negative price');
+    if (!Number.isFinite(numericPrice) || numericPrice < 0) {
+      toast.error(t('menu.priceInvalid', 'Please enter a valid non-negative price'));
       return;
     }
 
-    const item = {
-      name: trimmedName,
-      description,
-      // Major units, matching pos_menu_items.sale_price DECIMAL(10,2) and
-      // what useMenu's toStoreItems reads back. Scaling by 100 here meant the
-      // form seeded itself by dividing by 100 to compensate, so the field
-      // showed 0.125 for a $12.50 item.
-      price: numericPrice,
-      salePrice: salePrice ? Number(salePrice) : 0,
-      coverImage,
-      images,
-      ingredients,
-      isAvailable,
-      availability,
-      allergens,
-      tags,
-      isVeg,
-      isHalal,
-    };
+    const numericStock = Number(stock);
+    const safeStock = Number.isFinite(numericStock) && numericStock >= 0 ? numericStock : 0;
 
-    // Saving is off. These two calls change only the local store, and
-    // useGetMenu refetches over the top, so the success toast was telling
-    // someone their menu item had been created when nothing had left the
-    // browser. Reporting the state is the honest behaviour until the
-    // mutations reach pos/menu_item/v1. rtylr#1150.
-    void item;
-    toast.error(t('menu.savingUnavailableToast'));
+    try {
+      if (itemId) {
+        await updateMenuItem.mutateAsync({
+          id: itemId,
+          name: trimmedName,
+          salePrice: numericPrice,
+          isActive: isAvailable,
+          stock: safeStock,
+        });
+        toast.success(t('menu.itemUpdated', 'Menu item updated and synced across your apps'));
+      } else {
+        await createMenuItem.mutateAsync({
+          name: trimmedName,
+          sku: sku.trim() || generateSku(trimmedName),
+          salePrice: numericPrice,
+        });
+        toast.success(t('menu.itemCreated', 'Menu item created and synced across your apps'));
+      }
+      void navigate({ to: '/menu', search: { menuId: 'pos-menu' } });
+    } catch (err: unknown) {
+      const msg =
+        (err as { message?: string })?.message ||
+        t('menu.itemSaveFailed', 'Failed to save menu item');
+      toast.error(msg);
+    }
   };
 
   return (
     <>
       <HelmetContainer title={itemId ? 'Edit item · rtylr' : 'Create item · rtylr'} />
       <div className="max-w-2xl mx-auto space-y-6">
-        <UnavailableNotice>
-          <span id={UNAVAILABLE_ID}>{t('menu.savingUnavailable')}</span>
-        </UnavailableNotice>
-        <h2 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
-          {itemId ? 'Edit Menu Item' : 'Create Menu Item'}
-        </h2>
+        <div>
+          <h2 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
+            {itemId
+              ? t('menu.editItemTitle', 'Edit Menu Item')
+              : t('menu.createItemTitle', 'Create Menu Item')}
+          </h2>
+          <p className="text-xs mt-1" style={{ color: 'var(--dash-text-muted)' }}>
+            {t(
+              'menu.syncHint',
+              'Items saved here automatically stay in sync across Digital Menu, POS, and ERP Inventory.'
+            )}
+          </p>
+        </div>
+
         <form
-          onSubmit={handleSubmit}
+          onSubmit={(e) => void handleSubmit(e)}
           className="rounded-xl p-6 border space-y-4"
           style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
         >
@@ -164,31 +159,14 @@ const CreateItem: React.FC = () => {
             <Input
               id="item-name"
               type="text"
-              placeholder="Product name"
+              placeholder="e.g. Iced Matcha Latte"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
             />
           </div>
 
-          <div className="space-y-1">
-            <label
-              htmlFor="item-desc"
-              className="text-xs font-semibold"
-              style={{ color: 'var(--dash-text-muted)' }}
-            >
-              Description
-            </label>
-            <Input
-              id="item-desc"
-              type="text"
-              placeholder="Add a description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
               <label
                 htmlFor="item-price"
@@ -201,115 +179,69 @@ const CreateItem: React.FC = () => {
                 id="item-price"
                 type="number"
                 step="0.01"
+                min="0"
                 placeholder="0.00"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 required
               />
             </div>
-            <div className="space-y-1">
+
+            {!itemId ? (
+              <div className="space-y-1">
+                <label
+                  htmlFor="item-sku"
+                  className="text-xs font-semibold"
+                  style={{ color: 'var(--dash-text-muted)' }}
+                >
+                  SKU (optional)
+                </label>
+                <Input
+                  id="item-sku"
+                  type="text"
+                  placeholder="Auto-generated if left blank"
+                  value={sku}
+                  onChange={(e) => setSku(e.target.value)}
+                />
+              </div>
+            ) : (
+              <div className="space-y-1">
+                <label
+                  htmlFor="item-stock"
+                  className="text-xs font-semibold"
+                  style={{ color: 'var(--dash-text-muted)' }}
+                >
+                  Stock
+                </label>
+                <Input
+                  id="item-stock"
+                  type="number"
+                  step="1"
+                  min="0"
+                  placeholder="0"
+                  value={stock}
+                  onChange={(e) => setStock(e.target.value)}
+                />
+              </div>
+            )}
+          </div>
+
+          {itemId && (
+            <div className="flex items-center gap-6 pt-2">
               <label
-                htmlFor="item-sale-price"
-                className="text-xs font-semibold"
-                style={{ color: 'var(--dash-text-muted)' }}
+                className="flex items-center gap-2 text-xs font-medium cursor-pointer select-none"
+                style={{ color: 'var(--dash-text)' }}
               >
-                Sale Price
+                <input
+                  type="checkbox"
+                  checked={isAvailable}
+                  onChange={(e) => setIsAvailable(e.target.checked)}
+                  className="rounded"
+                />
+                Available on menu
               </label>
-              <Input
-                id="item-sale-price"
-                type="number"
-                step="0.01"
-                placeholder="0.00"
-                value={salePrice}
-                onChange={(e) => setSalePrice(e.target.value)}
-              />
             </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-semibold" style={{ color: 'var(--dash-text-muted)' }}>
-              Tags (comma separated)
-            </label>
-            <Input
-              type="text"
-              placeholder="Popular, Chef Special"
-              value={tags.join(', ')}
-              onChange={(e) => handleInputChange(e, setTags)}
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-semibold" style={{ color: 'var(--dash-text-muted)' }}>
-              Cover Image
-            </label>
-            <Input
-              type="file"
-              onChange={(e) => setCoverImage(e.target.files ? e.target.files[0] : null)}
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-semibold" style={{ color: 'var(--dash-text-muted)' }}>
-              Ingredients (comma separated)
-            </label>
-            <Input
-              type="text"
-              placeholder="Flour, Sugar, Butter"
-              value={ingredients.join(', ')}
-              onChange={(e) => handleInputChange(e, setIngredients)}
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-semibold" style={{ color: 'var(--dash-text-muted)' }}>
-              Allergens (comma separated)
-            </label>
-            <Input
-              type="text"
-              placeholder="Nuts, Dairy, Gluten"
-              value={allergens.join(', ')}
-              onChange={(e) => handleInputChange(e, setAllergens)}
-            />
-          </div>
-
-          <div className="flex items-center gap-6 pt-2">
-            <label
-              className="flex items-center gap-2 text-xs font-medium cursor-pointer select-none"
-              style={{ color: 'var(--dash-text)' }}
-            >
-              <input
-                type="checkbox"
-                checked={isAvailable}
-                onChange={(e) => setIsAvailable(e.target.checked)}
-                className="rounded"
-              />
-              Available
-            </label>
-            <label
-              className="flex items-center gap-2 text-xs font-medium cursor-pointer select-none"
-              style={{ color: 'var(--dash-text)' }}
-            >
-              <input
-                type="checkbox"
-                checked={isVeg}
-                onChange={(e) => setIsVeg(e.target.checked)}
-                className="rounded"
-              />
-              Vegetarian
-            </label>
-            <label
-              className="flex items-center gap-2 text-xs font-medium cursor-pointer select-none"
-              style={{ color: 'var(--dash-text)' }}
-            >
-              <input
-                type="checkbox"
-                checked={isHalal}
-                onChange={(e) => setIsHalal(e.target.checked)}
-                className="rounded"
-              />
-              Halal
-            </label>
-          </div>
+          )}
 
           <div
             className="flex items-center justify-end gap-3 pt-4 border-t"
@@ -318,10 +250,8 @@ const CreateItem: React.FC = () => {
             <Button variant="ghost" type="button" onClick={() => window.history.back()}>
               {t('common.cancel')}
             </Button>
-            {/* Disabled as well as guarded in the handler: a disabled submit
-                button does not stop Enter submitting the form from a field. */}
-            <Button variant="default" type="submit" disabled aria-describedby={UNAVAILABLE_ID}>
-              {t('menu.saveItem')}
+            <Button variant="default" type="submit" disabled={isSaving}>
+              {isSaving ? t('common.saving', 'Saving...') : t('menu.saveItem')}
             </Button>
           </div>
         </form>

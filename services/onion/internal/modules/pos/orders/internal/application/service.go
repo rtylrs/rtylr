@@ -36,7 +36,7 @@ type PaddlePaymentResult struct {
 }
 
 // PublicOrderHook is invoked after a public menu order lands in POS (stamps, webhooks, CRM).
-type PublicOrderHook func(ctx context.Context, businessID, locationID, tableID, orderID int64, orderNumber, fulfillmentMode, customerName, customerPhone string, crmOptIn bool, total float64)
+type PublicOrderHook func(ctx context.Context, businessID, locationID, tableID, orderID int64, orderNumber, fulfillmentMode, customerName, customerPhone, customerEmail string, crmOptIn bool, total float64)
 
 // PaymentRedirectResolver resolves an optional third-party payment redirect URL for a branch.
 type PaymentRedirectResolver func(ctx context.Context, businessID, locationID int64) string
