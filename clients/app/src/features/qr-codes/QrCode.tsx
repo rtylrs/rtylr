@@ -167,13 +167,13 @@ function QrCode() {
   const [customDomain, setCustomDomain] = useState('');
   const [useCustomDomain, setUseCustomDomain] = useState(false);
 
-  // A slug gives the canonical /<slug>/menu URL; without one the business is
-  // addressed by id in the POS-style /b/<id>/menu form.
+  // A slug gives the branded https://<slug>.rtylr.com[/<branch>] URL;
+  // without one the business is addressed by id in the POS-style /b/<id>/menu form.
   const baseMenuUrl =
     useCustomDomain && customDomain
       ? `https://${customDomain}${selectedBranchSlug ? `/menu/${selectedBranchSlug}` : '/menu'}`
       : businessSlug
-        ? `${buildPublicMenuUrl(businessSlug)}${selectedBranchSlug ? `/${selectedBranchSlug}` : ''}`
+        ? buildPublicMenuUrl(businessSlug, selectedBranchSlug || undefined)
         : businessId != null
           ? buildPublicMenuUrlById(businessId)
           : PORTAL_URL;

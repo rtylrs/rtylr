@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import classNames from "classnames";
 import { cdnImageUrl } from "@voxire/config";
 import MenuHeader from "../../components/MenuHeader";
@@ -90,6 +90,22 @@ function safeExternalHref(url?: string): string | null {
   if (!url) return null;
   const trimmed = url.trim();
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return null;
+}
+
+const SCROLL_OFFSET_PADDING_PX = 12;
+
+function findScrollContainer(element: HTMLElement | null): HTMLElement | null {
+  let node = element?.parentElement ?? null;
+  while (node && node !== document.body && node !== document.documentElement) {
+    const overflowY = window.getComputedStyle(node).overflowY;
+    const isScrollable =
+      overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay";
+    if (isScrollable && node.scrollHeight > node.clientHeight) {
+      return node;
+    }
+    node = node.parentElement;
+  }
   return null;
 }
 
@@ -211,9 +227,30 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
   const [crmConsent, setCrmConsent] = useState(true);
   const [crmSubmitting, setCrmSubmitting] = useState(false);
   const [crmError, setCrmError] = useState<string | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [stickyOffset, setStickyOffset] = useState(SCROLL_OFFSET_PADDING_PX);
   const [activeCategoryId, setActiveCategoryId] = useState<string>(
     categories[0]?.id ?? "",
   );
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const header = root.querySelector("header");
+    if (!header || !config.header.sticky) {
+      setStickyOffset(SCROLL_OFFSET_PADDING_PX);
+      return;
+    }
+    const updateOffset = () => {
+      const height = header.getBoundingClientRect().height;
+      setStickyOffset(Math.ceil(height) + SCROLL_OFFSET_PADDING_PX);
+    };
+    updateOffset();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(updateOffset);
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, [config.header.sticky, config.header.coverHeight, renderedPage, categories.length]);
 
   useEffect(() => {
     loadMenuFont(config.typography?.headingFont);
@@ -307,8 +344,34 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
 
   const scrollToCategory = (id: string) => {
     setActiveCategoryId(id);
-    const el = document.getElementById(`category-${id}`);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    const root = rootRef.current;
+    const el =
+      (root?.querySelector(`[id="category-${id.replace(/"/g, '\\"')}"]`) as HTMLElement | null) ??
+      document.getElementById(`category-${id}`);
+    if (!el) return;
+
+    const header = root?.querySelector("header") ?? null;
+    const headerHeight =
+      config.header.sticky && header ? header.getBoundingClientRect().height : 0;
+    const offset = Math.ceil(headerHeight) + SCROLL_OFFSET_PADDING_PX;
+
+    const container = findScrollContainer(el);
+    if (!container) {
+      const targetTop = Math.max(0, window.scrollY + el.getBoundingClientRect().top - offset);
+      window.scrollTo({ top: targetTop, behavior: "smooth" });
+      return;
+    }
+
+    const containerTop = container.getBoundingClientRect().top;
+    const targetTop = Math.max(
+      0,
+      container.scrollTop + (el.getBoundingClientRect().top - containerTop) - offset,
+    );
+    if (typeof container.scrollTo === "function") {
+      container.scrollTo({ top: targetTop, behavior: "smooth" });
+    } else {
+      container.scrollTop = targetTop;
+    }
   };
 
   const triggerTableAction = async (action: TableActionType) => {
@@ -374,7 +437,14 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
   const totalBasePrice = cartItems.reduce((sum, c) => sum + c.price * c.quantity, 0);
   const cartEnabled = enableCart && features.enableOrdering && config.items.layout !== "minimal";
   const categoryNavItems = decoratedCategories.map((c) => ({ id: c.id, name: c.name }));
-  const themeStyle = useMemo(() => buildMenuThemeStyle(config), [config]);
+  const themeStyle = useMemo(
+    () =>
+      ({
+        ...buildMenuThemeStyle(config),
+        "--menu-scroll-margin-top": `${stickyOffset}px`,
+      }) as React.CSSProperties,
+    [config, stickyOffset],
+  );
   const rtl = isRtlLocale(activeLocale);
 
   const showPrefTrigger =
@@ -457,6 +527,7 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
 
   return (
     <div
+      ref={rootRef}
       className={classNames("rtylr-menu-root", styles.layout, className)}
       style={themeStyle}
       dir={rtl ? "rtl" : "ltr"}
@@ -473,7 +544,14 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
         activePage={renderedPage}
         onPageChange={(page) => {
           setActivePage(page);
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          const container = findScrollContainer(rootRef.current);
+          if (!container) {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } else if (typeof container.scrollTo === "function") {
+            container.scrollTo({ top: 0, behavior: "smooth" });
+          } else {
+            container.scrollTop = 0;
+          }
         }}
         categories={categoryNavItems}
         activeCategoryId={activeCategoryId}
@@ -1015,7 +1093,10 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
               aria-label="Close item details"
               onClick={() => setDetailItem(null)}
             >
-              ×
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
             </button>
             {cdnImageUrl(detailItem.image) && (
               <img
@@ -1053,16 +1134,23 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
                   <div className={styles.qtyStepper}>
                     <button
                       type="button"
+                      aria-label="Decrease quantity"
                       onClick={() => setDetailQty((q) => Math.max(1, q - 1))}
                     >
-                      −
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                      </svg>
                     </button>
                     <span>{detailQty}</span>
                     <button
                       type="button"
+                      aria-label="Increase quantity"
                       onClick={() => setDetailQty((q) => q + 1)}
                     >
-                      +
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                      </svg>
                     </button>
                   </div>
                   <button

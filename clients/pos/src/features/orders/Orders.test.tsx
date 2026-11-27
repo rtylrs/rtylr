@@ -4,15 +4,19 @@ import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/re
 import { MemoryRouter } from 'react-router-dom';
 
 const listOrdersMock = vi.hoisted(() => vi.fn());
+const getOrderDetailMock = vi.hoisted(() => vi.fn());
 const updateOrderStatusMock = vi.hoisted(() => vi.fn());
 const voidOrderMock = vi.hoisted(() => vi.fn());
+const emailReceiptMock = vi.hoisted(() => vi.fn());
 const resolveOpenSessionIdMock = vi.hoisted(() => vi.fn());
 
 vi.mock('@voxire/api', () => ({
   createOneKitClient: () => ({
     listOrders: listOrdersMock,
+    getOrderDetail: getOrderDetailMock,
     updateOrderStatus: updateOrderStatusMock,
     voidOrder: voidOrderMock,
+    emailReceipt: emailReceiptMock,
   }),
 }));
 
@@ -38,8 +42,10 @@ import OrdersScreen from './index';
 describe('POS OrdersScreen online menu integration', () => {
   beforeEach(() => {
     listOrdersMock.mockReset();
+    getOrderDetailMock.mockReset();
     updateOrderStatusMock.mockReset();
     voidOrderMock.mockReset();
+    emailReceiptMock.mockReset();
     resolveOpenSessionIdMock.mockReset();
   });
 
@@ -128,6 +134,61 @@ describe('POS OrdersScreen online menu integration', () => {
       expect(listOrdersMock).toHaveBeenLastCalledWith(
         expect.objectContaining({ sessionId: '4' })
       );
+    });
+  });
+
+  it('opens an itemized receipt modal for online menu orders and emails receipts', async () => {
+    listOrdersMock.mockResolvedValue({
+      orders: [
+        {
+          id: '12',
+          sessionId: '0',
+          orderNumber: 'ORD-20261127-0012',
+          status: 'pending',
+          customerName: 'Sam Guest',
+          total: 11.0,
+          createdAt: '2026-11-27T10:00:00Z',
+          items: [{ id: '1', name: 'Iced Matcha Latte', quantity: 2 }],
+        },
+      ],
+      total: 1,
+      hasMore: false,
+    });
+    getOrderDetailMock.mockResolvedValue({
+      order: {
+        id: '12',
+        orderNumber: 'ORD-20261127-0012',
+        status: 'pending',
+        customerName: 'Sam Guest',
+        total: 11.0,
+        createdAt: '2026-11-27T10:00:00Z',
+        items: [{ id: '1', name: 'Iced Matcha Latte', quantity: 2, unitPrice: 5.5, total: 11.0 }],
+      },
+    });
+    emailReceiptMock.mockResolvedValue({ message: 'Receipt sent' });
+
+    render(
+      <MemoryRouter>
+        <OrdersScreen />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => expect(screen.getByText('#ORD-20261127-0012')).toBeTruthy());
+
+    fireEvent.click(screen.getByRole('button', { name: 'Receipt' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Receipt for order ORD-20261127-0012' })).toBeTruthy();
+      expect(screen.getByText('2× Iced Matcha Latte')).toBeTruthy();
+    });
+
+    fireEvent.change(screen.getByPlaceholderText('email@example.com'), {
+      target: { value: 'guest@example.com' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Email' }));
+
+    await waitFor(() => {
+      expect(emailReceiptMock).toHaveBeenCalledWith({ id: '12', email: 'guest@example.com' });
     });
   });
 });

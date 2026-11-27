@@ -25,6 +25,38 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
+func mapReceiptRow(
+	id int64,
+	orderNumber string,
+	customerName sql.NullString,
+	total sql.NullString,
+	paymentMethod sqlc.NullPosOrdersPaymentMethod,
+	paidAt sql.NullTime,
+	createdAt sql.NullTime,
+	businessID int64,
+) domain.Receipt {
+	timestamp := paidAt.Time
+	if !paidAt.Valid {
+		timestamp = createdAt.Time
+	}
+	method := ""
+	if paymentMethod.Valid {
+		method = string(paymentMethod.PosOrdersPaymentMethod)
+	}
+	if method == "" {
+		method = "online"
+	}
+	return domain.Receipt{
+		ID:            id,
+		OrderNumber:   orderNumber,
+		CustomerName:  customerName.String,
+		Total:         sqlutil.DecimalToFloat(total.String),
+		PaymentMethod: method,
+		PaidAt:        timestamp,
+		BusinessID:    businessID,
+	}
+}
+
 func (r *Repository) List(ctx context.Context, businessID int64, dateFrom, dateTo string) ([]domain.Receipt, error) {
 	var receipts []domain.Receipt
 
@@ -41,15 +73,10 @@ func (r *Repository) List(ctx context.Context, businessID int64, dateFrom, dateT
 		}
 		receipts = make([]domain.Receipt, 0, len(rows))
 		for _, row := range rows {
-			receipts = append(receipts, domain.Receipt{
-				ID:            row.ID,
-				OrderNumber:   row.OrderNumber,
-				CustomerName:  row.CustomerName.String,
-				Total:         sqlutil.DecimalToFloat(row.Total.String),
-				PaymentMethod: string(row.PaymentMethod.PosOrdersPaymentMethod),
-				PaidAt:        row.PaidAt.Time,
-				BusinessID:    row.BusinessID,
-			})
+			receipts = append(receipts, mapReceiptRow(
+				row.ID, row.OrderNumber, row.CustomerName, row.Total,
+				row.PaymentMethod, row.PaidAt, row.CreatedAt, row.BusinessID,
+			))
 		}
 	} else if dateFrom != "" {
 		rows, err := r.queries.ListReceiptsWithDateFrom(ctx, sqlc.ListReceiptsWithDateFromParams{
@@ -62,15 +89,10 @@ func (r *Repository) List(ctx context.Context, businessID int64, dateFrom, dateT
 		}
 		receipts = make([]domain.Receipt, 0, len(rows))
 		for _, row := range rows {
-			receipts = append(receipts, domain.Receipt{
-				ID:            row.ID,
-				OrderNumber:   row.OrderNumber,
-				CustomerName:  row.CustomerName.String,
-				Total:         sqlutil.DecimalToFloat(row.Total.String),
-				PaymentMethod: string(row.PaymentMethod.PosOrdersPaymentMethod),
-				PaidAt:        row.PaidAt.Time,
-				BusinessID:    row.BusinessID,
-			})
+			receipts = append(receipts, mapReceiptRow(
+				row.ID, row.OrderNumber, row.CustomerName, row.Total,
+				row.PaymentMethod, row.PaidAt, row.CreatedAt, row.BusinessID,
+			))
 		}
 	} else if dateTo != "" {
 		end := parseTime(dateTo).AddDate(0, 0, 1)
@@ -84,15 +106,10 @@ func (r *Repository) List(ctx context.Context, businessID int64, dateFrom, dateT
 		}
 		receipts = make([]domain.Receipt, 0, len(rows))
 		for _, row := range rows {
-			receipts = append(receipts, domain.Receipt{
-				ID:            row.ID,
-				OrderNumber:   row.OrderNumber,
-				CustomerName:  row.CustomerName.String,
-				Total:         sqlutil.DecimalToFloat(row.Total.String),
-				PaymentMethod: string(row.PaymentMethod.PosOrdersPaymentMethod),
-				PaidAt:        row.PaidAt.Time,
-				BusinessID:    row.BusinessID,
-			})
+			receipts = append(receipts, mapReceiptRow(
+				row.ID, row.OrderNumber, row.CustomerName, row.Total,
+				row.PaymentMethod, row.PaidAt, row.CreatedAt, row.BusinessID,
+			))
 		}
 	} else {
 		rows, err := r.queries.ListReceipts(ctx, businessID)
@@ -102,15 +119,10 @@ func (r *Repository) List(ctx context.Context, businessID int64, dateFrom, dateT
 		}
 		receipts = make([]domain.Receipt, 0, len(rows))
 		for _, row := range rows {
-			receipts = append(receipts, domain.Receipt{
-				ID:            row.ID,
-				OrderNumber:   row.OrderNumber,
-				CustomerName:  row.CustomerName.String,
-				Total:         sqlutil.DecimalToFloat(row.Total.String),
-				PaymentMethod: string(row.PaymentMethod.PosOrdersPaymentMethod),
-				PaidAt:        row.PaidAt.Time,
-				BusinessID:    row.BusinessID,
-			})
+			receipts = append(receipts, mapReceiptRow(
+				row.ID, row.OrderNumber, row.CustomerName, row.Total,
+				row.PaymentMethod, row.PaidAt, row.CreatedAt, row.BusinessID,
+			))
 		}
 	}
 
@@ -129,15 +141,11 @@ func (r *Repository) Get(ctx context.Context, businessID, id int64) (*domain.Rec
 		logger.Ctx(ctx).Error("Failed to get receipt", logger.Error(err))
 		return nil, err
 	}
-	return &domain.Receipt{
-		ID:            row.ID,
-		OrderNumber:   row.OrderNumber,
-		CustomerName:  row.CustomerName.String,
-		Total:         sqlutil.DecimalToFloat(row.Total.String),
-		PaymentMethod: string(row.PaymentMethod.PosOrdersPaymentMethod),
-		PaidAt:        row.PaidAt.Time,
-		BusinessID:    row.BusinessID,
-	}, nil
+	receipt := mapReceiptRow(
+		row.ID, row.OrderNumber, row.CustomerName, row.Total,
+		row.PaymentMethod, row.PaidAt, row.CreatedAt, row.BusinessID,
+	)
+	return &receipt, nil
 }
 
 func parseTime(s string) time.Time {

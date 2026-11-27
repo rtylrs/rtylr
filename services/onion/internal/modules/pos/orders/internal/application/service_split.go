@@ -267,11 +267,14 @@ func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input Pu
 	}
 
 	items := make([]domain.OrderItemInput, 0, len(input.Items))
+	requestedQtyByItem := make(map[int64]float64, len(input.Items))
+	itemNameByID := make(map[int64]string, len(input.Items))
+	itemOrder := make([]int64, 0, len(input.Items))
 	for i, it := range input.Items {
 		item, err := s.repo.GetPublicMenuItem(ctx, ownerID, it.MenuItemID)
 		if err != nil {
 			if errors.Is(err, domain.ErrPublicMenuItemNotFound) {
-				return 0, "", "", fmt.Errorf("item[%d]: menu item is not available", i)
+				return 0, "", "", fmt.Errorf("item[%d]: %w", i, domain.ErrPublicMenuItemNotFound)
 			}
 			return 0, "", "", fmt.Errorf("load menu item: %w", err)
 		}
@@ -281,7 +284,7 @@ func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input Pu
 				return 0, "", "", fmt.Errorf("resolve branch menu item: %w", ovErr)
 			}
 			if !visible {
-				return 0, "", "", fmt.Errorf("item[%d]: menu item is not available at this branch", i)
+				return 0, "", "", fmt.Errorf("item[%d]: menu item is not available at this branch: %w", i, domain.ErrPublicMenuItemNotFound)
 			}
 			if hasOverride && priceOverride >= 0 {
 				item.UnitPrice = priceOverride
@@ -290,6 +293,23 @@ func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input Pu
 		item.Quantity = it.Quantity
 		item.Notes = it.Notes
 		items = append(items, item)
+		if _, seen := requestedQtyByItem[it.MenuItemID]; !seen {
+			itemOrder = append(itemOrder, it.MenuItemID)
+			itemNameByID[it.MenuItemID] = item.Name
+		}
+		requestedQtyByItem[it.MenuItemID] += it.Quantity
+	}
+
+	if s.productStockReader != nil {
+		for _, menuItemID := range itemOrder {
+			trackInventory, allowBackorder, available, stockErr := s.productStockReader(ctx, ownerID, menuItemID)
+			if stockErr != nil {
+				return 0, "", "", fmt.Errorf("check menu item stock: %w", stockErr)
+			}
+			if trackInventory && !allowBackorder && available < requestedQtyByItem[menuItemID] {
+				return 0, "", "", fmt.Errorf("%w: %s", domain.ErrInsufficientStock, itemNameByID[menuItemID])
+			}
+		}
 	}
 
 	notes := input.Notes
@@ -324,6 +344,8 @@ func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input Pu
 	if err != nil {
 		return 0, "", "", fmt.Errorf("create public order: %w", err)
 	}
+
+	invalidateOrderScope(ctx, ownerID)
 
 	publicToken := uuid.NewString()
 	cacher.Of[string]().Put(ctx, publicOrderTokenCacheKey(ownerID, orderID), publicToken,

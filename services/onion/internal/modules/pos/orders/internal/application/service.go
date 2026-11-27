@@ -47,6 +47,9 @@ type BranchItemPriceResolver func(ctx context.Context, businessID, locationID, m
 // PublicOrderTenancyValidator verifies that locationID and tableID belong to businessID.
 type PublicOrderTenancyValidator func(ctx context.Context, businessID, locationID, tableID int64) error
 
+// ProductStockReader checks whether an ERP product tracks inventory and how many units are available.
+type ProductStockReader func(ctx context.Context, businessID, productID int64) (trackInventory, allowBackorder bool, available float64, err error)
+
 type Service struct {
 	repo                        repository
 	settings                    settingsReader
@@ -54,6 +57,7 @@ type Service struct {
 	paymentRedirectResolver     PaymentRedirectResolver
 	branchItemPriceResolver     BranchItemPriceResolver
 	publicOrderTenancyValidator PublicOrderTenancyValidator
+	productStockReader          ProductStockReader
 }
 
 func NewService(repo repository, settings settingsReader) *Service {
@@ -77,6 +81,11 @@ func (s *Service) WithBranchItemPriceResolver(fn BranchItemPriceResolver) *Servi
 
 func (s *Service) WithPublicOrderTenancyValidator(fn PublicOrderTenancyValidator) *Service {
 	s.publicOrderTenancyValidator = fn
+	return s
+}
+
+func (s *Service) WithProductStockReader(fn ProductStockReader) *Service {
+	s.productStockReader = fn
 	return s
 }
 

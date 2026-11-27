@@ -28,6 +28,7 @@
   "phoneRequired": "Veuillez entrer votre numéro de téléphone.",
   "emailInvalid": "Veuillez entrer une adresse e-mail valide.",
   "orderFailed": "Échec de la commande. Veuillez réessayer.",
+  "outOfStock": "Un ou plusieurs articles de votre panier sont en rupture de stock. Veuillez vérifier votre commande.",
   "fulfillmentDineIn": "Sur place",
   "fulfillmentSelfService": "Libre-service",
   "fulfillmentPickup": "À emporter",

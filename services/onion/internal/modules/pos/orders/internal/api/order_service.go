@@ -173,6 +173,12 @@ func (a *OrderAPI) CreatePublicOrder(ctx context.Context, req *posordersv1.Creat
 		Items:           items,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrInsufficientStock) {
+			return nil, orderAPIStatusError(http.StatusConflict, err.Error())
+		}
+		if errors.Is(err, domain.ErrPublicMenuItemNotFound) {
+			return nil, orderAPIStatusError(http.StatusUnprocessableEntity, "One or more items are no longer available")
+		}
 		return nil, orderAPIStatusError(http.StatusInternalServerError, "Failed to create order")
 	}
 

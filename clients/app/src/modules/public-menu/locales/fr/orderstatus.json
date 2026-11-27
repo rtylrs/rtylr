@@ -19,6 +19,8 @@
   "loading": "Chargement du statut de la commande...",
   "loadFailed": "Impossible de charger le statut de la commande.",
   "retry": "Réessayer",
+  "refresh": "Actualiser le statut",
+  "refreshing": "Actualisation...",
   "pollNotice": "Le statut est actualisé automatiquement toutes les {{seconds}} secondes.",
   "orderAnother": "Commander à nouveau",
   "notFoundTitle": "Commande introuvable",

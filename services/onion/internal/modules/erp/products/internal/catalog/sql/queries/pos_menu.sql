@@ -15,6 +15,8 @@ SELECT
     p.description,
     COALESCE(img.url, '') AS image_url,
     COALESCE(pst.total_quantity, p.stock_quantity) AS stock_quantity,
+    p.track_inventory,
+    p.allow_backorder,
     p.is_active,
     p.created_at,
     p.updated_at

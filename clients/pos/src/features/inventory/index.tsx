@@ -1,4 +1,5 @@
 import { createOneKitClient } from '@voxire/api';
+import { useQueryClient } from '@tanstack/react-query';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Package, Store } from 'lucide-react';
 import { toast } from 'sonner';
@@ -146,6 +147,7 @@ function ActionModal({
 }
 
 const InventoryScreen: React.FC = () => {
+  const queryClient = useQueryClient();
   const locationId = useTerminalContextStore((s) => s.locationId);
   const employee = useEmployeeSessionStore((s) => s.employee);
   const [items, setItems] = useState<InventoryItem[]>([]);
@@ -212,6 +214,7 @@ const InventoryScreen: React.FC = () => {
       });
       await recordStockAction(built);
       toast.success(`${ACTION_LABELS[action]} recorded`);
+      void queryClient.invalidateQueries({ queryKey: ['pos-menu-items'] });
       void load();
     } catch (err) {
       // Toast the failure and rethrow so the modal stays open (its submit

@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import MenuLayoutCore from "./index";
 import type { MenuCategoryData } from "../../components/MenuCategory";
-import type { MenuLayoutConfig } from "../../types";
+import { DEFAULT_LAYOUT_CONFIG, type MenuLayoutConfig } from "../../types";
 
 const categories: MenuCategoryData[] = [
   {
@@ -174,5 +174,44 @@ describe("MenuLayoutCore", () => {
       }),
     );
     expect(await screen.findByText(/Your details have been saved/)).toBeTruthy();
+  });
+
+  it("scrolls to the top of a clicked category section below the sticky header", () => {
+    const scrollToSpy = vi.fn();
+    const multiCategories: MenuCategoryData[] = [
+      { id: "coffee", name: "Coffee", items: [{ id: "1", name: "Espresso", price: 3 }] },
+      { id: "pastries", name: "Pastries", items: [{ id: "2", name: "Croissant", price: 4 }] },
+    ];
+
+    const { container } = render(
+      <div data-testid="scroll-wrapper" style={{ overflowY: "auto", height: "600px" }}>
+        <MenuLayoutCore
+          business={{ name: "Cafe" }}
+          categories={multiCategories}
+          config={{ header: { ...DEFAULT_LAYOUT_CONFIG.header, sticky: true } }}
+        />
+      </div>,
+    );
+
+    const wrapper = screen.getByTestId("scroll-wrapper");
+    Object.defineProperty(wrapper, "scrollHeight", { value: 2000, configurable: true });
+    Object.defineProperty(wrapper, "clientHeight", { value: 600, configurable: true });
+    Object.defineProperty(wrapper, "scrollTop", { value: 100, writable: true, configurable: true });
+    wrapper.scrollTo = scrollToSpy;
+    wrapper.getBoundingClientRect = () =>
+      ({ top: 0, bottom: 600, left: 0, right: 400, width: 400, height: 600, x: 0, y: 0, toJSON: () => ({}) });
+
+    const header = container.querySelector("header") as HTMLElement;
+    header.getBoundingClientRect = () =>
+      ({ top: 0, bottom: 120, left: 0, right: 400, width: 400, height: 120, x: 0, y: 0, toJSON: () => ({}) });
+
+    const pastriesSection = container.querySelector("#category-pastries") as HTMLElement;
+    pastriesSection.getBoundingClientRect = () =>
+      ({ top: 500, bottom: 900, left: 0, right: 400, width: 400, height: 400, x: 0, y: 500, toJSON: () => ({}) });
+
+    fireEvent.click(screen.getByRole("button", { name: "Pastries" }));
+
+    // scrollTop(100) + (sectionTop(500) - containerTop(0)) - (headerHeight(120) + 12px padding) = 468
+    expect(scrollToSpy).toHaveBeenCalledWith({ top: 468, behavior: "smooth" });
   });
 });

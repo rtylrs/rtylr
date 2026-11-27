@@ -167,6 +167,13 @@ export function isReservedBusinessSlug(slug: string): boolean {
 }
 
 export function buildPublicMenuUrl(slug: string, location?: string): string {
+  const normalized = slug.trim().toLowerCase();
+  if (
+    RFC1123_LABEL_RE.test(normalized) &&
+    !(RESERVED_PLATFORM_SUBDOMAINS as readonly string[]).includes(normalized)
+  ) {
+    return buildTenantSubdomainMenuUrl(normalized, location);
+  }
   const base = `${PORTAL_ORIGIN}/${encodeURIComponent(slug)}/menu`;
   return location ? `${base}/${encodeURIComponent(location)}` : base;
 }

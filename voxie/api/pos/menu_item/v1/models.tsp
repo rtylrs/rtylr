@@ -46,6 +46,12 @@ model MenuItem {
   /** Current tracked stock quantity for the menu item. */
   stock: float64;
 
+  /** Whether inventory stock tracking is enabled on the linked ERP product. */
+  track_inventory?: boolean;
+
+  /** Whether backorders are permitted when tracked stock reaches zero. */
+  allow_backorder?: boolean;
+
   /**
    * product_id is the ERP product this item is sold from; absent for items
    * that are not stocked as a single product. When it is absent, cost and

@@ -277,3 +277,67 @@ func TestCreatePublicOrder_BranchOverridesTenancyAndCRMOptIn(t *testing.T) {
 		t.Fatalf("expected hook total 15.00, got %.2f", hookTotal)
 	}
 }
+
+func TestCreatePublicOrder_EnforcesInventoryStock(t *testing.T) {
+	t.Run("rejects tracked out-of-stock item", func(t *testing.T) {
+		repo := &fakePublicOrderRepo{basePrice: 4.50}
+		svc := NewService(repo, nil).WithProductStockReader(func(_ context.Context, _, _ int64) (bool, bool, float64, error) {
+			return true, false, 0, nil
+		})
+		_, _, _, err := svc.CreatePublicOrder(context.Background(), 42, PublicOrderInput{
+			Items: []PublicOrderItemInput{{MenuItemID: 10, Quantity: 1}},
+		})
+		if !errors.Is(err, domain.ErrInsufficientStock) {
+			t.Fatalf("expected ErrInsufficientStock, got %v", err)
+		}
+		if repo.orderCreated {
+			t.Fatalf("order should not be created when item is out of stock")
+		}
+	})
+
+	t.Run("aggregates duplicate lines when checking tracked stock", func(t *testing.T) {
+		repo := &fakePublicOrderRepo{basePrice: 4.50}
+		svc := NewService(repo, nil).WithProductStockReader(func(_ context.Context, _, _ int64) (bool, bool, float64, error) {
+			return true, false, 3, nil
+		})
+		_, _, _, err := svc.CreatePublicOrder(context.Background(), 42, PublicOrderInput{
+			Items: []PublicOrderItemInput{
+				{MenuItemID: 10, Quantity: 2},
+				{MenuItemID: 10, Quantity: 2},
+			},
+		})
+		if !errors.Is(err, domain.ErrInsufficientStock) {
+			t.Fatalf("expected ErrInsufficientStock for combined qty 4 > 3, got %v", err)
+		}
+	})
+
+	t.Run("allows untracked zero-stock items and backorder-enabled tracked items", func(t *testing.T) {
+		repo := &fakePublicOrderRepo{basePrice: 4.50}
+		svc := NewService(repo, nil).WithProductStockReader(func(_ context.Context, _, productID int64) (bool, bool, float64, error) {
+			if productID == 11 {
+				return false, false, 0, nil
+			}
+			return true, true, 0, nil
+		})
+		if _, _, _, err := svc.CreatePublicOrder(context.Background(), 42, PublicOrderInput{
+			Items: []PublicOrderItemInput{
+				{MenuItemID: 11, Quantity: 2},
+				{MenuItemID: 12, Quantity: 1},
+			},
+		}); err != nil {
+			t.Fatalf("expected order to succeed, got %v", err)
+		}
+	})
+
+	t.Run("allows tracked item when stock covers requested quantity", func(t *testing.T) {
+		repo := &fakePublicOrderRepo{basePrice: 4.50}
+		svc := NewService(repo, nil).WithProductStockReader(func(_ context.Context, _, _ int64) (bool, bool, float64, error) {
+			return true, false, 5, nil
+		})
+		if _, _, _, err := svc.CreatePublicOrder(context.Background(), 42, PublicOrderInput{
+			Items: []PublicOrderItemInput{{MenuItemID: 10, Quantity: 5}},
+		}); err != nil {
+			t.Fatalf("expected order to succeed when stock == qty, got %v", err)
+		}
+	})
+}

@@ -14,12 +14,19 @@ type MenuItem struct {
 	SalePrice   float64
 	CostPrice   float64
 	TaxRate     float64
-	Description string
-	ImageURL    string
-	Stock       float64
-	IsActive    bool
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	Description    string
+	ImageURL       string
+	Stock          float64
+	TrackInventory bool
+	AllowBackorder bool
+	IsActive       bool
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}
+
+// IsOutOfStock reports whether inventory tracking blocks selling this item.
+func (m MenuItem) IsOutOfStock() bool {
+	return m.TrackInventory && !m.AllowBackorder && m.Stock <= 0
 }
 
 type MenuItemInput struct {

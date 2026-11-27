@@ -26,8 +26,54 @@ func TestToPublicProtoMenuItemOmitsInventoryAndInternalIdentifiers(t *testing.T)
 	if item.Id != 42 || item.Name != "Coffee" || item.SalePrice != 3.5 {
 		t.Fatalf("public menu lost customer-facing fields: %+v", item)
 	}
-	if item.OwnerId != 0 || item.CategoryId != 0 || item.Sku != "" || item.Barcode != "" || item.TaxRate != 0 || item.Stock != 0 {
+	if item.OwnerId != 0 || item.CategoryId != 0 || item.Sku != "" || item.Barcode != "" || item.TaxRate != 0 || item.Stock != 0 || item.TrackInventory != nil || item.AllowBackorder != nil {
 		t.Fatalf("public menu exposed internal or inventory fields: %+v", item)
+	}
+}
+
+func TestToPublicProtoMenuItemReflectsTrackedStockAvailability(t *testing.T) {
+	cases := []struct {
+		name           string
+		item           domain.MenuItem
+		expectedActive bool
+	}{
+		{
+			name:           "tracked item with zero stock is unavailable",
+			item:           domain.MenuItem{ID: 1, Name: "Croissant", IsActive: true, TrackInventory: true, Stock: 0},
+			expectedActive: false,
+		},
+		{
+			name:           "tracked item with negative stock is unavailable",
+			item:           domain.MenuItem{ID: 2, Name: "Matcha", IsActive: true, TrackInventory: true, Stock: -2},
+			expectedActive: false,
+		},
+		{
+			name:           "tracked item with positive stock stays available",
+			item:           domain.MenuItem{ID: 3, Name: "Espresso", IsActive: true, TrackInventory: true, Stock: 5},
+			expectedActive: true,
+		},
+		{
+			name:           "tracked item with zero stock and backorder enabled stays available",
+			item:           domain.MenuItem{ID: 4, Name: "Custom Cake", IsActive: true, TrackInventory: true, AllowBackorder: true, Stock: 0},
+			expectedActive: true,
+		},
+		{
+			name:           "untracked item with zero stock stays available",
+			item:           domain.MenuItem{ID: 5, Name: "House Tea", IsActive: true, TrackInventory: false, Stock: 0},
+			expectedActive: true,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := toPublicProtoMenuItem(tc.item)
+			if got.IsActive != tc.expectedActive {
+				t.Fatalf("expected IsActive=%v, got %v", tc.expectedActive, got.IsActive)
+			}
+			if got.Stock != 0 || got.TrackInventory != nil || got.AllowBackorder != nil {
+				t.Fatalf("public menu must not leak raw inventory fields: %+v", got)
+			}
+		})
 	}
 }
 

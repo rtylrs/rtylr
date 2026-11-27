@@ -1,6 +1,6 @@
 import { createOneKitClient } from '@voxire/api';
 import React, { useCallback, useEffect, useState } from 'react';
-import { AlertTriangle, ChevronLeft, ChevronRight, Globe, ReceiptText } from 'lucide-react';
+import { AlertTriangle, ChevronLeft, ChevronRight, Globe, ReceiptText, X } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useDebounce } from '@voxire/utils';
@@ -10,12 +10,17 @@ import SearchBar from '../../shared/components/SearchBar';
 import EmptyState from '../../shared/components/EmptyState';
 import Skeleton from '../../shared/components/Skeleton';
 import OrderStatusBadge from '../../shared/components/OrderStatusBadge';
-import type { OrderStatus } from '../../shared/types/pos';
+import ReceiptPreview from '../../shared/components/ReceiptPreview';
+import PrintButton from '../../shared/components/PrintButton';
+import type { OrderStatus, Receipt } from '../../shared/types/pos';
 import { formatCurrency, formatDate } from '../../shared/utils/format';
 import { isOrderFinalized, isVoidable, orderStatusLabel } from '../../shared/utils/orderStatus';
 import { OrderServiceClient } from '@voxire/voxie/pos/orders/v1/client';
+import { ReceiptServiceClient } from '@voxire/voxie/pos/receipt/v1/client';
 import type { Order } from '@voxire/voxie/pos/orders/v1/types';
 import { resolveOpenSessionId } from '../close-session/closeSessionWorkflow';
+import { buildReceiptFromOrder } from '../receipts/orderReceipt';
+import { useSettingsStore } from '../../shared/stores/settingsStore';
 
 /** Orders cannot be charged again once settled ('completed' is a legacy server value). */
 function isSettled(status: string | undefined): boolean {
@@ -33,6 +38,7 @@ const FILTERS = ['all', 'pending', 'confirmed', 'preparing', 'ready', 'paid', 'v
 type OrderFilter = (typeof FILTERS)[number];
 const PAGE_SIZE = 25;
 const orderClient = createOneKitClient(OrderServiceClient, 'pos');
+const receiptClient = createOneKitClient(ReceiptServiceClient, 'pos');
 
 const NEXT_KITCHEN_ACTION: Record<string, { status: string; label: string }> = {
   pending: { status: 'confirmed', label: 'Confirm & Send to Kitchen' },
@@ -74,6 +80,11 @@ const OrdersScreen: React.FC = () => {
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [voiding, setVoiding] = useState<string | null>(null);
   const [noSession, setNoSession] = useState(false);
+  const [activeReceipt, setActiveReceipt] = useState<Receipt | null>(null);
+  const [loadingReceipt, setLoadingReceipt] = useState(false);
+  const [receiptEmail, setReceiptEmail] = useState('');
+  const [emailingReceipt, setEmailingReceipt] = useState(false);
+  const businessName = useSettingsStore((s) => s.business.name.trim()) || undefined;
   const navigate = useNavigate();
   const [params] = useSearchParams();
   // Reopening PAID orders is a manager capability, not a URL toggle: without
@@ -189,6 +200,42 @@ const OrdersScreen: React.FC = () => {
       toast.error(e?.response?.data?.message ?? 'Failed to void order');
     } finally {
       setVoiding(null);
+    }
+  };
+
+  const handleOpenReceipt = async (e: React.MouseEvent, order: Order) => {
+    e.stopPropagation();
+    const initialReceipt = buildReceiptFromOrder(order);
+    setActiveReceipt(initialReceipt);
+    setReceiptEmail('');
+
+    const hasPricedItems = initialReceipt.items.some((item) => item.price > 0);
+    if (hasPricedItems || !order.id) return;
+
+    setLoadingReceipt(true);
+    try {
+      const detail = await orderClient.getOrderDetail({ orderId: String(order.id) });
+      if (detail.order) {
+        setActiveReceipt(buildReceiptFromOrder(detail.order));
+      }
+    } catch {
+      // Keep the summary receipt built from the list row if detail fetch fails.
+    } finally {
+      setLoadingReceipt(false);
+    }
+  };
+
+  const handleEmailReceipt = async () => {
+    if (!activeReceipt || !receiptEmail.trim()) return;
+    setEmailingReceipt(true);
+    try {
+      await receiptClient.emailReceipt({ id: activeReceipt.id, email: receiptEmail.trim() });
+      toast.success('Emailed receipt');
+      setReceiptEmail('');
+    } catch {
+      toast.error('Failed to email receipt');
+    } finally {
+      setEmailingReceipt(false);
     }
   };
 
@@ -317,6 +364,16 @@ const OrdersScreen: React.FC = () => {
                         <span className="text-sm font-bold text-pos-text">
                           {formatCurrency(o.total ?? 0)}
                         </span>
+                        {(onlineOrder || settled) && (
+                          <button
+                            type="button"
+                            onClick={(e) => void handleOpenReceipt(e, o)}
+                            className="h-8 px-3 rounded-lg bg-white/10 border border-pos-border text-pos-text text-xs font-semibold hover:bg-white/20 inline-flex items-center gap-1.5 transition-colors"
+                          >
+                            <ReceiptText className="w-3.5 h-3.5" aria-hidden="true" />
+                            Receipt
+                          </button>
+                        )}
                         {!reopenMode && nextAction && (
                           <button
                             type="button"
@@ -386,6 +443,59 @@ const OrdersScreen: React.FC = () => {
           </>
         )}
       </div>
+      {activeReceipt && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Receipt for order ${activeReceipt.orderId}`}
+          onClick={() => setActiveReceipt(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md rounded-2xl bg-pos-card border border-pos-border p-5 space-y-4 max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-base font-bold text-pos-text">
+                Receipt · #{activeReceipt.orderId}
+              </h2>
+              <button
+                type="button"
+                aria-label="Close receipt"
+                onClick={() => setActiveReceipt(null)}
+                className="w-8 h-8 rounded-lg bg-white/8 hover:bg-white/15 flex items-center justify-center text-pos-muted hover:text-pos-text"
+              >
+                <X className="w-4 h-4" aria-hidden="true" />
+              </button>
+            </div>
+            {loadingReceipt ? (
+              <p className="text-center text-xs text-pos-muted py-4">Loading order items…</p>
+            ) : (
+              <div id="order-receipt-target">
+                <ReceiptPreview receipt={activeReceipt} businessName={businessName} />
+              </div>
+            )}
+            <div className="flex flex-wrap gap-2">
+              <PrintButton targetId="order-receipt-target" className="h-10 px-4 text-xs" />
+              <input
+                type="email"
+                value={receiptEmail}
+                onChange={(e) => setReceiptEmail(e.target.value)}
+                placeholder="email@example.com"
+                className="flex-1 min-w-[140px] h-10 px-3 rounded-lg bg-white/8 border border-pos-border text-xs text-pos-text outline-none focus:border-white/25"
+              />
+              <button
+                type="button"
+                onClick={() => void handleEmailReceipt()}
+                disabled={!receiptEmail.trim() || emailingReceipt}
+                className="h-10 px-4 rounded-lg bg-white/10 text-pos-text text-xs font-semibold hover:bg-white/20 disabled:opacity-50"
+              >
+                {emailingReceipt ? 'Sending…' : 'Email'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </ScreenLayout>
   );
 };

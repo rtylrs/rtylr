@@ -19,6 +19,8 @@
   "loading": "Loading order status...",
   "loadFailed": "Could not load order status.",
   "retry": "Retry",
+  "refresh": "Refresh status",
+  "refreshing": "Refreshing...",
   "pollNotice": "Status refreshes automatically every {{seconds}} seconds.",
   "orderAnother": "Order Another",
   "notFoundTitle": "Order not found",
