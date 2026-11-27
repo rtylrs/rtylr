@@ -146,16 +146,21 @@
   min-height: 44px;
   width: 44px;
   height: 44px;
+  padding: 0;
   border-radius: 50%;
   border: 1px solid var(--menu-border, rgba(0, 0, 0, 0.15));
   background: none;
-  font-size: 1rem;
+  line-height: 0;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   color: var(--menu-text, #1a1a1a);
   transition: background 0.15s ease;
+
+  svg {
+    display: block;
+  }
 
   &:hover {
     background: rgba(0, 0, 0, 0.05);
