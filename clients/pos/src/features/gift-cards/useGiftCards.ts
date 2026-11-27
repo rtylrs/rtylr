@@ -65,40 +65,52 @@ export function useGiftCards() {
   // Server-authoritative redemption: stored value must never be mutated
   // locally only, or balances resurrect on refresh and other terminals never
   // see the redemption. Fails closed - no local mutation on any error.
-  const redeemCard = useCallback(async (code: string, amountInput: string): Promise<RedeemResult> => {
-    const normalizedCode = code.trim();
-    const amount = Number(amountInput);
-    if (!normalizedCode) return { ok: false, error: 'Enter a gift card code' };
-    if (!Number.isFinite(amount) || amount <= 0) {
-      return { ok: false, error: 'Redeem amount must be greater than zero' };
-    }
-
-    try {
-      const res = await giftCardClient.redeemGiftCard({
-        code: normalizedCode,
-        amount,
-        orderId: '1',
-      });
-      if (res.giftCard) {
-        const redeemed = giftCardFromServer(res.giftCard);
-        useGiftCardStore.getState().setCards(
-          useGiftCardStore
-            .getState()
-            .cards.map((c) => (c.code === redeemed.code ? { ...redeemed, id: c.id } : c))
-        );
-        return { ok: true, remaining: redeemed.balance };
+  const redeemCard = useCallback(
+    async (code: string, amountInput: string, orderIdInput?: string): Promise<RedeemResult> => {
+      const normalizedCode = code.trim();
+      const amount = Number(amountInput);
+      const numericOrderId = Number((orderIdInput ?? '').trim());
+      if (!normalizedCode) return { ok: false, error: 'Enter a gift card code' };
+      if (!Number.isFinite(amount) || amount <= 0) {
+        return { ok: false, error: 'Redeem amount must be greater than zero' };
       }
-      return { ok: false, error: res.message ?? 'Redemption failed' };
-    } catch (error) {
-      return {
-        ok: false,
-        error:
-          error instanceof Error && error.message.includes('status')
-            ? `Server refused redemption (${error.message.split(':').pop()?.trim() || 'error'})`
-            : 'Redemption failed. Check your connection and try again.',
-      };
-    }
-  }, []);
+      if (!Number.isInteger(numericOrderId) || numericOrderId <= 0) {
+        return { ok: false, error: 'Select an order before redeeming a gift card' };
+      }
+
+      try {
+        const res = await giftCardClient.redeemGiftCard({
+          code: normalizedCode,
+          amount,
+          orderId: String(numericOrderId),
+        });
+        if (res.giftCard) {
+          const redeemed = giftCardFromServer(res.giftCard);
+          useGiftCardStore.getState().setCards(
+            useGiftCardStore
+              .getState()
+              .cards.map((c) => (c.code === redeemed.code ? { ...redeemed, id: c.id } : c))
+          );
+          return { ok: true, remaining: redeemed.balance };
+        }
+        return { ok: false, error: res.message ?? 'Redemption failed' };
+      } catch (error) {
+        const apiMessage =
+          error && typeof error === 'object'
+            ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+            : undefined;
+        return {
+          ok: false,
+          error:
+            apiMessage ??
+            (error instanceof Error && error.message
+              ? error.message
+              : 'Redemption failed. Check your connection and try again.'),
+        };
+      }
+    },
+    []
+  );
 
   return {
     cards,
