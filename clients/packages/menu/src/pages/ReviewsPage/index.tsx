@@ -3,10 +3,18 @@ import { cdnImageUrl } from '@voxire/config';
 import { BusinessReview } from '../../types';
 import styles from './ReviewsPage.module.scss';
 
+export interface ReviewSubmissionInput {
+  authorName: string;
+  rating: number;
+  comment: string;
+}
+
 interface ReviewsPageProps {
   reviews: BusinessReview[];
   averageRating?: number;
   reviewCount?: number;
+  previewMode?: boolean;
+  onSubmitReview?: (input: ReviewSubmissionInput) => Promise<void> | void;
 }
 
 const StarRow: React.FC<{
@@ -38,10 +46,18 @@ const StarRow: React.FC<{
   );
 };
 
-const ReviewsPage: React.FC<ReviewsPageProps> = ({ reviews, averageRating, reviewCount }) => {
+const ReviewsPage: React.FC<ReviewsPageProps> = ({
+  reviews,
+  averageRating,
+  reviewCount,
+  previewMode = false,
+  onSubmitReview,
+}) => {
   const [newRating, setNewRating] = useState(0);
   const [newComment, setNewComment] = useState('');
   const [newName, setNewName] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
   const avg =
@@ -49,10 +65,30 @@ const ReviewsPage: React.FC<ReviewsPageProps> = ({ reviews, averageRating, revie
     (reviews.length > 0 ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0);
   const total = reviewCount ?? reviews.length;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newRating || !newComment.trim()) return;
-    setSubmitted(true);
+    setSubmitError(null);
+    if (previewMode || !onSubmitReview) {
+      setSubmitted(true);
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await onSubmitReview({
+        authorName: newName.trim() || 'Guest',
+        rating: newRating,
+        comment: newComment.trim(),
+      });
+      setSubmitted(true);
+      setNewRating(0);
+      setNewName('');
+      setNewComment('');
+    } catch {
+      setSubmitError('Could not submit your review right now. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -72,9 +108,13 @@ const ReviewsPage: React.FC<ReviewsPageProps> = ({ reviews, averageRating, revie
       <div className={styles.reviews__form}>
         <h3 className={styles.reviews__formTitle}>Leave a Review</h3>
         {submitted ? (
-          <p className={styles.reviews__thanks}>Thanks for your review!</p>
+          <p className={styles.reviews__thanks} role="status">
+            {previewMode
+              ? 'Preview only — guest reviews are saved for moderation on your live menu.'
+              : 'Thanks for your review! It will appear once approved by the restaurant.'}
+          </p>
         ) : (
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={(e) => void handleSubmit(e)}>
             <div className={styles.reviews__formGroup}>
               <label className={styles.reviews__label}>Your Rating</label>
               <StarRow rating={newRating} interactive onChange={setNewRating} />
@@ -99,12 +139,17 @@ const ReviewsPage: React.FC<ReviewsPageProps> = ({ reviews, averageRating, revie
                 rows={3}
               />
             </div>
+            {submitError && (
+              <p role="alert" style={{ color: '#dc2626', fontSize: '0.8rem', margin: '0 0 10px' }}>
+                {submitError}
+              </p>
+            )}
             <button
               className={styles.reviews__submitBtn}
               type="submit"
-              disabled={!newRating || !newComment.trim()}
+              disabled={!newRating || !newComment.trim() || submitting}
             >
-              Submit Review
+              {submitting ? 'Submitting…' : 'Submit Review'}
             </button>
           </form>
         )}
