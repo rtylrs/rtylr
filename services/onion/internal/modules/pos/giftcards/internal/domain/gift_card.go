@@ -7,6 +7,7 @@ import (
 
 var (
 	ErrGiftCardNotFound    = errors.New("gift card not found")
+	ErrGiftCardCodeExists  = errors.New("gift card code already exists")
 	ErrGiftCardInactive    = errors.New("gift card is inactive")
 	ErrGiftCardExpired     = errors.New("gift card has expired")
 	ErrInsufficientBalance = errors.New("insufficient gift card balance")
