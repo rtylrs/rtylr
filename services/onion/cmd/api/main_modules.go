@@ -358,6 +358,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		})
 	posOrdersModule := orders.NewModule(ctx, dbclient.Pool()).
 		WithSalesProductReader(productsModule.SalesProduct).
+		WithProductStockReader(productsModule.ProductStockAvailability).
 		WithOnlineOrderingReader(func(ordCtx context.Context, businessID int64) (bool, error) {
 			if !featureSupportModule.IsFlagEnabled(ordCtx, "app.menu.ordering", true) {
 				return false, nil
