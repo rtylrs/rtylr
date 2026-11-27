@@ -84,7 +84,7 @@ func toPublicProtoMenuItem(item domain.MenuItem) *posmenuitemv1.MenuItem {
 		Id:          item.ID,
 		Name:        item.Name,
 		SalePrice:   item.SalePrice,
-		IsActive:    item.IsActive,
+		IsActive:    item.IsActive && !item.IsOutOfStock(),
 		ImageUrl:    item.ImageURL,
 		Category:    item.Category,
 		Description: item.Description,
@@ -217,23 +217,27 @@ func toProtoMenuItem(item domain.MenuItem) *posmenuitemv1.MenuItem {
 
 	productId := item.ID
 	unitCost := item.CostPrice
+	trackInventory := item.TrackInventory
+	allowBackorder := item.AllowBackorder
 	return &posmenuitemv1.MenuItem{
-		Id:          item.ID,
-		ProductId:   &productId,
-		UnitCost:    &unitCost,
-		OwnerId:     item.OwnerID,
-		CategoryId:  item.CategoryID,
-		Name:        item.Name,
-		Sku:         item.SKU,
-		SalePrice:   item.SalePrice,
-		IsActive:    item.IsActive,
-		CreatedAt:   createdAt,
-		UpdatedAt:   updatedAt,
-		ImageUrl:    item.ImageURL,
-		Category:    item.Category,
-		Barcode:     item.Barcode,
-		Description: item.Description,
-		TaxRate:     item.TaxRate,
-		Stock:       item.Stock,
+		Id:             item.ID,
+		ProductId:      &productId,
+		UnitCost:       &unitCost,
+		OwnerId:        item.OwnerID,
+		CategoryId:     item.CategoryID,
+		Name:           item.Name,
+		Sku:            item.SKU,
+		SalePrice:      item.SalePrice,
+		IsActive:       item.IsActive,
+		CreatedAt:      createdAt,
+		UpdatedAt:      updatedAt,
+		ImageUrl:       item.ImageURL,
+		Category:       item.Category,
+		Barcode:        item.Barcode,
+		Description:    item.Description,
+		TaxRate:        item.TaxRate,
+		Stock:          item.Stock,
+		TrackInventory: &trackInventory,
+		AllowBackorder: &allowBackorder,
 	}
 }
