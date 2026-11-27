@@ -34,5 +34,6 @@
   "fulfillmentPickup": "استلام من الفرع",
   "fulfillmentDelivery": "توصيل",
   "deliveryAddressPlaceholder": "عنوان التوصيل",
-  "crmOptInLabel": "اكسب أختام الولاء واحفظ سجل الطلبات"
+  "crmOptInLabel": "اكسب أختام الولاء واحفظ سجل الطلبات",
+  "trackActiveOrder": "تتبع الطلب #{{number}}"
 }
