@@ -89,18 +89,22 @@ describe('isReservedBusinessSlug', () => {
 });
 
 describe('buildPublicMenuUrl', () => {
-  it('builds the slug menu URL on the Portal origin', () => {
-    expect(buildPublicMenuUrl('acme')).toBe(`${ORIGIN}/acme/menu`);
+  it('builds the branded tenant subdomain URL for valid non-reserved slugs', () => {
+    expect(buildPublicMenuUrl('acme')).toBe('https://acme.rtylr.com');
   });
 
-  it('appends a location segment when given', () => {
-    expect(buildPublicMenuUrl('acme', 'downtown')).toBe(`${ORIGIN}/acme/menu/downtown`);
+  it('appends a location segment on the tenant subdomain when given', () => {
+    expect(buildPublicMenuUrl('acme', 'downtown')).toBe('https://acme.rtylr.com/downtown');
   });
 
-  it('encodes the slug and location and never leaves a trailing slash', () => {
+  it('falls back to the Portal path form for non-DNS slugs and encodes safely', () => {
     const url = buildPublicMenuUrl('acme cafe', 'a/b');
     expect(url).toBe(`${ORIGIN}/acme%20cafe/menu/a%2Fb`);
     expect(url.endsWith('/')).toBe(false);
+  });
+
+  it('falls back to the Portal path form for reserved platform subdomains', () => {
+    expect(buildPublicMenuUrl('portal')).toBe(`${ORIGIN}/portal/menu`);
   });
 });
 
