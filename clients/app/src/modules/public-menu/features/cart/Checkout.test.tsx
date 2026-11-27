@@ -26,6 +26,11 @@ vi.mock('../../shared/lib/clients', () => ({
 }));
 
 import { useCartStore } from '../../shared/stores/cartStore';
+import {
+  clearActiveOrders,
+  getActiveOrdersForBusiness,
+  saveActiveOrder,
+} from '../../shared/stores/activeOrderStore';
 import { orderClient } from '../../shared/lib/clients';
 import Checkout from './Checkout';
 import { initTestI18n } from '../../shared/testing/i18n';
@@ -39,6 +44,8 @@ beforeAll(async () => {
 describe('Checkout empty cart', () => {
   beforeEach(() => {
     useCartStore.getState().clearCart();
+    clearActiveOrders();
+    navigateSpy.mockClear();
   });
 
   it('shows the shared EmptyState with the emptyCart title and a working back action', () => {
@@ -53,6 +60,25 @@ describe('Checkout empty cart', () => {
 
     expect(backSpy).toHaveBeenCalledTimes(1);
     backSpy.mockRestore();
+  });
+
+  it('offers a Track Order action on empty checkout when an active order exists', () => {
+    saveActiveOrder({
+      orderId: '9001',
+      orderNumber: 'ORD-9001',
+      businessId: '1',
+      slug: 'acme',
+      publicToken: 'tok-abc',
+      status: 'preparing',
+      createdAt: Date.now(),
+    });
+
+    render(<Checkout />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Track Order #ORD-9001' }));
+    expect(navigateSpy).toHaveBeenCalledWith({
+      to: '/menu/order-status/9001?number=ORD-9001&business_id=1&slug=acme&public_token=tok-abc',
+    });
   });
 });
 
@@ -109,6 +135,7 @@ describe('Checkout form', () => {
 describe('Checkout validation and submit', () => {
   beforeEach(() => {
     useCartStore.getState().clearCart();
+    clearActiveOrders();
     useCartStore.getState().setBusinessId(1);
     useCartStore.getState().addItem({ menuItemId: 7, name: 'Falafel wrap', unitPrice: 5.5 });
     navigateSpy.mockClear();
@@ -187,9 +214,19 @@ describe('Checkout validation and submit', () => {
     await waitFor(() =>
       expect(navigateSpy).toHaveBeenCalledWith({
         to: '/menu/order-status/9001?number=ORD-9001&business_id=1&slug=acme&public_token=tok-abc',
+        replace: true,
       })
     );
     expect(useCartStore.getState().items).toHaveLength(0);
+    expect(getActiveOrdersForBusiness(1)).toMatchObject([
+      {
+        orderId: '9001',
+        orderNumber: 'ORD-9001',
+        businessId: '1',
+        slug: 'acme',
+        publicToken: 'tok-abc',
+      },
+    ]);
   });
 
   it('shows an error and keeps the cart when the order request fails', async () => {
