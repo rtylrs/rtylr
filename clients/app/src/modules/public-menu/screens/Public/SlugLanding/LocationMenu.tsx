@@ -16,6 +16,7 @@ import { usePublicBusinessBySlug, usePublicMenu } from '../../../shared/hooks/us
 import {
   capturePublicMenuGuestSafe,
   lookupPublicCustomerStampsSafe,
+  submitPublicMenuReviewSafe,
   submitPublicTableActionSafe,
   trackPublicMenuEventSafe,
   translationKey,
@@ -286,6 +287,10 @@ const LocationMenu: React.FC<{ slugOverride?: string }> = ({ slugOverride }): Re
   const businessInfo: BusinessInfo = {
     name: `${biz.business.name} - ${location.name}`,
     logo: biz.business.logoUrl || undefined,
+    address: location.address || undefined,
+    reviews: brandBundle?.reviews,
+    averageRating: brandBundle?.averageRating,
+    reviewCount: brandBundle?.reviewCount,
   };
 
   const hasItems = categories.some((cat) => cat.items && cat.items.length > 0);
@@ -349,6 +354,16 @@ const LocationMenu: React.FC<{ slugOverride?: string }> = ({ slugOverride }): Re
                   businessId,
                   locationId: location.id,
                   ...guest,
+                })
+            : undefined
+        }
+        onSubmitReview={
+          businessId
+            ? (review) =>
+                submitPublicMenuReviewSafe({
+                  businessId,
+                  locationId: location.id,
+                  ...review,
                 })
             : undefined
         }
