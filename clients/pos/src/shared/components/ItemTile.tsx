@@ -18,9 +18,16 @@ const ItemTile = React.memo<ItemTileProps>(function ItemTile({
   size = "md",
   disabled,
 }) {
-  const unavailable = disabled || item.isActive === false;
   const stock = item.stock;
-  const showStock = typeof stock === "number" && Number.isFinite(stock);
+  const isOutOfStock =
+    item.trackInventory === true &&
+    item.allowBackorder !== true &&
+    typeof stock === "number" &&
+    Number.isFinite(stock) &&
+    stock <= 0;
+  const unavailable = disabled || item.isActive === false || isOutOfStock;
+  const showStock =
+    item.trackInventory !== false && typeof stock === "number" && Number.isFinite(stock);
   const stockLabel =
     showStock &&
     (Number.isInteger(stock)
