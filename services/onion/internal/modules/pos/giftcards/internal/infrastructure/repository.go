@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-sql-driver/mysql"
 	crmcontract "github.com/voxire/onion/internal/contracts/crm"
 	"github.com/voxire/onion/internal/modules/pos/giftcards/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos/giftcards/internal/infrastructure/persistence/sqlc"
@@ -70,9 +71,10 @@ func (r *Repository) CreateForOwner(ctx context.Context, businessID, ownerID int
 func (r *Repository) create(ctx context.Context, businessID, ownerID int64, input domain.GiftCardInput) (int64, error) {
 	var expiresAt sql.NullTime
 	if input.ExpiresAt != "" {
-		t, err := time.Parse("2006-01-02", input.ExpiresAt)
-		if err == nil {
+		if t, err := time.Parse("2006-01-02", input.ExpiresAt); err == nil {
 			expiresAt = sql.NullTime{Time: t, Valid: true}
+		} else if t, err := time.Parse(time.RFC3339, input.ExpiresAt); err == nil {
+			expiresAt = sql.NullTime{Time: t.UTC().Truncate(24 * time.Hour), Valid: true}
 		}
 	}
 
@@ -106,6 +108,10 @@ func (r *Repository) create(ctx context.Context, businessID, ownerID int64, inpu
 		ExpiresAt:      expiresAt,
 	})
 	if err != nil {
+		var mysqlErr *mysql.MySQLError
+		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
+			return 0, domain.ErrGiftCardCodeExists
+		}
 		logger.Ctx(ctx).Error("Failed to create gift card", logger.Error(err))
 		return 0, err
 	}
