@@ -859,6 +859,15 @@ func (s *Service) GetPublicMenuBundle(ctx context.Context, businessID, locationI
 		}
 	}
 
+	reviews := []domain.MenuReview{}
+	if found && profile.IsPublished && domain.IsReviewsPageEnabled(profile.PublishedConfigJSON) {
+		approvedReviews, reviewErr := s.repo.ListApprovedPublicMenuReviews(ctx, businessID, locationID)
+		if reviewErr != nil {
+			return domain.PublicMenuBundle{}, reviewErr
+		}
+		reviews = approvedReviews
+	}
+
 	return domain.PublicMenuBundle{
 		Profile:      profile,
 		Banners:      banners,
@@ -866,7 +875,102 @@ func (s *Service) GetPublicMenuBundle(ctx context.Context, businessID, locationI
 		Currencies:   currencies,
 		Translations: translations,
 		StampCards:   activeCards,
+		Reviews:      reviews,
 	}, nil
+}
+
+func (s *Service) CreatePublicMenuReview(ctx context.Context, businessID int64, review domain.MenuReview) (domain.MenuReview, error) {
+	if businessID <= 0 {
+		return domain.MenuReview{}, fmt.Errorf("%w: business_id is required", domain.ErrReviewInvalidInput)
+	}
+	if review.LocationID < 0 {
+		review.LocationID = 0
+	}
+	if err := s.validateLocation(ctx, businessID, review.LocationID); err != nil {
+		return domain.MenuReview{}, fmt.Errorf("%w: %v", domain.ErrReviewInvalidInput, err)
+	}
+	if review.Rating < 1 || review.Rating > 5 {
+		return domain.MenuReview{}, fmt.Errorf("%w: rating must be between 1 and 5", domain.ErrReviewInvalidInput)
+	}
+	review.Comment = strings.TrimSpace(review.Comment)
+	if review.Comment == "" {
+		return domain.MenuReview{}, fmt.Errorf("%w: comment is required", domain.ErrReviewInvalidInput)
+	}
+	if len(review.Comment) > 2000 {
+		review.Comment = review.Comment[:2000]
+	}
+	review.AuthorName = strings.TrimSpace(review.AuthorName)
+	if review.AuthorName == "" {
+		review.AuthorName = "Guest"
+	}
+	if len(review.AuthorName) > 120 {
+		review.AuthorName = review.AuthorName[:120]
+	}
+
+	profile, found, err := s.repo.GetMenuProfile(ctx, businessID, review.LocationID)
+	if err != nil {
+		return domain.MenuReview{}, err
+	}
+	if (!found || !profile.IsPublished) && review.LocationID > 0 {
+		fallback, fallbackFound, fallbackErr := s.repo.GetMenuProfile(ctx, businessID, 0)
+		if fallbackErr != nil {
+			return domain.MenuReview{}, fallbackErr
+		}
+		if fallbackFound && fallback.IsPublished {
+			profile = fallback
+			found = true
+		}
+	}
+	if !found || !profile.IsPublished || !domain.IsReviewsPageEnabled(profile.PublishedConfigJSON) {
+		return domain.MenuReview{}, fmt.Errorf("%w: reviews are not enabled for this menu", domain.ErrFeatureDisabled)
+	}
+
+	review.BusinessID = businessID
+	review.Status = "pending"
+	id, err := s.repo.CreateMenuReview(ctx, review)
+	if err != nil {
+		return domain.MenuReview{}, err
+	}
+	review.ID = id
+	review.CreatedAt = time.Now().UTC()
+	review.UpdatedAt = review.CreatedAt
+
+	s.emitEvent(ctx, businessID, "menu.review.submitted", map[string]any{
+		"review_id":   review.ID,
+		"business_id": businessID,
+		"location_id": review.LocationID,
+		"rating":      review.Rating,
+	})
+	return review, nil
+}
+
+func (s *Service) ListMenuReviews(ctx context.Context, businessID, locationID int64, status string) ([]domain.MenuReview, error) {
+	if locationID < 0 {
+		locationID = 0
+	}
+	if err := s.validateLocation(ctx, businessID, locationID); err != nil {
+		return nil, err
+	}
+	status = strings.ToLower(strings.TrimSpace(status))
+	if status != "" && status != "pending" && status != "approved" && status != "hidden" {
+		return nil, fmt.Errorf("%w: invalid review status", domain.ErrReviewInvalidInput)
+	}
+	return s.repo.ListMenuReviews(ctx, businessID, locationID, status)
+}
+
+func (s *Service) UpdateMenuReviewStatus(ctx context.Context, businessID, id int64, status string) error {
+	status = strings.ToLower(strings.TrimSpace(status))
+	if id <= 0 || (status != "pending" && status != "approved" && status != "hidden") {
+		return fmt.Errorf("%w: invalid review status", domain.ErrReviewInvalidInput)
+	}
+	return s.repo.UpdateMenuReviewStatus(ctx, businessID, id, status)
+}
+
+func (s *Service) DeleteMenuReview(ctx context.Context, businessID, id int64) error {
+	if id <= 0 {
+		return fmt.Errorf("%w: review id must be positive", domain.ErrReviewInvalidInput)
+	}
+	return s.repo.DeleteMenuReview(ctx, businessID, id)
 }
 
 // CapturePublicMenuGuest validates and stores an optional consenting guest from
