@@ -431,3 +431,57 @@ WHERE business_id = ?
   AND (ends_at IS NULL OR ends_at >= CURRENT_TIMESTAMP)
 ORDER BY position ASC, id ASC
 LIMIT 50;
+
+-- name: CreateMenuReview :execresult
+INSERT INTO hub_menu_reviews (
+    business_id,
+    location_id,
+    author_name,
+    rating,
+    comment,
+    status
+) VALUES (?, ?, ?, ?, ?, 'pending');
+
+-- name: ListMenuReviews :many
+SELECT
+    id,
+    business_id,
+    location_id,
+    author_name,
+    rating,
+    comment,
+    status,
+    created_at,
+    updated_at
+FROM hub_menu_reviews
+WHERE business_id = ? AND (? = 0 OR location_id = ?) AND (? = '' OR status = ?)
+ORDER BY created_at DESC, id DESC
+LIMIT 200;
+
+-- name: ListApprovedPublicMenuReviews :many
+SELECT
+    id,
+    business_id,
+    location_id,
+    author_name,
+    rating,
+    comment,
+    status,
+    created_at,
+    updated_at
+FROM hub_menu_reviews
+WHERE business_id = ?
+  AND (location_id = ? OR location_id = 0)
+  AND status = 'approved'
+ORDER BY created_at DESC, id DESC
+LIMIT 100;
+
+-- name: UpdateMenuReviewStatus :exec
+UPDATE hub_menu_reviews
+SET status = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE business_id = ? AND id = ?;
+
+-- name: DeleteMenuReview :exec
+DELETE FROM hub_menu_reviews
+WHERE business_id = ? AND id = ?;
