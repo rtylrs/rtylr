@@ -78,6 +78,23 @@ describe('OAuthConsent', () => {
     expect(screen.getByText('auth.oauth.errInvalidRedirect')).toBeInTheDocument();
   });
 
+  it('refuses tenant menu subdomains and nested subdomains on rtylr.com', () => {
+    openAuthorize('https://voxire.rtylr.com/callback', 'flow:read');
+    const first = render(<OAuthConsent />);
+    expect(screen.getByText('auth.oauth.errInvalidRedirect')).toBeInTheDocument();
+    first.unmount();
+
+    openAuthorize('https://sub.voxire.rtylr.com/callback', 'flow:read');
+    render(<OAuthConsent />);
+    expect(screen.getByText('auth.oauth.errInvalidRedirect')).toBeInTheDocument();
+  });
+
+  it('accepts reserved platform subdomains on https://*.rtylr.com', () => {
+    openAuthorize('https://portal.rtylr.com/callback', 'flow:read');
+    render(<OAuthConsent />);
+    expect(screen.queryByText('auth.oauth.errInvalidRedirect')).not.toBeInTheDocument();
+  });
+
   it('refuses a request that asks for no scope', () => {
     openAuthorize('http://127.0.0.1:51234/callback', '');
     render(<OAuthConsent />);
