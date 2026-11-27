@@ -211,6 +211,23 @@ describe('Checkout validation and submit', () => {
     expect(screen.getByRole('button', { name: /Place Order/ })).toBeEnabled();
   });
 
+  it('shows an out-of-stock message when the server rejects the order with 409', async () => {
+    createPublicOrder.mockRejectedValue({ statusCode: 409, message: 'item is out of stock' });
+
+    render(<Checkout />);
+
+    fireEvent.change(screen.getByLabelText('Name *'), { target: { value: 'Sam' } });
+    fireEvent.change(screen.getByLabelText('Phone Number *'), { target: { value: '+1 555 0199' } });
+    fireEvent.click(screen.getByRole('button', { name: /Place Order/ }));
+
+    await waitFor(() =>
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        'One or more items in your cart are out of stock. Please review your order.'
+      )
+    );
+    expect(navigateSpy).not.toHaveBeenCalled();
+  });
+
   it('disables the submit button while the order is in flight', () => {
     // A promise that never settles keeps the submitting state observable.
     createPublicOrder.mockReturnValue(new Promise(() => {}));
