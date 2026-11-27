@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/voxire/onion/internal/contracts/audit"
@@ -17,6 +18,7 @@ import (
 	"github.com/voxire/onion/internal/modules/erp/products/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/searchutil"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -276,4 +278,35 @@ func (r *Repository) SalesProduct(ctx context.Context, businessID, productID int
 		return "", "", "", "", err
 	}
 	return row.Name, row.Sku, row.SalePrice, row.TaxRate, nil
+}
+
+func (r *Repository) ProductStockAvailability(ctx context.Context, businessID, productID int64) (trackInventory, allowBackorder bool, available float64, err error) {
+	row, err := r.queries.GetProductStockAvailability(ctx, sqlc.GetProductStockAvailabilityParams{
+		BusinessID: businessID,
+		ID:         productID,
+	})
+	if err != nil {
+		return false, false, 0, err
+	}
+	return row.TrackInventory.Valid && row.TrackInventory.Bool, row.AllowBackorder, parseStockValue(row.StockQuantity), nil
+}
+
+func parseStockValue(v interface{}) float64 {
+	if v == nil {
+		return 0
+	}
+	switch val := v.(type) {
+	case float64:
+		return val
+	case float32:
+		return float64(val)
+	case int64:
+		return float64(val)
+	case []byte:
+		return sqlutil.DecimalToFloat(string(val))
+	case string:
+		return sqlutil.DecimalToFloat(val)
+	default:
+		return sqlutil.DecimalToFloat(fmt.Sprintf("%v", val))
+	}
 }
