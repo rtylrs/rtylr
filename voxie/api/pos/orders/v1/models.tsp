@@ -240,8 +240,8 @@ model GetPublicOrderStatusResponse {
 
 // ── List Orders ───────────────────────────────────────────────────
 model ListOrdersRequest {
-  @Onkt.required
-  @minValueExclusive(0)
+  /** Optional register session filter; omitted or 0 returns all business orders including online menu orders. */
+  @minValue(0)
   @query("session_id")
   @encode(string)
   session_id?: int64;
