@@ -11,6 +11,16 @@ const LocationMenu = React.lazy(() => import('./screens/Public/SlugLanding/Locat
 const CustomDomainMenu = React.lazy(
   () => import('./screens/Public/CustomDomainMenu/CustomDomainMenu')
 );
+const TenantHostLanding = React.lazy(() =>
+  import('./screens/Public/CustomDomainMenu/CustomDomainMenu').then((m) => ({
+    default: m.TenantHostLanding,
+  }))
+);
+const TenantHostLocationMenu = React.lazy(() =>
+  import('./screens/Public/CustomDomainMenu/CustomDomainMenu').then((m) => ({
+    default: m.TenantHostLocationMenu,
+  }))
+);
 const Checkout = React.lazy(() => import('./features/cart/Checkout'));
 const OrderStatus = React.lazy(() => import('./features/cart/OrderStatus'));
 
@@ -76,6 +86,54 @@ export function createPublicMenuRoutes<TParent extends AnyRoute>(rootRoute: TPar
         getParentRoute: () => layoutRoute,
         path: '/b/$businessId/menu',
         component: PosMenu,
+      }),
+    ]),
+  ];
+}
+
+/**
+ * Storefront-only route tree mounted when Portal is accessed on a tenant
+ * subdomain (`https://<slug>.rtylr.com`) or a merchant custom domain.
+ * Admin/Portal routes are intentionally excluded on these hosts.
+ */
+export function createTenantMenuRoutes<TParent extends AnyRoute>(rootRoute: TParent) {
+  const layoutRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    id: 'tenant-public-menu',
+    component: () => (
+      <ErrorBoundary>
+        <Suspense fallback={<FullScreenLoader />}>
+          <AppFlagGuard flag={FLAG_KEYS.APP_MENU}>
+            <div className="public-menu-root">
+              <Outlet />
+            </div>
+          </AppFlagGuard>
+        </Suspense>
+      </ErrorBoundary>
+    ),
+  });
+
+  return [
+    layoutRoute.addChildren([
+      createRoute({
+        getParentRoute: () => layoutRoute,
+        path: '/',
+        component: TenantHostLanding,
+      }),
+      createRoute({
+        getParentRoute: () => layoutRoute,
+        path: '/checkout',
+        component: Checkout,
+      }),
+      createRoute({
+        getParentRoute: () => layoutRoute,
+        path: '/order-status/$id',
+        component: OrderStatus,
+      }),
+      createRoute({
+        getParentRoute: () => layoutRoute,
+        path: '/$location',
+        component: TenantHostLocationMenu,
       }),
     ]),
   ];

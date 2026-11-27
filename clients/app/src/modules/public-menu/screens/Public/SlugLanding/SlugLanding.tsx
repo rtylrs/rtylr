@@ -18,12 +18,12 @@ import { menuByBusinessIdPath, menuLocationPath } from '../../../menuPaths';
  * matching location by slug.
  */
 
-const SlugLanding: React.FC = (): React.JSX.Element => {
+const SlugLanding: React.FC<{ slugOverride?: string }> = ({ slugOverride }): React.JSX.Element => {
   const { t } = useTranslation('sluglanding');
   const { slug: raw } = useParams({ strict: false });
   const navigate = useNavigate();
   const router = useRouter();
-  const slug = (raw ?? '').toLowerCase();
+  const slug = (slugOverride ?? raw ?? '').toLowerCase();
 
   const { data, isLoading, isError } = usePublicBusinessBySlug(slug);
 

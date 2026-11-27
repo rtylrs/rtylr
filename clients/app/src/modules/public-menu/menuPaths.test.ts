@@ -27,4 +27,11 @@ describe('menuPaths', () => {
   it('builds the business-id menu path', () => {
     expect(menuByBusinessIdPath(69)).toBe('/b/69/menu');
   });
+
+  it('builds clean root-relative paths on tenant menu subdomains', () => {
+    expect(menuHomePath('voxire', 'voxire.rtylr.com')).toBe('/');
+    expect(menuLocationPath('voxire', 'voxire-cafe', 'voxire.rtylr.com')).toBe('/voxire-cafe');
+    expect(menuCheckoutPath('voxire.rtylr.com')).toBe('/checkout');
+    expect(menuOrderStatusPath('42', 'voxire.rtylr.com')).toBe('/order-status/42');
+  });
 });

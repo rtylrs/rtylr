@@ -1,5 +1,6 @@
 import type { AppId } from '@voxire/types';
 import { APP_URLS } from './apps';
+import { isTenantMenuHost } from './publicMenu';
 
 const env = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env;
 
@@ -27,6 +28,8 @@ export function resolveCookieDomain(): string | undefined {
   if (typeof window === 'undefined') return undefined;
   const hostname = window.location.hostname.toLowerCase();
   if (hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) return undefined;
+  // Never write .rtylr.com-scoped cookies from public tenant storefront hosts.
+  if (isTenantMenuHost(hostname)) return undefined;
   if (hostname === 'rtylr.com' || hostname.endsWith('.rtylr.com')) return '.rtylr.com';
   return undefined;
 }
