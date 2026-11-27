@@ -213,5 +213,9 @@ describe("MenuLayoutCore", () => {
 
     // scrollTop(100) + (sectionTop(500) - containerTop(0)) - (headerHeight(120) + 12px padding) = 468
     expect(scrollToSpy).toHaveBeenCalledWith({ top: 468, behavior: "smooth" });
+
+    // Clicking back to the first category returns cleanly to the very top of the menu.
+    fireEvent.click(screen.getByRole("button", { name: "Coffee" }));
+    expect(scrollToSpy).toHaveBeenLastCalledWith({ top: 0, behavior: "smooth" });
   });
 });
