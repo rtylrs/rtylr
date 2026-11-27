@@ -16,6 +16,7 @@ export function mapCustomers(customers: RemoteCustomer[]): Customer[] {
       `${c.firstName ?? ''} ${c.lastName ?? ''}`.trim() || c.email || c.phone || 'Customer',
     phone: c.phone || undefined,
     email: c.email || undefined,
+    loyaltyPoints: typeof c.loyaltyPoints === 'number' ? c.loyaltyPoints : undefined,
   }));
 }
 
