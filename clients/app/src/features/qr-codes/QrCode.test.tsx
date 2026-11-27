@@ -91,10 +91,10 @@ describe('QrCode generator', () => {
     expect(toast.error).not.toHaveBeenCalled();
   });
 
-  it('encodes the QR payload as the Portal slug URL when a slug exists', () => {
+  it('encodes the QR payload as the branded tenant subdomain URL when a slug exists', () => {
     render(<QrCode />);
 
-    expect(mainQrProps()?.value).toBe(`${menuOrigin}/acme/menu`);
+    expect(mainQrProps()?.value).toBe('https://acme.rtylr.com');
   });
 
   it('falls back to the POS-style id URL when only a numeric id exists', () => {
