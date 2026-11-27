@@ -119,25 +119,52 @@ const MenuCart: React.FC<MenuCartProps> = ({
                       </div>
                       <div className={styles.cart__itemControls}>
                         <button
+                          type="button"
                           className={styles.cart__qtyBtn}
                           onClick={() =>
                             onQuantityChange(item.id, item.quantity - 1)
                           }
                           aria-label="Decrease quantity"
                         >
-                          −
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.4"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                          </svg>
                         </button>
                         <span className={styles.cart__qty}>
                           {item.quantity}
                         </span>
                         <button
+                          type="button"
                           className={styles.cart__qtyBtn}
                           onClick={() =>
                             onQuantityChange(item.id, item.quantity + 1)
                           }
                           aria-label="Increase quantity"
                         >
-                          +
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.4"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                          </svg>
                         </button>
                       </div>
                     </li>
