@@ -25,5 +25,8 @@
   "orderAnother": "Commander à nouveau",
   "notFoundTitle": "Commande introuvable",
   "notFoundDescription": "Nous n'avons trouvé aucune commande correspondant à cet identifiant. Vérifiez votre lien de commande.",
-  "backToMenu": "Retour au menu"
+  "backToMenu": "Retour au menu",
+  "activeOrderTitle": "Commande n°{{number}}",
+  "trackOrder": "Suivre",
+  "dismissActiveOrder": "Masquer la bannière de commande"
 }
