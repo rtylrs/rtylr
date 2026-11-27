@@ -3,14 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useParams, useRouterState, useNavigate } from '@tanstack/react-router';
 import { EmptyState } from '@voxire/ui';
-import { PackageX } from 'lucide-react';
+import { PackageX, RefreshCw } from 'lucide-react';
 import { orderClient } from '../../shared/lib/clients';
 import { useCartStore } from '../../shared/stores/cartStore';
 import { menuByBusinessIdPath, menuHomePath } from '../../menuPaths';
 
 // The backend returns the internal pos_orders enum, not the FE's display steps.
 // STEP_FOR_STATUS below maps each known status onto a display step.
-const POLL_INTERVAL_MS = 30_000;
+const POLL_INTERVAL_MS = 15_000;
 
 // Display steps, in order. These are keys, not copy: each one is looked up
 // under orderstatus.steps.* and orderstatus.messages.*, which keeps them
@@ -78,6 +78,7 @@ const OrderStatus = (): React.JSX.Element => {
   const [status, setStatus] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -133,6 +134,15 @@ const OrderStatus = (): React.JSX.Element => {
     };
   }, [fetchStatus]);
 
+  const handleManualRefresh = useCallback(async (): Promise<void> => {
+    setIsRefreshing(true);
+    try {
+      await fetchStatus();
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [fetchStatus]);
+
   const navigate = useNavigate();
 
   const handleOrderAnother = (): void => {
@@ -166,178 +176,241 @@ const OrderStatus = (): React.JSX.Element => {
         style={{
           maxWidth: 480,
           margin: '0 auto',
-          padding: '40px 20px',
-          minHeight: '100vh',
+          padding: '40px 20px 0',
+          minHeight: '100dvh',
           background: 'var(--menu-bg, #ffffff)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: 32,
         }}
       >
-        {/* Order number */}
-        <div style={{ textAlign: 'center' }}>
-          <p
-            style={{
-              fontSize: '14px',
-              color: 'rgba(0,0,0,0.5)',
-              margin: '0 0 6px',
-              letterSpacing: '0.05em',
-              textTransform: 'uppercase',
-            }}
-          >
-            {t('orderstatus.orderLabel')}
-          </p>
-          <h1
-            style={{
-              fontSize: '40px',
-              fontWeight: 900,
-              margin: 0,
-              color: 'var(--menu-accent, #03aed2)',
-              letterSpacing: '-0.02em',
-            }}
-          >
-            {orderNumber || `#${id ?? ''}`}
-          </h1>
-        </div>
-
-        {/* Cancelled / refunded / voided terminal state */}
-        {cancelled && !fetchError && (
-          <p style={{ textAlign: 'center', fontSize: '18px', fontWeight: 700, color: '#dc2626' }}>
-            {status === 'refunded' ? t('orderstatus.refunded') : t('orderstatus.cancelled')}
-          </p>
-        )}
-
-        {/* Progress bar */}
-        {status != null && !fetchError && !cancelled && (
-          <div style={{ width: '100%' }}>
-            {/* Step labels */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-              {STATUS_STEPS.map((step, i) => (
-                <span
-                  key={step}
-                  style={{
-                    fontSize: '12px',
-                    fontWeight: i <= currentIndex ? 700 : 400,
-                    color: i <= currentIndex ? 'var(--menu-accent, #03aed2)' : 'rgba(0,0,0,0.35)',
-                    flex: 1,
-                    textAlign: 'center',
-                  }}
-                >
-                  {t(`orderstatus.steps.${step}`)}
-                </span>
-              ))}
-            </div>
-            {/* Track */}
-            <div
-              style={{
-                height: 8,
-                background: 'rgba(0,0,0,0.08)',
-                borderRadius: 999,
-                overflow: 'hidden',
-              }}
-            >
-              <div
-                style={{
-                  height: '100%',
-                  borderRadius: 999,
-                  background: 'var(--menu-accent, #03aed2)',
-                  width: `${((currentIndex + 1) / STATUS_STEPS.length) * 100}%`,
-                  transition: 'width 0.5s ease',
-                }}
-              />
-            </div>
-            {/* Current status label */}
+        <div
+          style={{
+            flex: 1,
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 28,
+            paddingBottom: 24,
+          }}
+        >
+          {/* Order number */}
+          <div style={{ textAlign: 'center' }}>
             <p
               style={{
-                textAlign: 'center',
-                marginTop: 16,
-                fontSize: '18px',
-                fontWeight: 700,
-                color: currentIndex === STATUS_STEPS.length - 1 ? '#16a34a' : 'rgba(0,0,0,0.8)',
+                fontSize: '14px',
+                color: 'rgba(0,0,0,0.5)',
+                margin: '0 0 6px',
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
               }}
             >
-              {currentIndex === -1
-                ? t('orderstatus.statusFallback', { status })
-                : t(`orderstatus.messages.${STATUS_STEPS[currentIndex]}`)}
+              {t('orderstatus.orderLabel')}
             </p>
+            <h1
+              style={{
+                fontSize: '40px',
+                fontWeight: 900,
+                margin: 0,
+                color: 'var(--menu-accent, #03aed2)',
+                letterSpacing: '-0.02em',
+              }}
+            >
+              {orderNumber || `#${id ?? ''}`}
+            </h1>
           </div>
-        )}
 
-        {/* Not Found state */}
-        {notFound && (
-          <EmptyState
-            icon={PackageX}
-            title={t('orderstatus.notFoundTitle')}
-            description={t('orderstatus.notFoundDescription')}
-            action={{ label: t('orderstatus.backToMenu'), onClick: handleOrderAnother }}
-          />
-        )}
-
-        {/* Loading state */}
-        {status == null && !fetchError && !notFound && (
-          <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: '15px' }}>{t('orderstatus.loading')}</p>
-        )}
-
-        {/* Error state */}
-        {fetchError && (
-          <div style={{ textAlign: 'center' }}>
-            <p style={{ color: '#dc2626', fontSize: '15px', marginBottom: 12 }}>
-              {t('orderstatus.loadFailed')}
+          {/* Cancelled / refunded / voided terminal state */}
+          {cancelled && !fetchError && (
+            <p style={{ textAlign: 'center', fontSize: '18px', fontWeight: 700, color: '#dc2626' }}>
+              {status === 'refunded' ? t('orderstatus.refunded') : t('orderstatus.cancelled')}
             </p>
+          )}
+
+          {/* Progress bar */}
+          {status != null && !fetchError && !cancelled && (
+            <div style={{ width: '100%' }}>
+              {/* Step labels */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                {STATUS_STEPS.map((step, i) => (
+                  <span
+                    key={step}
+                    style={{
+                      fontSize: '12px',
+                      fontWeight: i <= currentIndex ? 700 : 400,
+                      color: i <= currentIndex ? 'var(--menu-accent, #03aed2)' : 'rgba(0,0,0,0.35)',
+                      flex: 1,
+                      textAlign: 'center',
+                    }}
+                  >
+                    {t(`orderstatus.steps.${step}`)}
+                  </span>
+                ))}
+              </div>
+              {/* Track */}
+              <div
+                style={{
+                  height: 8,
+                  background: 'rgba(0,0,0,0.08)',
+                  borderRadius: 999,
+                  overflow: 'hidden',
+                }}
+              >
+                <div
+                  style={{
+                    height: '100%',
+                    borderRadius: 999,
+                    background: 'var(--menu-accent, #03aed2)',
+                    width: `${((currentIndex + 1) / STATUS_STEPS.length) * 100}%`,
+                    transition: 'width 0.5s ease',
+                  }}
+                />
+              </div>
+              {/* Current status label */}
+              <p
+                style={{
+                  textAlign: 'center',
+                  marginTop: 16,
+                  fontSize: '18px',
+                  fontWeight: 700,
+                  color: currentIndex === STATUS_STEPS.length - 1 ? '#16a34a' : 'rgba(0,0,0,0.8)',
+                }}
+              >
+                {currentIndex === -1
+                  ? t('orderstatus.statusFallback', { status })
+                  : t(`orderstatus.messages.${STATUS_STEPS[currentIndex]}`)}
+              </p>
+            </div>
+          )}
+
+          {/* Not Found state */}
+          {notFound && (
+            <EmptyState
+              icon={PackageX}
+              title={t('orderstatus.notFoundTitle')}
+              description={t('orderstatus.notFoundDescription')}
+              action={{ label: t('orderstatus.backToMenu'), onClick: handleOrderAnother }}
+            />
+          )}
+
+          {/* Loading state */}
+          {status == null && !fetchError && !notFound && (
+            <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: '15px' }}>{t('orderstatus.loading')}</p>
+          )}
+
+          {/* Error state */}
+          {fetchError && (
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ color: '#dc2626', fontSize: '15px', marginBottom: 12 }}>
+                {t('orderstatus.loadFailed')}
+              </p>
+              <button
+                type="button"
+                onClick={() => void fetchStatus()}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid rgba(0,0,0,0.2)',
+                  borderRadius: 10,
+                  padding: '10px 20px',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  minHeight: 44,
+                }}
+              >
+                {t('orderstatus.retry')}
+              </button>
+            </div>
+          )}
+
+          {/* Manual refresh + auto-poll notice */}
+          {!fetchError && !notFound && (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 10,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => void handleManualRefresh()}
+                disabled={isRefreshing}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  background: 'rgba(0,0,0,0.04)',
+                  border: '1px solid rgba(0,0,0,0.12)',
+                  color: 'rgba(0,0,0,0.75)',
+                  borderRadius: 999,
+                  padding: '8px 16px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: isRefreshing ? 'wait' : 'pointer',
+                  minHeight: 40,
+                  opacity: isRefreshing ? 0.7 : 1,
+                }}
+              >
+                <RefreshCw
+                  size={14}
+                  aria-hidden="true"
+                  className={isRefreshing ? 'animate-spin' : undefined}
+                />
+                {isRefreshing ? t('orderstatus.refreshing') : t('orderstatus.refresh')}
+              </button>
+              {!isTerminal(status) && (
+                <p
+                  style={{
+                    fontSize: '12px',
+                    color: 'rgba(0,0,0,0.45)',
+                    textAlign: 'center',
+                    margin: 0,
+                  }}
+                >
+                  {t('orderstatus.pollNotice', { seconds: POLL_INTERVAL_MS / 1000 })}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Sticky Order another CTA */}
+        {!notFound && (
+          <div
+            data-testid="order-status-sticky-footer"
+            style={{
+              position: 'sticky',
+              bottom: 0,
+              width: '100%',
+              marginTop: 'auto',
+              padding: '12px 0 calc(20px + env(safe-area-inset-bottom, 0px))',
+              background: 'var(--menu-bg, #ffffff)',
+              borderTop: '1px solid rgba(0,0,0,0.06)',
+              zIndex: 10,
+            }}
+          >
             <button
               type="button"
-              onClick={() => void fetchStatus()}
+              onClick={handleOrderAnother}
               style={{
-                background: 'transparent',
-                border: '1px solid rgba(0,0,0,0.2)',
-                borderRadius: 10,
-                padding: '10px 20px',
-                fontSize: '14px',
+                background: 'var(--menu-bg, #ffffff)',
+                border: '2px solid var(--menu-accent, #03aed2)',
+                color: 'var(--menu-accent, #03aed2)',
+                borderRadius: 14,
+                padding: '14px 32px',
+                fontSize: '16px',
+                fontWeight: 700,
                 cursor: 'pointer',
-                minHeight: 44,
+                minHeight: 48,
+                width: '100%',
               }}
             >
-              {t('orderstatus.retry')}
+              {t('orderstatus.orderAnother')}
             </button>
           </div>
-        )}
-
-        {/* Poll notice */}
-        {!isTerminal(status) && !fetchError && !notFound && (
-          <p
-            style={{
-              fontSize: '12px',
-              color: 'rgba(0,0,0,0.3)',
-              textAlign: 'center',
-              margin: 0,
-            }}
-          >
-            {t('orderstatus.pollNotice', { seconds: POLL_INTERVAL_MS / 1000 })}
-          </p>
-        )}
-
-        {/* Order another */}
-        {!notFound && (
-          <button
-            type="button"
-            onClick={handleOrderAnother}
-            style={{
-              marginTop: 'auto',
-              background: 'transparent',
-              border: '2px solid var(--menu-accent, #03aed2)',
-              color: 'var(--menu-accent, #03aed2)',
-              borderRadius: 14,
-              padding: '14px 32px',
-              fontSize: '16px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              minHeight: 48,
-              width: '100%',
-            }}
-          >
-            {t('orderstatus.orderAnother')}
-          </button>
         )}
       </div>
     </>
