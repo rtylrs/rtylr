@@ -350,12 +350,24 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
       document.getElementById(`category-${id}`);
     if (!el) return;
 
+    const container = findScrollContainer(el);
+    const isFirstCategory = decoratedCategories[0]?.id === id;
+    if (isFirstCategory) {
+      if (!container) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (typeof container.scrollTo === "function") {
+        container.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        container.scrollTop = 0;
+      }
+      return;
+    }
+
     const header = root?.querySelector("header") ?? null;
     const headerHeight =
       config.header.sticky && header ? header.getBoundingClientRect().height : 0;
     const offset = Math.ceil(headerHeight) + SCROLL_OFFSET_PADDING_PX;
 
-    const container = findScrollContainer(el);
     if (!container) {
       const targetTop = Math.max(0, window.scrollY + el.getBoundingClientRect().top - offset);
       window.scrollTo({ top: targetTop, behavior: "smooth" });
