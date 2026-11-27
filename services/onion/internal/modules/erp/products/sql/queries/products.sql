@@ -86,6 +86,19 @@ VALUES (?, ?, ?, ?, ?, ?);
 SELECT name, COALESCE(sku, '') AS sku, sale_price, COALESCE(tax_rate, 0) AS tax_rate
 FROM erp_products WHERE business_id = ? AND id = ? AND is_active = TRUE;
 
+-- name: GetProductStockAvailability :one
+SELECT
+    p.track_inventory,
+    p.allow_backorder,
+    COALESCE(pst.total_quantity, p.stock_quantity) AS stock_quantity
+FROM erp_products p
+LEFT JOIN product_stock_total pst
+  ON pst.business_id = p.business_id
+ AND pst.product_id = p.id
+WHERE p.business_id = ?
+  AND p.id = ?
+  AND p.is_active = TRUE;
+
 -- name: GetProductForUpdate :one
 SELECT id, owner_id, business_id, category_id, supplier_id, brand_id, name, sku, barcode, description,
        unit, cost_price, sale_price, compare_at_price, tax_rate, currency,
