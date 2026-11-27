@@ -166,8 +166,33 @@ describe('OrderStatus progress copy', () => {
     render(<OrderStatus />);
 
     expect(
-      screen.getByText('Status refreshes automatically every 30 seconds.')
+      screen.getByText('Status refreshes automatically every 15 seconds.')
     ).toBeInTheDocument();
+  });
+
+  it('refreshes immediately when the manual refresh button is clicked', async () => {
+    apiGet.mockResolvedValueOnce({ status: 'pending' }).mockResolvedValue({ status: 'ready' });
+
+    render(<OrderStatus />);
+
+    await waitFor(() => expect(screen.getByText('Order received!')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh status' }));
+
+    await waitFor(() => expect(screen.getByText('Ready for pickup!')).toBeInTheDocument());
+    expect(apiGet).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps the Order Another CTA inside a sticky footer bar', async () => {
+    apiGet.mockResolvedValue({ status: 'preparing' });
+
+    render(<OrderStatus />);
+
+    await waitFor(() => expect(screen.getByText('Being prepared...')).toBeInTheDocument());
+    const stickyFooter = screen.getByTestId('order-status-sticky-footer');
+    expect(stickyFooter.style.position).toBe('sticky');
+    expect(stickyFooter.style.bottom).toBe('0px');
+    expect(stickyFooter).toContainElement(screen.getByRole('button', { name: 'Order Another' }));
   });
 
   it('offers a translated retry when the status cannot be read', async () => {
@@ -257,14 +282,17 @@ describe('OrderStatus polling', () => {
   it('refreshes the status when the poll interval fires', async () => {
     apiGet.mockResolvedValueOnce({ status: 'pending' }).mockResolvedValue({ status: 'preparing' });
     const callbacks: (() => void)[] = [];
-    const setIntervalSpy = vi.spyOn(globalThis, 'setInterval').mockImplementation((cb) => {
+    const delays: (number | undefined)[] = [];
+    const setIntervalSpy = vi.spyOn(globalThis, 'setInterval').mockImplementation((cb, ms) => {
       callbacks.push(cb as () => void);
+      delays.push(ms);
       return 0 as unknown as ReturnType<typeof setInterval>;
     });
 
     try {
       render(<OrderStatus />);
       await waitFor(() => expect(screen.getByText('Order received!')).toBeInTheDocument());
+      expect(delays).toContain(15_000);
 
       await act(async () => {
         callbacks.forEach((cb) => cb());
