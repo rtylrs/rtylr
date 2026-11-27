@@ -66,6 +66,11 @@ func (m *Module) WithPublicOrderTenancyValidator(fn application.PublicOrderTenan
 	return m
 }
 
+func (m *Module) WithProductStockReader(fn application.ProductStockReader) *Module {
+	m.service.WithProductStockReader(fn)
+	return m
+}
+
 func (m *Module) CountOrdersCreatedBetween(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
 	return m.repository.CountOrdersCreatedBetween(ctx, businessID, from, to)
 }
