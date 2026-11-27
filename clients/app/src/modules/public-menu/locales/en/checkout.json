@@ -28,6 +28,7 @@
   "phoneRequired": "Please enter your phone number.",
   "emailInvalid": "Please enter a valid email address.",
   "orderFailed": "Failed to place order. Please try again.",
+  "outOfStock": "One or more items in your cart are out of stock. Please review your order.",
   "fulfillmentDineIn": "Dine-in",
   "fulfillmentSelfService": "Self-service",
   "fulfillmentPickup": "Pickup",
