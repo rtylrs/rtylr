@@ -26,6 +26,7 @@ func NewService(_ context.Context, repo repository) *Service {
 
 func invalidateStockMovementsScope(ctx context.Context, businessID int64) {
 	cacher.InvalidateScope(ctx, cacheKeys.ProductPrefix(businessID))
+	cacher.InvalidateScope(ctx, cacheKeys.MenuPrefix(businessID))
 }
 
 func (s *Service) ListMovements(ctx context.Context, businessID, branchID, productID int64) ([]domain.StockMovement, error) {
