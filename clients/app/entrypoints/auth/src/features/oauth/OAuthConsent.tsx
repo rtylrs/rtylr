@@ -4,20 +4,27 @@ import { useTranslation } from 'react-i18next';
 
 import AuthShell from '../../shared/components/AuthShell';
 import { HelmetContainer } from '@voxire/components';
+import { isTenantMenuHost, RESERVED_PLATFORM_SUBDOMAINS } from '@voxire/config';
 import { useLogin } from '../../shared/hooks/useAuth';
 import { useIssueAuthCode } from './useOAuth';
 import { getEmailError } from '../../shared/lib/validation';
 import { authInputClass } from '../../shared/components/AuthField';
 
 const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '[::1]']);
+const PLATFORM_SUBDOMAINS = new Set<string>(RESERVED_PLATFORM_SUBDOMAINS);
 
 function isAllowedOAuthRedirect(url: string): boolean {
   try {
     const { protocol, hostname } = new URL(url);
-    const host = hostname.toLowerCase();
+    const host = hostname.toLowerCase().replace(/\.+$/, '');
     // Native clients such as the MCP server receive the code on a loopback port.
     if (protocol === 'http:' && LOOPBACK_HOSTS.has(host)) return true;
-    return protocol === 'https:' && (host === 'rtylr.com' || host.endsWith('.rtylr.com'));
+    if (protocol !== 'https:') return false;
+    if (host === 'rtylr.com') return true;
+    if (isTenantMenuHost(host)) return false;
+    if (!host.endsWith('.rtylr.com')) return false;
+    const sub = host.slice(0, -'.rtylr.com'.length);
+    return PLATFORM_SUBDOMAINS.has(sub);
   } catch {
     return false;
   }
