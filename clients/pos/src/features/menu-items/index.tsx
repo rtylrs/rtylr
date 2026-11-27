@@ -102,6 +102,16 @@ const MenuItemsScreen: React.FC = () => {
 
   const quickAdd = useCallback(
     (item: MenuItem) => {
+      if (
+        item.trackInventory === true &&
+        item.allowBackorder !== true &&
+        typeof item.stock === 'number' &&
+        Number.isFinite(item.stock) &&
+        item.stock <= 0
+      ) {
+        toast.error(`${item.name ?? 'Item'} is out of stock`);
+        return;
+      }
       const ov = branchOverrides.get(String(item.id ?? ''));
       const effectiveItem =
         ov?.hasPriceOverride && ov.priceOverride != null
