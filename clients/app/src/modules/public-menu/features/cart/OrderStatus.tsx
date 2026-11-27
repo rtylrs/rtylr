@@ -6,6 +6,11 @@ import { EmptyState } from '@voxire/ui';
 import { PackageX, RefreshCw } from 'lucide-react';
 import { orderClient } from '../../shared/lib/clients';
 import { useCartStore } from '../../shared/stores/cartStore';
+import {
+  dismissActiveOrder,
+  saveActiveOrder,
+  updateActiveOrderStatus,
+} from '../../shared/stores/activeOrderStore';
 import { menuByBusinessIdPath, menuHomePath } from '../../menuPaths';
 
 // The backend returns the internal pos_orders enum, not the FE's display steps.
@@ -74,6 +79,22 @@ const OrderStatus = (): React.JSX.Element => {
   // a shared URL) can no longer poll. That is the point of the change: the
   // sequential order id on its own used to be enough to read any order.
   const publicToken = new URLSearchParams(searchStr).get('public_token') ?? '';
+  const slug = new URLSearchParams(searchStr).get('slug') ?? '';
+
+  useEffect(() => {
+    if (!id || !businessId || !publicToken) return;
+    saveActiveOrder({
+      orderId: id,
+      orderNumber: orderNumber || id,
+      businessId,
+      slug: slug || undefined,
+      publicToken,
+      status: status || 'pending',
+      createdAt: Date.now(),
+    });
+    // Persist the order link once when opened with a valid token.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, businessId, publicToken]);
 
   const [status, setStatus] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState(false);
@@ -101,6 +122,9 @@ const OrderStatus = (): React.JSX.Element => {
       setStatus(nextStatus);
       setFetchError(false);
       setNotFound(false);
+      if (nextStatus) {
+        updateActiveOrderStatus(id, nextStatus);
+      }
 
       // Stop polling once the order reaches a terminal state (done/cancelled).
       if (isTerminal(nextStatus) && intervalRef.current) {
@@ -114,6 +138,7 @@ const OrderStatus = (): React.JSX.Element => {
         (err as { statusCode?: number })?.statusCode ??
         (err as { response?: { status?: number } })?.response?.status;
       if (statusCode === 404) {
+        dismissActiveOrder(id);
         setNotFound(true);
         setFetchError(false);
         if (intervalRef.current) {
