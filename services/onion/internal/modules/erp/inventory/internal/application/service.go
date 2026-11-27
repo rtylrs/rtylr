@@ -40,9 +40,11 @@ func NewService(_ context.Context, repo repository) *Service {
 }
 
 // Inventory views live under the product namespace because they are derived
-// from product stock — wiping ProductPrefix covers every inventory view too.
+// from product stock — wiping ProductPrefix and MenuPrefix keeps both ERP and
+// storefront/POS menus in sync with stock changes.
 func invalidateInventoryScope(ctx context.Context, ownerID int64) {
 	cacher.InvalidateScope(ctx, cacheKeys.ProductPrefix(ownerID))
+	cacher.InvalidateScope(ctx, cacheKeys.MenuPrefix(ownerID))
 }
 
 func (s *Service) AdjustInventory(ctx context.Context, ownerID int64, input domain.InventoryAdjustInput) error {
