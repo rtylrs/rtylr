@@ -23,6 +23,7 @@ import {
 } from '../../../shared/hooks/usePublicBrandBundle';
 import { useCartStore } from '../../../shared/stores/cartStore';
 import { menuCheckoutPath, menuHomePath } from '../../../menuPaths';
+import ActiveOrderBanner from '../../../features/cart/ActiveOrderBanner';
 
 /**
  * Mounted at `/$slug/menu/$location`. Resolves the business by slug, picks
@@ -407,6 +408,7 @@ const LocationMenu: React.FC<{ slugOverride?: string }> = ({ slugOverride }): Re
             : undefined
         }
       />
+      <ActiveOrderBanner businessId={businessId} />
     </>
   );
 };
