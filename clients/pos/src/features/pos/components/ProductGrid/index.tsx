@@ -30,6 +30,12 @@ interface ProductTileProps {
   onAdd: (product: Product) => void;
 }
 
+const isOutOfStockProduct = (product: Product): boolean =>
+  product.trackInventory === true &&
+  product.allowBackorder !== true &&
+  hasFiniteStock(product.stock) &&
+  product.stock <= 0;
+
 // Memoized so typing in the search box only re-renders tiles whose visibility
 // changed, not every image-bearing card in the catalog.
 const ProductTile = React.memo<ProductTileProps>(function ProductTile({
@@ -39,9 +45,11 @@ const ProductTile = React.memo<ProductTileProps>(function ProductTile({
   currency,
   onAdd,
 }) {
-  const unavailable = product.isActive === false;
+  const outOfStock = isOutOfStockProduct(product);
+  const unavailable = product.isActive === false || outOfStock;
   const stock = product.stock;
-  const showStock = inventoryEnabled && hasFiniteStock(stock);
+  const showStock =
+    inventoryEnabled && product.trackInventory !== false && hasFiniteStock(stock);
   return (
     <motion.button
       className={`flex min-h-[13rem] flex-col overflow-hidden rounded-xl bg-pos-card border border-pos-border text-left transition-colors hover:border-white/15 ${
@@ -84,7 +92,7 @@ const ProductTile = React.memo<ProductTileProps>(function ProductTile({
         </div>
         {unavailable && (
           <span className="text-[10px] text-destructive font-semibold">
-            Unavailable
+            {outOfStock ? "Out of stock" : "Unavailable"}
           </span>
         )}
       </div>
@@ -120,7 +128,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, categories }) => {
 
   const addProduct = useCallback(
     (product: Product) => {
-      if (product.isActive === false) return;
+      if (product.isActive === false || isOutOfStockProduct(product)) return;
 
       try {
         addItem(buildMenuItemCartProduct(product));
