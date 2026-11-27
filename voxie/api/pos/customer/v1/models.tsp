@@ -22,6 +22,9 @@ model Customer {
   email: string;
 
   phone: string;
+
+  /** Current CRM loyalty points balance for the customer. */
+  loyalty_points?: int32;
 }
 
 model SearchCustomersRequest {
@@ -32,4 +35,17 @@ model SearchCustomersRequest {
 
 model SearchCustomersResponse {
   customers: Customer[];
+}
+
+model CreateCustomerRequest {
+  @Onkt.required
+  first_name: string;
+
+  last_name?: string;
+  email?: string;
+  phone?: string;
+}
+
+model CreateCustomerResponse {
+  customer: Customer;
 }
