@@ -34,5 +34,6 @@
   "fulfillmentPickup": "À emporter",
   "fulfillmentDelivery": "Livraison",
   "deliveryAddressPlaceholder": "Adresse de livraison",
-  "crmOptInLabel": "Cumuler des tampons de fidélité et enregistrer l’historique"
+  "crmOptInLabel": "Cumuler des tampons de fidélité et enregistrer l’historique",
+  "trackActiveOrder": "Suivre la commande n°{{number}}"
 }
