@@ -1,4 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import { createOneKitClient } from '@voxire/api';
+import { OrderServiceClient } from '@voxire/voxie/pos/orders/v1/client';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Calculator, Pointer } from 'lucide-react';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
@@ -8,14 +10,42 @@ import Skeleton from '../../shared/components/Skeleton';
 import ReceiptPreview from '../../shared/components/ReceiptPreview';
 import PrintButton from '../../shared/components/PrintButton';
 import { useReceipts } from './useReceipts';
+import { buildReceiptFromOrder } from './orderReceipt';
+import { useSettingsStore } from '../../shared/stores/settingsStore';
 import { formatCurrency, formatDate } from '../../shared/utils/format';
 import type { Receipt } from '../../shared/types/pos';
 
+const orderClient = createOneKitClient(OrderServiceClient, 'pos');
+
 const ReceiptsScreen: React.FC = () => {
   const { receipts, loading, email } = useReceipts();
+  const businessName = useSettingsStore((s) => s.business.name.trim()) || undefined;
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Receipt | null>(null);
   const [emailInput, setEmailInput] = useState('');
+
+  useEffect(() => {
+    if (!selected || selected.items.length > 0) return;
+    const numericId = Number(selected.id);
+    if (!Number.isInteger(numericId) || numericId <= 0) return;
+
+    let cancelled = false;
+    void orderClient
+      .getOrderDetail({ orderId: selected.id })
+      .then((res) => {
+        if (cancelled || !res.order) return;
+        const hydrated = buildReceiptFromOrder(res.order);
+        setSelected((current) =>
+          current && current.id === selected.id ? { ...current, items: hydrated.items } : current
+        );
+      })
+      .catch(() => {
+        // Non-fatal: keep summary receipt if detail lookup fails.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selected?.id]);
 
   const searchTerm = search.trim().toLowerCase();
   const filtered = useMemo(
@@ -71,7 +101,7 @@ const ReceiptsScreen: React.FC = () => {
           {selected ? (
             <>
               <div id="receipt-target">
-                <ReceiptPreview receipt={selected} />
+                <ReceiptPreview receipt={selected} businessName={businessName} />
               </div>
               <div className="flex flex-wrap gap-2">
                 <PrintButton targetId="receipt-target" />
