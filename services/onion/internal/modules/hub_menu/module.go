@@ -74,6 +74,7 @@ func (m *Module) GetAnonymousRoutes() []string {
 		"/hub/menu/v1/public/events",
 		"/hub/menu/v1/public/stamps",
 		"/hub/menu/v1/public/guest",
+		"/hub/menu/v1/public/reviews",
 	}
 }
 
