@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { cdnImageUrl } from '@voxire/config';
 import type {
+  BusinessReview,
   MenuBannerData,
   MenuCurrencyOption,
   MenuLayoutConfig,
@@ -55,6 +56,9 @@ export interface PublicBrandBundle {
   currencies: MenuCurrencyOption[];
   translations: Map<string, string>;
   stampCards: MenuStampCardSummary[];
+  reviews: BusinessReview[];
+  averageRating: number;
+  reviewCount: number;
 }
 
 const toNumber = (value: string | undefined, fallback = 0): number => {
