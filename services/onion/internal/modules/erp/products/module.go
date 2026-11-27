@@ -57,3 +57,8 @@ func (m *Module) GetAnonymousRoutes() []string {
 func (m *Module) SalesProduct(ctx context.Context, businessID, productID int64) (name, sku, price, tax string, err error) {
 	return m.repository.SalesProduct(ctx, businessID, productID)
 }
+
+// ProductStockAvailability returns inventory tracking and current available stock for an active product.
+func (m *Module) ProductStockAvailability(ctx context.Context, businessID, productID int64) (trackInventory, allowBackorder bool, available float64, err error) {
+	return m.repository.ProductStockAvailability(ctx, businessID, productID)
+}
