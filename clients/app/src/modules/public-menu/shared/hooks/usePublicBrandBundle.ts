@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { QueryClientContext } from '@tanstack/react-query';
 import {
   DEFAULT_LAYOUT_CONFIG,
+  type BusinessReview,
   type CustomerStampProgressData,
   type MenuBannerData,
   type MenuCurrencyOption,
@@ -122,6 +123,19 @@ export async function fetchPublicBrandBundle(
       stampsRequired: sc.stampsRequired ?? 10,
       rewardLabel: sc.rewardLabel ?? '',
     })),
+    ...(() => {
+      const reviews: BusinessReview[] = (res.reviews ?? []).map((rev) => ({
+        id: String(rev.id ?? ''),
+        author: rev.authorName || 'Guest',
+        rating: rev.rating ?? 5,
+        comment: rev.comment ?? '',
+        date: rev.createdAt ? rev.createdAt.slice(0, 10) : '',
+      }));
+      const reviewCount = reviews.length;
+      const averageRating =
+        reviewCount > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount : 0;
+      return { reviews, averageRating, reviewCount };
+    })(),
   };
 }
 
@@ -263,5 +277,21 @@ export async function capturePublicMenuGuestSafe(params: {
     ...(params.email ? { email: params.email } : {}),
     ...(params.notes ? { notes: params.notes } : {}),
     consent: params.consent,
+  });
+}
+
+export async function submitPublicMenuReviewSafe(params: {
+  businessId: number;
+  locationId?: number;
+  authorName?: string;
+  rating: number;
+  comment: string;
+}): Promise<void> {
+  await menuBuilderClient.createPublicMenuReview({
+    businessId: String(params.businessId),
+    ...(params.locationId ? { locationId: String(params.locationId) } : {}),
+    ...(params.authorName ? { authorName: params.authorName } : {}),
+    rating: params.rating,
+    comment: params.comment,
   });
 }
