@@ -1,5 +1,5 @@
 import { createRecruitRoutes } from './modules/recruit/routes';
-import { createPublicMenuRoutes } from './modules/public-menu/routes';
+import { createPublicMenuRoutes, createTenantMenuRoutes } from './modules/public-menu/routes';
 import React, { Suspense } from 'react';
 import { z } from 'zod';
 import {
@@ -15,7 +15,7 @@ import { Spinner } from '@voxire/components';
 import { BusinessRoute } from './shared/utils/BusinessRoute';
 import NoMatch from './features/extras/NoMatch';
 import { createFlowRoutes } from './modules/flow/routes';
-import { AppFlagGuard, FLAG_KEYS, resolveAppUrl } from '@voxire/config';
+import { AppFlagGuard, FLAG_KEYS, isTenantMenuHost, resolveAppUrl } from '@voxire/config';
 import { createCrmRoutes } from './modules/crm/routes';
 import { createHrRoutes } from './modules/hr/routes';
 import { createFinanceRoutes } from './modules/finance/routes';
@@ -314,56 +314,73 @@ const standalonePosSettingsRoute = createRoute({
   },
 });
 
-const routeTree = rootRoute.addChildren([
-  businessRoute.addChildren([
-    createInsightsRoutes(businessRoute),
-    createFlowRoutes(businessRoute),
-    createCrmRoutes(businessRoute),
-    createErpRoutes(businessRoute),
-    createFinanceRoutes(businessRoute),
-    createHrRoutes(businessRoute),
-    createRecruitRoutes(businessRoute),
-    dashboardRoute,
-    automationsRoute,
-    automationWebhooksRoute,
-    webhooksRedirectRoute,
-    automationBuilderRoute,
-    menusRoute,
-    menuRoute,
-    createItemRoute,
-    createBannerRoute,
-    ordersRoute,
-    qrCodesRoute,
-    qrCodeCreateRoute,
-    designRoute,
-    chatRoute,
-    caretRoute,
-    teamRoute,
-    teamInviteRoute,
-    teamGroupsRoute,
-    teamGroupNewRoute,
-    teamGroupDetailRoute,
-    teamMemberDetailRoute,
-    rolesRoute,
-    auditRoute,
-    notificationsRoute,
-    accountRedirectRoute,
-    billingRedirectRoute,
-    themeRoute,
-    helpRoute,
-    extensionsRoute,
-    storeRoute,
-    integrationsRoute,
-    ...createSettingsRoutes(businessRoute, openInSettingsModal),
-  ]),
-  standalonePosRoute,
-  standalonePosDeepLinkRoute,
-  standalonePosSettingsRoute,
-  ...createPublicMenuRoutes(rootRoute),
-  notFoundRoute,
-]);
+function buildPortalRouteTree() {
+  return rootRoute.addChildren([
+    businessRoute.addChildren([
+      createInsightsRoutes(businessRoute),
+      createFlowRoutes(businessRoute),
+      createCrmRoutes(businessRoute),
+      createErpRoutes(businessRoute),
+      createFinanceRoutes(businessRoute),
+      createHrRoutes(businessRoute),
+      createRecruitRoutes(businessRoute),
+      dashboardRoute,
+      automationsRoute,
+      automationWebhooksRoute,
+      webhooksRedirectRoute,
+      automationBuilderRoute,
+      menusRoute,
+      menuRoute,
+      createItemRoute,
+      createBannerRoute,
+      ordersRoute,
+      qrCodesRoute,
+      qrCodeCreateRoute,
+      designRoute,
+      chatRoute,
+      caretRoute,
+      teamRoute,
+      teamInviteRoute,
+      teamGroupsRoute,
+      teamGroupNewRoute,
+      teamGroupDetailRoute,
+      teamMemberDetailRoute,
+      rolesRoute,
+      auditRoute,
+      notificationsRoute,
+      accountRedirectRoute,
+      billingRedirectRoute,
+      themeRoute,
+      helpRoute,
+      extensionsRoute,
+      storeRoute,
+      integrationsRoute,
+      ...createSettingsRoutes(businessRoute, openInSettingsModal),
+    ]),
+    standalonePosRoute,
+    standalonePosDeepLinkRoute,
+    standalonePosSettingsRoute,
+    ...createPublicMenuRoutes(rootRoute),
+    notFoundRoute,
+  ]);
+}
 
-export const router = createRouter({ routeTree });
+function buildTenantRouteTree() {
+  return rootRoute.addChildren([
+    ...createTenantMenuRoutes(rootRoute),
+    ...createPublicMenuRoutes(rootRoute),
+    notFoundRoute,
+  ]);
+}
+
+// Mount only the public storefront routes on tenant subdomains (`<slug>.rtylr.com`)
+// and custom domains so Portal admin screens are never reachable there.
+// Only call `rootRoute.addChildren` once — TanStack Router mutates `rootRoute.children`.
+const activeRouteTree = isTenantMenuHost()
+  ? (buildTenantRouteTree() as unknown as ReturnType<typeof buildPortalRouteTree>)
+  : buildPortalRouteTree();
+
+export const router = createRouter({ routeTree: activeRouteTree });
 
 declare module '@tanstack/react-router' {
   interface Register {

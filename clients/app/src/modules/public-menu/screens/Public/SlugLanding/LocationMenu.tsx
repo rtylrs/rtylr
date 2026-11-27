@@ -36,12 +36,12 @@ import { menuCheckoutPath, menuHomePath } from '../../../menuPaths';
 const isOnlineOrderingEnabled = (): boolean =>
   import.meta.env.VITE_ONLINE_ORDERING_ENABLED !== 'false';
 
-const LocationMenu: React.FC = (): React.JSX.Element => {
+const LocationMenu: React.FC<{ slugOverride?: string }> = ({ slugOverride }): React.JSX.Element => {
   const { t } = useTranslation('locationmenu');
   const { slug: rawSlug, location: rawLoc } = useParams({ strict: false });
   const navigate = useNavigate();
   const router = useRouter();
-  const slug = (rawSlug ?? '').toLowerCase();
+  const slug = (slugOverride ?? rawSlug ?? '').toLowerCase();
   const locationSlug = (rawLoc ?? '').toLowerCase();
 
   const { data: biz, isLoading: bizLoading, isError: bizError } = usePublicBusinessBySlug(slug);

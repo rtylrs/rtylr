@@ -4,7 +4,10 @@ import {
   RESERVED_BUSINESS_SLUGS,
   buildPublicMenuUrl,
   buildPublicMenuUrlById,
+  buildTenantSubdomainMenuUrl,
+  extractTenantSubdomain,
   isReservedBusinessSlug,
+  isTenantMenuHost,
 } from './publicMenu';
 
 const ORIGIN = PORTAL_URL.replace(/\/+$/, '');
@@ -105,5 +108,38 @@ describe('buildPublicMenuUrlById', () => {
   it('uses the POS-style /b/<id>/menu form', () => {
     expect(buildPublicMenuUrlById(42)).toBe(`${ORIGIN}/b/42/menu`);
     expect(buildPublicMenuUrlById('42')).toBe(`${ORIGIN}/b/42/menu`);
+  });
+});
+
+describe('tenant subdomain and custom domain host detection', () => {
+  it('extracts valid non-reserved <slug>.rtylr.com subdomains', () => {
+    expect(extractTenantSubdomain('voxire.rtylr.com')).toBe('voxire');
+    expect(extractTenantSubdomain('Acme-Cafe.RTYLR.COM')).toBe('acme-cafe');
+  });
+
+  it('rejects reserved platform subdomains and multi-level hosts', () => {
+    expect(extractTenantSubdomain('portal.rtylr.com')).toBeNull();
+    expect(extractTenantSubdomain('pos.rtylr.com')).toBeNull();
+    expect(extractTenantSubdomain('sso.rtylr.com')).toBeNull();
+    expect(extractTenantSubdomain('rennili.rtylr.com')).toBeNull();
+    expect(extractTenantSubdomain('a.b.rtylr.com')).toBeNull();
+    expect(extractTenantSubdomain('rtylr.com')).toBeNull();
+  });
+
+  it('distinguishes tenant menu hosts from platform and local hosts', () => {
+    expect(isTenantMenuHost('voxire.rtylr.com')).toBe(true);
+    expect(isTenantMenuHost('menu.myrestaurant.com')).toBe(true);
+    expect(isTenantMenuHost('portal.rtylr.com')).toBe(false);
+    expect(isTenantMenuHost('rtylr.com')).toBe(false);
+    expect(isTenantMenuHost('rtylr-portal.pages.dev')).toBe(false);
+    expect(isTenantMenuHost('localhost')).toBe(false);
+    expect(isTenantMenuHost('127.0.0.1')).toBe(false);
+  });
+
+  it('builds branded tenant subdomain menu URLs', () => {
+    expect(buildTenantSubdomainMenuUrl('voxire')).toBe('https://voxire.rtylr.com');
+    expect(buildTenantSubdomainMenuUrl('voxire', 'voxire-cafe')).toBe(
+      'https://voxire.rtylr.com/voxire-cafe'
+    );
   });
 });
