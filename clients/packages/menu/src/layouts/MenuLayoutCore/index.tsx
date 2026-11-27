@@ -28,7 +28,7 @@ import {
 } from "../../theme";
 import AboutPage from "../../pages/AboutPage";
 import GalleryPage from "../../pages/GalleryPage";
-import ReviewsPage from "../../pages/ReviewsPage";
+import ReviewsPage, { type ReviewSubmissionInput } from "../../pages/ReviewsPage";
 import OffersPage from "../../pages/OffersPage";
 import styles from "./MenuLayoutCore.module.scss";
 
@@ -127,6 +127,7 @@ export interface MenuLayoutCoreProps {
   tableLabel?: string;
   onTableAction?: (action: TableActionType) => Promise<void> | void;
   onCaptureCrmGuest?: (input: CrmGuestInput) => Promise<void> | void;
+  onSubmitReview?: (input: ReviewSubmissionInput) => Promise<void> | void;
   previewMode?: boolean;
   labels?: Partial<MenuLayoutLabels>;
   enableCart?: boolean;
@@ -165,6 +166,7 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
   tableLabel,
   onTableAction,
   onCaptureCrmGuest,
+  onSubmitReview,
   previewMode = false,
   labels: labelsOverride,
   enableCart = true,
@@ -528,6 +530,51 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
     </>
   );
 
+  const effectiveBusiness = useMemo<BusinessInfo>(() => {
+    const about = config.content?.about;
+    const mergedSocials = {
+      instagram: about?.socials?.instagram?.trim() || business.socials?.instagram,
+      facebook: about?.socials?.facebook?.trim() || business.socials?.facebook,
+      tiktok: about?.socials?.tiktok?.trim() || business.socials?.tiktok,
+    };
+    return {
+      ...business,
+      story: about?.story?.trim() || business.story,
+      hours: about?.hours?.trim() || business.hours,
+      address: about?.address?.trim() || business.address,
+      phone: about?.phone?.trim() || business.phone,
+      email: about?.email?.trim() || business.email,
+      website: about?.website?.trim() || business.website,
+      socials:
+        mergedSocials.instagram || mergedSocials.facebook || mergedSocials.tiktok
+          ? mergedSocials
+          : undefined,
+    };
+  }, [business, config.content?.about]);
+
+  const effectivePhotos = useMemo<string[]>(() => {
+    const configured = (config.content?.gallery ?? []).filter((url) => url.trim().length > 0);
+    return configured.length > 0 ? configured : (business.photos ?? []);
+  }, [business.photos, config.content?.gallery]);
+
+  const effectiveOffers = useMemo(() => {
+    const baseOffers =
+      config.content?.offers && config.content.offers.length > 0
+        ? config.content.offers
+        : (business.offers ?? []);
+    const includeBanners = config.content?.includeBannersInOffers !== false;
+    if (!includeBanners || !features.enableBanners || banners.length === 0) {
+      return baseOffers;
+    }
+    const bannerOffers = banners.map((banner) => ({
+      id: `banner-${banner.id}`,
+      title: banner.title,
+      description: banner.body ?? "",
+      image: banner.imageUrl,
+    }));
+    return [...baseOffers, ...bannerOffers];
+  }, [banners, business.offers, config.content?.includeBannersInOffers, config.content?.offers, features.enableBanners]);
+
   const handleOpenItem = (item: MenuItemData) => {
     if (onItemClick) {
       onItemClick(item);
@@ -549,7 +596,7 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
       )}
 
       <MenuHeader
-        business={business}
+        business={effectiveBusiness}
         headerConfig={config.header}
         navConfig={config.nav}
         pages={config.pages}
@@ -679,18 +726,20 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
             </>
           )}
 
-          {renderedPage === "about" && <AboutPage business={business} />}
+          {renderedPage === "about" && <AboutPage business={effectiveBusiness} />}
           {renderedPage === "gallery" && (
-            <GalleryPage photos={business.photos ?? []} businessName={business.name} />
+            <GalleryPage photos={effectivePhotos} businessName={effectiveBusiness.name} />
           )}
           {renderedPage === "reviews" && (
             <ReviewsPage
-              reviews={business.reviews ?? []}
-              averageRating={business.averageRating}
-              reviewCount={business.reviewCount}
+              reviews={effectiveBusiness.reviews ?? []}
+              averageRating={effectiveBusiness.averageRating}
+              reviewCount={effectiveBusiness.reviewCount}
+              previewMode={previewMode}
+              onSubmitReview={onSubmitReview}
             />
           )}
-          {renderedPage === "offers" && <OffersPage offers={business.offers ?? []} />}
+          {renderedPage === "offers" && <OffersPage offers={effectiveOffers} />}
         </>,
       )}
 
