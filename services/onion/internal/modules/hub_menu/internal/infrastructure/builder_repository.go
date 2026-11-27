@@ -662,6 +662,82 @@ func (r *Repository) ListActivePublicBanners(ctx context.Context, businessID int
 	return out, nil
 }
 
+func (r *Repository) CreateMenuReview(ctx context.Context, review domain.MenuReview) (int64, error) {
+	res, err := r.queries.CreateMenuReview(ctx, sqlc.CreateMenuReviewParams{
+		BusinessID: review.BusinessID,
+		LocationID: review.LocationID,
+		AuthorName: review.AuthorName,
+		Rating:     review.Rating,
+		Comment:    review.Comment,
+	})
+	if err != nil {
+		return 0, err
+	}
+	return res.LastInsertId()
+}
+
+func (r *Repository) ListMenuReviews(ctx context.Context, businessID, locationID int64, status string) ([]domain.MenuReview, error) {
+	rows, err := r.queries.ListMenuReviews(ctx, sqlc.ListMenuReviewsParams{
+		BusinessID: businessID,
+		Column2:    locationID,
+		LocationID: locationID,
+		Column4:    status,
+		Status:     sqlc.HubMenuReviewsStatus(status),
+	})
+	if err != nil {
+		return nil, err
+	}
+	out := make([]domain.MenuReview, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, menuReviewFromRow(row))
+	}
+	return out, nil
+}
+
+func (r *Repository) ListApprovedPublicMenuReviews(ctx context.Context, businessID, locationID int64) ([]domain.MenuReview, error) {
+	rows, err := r.queries.ListApprovedPublicMenuReviews(ctx, sqlc.ListApprovedPublicMenuReviewsParams{
+		BusinessID: businessID,
+		LocationID: locationID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	out := make([]domain.MenuReview, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, menuReviewFromRow(row))
+	}
+	return out, nil
+}
+
+func (r *Repository) UpdateMenuReviewStatus(ctx context.Context, businessID, id int64, status string) error {
+	return r.queries.UpdateMenuReviewStatus(ctx, sqlc.UpdateMenuReviewStatusParams{
+		Status:     sqlc.HubMenuReviewsStatus(status),
+		BusinessID: businessID,
+		ID:         id,
+	})
+}
+
+func (r *Repository) DeleteMenuReview(ctx context.Context, businessID, id int64) error {
+	return r.queries.DeleteMenuReview(ctx, sqlc.DeleteMenuReviewParams{
+		BusinessID: businessID,
+		ID:         id,
+	})
+}
+
+func menuReviewFromRow(row sqlc.HubMenuReview) domain.MenuReview {
+	return domain.MenuReview{
+		ID:         row.ID,
+		BusinessID: row.BusinessID,
+		LocationID: row.LocationID,
+		AuthorName: row.AuthorName,
+		Rating:     row.Rating,
+		Comment:    row.Comment,
+		Status:     string(row.Status),
+		CreatedAt:  row.CreatedAt,
+		UpdatedAt:  row.UpdatedAt,
+	}
+}
+
 func menuProfileFromRow(row sqlc.GetMenuProfileRow) domain.MenuProfile {
 	var locales []string
 	_ = json.Unmarshal(row.EnabledLocales, &locales)

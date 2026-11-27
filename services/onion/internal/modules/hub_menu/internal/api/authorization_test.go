@@ -133,3 +133,16 @@ func TestMenuOrPOSPermissionAllowsScopedPOSStaffForOperations(t *testing.T) {
 		t.Fatalf("expected unscoped POS user to receive 403, got %v", err)
 	}
 }
+
+func TestMenuReviewModerationRequiresBrandingEditPermission(t *testing.T) {
+	ctx := authPkg.WithAuthUser(context.Background(), menuUser(true, "menu:menus:view"))
+	if _, err := (&MenuAPI{}).ListMenuReviews(ctx, &hubmenuv1.ListMenuReviewsRequest{}); menuPermissionStatus(err) != http.StatusForbidden {
+		t.Fatalf("ListMenuReviews status = %d, want 403", menuPermissionStatus(err))
+	}
+	if _, err := (&MenuAPI{}).UpdateMenuReviewStatus(ctx, &hubmenuv1.UpdateMenuReviewStatusRequest{Id: 1, Status: "approved"}); menuPermissionStatus(err) != http.StatusForbidden {
+		t.Fatalf("UpdateMenuReviewStatus status = %d, want 403", menuPermissionStatus(err))
+	}
+	if _, err := (&MenuAPI{}).DeleteMenuReview(ctx, &hubmenuv1.DeleteMenuReviewRequest{Id: 1}); menuPermissionStatus(err) != http.StatusForbidden {
+		t.Fatalf("DeleteMenuReview status = %d, want 403", menuPermissionStatus(err))
+	}
+}

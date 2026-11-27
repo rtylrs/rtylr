@@ -14,6 +14,7 @@ import { usePublicMenu } from '../../../shared/hooks/usePublicMenu';
 import {
   capturePublicMenuGuestSafe,
   lookupPublicCustomerStampsSafe,
+  submitPublicMenuReviewSafe,
   translationKey,
   usePublicBrandBundleSafe,
 } from '../../../shared/hooks/usePublicBrandBundle';
@@ -113,8 +114,11 @@ const PosMenu: React.FC = (): React.JSX.Element => {
     return {
       name: data.business.name,
       logo: data.business.logoUrl || undefined,
+      reviews: brandBundle?.reviews,
+      averageRating: brandBundle?.averageRating,
+      reviewCount: brandBundle?.reviewCount,
     };
-  }, [data]);
+  }, [data, brandBundle]);
 
   const handleCheckout = (cartItems: CartItem[]): void => {
     if (businessId == null) return;
@@ -206,6 +210,15 @@ const PosMenu: React.FC = (): React.JSX.Element => {
                 capturePublicMenuGuestSafe({
                   businessId,
                   ...guest,
+                })
+            : undefined
+        }
+        onSubmitReview={
+          businessId
+            ? (review) =>
+                submitPublicMenuReviewSafe({
+                  businessId,
+                  ...review,
                 })
             : undefined
         }

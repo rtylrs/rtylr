@@ -245,6 +245,27 @@ export interface MenuPaymentConfig {
   redirectUrl?: string;
 }
 
+export interface AboutPageContent {
+  story?: string;
+  hours?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  socials?: {
+    instagram?: string;
+    facebook?: string;
+    tiktok?: string;
+  };
+}
+
+export interface MenuPageContentConfig {
+  about?: AboutPageContent;
+  gallery?: string[];
+  offers?: BusinessOffer[];
+  includeBannersInOffers?: boolean;
+}
+
 export interface MenuLayoutConfig {
   pages: PageConfig;
   header: HeaderConfig;
@@ -255,6 +276,7 @@ export interface MenuLayoutConfig {
   mode?: ThemeMode;
   features?: Partial<MenuFeaturesConfig>;
   payment?: MenuPaymentConfig;
+  content?: MenuPageContentConfig;
   customCss?: string;
 }
 

@@ -712,6 +712,82 @@ model GetPublicMenuBundleResponse {
   currencies: MenuCurrency[];
   translations: MenuTranslation[];
   stamp_cards: MenuStampCard[];
+  reviews: MenuReview[];
+}
+
+// ── Public Guest Reviews & Moderation ────────────────────────────────────────
+
+model MenuReview {
+  @encode(string)
+  id: int64;
+
+  @encode(string)
+  location_id: int64;
+
+  author_name: string;
+  rating: int32;
+  comment: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+model CreatePublicMenuReviewRequest {
+  @minValueExclusive(0)
+  @encode(string)
+  business_id: int64;
+
+  @encode(string)
+  location_id?: int64;
+
+  author_name?: string;
+
+  @minValue(1)
+  @maxValue(5)
+  rating: int32;
+
+  @Onkt.required
+  comment: string;
+}
+
+model CreatePublicMenuReviewResponse {
+  review: MenuReview;
+}
+
+model ListMenuReviewsRequest {
+  @query("location_id")
+  @encode(string)
+  location_id?: int64;
+
+  @query("status")
+  status?: string;
+}
+
+model ListMenuReviewsResponse {
+  reviews: MenuReview[];
+}
+
+model UpdateMenuReviewStatusRequest {
+  @minValueExclusive(0)
+  @encode(string)
+  id: int64;
+
+  @Onkt.required
+  status: string;
+}
+
+model UpdateMenuReviewStatusResponse {
+  success: boolean;
+}
+
+model DeleteMenuReviewRequest {
+  @minValueExclusive(0)
+  @encode(string)
+  id: int64;
+}
+
+model DeleteMenuReviewResponse {
+  success: boolean;
 }
 
 // ── Public Guest CRM Capture ─────────────────────────────────────────────────

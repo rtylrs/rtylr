@@ -12,6 +12,7 @@ import {
   Code2,
   Copy,
   Eye,
+  FileText,
   LayoutGrid,
   Monitor,
   Palette,
@@ -70,6 +71,7 @@ import {
   useMenuCurrencies,
   useMenuPresets,
   useMenuProfile,
+  useMenuReviews,
   usePublishMenuProfile,
   useSaveMenuProfileDraft,
   useStampCards,
@@ -82,8 +84,9 @@ import {
   useDeleteMenuBanner,
   useMenuBanners,
 } from '../../shared/hooks/queries/useMenu';
+import PagesEditor from './PagesEditor';
 
-type RailTab = 'themes' | 'brand' | 'layout' | 'features' | 'ai' | 'css';
+type RailTab = 'themes' | 'brand' | 'layout' | 'pages' | 'features' | 'ai' | 'css';
 type DeviceViewport = 'mobile' | 'tablet' | 'desktop';
 
 const DEFAULT_BUSINESS: Omit<BusinessInfo, 'name' | 'description'> = {
@@ -317,6 +320,25 @@ const Design: React.FC = () => {
   }, [remoteProfile, setDraftConfig]);
 
   const previewT = useMemo(() => i18n.getFixedT(previewLocale), [i18n, previewLocale]);
+  const { data: studioReviews = [] } = useMenuReviews(selectedLocationId);
+  const selectedBranch = branches.find((b) => b.id === selectedLocationId);
+  const approvedPreviewReviews = useMemo(
+    () =>
+      studioReviews
+        .filter((r) => r.status === 'approved')
+        .map((r) => ({
+          id: String(r.id ?? ''),
+          author: r.authorName || 'Guest',
+          rating: r.rating ?? 5,
+          comment: r.comment ?? '',
+          date: r.createdAt ? r.createdAt.slice(0, 10) : '',
+        })),
+    [studioReviews]
+  );
+  const pendingReviewCount = useMemo(
+    () => studioReviews.filter((r) => r.status === 'pending').length,
+    [studioReviews]
+  );
   const u = user as Record<string, unknown> | null;
   const businessInfo: BusinessInfo = {
     name: (u?.businessName as string) || previewT('design.businessPlaceholder.name'),
@@ -324,11 +346,16 @@ const Design: React.FC = () => {
       (u?.businessDescription as string) || previewT('design.businessPlaceholder.description'),
     coverImage: (u?.coverImage as string) || DEFAULT_BUSINESS.coverImage,
     logo: (u?.logo as string) || DEFAULT_BUSINESS.logo,
-    address: (u?.address as string) || '',
+    address: selectedBranch?.address || (u?.address as string) || '',
     phone: (u?.phone as string) || '',
     hours: (u?.hours as string) || '',
-    averageRating: (u?.averageRating as number) ?? 0,
-    reviewCount: (u?.reviewCount as number) ?? 0,
+    reviews: approvedPreviewReviews,
+    averageRating:
+      approvedPreviewReviews.length > 0
+        ? approvedPreviewReviews.reduce((sum, r) => sum + r.rating, 0) /
+          approvedPreviewReviews.length
+        : 0,
+    reviewCount: approvedPreviewReviews.length,
   };
 
   const menuCategories: MenuCategoryData[] = useMemo(() => {
@@ -427,6 +454,9 @@ const Design: React.FC = () => {
 
   const patchPages = (patch: Partial<MenuLayoutConfig['pages']>) =>
     patchDraftConfig({ pages: { ...draftConfig.pages, ...patch } });
+
+  const patchContent = (patch: Partial<NonNullable<MenuLayoutConfig['content']>>) =>
+    patchDraftConfig({ content: { ...draftConfig.content, ...patch } });
 
   const patchColors = (patch: Partial<NonNullable<MenuLayoutConfig['colors']>>) =>
     patchDraftConfig({
@@ -567,6 +597,23 @@ const Design: React.FC = () => {
       id: 'layout',
       label: t('design.studio.rail.layout'),
       icon: <SlidersHorizontal className="w-[18px] h-[18px]" />,
+    },
+    {
+      id: 'pages',
+      label: t('design.studio.rail.pages'),
+      icon: (
+        <span className="relative inline-flex">
+          <FileText className="w-[18px] h-[18px]" />
+          {pendingReviewCount > 0 && (
+            <span
+              className="absolute -top-1 -end-1.5 min-w-[14px] h-[14px] px-0.5 rounded-full text-[9px] font-bold flex items-center justify-center bg-amber-500 text-white"
+              aria-label={`${pendingReviewCount} pending reviews`}
+            >
+              {pendingReviewCount}
+            </span>
+          )}
+        </span>
+      ),
     },
     {
       id: 'features',
@@ -1388,9 +1435,19 @@ const Design: React.FC = () => {
                 <Separator />
 
                 <div className="space-y-1">
-                  <Label className="text-[11px] uppercase tracking-wider">
-                    {t('design.sections.pages')}
-                  </Label>
+                  <div className="flex items-center justify-between gap-2">
+                    <Label className="text-[11px] uppercase tracking-wider">
+                      {t('design.sections.pages')}
+                    </Label>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('pages')}
+                      className="text-[11px] font-semibold hover:underline"
+                      style={{ color: colorAccent }}
+                    >
+                      {t('design.pagesEditor.editContent')} →
+                    </button>
+                  </div>
                   <SwitchRow
                     id="page-about"
                     label={t('design.pages.about')}
@@ -1417,6 +1474,19 @@ const Design: React.FC = () => {
                   />
                 </div>
               </div>
+            )}
+
+            {/* 3b. PAGES CONTENT & REVIEW MODERATION TAB */}
+            {activeTab === 'pages' && (
+              <PagesEditor
+                selectedLocationId={selectedLocationId}
+                pages={draftConfig.pages}
+                content={draftConfig.content ?? {}}
+                defaultAddress={businessInfo.address}
+                defaultPhone={businessInfo.phone}
+                onPatchPages={patchPages}
+                onPatchContent={patchContent}
+              />
             )}
 
             {/* 4. FEATURES, CURRENCIES, LANGUAGES, LOYALTY & PAYMENTS TAB */}

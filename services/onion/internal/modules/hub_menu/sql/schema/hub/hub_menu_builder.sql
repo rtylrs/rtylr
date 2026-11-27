@@ -153,3 +153,17 @@ CREATE TABLE IF NOT EXISTS `hub_menu_events` (
   PRIMARY KEY (`id`),
   KEY `idx_hub_menu_events_biz_loc_type_time` (`business_id`, `location_id`, `event_type`, `created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `hub_menu_reviews` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `business_id` bigint NOT NULL,
+  `location_id` bigint NOT NULL DEFAULT '0',
+  `author_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `rating` int NOT NULL,
+  `comment` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` enum('pending','approved','hidden') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_hub_menu_reviews_biz_loc_status` (`business_id`, `location_id`, `status`, `created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

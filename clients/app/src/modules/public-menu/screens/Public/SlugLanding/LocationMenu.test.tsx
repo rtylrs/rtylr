@@ -250,10 +250,11 @@ describe('LocationMenu normal rendering', () => {
 
     expect(gridLayoutSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        business: {
+        business: expect.objectContaining({
           name: 'Acme Diner - Downtown',
           logo: 'https://example.com/logo.png',
-        },
+          address: '123 Main St',
+        }),
         categories: [
           {
             id: 'all',

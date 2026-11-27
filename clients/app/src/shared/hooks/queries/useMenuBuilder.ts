@@ -7,6 +7,7 @@ import type {
   MenuCurrency,
   MenuPreset,
   MenuProfile,
+  MenuReview,
   MenuStampCard,
   MenuTableAction,
   MenuTranslationSourceEntry,
@@ -21,6 +22,7 @@ export interface MenuBranchOption {
   id: number;
   name: string;
   slug: string;
+  address?: string;
 }
 
 export interface MenuTableOption {
@@ -48,6 +50,7 @@ export const useMenuBranches = (businessSlug?: string) =>
               id: Number(loc.id ?? 0),
               name: loc.name ?? '',
               slug: loc.slug ?? '',
+              address: loc.address ?? '',
             }))
             .filter((loc) => loc.id > 0 && loc.slug);
           if (hrLocations.length > 0) return hrLocations;
@@ -452,3 +455,55 @@ export const useMenuAnalyticsSummary = (locationId: number, days = 30) =>
         days,
       }),
   });
+
+export const useMenuReviews = (locationId: number, status?: string) =>
+  useQuery<MenuReview[]>({
+    queryKey: ['menu-builder', 'reviews', locationId, status ?? ''],
+    queryFn: async () => {
+      const res = await menuClient.listMenuReviews({
+        ...(locationId > 0 ? { locationId: String(locationId) } : {}),
+        ...(status ? { status } : {}),
+      });
+      return res.reviews ?? [];
+    },
+  });
+
+export const useUpdateMenuReviewStatus = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: { id: string; status: 'pending' | 'approved' | 'hidden' }) => {
+      await menuClient.updateMenuReviewStatus(params);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['menu-builder', 'reviews'] });
+      void queryClient.invalidateQueries({ queryKey: ['public-menu-brand-bundle'] });
+      toast.success(i18next.t('design.toasts.reviewUpdated', 'Review updated'));
+    },
+    onError: (err: unknown) => {
+      const msg =
+        (err as { message?: string })?.message ||
+        i18next.t('design.toasts.reviewUpdateFailed', 'Failed to update review');
+      toast.error(msg);
+    },
+  });
+};
+
+export const useDeleteMenuReview = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await menuClient.deleteMenuReview({ id });
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['menu-builder', 'reviews'] });
+      void queryClient.invalidateQueries({ queryKey: ['public-menu-brand-bundle'] });
+      toast.success(i18next.t('design.toasts.reviewDeleted', 'Review deleted'));
+    },
+    onError: (err: unknown) => {
+      const msg =
+        (err as { message?: string })?.message ||
+        i18next.t('design.toasts.reviewDeleteFailed', 'Failed to delete review');
+      toast.error(msg);
+    },
+  });
+};

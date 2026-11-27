@@ -20,6 +20,8 @@ export type {
   TableActionsConfig,
   MenuFeaturesConfig,
   MenuPaymentConfig,
+  AboutPageContent,
+  MenuPageContentConfig,
   MenuLayoutConfig,
   CoverHeight,
   NavStyle,
@@ -70,6 +72,7 @@ export { default as AiChat } from './components/AiChat';
 export { default as AboutPage } from './pages/AboutPage';
 export { default as GalleryPage } from './pages/GalleryPage';
 export { default as ReviewsPage } from './pages/ReviewsPage';
+export type { ReviewSubmissionInput } from './pages/ReviewsPage';
 export { default as OffersPage } from './pages/OffersPage';
 
 // Layouts

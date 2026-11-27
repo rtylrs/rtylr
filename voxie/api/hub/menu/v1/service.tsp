@@ -191,4 +191,26 @@ interface MenuService {
   @post
   @route("/public/guest")
   capturePublicMenuGuest(...CapturePublicMenuGuestRequest): CapturePublicMenuGuestResponse;
+
+  /** Submits a customer review for merchant moderation. */
+  @post
+  @route("/public/reviews")
+  createPublicMenuReview(...CreatePublicMenuReviewRequest): CreatePublicMenuReviewResponse;
+
+  // ── Reviews Moderation (Authenticated) ──────────────────────────────────────
+
+  /** Lists submitted customer reviews for moderation in Menu Studio. */
+  @get
+  @route("/menu/reviews")
+  listMenuReviews(...ListMenuReviewsRequest): ListMenuReviewsResponse;
+
+  /** Approves, hides, or marks a customer review as pending. */
+  @put
+  @route("/menu/reviews/{id}")
+  updateMenuReviewStatus(...UpdateMenuReviewStatusRequest): UpdateMenuReviewStatusResponse;
+
+  /** Deletes a customer review permanently. */
+  @delete
+  @route("/menu/reviews/{id}")
+  deleteMenuReview(...DeleteMenuReviewRequest): DeleteMenuReviewResponse;
 }

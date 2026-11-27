@@ -19,6 +19,7 @@ type fakeBuilderRepo struct {
 	stampCards   []domain.StampCard
 	tableActions []domain.TableAction
 	events       []domain.MenuEventInput
+	reviews      []domain.MenuReview
 	clonedSource int64
 	clonedTarget int64
 	stampsAdded  int
@@ -144,6 +145,63 @@ func (f *fakeBuilderRepo) ListBranchMenuItems(_ context.Context, _ int64, locati
 
 func (f *fakeBuilderRepo) GetCustomerStampProgress(_ context.Context, _ int64, _ string) ([]domain.CustomerStampProgress, error) {
 	return []domain.CustomerStampProgress{{StampCardID: 7, StampsCount: 3, StampsRequired: 5}}, nil
+}
+
+func (f *fakeBuilderRepo) CreateMenuReview(_ context.Context, review domain.MenuReview) (int64, error) {
+	review.ID = int64(len(f.reviews) + 1)
+	if review.Status == "" {
+		review.Status = "pending"
+	}
+	f.reviews = append(f.reviews, review)
+	return review.ID, nil
+}
+
+func (f *fakeBuilderRepo) ListMenuReviews(_ context.Context, _ int64, locationID int64, status string) ([]domain.MenuReview, error) {
+	var out []domain.MenuReview
+	for _, r := range f.reviews {
+		if locationID != 0 && r.LocationID != locationID {
+			continue
+		}
+		if status != "" && r.Status != status {
+			continue
+		}
+		out = append(out, r)
+	}
+	return out, nil
+}
+
+func (f *fakeBuilderRepo) ListApprovedPublicMenuReviews(_ context.Context, _ int64, locationID int64) ([]domain.MenuReview, error) {
+	var out []domain.MenuReview
+	for _, r := range f.reviews {
+		if r.Status != "approved" {
+			continue
+		}
+		if r.LocationID != locationID && r.LocationID != 0 {
+			continue
+		}
+		out = append(out, r)
+	}
+	return out, nil
+}
+
+func (f *fakeBuilderRepo) UpdateMenuReviewStatus(_ context.Context, _ int64, id int64, status string) error {
+	for i := range f.reviews {
+		if f.reviews[i].ID == id {
+			f.reviews[i].Status = status
+		}
+	}
+	return nil
+}
+
+func (f *fakeBuilderRepo) DeleteMenuReview(_ context.Context, _ int64, id int64) error {
+	var out []domain.MenuReview
+	for _, r := range f.reviews {
+		if r.ID != id {
+			out = append(out, r)
+		}
+	}
+	f.reviews = out
+	return nil
 }
 
 func TestSavePublishAndCloneMenuProfile(t *testing.T) {
@@ -541,5 +599,77 @@ func TestGetPublicMenuBundleFallsBackWhenBranchHasUnpublishedDraft(t *testing.T)
 	}
 	if len(bundle.BranchItems) != 1 || bundle.BranchItems[0].MenuItemID != 99 || bundle.BranchItems[0].IsVisible {
 		t.Fatalf("expected branch 4 item overrides preserved, got %+v", bundle.BranchItems)
+	}
+}
+
+func TestMenuReviewsRequireEnabledPageAndModerationBeforePublicBundle(t *testing.T) {
+	repo := newFakeBuilderRepo()
+	svc := NewService(context.Background(), repo)
+
+	// Reject submissions when reviews page is not published/enabled.
+	if _, err := svc.CreatePublicMenuReview(context.Background(), 42, domain.MenuReview{
+		AuthorName: "Nadia",
+		Rating:     5,
+		Comment:    "Best espresso in town",
+	}); !errors.Is(err, domain.ErrFeatureDisabled) {
+		t.Fatalf("expected ErrFeatureDisabled when reviews disabled, got %v", err)
+	}
+
+	// Publish profile with reviews page enabled.
+	_, err := svc.SaveMenuProfileDraft(context.Background(), 42, domain.SaveMenuProfileDraftInput{
+		LocationID:      0,
+		DraftConfigJSON: `{"pages":{"menu":true,"reviews":true}}`,
+	})
+	if err != nil {
+		t.Fatalf("save draft failed: %v", err)
+	}
+	if _, err := svc.PublishMenuProfile(context.Background(), 42, 0); err != nil {
+		t.Fatalf("publish failed: %v", err)
+	}
+
+	// Submit review -> stored as pending, NOT visible in public bundle yet.
+	created, err := svc.CreatePublicMenuReview(context.Background(), 42, domain.MenuReview{
+		LocationID: 4,
+		AuthorName: "  ",
+		Rating:     5,
+		Comment:    "  Amazing matcha latte!  ",
+	})
+	if err != nil {
+		t.Fatalf("CreatePublicMenuReview failed: %v", err)
+	}
+	if created.Status != "pending" || created.AuthorName != "Guest" || created.Comment != "Amazing matcha latte!" {
+		t.Fatalf("unexpected created review: %+v", created)
+	}
+
+	bundleBefore, err := svc.GetPublicMenuBundle(context.Background(), 42, 4, "en")
+	if err != nil {
+		t.Fatalf("GetPublicMenuBundle failed: %v", err)
+	}
+	if len(bundleBefore.Reviews) != 0 {
+		t.Fatalf("pending review must not appear in public bundle, got %+v", bundleBefore.Reviews)
+	}
+
+	// Approve review -> now appears in public bundle.
+	if err := svc.UpdateMenuReviewStatus(context.Background(), 42, created.ID, "approved"); err != nil {
+		t.Fatalf("UpdateMenuReviewStatus failed: %v", err)
+	}
+	bundleAfter, err := svc.GetPublicMenuBundle(context.Background(), 42, 4, "en")
+	if err != nil {
+		t.Fatalf("GetPublicMenuBundle failed: %v", err)
+	}
+	if len(bundleAfter.Reviews) != 1 || bundleAfter.Reviews[0].Comment != "Amazing matcha latte!" {
+		t.Fatalf("expected approved review in public bundle, got %+v", bundleAfter.Reviews)
+	}
+
+	// Hide and delete.
+	if err := svc.UpdateMenuReviewStatus(context.Background(), 42, created.ID, "hidden"); err != nil {
+		t.Fatalf("hide review failed: %v", err)
+	}
+	if err := svc.DeleteMenuReview(context.Background(), 42, created.ID); err != nil {
+		t.Fatalf("delete review failed: %v", err)
+	}
+	remaining, err := svc.ListMenuReviews(context.Background(), 42, 0, "")
+	if err != nil || len(remaining) != 0 {
+		t.Fatalf("expected 0 reviews after delete, got %d err=%v", len(remaining), err)
 	}
 }

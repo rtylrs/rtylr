@@ -448,6 +448,7 @@ func (a *MenuAPI) GetPublicMenuBundle(ctx context.Context, req *hubmenuv1.GetPub
 		Currencies:   toProtoCurrencies(bundle.Currencies),
 		Translations: translations,
 		StampCards:   toProtoStampCards(bundle.StampCards),
+		Reviews:      toProtoReviews(bundle.Reviews),
 	}, nil
 }
 
@@ -521,6 +522,55 @@ func (a *MenuAPI) CapturePublicMenuGuest(ctx context.Context, req *hubmenuv1.Cap
 	return &hubmenuv1.CapturePublicMenuGuestResponse{Captured: true}, nil
 }
 
+// ── Public Reviews & Moderation ───────────────────────────────────────────────
+
+func (a *MenuAPI) CreatePublicMenuReview(ctx context.Context, req *hubmenuv1.CreatePublicMenuReviewRequest) (*hubmenuv1.CreatePublicMenuReviewResponse, error) {
+	review, err := a.Service.CreatePublicMenuReview(ctx, req.GetBusinessId(), domain.MenuReview{
+		LocationID: req.GetLocationId(),
+		AuthorName: req.GetAuthorName(),
+		Rating:     req.GetRating(),
+		Comment:    req.GetComment(),
+	})
+	if err != nil {
+		return nil, builderError(err, "Failed to submit review")
+	}
+	return &hubmenuv1.CreatePublicMenuReviewResponse{Review: toProtoReview(review)}, nil
+}
+
+func (a *MenuAPI) ListMenuReviews(ctx context.Context, req *hubmenuv1.ListMenuReviewsRequest) (*hubmenuv1.ListMenuReviewsResponse, error) {
+	businessID, err := requireMenuPermission(ctx, "menu:branding:edit")
+	if err != nil {
+		return nil, err
+	}
+	reviews, err := a.Service.ListMenuReviews(ctx, businessID, req.GetLocationId(), req.GetStatus())
+	if err != nil {
+		return nil, builderError(err, "Failed to list menu reviews")
+	}
+	return &hubmenuv1.ListMenuReviewsResponse{Reviews: toProtoReviews(reviews)}, nil
+}
+
+func (a *MenuAPI) UpdateMenuReviewStatus(ctx context.Context, req *hubmenuv1.UpdateMenuReviewStatusRequest) (*hubmenuv1.UpdateMenuReviewStatusResponse, error) {
+	businessID, err := requireMenuPermission(ctx, "menu:branding:edit")
+	if err != nil {
+		return nil, err
+	}
+	if err := a.Service.UpdateMenuReviewStatus(ctx, businessID, req.GetId(), req.GetStatus()); err != nil {
+		return nil, builderError(err, "Failed to update menu review")
+	}
+	return &hubmenuv1.UpdateMenuReviewStatusResponse{Success: true}, nil
+}
+
+func (a *MenuAPI) DeleteMenuReview(ctx context.Context, req *hubmenuv1.DeleteMenuReviewRequest) (*hubmenuv1.DeleteMenuReviewResponse, error) {
+	businessID, err := requireMenuPermission(ctx, "menu:branding:edit")
+	if err != nil {
+		return nil, err
+	}
+	if err := a.Service.DeleteMenuReview(ctx, businessID, req.GetId()); err != nil {
+		return nil, builderError(err, "Failed to delete menu review")
+	}
+	return &hubmenuv1.DeleteMenuReviewResponse{Success: true}, nil
+}
+
 // ── Converters & Error Mapping ────────────────────────────────────────────────
 
 func builderError(err error, fallback string) error {
@@ -538,6 +588,7 @@ func builderError(err error, fallback string) error {
 		errors.Is(err, domain.ErrTableActionInvalidInput),
 		errors.Is(err, domain.ErrEventInvalidInput),
 		errors.Is(err, domain.ErrGuestCaptureInvalidInput),
+		errors.Is(err, domain.ErrReviewInvalidInput),
 		errors.Is(err, domain.ErrUnsafeCustomCSS):
 		return onekiterrors.New(http.StatusBadRequest, err.Error())
 	default:
@@ -672,5 +723,26 @@ func toProtoTableAction(act domain.TableAction) *hubmenuv1.MenuTableAction {
 		Note:       act.Note,
 		CreatedAt:  formatTimeUTC(act.CreatedAt),
 		UpdatedAt:  formatTimeUTC(act.UpdatedAt),
+	}
+}
+
+func toProtoReviews(list []domain.MenuReview) []*hubmenuv1.MenuReview {
+	out := make([]*hubmenuv1.MenuReview, 0, len(list))
+	for _, r := range list {
+		out = append(out, toProtoReview(r))
+	}
+	return out
+}
+
+func toProtoReview(r domain.MenuReview) *hubmenuv1.MenuReview {
+	return &hubmenuv1.MenuReview{
+		Id:         r.ID,
+		LocationId: r.LocationID,
+		AuthorName: r.AuthorName,
+		Rating:     r.Rating,
+		Comment:    r.Comment,
+		Status:     r.Status,
+		CreatedAt:  formatTimeUTC(r.CreatedAt),
+		UpdatedAt:  formatTimeUTC(r.UpdatedAt),
 	}
 }

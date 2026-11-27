@@ -64,6 +64,12 @@ type repository interface {
 
 	InsertMenuEvents(ctx context.Context, businessID int64, events []domain.MenuEventInput) error
 	SummarizeMenuEvents(ctx context.Context, businessID, locationID int64, since time.Time) (domain.AnalyticsSummary, error)
+
+	CreateMenuReview(ctx context.Context, review domain.MenuReview) (int64, error)
+	ListMenuReviews(ctx context.Context, businessID, locationID int64, status string) ([]domain.MenuReview, error)
+	ListApprovedPublicMenuReviews(ctx context.Context, businessID, locationID int64) ([]domain.MenuReview, error)
+	UpdateMenuReviewStatus(ctx context.Context, businessID, id int64, status string) error
+	DeleteMenuReview(ctx context.Context, businessID, id int64) error
 }
 
 type Service struct {

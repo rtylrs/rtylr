@@ -218,4 +218,69 @@ describe("MenuLayoutCore", () => {
     fireEvent.click(screen.getByRole("button", { name: "Coffee" }));
     expect(scrollToSpy).toHaveBeenLastCalledWith({ top: 0, behavior: "smooth" });
   });
+
+  it("renders configured About, Gallery, Offers, and submits Reviews via callback", async () => {
+    vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
+    const onSubmitReview = vi.fn().mockResolvedValue(undefined);
+    render(
+      <MenuLayoutCore
+        business={{
+          name: "Voxire Cafe",
+          address: "123 Cedar St",
+          reviews: [
+            { id: "r1", author: "Lina", rating: 5, comment: "Loved the matcha", date: "2026-11-27" },
+          ],
+        }}
+        categories={categories}
+        banners={[{ id: "b1", title: "Morning Combo", body: "Coffee + Croissant $8" }]}
+        onSubmitReview={onSubmitReview}
+        config={{
+          pages: { menu: true, about: true, gallery: true, offers: true, reviews: true },
+          content: {
+            about: {
+              story: "Roasted fresh every morning.",
+              hours: "Daily 8am - 10pm",
+              socials: { instagram: "@voxirecafe" },
+            },
+            gallery: ["https://cdn.example.com/cafe-1.jpg"],
+            offers: [
+              { id: "o1", title: "Happy Hour", description: "20% off iced drinks", badge: "20% OFF" },
+            ],
+            includeBannersInOffers: true,
+          },
+        }}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "About" }));
+    expect(screen.getByText("Roasted fresh every morning.")).toBeTruthy();
+    expect(screen.getByText("123 Cedar St")).toBeTruthy();
+    expect(screen.getByText("Daily 8am - 10pm")).toBeTruthy();
+    expect(screen.getByText("Instagram · @voxirecafe")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Gallery" }));
+    expect(screen.getByRole("button", { name: "View photo 1" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Offers" }));
+    expect(screen.getByText("Happy Hour")).toBeTruthy();
+    expect(screen.getByText("Morning Combo")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Reviews" }));
+    expect(screen.getByText("Loved the matcha")).toBeTruthy();
+    fireEvent.click(screen.getAllByText("★")[9]); // 5th interactive star
+    fireEvent.change(screen.getByPlaceholderText("Your name"), { target: { value: "Karim" } });
+    fireEvent.change(screen.getByPlaceholderText("Tell us about your experience…"), {
+      target: { value: "Great atmosphere!" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Submit Review" }));
+
+    await waitFor(() =>
+      expect(onSubmitReview).toHaveBeenCalledWith({
+        authorName: "Karim",
+        rating: 5,
+        comment: "Great atmosphere!",
+      }),
+    );
+    expect(await screen.findByText(/once approved by the restaurant/i)).toBeTruthy();
+  });
 });
