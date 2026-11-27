@@ -137,8 +137,11 @@ const Checkout = (): React.JSX.Element => {
       void navigate({
         to: `${menuOrderStatusPath(orderId)}?number=${encodeURIComponent(orderNumber)}${businessQuery}${slugQuery}${tokenQuery}`,
       });
-    } catch {
-      setErrorMessage(t('checkout.orderFailed'));
+    } catch (err: unknown) {
+      const statusCode =
+        (err as { statusCode?: number })?.statusCode ??
+        (err as { response?: { status?: number } })?.response?.status;
+      setErrorMessage(statusCode === 409 ? t('checkout.outOfStock') : t('checkout.orderFailed'));
     } finally {
       setSubmitting(false);
     }
