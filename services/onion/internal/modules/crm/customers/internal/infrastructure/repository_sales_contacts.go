@@ -13,26 +13,31 @@ import (
 func (r *Repository) SearchSalesContacts(ctx context.Context, businessID int64, query string) ([]domain.SalesContact, error) {
 	query = strings.TrimSpace(query)
 	searchTerm := searchutil.BooleanPrefixQuery(query)
+	likePattern := "%" + escapeLikeLiteral(query) + "%"
 
 	var rows *sql.Rows
 	var err error
 	if query == "" {
 		rows, err = r.pool.QueryContext(ctx, `
-SELECT id, business_id, first_name, last_name, email, phone
+SELECT id, business_id, first_name, last_name, email, phone, COALESCE(loyalty_points, 0)
 FROM crm_customers
 WHERE business_id = ?
 ORDER BY first_name LIMIT 20`, businessID)
 	} else {
 		rows, err = r.pool.QueryContext(ctx, `
-SELECT id, business_id, first_name, last_name, email, phone
+SELECT id, business_id, first_name, last_name, email, phone, COALESCE(loyalty_points, 0)
 FROM crm_customers
 WHERE business_id = ?
   AND (
     phone = ?
     OR email = ?
+    OR first_name LIKE ? ESCAPE '\\'
+    OR last_name LIKE ? ESCAPE '\\'
+    OR email LIKE ? ESCAPE '\\'
+    OR phone LIKE ? ESCAPE '\\'
     OR (? <> '' AND MATCH(first_name, last_name, email, phone) AGAINST (? IN BOOLEAN MODE))
   )
-ORDER BY first_name LIMIT 20`, businessID, query, query, searchTerm, searchTerm)
+ORDER BY first_name LIMIT 20`, businessID, query, query, likePattern, likePattern, likePattern, likePattern, searchTerm, searchTerm)
 	}
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to search POS customers", logger.Error(err))
@@ -43,12 +48,13 @@ ORDER BY first_name LIMIT 20`, businessID, query, query, searchTerm, searchTerm)
 	customers := make([]domain.SalesContact, 0)
 	for rows.Next() {
 		var row struct {
-			ID         int64
-			BusinessID int64
-			FirstName  string
-			LastName   sql.NullString
-			Email      sql.NullString
-			Phone      sql.NullString
+			ID            int64
+			BusinessID    int64
+			FirstName     string
+			LastName      sql.NullString
+			Email         sql.NullString
+			Phone         sql.NullString
+			LoyaltyPoints int32
 		}
 		if scanErr := rows.Scan(
 			&row.ID,
@@ -57,16 +63,18 @@ ORDER BY first_name LIMIT 20`, businessID, query, query, searchTerm, searchTerm)
 			&row.LastName,
 			&row.Email,
 			&row.Phone,
+			&row.LoyaltyPoints,
 		); scanErr != nil {
 			return nil, scanErr
 		}
 
 		customers = append(customers, domain.SalesContact{
-			ID:        row.ID,
-			FirstName: row.FirstName,
-			LastName:  row.LastName.String,
-			Email:     row.Email.String,
-			Phone:     row.Phone.String,
+			ID:            row.ID,
+			FirstName:     row.FirstName,
+			LastName:      row.LastName.String,
+			Email:         row.Email.String,
+			Phone:         row.Phone.String,
+			LoyaltyPoints: row.LoyaltyPoints,
 		})
 	}
 	if rowsErr := rows.Err(); rowsErr != nil {
@@ -74,4 +82,9 @@ ORDER BY first_name LIMIT 20`, businessID, query, query, searchTerm, searchTerm)
 	}
 
 	return customers, nil
+}
+
+func escapeLikeLiteral(raw string) string {
+	r := strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`)
+	return r.Replace(raw)
 }

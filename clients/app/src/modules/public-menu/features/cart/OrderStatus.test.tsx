@@ -283,11 +283,17 @@ describe('OrderStatus polling', () => {
     apiGet.mockResolvedValueOnce({ status: 'pending' }).mockResolvedValue({ status: 'preparing' });
     const callbacks: (() => void)[] = [];
     const delays: (number | undefined)[] = [];
-    const setIntervalSpy = vi.spyOn(globalThis, 'setInterval').mockImplementation((cb, ms) => {
-      callbacks.push(cb as () => void);
-      delays.push(ms);
-      return 0 as unknown as ReturnType<typeof setInterval>;
-    });
+    const realSetInterval = globalThis.setInterval;
+    const setIntervalSpy = vi
+      .spyOn(globalThis, 'setInterval')
+      .mockImplementation((cb, ms, ...args) => {
+        if (ms === 15_000) {
+          callbacks.push(cb as () => void);
+          delays.push(ms);
+          return 0 as unknown as ReturnType<typeof setInterval>;
+        }
+        return realSetInterval(cb, ms, ...args);
+      });
 
     try {
       render(<OrderStatus />);

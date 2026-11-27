@@ -34,5 +34,6 @@
   "fulfillmentPickup": "Pickup",
   "fulfillmentDelivery": "Delivery",
   "deliveryAddressPlaceholder": "Delivery address",
-  "crmOptInLabel": "Earn loyalty stamps & save order history"
+  "crmOptInLabel": "Earn loyalty stamps & save order history",
+  "trackActiveOrder": "Track Order #{{number}}"
 }

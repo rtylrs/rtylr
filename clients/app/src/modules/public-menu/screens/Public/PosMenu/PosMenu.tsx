@@ -19,6 +19,7 @@ import {
 } from '../../../shared/hooks/usePublicBrandBundle';
 import { useCartStore } from '../../../shared/stores/cartStore';
 import { menuCheckoutPath } from '../../../menuPaths';
+import ActiveOrderBanner from '../../../features/cart/ActiveOrderBanner';
 
 /**
  * PosMenu - public customer-facing menu for POS-backed businesses.
@@ -211,6 +212,7 @@ const PosMenu: React.FC = (): React.JSX.Element => {
         enableCart={orderingEnabled}
         onCheckout={orderingEnabled ? handleCheckout : undefined}
       />
+      <ActiveOrderBanner businessId={businessId} />
     </>
   );
 };

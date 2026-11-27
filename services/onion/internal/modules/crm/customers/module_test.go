@@ -27,6 +27,7 @@ func TestGeneratedCustomerRoutesRequireAuthorization(t *testing.T) {
 		{"DELETE", "/crm/customer/v1/customers/1", ""},
 		{"GET", "/crm/dashboard/v1/dashboard", ""},
 		{"GET", "/pos/customer/v1/customers?query=Portal", ""},
+		{"POST", "/pos/customer/v1/customers", `{"first_name":"Test"}`},
 	} {
 		t.Run(tc.method+tc.path, func(t *testing.T) {
 			response := httptest.NewRecorder()

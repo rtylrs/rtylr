@@ -25,5 +25,8 @@
   "orderAnother": "طلب جديد",
   "notFoundTitle": "الطلب غير موجود",
   "notFoundDescription": "لم نتمكن من العثور على طلب يطابق هذا المعرف. يرجى التحقق من رابط الطلب.",
-  "backToMenu": "الرجوع إلى القائمة"
+  "backToMenu": "الرجوع إلى القائمة",
+  "activeOrderTitle": "الطلب #{{number}}",
+  "trackOrder": "تتبع الطلب",
+  "dismissActiveOrder": "إخفاء شريط الطلب"
 }

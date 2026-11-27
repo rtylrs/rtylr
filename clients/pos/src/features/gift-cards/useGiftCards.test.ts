@@ -6,6 +6,7 @@ import { useGiftCards } from './useGiftCards';
 const mockPosService = vi.hoisted(() => ({
   listGiftCards: vi.fn(),
   getGiftCardByCode: vi.fn(),
+  redeemGiftCard: vi.fn(),
 }));
 
 vi.mock('@voxire/api', () => ({
@@ -101,5 +102,39 @@ describe('useGiftCards', () => {
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.error).toBe('Gift card service unavailable');
+  });
+
+  it('requires a valid orderId when redeeming and forwards it to the API', async () => {
+    mockPosService.redeemGiftCard.mockResolvedValue({
+      giftCard: {
+        id: '7',
+        code: 'GC-7',
+        currentBalance: 15,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        isActive: true,
+      },
+    });
+    const { result } = renderHook(() => useGiftCards());
+
+    let missingOrder;
+    await act(async () => {
+      missingOrder = await result.current.redeem('GC-7', '10', '');
+    });
+    expect(missingOrder).toEqual({
+      ok: false,
+      error: 'Select an order before redeeming a gift card',
+    });
+    expect(mockPosService.redeemGiftCard).not.toHaveBeenCalled();
+
+    let okResult;
+    await act(async () => {
+      okResult = await result.current.redeem('GC-7', '10', '42');
+    });
+    expect(mockPosService.redeemGiftCard).toHaveBeenCalledWith({
+      code: 'GC-7',
+      amount: 10,
+      orderId: '42',
+    });
+    expect(okResult).toEqual({ ok: true, remaining: 15 });
   });
 });

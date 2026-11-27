@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Banknote, CreditCard, Smartphone } from "lucide-react";
+import { Banknote, CreditCard, Gift, Smartphone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import { createOneKitClient } from "@voxire/api";
+import { GiftCardServiceClient } from "@voxire/voxie/pos/gift_card/v1/client";
 import { OrderServiceClient } from "@voxire/voxie/pos/orders/v1/client";
 import { OrderPaymentServiceClient } from "@voxire/voxie/pos/orders/payments/v1/client";
 import POSLayout from "../../layouts/POSLayout";
@@ -38,6 +39,7 @@ import {
 
 const orderClient = createOneKitClient(OrderServiceClient, "pos");
 const orderPaymentClient = createOneKitClient(OrderPaymentServiceClient, "pos");
+const giftCardClient = createOneKitClient(GiftCardServiceClient, "pos");
 
 const fmt = (n: number): string =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
@@ -70,6 +72,7 @@ const Payment: React.FC = () => {
   const business = useSettingsStore((s) => s.business);
   const tablesEnabled = useSettingsStore((s) => s.features.tables);
   const cashDrawerEnabled = useSettingsStore((s) => s.features.cashDrawer);
+  const giftCardsEnabled = useSettingsStore((s) => s.features.giftCards);
   const enqueueOffline = useOfflineQueueStore((s) => s.enqueue);
   const setServerOrderId = useCartStore((s) => s.setServerOrderId);
   const addReceipt = useReceiptsStore((s) => s.add);
@@ -79,6 +82,14 @@ const Payment: React.FC = () => {
   const [cashAmount, setCashAmount] = useState("");
   const [cardAttested, setCardAttested] = useState(false);
   const [qrAttested, setQrAttested] = useState(false);
+  const [giftCardCode, setGiftCardCode] = useState("");
+  const [verifyingGiftCard, setVerifyingGiftCard] = useState(false);
+  const [verifiedGiftCard, setVerifiedGiftCard] = useState<{
+    code: string;
+    balance: number;
+    active: boolean;
+  } | null>(null);
+  const [giftCardError, setGiftCardError] = useState<string | null>(null);
   // `processing` only reaches the DOM on the next render, so a second tap in
   // the same tick still reaches handleCharge. Without this synchronous claim a
   // double-tap starts two checkouts, and two checkouts are two sales.
@@ -112,8 +123,48 @@ const Payment: React.FC = () => {
 
   const attested =
     method === "card" ? cardAttested : method === "qr" ? qrAttested : false;
+  const giftCardSatisfied =
+    method === "gift_card" &&
+    verifiedGiftCard != null &&
+    verifiedGiftCard.active &&
+    verifiedGiftCard.balance + 0.001 >= grandTotal;
   const tenderSatisfied =
-    method === "cash" ? cashTender.canCharge : attested;
+    method === "cash"
+      ? cashTender.canCharge
+      : method === "gift_card"
+        ? giftCardSatisfied
+        : attested;
+
+  const handleVerifyGiftCard = async (): Promise<void> => {
+    const code = giftCardCode.trim();
+    if (!code) return;
+    setVerifyingGiftCard(true);
+    setGiftCardError(null);
+    try {
+      const res = await giftCardClient.getGiftCardByCode({ code });
+      const card = res.giftCard;
+      if (!card) {
+        setVerifiedGiftCard(null);
+        setGiftCardError("Gift card not found.");
+        return;
+      }
+      const balance = card.currentBalance ?? 0;
+      const active = Boolean(card.isActive);
+      setVerifiedGiftCard({ code: card.code ?? code, balance, active });
+      if (!active) {
+        setGiftCardError("This gift card is inactive.");
+      } else if (balance + 0.001 < grandTotal) {
+        setGiftCardError(
+          `Insufficient balance (${fmt(balance)} available for ${fmt(grandTotal)}). Use Split Pay or Multi-pay to combine methods.`,
+        );
+      }
+    } catch {
+      setVerifiedGiftCard(null);
+      setGiftCardError("Gift card not found or could not be verified.");
+    } finally {
+      setVerifyingGiftCard(false);
+    }
+  };
 
   const handleCharge = async (): Promise<void> => {
     // The disabled button is only one way in; never let an unattested card/QR
@@ -123,7 +174,9 @@ const Payment: React.FC = () => {
       toast.error(
         method === "cash"
           ? "Enter the cash received before charging."
-          : "Confirm the payment before charging.",
+          : method === "gift_card"
+            ? "Verify a gift card with sufficient balance before charging."
+            : "Confirm the payment before charging.",
       );
       return;
     }
@@ -198,6 +251,16 @@ const Payment: React.FC = () => {
           }
           return orderClient.createOrder(generatedPayload);
         },
+        redeemGiftCard:
+          method === "gift_card" && verifiedGiftCard
+            ? async (createdOrderId) => {
+                await giftCardClient.redeemGiftCard({
+                  code: verifiedGiftCard.code,
+                  orderId: String(createdOrderId),
+                  amount: grandTotal,
+                });
+              }
+            : undefined,
         chargeOrder: async ({ idempotencyKey, ...chargePayload }) => {
           // The generated client already accepts per-call RequestOptions, so the
           // key reaches the wire without a contract change. Without it the
@@ -314,6 +377,7 @@ const Payment: React.FC = () => {
     { id: "card", label: "Card", icon: CreditCard },
     { id: "cash", label: "Cash", icon: Banknote },
     { id: "qr", label: "QR Pay", icon: Smartphone },
+    ...(giftCardsEnabled ? [{ id: "gift_card" as const, label: "Gift Card", icon: Gift }] : []),
   ];
 
   return (
@@ -475,6 +539,45 @@ const Payment: React.FC = () => {
             />
           )}
 
+          {method === "gift_card" && (
+            <div className="space-y-2.5">
+              <label
+                htmlFor="checkout-gift-card-code"
+                className="text-xs font-semibold uppercase tracking-wide text-pos-muted"
+              >
+                Gift card code
+              </label>
+              <div className="flex gap-2">
+                <input
+                  id="checkout-gift-card-code"
+                  value={giftCardCode}
+                  onChange={(e) => {
+                    setGiftCardCode(e.target.value);
+                    setVerifiedGiftCard(null);
+                    setGiftCardError(null);
+                  }}
+                  placeholder="GC-XXXX-XXXX"
+                  className="flex-1 bg-pos-input border border-pos-border rounded-xl px-4 py-3 text-pos-text font-mono text-sm outline-none focus:border-white/20 transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => void handleVerifyGiftCard()}
+                  disabled={verifyingGiftCard || !giftCardCode.trim()}
+                  className="px-4 rounded-xl bg-white/10 hover:bg-white/20 text-pos-text text-xs font-semibold disabled:opacity-50"
+                >
+                  {verifyingGiftCard ? "Checking…" : "Verify"}
+                </button>
+              </div>
+              {verifiedGiftCard && verifiedGiftCard.active && verifiedGiftCard.balance + 0.001 >= grandTotal && (
+                <p className="text-xs font-semibold text-emerald-300">
+                  Verified {verifiedGiftCard.code} · Balance {fmt(verifiedGiftCard.balance)} (remaining after sale:{" "}
+                  {fmt(Math.max(0, verifiedGiftCard.balance - grandTotal))})
+                </p>
+              )}
+              {giftCardError && <p className="text-xs text-destructive">{giftCardError}</p>}
+            </div>
+          )}
+
           <button
             className="w-full py-3.5 rounded-xl bg-pos-text text-pos-bg font-bold text-sm hover:opacity-90 disabled:opacity-40 transition-opacity"
             onClick={handleCharge}
@@ -489,7 +592,7 @@ const Payment: React.FC = () => {
               `Confirm Payment · ${fmt(grandTotal)}`
             )}
           </button>
-          {method !== "cash" && (
+          {method !== "cash" && method !== "gift_card" && (
             <p className="text-xs text-pos-muted text-center">
               Operator-attested. No terminal or provider confirms this payment;
               the order is recorded as paid on the attestation above.

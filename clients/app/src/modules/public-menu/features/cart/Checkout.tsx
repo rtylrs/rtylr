@@ -8,7 +8,11 @@ import { EmptyState } from '@voxire/ui';
 import { ShoppingCart } from 'lucide-react';
 import { orderClient } from '../../shared/lib/clients';
 import { useCartStore } from '../../shared/stores/cartStore';
-import { menuOrderStatusPath } from '../../menuPaths';
+import {
+  buildOrderStatusUrl,
+  saveActiveOrder,
+  useActiveOrders,
+} from '../../shared/stores/activeOrderStore';
 
 const Checkout = (): React.JSX.Element => {
   const navigate = useNavigate();
@@ -45,6 +49,8 @@ const Checkout = (): React.JSX.Element => {
   const onlineOrderingEnabled = import.meta.env.VITE_ONLINE_ORDERING_ENABLED !== 'false';
 
   const { t } = useTranslation('checkout');
+  const activeOrders = useActiveOrders(businessId > 0 ? businessId : null);
+  const latestActiveOrder = activeOrders[0] ?? null;
 
   if (!onlineOrderingEnabled) {
     return (
@@ -119,23 +125,37 @@ const Checkout = (): React.JSX.Element => {
       const { orderId, orderNumber, publicToken, paymentRedirectUrl } = response;
       if (!orderId || !orderNumber) throw new Error('Incomplete order response');
 
+      const slug = new URLSearchParams(searchStr).get('slug') || undefined;
+      if (businessId && publicToken) {
+        saveActiveOrder({
+          orderId,
+          orderNumber,
+          businessId: String(businessId),
+          slug,
+          publicToken,
+          status: 'pending',
+          createdAt: Date.now(),
+        });
+      }
+
       clearCart();
       if (paymentRedirectUrl && /^https?:\/\//i.test(paymentRedirectUrl)) {
         window.location.assign(paymentRedirectUrl);
         return;
       }
-      const businessQuery = businessId
-        ? `&business_id=${encodeURIComponent(String(businessId))}`
-        : '';
-      const slug = new URLSearchParams(searchStr).get('slug');
-      const slugQuery = slug ? `&slug=${encodeURIComponent(slug)}` : '';
       // The status endpoint takes an opaque per-order token now, so the
       // sequential order id alone can no longer be used to read anyone's
-      // order. This is the only place it is handed out, so it has to travel
-      // to the status page or that page cannot poll at all.
-      const tokenQuery = publicToken ? `&public_token=${encodeURIComponent(publicToken)}` : '';
+      // order. Replace checkout in history so pressing Back returns cleanly
+      // to the menu (where the active order banner links back here).
       void navigate({
-        to: `${menuOrderStatusPath(orderId)}?number=${encodeURIComponent(orderNumber)}${businessQuery}${slugQuery}${tokenQuery}`,
+        to: buildOrderStatusUrl({
+          orderId,
+          orderNumber,
+          businessId: businessId ? String(businessId) : '',
+          slug,
+          publicToken: publicToken ?? '',
+        }),
+        replace: true,
       });
     } catch (err: unknown) {
       const statusCode =
@@ -167,6 +187,24 @@ const Checkout = (): React.JSX.Element => {
             title={t('checkout.emptyCart')}
             action={{ label: t('checkout.backToMenu'), onClick: () => window.history.back() }}
           />
+          {latestActiveOrder && (
+            <button
+              type="button"
+              onClick={() => void navigate({ to: buildOrderStatusUrl(latestActiveOrder) })}
+              style={{
+                padding: '10px 18px',
+                borderRadius: 12,
+                border: 'none',
+                background: 'var(--menu-accent, #111827)',
+                color: 'var(--menu-accent-text, #ffffff)',
+                fontSize: '14px',
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              {t('checkout.trackActiveOrder', { number: latestActiveOrder.orderNumber })}
+            </button>
+          )}
         </div>
       </>
     );

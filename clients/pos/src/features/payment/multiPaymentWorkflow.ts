@@ -2,9 +2,16 @@ import type { PaymentEntry } from '../../shared/types/pos';
 import type { ProcessPaymentRequest } from '@voxire/voxie/pos/orders/payments/v1/types';
 import type { ChargeOrderRequest } from './checkoutWorkflow';
 
+interface RedeemGiftCardTenderParams {
+  code: string;
+  orderId: string;
+  amount: number;
+}
+
 interface FinalizeMultiPaymentParams {
   orderId: string | undefined;
   payments: PaymentEntry[];
+  redeemGiftCard?: (params: RedeemGiftCardTenderParams) => Promise<void>;
   chargeOrder: (request: ChargeOrderRequest) => Promise<void>;
 }
 
@@ -60,9 +67,24 @@ export function collapsePayments(
 export async function finalizeMultiPayment({
   orderId,
   payments,
+  redeemGiftCard,
   chargeOrder,
 }: FinalizeMultiPaymentParams): Promise<void> {
   const parsedOrderId = parseOrderId(orderId);
+  const giftCardEntries = payments.filter((p) => p.method === 'gift_card');
+  if (giftCardEntries.length > 0 && redeemGiftCard) {
+    for (const entry of giftCardEntries) {
+      const code = (entry.reference ?? '').trim();
+      if (!code) {
+        throw new Error('Enter and verify a gift card code for each gift card payment.');
+      }
+      await redeemGiftCard({
+        code,
+        orderId: String(parsedOrderId),
+        amount: entry.amount,
+      });
+    }
+  }
   // One key per Finalize press, carried by the request so a retry of the same
   // press is deduped while the next sale gets its own.
   await chargeOrder({

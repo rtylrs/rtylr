@@ -70,6 +70,7 @@ interface ProcessCheckoutParams {
   method: CheckoutPaymentMethod;
   existingOrderId?: number | null;
   createOrder: (payload: CreateOrderRequest) => Promise<CreateOrderResponse>;
+  redeemGiftCard?: (orderId: number) => Promise<void>;
   chargeOrder: (request: ChargeOrderRequest) => Promise<void>;
   persistExistingOrder?: () => Promise<void>;
   enqueueOffline: (payload: CreateOrderRequest) => void;
@@ -201,6 +202,7 @@ export async function processCheckout({
   method,
   existingOrderId,
   createOrder,
+  redeemGiftCard,
   chargeOrder,
   persistExistingOrder,
   enqueueOffline,
@@ -243,6 +245,26 @@ export async function processCheckout({
       await persistExistingOrder();
     } catch {
       throw new Error("Could not save the resumed order. Please try again.");
+    }
+  }
+
+  // When paying by gift card, redeem the stored value on the server BEFORE
+  // marking the order paid so insufficient balance or concurrent spend fails
+  // closed without settling the order.
+  if (orderId && redeemGiftCard) {
+    try {
+      await redeemGiftCard(orderId);
+    } catch (error) {
+      const apiMsg =
+        error && typeof error === "object"
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+      throw new Error(
+        apiMsg ||
+          (error instanceof Error && error.message
+            ? error.message
+            : "Gift card redemption failed. Please check the card balance."),
+      );
     }
   }
 

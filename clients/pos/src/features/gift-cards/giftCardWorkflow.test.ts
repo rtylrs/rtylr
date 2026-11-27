@@ -8,7 +8,7 @@ vi.mock('@voxire/api', () => ({
   createOneKitClient: () => giftCardClient,
 }));
 
-import { issueGiftCard } from './giftCardWorkflow';
+import { generateGiftCardCode, issueGiftCard } from './giftCardWorkflow';
 import type { GiftCard } from '../../shared/types/pos';
 
 const card: GiftCard = {
@@ -60,5 +60,31 @@ describe('issueGiftCard', () => {
         }),
       })
     ).resolves.toEqual({ ok: false, error: 'Gift card amount must be greater than zero' });
+  });
+
+  it('sends YYYY-MM-DD expiresAt, real paidOrderId, and customer details to the API', async () => {
+    giftCardClient.createGiftCard.mockClear();
+    await issueGiftCard({
+      codeInput: 'GC-REAL-1',
+      amountInput: '40',
+      paidOrderId: '99',
+      customerName: 'Maya',
+      customerEmail: 'maya@example.com',
+      expiresAt: '2027-06-15T12:00:00Z',
+      issue: vi.fn(() => card),
+    });
+
+    expect(giftCardClient.createGiftCard).toHaveBeenCalledWith({
+      code: 'GC-REAL-1',
+      paidOrderId: '99',
+      initialAmount: 40,
+      customerName: 'Maya',
+      customerEmail: 'maya@example.com',
+      expiresAt: '2027-06-15',
+    });
+  });
+
+  it('generates formatted gift card codes', () => {
+    expect(generateGiftCardCode()).toMatch(/^GC-[A-Z0-9]{4}-[A-Z0-9]{4}$/);
   });
 });

@@ -12,4 +12,9 @@ interface CustomerService {
   @get
   @route("/customers")
   searchCustomers(...SearchCustomersRequest): SearchCustomersResponse;
+
+  /** Creates a CRM customer directly from POS customer lookup. */
+  @post
+  @route("/customers")
+  createCustomer(@body body: CreateCustomerRequest): CreateCustomerResponse;
 }
