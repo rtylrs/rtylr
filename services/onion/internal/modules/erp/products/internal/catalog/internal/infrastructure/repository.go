@@ -44,10 +44,12 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.MenuI
 			Name:       row.Name,
 			SalePrice:  sqlutil.DecimalToFloat(row.SalePrice),
 			CostPrice:  sqlutil.DecimalToFloat(row.CostPrice),
-			TaxRate:    sqlutil.DecimalToFloat(row.TaxRate),
-			Stock:      stockToFloat(row.StockQuantity),
-			IsActive:   row.IsActive.Valid && row.IsActive.Bool,
-			Category:   row.CategoryName,
+			TaxRate:        sqlutil.DecimalToFloat(row.TaxRate),
+			Stock:          stockToFloat(row.StockQuantity),
+			TrackInventory: row.TrackInventory.Valid && row.TrackInventory.Bool,
+			AllowBackorder: row.AllowBackorder,
+			IsActive:       row.IsActive.Valid && row.IsActive.Bool,
+			Category:       row.CategoryName,
 		}
 		if row.CategoryID.Valid {
 			item.CategoryID = row.CategoryID.Int64
