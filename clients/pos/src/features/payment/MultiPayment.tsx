@@ -9,6 +9,7 @@ import TipSelector from '../../shared/components/TipSelector';
 import { formatCurrency } from '../../shared/utils/format';
 import type { PaymentEntry, PaymentMethod } from '../../shared/types/pos';
 import type { Order, OrderItem } from '@voxire/voxie/pos/orders/v1/types';
+import { GiftCardServiceClient } from '@voxire/voxie/pos/gift_card/v1/client';
 import { OrderServiceClient } from '@voxire/voxie/pos/orders/v1/client';
 import { OrderPaymentServiceClient } from '@voxire/voxie/pos/orders/payments/v1/client';
 import { finalizeMultiPayment } from './multiPaymentWorkflow';
@@ -18,6 +19,7 @@ import type { OrderStatus } from '../../shared/types/pos';
 
 const orderClient = createOneKitClient(OrderServiceClient, 'pos');
 const orderPaymentClient = createOneKitClient(OrderPaymentServiceClient, 'pos');
+const giftCardClient = createOneKitClient(GiftCardServiceClient, 'pos');
 
 function lineTotal(item: OrderItem): number {
   return item.total || (item.unitPrice ?? 0) * (item.quantity ?? 0);
@@ -40,6 +42,13 @@ const MultiPaymentScreen: React.FC = () => {
   const [payments, setPayments] = useState<PaymentEntry[]>([]);
   const [method, setMethod] = useState<PaymentMethod>('cash');
   const [amount, setAmount] = useState('');
+  const [giftCardCode, setGiftCardCode] = useState('');
+  const [verifyingCard, setVerifyingCard] = useState(false);
+  const [verifiedCard, setVerifiedCard] = useState<{
+    code: string;
+    balance: number;
+    active: boolean;
+  } | null>(null);
   const [busy, setBusy] = useState(false);
   // Same reason as the checkout screen: `busy` disables the button on the next
   // render only, so a second tap in the same tick would charge twice.
@@ -95,9 +104,67 @@ const MultiPaymentScreen: React.FC = () => {
   const paid = payments.reduce((sum, p) => sum + p.amount, 0);
   const remaining = useMemo(() => Math.max(0, total - paid), [total, paid]);
 
+  const verifyGiftCard = async () => {
+    const code = giftCardCode.trim();
+    if (!code) return;
+    setVerifyingCard(true);
+    try {
+      const res = await giftCardClient.getGiftCardByCode({ code });
+      const card = res.giftCard;
+      if (!card) {
+        setVerifiedCard(null);
+        toast.error('Gift card not found');
+        return;
+      }
+      const next = {
+        code: card.code ?? code,
+        balance: card.currentBalance ?? 0,
+        active: Boolean(card.isActive),
+      };
+      setVerifiedCard(next);
+      if (!next.active) {
+        toast.error('Gift card is inactive');
+      } else if (next.balance <= 0) {
+        toast.error('Gift card has zero remaining balance');
+      }
+    } catch {
+      setVerifiedCard(null);
+      toast.error('Gift card not found');
+    } finally {
+      setVerifyingCard(false);
+    }
+  };
+
   const addPayment = () => {
     const value = Number(amount || remaining);
     if (value <= 0) return;
+    if (method === 'gift_card') {
+      if (!verifiedCard || !verifiedCard.active) {
+        toast.error('Verify an active gift card before adding a gift card payment');
+        return;
+      }
+      const alreadyQueued = payments
+        .filter((p) => p.method === 'gift_card' && p.reference === verifiedCard.code)
+        .reduce((sum, p) => sum + p.amount, 0);
+      const availableOnCard = Math.max(0, verifiedCard.balance - alreadyQueued);
+      if (availableOnCard <= 0) {
+        toast.error('No remaining balance left on this gift card');
+        return;
+      }
+      const applied = Math.min(value, remaining, availableOnCard);
+      setPayments((prev) => [
+        ...prev,
+        {
+          id: 'p_' + Math.random().toString(36).slice(2, 8),
+          method,
+          amount: applied,
+          reference: verifiedCard.code,
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+      setAmount('');
+      return;
+    }
     setPayments((prev) => [
       ...prev,
       {
@@ -134,6 +201,13 @@ const MultiPaymentScreen: React.FC = () => {
       await finalizeMultiPayment({
         orderId,
         payments,
+        redeemGiftCard: async ({ code, orderId: targetOrderId, amount: redeemAmount }) => {
+          await giftCardClient.redeemGiftCard({
+            code,
+            orderId: targetOrderId,
+            amount: redeemAmount,
+          });
+        },
         chargeOrder: async ({ idempotencyKey, ...payload }) => {
           // Required on this route: the server answers 428 without it.
           await orderPaymentClient.processPayment(payload, {
@@ -284,6 +358,42 @@ const MultiPaymentScreen: React.FC = () => {
               />
             ))}
           </div>
+          {method === 'gift_card' && (
+            <div className="space-y-2 rounded-xl bg-white/5 border border-pos-border p-3">
+              <div className="flex gap-2">
+                <input
+                  value={giftCardCode}
+                  onChange={(e) => {
+                    setGiftCardCode(e.target.value);
+                    setVerifiedCard(null);
+                  }}
+                  placeholder="Gift card code (GC-XXXX-XXXX)"
+                  className="flex-1 h-11 px-3.5 rounded-lg bg-white/8 border border-pos-border text-sm font-mono text-pos-text outline-none focus:border-white/25"
+                />
+                <button
+                  type="button"
+                  onClick={() => void verifyGiftCard()}
+                  disabled={verifyingCard || !giftCardCode.trim()}
+                  className="h-11 px-4 rounded-lg bg-white/10 hover:bg-white/20 text-pos-text text-xs font-semibold disabled:opacity-50"
+                >
+                  {verifyingCard ? 'Checking…' : 'Verify'}
+                </button>
+              </div>
+              {verifiedCard && (
+                <p
+                  className={`text-xs font-semibold ${
+                    verifiedCard.active && verifiedCard.balance > 0
+                      ? 'text-emerald-300'
+                      : 'text-destructive'
+                  }`}
+                >
+                  {verifiedCard.active
+                    ? `${verifiedCard.code} · Available balance: ${formatCurrency(verifiedCard.balance)}`
+                    : `${verifiedCard.code} · Inactive`}
+                </p>
+              )}
+            </div>
+          )}
           <div className="flex gap-2">
             <input
               type="number"
@@ -306,7 +416,10 @@ const MultiPaymentScreen: React.FC = () => {
                 key={p.id}
                 className="flex items-center justify-between p-3 rounded-lg bg-white/6 border border-pos-border"
               >
-                <span className="text-sm text-pos-text capitalize">{p.method}</span>
+                <span className="text-sm text-pos-text capitalize">
+                  {p.method.replace('_', ' ')}
+                  {p.reference ? ` (${p.reference})` : ''}
+                </span>
                 <span className="text-sm font-semibold text-pos-text">
                   {formatCurrency(p.amount)}
                 </span>
