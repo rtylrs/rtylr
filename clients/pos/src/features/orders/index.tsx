@@ -89,9 +89,9 @@ const OrdersScreen: React.FC = () => {
       // Only scope by open register session on "This Shift"; "All Orders" and
       // "Online Menu" omit sessionId so public digital menu orders (session_id IS NULL)
       // appear directly in POS alongside register orders.
-      const sessionId = scope === 'shift' ? String(await resolveOpenSessionId()) : '';
+      const sessionId = scope === 'shift' ? String(await resolveOpenSessionId()) : undefined;
       const res = await orderClient.listOrders({
-        sessionId,
+        ...(sessionId ? { sessionId } : {}),
         status: filter !== 'all' ? filter : '',
         dateFrom: '',
         dateTo: '',

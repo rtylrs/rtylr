@@ -88,7 +88,7 @@ describe('POS OrdersScreen online menu integration', () => {
 
     // Default scope ('all') must omit sessionId so online menu orders are never hidden.
     expect(listOrdersMock).toHaveBeenCalledWith(
-      expect.objectContaining({ sessionId: '' })
+      expect.not.objectContaining({ sessionId: expect.anything() })
     );
     expect(screen.getAllByText('Online Menu').length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText('Anonymous Client Test')).toBeTruthy();
