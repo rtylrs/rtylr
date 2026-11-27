@@ -1,5 +1,6 @@
 .category {
   margin-bottom: 40px;
+  scroll-margin-top: var(--menu-scroll-margin-top, 16px);
 
   &:last-child {
     margin-bottom: 0;
