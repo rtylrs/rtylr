@@ -16,6 +16,7 @@ var (
 	ErrDiscountExceedsLimit     = errors.New("discount exceeds staff limit")
 	ErrPricedItemNotFound       = errors.New("order item is not an active menu item or combo")
 	ErrPublicMenuItemNotFound   = errors.New("public menu item is unavailable")
+	ErrInsufficientStock        = errors.New("item is out of stock")
 	ErrPaymentInsufficient      = errors.New("amount paid is less than total")
 	ErrOrderNotPaid             = errors.New("order has not been paid")
 	ErrRefundExceedsTotal       = errors.New("refund exceeds order total")
