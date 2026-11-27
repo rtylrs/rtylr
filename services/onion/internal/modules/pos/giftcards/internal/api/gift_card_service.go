@@ -52,14 +52,20 @@ func (a *GiftCardAPI) CreateGiftCard(ctx context.Context, req *posgiftcardv1.Cre
 	if err != nil {
 		return nil, err
 	}
-	if strings.TrimSpace(req.GetCode()) == "" {
+	code := strings.TrimSpace(req.GetCode())
+	if code == "" {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Code is required")
 	}
 	if req.GetInitialAmount() <= 0 {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Initial amount must be greater than zero")
 	}
-	if expiresAt := req.GetExpiresAt(); expiresAt != "" {
-		if _, parseErr := time.Parse("2006-01-02", expiresAt); parseErr != nil {
+	normalizedExpiresAt := strings.TrimSpace(req.GetExpiresAt())
+	if normalizedExpiresAt != "" {
+		if t, parseErr := time.Parse("2006-01-02", normalizedExpiresAt); parseErr == nil {
+			normalizedExpiresAt = t.Format("2006-01-02")
+		} else if t, rfcErr := time.Parse(time.RFC3339, normalizedExpiresAt); rfcErr == nil {
+			normalizedExpiresAt = t.UTC().Format("2006-01-02")
+		} else {
 			return nil, onekiterrors.New(http.StatusBadRequest, "expires_at must be a valid date in YYYY-MM-DD format")
 		}
 	}
@@ -67,13 +73,16 @@ func (a *GiftCardAPI) CreateGiftCard(ctx context.Context, req *posgiftcardv1.Cre
 	device := authPkg.DeviceCtx(ctx)
 	id, createErr := a.Service.CreateForOwner(ctx, businessID, device.User.UserID, domain.GiftCardInput{
 		PaidOrderID:   req.GetPaidOrderId(),
-		Code:          req.GetCode(),
+		Code:          code,
 		InitialAmount: req.GetInitialAmount(),
-		CustomerName:  req.GetCustomerName(),
-		CustomerEmail: req.GetCustomerEmail(),
-		ExpiresAt:     req.GetExpiresAt(),
+		CustomerName:  strings.TrimSpace(req.GetCustomerName()),
+		CustomerEmail: strings.TrimSpace(req.GetCustomerEmail()),
+		ExpiresAt:     normalizedExpiresAt,
 	})
 	if createErr != nil {
+		if errors.Is(createErr, domain.ErrGiftCardCodeExists) {
+			return nil, onekiterrors.New(http.StatusConflict, "A gift card with this code already exists")
+		}
 		if errors.Is(createErr, domain.ErrInvalidTender) {
 			return nil, onekiterrors.New(http.StatusBadRequest, "paid order is invalid or not fully paid")
 		}
