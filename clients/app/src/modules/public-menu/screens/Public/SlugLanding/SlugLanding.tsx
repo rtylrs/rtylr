@@ -6,6 +6,7 @@ import { EmptyState } from '@voxire/ui';
 import { SearchX } from 'lucide-react';
 import { usePublicBusinessBySlug } from '../../../shared/hooks/usePublicMenu';
 import { menuByBusinessIdPath, menuLocationPath } from '../../../menuPaths';
+import ActiveOrderBanner from '../../../features/cart/ActiveOrderBanner';
 
 /**
  * Single screen mounted at `/$slug/menu`. Tries the new slug lookup
@@ -144,6 +145,7 @@ const SlugLanding: React.FC<{ slugOverride?: string }> = ({ slugOverride }): Rea
           ))}
         </ul>
       </div>
+      <ActiveOrderBanner businessId={data.business.id} />
     </>
   );
 };
