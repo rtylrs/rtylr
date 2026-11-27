@@ -21,6 +21,7 @@ var (
 	ErrTableActionInvalidInput  = errors.New("invalid table action input")
 	ErrEventInvalidInput        = errors.New("invalid menu event input")
 	ErrGuestCaptureInvalidInput = errors.New("invalid guest capture input")
+	ErrReviewInvalidInput       = errors.New("invalid menu review input")
 	ErrFeatureDisabled          = errors.New("feature is disabled")
 	ErrUnsafeCustomCSS          = errors.New("custom CSS contains disallowed directives")
 )
@@ -237,6 +238,22 @@ func IsOrderingEnabled(configJSON string) bool {
 	return *parsed.Features.EnableOrdering
 }
 
+// IsReviewsPageEnabled reports whether a published profile explicitly enables the Reviews page.
+func IsReviewsPageEnabled(configJSON string) bool {
+	if strings.TrimSpace(configJSON) == "" {
+		return false
+	}
+	var parsed struct {
+		Pages struct {
+			Reviews *bool `json:"reviews"`
+		} `json:"pages"`
+	}
+	if err := json.Unmarshal([]byte(configJSON), &parsed); err != nil {
+		return false
+	}
+	return parsed.Pages.Reviews != nil && *parsed.Pages.Reviews
+}
+
 // DefaultDraftConfigJSON returns a baseline MenuLayoutConfig JSON payload for
 // branches that have not saved a custom profile yet.
 func DefaultDraftConfigJSON() string {
@@ -430,6 +447,18 @@ type PublicHostResolution struct {
 	Domain       string
 }
 
+type MenuReview struct {
+	ID         int64
+	BusinessID int64
+	LocationID int64
+	AuthorName string
+	Rating     int32
+	Comment    string
+	Status     string
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+}
+
 type PublicMenuBundle struct {
 	Profile      MenuProfile
 	Banners      []Banner
@@ -437,4 +466,5 @@ type PublicMenuBundle struct {
 	Currencies   []MenuCurrency
 	Translations []MenuTranslation
 	StampCards   []StampCard
+	Reviews      []MenuReview
 }
