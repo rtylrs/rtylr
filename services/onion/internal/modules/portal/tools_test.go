@@ -202,7 +202,7 @@ func TestChangesReportTheOrderOnScreen(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := "App bar from the top: Work, Home, Insights, CRM, Operations, Finance, HR, Rennili, Automations; pinned at the bottom: Caret, Settings, Profile; hidden: POS."
+	want := "App bar from the top: Work, Home, Insights, CRM, Operations, Finance, HR, Menu, Rennili, Automations; pinned at the bottom: Caret, Settings, Profile; hidden: POS."
 	if out["order"] != want || !strings.HasSuffix(out["message"].(string), want) {
 		t.Fatalf("order = %q\nmessage = %q", out["order"], out["message"])
 	}
