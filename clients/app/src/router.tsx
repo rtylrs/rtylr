@@ -28,12 +28,17 @@ import { requireDashManagement } from './shared/utils/requireDashManagement';
 const Orders = React.lazy(() => import('./features/orders/Orders'));
 const Home = React.lazy(() => import('./features/home/Home'));
 const Menu = React.lazy(() => import('./features/menu/Menu.tsx'));
-const Menus = React.lazy(() => import('./features/menu/Menus.tsx'));
-const CreateItem = React.lazy(() => import('./features/menu/Components/CreateItem.jsx'));
+const CreateItem = React.lazy(() => import('./features/menu/Components/CreateItem.tsx'));
 const CreateBanner = React.lazy(() => import('./features/menu/Components/CreateBanner.tsx'));
 const QrCodes = React.lazy(() => import('./features/qr-codes/QrCodes.tsx'));
 const QrCode = React.lazy(() => import('./features/qr-codes/QrCode.tsx'));
 const Design = React.lazy(() => import('./features/design/Design.tsx'));
+const MenuOverviewPage = React.lazy(() => import('./features/menu-app/MenuOverviewPage.tsx'));
+const MenuPagesPage = React.lazy(() => import('./features/menu-app/MenuPagesPage.tsx'));
+const MenuReviewsPage = React.lazy(() => import('./features/menu-app/MenuReviewsPage.tsx'));
+const MenuPromosPage = React.lazy(() => import('./features/menu-app/MenuPromosPage.tsx'));
+const MenuAnalyticsPage = React.lazy(() => import('./features/menu-app/MenuAnalyticsPage.tsx'));
+const MenuSettingsPage = React.lazy(() => import('./features/menu-app/MenuSettingsPage.tsx'));
 const Automations = React.lazy(() => import('./features/automations/Automations'));
 const Webhooks = React.lazy(() => import('./features/developer/Webhooks'));
 const AutomationBuilder = React.lazy(() => import('./features/automations/AutomationBuilder'));
@@ -118,13 +123,67 @@ const automationBuilderRoute = createRoute({
 const menusRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/menus',
-  component: () => wrap(<Menus />),
+  component: () => wrap(<MenuOverviewPage />),
+});
+
+const menuItemsRoute = createRoute({
+  getParentRoute: () => businessRoute,
+  path: '/menus/items',
+  component: () => wrap(<Menu />),
+});
+
+const menuStudioRoute = createRoute({
+  getParentRoute: () => businessRoute,
+  path: '/menus/studio',
+  component: () => wrap(<Design />),
+});
+
+const menuPagesRoute = createRoute({
+  getParentRoute: () => businessRoute,
+  path: '/menus/pages',
+  component: () => wrap(<MenuPagesPage />),
+});
+
+const menuReviewsRoute = createRoute({
+  getParentRoute: () => businessRoute,
+  path: '/menus/reviews',
+  component: () => wrap(<MenuReviewsPage />),
+});
+
+const menuPromosRoute = createRoute({
+  getParentRoute: () => businessRoute,
+  path: '/menus/promos',
+  component: () => wrap(<MenuPromosPage />),
+});
+
+const menuQrCodesRoute = createRoute({
+  getParentRoute: () => businessRoute,
+  path: '/menus/qr-codes',
+  component: () => wrap(<QrCodes />),
+});
+
+const menuQrCodeCreateRoute = createRoute({
+  getParentRoute: () => businessRoute,
+  path: '/menus/qr-codes/create',
+  component: () => wrap(<QrCode />),
+});
+
+const menuAnalyticsRoute = createRoute({
+  getParentRoute: () => businessRoute,
+  path: '/menus/analytics',
+  component: () => wrap(<MenuAnalyticsPage />),
+});
+
+const menuSettingsRoute = createRoute({
+  getParentRoute: () => businessRoute,
+  path: '/menus/settings',
+  component: () => wrap(<MenuSettingsPage />),
 });
 
 const menuRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/menu',
-  component: () => wrap(<Menu />),
+  component: () => <Navigate to="/menus/items" replace />,
 });
 
 const createItemRoute = createRoute({
@@ -148,19 +207,19 @@ const ordersRoute = createRoute({
 const qrCodesRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/qr-codes',
-  component: () => wrap(<QrCodes />),
+  component: () => <Navigate to="/menus/qr-codes" replace />,
 });
 
 const qrCodeCreateRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/qr-codes/create',
-  component: () => wrap(<QrCode />),
+  component: () => <Navigate to="/menus/qr-codes/create" replace />,
 });
 
 const designRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/design',
-  component: () => wrap(<Design />),
+  component: () => <Navigate to="/menus/studio" replace />,
 });
 
 const chatRoute = createRoute({
@@ -330,6 +389,15 @@ function buildPortalRouteTree() {
       webhooksRedirectRoute,
       automationBuilderRoute,
       menusRoute,
+      menuItemsRoute,
+      menuStudioRoute,
+      menuPagesRoute,
+      menuReviewsRoute,
+      menuPromosRoute,
+      menuQrCodesRoute,
+      menuQrCodeCreateRoute,
+      menuAnalyticsRoute,
+      menuSettingsRoute,
       menuRoute,
       createItemRoute,
       createBannerRoute,
