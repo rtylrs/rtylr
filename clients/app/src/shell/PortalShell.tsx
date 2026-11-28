@@ -44,7 +44,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useUserStore } from '../shared/stores/userStore';
 import { useCommandPalette } from '../shared/stores/commandPaletteStore';
 import { useNotifications } from '../shared/hooks/queries/useNotifications';
-import { useAddons, isAddonEnabled } from '../shared/hooks/queries/useAddons';
 import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
 import { useOnboardingTour } from '../shared/hooks/useOnboardingTour';
 import CommandPalette from './command-palette/CommandPalette';
@@ -62,7 +61,7 @@ import SettingsModal from '../features/settings/SettingsModal';
 import { useSettingsModalStore } from '../features/settings/settingsModalStore';
 import { PortalHeaderActionsProvider } from './PortalHeaderActions';
 import { SidebarCollapseProvider } from './SidebarCollapseContext';
-import { rawNavItems, rawMenuSubItems, PortalNavLink, routeKeys } from './navigation';
+import { rawNavItems, menuNavItems, PortalNavLink, routeKeys } from './navigation';
 import { arrangeItems, portalLayoutKey, usePortalLayout } from './portalLayout';
 import { RAIL_BOTTOM, RAIL_ICONS, railItems, type RailItem } from './railItems';
 import { spotlightControl } from './spotlight';
@@ -175,7 +174,6 @@ export default function PortalShell({ children }: { children: ReactNode }) {
   const [caretMounted, setCaretMounted] = useState(caretOpen);
   const caretWidth = useCaretSettingsStore((state) => state.panelWidth);
   const { data: notifications = [] } = useNotifications();
-  const { data: addons = [] } = useAddons();
   const portalLayout = usePortalLayout(user?.id);
   const unreadCount = notifications.filter((notification) => !notification.read).length;
   const isInsights = pathname === '/insights' || pathname.startsWith('/insights/');
@@ -188,6 +186,15 @@ export default function PortalShell({ children }: { children: ReactNode }) {
   const isErp = pathname === '/erp' || pathname.startsWith('/erp/');
   const isCrm = pathname === '/crm' || pathname.startsWith('/crm/');
   const isFlow = pathname === '/flow' || pathname.startsWith('/flow/');
+  const isMenuApp =
+    pathname === '/menus' ||
+    pathname.startsWith('/menus/') ||
+    pathname === '/menu' ||
+    pathname === '/create-item' ||
+    pathname === '/create-banner' ||
+    pathname === '/design' ||
+    pathname === '/qr-codes' ||
+    pathname.startsWith('/qr-codes/');
   const insightsPage = insightsNavItems.find((item) => item.path === pathname);
   const pageKey =
     routeKeys[pathname] ||
@@ -258,14 +265,12 @@ export default function PortalShell({ children }: { children: ReactNode }) {
               ? [...erpNavItems]
               : isCrm
                 ? [...crmSidebarItems]
-                : arrangeItems(
-                    [...rawNavItems, ...(isAddonEnabled(addons, 'menu') ? rawMenuSubItems : [])]
-                      .sort(
-                        (a, b) => Number(a.key === 'extensions') - Number(b.key === 'extensions')
-                      )
-                      .map((item) => ({ ...item, id: item.key ?? item.path })),
-                    portalLayout?.workspace
-                  ).top
+                : isMenuApp
+                  ? [...menuNavItems]
+                  : arrangeItems(
+                      rawNavItems.map((item) => ({ ...item, id: item.key ?? item.path })),
+                      portalLayout?.workspace
+                    ).top
   ).filter((item) => canAccessPortalPath(user, item.path));
   const apps = useMemo(
     () =>
@@ -369,7 +374,8 @@ export default function PortalShell({ children }: { children: ReactNode }) {
     !isErp &&
     !isFinance &&
     !isHr &&
-    !isRecruit;
+    !isRecruit &&
+    !isMenuApp;
   const activeRail = isInsights
     ? 'insights'
     : isFlow
@@ -382,13 +388,15 @@ export default function PortalShell({ children }: { children: ReactNode }) {
             ? 'finance'
             : isHr
               ? 'hr'
-              : isAutomations
-                ? 'automations'
-                : isCaret
-                  ? 'caret'
-                  : isHomeApp
-                    ? 'home'
-                    : '';
+              : isMenuApp
+                ? 'menu'
+                : isAutomations
+                  ? 'automations'
+                  : isCaret
+                    ? 'caret'
+                    : isHomeApp
+                      ? 'home'
+                      : '';
   const railEntries: RailEntry[] = railItems(user, t).map((item) => ({
     ...item,
     active: item.id === 'settings' ? settingsOpen : item.id === activeRail,
@@ -520,9 +528,11 @@ export default function PortalShell({ children }: { children: ReactNode }) {
                     ? t('appNames.short.erp')
                     : isCrm
                       ? t('appNames.short.crm')
-                      : isInsights
-                        ? t('appNames.short.insights')
-                        : t('common.portal.workspace')}
+                      : isMenuApp
+                        ? t('appNames.short.menu')
+                        : isInsights
+                          ? t('appNames.short.insights')
+                          : t('common.portal.workspace')}
         </p>
         {nav.map((item, index) => {
           const group = 'group' in item ? item.group : undefined;
