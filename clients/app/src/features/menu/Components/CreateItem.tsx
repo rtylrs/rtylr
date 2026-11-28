@@ -162,7 +162,7 @@ const CreateItem: React.FC = () => {
         });
         toast.success(t('menu.itemCreated', 'Menu item created and synced across your apps'));
       }
-      void navigate({ to: '/menu', search: { menuId: 'pos-menu' } });
+      void navigate({ to: '/menus/items', search: { menuId: 'pos-menu' } });
     } catch (err: unknown) {
       const msg =
         (err as { message?: string })?.message ||

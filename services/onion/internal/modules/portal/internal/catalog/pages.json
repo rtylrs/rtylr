@@ -129,28 +129,148 @@
   },
   {
     "path": "/menus",
-    "app": "workspace",
-    "title": "Menus",
-    "summary": "Your menus, with the items on each one.",
+    "app": "menu",
+    "title": "Overview",
+    "summary": "Your digital menu home: live storefront link, branch status, recent stats, and shortcuts to every menu tool.",
     "tasks": [
-      "See the menus for the business",
-      "Add an item to a menu"
+      "Open or copy your live digital menu link",
+      "Check menu status, active items, and pending reviews"
     ],
-    "actions": [],
+    "actions": [
+      "Open live menu",
+      "Add item"
+    ],
     "keywords": [
       "menu",
-      "food menu",
-      "products list",
-      "public menu"
+      "menus",
+      "digital menu",
+      "public menu",
+      "storefront",
+      "food menu"
     ]
   },
   {
-    "path": "/qr-codes",
-    "app": "workspace",
+    "path": "/menus/items",
+    "app": "menu",
+    "title": "Items & Categories",
+    "summary": "Manage menu items, categories, prices, and availability for your digital menu.",
+    "tasks": [
+      "See menu items and categories",
+      "Add or edit a menu item",
+      "Hide or activate an item on the menu"
+    ],
+    "actions": [
+      "Add Item"
+    ],
+    "keywords": [
+      "items",
+      "categories",
+      "dishes",
+      "products list",
+      "food menu"
+    ]
+  },
+  {
+    "path": "/menus/studio",
+    "app": "menu",
+    "title": "Menu Studio",
+    "summary": "Visual storefront designer with live preview: themes, brand logo and cover, colors, typography, layout, Caret AI styling, and custom CSS.",
+    "tasks": [
+      "Change the colors or theme of the storefront",
+      "Change the fonts used on the storefront",
+      "Change the header, cover image, logo, or layout"
+    ],
+    "actions": [
+      "Save",
+      "Publish"
+    ],
+    "keywords": [
+      "design",
+      "storefront",
+      "look",
+      "theme",
+      "colors",
+      "fonts",
+      "layout",
+      "appearance",
+      "branding"
+    ]
+  },
+  {
+    "path": "/menus/pages",
+    "app": "menu",
+    "title": "Pages",
+    "summary": "Configure your public About story and hours, Photo Gallery, and Offers pages.",
+    "tasks": [
+      "Edit the About page story, hours, and contact info",
+      "Upload photos to the menu Gallery",
+      "Add promotional offers to the Offers page"
+    ],
+    "actions": [
+      "Save",
+      "Publish"
+    ],
+    "keywords": [
+      "about",
+      "gallery",
+      "offers",
+      "photos",
+      "story",
+      "opening hours",
+      "menu pages"
+    ]
+  },
+  {
+    "path": "/menus/reviews",
+    "app": "menu",
+    "title": "Reviews",
+    "summary": "Moderate guest reviews submitted on your digital menu and control whether the public Reviews tab is enabled.",
+    "tasks": [
+      "Approve or hide guest reviews",
+      "Delete spam reviews",
+      "Enable or disable the public Reviews page"
+    ],
+    "actions": [
+      "Approve",
+      "Hide"
+    ],
+    "keywords": [
+      "reviews",
+      "ratings",
+      "feedback",
+      "moderation",
+      "guests"
+    ]
+  },
+  {
+    "path": "/menus/promos",
+    "app": "menu",
+    "title": "Promos & Loyalty",
+    "summary": "Manage promotional banners and digital loyalty stamp cards shown on your menu.",
+    "tasks": [
+      "Create or remove a promo banner",
+      "Create a digital loyalty stamp card"
+    ],
+    "actions": [
+      "Add banner",
+      "Add stamp card"
+    ],
+    "keywords": [
+      "banners",
+      "promotions",
+      "loyalty",
+      "stamp cards",
+      "rewards"
+    ]
+  },
+  {
+    "path": "/menus/qr-codes",
+    "app": "menu",
     "title": "QR Codes",
-    "summary": "QR codes for your public menu, including a custom QR generator.",
+    "summary": "QR codes and direct table links for your public menu, including a custom QR generator.",
     "tasks": [
       "Create a QR code for a table",
+      "Copy a table menu link",
       "Find an existing QR code"
     ],
     "actions": [
@@ -161,28 +281,51 @@
       "table codes",
       "scan",
       "menu code",
-      "qr generator"
+      "qr generator",
+      "links"
     ]
   },
   {
-    "path": "/design",
-    "app": "workspace",
-    "title": "Design",
-    "summary": "Storefront appearance for your public menu: pages, header, navigation, items, colors and typography.",
+    "path": "/menus/analytics",
+    "app": "menu",
+    "title": "Analytics",
+    "summary": "Track QR scans, menu views, item views, add-to-cart actions, checkout starts, and orders over 7, 30, or 90 days.",
     "tasks": [
-      "Change the colors of the storefront",
-      "Change the fonts used on the storefront",
-      "Change the header or navigation"
+      "Review digital menu conversion funnel",
+      "Check QR scan and order volume"
     ],
     "actions": [],
     "keywords": [
-      "storefront",
-      "look",
-      "theme",
-      "colors",
-      "fonts",
-      "layout",
-      "appearance"
+      "menu analytics",
+      "qr scans",
+      "funnel",
+      "views",
+      "conversion"
+    ]
+  },
+  {
+    "path": "/menus/settings",
+    "app": "menu",
+    "title": "Settings",
+    "summary": "Configure ordering and fulfillment modes, table service actions, currencies, languages and AI translation, and payment handoff.",
+    "tasks": [
+      "Enable or disable online ordering and fulfillment modes",
+      "Configure table service actions",
+      "Add menu currencies or languages",
+      "Translate the menu with AI"
+    ],
+    "actions": [
+      "Save",
+      "Publish"
+    ],
+    "keywords": [
+      "menu settings",
+      "ordering",
+      "fulfillment",
+      "currencies",
+      "languages",
+      "translation",
+      "payment"
     ]
   },
   {
@@ -288,7 +431,7 @@
   },
   {
     "path": "/create-item",
-    "app": "workspace",
+    "app": "menu",
     "title": "Create item",
     "summary": "Add a new item to the menu.",
     "tasks": [
@@ -305,8 +448,8 @@
     ]
   },
   {
-    "path": "/qr-codes/create",
-    "app": "workspace",
+    "path": "/menus/qr-codes/create",
+    "app": "menu",
     "title": "QR Code Generator",
     "summary": "Generate a custom QR code and download it.",
     "tasks": [

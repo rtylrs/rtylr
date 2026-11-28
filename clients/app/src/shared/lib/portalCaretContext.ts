@@ -65,8 +65,48 @@ const PAGE_HINTS: Record<string, PageInfo> = {
   },
   '/menus': {
     module: 'storefront',
-    page: 'Menus',
-    hint: 'menu items and storefront catalog setup',
+    page: 'Menu Overview',
+    hint: 'live digital menu link, branch overview, and quick actions',
+  },
+  '/menus/items': {
+    module: 'storefront',
+    page: 'Menu Items & Categories',
+    hint: 'menu items, categories, prices, and availability',
+  },
+  '/menus/studio': {
+    module: 'storefront',
+    page: 'Menu Studio',
+    hint: 'visual design, themes, colors, typography, layout, and live preview',
+  },
+  '/menus/pages': {
+    module: 'storefront',
+    page: 'Menu Pages',
+    hint: 'About, Gallery, and Offers content pages for the digital menu',
+  },
+  '/menus/reviews': {
+    module: 'storefront',
+    page: 'Menu Reviews',
+    hint: 'moderate guest reviews (approve, hide, delete)',
+  },
+  '/menus/promos': {
+    module: 'storefront',
+    page: 'Promos & Loyalty',
+    hint: 'promo banners and digital stamp cards on the menu',
+  },
+  '/menus/qr-codes': {
+    module: 'storefront',
+    page: 'QR Codes & Links',
+    hint: 'table links and custom QR code generator',
+  },
+  '/menus/analytics': {
+    module: 'storefront',
+    page: 'Menu Analytics',
+    hint: 'QR scans, views, cart additions, and order conversion funnel',
+  },
+  '/menus/settings': {
+    module: 'storefront',
+    page: 'Menu Settings',
+    hint: 'ordering modes, table service, currencies, languages, and payment handoff',
   },
   '/orders': {
     module: 'storefront',
@@ -80,7 +120,7 @@ const PAGE_HINTS: Record<string, PageInfo> = {
   },
   '/design': {
     module: 'storefront',
-    page: 'Design',
+    page: 'Menu Studio',
     hint: 'storefront design and branding',
   },
   '/settings': {
@@ -123,7 +163,6 @@ function selectedFromPath(pathname: string): Record<string, string> | undefined 
     [/^\/flow\/p\/([^/]+)/, 'project_id'],
     [/^\/flow\/task\/([^/]+)/, 'task_id'],
     [/^\/orders\/([^/]+)/, 'order_id'],
-    [/^\/menus\/([^/]+)/, 'menu_id'],
     [/^\/team\/groups\/(\d+)(?:\/|$)/, 'group_id'],
     [/^\/team\/(\d+)(?:\/|$)/, 'employee_id'],
     [/^\/customers\/([^/]+)/, 'customer_id'],

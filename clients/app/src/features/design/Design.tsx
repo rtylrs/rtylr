@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { HelmetContainer } from '@voxire/components';
 import { Switch } from '@voxire/ui';
@@ -12,7 +13,6 @@ import {
   Code2,
   Copy,
   Eye,
-  FileText,
   LayoutGrid,
   Monitor,
   Palette,
@@ -63,9 +63,7 @@ import { useMenuStore } from '../../shared/stores/menuStore';
 import {
   useCloneMenuProfile,
   useCreateMenuPreset,
-  useDeleteMenuCurrency,
   useDeleteMenuPreset,
-  useMenuAnalyticsSummary,
   useMenuBranches,
   useMenuCatalogItems,
   useMenuCurrencies,
@@ -75,18 +73,10 @@ import {
   usePublishMenuProfile,
   useSaveMenuProfileDraft,
   useStampCards,
-  useTranslateMenu,
-  useUpsertMenuCurrency,
-  useUpsertStampCard,
 } from '../../shared/hooks/queries/useMenuBuilder';
-import {
-  useCreateMenuBanner,
-  useDeleteMenuBanner,
-  useMenuBanners,
-} from '../../shared/hooks/queries/useMenu';
-import PagesEditor from './PagesEditor';
+import { useMenuBanners } from '../../shared/hooks/queries/useMenu';
 
-type RailTab = 'themes' | 'brand' | 'layout' | 'pages' | 'features' | 'ai' | 'css';
+type RailTab = 'themes' | 'brand' | 'layout' | 'ai' | 'css';
 type DeviceViewport = 'mobile' | 'tablet' | 'desktop';
 
 const DEFAULT_BUSINESS: Omit<BusinessInfo, 'name' | 'description'> = {
@@ -219,7 +209,6 @@ const Design: React.FC = () => {
   const platformTableActionsEnabled = useFeatureFlag(FLAG_KEYS.APP_MENU_TABLE_ACTIONS);
   const platformCrmCaptureEnabled = useFeatureFlag(FLAG_KEYS.APP_MENU_CRM_CAPTURE);
   const platformCurrenciesEnabled = useFeatureFlag(FLAG_KEYS.APP_MENU_CURRENCIES);
-  const platformAiTranslateEnabled = useFeatureFlag(FLAG_KEYS.APP_MENU_AI_TRANSLATE);
   const platformCustomCssEnabled = useFeatureFlag(FLAG_KEYS.APP_MENU_CUSTOM_CSS);
   const platformBannersEnabled = useFeatureFlag(FLAG_KEYS.APP_MENU_BANNERS);
 
@@ -232,14 +221,6 @@ const Design: React.FC = () => {
   const [customCss, setCustomCss] = useState<string>('');
   const [enabledLocales, setEnabledLocales] = useState<string[]>(['en', 'fr', 'ar']);
   const [newPresetName, setNewPresetName] = useState('');
-  const [newCurrencyCode, setNewCurrencyCode] = useState('');
-  const [newCurrencySymbol, setNewCurrencySymbol] = useState('');
-  const [newCurrencyRate, setNewCurrencyRate] = useState('1');
-  const [newStampTitle, setNewStampTitle] = useState('');
-  const [newStampTarget, setNewStampTarget] = useState('10');
-  const [newStampReward, setNewStampReward] = useState('');
-  const [newBannerTitle, setNewBannerTitle] = useState('');
-  const [newBannerBody, setNewBannerBody] = useState('');
   const [aiPrompt, setAiPrompt] = useState('');
   const [saved, setSaved] = useState(false);
   const [uploadingField, setUploadingField] = useState<'cover' | 'logo' | null>(null);
@@ -253,19 +234,12 @@ const Design: React.FC = () => {
   const { data: currencies = [] } = useMenuCurrencies(selectedLocationId);
   const { data: stampCards = [] } = useStampCards(selectedLocationId);
   const { data: menuBanners = [] } = useMenuBanners();
-  const { data: analyticsSummary } = useMenuAnalyticsSummary(selectedLocationId, 30);
 
   const saveDraftMutation = useSaveMenuProfileDraft();
   const publishMutation = usePublishMenuProfile();
   const cloneMutation = useCloneMenuProfile();
   const createPresetMutation = useCreateMenuPreset();
   const deletePresetMutation = useDeleteMenuPreset();
-  const upsertCurrencyMutation = useUpsertMenuCurrency();
-  const deleteCurrencyMutation = useDeleteMenuCurrency();
-  const upsertStampCardMutation = useUpsertStampCard();
-  const createBannerMutation = useCreateMenuBanner();
-  const deleteBannerMutation = useDeleteMenuBanner();
-  const translateMenuMutation = useTranslateMenu();
 
   useEffect(() => {
     return onCaretToolSuccess((event) => {
@@ -423,9 +397,6 @@ const Design: React.FC = () => {
       ...draftConfig.features?.tableActions,
     },
   };
-  const paymentMode = draftConfig.payment?.mode ?? 'pos';
-  const paymentRedirectUrl = draftConfig.payment?.redirectUrl ?? '';
-
   const patchHeader = (patch: Partial<MenuLayoutConfig['header']>) =>
     patchDraftConfig({ header: { ...draftConfig.header, ...patch } });
 
@@ -455,9 +426,6 @@ const Design: React.FC = () => {
   const patchPages = (patch: Partial<MenuLayoutConfig['pages']>) =>
     patchDraftConfig({ pages: { ...draftConfig.pages, ...patch } });
 
-  const patchContent = (patch: Partial<NonNullable<MenuLayoutConfig['content']>>) =>
-    patchDraftConfig({ content: { ...draftConfig.content, ...patch } });
-
   const patchColors = (patch: Partial<NonNullable<MenuLayoutConfig['colors']>>) =>
     patchDraftConfig({
       colors: {
@@ -469,9 +437,6 @@ const Design: React.FC = () => {
         ...patch,
       },
     });
-
-  const patchFeatures = (patch: Partial<typeof features>) =>
-    patchDraftConfig({ features: { ...features, ...patch } });
 
   const handleAddPreset = () => {
     const name = newPresetName.trim();
@@ -518,30 +483,6 @@ const Design: React.FC = () => {
     }
     if (locale) setPreviewLocale(locale);
     setAiPrompt('');
-  };
-
-  const handleTranslateAll = () => {
-    const entries = menuCategories.flatMap((cat) => [
-      { entityType: 'category', entityId: cat.id, field: 'name', sourceText: cat.name },
-      ...cat.items.flatMap((item) => [
-        { entityType: 'item', entityId: item.id, field: 'name', sourceText: item.name },
-        ...(item.description
-          ? [
-              {
-                entityType: 'item',
-                entityId: item.id,
-                field: 'description',
-                sourceText: item.description,
-              },
-            ]
-          : []),
-      ]),
-    ]);
-    translateMenuMutation.mutate({
-      locationId: selectedLocationId,
-      targetLocales: enabledLocales,
-      entries,
-    });
   };
 
   const previewConfig: MenuLayoutConfig = {
@@ -597,28 +538,6 @@ const Design: React.FC = () => {
       id: 'layout',
       label: t('design.studio.rail.layout'),
       icon: <SlidersHorizontal className="w-[18px] h-[18px]" />,
-    },
-    {
-      id: 'pages',
-      label: t('design.studio.rail.pages'),
-      icon: (
-        <span className="relative inline-flex">
-          <FileText className="w-[18px] h-[18px]" />
-          {pendingReviewCount > 0 && (
-            <span
-              className="absolute -top-1 -end-1.5 min-w-[14px] h-[14px] px-0.5 rounded-full text-[9px] font-bold flex items-center justify-center bg-amber-500 text-white"
-              aria-label={`${pendingReviewCount} pending reviews`}
-            >
-              {pendingReviewCount}
-            </span>
-          )}
-        </span>
-      ),
-    },
-    {
-      id: 'features',
-      label: t('design.studio.rail.features'),
-      icon: <Store className="w-[18px] h-[18px]" />,
     },
     {
       id: 'ai',
@@ -1439,14 +1358,13 @@ const Design: React.FC = () => {
                     <Label className="text-[11px] uppercase tracking-wider">
                       {t('design.sections.pages')}
                     </Label>
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab('pages')}
+                    <Link
+                      to="/menus/pages"
                       className="text-[11px] font-semibold hover:underline"
                       style={{ color: colorAccent }}
                     >
                       {t('design.pagesEditor.editContent')} →
-                    </button>
+                    </Link>
                   </div>
                   <SwitchRow
                     id="page-about"
@@ -1473,538 +1391,56 @@ const Design: React.FC = () => {
                     onChange={(offers) => patchPages({ offers })}
                   />
                 </div>
-              </div>
-            )}
-
-            {/* 3b. PAGES CONTENT & REVIEW MODERATION TAB */}
-            {activeTab === 'pages' && (
-              <PagesEditor
-                selectedLocationId={selectedLocationId}
-                pages={draftConfig.pages}
-                content={draftConfig.content ?? {}}
-                defaultAddress={businessInfo.address}
-                defaultPhone={businessInfo.phone}
-                onPatchPages={patchPages}
-                onPatchContent={patchContent}
-              />
-            )}
-
-            {/* 4. FEATURES, CURRENCIES, LANGUAGES, LOYALTY & PAYMENTS TAB */}
-            {activeTab === 'features' && (
-              <div className="space-y-5">
-                <div>
-                  <h2 className="text-sm font-semibold">{t('design.sections.features')}</h2>
-                  <p className="text-xs mt-1" style={{ color: 'var(--dash-text-muted)' }}>
-                    {t('design.studio.featuresSubtitle')}
-                  </p>
-                </div>
-
-                {platformOrderingEnabled && (
-                  <div className="space-y-1">
-                    <SwitchRow
-                      id="feat-ordering"
-                      label={t('design.studio.orderingEnabled')}
-                      checked={features.enableOrdering}
-                      onChange={(enableOrdering) => patchFeatures({ enableOrdering })}
-                    />
-                    <SwitchRow
-                      id="feat-dinein"
-                      label={t('design.studio.modeDineIn')}
-                      checked={features.fulfillmentModes.dineIn}
-                      onChange={(dineIn) =>
-                        patchFeatures({
-                          fulfillmentModes: { ...features.fulfillmentModes, dineIn },
-                        })
-                      }
-                    />
-                    <SwitchRow
-                      id="feat-selfservice"
-                      label={t('design.studio.modeSelfService')}
-                      checked={features.fulfillmentModes.selfService}
-                      onChange={(selfService) =>
-                        patchFeatures({
-                          fulfillmentModes: { ...features.fulfillmentModes, selfService },
-                        })
-                      }
-                    />
-                    <SwitchRow
-                      id="feat-pickup"
-                      label={t('design.studio.modePickup')}
-                      checked={features.fulfillmentModes.pickup}
-                      onChange={(pickup) =>
-                        patchFeatures({
-                          fulfillmentModes: { ...features.fulfillmentModes, pickup },
-                        })
-                      }
-                    />
-                    <SwitchRow
-                      id="feat-delivery"
-                      label={t('design.studio.modeDelivery')}
-                      checked={features.fulfillmentModes.delivery}
-                      onChange={(delivery) =>
-                        patchFeatures({
-                          fulfillmentModes: { ...features.fulfillmentModes, delivery },
-                        })
-                      }
-                    />
-                  </div>
-                )}
 
                 <Separator />
 
-                <div className="space-y-1">
-                  {platformTableActionsEnabled && (
-                    <>
-                      <Label className="text-[11px] uppercase tracking-wider">
-                        {t('design.studio.tableService')}
-                      </Label>
-                      <SwitchRow
-                        id="act-waiter"
-                        label={t('design.studio.callStaff')}
-                        checked={features.tableActions.callWaiter}
-                        onChange={(callWaiter) =>
-                          patchFeatures({ tableActions: { ...features.tableActions, callWaiter } })
-                        }
-                      />
-                      <SwitchRow
-                        id="act-bill"
-                        label={t('design.studio.requestBill')}
-                        checked={features.tableActions.requestBill}
-                        onChange={(requestBill) =>
-                          patchFeatures({ tableActions: { ...features.tableActions, requestBill } })
-                        }
-                      />
-                      <SwitchRow
-                        id="act-split"
-                        label={t('design.studio.splitBill')}
-                        checked={features.tableActions.splitBill}
-                        onChange={(splitBill) =>
-                          patchFeatures({ tableActions: { ...features.tableActions, splitBill } })
-                        }
-                      />
-                    </>
-                  )}
-                  {platformLoyaltyEnabled && (
-                    <SwitchRow
-                      id="feat-loyalty"
-                      label={t('design.sections.loyalty')}
-                      checked={features.enableLoyaltyStamps}
-                      onChange={(enableLoyaltyStamps) => patchFeatures({ enableLoyaltyStamps })}
-                    />
-                  )}
-                  {platformCrmCaptureEnabled && (
-                    <SwitchRow
-                      id="feat-crm-capture"
-                      label={t('design.studio.crmCapture', 'Guest CRM capture')}
-                      hint={t(
-                        'design.studio.crmCaptureHint',
-                        'Let guests optionally leave their contact info directly into your CRM.'
-                      )}
-                      checked={features.enableCrmCapture}
-                      onChange={(enableCrmCapture) => patchFeatures({ enableCrmCapture })}
-                    />
-                  )}
-                  {platformBannersEnabled && (
-                    <>
-                      <SwitchRow
-                        id="feat-banners"
-                        label={t('design.studio.promoBanners')}
-                        checked={features.enableBanners}
-                        onChange={(enableBanners) => patchFeatures({ enableBanners })}
-                      />
-                      {features.enableBanners && (
-                        <div className="space-y-2 pt-1 pb-2">
-                          {menuBanners.map((banner) => (
-                            <div
-                              key={banner.id}
-                              className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg border text-xs"
-                              style={{
-                                background: 'var(--dash-card)',
-                                borderColor: 'var(--dash-border)',
-                              }}
-                            >
-                              <div className="min-w-0">
-                                <div className="font-semibold truncate">{banner.title}</div>
-                                {banner.body && (
-                                  <div
-                                    className="truncate text-[11px]"
-                                    style={{ color: 'var(--dash-text-muted)' }}
-                                  >
-                                    {banner.body}
-                                  </div>
-                                )}
-                              </div>
-                              {banner.id && (
-                                <button
-                                  type="button"
-                                  onClick={() => deleteBannerMutation.mutate(String(banner.id))}
-                                  style={{ color: 'var(--dash-text-muted)' }}
-                                  aria-label={`Remove ${banner.title ?? ''}`}
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              )}
-                            </div>
-                          ))}
-                          <Input
-                            value={newBannerTitle}
-                            onChange={(e) => setNewBannerTitle(e.target.value)}
-                            placeholder={t(
-                              'design.studio.promoBannerTitlePlaceholder',
-                              'Banner title (e.g. Happy Hour 20% off)'
-                            )}
-                            className="h-8 text-xs"
-                          />
-                          <Input
-                            value={newBannerBody}
-                            onChange={(e) => setNewBannerBody(e.target.value)}
-                            placeholder={t(
-                              'design.studio.promoBannerBodyPlaceholder',
-                              'Short details (optional)'
-                            )}
-                            className="h-8 text-xs"
-                          />
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full"
-                            disabled={!newBannerTitle.trim() || createBannerMutation.isPending}
-                            onClick={() => {
-                              createBannerMutation.mutate(
-                                {
-                                  title: newBannerTitle.trim(),
-                                  body: newBannerBody.trim(),
-                                  isActive: true,
-                                },
-                                {
-                                  onSuccess: () => {
-                                    setNewBannerTitle('');
-                                    setNewBannerBody('');
-                                    toast.success(
-                                      t('menu.bannerCreated', 'Promo banner added to menu')
-                                    );
-                                  },
-                                }
-                              );
-                            }}
-                          >
-                            <Plus className="w-3.5 h-3.5 me-1.5" />
-                            {t('design.studio.addBanner', 'Add banner')}
-                          </Button>
-                        </div>
-                      )}
-                    </>
-                  )}
-                  <SwitchRow
-                    id="feat-search"
-                    label={t('design.studio.searchAndFilters')}
-                    checked={features.enableSearch}
-                    onChange={(enableSearch) =>
-                      patchFeatures({ enableSearch, enableDietaryFilters: enableSearch })
-                    }
-                  />
-                </div>
-
-                <Separator />
-
-                {/* Payment Redirect */}
-                <div className="space-y-2.5">
-                  <Label className="text-[11px] uppercase tracking-wider">
-                    {t('design.sections.payment')}
-                  </Label>
-                  <SegmentedControl<'pos' | 'redirect'>
-                    value={paymentMode === 'redirect' ? 'redirect' : 'pos'}
-                    options={[
-                      { label: t('design.studio.payAtPos'), value: 'pos' },
-                      { label: t('design.studio.payExternal'), value: 'redirect' },
-                    ]}
-                    onChange={(mode) =>
-                      patchDraftConfig({ payment: { ...draftConfig.payment, mode } })
-                    }
-                  />
-                  {paymentMode === 'redirect' && (
-                    <Input
-                      value={paymentRedirectUrl}
-                      onChange={(e) =>
-                        patchDraftConfig({
-                          payment: {
-                            ...draftConfig.payment,
-                            mode: 'redirect',
-                            redirectUrl: e.target.value,
-                          },
-                        })
-                      }
-                      placeholder="https://pay.yourstore.com/checkout"
-                      className="h-9 text-xs"
-                    />
-                  )}
-                </div>
-
-                {platformCurrenciesEnabled && (
-                  <>
-                    <Separator />
-
-                    {/* Dynamic Currencies */}
-                    <div className="space-y-2.5">
-                      <Label className="text-[11px] uppercase tracking-wider">
-                        {t('design.sections.currencies')}
-                      </Label>
-                      <div className="space-y-1.5">
-                        {currencies.map((cur) => (
-                          <div
-                            key={cur.code}
-                            className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg border text-xs"
-                            style={{
-                              background: 'var(--dash-card)',
-                              borderColor: 'var(--dash-border)',
-                            }}
-                          >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <span className="font-semibold">{cur.code}</span>
-                              <span style={{ color: 'var(--dash-text-muted)' }}>
-                                {cur.symbol} · ×{cur.exchangeRate}
-                              </span>
-                              {cur.isDefault && (
-                                <Badge variant="secondary">{t('design.studio.defaultTag')}</Badge>
-                              )}
-                            </div>
-                            {!cur.isDefault && cur.code && (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  deleteCurrencyMutation.mutate({
-                                    locationId: selectedLocationId,
-                                    code: cur.code!,
-                                  })
-                                }
-                                style={{ color: 'var(--dash-text-muted)' }}
-                                aria-label={`Remove ${cur.code}`}
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                      <div className="grid grid-cols-3 gap-1.5">
-                        <Input
-                          value={newCurrencyCode}
-                          onChange={(e) => setNewCurrencyCode(e.target.value.toUpperCase())}
-                          placeholder="EUR"
-                          className="h-8 text-xs"
-                        />
-                        <Input
-                          value={newCurrencySymbol}
-                          onChange={(e) => setNewCurrencySymbol(e.target.value)}
-                          placeholder="€"
-                          className="h-8 text-xs"
-                        />
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={newCurrencyRate}
-                          onChange={(e) => setNewCurrencyRate(e.target.value)}
-                          placeholder="0.92"
-                          className="h-8 text-xs"
-                        />
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        disabled={
-                          !newCurrencyCode.trim() ||
-                          !newCurrencySymbol.trim() ||
-                          upsertCurrencyMutation.isPending
-                        }
-                        onClick={() => {
-                          upsertCurrencyMutation.mutate({
-                            locationId: selectedLocationId,
-                            code: newCurrencyCode.trim().toUpperCase(),
-                            symbol: newCurrencySymbol.trim(),
-                            exchangeRate: Number(newCurrencyRate) || 1,
-                          });
-                          setNewCurrencyCode('');
-                          setNewCurrencySymbol('');
-                          setNewCurrencyRate('1');
-                        }}
-                      >
-                        <Plus className="w-3.5 h-3.5 me-1.5" />
-                        {t('design.studio.addCurrency')}
-                      </Button>
-                    </div>
-                  </>
-                )}
-
-                <Separator />
-
-                {/* Languages & AI Translation */}
-                <div className="space-y-2.5">
-                  <Label className="text-[11px] uppercase tracking-wider">
-                    {t('design.sections.languages')}
-                  </Label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {(['en', 'fr', 'ar'] as const).map((loc) => {
-                      const active = enabledLocales.includes(loc);
-                      return (
-                        <Button
-                          key={loc}
-                          size="sm"
-                          variant={active ? 'default' : 'outline'}
-                          onClick={() =>
-                            setEnabledLocales((prev) =>
-                              prev.includes(loc)
-                                ? prev.length > 1
-                                  ? prev.filter((l) => l !== loc)
-                                  : prev
-                                : [...prev, loc]
-                            )
-                          }
-                        >
-                          {loc.toUpperCase()}
-                        </Button>
-                      );
-                    })}
-                  </div>
-                  {platformAiTranslateEnabled && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full whitespace-normal text-center h-auto py-2 leading-snug"
-                      disabled={translateMenuMutation.isPending || menuCategories.length === 0}
-                      onClick={handleTranslateAll}
-                    >
-                      <Sparkles className="w-3.5 h-3.5 me-1.5 shrink-0" />
-                      <span>{t('design.studio.aiTranslate')}</span>
-                    </Button>
-                  )}
-                </div>
-
-                {platformLoyaltyEnabled && (
-                  <>
-                    <Separator />
-
-                    {/* Loyalty Stamp Cards */}
-                    <div className="space-y-2.5">
-                      <Label className="text-[11px] uppercase tracking-wider">
-                        {t('design.sections.loyalty')}
-                      </Label>
-                      {stampCards.map((card) => (
-                        <div
-                          key={card.id}
-                          className="px-2.5 py-2 rounded-lg border text-xs"
-                          style={{
-                            background: 'var(--dash-card)',
-                            borderColor: 'var(--dash-border)',
-                          }}
-                        >
-                          <div className="font-semibold">{card.title}</div>
-                          <div style={{ color: 'var(--dash-text-muted)' }}>
-                            {card.stampsRequired} → {card.rewardLabel}
-                          </div>
-                        </div>
-                      ))}
-                      <Input
-                        value={newStampTitle}
-                        onChange={(e) => setNewStampTitle(e.target.value)}
-                        placeholder={t('design.studio.stampTitlePlaceholder')}
-                        className="h-8 text-xs"
-                      />
-                      <div className="grid grid-cols-3 gap-1.5">
-                        <Input
-                          type="number"
-                          min={1}
-                          value={newStampTarget}
-                          onChange={(e) => setNewStampTarget(e.target.value)}
-                          placeholder="10"
-                          className="h-8 text-xs"
-                        />
-                        <Input
-                          value={newStampReward}
-                          onChange={(e) => setNewStampReward(e.target.value)}
-                          placeholder={t('design.studio.stampRewardPlaceholder')}
-                          className="h-8 text-xs col-span-2"
-                        />
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        disabled={
-                          !newStampTitle.trim() ||
-                          !newStampReward.trim() ||
-                          upsertStampCardMutation.isPending
-                        }
-                        onClick={() => {
-                          upsertStampCardMutation.mutate({
-                            locationId: selectedLocationId,
-                            title: newStampTitle.trim(),
-                            stampsRequired: Math.max(1, Number(newStampTarget) || 10),
-                            rewardLabel: newStampReward.trim(),
-                          });
-                          setNewStampTitle('');
-                          setNewStampReward('');
-                        }}
-                      >
-                        <Plus className="w-3.5 h-3.5 me-1.5" />
-                        {t('design.studio.addStampCard')}
-                      </Button>
-                    </div>
-                  </>
-                )}
-
-                <Separator />
-
-                {/* Compact 30-day Menu Analytics + POS Operations Note */}
                 <div className="space-y-2">
                   <Label className="text-[11px] uppercase tracking-wider">
-                    {t('design.studio.analyticsTitle')}
+                    {t('appNames.short.menu')}
                   </Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      {
-                        label: t('design.studio.metricScans'),
-                        val: analyticsSummary?.qrScans ?? 0,
-                      },
-                      {
-                        label: t('design.studio.metricViews'),
-                        val: analyticsSummary?.menuViews ?? 0,
-                      },
-                      {
-                        label: t('design.studio.metricCarts'),
-                        val: analyticsSummary?.addToCarts ?? 0,
-                      },
-                      {
-                        label: t('design.studio.metricOrders'),
-                        val: analyticsSummary?.ordersPlaced ?? 0,
-                      },
-                    ].map((m) => (
-                      <div
-                        key={m.label}
-                        className="rounded-lg border px-2.5 py-2"
-                        style={{
-                          background: 'var(--dash-card)',
-                          borderColor: 'var(--dash-border)',
-                        }}
-                      >
-                        <div className="text-base font-semibold">{m.val}</div>
-                        <div className="text-[11px]" style={{ color: 'var(--dash-text-muted)' }}>
-                          {m.label}
-                        </div>
-                      </div>
-                    ))}
+                  <div className="grid grid-cols-1 gap-1.5">
+                    <Link
+                      to="/menus/pages"
+                      className="flex items-center justify-between rounded-lg border px-2.5 py-2 text-xs font-medium hover:bg-[var(--dash-hover)] transition-colors"
+                      style={{ borderColor: 'var(--dash-border)', color: 'var(--dash-text)' }}
+                    >
+                      <span>{t('common.nav.menuPages')}</span>
+                      <span style={{ color: 'var(--dash-text-muted)' }}>→</span>
+                    </Link>
+                    <Link
+                      to="/menus/reviews"
+                      className="flex items-center justify-between rounded-lg border px-2.5 py-2 text-xs font-medium hover:bg-[var(--dash-hover)] transition-colors"
+                      style={{ borderColor: 'var(--dash-border)', color: 'var(--dash-text)' }}
+                    >
+                      <span>{t('common.nav.menuReviews')}</span>
+                      {pendingReviewCount > 0 ? (
+                        <Badge variant="warning">{pendingReviewCount}</Badge>
+                      ) : (
+                        <span style={{ color: 'var(--dash-text-muted)' }}>→</span>
+                      )}
+                    </Link>
+                    <Link
+                      to="/menus/promos"
+                      className="flex items-center justify-between rounded-lg border px-2.5 py-2 text-xs font-medium hover:bg-[var(--dash-hover)] transition-colors"
+                      style={{ borderColor: 'var(--dash-border)', color: 'var(--dash-text)' }}
+                    >
+                      <span>{t('common.nav.menuPromos')}</span>
+                      <span style={{ color: 'var(--dash-text-muted)' }}>→</span>
+                    </Link>
+                    <Link
+                      to="/menus/settings"
+                      className="flex items-center justify-between rounded-lg border px-2.5 py-2 text-xs font-medium hover:bg-[var(--dash-hover)] transition-colors"
+                      style={{ borderColor: 'var(--dash-border)', color: 'var(--dash-text)' }}
+                    >
+                      <span>{t('common.nav.menuSettings')}</span>
+                      <span style={{ color: 'var(--dash-text-muted)' }}>→</span>
+                    </Link>
                   </div>
-                  <p className="text-[11px] pt-1" style={{ color: 'var(--dash-text-muted)' }}>
-                    {t(
-                      'design.studio.posOpsHint',
-                      'Live table service requests and branch 86 / price overrides are managed in POS.'
-                    )}
-                  </p>
                 </div>
               </div>
             )}
 
-            {/* 6. CARET AI TAB */}
+            {/* 4. CARET AI TAB */}
             {activeTab === 'ai' && (
               <div className="space-y-4">
                 <div>

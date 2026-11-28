@@ -60,7 +60,7 @@ const CreateBanner = (): React.JSX.Element => {
       });
 
       toast.success(t('menu.bannerCreated', 'Promo banner published to your digital menu'));
-      void navigate({ to: '/design' });
+      void navigate({ to: '/menus/promos' });
     } catch (err: unknown) {
       const msg =
         (err as { message?: string })?.message ||

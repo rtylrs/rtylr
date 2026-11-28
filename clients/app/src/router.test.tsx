@@ -127,9 +127,9 @@ describe('Public menu routes', () => {
     expect(router.state.location.pathname).toBe('/some-business/menu');
   });
 
-  it('leaves the authenticated admin /menu route untouched', async () => {
+  it('redirects the authenticated admin /menu route to /menus/items', async () => {
     const router = await open('/menu');
     expect(await screen.findByRole('heading', { name: 'Admin menu' })).toBeVisible();
-    expect(router.state.location.pathname).toBe('/menu');
+    await vi.waitFor(() => expect(router.state.location.pathname).toBe('/menus/items'));
   });
 });

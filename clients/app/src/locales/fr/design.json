@@ -227,5 +227,29 @@
   "businessPlaceholder": {
     "name": "Votre entreprise",
     "description": "Ajoutez la description de votre entreprise dans les paramètres."
+  },
+  "menuApp": {
+    "overviewSubtitle": "Gérez votre menu numérique, le design, les pages, les avis, les codes QR et les paramètres au même endroit.",
+    "addItem": "Ajouter un article",
+    "liveStorefrontUrl": "Menu numérique en ligne",
+    "linkCopied": "Lien du menu copié",
+    "openLiveMenu": "Ouvrir le menu",
+    "activeItems": "Articles actifs",
+    "pendingReviews": "Avis en attente",
+    "avgRating": "Note moyenne",
+    "cardItemsDesc": "Ajoutez, modifiez, tarifez et organisez vos articles et catégories.",
+    "cardStudioDesc": "Personnalisez thèmes, logo, couverture, couleurs, polices, mise en page et style Caret IA.",
+    "cardPagesDesc": "Modifiez vos pages À propos, horaires, Galerie photo et Offres.",
+    "cardReviewsDesc": "Approuvez, masquez ou supprimez les avis clients avant publication.",
+    "cardPromosDesc": "Créez des bannières promotionnelles et des cartes de fidélité à tampons.",
+    "cardQrDesc": "Générez des codes QR personnalisés et copiez les liens de table.",
+    "cardAnalyticsDesc": "Suivez les scans QR, vues, ajouts au panier et conversions.",
+    "cardSettingsDesc": "Configurez la commande, le service à table, les devises, les langues et les paiements.",
+    "enableReviewsPage": "Afficher l’onglet Avis public",
+    "promosSubtitle": "Mettez en avant vos offres avec des bannières et récompensez vos clients avec des cartes à tampons.",
+    "analyticsSubtitle": "Suivez comment vos clients parcourent votre menu numérique et commandent.",
+    "funnelTitle": "Entonnoir de conversion",
+    "metricItemViews": "Vues d’articles",
+    "metricCheckouts": "Débuts de commande"
   }
 }

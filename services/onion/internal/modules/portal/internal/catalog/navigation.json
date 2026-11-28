@@ -10,6 +10,7 @@
       { "id": "erp", "label": "Operations" },
       { "id": "finance", "label": "Finance" },
       { "id": "hr", "label": "HR" },
+      { "id": "menu", "label": "Menu" },
       { "id": "pos", "label": "POS" },
       { "id": "rennili", "label": "Rennili" },
       { "id": "automations", "label": "Automations" },
@@ -27,9 +28,6 @@
       { "id": "groups", "label": "Groups" },
       { "id": "roles", "label": "Permissions" },
       { "id": "auditLog", "label": "Audit Log" },
-      { "id": "menus", "label": "Menus" },
-      { "id": "qrCodes", "label": "QR Codes" },
-      { "id": "design", "label": "Design" },
       { "id": "extensions", "label": "Extensions" }
     ]
   }

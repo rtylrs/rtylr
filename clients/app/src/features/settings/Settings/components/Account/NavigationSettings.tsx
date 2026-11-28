@@ -4,9 +4,8 @@ import { ArrowDown, ArrowUp, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { getOneKitErrorMessage } from '@voxire/api';
 import { useUserStore } from '../../../../../shared/stores/userStore';
-import { useAddons, isAddonEnabled } from '../../../../../shared/hooks/queries/useAddons';
 import { canAccessPortalPath } from '../../../../../shared/utils/canAccessPortalPath';
-import { rawMenuSubItems, rawNavItems } from '../../../../../shell/navigation';
+import { rawNavItems } from '../../../../../shell/navigation';
 import { RAIL_BOTTOM, railItems } from '../../../../../shell/railItems';
 import {
   usePortalLayout,
@@ -205,7 +204,6 @@ function ArrangeList({
 export default function NavigationSettings() {
   const { t } = useTranslation();
   const user = useUserStore((state) => state.user);
-  const { data: addons = [] } = useAddons();
   const layout = usePortalLayout(user?.id);
   const save = useSavePortalLayout(user?.id);
   const reset = useResetPortalLayout(user?.id);
@@ -213,10 +211,7 @@ export default function NavigationSettings() {
   const failed = (error: unknown) =>
     toast.error(getOneKitErrorMessage(error, t('settings.navigation.saveFailed')));
 
-  const workspace: Entry[] = [
-    ...rawNavItems,
-    ...(isAddonEnabled(addons, 'menu') ? rawMenuSubItems : []),
-  ]
+  const workspace: Entry[] = rawNavItems
     .filter((item) => canAccessPortalPath(user, item.path))
     .map((item) => ({
       id: item.key ?? item.path,

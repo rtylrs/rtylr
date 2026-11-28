@@ -24,6 +24,7 @@ interface PagesEditorProps {
   content: MenuPageContentConfig;
   defaultAddress?: string;
   defaultPhone?: string;
+  hideReviews?: boolean;
   onPatchPages: (patch: Partial<PageConfig>) => void;
   onPatchContent: (patch: Partial<MenuPageContentConfig>) => void;
 }
@@ -34,6 +35,7 @@ const PagesEditor: React.FC<PagesEditorProps> = ({
   content,
   defaultAddress,
   defaultPhone,
+  hideReviews = false,
   onPatchPages,
   onPatchContent,
 }) => {
@@ -536,143 +538,154 @@ const PagesEditor: React.FC<PagesEditorProps> = ({
         )}
       </div>
 
-      <Separator />
+      {!hideReviews && (
+        <>
+          <Separator />
 
-      {/* 4. REVIEWS PAGE + MODERATION QUEUE */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between gap-2">
-          <Label
-            htmlFor="page-reviews-toggle"
-            className="text-[11px] uppercase tracking-wider cursor-pointer"
-          >
-            {t('design.pages.reviews')}
-          </Label>
-          <Switch
-            id="page-reviews-toggle"
-            checked={Boolean(pages.reviews)}
-            onCheckedChange={(checked) => onPatchPages({ reviews: checked })}
-          />
-        </div>
-
-        {pages.reviews && (
-          <div className="space-y-2.5">
-            <p className="text-[11px]" style={{ color: 'var(--dash-text-muted)' }}>
-              {t('design.pagesEditor.reviewsHint')}
-            </p>
-            <div className="flex flex-wrap gap-1">
-              {(
-                [
-                  { id: '', label: t('design.pagesEditor.filterAll') },
-                  { id: 'pending', label: t('design.pagesEditor.filterPending') },
-                  { id: 'approved', label: t('design.pagesEditor.filterApproved') },
-                  { id: 'hidden', label: t('design.pagesEditor.filterHidden') },
-                ] as const
-              ).map((f) => (
-                <button
-                  key={f.id || 'all'}
-                  type="button"
-                  onClick={() => setReviewFilter(f.id)}
-                  className="px-2 py-1 rounded-md text-[11px] font-medium border transition-colors"
-                  style={{
-                    background: reviewFilter === f.id ? 'var(--dash-active)' : 'transparent',
-                    borderColor: 'var(--dash-border)',
-                    color: reviewFilter === f.id ? 'var(--dash-text)' : 'var(--dash-text-muted)',
-                  }}
-                >
-                  {f.label}
-                </button>
-              ))}
+          {/* 4. REVIEWS PAGE + MODERATION QUEUE */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <Label
+                htmlFor="page-reviews-toggle"
+                className="text-[11px] uppercase tracking-wider cursor-pointer"
+              >
+                {t('design.pages.reviews')}
+              </Label>
+              <Switch
+                id="page-reviews-toggle"
+                checked={Boolean(pages.reviews)}
+                onCheckedChange={(checked) => onPatchPages({ reviews: checked })}
+              />
             </div>
 
-            {reviewsLoading ? (
-              <p className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
-                {t('design.pagesEditor.loadingReviews')}
-              </p>
-            ) : reviews.length === 0 ? (
-              <p className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
-                {t('design.pagesEditor.noReviews')}
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {reviews.map((rev) => (
-                  <div
-                    key={rev.id}
-                    className="rounded-lg border p-2.5 space-y-1.5"
-                    style={{ borderColor: 'var(--dash-border)', background: 'var(--dash-card)' }}
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-semibold truncate">
-                        {rev.authorName || 'Guest'}
-                      </span>
-                      <Badge
-                        variant={
-                          rev.status === 'approved'
-                            ? 'success'
-                            : rev.status === 'hidden'
-                              ? 'secondary'
-                              : 'warning'
-                        }
+            {pages.reviews && (
+              <div className="space-y-2.5">
+                <p className="text-[11px]" style={{ color: 'var(--dash-text-muted)' }}>
+                  {t('design.pagesEditor.reviewsHint')}
+                </p>
+                <div className="flex flex-wrap gap-1">
+                  {(
+                    [
+                      { id: '', label: t('design.pagesEditor.filterAll') },
+                      { id: 'pending', label: t('design.pagesEditor.filterPending') },
+                      { id: 'approved', label: t('design.pagesEditor.filterApproved') },
+                      { id: 'hidden', label: t('design.pagesEditor.filterHidden') },
+                    ] as const
+                  ).map((f) => (
+                    <button
+                      key={f.id || 'all'}
+                      type="button"
+                      onClick={() => setReviewFilter(f.id)}
+                      className="px-2 py-1 rounded-md text-[11px] font-medium border transition-colors"
+                      style={{
+                        background: reviewFilter === f.id ? 'var(--dash-active)' : 'transparent',
+                        borderColor: 'var(--dash-border)',
+                        color:
+                          reviewFilter === f.id ? 'var(--dash-text)' : 'var(--dash-text-muted)',
+                      }}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+
+                {reviewsLoading ? (
+                  <p className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
+                    {t('design.pagesEditor.loadingReviews')}
+                  </p>
+                ) : reviews.length === 0 ? (
+                  <p className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
+                    {t('design.pagesEditor.noReviews')}
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {reviews.map((rev) => (
+                      <div
+                        key={rev.id}
+                        className="rounded-lg border p-2.5 space-y-1.5"
+                        style={{
+                          borderColor: 'var(--dash-border)',
+                          background: 'var(--dash-card)',
+                        }}
                       >
-                        {rev.status}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-0.5 text-amber-500">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star
-                          key={i}
-                          className="w-3 h-3"
-                          fill={i < (rev.rating ?? 0) ? 'currentColor' : 'none'}
-                        />
-                      ))}
-                    </div>
-                    <p className="text-xs break-words">{rev.comment}</p>
-                    <div className="flex items-center gap-1.5 pt-1">
-                      {rev.status !== 'approved' && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-6 px-2 text-[11px]"
-                          disabled={updateReviewStatus.isPending}
-                          onClick={() =>
-                            updateReviewStatus.mutate({ id: String(rev.id), status: 'approved' })
-                          }
-                        >
-                          <Check className="w-3 h-3 me-1" />
-                          {t('design.pagesEditor.approve')}
-                        </Button>
-                      )}
-                      {rev.status !== 'hidden' && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-6 px-2 text-[11px]"
-                          disabled={updateReviewStatus.isPending}
-                          onClick={() =>
-                            updateReviewStatus.mutate({ id: String(rev.id), status: 'hidden' })
-                          }
-                        >
-                          <EyeOff className="w-3 h-3 me-1" />
-                          {t('design.pagesEditor.hide')}
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0 ms-auto text-red-500"
-                        disabled={deleteReview.isPending}
-                        aria-label={t('design.pagesEditor.deleteReview')}
-                        onClick={() => deleteReview.mutate(String(rev.id))}
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-semibold truncate">
+                            {rev.authorName || 'Guest'}
+                          </span>
+                          <Badge
+                            variant={
+                              rev.status === 'approved'
+                                ? 'success'
+                                : rev.status === 'hidden'
+                                  ? 'secondary'
+                                  : 'warning'
+                            }
+                          >
+                            {rev.status}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-0.5 text-amber-500">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className="w-3 h-3"
+                              fill={i < (rev.rating ?? 0) ? 'currentColor' : 'none'}
+                            />
+                          ))}
+                        </div>
+                        <p className="text-xs break-words">{rev.comment}</p>
+                        <div className="flex items-center gap-1.5 pt-1">
+                          {rev.status !== 'approved' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-6 px-2 text-[11px]"
+                              disabled={updateReviewStatus.isPending}
+                              onClick={() =>
+                                updateReviewStatus.mutate({
+                                  id: String(rev.id),
+                                  status: 'approved',
+                                })
+                              }
+                            >
+                              <Check className="w-3 h-3 me-1" />
+                              {t('design.pagesEditor.approve')}
+                            </Button>
+                          )}
+                          {rev.status !== 'hidden' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-6 px-2 text-[11px]"
+                              disabled={updateReviewStatus.isPending}
+                              onClick={() =>
+                                updateReviewStatus.mutate({ id: String(rev.id), status: 'hidden' })
+                              }
+                            >
+                              <EyeOff className="w-3 h-3 me-1" />
+                              {t('design.pagesEditor.hide')}
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0 ms-auto text-red-500"
+                            disabled={deleteReview.isPending}
+                            aria-label={t('design.pagesEditor.deleteReview')}
+                            onClick={() => deleteReview.mutate(String(rev.id))}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
             )}
           </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 };

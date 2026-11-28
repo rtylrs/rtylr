@@ -1,25 +1,30 @@
 import { Link, useRouterState } from '@tanstack/react-router';
 import {
-  Users,
-  Folder,
-  Shield,
-  History,
-  User,
-  Building2,
-  Globe,
-  Mail,
-  CreditCard,
-  ToyBrick,
+  BarChart3,
   Briefcase,
-  Sparkles,
-  QrCode,
-  Palette,
+  Building2,
+  CreditCard,
+  FileText,
+  Folder,
+  Globe,
+  History,
   KeyRound,
+  LayoutDashboard,
+  Mail,
+  Megaphone,
+  Palette,
+  QrCode,
   Settings,
+  Shield,
+  Sparkles,
+  Star,
+  ToyBrick,
+  User,
+  Users,
+  UtensilsCrossed,
 } from 'lucide-react';
 import {
   HomeIcon,
-  MenuIcon,
   FlowIcon,
   InsightsIcon,
   CrmIcon,
@@ -46,10 +51,16 @@ export const rawNavItems: PortalNavItem[] = [
   { key: 'auditLog', path: '/audit', icon: History },
   { key: 'extensions', path: '/extensions', icon: ToyBrick },
 ];
-export const rawMenuSubItems: PortalNavItem[] = [
-  { key: 'menus', path: '/menus', icon: MenuIcon },
-  { key: 'qrCodes', path: '/qr-codes', icon: QrCode },
-  { key: 'design', path: '/design', icon: Palette },
+export const menuNavItems: PortalNavItem[] = [
+  { key: 'menuOverview', path: '/menus', icon: LayoutDashboard },
+  { key: 'menuItems', path: '/menus/items', icon: UtensilsCrossed },
+  { key: 'menuStudio', path: '/menus/studio', icon: Palette },
+  { key: 'menuPages', path: '/menus/pages', icon: FileText },
+  { key: 'menuReviews', path: '/menus/reviews', icon: Star },
+  { key: 'menuPromos', path: '/menus/promos', icon: Megaphone },
+  { key: 'qrCodes', path: '/menus/qr-codes', icon: QrCode },
+  { key: 'menuAnalytics', path: '/menus/analytics', icon: BarChart3 },
+  { key: 'menuSettings', path: '/menus/settings', icon: Settings },
 ];
 export const settingsNavItems: PortalNavItem[] = [
   { key: 'settings', path: '/settings', icon: Settings },
@@ -103,6 +114,7 @@ export function PortalNavLink({
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const active =
     path === '/' ||
+    path === '/menus' ||
     path === '/insights' ||
     path === '/crm' ||
     path === '/erp' ||

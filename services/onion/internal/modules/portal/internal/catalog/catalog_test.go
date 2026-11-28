@@ -14,6 +14,8 @@ func TestSearchFindsThePageForWhatPeopleAsk(t *testing.T) {
 		"deals pipeline":              "/crm/sales",
 		"mark notifications as read":  "/notifications",
 		"set up a routine with caret": "/caret",
+		"moderate guest reviews":      "/menus/reviews",
+		"edit menu studio colors":     "/menus/studio",
 	}
 	for query, want := range cases {
 		got := Search(query, 3)

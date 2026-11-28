@@ -11,10 +11,11 @@ import {
   HomeIcon,
   HrIcon,
   InsightsIcon,
+  MenuIcon,
   RecruitIcon,
 } from '@voxire/ui';
 import { CaretIcon } from '@voxire/caret';
-import { rawMenuSubItems, rawNavItems, settingsNavItems } from '../../shell/navigation';
+import { menuNavItems, rawNavItems, settingsNavItems } from '../../shell/navigation';
 import { crmSidebarItems } from '../../modules/crm/navigation';
 import { erpNavItems } from '../../modules/erp/navigation';
 import { financeNavItems } from '../../modules/finance/navigation';
@@ -31,6 +32,7 @@ export type PortalApp =
   | 'erp'
   | 'finance'
   | 'hr'
+  | 'menu'
   | 'recruit'
   | 'automations'
   | 'settings'
@@ -50,10 +52,7 @@ const AUTOMATION_ITEMS: NavEntry[] = [
 // Each app's sidebar and the i18n prefix of its labels, as PortalShell shows them.
 const APP_NAV: Record<PortalApp, { items: NavEntry[]; label: (key: string) => string }> = {
   workspace: {
-    items: [...rawNavItems, ...rawMenuSubItems].map((item) => ({
-      key: item.key ?? item.path,
-      path: item.path,
-    })),
+    items: entries(rawNavItems),
     label: (key) => `common.nav.${key}`,
   },
   insights: { items: entries(insightsNavItems), label: (key) => `insightsNav.${key}` },
@@ -62,6 +61,7 @@ const APP_NAV: Record<PortalApp, { items: NavEntry[]; label: (key: string) => st
   erp: { items: entries(erpNavItems), label: (key) => `erpNav.${key}` },
   finance: { items: entries(financeNavItems), label: (key) => `financeNav.${key}` },
   hr: { items: entries(hrNavItems), label: (key) => `hrNav.${key}` },
+  menu: { items: entries(menuNavItems), label: (key) => `common.nav.${key}` },
   recruit: { items: entries(recruitNavItems), label: (key) => `recruitAdmin.nav.${key}` },
   automations: { items: AUTOMATION_ITEMS, label: (key) => `common.nav.${key}` },
   settings: { items: entries(settingsNavItems), label: (key) => `common.nav.${key}` },
@@ -76,6 +76,7 @@ const APP_ICONS: Record<PortalApp, ComponentType<{ size?: number }>> = {
   erp: ErpIcon,
   finance: FinanceIcon,
   hr: HrIcon,
+  menu: MenuIcon,
   recruit: RecruitIcon,
   automations: AutomationsIcon,
   settings: Settings,
@@ -89,6 +90,8 @@ function entries(items: ReadonlyArray<{ key?: string; path: string }>): NavEntry
 export function appForPath(path: string): PortalApp {
   const first = path.split(/[?#]/)[0].split('/')[1] ?? '';
   if (first === 'settings') return 'settings';
+  if (['menus', 'menu', 'design', 'qr-codes', 'create-item', 'create-banner'].includes(first))
+    return 'menu';
   if (
     ['insights', 'flow', 'crm', 'erp', 'finance', 'hr', 'recruit', 'automations', 'caret'].includes(
       first

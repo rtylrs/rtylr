@@ -34,7 +34,7 @@ type Page struct {
 	Keywords []string `json:"keywords"`
 }
 
-var apps = []string{"workspace", "insights", "flow", "crm", "erp", "finance", "hr", "recruit", "automations", "settings", "caret"}
+var apps = []string{"workspace", "insights", "flow", "crm", "erp", "finance", "hr", "menu", "recruit", "automations", "settings", "caret"}
 
 var (
 	navigation layout.Navigation

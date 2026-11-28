@@ -17,7 +17,7 @@ import { crmNavItems, crmSalesNavItems } from '../../modules/crm/navigation';
 import { flowNavItems } from '../../modules/flow/navigation';
 import { insightsNavItems } from '../../modules/insights/navigation';
 import { RenniliMark } from '../../modules/pager/shared/components/RenniliLogo';
-import { rawNavItems, rawMenuSubItems, settingsNavItems, type PortalNavItem } from '../navigation';
+import { rawNavItems, menuNavItems, settingsNavItems, type PortalNavItem } from '../navigation';
 
 const RENNILI_BOARD_URL = new URL('/board', RENNILI_URL).href;
 
@@ -30,6 +30,7 @@ export const COMMAND_GROUPS = [
   'erp',
   'finance',
   'hr',
+  'menu',
   'recruit',
   'projects',
   'tasks',
@@ -141,14 +142,8 @@ export function getPortalCommands(
       });
     }
   };
-  addPages(
-    [
-      ...rawNavItems,
-      ...rawMenuSubItems,
-      { key: 'notifications', path: '/notifications', icon: Bell },
-    ],
-    'home'
-  );
+  addPages([...rawNavItems, { key: 'notifications', path: '/notifications', icon: Bell }], 'home');
+  addPages([...menuNavItems], 'menu');
   addPages([...financeNavItems], 'finance', 'financeNav');
   addPages([...hrNavItems], 'hr', 'hrNav');
   addPages([...recruitNavItems], 'recruit', 'recruitAdmin.nav');
