@@ -51,7 +51,7 @@ describe('QrCodes list: true-empty state', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'qrCodes.createQrCode' }));
 
-    expect(navigateMock).toHaveBeenCalledWith({ to: '/qr-codes/create' });
+    expect(navigateMock).toHaveBeenCalledWith({ to: '/menus/qr-codes/create' });
   });
 });
 

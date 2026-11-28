@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { rawNavItems, rawMenuSubItems, settingsNavItems, routeKeys } from '../shell/navigation';
+import { rawNavItems, menuNavItems, settingsNavItems, routeKeys } from '../shell/navigation';
 
 /**
  * Keys that are built rather than written, and are therefore invisible to
@@ -43,7 +43,7 @@ const FAMILIES: Record<string, string[]> = {
   // DefaultLayout and Breadcrumbs: t(`common.nav.${key}`)
   nav: [
     ...rawNavItems.map((i) => i.key),
-    ...rawMenuSubItems.map((i) => i.key),
+    ...menuNavItems.map((i) => i.key),
     ...settingsNavItems.map((i) => i.key),
     ...Object.values(routeKeys),
   ]

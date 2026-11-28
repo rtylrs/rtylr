@@ -7,7 +7,7 @@ import { createEffectiveAccess } from '../../test/effectiveAccess';
 import type { StoredUser } from '../shared/stores/userStore';
 import { router } from '../router';
 import { isPortalRoute } from '../features/caret/portalPlaces';
-import { rawMenuSubItems, rawNavItems } from './navigation';
+import { rawNavItems } from './navigation';
 import { arrangeItems } from './portalLayout';
 import { RAIL_BOTTOM, railItems } from './railItems';
 
@@ -51,9 +51,7 @@ describe('Portal map', () => {
   });
 
   it('names the Home sidebar items in the order the Portal shows them', () => {
-    const shown = [...rawNavItems, ...rawMenuSubItems]
-      .sort((a, b) => Number(a.key === 'extensions') - Number(b.key === 'extensions'))
-      .map((item) => item.key);
+    const shown = rawNavItems.map((item) => item.key);
     expect(shown).toEqual(navigation.workspace.items.map((item) => item.id));
     expect(shown.map((id) => i18next.t(`common.nav.${id}`))).toEqual(
       navigation.workspace.items.map((item) => item.label)
