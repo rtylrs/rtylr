@@ -227,5 +227,29 @@
   "businessPlaceholder": {
     "name": "Your Business",
     "description": "Add your business description in settings."
+  },
+  "menuApp": {
+    "overviewSubtitle": "Manage your digital menu, storefront design, pages, reviews, QR codes, and settings in one place.",
+    "addItem": "Add item",
+    "liveStorefrontUrl": "Live digital menu",
+    "linkCopied": "Menu link copied",
+    "openLiveMenu": "Open live menu",
+    "activeItems": "Active items",
+    "pendingReviews": "Pending reviews",
+    "avgRating": "Average rating",
+    "cardItemsDesc": "Add, edit, price, and organize your menu items and categories.",
+    "cardStudioDesc": "Customize themes, logo, cover image, colors, fonts, layout, and Caret AI styling.",
+    "cardPagesDesc": "Edit your public About story, hours, Photo Gallery, and Offers.",
+    "cardReviewsDesc": "Approve, hide, or remove guest reviews before they appear live.",
+    "cardPromosDesc": "Create promotional banners and digital loyalty stamp cards.",
+    "cardQrDesc": "Generate custom QR codes and copy table-specific menu links.",
+    "cardAnalyticsDesc": "Track QR scans, views, cart additions, and checkout conversions.",
+    "cardSettingsDesc": "Configure ordering modes, table service, currencies, languages, and payments.",
+    "enableReviewsPage": "Show public Reviews tab",
+    "promosSubtitle": "Highlight seasonal specials with promo banners and reward regulars with digital stamp cards.",
+    "analyticsSubtitle": "Track how guests discover your digital menu and convert into orders.",
+    "funnelTitle": "Conversion funnel",
+    "metricItemViews": "Item views",
+    "metricCheckouts": "Checkout starts"
   }
 }
