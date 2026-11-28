@@ -355,10 +355,10 @@ const Menu: React.FC = () => {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-bold text-primary">Menu</h1>
           <div className="flex flex-wrap items-center gap-2">
-            <Button size="sm" variant="outline" onClick={() => navigate({ to: '/design' })}>
+            <Button size="sm" variant="outline" onClick={() => navigate({ to: '/menus/studio' })}>
               Menu Studio
             </Button>
-            <Button size="sm" variant="outline" onClick={() => navigate({ to: '/qr-codes' })}>
+            <Button size="sm" variant="outline" onClick={() => navigate({ to: '/menus/qr-codes' })}>
               QR &amp; Links
             </Button>
             <Button size="sm" onClick={() => navigate({ to: '/create-item' })}>

@@ -101,7 +101,7 @@ const QrCodes: React.FC = () => {
         setUser({ ...user, businessSlug });
       }
     }
-    navigate({ to: '/qr-codes/create' });
+    navigate({ to: '/menus/qr-codes/create' });
   };
 
   return (
