@@ -11,6 +11,7 @@ import {
   HomeIcon,
   HrIcon,
   InsightsIcon,
+  MenuIcon,
   PosIcon,
 } from '@voxire/ui';
 import { CaretIcon } from '@voxire/caret';
@@ -46,6 +47,7 @@ export const RAIL_ICONS: Record<string, ComponentType<{ size?: number }>> = {
   erp: ErpIcon,
   finance: FinanceIcon,
   hr: HrIcon,
+  menu: MenuIcon,
   pos: PosIcon,
   rennili: RenniliMark,
   automations: AutomationsIcon,
@@ -89,6 +91,16 @@ export function railItems(user: StoredUser | null, t: TFunction): RailItem[] {
         icon: RAIL_ICONS[id],
         to: path,
       })),
+    ...(canAccessPortalPath(user, '/menus') || canAccessPortalPath(user, '/menus/studio')
+      ? [
+          {
+            id: 'menu',
+            label: t('appNames.short.menu'),
+            icon: RAIL_ICONS.menu,
+            to: canAccessPortalPath(user, '/menus') ? '/menus' : '/menus/studio',
+          },
+        ]
+      : []),
     ...(apps?.includes('pos')
       ? [
           {
